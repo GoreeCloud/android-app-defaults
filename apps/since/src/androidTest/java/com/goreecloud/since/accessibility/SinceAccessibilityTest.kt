@@ -2,6 +2,7 @@ package com.goreecloud.since.accessibility
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.InputMode.Companion.Keyboard
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
@@ -10,6 +11,7 @@ import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -213,6 +215,7 @@ class SinceAccessibilityTest {
         composeRule.onNodeWithText("Save").performScrollTo().assertIsDisplayed()
     }
 
+    @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
     @Test
     fun keyboardTabMovesFromCancelToSaveAndEnterActivatesSave() {
         lateinit var inputModeManager: InputModeManager
