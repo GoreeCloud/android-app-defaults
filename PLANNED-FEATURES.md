@@ -57,11 +57,14 @@ Verified on `main` through PR #12:
 - Forced RTL Create-editor reachability and heading instrumentation.
 - Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed run `35965422146` with Android 16 instrumentation `OK (15 tests)` and was squash-merged as `634623f03954bcb1e1d53107e5187b7c724b40c4`.
 
+Active candidate:
+- Android 16 Compose keyboard-focus evidence for Cancel → Tab → Save focus traversal and Enter activation in the Create editor.
+
 Still open within M1:
 - Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
 - Preferences DataStore only for application preferences that are actually implemented.
 - Representative TalkBack and large-font visual acceptance.
-- Keyboard/switch-access acceptance.
+- Representative hardware-keyboard and physical assistive-input acceptance beyond automated keyboard-focus instrumentation.
 - Real localization coverage and representative RTL acceptance beyond forced-layout CI.
 - Rendered visual acceptance required before Stable qualification.
 
