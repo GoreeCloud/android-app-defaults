@@ -18,24 +18,33 @@
 - A verified Gradle Wrapper remains desirable when its binary/provenance can be introduced safely; current CI explicitly bootstraps Gradle 8.11.1.
 - M0 completion is Development-only and does not imply Release Candidate, production, or Stable qualification.
 
-### M1 — Persistent tracker fundamentals
+### M1 — Core Time and persistent tracker fundamentals
 
-**State:** In progress — persistence foundation candidate on `feature/since-persistence`.
+**State:** In progress.
 
-Current tranche:
-- Maintain the committed compiler-generated Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with CI drift detection.
-- Enforce exactly one open current period per tracker at the SQLite boundary.
-- Enforce permanent-event single-period, valid period chronology, and streak-only positive goals at the database boundary.
-- Create tracker + initial period + optional goal as one transaction.
-- Keep Room entities behind a repository/domain mapping boundary.
-- Validate the database invariants on Android 16 in CI, including persistent close/reopen behavior.
+Parent persistence tranche — PR #3 / `feature/since-persistence`:
+- Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with committed compiler-generated schema and CI drift detection.
+- Database-level exactly-one-open-period, permanent-event single-period, period chronology, and streak-only positive-goal invariants.
+- Atomic tracker + initial period + optional goal creation.
+- Repository/domain mapping boundary.
+- Android 16 runtime-invariant validation, including persistent close/reopen behavior.
+- This tranche remains candidate-only until PR #3 exact-head gates and merge/readback complete.
+
+Stacked create-flow tranche — `feature/since-create-flow`:
+- Tracker Type Chooser for Permanent Event vs Streak.
+- Persistent creation for title, note, default Start = Now/current IANA ZoneId, display format, and optional streak goal.
+- Populated Dashboard observation and tracker cards with derived elapsed summary.
+- Repository-level runtime coverage of validated create + aggregate observation.
+- This child tranche remains candidate-only and must be reconciled after its parent persistence line changes or merges.
 
 Still open within M1:
-- Connect persistent creation to the Compose tracker type chooser and Create screen.
-- Implement populated Dashboard state.
-- Implement Edit and Tracker Details.
-- Add Preferences DataStore only for settings that are actually implemented.
-- Add additional persistence/query tests required by the UI flows.
+- User-selected past start date/time.
+- Explicit start-zone editing for custom starts.
+- Curated icon and accent selection.
+- Edit Tracker.
+- Tracker Details with full elapsed decomposition, start information, display-format updates, streak statistics/goal presentation, note, and actions.
+- Preferences DataStore only for settings that are actually implemented.
+- Additional persistence/query/UI-runtime tests required by those flows.
 
 ### M2 — Streak reset, history, and goals
 
