@@ -34,15 +34,15 @@ No separate post-merge workflow run was visible at the integration readback chec
 
 ### Added
 
-- Room 3.0.3 / SQLite 2.7.1 persistence baseline and Room Gradle schema export.
+- Room 3.0.3 / SQLite 2.7.1 persistence baseline, Room Gradle schema export, committed compiler-generated v1 schema, and CI schema-drift enforcement.
 - Schema-v1 entities for `tracked_events`, `event_periods`, and `event_goals` with cascading foreign keys and unique per-event period sequence.
 - App-owned SQLite setup for the one-open-period partial unique index because Room 3.0's current `Index` annotation cannot express a WHERE predicate.
 - Persistence triggers for period chronology, permanent-event single-period behavior, and streak-only positive goals.
 - Transactional tracker aggregate creation and repository/domain mapping boundaries.
 - Lazy application-level database and repository wiring.
-- API 36 instrumentation coverage for the critical database invariants.
+- API 36 instrumentation coverage for the critical database invariants, including persistent database close/reopen behavior.
 - CI schema artifact upload and Android 16 runtime-invariant lane.
 
 ### Boundary
 
-This entry describes candidate source only. The persistence foundation is not authoritative on `main` until exact-head build/lint/unit/runtime validation succeeds, the generated schema is reconciled and committed, and the reviewed pull request is merged.
+This entry describes candidate source only. The first persistence CI attempt (#6 / `35948301985`) failed on an overloaded Kotlin mapping reference and was corrected without rewriting history. The compiler-generated schema from the repaired build lane was retrieved and committed exactly. The persistence foundation is not authoritative on `main` until the final exact-head build/lint/unit/schema-drift/API 36 runtime validation succeeds and the reviewed pull request is merged.
