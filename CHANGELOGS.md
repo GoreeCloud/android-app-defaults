@@ -140,3 +140,19 @@ Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Develo
 ### Boundary
 
 This is CI-level Development evidence only. It does not establish representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, downstream GLAZE consumer acceptance, Release Candidate, production, or Stable status.
+
+
+## 2026-09-24 — Since keyboard-focus evidence candidate
+
+**Lifecycle:** Development candidate on `feature/since-keyboard-focus-evidence-v2`  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Android Compose instrumentation requests keyboard input mode.
+- The Create editor Cancel action is focused explicitly, then Tab traversal is verified to move to Save.
+- Enter activation on the focused Save action is verified through the existing validation-error outcome.
+
+### Boundary
+
+This is automated emulator keyboard evidence only. Representative hardware-keyboard behavior, physical assistive-input acceptance, TalkBack/large-font visual acceptance, localization/RTL acceptance, GLAZE consumer acceptance, and M2–M6 remain open.
