@@ -4,7 +4,38 @@
     <string name="dashboard_empty_message">Track time since an event or start a streak.</string>
     <string name="dashboard_empty_status">No trackers yet</string>
     <string name="add_tracker">Add tracker</string>
-    <string name="development_boundary_title">Tracker creation is next</string>
-    <string name="development_boundary_message">This Development foundation verifies the app shell and time/domain engine. Persistent tracker creation is not implemented yet.</string>
-    <string name="ok">OK</string>
+
+    <string name="choose_tracker_type">Choose tracker type</string>
+    <string name="tracker_kind_event">Permanent Event</string>
+    <string name="tracker_kind_streak">Streak</string>
+    <string name="event_description">A historical point that keeps accumulating and cannot be reset.</string>
+    <string name="streak_description">A resettable period whose history will be preserved.</string>
+
+    <string name="create_tracker_title">Create %1$s</string>
+    <string name="title_label">Title</string>
+    <string name="note_label">Note</string>
+    <string name="start_label">Start</string>
+    <string name="start_now_value">Now · %1$s</string>
+    <string name="custom_start_development_boundary">Custom past date/time, icon, and accent selection remain in the next M1 editor increment.</string>
+    <string name="display_format_label">Display format</string>
+    <string name="format_days">Days</string>
+    <string name="format_weeks">Weeks</string>
+    <string name="format_months">Months</string>
+    <string name="format_years">Years</string>
+    <string name="goal_label">Goal</string>
+    <string name="goal_optional_description">Optional for streak trackers.</string>
+    <string name="goal_amount_label">Target amount</string>
+    <string name="goal_unit_label">Target unit</string>
+    <string name="goal_summary">Goal: %1$d %2$s</string>
+
+    <string name="elapsed_days_short">%1$d d</string>
+    <string name="elapsed_weeks_short">%1$d wk</string>
+    <string name="elapsed_months_short">%1$d mo</string>
+    <string name="elapsed_years_short">%1$d yr</string>
+    <string name="clock_inconsistency">Check device clock</string>
+
+    <string name="save">Save</string>
+    <string name="saving">Saving…</string>
+    <string name="save_failed">Could not save this tracker. No partial tracker should be retained.</string>
+    <string name="cancel">Cancel</string>
 </resources>
