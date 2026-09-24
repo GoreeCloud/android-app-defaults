@@ -25,7 +25,7 @@ class RoomTrackerRepository(
 ) : TrackerRepository {
     override fun observeActiveTrackers(): Flow<List<Tracker>> =
         dao.observeActiveTrackedEvents().map { rows ->
-            rows.map(::toDomain)
+            rows.map { it.toDomain() }
         }
 
     override suspend fun createTracker(
