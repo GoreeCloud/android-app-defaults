@@ -52,10 +52,14 @@ Verified on `main` through PR #9:
 - Android 16 runtime instrumentation remains mandatory with KVM detection and software-acceleration fallback.
 - Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed run `35963071718` with Android 16 instrumentation `OK (13 tests)` and was squash-merged as `5b14c58af68b8748e71f6af0c462650d06e852d6`.
 
+Active accessibility evidence candidate:
+- emulator instrumentation for combined 2.0× font-scale and RTL editor layout;
+- explicit accessibility-role assertions for full-row display-format radio choices and streak-goal switch target.
+
 Still open within M1:
 - Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
 - Preferences DataStore only for application preferences that are actually implemented.
-- Representative TalkBack, large-font, keyboard/switch-access, localization/RTL, and rendered visual acceptance required before Stable qualification.
+- Representative TalkBack, keyboard navigation, external switch-device acceptance, broader localization, and rendered visual acceptance required before Stable qualification.
 
 ### M2 — Streak reset, history, and goals
 

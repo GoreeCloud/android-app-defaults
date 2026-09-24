@@ -111,3 +111,15 @@ Current `main` additionally implements:
 PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`. Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Development Foundation run `35963071718`: local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (13 tests)`. The runtime gate now detects emulator acceleration and keeps instrumentation mandatory, using KVM when available and software acceleration otherwise. Draft PR #8 was closed unmerged after its useful non-overlapping work was consolidated into PR #9.
 
 Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, localization/RTL acceptance, approved Since-specific icon/accent mapping, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
+
+
+### Active large-font / RTL accessibility evidence candidate
+
+The current Development candidate on `feature/since-a11y-layout-stabilization` adds emulator instrumentation evidence only; it does not change permissions, persistence, network behavior, or production feature scope.
+
+- verifies Create Tracker remains navigable with Compose font scale 2.0 and RTL layout direction;
+- verifies the primary Save action remains scroll-reachable under the combined large-font/RTL condition;
+- verifies full-row display-format semantics expose `Role.RadioButton` and a click action;
+- verifies the streak-goal activation row exposes `Role.Switch` and a click action.
+
+**Candidate boundary:** this evidence is not authoritative on `main` until the exact head passes applicable CI/runtime gates and the reviewed pull request is merged. It is emulator-level evidence only and does not establish representative-device TalkBack, external switch hardware, keyboard navigation, or rendered visual acceptance.

@@ -120,3 +120,18 @@ Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Develo
 ### Boundary
 
 Representative-device TalkBack/large-font/keyboard/switch-access, localization/RTL, approved Since-specific icon/accent mapping, downstream GLAZE UI consumer acceptance, and all later M2–M6 work remain open.
+
+
+## 2026-09-24 — Since large-font and RTL accessibility evidence candidate
+
+**Lifecycle:** Development candidate on `feature/since-a11y-layout-stabilization`  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Compose instrumentation that renders the Create Tracker flow at 2.0× font scale with RTL layout direction and verifies the screen heading, title field, and scroll-reachable Save action remain available.
+- Accessibility-role assertions proving the full-row display-format target exposes `Role.RadioButton` and the streak-goal activation row exposes `Role.Switch`, with click actions on the merged row semantics.
+
+### Boundary
+
+This is emulator-level accessibility evidence only. It does not establish representative-device TalkBack, external switch hardware, keyboard-navigation acceptance, complete localization, rendered visual acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, or Stable status.

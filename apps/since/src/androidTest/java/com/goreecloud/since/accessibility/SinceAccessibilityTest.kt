@@ -1,7 +1,11 @@
 package com.goreecloud.since.accessibility
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertHasClickAction
@@ -14,6 +18,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Goal
 import com.goreecloud.since.domain.model.Tracker
@@ -102,6 +108,80 @@ class SinceAccessibilityTest {
                     LiveRegionMode.Assertive,
                 )
             )
+    }
+
+    @Test
+    fun largeFontAndRtlEditorKeepsPrimaryActionsReachable() {
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalDensity provides Density(density = 1f, fontScale = 2f),
+                LocalLayoutDirection provides LayoutDirection.Rtl,
+            ) {
+                MaterialTheme {
+                    SinceApp(
+                        repository = FakeTrackerRepository(emptyList()),
+                        clock = clock,
+                    )
+                }
+            }
+        }
+
+        composeRule.onNodeWithText("Add tracker").performClick()
+        composeRule.onNodeWithText("Permanent Event").performClick()
+
+        composeRule
+            .onNodeWithText("Create Permanent Event")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+            .assertIsDisplayed()
+
+        composeRule
+            .onNodeWithTag("title-field")
+            .assertIsDisplayed()
+
+        composeRule
+            .onNodeWithText("Save")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun radioAndGoalToggleRowsExposeExplicitAccessibilityRoles() {
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = FakeTrackerRepository(emptyList()),
+                    clock = clock,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Add tracker").performClick()
+        composeRule.onNodeWithText("Streak").performClick()
+
+        composeRule
+            .onNodeWithText("Days")
+            .assertHasClickAction()
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.Role,
+                    Role.RadioButton,
+                )
+            )
+
+        composeRule
+            .onNodeWithText("Goal")
+            .assertHasClickAction()
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.Role,
+                    Role.Switch,
+                )
+            )
+            .performClick()
+
+        composeRule
+            .onNodeWithText("Target amount")
+            .assertIsDisplayed()
     }
 
     @Test
