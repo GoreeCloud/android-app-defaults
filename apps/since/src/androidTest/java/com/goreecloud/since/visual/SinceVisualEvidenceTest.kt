@@ -44,7 +44,7 @@ class SinceVisualEvidenceTest {
             composeRule.onNodeWithText("Choose tracker type").assertIsDisplayed()
             capture("tracker-type-chooser")
 
-            composeRule.onNodeWithText("Streak").performClick()
+            composeRule.onNodeWithText("A resettable period whose history will be preserved.").performClick()
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
             capture("create-streak")
 
@@ -68,7 +68,7 @@ class SinceVisualEvidenceTest {
             composeRule.onNodeWithText("Choose tracker type").assertIsDisplayed()
             capture("tracker-type-chooser-dark")
 
-            composeRule.onNodeWithText("Streak").performClick()
+            composeRule.onNodeWithText("A resettable period whose history will be preserved.").performClick()
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
             capture("create-streak-dark")
 
