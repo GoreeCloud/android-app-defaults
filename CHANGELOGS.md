@@ -42,6 +42,7 @@ No separate post-merge workflow run was visible at the integration readback chec
 - Lazy application-level database and repository wiring.
 - API 36 instrumentation coverage for the critical database invariants, including persistent database close/reopen behavior.
 - CI schema artifact upload and Android 16 runtime-invariant lane.
+- PR-workflow concurrency that cancels superseded heads so stale emulator jobs do not consume validation capacity, plus build-lane Android-test APK compilation to fail instrumentation compile errors before emulator provisioning.
 
 ### Boundary
 
