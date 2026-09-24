@@ -266,7 +266,8 @@ internal fun SettingsScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
+            .padding(innerPadding)
+            .testTag("settings-list"),
         contentPadding = PaddingValues(
             start = 20.dp,
             top = 24.dp,
