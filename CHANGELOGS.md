@@ -276,3 +276,27 @@ PR #24 was squash-merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`. Exact me
 
 This is Development presentation refinement and emulator evidence, not representative physical-device/OEM, dark-mode, assistive-technology, complete downstream GLAZE UI consumer acceptance, Release Candidate, production, or Stable acceptance.
 
+
+
+## 2026-09-24 — Since dual-theme rendered evidence
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #27
+
+### Added
+
+- Android 16 dark-mode rendered evidence for the empty Dashboard, tracker-type chooser, Create Streak, Tracker Details, and populated Dashboard.
+- Stable tracker-type test tags so evidence automation targets explicit chooser actions rather than ambiguous text.
+- CI extraction now requires all ten light/dark principal-flow PNG scenes.
+
+### Verification and integration
+
+Exact PR #27 final head `2b387c57fbb603857bfbe5dc70c909acea483377` passed Android Development Foundation run `35986151222` / #91 with Android 16 instrumentation `OK (18 tests)` and rendered-evidence upload. The PR was squash-merged as `eb8975dca84d2db613b05af07f7b4b9d3f1ed027`.
+
+Exact merged-main run `35986755499` / #92 also passed with Android 16 instrumentation `OK (18 tests)`, producing runtime artifact `10802144523` with digest `sha256:6d2271641128def6c8d846b00bf0295ca34ae77fc9321975120caf91a012a034` and rendered artifact `10802244368` with digest `sha256:1e4ecc14b94128dc1849311a1decb52b7ccdcf0c240994d8aae279822f51e866`.
+
+Human review of all ten exact-main scenes found no clipping, text corruption, unintended pink/purple Material inheritance, or unreadable dark-mode contrast.
+
+### Boundary
+
+This closes the bounded Android-emulator dark-mode rendered-evidence gap. Representative physical-device/OEM, native-language, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
