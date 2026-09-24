@@ -400,6 +400,39 @@ private class FakeTrackerRepository(
         return updated
     }
 
+    override suspend fun updateGoal(
+        trackerId: String,
+        targetAmount: Int,
+        targetUnit: DisplayFormat,
+    ): Goal? {
+        val existing = loadTracker(trackerId) ?: return null
+        if (existing.tracker.kind != TrackerKind.STREAK || targetAmount !in 1..100_000) return null
+        val timestamp = clock.millis()
+        val currentGoal = existing.goal
+        val updatedGoal = Goal(
+            trackerId = trackerId,
+            targetAmount = targetAmount,
+            targetUnit = targetUnit,
+            createdAtEpochMs = currentGoal?.createdAtEpochMs ?: timestamp,
+            updatedAtEpochMs = timestamp,
+        )
+        val updated = existing.copy(goal = updatedGoal)
+        aggregates.value = aggregates.value.map { row ->
+            if (row.tracker.id == trackerId) updated else row
+        }
+        return updatedGoal
+    }
+
+    override suspend fun removeGoal(trackerId: String): Boolean {
+        val existing = loadTracker(trackerId) ?: return false
+        if (existing.tracker.kind != TrackerKind.STREAK) return false
+        val updated = existing.copy(goal = null)
+        aggregates.value = aggregates.value.map { row ->
+            if (row.tracker.id == trackerId) updated else row
+        }
+        return true
+    }
+
     override suspend fun updateDisplayFormat(
         trackerId: String,
         displayFormat: DisplayFormat,
