@@ -51,7 +51,7 @@ This is Development evidence only. It does not establish representative-device a
 
 The current branch adds Development-candidate source for:
 
-- Room 3.0.3 database `since.db`, schema version 1, with exported schema generation.
+- Room 3.0.3 database `since.db`, schema version 1, with the compiler-generated v1 schema committed for migration review and CI drift detection.
 - `tracked_events`, `event_periods`, and `event_goals` entities using the specified column identities and cascading foreign keys.
 - Unique `(event_id, sequence)` period ordering.
 - App-owned SQLite setup for the one-open-period partial unique index that Room's current `Index` annotation cannot express.
@@ -59,9 +59,9 @@ The current branch adds Development-candidate source for:
 - Transactional aggregate creation of tracker + initial open period + optional goal with stable manual sort ordering.
 - Repository mapping that keeps Room entities out of the domain/UI contract.
 - Lazy application-level database/repository wiring.
-- Android runtime tests intended to verify the partial-index and trigger invariants on API 36.
+- Android runtime tests intended to verify the partial-index and trigger invariants on API 36, including close/reopen behavior for the persistent database.
 
-**Candidate boundary:** the persistence items above are not authoritative on `main` until their exact branch head passes required CI/runtime validation and the reviewed change is merged.
+**Candidate boundary:** the persistence items above are not authoritative on `main` until their exact branch head passes build/lint/unit/schema-drift and API 36 runtime validation and the reviewed change is merged.
 
 ## Material limitations
 
