@@ -22,6 +22,12 @@ abstract class TrackerDao {
     )
     abstract fun observeActiveTrackedEvents(): Flow<List<TrackedEventEntity>>
 
+    @Query("SELECT * FROM event_periods ORDER BY event_id, sequence")
+    abstract fun observeAllPeriods(): Flow<List<EventPeriodEntity>>
+
+    @Query("SELECT * FROM event_goals ORDER BY event_id")
+    abstract fun observeAllGoals(): Flow<List<EventGoalEntity>>
+
     @Query("SELECT * FROM tracked_events WHERE id = :eventId")
     protected abstract suspend fun readTrackedEvent(eventId: String): TrackedEventEntity?
 
