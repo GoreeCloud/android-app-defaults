@@ -38,7 +38,9 @@ jobs:
         run: gradle --no-daemon :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug
 
       - name: Verify committed Room schema is current
-        run: git diff --exit-code -- apps/since/schemas
+        run: |
+          git diff --exit-code -- apps/since/schemas
+          test -z "$(git status --porcelain --untracked-files=all -- apps/since/schemas)"
 
       - name: Upload generated Room schema
         uses: actions/upload-artifact@v4
