@@ -126,13 +126,26 @@ PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`
 Automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
 
 
-### Active Arabic localization candidate
+### Verified Arabic localization
 
-The current Development candidate on `feature/since-arabic-localization` adds bounded Android localization support without changing persistence, permissions, networking, schema, or tracker behavior.
+Current `main` additionally implements:
 
-- provides Arabic translations for the complete current 51-string Since UI resource surface while preserving the product name **Since**;
-- declares English and Arabic through Android locale metadata;
-- retains `android:supportsRtl="true"`;
-- adds Android instrumentation that creates an Arabic configuration context, verifies RTL layout direction, and verifies representative Arabic resource resolution.
+- Arabic translations for the complete current 51-string Since UI resource surface while preserving the product name **Since**;
+- English and Arabic Android locale metadata;
+- retained RTL support through `android:supportsRtl="true"`;
+- Android instrumentation that creates an Arabic configuration context, verifies RTL layout direction, and verifies representative Arabic resource resolution.
 
-**Candidate boundary:** this is not authoritative on `main` until the exact branch head passes applicable CI/runtime gates and the reviewed pull request is merged. It does not establish translation review by a native-language reviewer, representative-device RTL visual acceptance, TalkBack acceptance in Arabic, keyboard/external-switch acceptance, complete localization coverage for future features, or downstream GLAZE UI consumer acceptance.
+PR #16 was squash-merged to `main` as `d204cbd4464539a15b8f1ed6e0d9e9dfef4ddbb7`. Exact candidate `3867afe88e6570f647b65dfa224c5b67708d998c` passed Android Development Foundation run `35967471510`, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (16 tests)`.
+
+Native-speaker translation review, representative-device RTL visual acceptance, Arabic TalkBack acceptance, representative hardware-keyboard/physical assistive-input acceptance, future-feature localization, and downstream GLAZE UI consumer acceptance remain separate obligations.
+
+### Active keyboard-focus evidence candidate
+
+The current Development candidate on `feature/since-keyboard-focus-evidence-v3` adds Android Compose instrumentation that:
+
+- switches the test environment to keyboard input mode;
+- gives focus to the Create editor Cancel action;
+- verifies Tab moves focus to Save in the expected action order;
+- verifies Enter activates the focused Save action and surfaces the existing assertive validation error.
+
+**Candidate boundary:** this is automated Android 16 keyboard evidence only. It does not establish representative hardware-keyboard, physical assistive-input, TalkBack, or Stable accessibility acceptance until separately verified and merged.
