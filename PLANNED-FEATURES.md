@@ -71,12 +71,12 @@ Still open within M1:
 
 ### M2 — Streak reset, history, and goals
 
-**State:** Planned.
+**State:** In progress — goal editing/progress is implemented in the current PR #32 candidate; reset/history/statistics remain open.
 
 - Atomic close-current/create-next streak reset at one reset instant.
 - Preserved read-only history and reset reason/note.
 - Derived longest streak and reset count.
-- Goal editor, current-period progress, and estimated completion.
+- Goal editor, current-period progress, and estimated completion: implemented by PR #32 as the bounded first M2 slice. Exact final-candidate validation is authoritative in the GitHub pull-request/workflow record; reset/history/statistics remain open.
 
 ### M3 — Local management, portability, and recovery
 
