@@ -276,3 +276,26 @@ PR #24 was squash-merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`. Exact me
 
 This is Development presentation refinement and emulator evidence, not representative physical-device/OEM, dark-mode, assistive-technology, complete downstream GLAZE UI consumer acceptance, Release Candidate, production, or Stable acceptance.
 
+## 2026-09-24 — Since light and dark rendered evidence
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #27
+
+### Added
+
+- Exact Android 16 full-device rendered evidence for the principal Since flow in both light and dark modes.
+- Dark-mode captures for the empty Dashboard, tracker-type chooser, Create Streak, Tracker Details, and populated Dashboard.
+- Stable tracker-type evidence tags so the visual flow does not depend on ambiguous text-node matching.
+
+### Verification and integration
+
+The final PR #27 candidate `2b387c57fbb603857bfbe5dc70c909acea483377` passed Android Development Foundation run `35986151222` / #91 with Android 16 instrumentation `OK (18 tests)` and all ten required PNG scenes uploaded. Earlier failing attempts were retained as failed evidence and corrected rather than treated as acceptance.
+
+PR #27 was squash-merged as `eb8975dca84d2db613b05af07f7b4b9d3f1ed027`. Exact-main run `35986755499` / #92 passed Android 16 instrumentation `OK (18 tests)`, producing `since-runtime-apks` artifact ID `10802144523`, digest `sha256:6d2271641128def6c8d846b00bf0295ca34ae77fc9321975120caf91a012a034`, and `since-rendered-ui` artifact ID `10802244368`, digest `sha256:1e4ecc14b94128dc1849311a1decb52b7ccdcf0c240994d8aae279822f51e866`.
+
+All ten exact-main scenes were visually reviewed. No clipping, unintended pink/purple Material fallback, broken field geometry, obvious contrast/layout defect, or unequal tracker-type treatment was observed in the captured light/dark principal flow.
+
+### Boundary
+
+This closes bounded emulator light/dark rendered review only. Representative physical-device/OEM, native-language, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
+
