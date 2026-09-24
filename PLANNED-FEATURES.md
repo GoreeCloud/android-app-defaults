@@ -42,10 +42,17 @@ Verified on `main` through PR #6:
 - Closed streak history remains immutable; an edited current start cannot precede the latest closed-period end.
 - Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed run `35959431091` with Android 16 `SinceDatabaseRuntimeTest` `OK (10 tests)` and was squash-merged as `48d7c8342ad17e860b521690df5c817d84d92b7b`.
 
+Active candidate on `feature/since-editor-accessibility`:
+- Explicit screen heading semantics.
+- Coherent TalkBack grouping for tracker cards.
+- Full-row accessible display-format radio choices and streak-goal toggle target.
+- Assertive error live regions.
+- Android Compose accessibility instrumentation tests.
+
 Still open within M1:
 - Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
 - Preferences DataStore only for application preferences that are actually implemented.
-- Additional UI/accessibility/runtime evidence required by the new editor behaviors.
+- Representative TalkBack, large-font, keyboard/switch-access, localization/RTL, and rendered visual acceptance required before Stable qualification.
 
 ### M2 — Streak reset, history, and goals
 

@@ -63,10 +63,10 @@ jobs:
           if-no-files-found: error
 
   since-runtime:
-    name: Since Android 16 Room runtime invariants
+    name: Since Android 16 runtime instrumentation
     needs: since
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
 
     steps:
       - name: Check out source
@@ -78,20 +78,28 @@ jobs:
           name: since-runtime-apks
           path: ci-apks
 
-      - name: Enable KVM acceleration
+      - name: Detect Android emulator acceleration
+        id: emulator-accel
+        shell: bash
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-          test -r /dev/kvm
-          test -w /dev/kvm
+          if [ -e /dev/kvm ]; then
+            sudo chmod 0666 /dev/kvm || true
+          fi
 
-      - name: Run Android 16 database tests
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+            echo "kvm_available=true" >> "$GITHUB_OUTPUT"
+            echo "KVM acceleration is available."
+          else
+            echo "kvm_available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::KVM acceleration is unavailable; Android 16 instrumentation will use software acceleration."
+          fi
+
+      - name: Run Android 16 instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2.38.0
         with:
           api-level: 36
           target: default
           arch: x86_64
           disable-animations: true
-          disable-linux-hw-accel: false
+          disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
           script: bash scripts/run_since_android_tests.sh

@@ -95,3 +95,24 @@ Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Develo
 ### Boundary
 
 Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 remain open. This does not establish GLAZE UI consumer acceptance, representative-device acceptance, Release Candidate, production, or Stable status.
+
+
+## 2026-09-24 — Since editor accessibility candidate
+
+**Lifecycle:** Development candidate on `feature/since-editor-accessibility`  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Explicit accessibility heading semantics on primary Since screens.
+- Merged clickable tracker-card semantics so visible title/type/elapsed/goal content is exposed as one coherent accessible unit.
+- Full-row selectable display-format choices and a full-row streak-goal toggle, while suppressing redundant child radio/switch focus stops.
+- Assertive live-region semantics for validation, start-input, save, and display-format update errors.
+- Compose UI instrumentation coverage for headings, tracker-card click semantics, selectable display-format rows, scroll-reachable Save action, assertive validation errors, and custom-past-start Create → Details → Edit persistence.
+- One shared lifecycle-aware Dashboard minute ticker replacing per-card ticker coroutines.
+- Compose UI test dependencies scoped to Android instrumentation/debug builds.
+- Android 16 runtime CI acceleration detection: KVM is used when available; otherwise the required instrumentation suite runs with software acceleration instead of being skipped.
+
+### Boundary
+
+This entry describes candidate source only. Exact-head CI/runtime, merge verification, representative-device TalkBack/large-font/switch-access evidence, GLAZE UI consumer acceptance, and all later M2–M6 work remain open.

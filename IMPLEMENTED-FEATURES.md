@@ -93,3 +93,19 @@ Current `main` additionally implements:
 PR #6 was squash-merged to `main` as `48d7c8342ad17e860b521690df5c817d84d92b7b`. Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Development Foundation run `35959431091` on attempt 2, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 `SinceDatabaseRuntimeTest` with `OK (10 tests)`. Attempt 1 failed before tests because that hosted runner did not expose readable/writable `/dev/kvm`; no source change or validation weakening was used before the successful exact-head rerun.
 
 Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
+
+
+### Active editor accessibility candidate
+
+The current Development candidate on `feature/since-editor-accessibility` additionally implements:
+
+- explicit heading semantics for Dashboard, Create, Edit, and Tracker Details headings;
+- coherent merged tracker-card semantics so title, tracker type, elapsed summary, and optional goal content present through one clickable accessibility unit;
+- full-row selectable display-format options with the visual radio control removed as a redundant accessibility focus stop;
+- full-row toggleable streak-goal activation with the visual switch removed as a redundant accessibility focus stop;
+- assertive live-region semantics for validation, start-input, save, and display-format failure messages;
+- Android Compose instrumentation coverage for heading semantics, coherent clickable tracker cards, full-row selectable format behavior, scroll-reachable editor actions, assertive validation errors, and custom-past-start Create → Details → Edit persistence through the repository contract.
+- one shared lifecycle-aware Dashboard minute ticker instead of one ticker coroutine per tracker card; Details retains its own ticker only while the Details screen is active.
+- Android 16 runtime CI keeps instrumentation mandatory while using KVM when available and software emulator acceleration when the hosted runner lacks usable `/dev/kvm`.
+
+**Candidate boundary:** this source is not authoritative on `main` until the exact candidate passes the applicable build/lint/schema/Android-runtime gates and the reviewed pull request is merged. Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
