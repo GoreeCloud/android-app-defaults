@@ -62,7 +62,7 @@ Still open within M1:
 - Preferences DataStore only for application preferences that are actually implemented.
 - Representative TalkBack and large-font visual acceptance.
 - Keyboard/switch-access acceptance.
-- Real localization coverage and representative RTL acceptance beyond forced-layout CI.
+- Arabic localization is the active M1 candidate for the current UI resource surface; translation review, future-feature localization, and representative-device RTL acceptance remain open until separately verified.
 - Rendered visual acceptance required before Stable qualification.
 
 ### M2 — Streak reset, history, and goals
