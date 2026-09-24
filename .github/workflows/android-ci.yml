@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: android-development-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -35,7 +39,7 @@ jobs:
         run: python3 scripts/check_since_manifest.py
 
       - name: Test, lint, and assemble Since
-        run: gradle --no-daemon :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug
+        run: gradle --no-daemon :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug :apps:since:assembleDebugAndroidTest
 
       - name: Verify committed Room schema is current
         run: |
