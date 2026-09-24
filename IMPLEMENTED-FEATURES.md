@@ -124,3 +124,15 @@ Current `main` adds CI-level accessibility/layout evidence without claiming repr
 PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`. Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Development Foundation run `35965422146`, including manifest guard, JVM tests, Android lint, app/test APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (15 tests)`.
 
 Automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
+
+
+### Active keyboard-focus evidence candidate
+
+The current Development candidate on `feature/since-keyboard-focus-evidence` adds Android Compose instrumentation that:
+
+- switches the test environment to keyboard input mode;
+- gives focus to the Create editor Cancel action;
+- verifies Tab moves focus to Save in the expected action order;
+- verifies Enter activates the focused Save action and surfaces the existing assertive validation error.
+
+**Candidate boundary:** this is automated Android 16 keyboard evidence only. It does not establish representative physical-keyboard, external switch-device, TalkBack, or Stable accessibility acceptance until separately verified and merged.
