@@ -22,7 +22,9 @@ adb install -r "$TEST_APK"
 AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
 test -n "$AAPT"
 TEST_PACKAGE="$("$AAPT" dump badging "$TEST_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+APP_PACKAGE="$("$AAPT" dump badging "$APP_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
 test -n "$TEST_PACKAGE"
+test -n "$APP_PACKAGE"
 
 adb logcat -c
 
@@ -38,3 +40,21 @@ if [ "$STATUS" -ne 0 ] || ! printf '%s\n' "$OUTPUT" | grep -Eq 'OK \([1-9][0-9]*
     adb logcat -d -v threadtime | tail -n 1500
     exit 1
 fi
+
+
+echo "Collecting rendered GoreeCloud Since evidence."
+mkdir -p ci-screenshots
+for screenshot in \
+  dashboard-empty \
+  tracker-type-chooser \
+  create-streak \
+  tracker-details \
+  dashboard-populated
+do
+    destination="ci-screenshots/${screenshot}.png"
+    adb exec-out run-as "$APP_PACKAGE" cat "files/visual-evidence/${screenshot}.png" > "$destination"
+    test -s "$destination"
+done
+
+echo "Rendered evidence files:"
+find ci-screenshots -maxdepth 1 -type f -name '*.png' -print | sort
