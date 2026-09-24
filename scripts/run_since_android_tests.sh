@@ -24,11 +24,17 @@ test -n "$AAPT"
 TEST_PACKAGE="$("$AAPT" dump badging "$TEST_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
 test -n "$TEST_PACKAGE"
 
+adb logcat -c
+
 set +e
 OUTPUT="$(adb shell am instrument -w "$TEST_PACKAGE/androidx.test.runner.AndroidJUnitRunner" 2>&1)"
 STATUS=$?
 set -e
 
 printf '%s\n' "$OUTPUT"
-test "$STATUS" -eq 0
-printf '%s\n' "$OUTPUT" | grep -Eq 'OK \([1-9][0-9]* tests?\)'
+
+if [ "$STATUS" -ne 0 ] || ! printf '%s\n' "$OUTPUT" | grep -Eq 'OK \([1-9][0-9]* tests?\)'; then
+    echo "Instrumentation did not complete successfully. Recent Android logcat:"
+    adb logcat -d -v threadtime | tail -n 1500
+    exit 1
+fi
