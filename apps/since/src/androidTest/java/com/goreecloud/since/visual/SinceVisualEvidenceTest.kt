@@ -18,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.WindowCompat
 import androidx.test.platform.app.InstrumentationRegistry
@@ -118,20 +119,23 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithTag("nav-settings").performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
         capture("settings")
-        composeRule.onNodeWithTag("settings-backup").performScrollTo()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
         capture("settings-recovery")
-        composeRule.onNodeWithText("App version").performScrollTo()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithText("App version").assertIsDisplayed()
         capture("settings-about")
 
         composeRule.runOnIdle {
             darkTheme = true
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag("settings-screen").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(0)
+        composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
         capture("settings-dark")
-        composeRule.onNodeWithTag("settings-backup").performScrollTo()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
         capture("settings-recovery-dark")
-        composeRule.onNodeWithText("App version").performScrollTo()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithText("App version").assertIsDisplayed()
         capture("settings-about-dark")
 
         composeRule.onNodeWithTag("nav-achievements").performClick()
