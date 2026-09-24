@@ -66,7 +66,7 @@ fun SinceApp(
 
     var showTypeChooser by rememberSaveable { mutableStateOf(false) }
     var editorKindName by rememberSaveable { mutableStateOf<String?>(null) }
-    var validationErrors by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var validationErrors by remember { mutableStateOf(emptyList<String>()) }
     var saveFailed by rememberSaveable { mutableStateOf(false) }
     var isSaving by rememberSaveable { mutableStateOf(false) }
 
