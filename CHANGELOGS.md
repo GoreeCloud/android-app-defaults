@@ -160,3 +160,24 @@ Exact candidate `3867afe88e6570f647b65dfa224c5b67708d998c` passed Android Develo
 ### Boundary
 
 Native-language translation review, representative-device RTL visual acceptance, Arabic TalkBack acceptance, physical keyboard/external-switch acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable remain open.
+
+
+## 2026-09-24 — Since keyboard-focus automated evidence
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #19
+
+### Added
+
+- Compose keyboard input mode instrumentation for the Create editor.
+- Focus assertion on Cancel.
+- Tab traversal verification from Cancel to Save.
+- Enter activation verification on focused Save with the existing validation error as the observable result.
+
+### Verification and integration
+
+Exact candidate `bdc89ec81fae8a195e7f611efa4ca0f81c614650` passed Android Development Foundation run `35968237474` with Android 16 instrumentation `OK (17 tests)`. PR #19 was squash-merged to `main` as `a24942ce244b2182d72aadde0f57eb10bebc8f5c`. Exact merged-main run `35968638222` also passed `OK (17 tests)` and produced unexpired Development artifact `since-runtime-apks` ID `10794409287`.
+
+### Boundary
+
+This is automated emulator evidence only. Representative physical-keyboard/external-switch acceptance, representative-device TalkBack or large-font visual acceptance, native-language Arabic review, representative-device RTL visual acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable remain open.
