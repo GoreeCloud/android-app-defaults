@@ -37,6 +37,9 @@ jobs:
       - name: Test, lint, and assemble Since
         run: gradle --no-daemon :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug
 
+      - name: Verify committed Room schema is current
+        run: git diff --exit-code -- apps/since/schemas
+
       - name: Upload generated Room schema
         uses: actions/upload-artifact@v4
         with:
