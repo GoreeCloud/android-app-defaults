@@ -16,6 +16,7 @@ import com.goreecloud.since.domain.validation.ValidatedTrackerDraft
 import java.time.Clock
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 class RoomTrackerRepository(
@@ -26,6 +27,17 @@ class RoomTrackerRepository(
     override fun observeActiveTrackers(): Flow<List<Tracker>> =
         dao.observeActiveTrackedEvents().map { rows ->
             rows.map { it.toDomain() }
+        }
+
+    override fun observeActiveTrackerAggregates(): Flow<List<TrackerAggregate>> =
+        combine(
+            dao.observeActiveTrackedEvents(),
+            dao.observeAllPeriods(),
+            dao.observeAllGoals(),
+        ) { rows, _, _ ->
+            rows.mapNotNull { row ->
+                dao.readAggregate(row.id)?.toDomain()
+            }
         }
 
     override suspend fun createTracker(
