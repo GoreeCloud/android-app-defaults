@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,8 +18,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.goreecloud.since.R
 
 @Composable
 fun SinceApp() {
@@ -27,9 +29,10 @@ fun SinceApp() {
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { showDevelopmentBoundary = true }) {
-                Text("+")
-            }
+            ExtendedFloatingActionButton(
+                onClick = { showDevelopmentBoundary = true },
+                text = { Text(stringResource(R.string.add_tracker)) },
+            )
         },
     ) { innerPadding ->
         DashboardEmptyState(innerPadding)
@@ -38,16 +41,11 @@ fun SinceApp() {
     if (showDevelopmentBoundary) {
         AlertDialog(
             onDismissRequest = { showDevelopmentBoundary = false },
-            title = { Text("Tracker creation is next") },
-            text = {
-                Text(
-                    "This Development foundation verifies the app shell and time/domain engine. " +
-                        "Persistent tracker creation is not implemented yet."
-                )
-            },
+            title = { Text(stringResource(R.string.development_boundary_title)) },
+            text = { Text(stringResource(R.string.development_boundary_message)) },
             confirmButton = {
                 TextButton(onClick = { showDevelopmentBoundary = false }) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
         )
@@ -67,18 +65,18 @@ private fun DashboardEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Since",
+            text = stringResource(R.string.dashboard_title),
             style = MaterialTheme.typography.headlineLarge,
         )
         Text(
             modifier = Modifier.padding(top = 12.dp),
-            text = "Track time since an event or start a streak.",
+            text = stringResource(R.string.dashboard_empty_message),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
         Text(
             modifier = Modifier.padding(top = 16.dp),
-            text = "No trackers yet",
+            text = stringResource(R.string.dashboard_empty_status),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
