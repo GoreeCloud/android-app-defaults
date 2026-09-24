@@ -6,12 +6,16 @@ on:
     branches:
       - main
 
+concurrency:
+  group: android-development-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   since:
-    name: Since build, unit tests, lint, and manifest guard
+    name: Since build, unit tests, lint, schema, and manifest guard
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -35,4 +39,59 @@ jobs:
         run: python3 scripts/check_since_manifest.py
 
       - name: Test, lint, and assemble Since
-        run: gradle --no-daemon :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug
+        run: gradle --no-daemon :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug :apps:since:assembleDebugAndroidTest
+
+      - name: Verify committed Room schema is current
+        run: |
+          git diff --exit-code -- apps/since/schemas
+          test -z "$(git status --porcelain --untracked-files=all -- apps/since/schemas)"
+
+      - name: Upload generated Room schema
+        uses: actions/upload-artifact@v4
+        with:
+          name: since-room-schema
+          path: apps/since/schemas
+          if-no-files-found: error
+
+      - name: Upload Since runtime APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: since-runtime-apks
+          path: |
+            apps/since/build/outputs/apk/debug/*.apk
+            apps/since/build/outputs/apk/androidTest/debug/*.apk
+          if-no-files-found: error
+
+  since-runtime:
+    name: Since Android 16 Room runtime invariants
+    needs: since
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Download validated Since APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: since-runtime-apks
+          path: ci-apks
+
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -r /dev/kvm
+          test -w /dev/kvm
+
+      - name: Run Android 16 database tests
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 36
+          target: default
+          arch: x86_64
+          disable-animations: true
+          disable-linux-hw-accel: false
+          script: bash scripts/run_since_android_tests.sh

@@ -10,25 +10,32 @@
 
 ### M0 — Foundation stabilization
 
-**State:** In progress — Development candidate implemented; independent review and integration remain pending.
+**State:** Implemented on `main` for the bounded Development foundation; broader release acceptance remains open.
 
-- Maintain the Android monorepo skeleton and independently installable `apps/since` application module.
-- Keep MVP operation local-first with no `INTERNET` permission.
-- Keep dependency and build versions explicit and reproducible.
-- Keep final reviewed-head CI green for unit tests, Android lint, Debug assembly, and the fail-closed manifest boundary.
-- Maintain truthful Development lifecycle and repository-native feature/change records.
-- Add a verified Gradle Wrapper when its binary/provenance can be introduced safely; current CI explicitly bootstraps Gradle 8.11.1.
+- PR #2 merged as `8afd4eecc1a374443f7a7b7da72eb19e79dfc4e1`.
+- Exact candidate `a945cee18ef0924d7ef5360e5f252231c446753d` passed Android Development Foundation run #4 / `35947248482`.
+- Main-branch readback verified the merged source and fail-closed manifest.
+- A verified Gradle Wrapper remains desirable when its binary/provenance can be introduced safely; current CI explicitly bootstraps Gradle 8.11.1.
+- M0 completion is Development-only and does not imply Release Candidate, production, or Stable qualification.
 
 ### M1 — Persistent tracker fundamentals
 
-**State:** Planned.
+**State:** In progress — persistence foundation candidate on `feature/since-persistence`.
 
-- Add Room schema v1 for trackers, periods, and goals with schema export.
-- Enforce exactly one open current period per tracker and transactional aggregate creation.
-- Add Preferences DataStore only for application preferences that are actually implemented.
-- Implement Dashboard populated state, tracker type chooser, Create/Edit, and Tracker Details.
-- Persist permanent events and streak current periods.
-- Keep elapsed values derived from timestamps through the injected-clock TimeEngine.
+Current tranche:
+- Maintain the committed compiler-generated Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with CI drift detection.
+- Enforce exactly one open current period per tracker at the SQLite boundary.
+- Enforce permanent-event single-period, valid period chronology, and streak-only positive goals at the database boundary.
+- Create tracker + initial period + optional goal as one transaction.
+- Keep Room entities behind a repository/domain mapping boundary.
+- Validate the database invariants on Android 16 in CI, including persistent close/reopen behavior.
+
+Still open within M1:
+- Connect persistent creation to the Compose tracker type chooser and Create screen.
+- Implement populated Dashboard state.
+- Implement Edit and Tracker Details.
+- Add Preferences DataStore only for settings that are actually implemented.
+- Add additional persistence/query tests required by the UI flows.
 
 ### M2 — Streak reset, history, and goals
 
@@ -46,8 +53,8 @@
 - Search, sorting, archive/restore, delete safeguards, settings, and About/Privacy.
 - Versioned JSON export using Android Storage Access Framework.
 - Fail-closed validated import with review before mutation; prefer Replace import until safe merge semantics are fully designed.
-- Room migration tests and tested process-death/reboot behavior.
-- Recovery and portability evidence sufficient for the implemented scope.
+- Room migration tests using committed historical schema files.
+- Tested process-death/reboot behavior and recovery evidence sufficient for the implemented scope.
 
 ### M4 — Post-MVP Android experience
 
@@ -63,7 +70,7 @@
 
 Evaluate and integrate all nine Integral Platform Systems as applicable: GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, GoreeCloud Policy, and GoreeCloud Observability.
 
-The temporary Compose Material 3 substrate in the first Since Development shell is **not** GLAZE UI conformance. The current approved GLAZE UI Android mapping must be verified and adopted before any conformance claim.
+The temporary Compose Material 3 substrate in the current Since Development shell is **not** GLAZE UI conformance. The current approved GLAZE UI Android mapping must be verified and adopted before any conformance claim.
 
 ### M6 — Release acceptance
 
@@ -75,4 +82,4 @@ The temporary Compose Material 3 substrate in the first Since Development shell 
 
 ## Other Android App Defaults applications
 
-The broader Android App Defaults suite remains planned. No application other than the bounded Since Development foundation is represented by this repository as currently implemented.
+The broader Android App Defaults suite remains planned. No application other than the bounded Since Development source is represented by this repository as currently implemented.
