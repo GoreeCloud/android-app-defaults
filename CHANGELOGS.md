@@ -2,6 +2,26 @@
 
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
+## 2026-09-24 — Since date and time picker candidate
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #34
+
+### Changed
+
+- Replaced manual `YYYY-MM-DD HH:MM` editing in Create/Edit Tracker with separate Date and Time picker controls.
+- Preserved the stored local start plus explicit IANA time-zone contract, including existing DST validation and persistence behavior.
+- Time selection follows the device 12/24-hour preference.
+- Added English and Arabic picker labels and Compose coverage for picker reachability.
+
+### Verification
+
+PR #34 carries this Development interaction refinement. Exact-head Android Development Foundation validation is required before merge.
+
+### Boundary
+
+This does not change the Room schema, chronology rules, network/privacy permissions, representative-device acceptance, Release Candidate, production, or Stable status.
+
 ## 2026-09-24 — Since M2 goal progress and editor candidate
 
 **Lifecycle:** Development  
