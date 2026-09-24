@@ -76,7 +76,7 @@ Still open within M1:
 - Atomic close-current/create-next streak reset at one reset instant.
 - Preserved read-only history and reset reason/note.
 - Derived longest streak and reset count.
-- Goal editor, current-period progress, and estimated completion: implemented in PR #32 exact candidate `024a910d9410e1a4e7644d5651be7224a1752b2a`, which passed Android Development Foundation run `35994826843` before this documentation reconciliation. The final documentation head requires its own exact-head rerun before merge.
+- Goal editor, current-period progress, and estimated completion: implemented by PR #32 as the bounded first M2 slice. Exact final-candidate validation is authoritative in the GitHub pull-request/workflow record; reset/history/statistics remain open.
 
 ### M3 — Local management, portability, and recovery
 
