@@ -104,6 +104,49 @@ class SinceDatabaseRuntimeTest {
     }
 
     @Test
+    fun persistedDatabaseReopensWithManualInvariantsIntact() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        context.deleteDatabase(SinceDatabase.NAME)
+
+        var persistent: SinceDatabase? = null
+        try {
+            persistent = SinceDatabaseFactory.build(context)
+            val firstDao = persistent.trackerDao()
+            val tracker = trackerEntity(id = "reopen-streak", kind = TrackerKind.STREAK)
+            firstDao.createTrackerAggregate(
+                tracker = tracker,
+                initialPeriod = periodEntity(
+                    id = "reopen-period-0",
+                    eventId = tracker.id,
+                    sequence = 0,
+                    start = 1_000L,
+                ),
+                goal = null,
+            )
+            persistent.close()
+            persistent = null
+
+            persistent = SinceDatabaseFactory.build(context)
+            val reopenedDao = persistent.trackerDao()
+            assertEquals(1, reopenedDao.openPeriodCount(tracker.id))
+
+            expectSQLiteFailure {
+                reopenedDao.insertPeriod(
+                    periodEntity(
+                        id = "reopen-period-duplicate",
+                        eventId = tracker.id,
+                        sequence = 1,
+                        start = 2_000L,
+                    )
+                )
+            }
+        } finally {
+            persistent?.close()
+            context.deleteDatabase(SinceDatabase.NAME)
+        }
+    }
+
+    @Test
     fun databaseRejectsInvalidPeriodChronologyAndEventGoal() = runBlocking {
         val streak = trackerEntity(id = "streak-2", kind = TrackerKind.STREAK)
         dao.createTrackerAggregate(
