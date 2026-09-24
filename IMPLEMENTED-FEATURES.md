@@ -153,3 +153,22 @@ Current `main` also includes focused Android Compose keyboard-navigation evidenc
 PR #19 was squash-merged to `main` as `a24942ce244b2182d72aadde0f57eb10bebc8f5c`. Exact candidate `bdc89ec81fae8a195e7f611efa4ca0f81c614650` passed Android Development Foundation run `35968237474` with Android 16 instrumentation `OK (17 tests)`. Exact merged-main run `35968638222` also passed `OK (17 tests)` and produced unexpired Development artifact `since-runtime-apks` ID `10794409287`.
 
 This is automated emulator evidence only. Representative physical-keyboard/external-switch acceptance, representative-device TalkBack/large-font visual acceptance, native-language Arabic review, representative-device RTL acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable remain open.
+
+### Verified Since visual interface refinement
+
+Current Development source additionally includes a dedicated GoreeCloud Since Android presentation layer informed by the current Stable Glaze UI V1.6 direction without claiming downstream consumer conformance:
+
+- explicit light and dark Since color schemes with deep-teal primary identity, restrained amber goal accents, neutral layered surfaces, and continuous rounded geometry;
+- a compact Dashboard first-run state rather than a vertically centered empty canvas;
+- redesigned tracker cards with grouped tracker type, elapsed-time, and goal hierarchy;
+- a Details elapsed-time hero that also keeps the persisted start date/time and IANA zone visible;
+- grouped information surfaces for display format, goal, and notes;
+- two-column selectable display-format controls that preserve radio-button semantics and touch targets;
+- larger tracker-type option surfaces and clearer Create/Edit section grouping;
+- normal user-facing screens no longer expose implementation/development deferral copy;
+- explicit Android edge-to-edge system-bar appearance handling.
+
+Exact source candidate `41a61992a76a8c7475c98666d8db5993913b0c50` passed Android Development Foundation run #67 / `35973932878`, including Android 16 instrumentation with all 17 tests passing.
+
+Representative physical-device visual acceptance and full downstream GLAZE UI consumer acceptance remain open release obligations.
+
