@@ -71,12 +71,12 @@ Still open within M1:
 
 ### M2 — Streak reset, history, and goals
 
-**State:** Planned.
+**State:** In progress — goal editing/progress is implemented in the current PR #32 candidate; reset/history/statistics remain open.
 
 - Atomic close-current/create-next streak reset at one reset instant.
 - Preserved read-only history and reset reason/note.
 - Derived longest streak and reset count.
-- Goal editor, current-period progress, and estimated completion.
+- Goal editor, current-period progress, and estimated completion: implemented in PR #32 exact candidate `024a910d9410e1a4e7644d5651be7224a1752b2a`, which passed Android Development Foundation run `35994826843` before this documentation reconciliation. The final documentation head requires its own exact-head rerun before merge.
 
 ### M3 — Local management, portability, and recovery
 
