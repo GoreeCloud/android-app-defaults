@@ -543,6 +543,21 @@ private fun TrackerDetailsScreen(
                             style = MaterialTheme.typography.displaySmall,
                         )
                     }
+                    Text(
+                        text = stringResource(R.string.started_on_label),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    Text(
+                        text = startedOn,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = currentPeriod.startZoneId,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
 
@@ -564,22 +579,6 @@ private fun TrackerDetailsScreen(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-            }
-
-            SectionCard {
-                Text(
-                    text = stringResource(R.string.started_on_label),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = startedOn,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Text(
-                    text = currentPeriod.startZoneId,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
             }
 
             aggregate.goal?.let { goal ->
