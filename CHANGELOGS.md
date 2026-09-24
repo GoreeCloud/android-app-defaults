@@ -43,6 +43,7 @@ No separate post-merge workflow run was visible at the integration readback chec
 - API 36 instrumentation coverage for the critical database invariants, including persistent database close/reopen behavior.
 - CI schema artifact upload and Android 16 runtime-invariant lane.
 - PR-workflow concurrency that cancels superseded heads so stale emulator jobs do not consume validation capacity, plus build-lane Android-test APK compilation to fail instrumentation compile errors before emulator provisioning.
+- Runtime CI now transfers the exact build-lane application/test APK artifacts to an API 36 default emulator image, installs them directly with ADB, and invokes AndroidJUnitRunner directly. This avoids the opaque Gradle/UTP install path that previously failed before any Since test executed while preserving the Android 16 runtime gate.
 
 ### Boundary
 
