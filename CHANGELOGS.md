@@ -18,7 +18,7 @@ This repository-local record is the authoritative human-readable change history 
 
 ### Verification
 
-Exact candidate `024a910d9410e1a4e7644d5651be7224a1752b2a` passed Android Development Foundation run `35994826843`. This documentation commit advances the candidate and therefore requires a fresh exact-head run before merge.
+PR #32 carries this Development slice. Exact-head validation for the final merge candidate is authoritative in the GitHub pull-request/workflow record; this changelog does not pin a moving pre-merge head. Any candidate-head change requires a fresh exact-head run before merge.
 
 ### Boundary
 
