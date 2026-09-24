@@ -545,7 +545,7 @@ private fun TrackerDetailsScreen(
                         Text(
                             text = elapsedSummary(elapsed),
                             color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.headlineLarge,
                         )
                     }
                     Text(
