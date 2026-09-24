@@ -142,10 +142,10 @@ Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Develo
 This is CI-level Development evidence only. It does not establish representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, downstream GLAZE consumer acceptance, Release Candidate, production, or Stable status.
 
 
-## 2026-09-24 — Since Arabic localization candidate
+## 2026-09-24 — Since Arabic localization
 
-**Lifecycle:** Development candidate on `feature/since-arabic-localization`  
-**Tracking:** GitHub issue #1
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #16
 
 ### Added
 
@@ -153,6 +153,10 @@ This is CI-level Development evidence only. It does not establish representative
 - Android locale metadata declaring English and Arabic.
 - Android instrumentation that verifies an Arabic configuration resolves RTL layout direction and representative localized resources.
 
+### Verification and integration
+
+Exact candidate `3867afe88e6570f647b65dfa224c5b67708d998c` passed Android Development Foundation run `35967471510` with Android 16 instrumentation `OK (16 tests)`. PR #16 was squash-merged to `main` as `d204cbd4464539a15b8f1ed6e0d9e9dfef4ddbb7`.
+
 ### Boundary
 
-This is a Development candidate until exact-head CI/runtime verification and reviewed integration complete. It does not establish native-speaker translation acceptance, representative-device RTL visual acceptance, Arabic TalkBack acceptance, keyboard/external-switch acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, or Stable status.
+Native-language translation review, representative-device RTL visual acceptance, Arabic TalkBack acceptance, physical keyboard/external-switch acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable remain open.
