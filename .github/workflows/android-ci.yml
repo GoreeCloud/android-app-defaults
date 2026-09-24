@@ -85,31 +85,4 @@ jobs:
           target: default
           arch: x86_64
           disable-animations: true
-          script: |
-            set -eu
-            APP_APK="$(find ci-apks -type f -name '*-debug.apk' ! -name '*androidTest*' | head -n 1)"
-            TEST_APK="$(find ci-apks -type f -name '*-debug-androidTest.apk' | head -n 1)"
-            test -n "$APP_APK"
-            test -n "$TEST_APK"
-
-            echo "Android /data capacity before install:"
-            adb shell df -h /data
-
-            echo "Installing application APK: $APP_APK"
-            adb install -r "$APP_APK"
-
-            echo "Installing instrumentation APK: $TEST_APK"
-            adb install -r "$TEST_APK"
-
-            AAPT="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)"
-            test -n "$AAPT"
-            TEST_PACKAGE="$("$AAPT" dump badging "$TEST_APK" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
-            test -n "$TEST_PACKAGE"
-
-            set +e
-            OUTPUT="$(adb shell am instrument -w "$TEST_PACKAGE/androidx.test.runner.AndroidJUnitRunner" 2>&1)"
-            STATUS=$?
-            set -e
-            printf '%s\n' "$OUTPUT"
-            test "$STATUS" -eq 0
-            printf '%s\n' "$OUTPUT" | grep -Eq 'OK \([1-9][0-9]* tests?\)'
+          script: bash scripts/run_since_android_tests.sh
