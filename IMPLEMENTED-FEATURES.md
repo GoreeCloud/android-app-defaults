@@ -87,7 +87,7 @@ PR #32 adds the bounded first M2 slice without changing the Room v1 schema or th
 - JVM coverage for DST, month-end, leap-day, completion, >100%, reset/new-period progress, and backward-clock behavior;
 - Android runtime persistence/reactivity coverage plus Compose goal editor update/remove coverage.
 
-Exact candidate `024a910d9410e1a4e7644d5651be7224a1752b2a` passed Android Development Foundation run `35994826843`: build, JVM tests, Android lint, Debug application/instrumentation assembly, Room schema drift verification, local-only/canonical-identity guard, and Android 16 instrumentation all succeeded. This documentation reconciliation advances the branch again, so a fresh exact-head workflow is required before merge.
+PR #32 carries this bounded M2 goal-progress/editor implementation with build, JVM, Android lint, Debug application/instrumentation assembly, Room schema-drift, local-only/canonical-identity, and Android 16 runtime validation. The final exact-head result is authoritative in the GitHub pull-request/workflow record rather than duplicated as a moving pre-merge SHA here; any head change requires fresh exact-head validation before merge.
 
 This remains Development evidence. Atomic streak reset, preserved History, longest-streak/reset-count statistics, representative-device acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable qualification remain open.
 
