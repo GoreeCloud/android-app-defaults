@@ -261,6 +261,43 @@ class SinceAccessibilityTest {
             .assertIsDisplayed()
     }
 
+    @Test
+    fun goalEditorUpdatesAndRemovesGoalWithoutChangingStreakHistory() {
+        val repository = FakeTrackerRepository(
+            initial = listOf(sampleAggregate()),
+            clock = clock,
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                )
+            }
+        }
+
+        val originalPeriod = repository.current.single().periods.single()
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithText("Edit goal").performClick()
+        composeRule.onNodeWithTag("goal-amount-field").performTextClearance()
+        composeRule.onNodeWithTag("goal-amount-field").performTextInput("14")
+        composeRule.onNodeWithText("Save").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(14, repository.current.single().goal!!.targetAmount)
+        assertEquals(originalPeriod, repository.current.single().periods.single())
+
+        composeRule.onNodeWithText("Edit goal").performClick()
+        composeRule.onNodeWithText("Remove goal").performClick()
+        composeRule.onNodeWithText("Remove").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(null, repository.current.single().goal)
+        assertEquals(originalPeriod, repository.current.single().periods.single())
+    }
+
     private fun sampleAggregate(): TrackerAggregate {
         val trackerId = "tracker-accessibility"
         return TrackerAggregate(
