@@ -238,3 +238,24 @@ PR #27 was squash-merged as `eb8975dca84d2db613b05af07f7b4b9d3f1ed027`. Exact me
 - `since-rendered-ui` artifact ID `10802244368`, digest `sha256:1e4ecc14b94128dc1849311a1decb52b7ccdcf0c240994d8aae279822f51e866`.
 
 Human review of the ten exact-main scenes verified readable light/dark contrast, preserved content hierarchy, and no clipping, text corruption, or reappearance of the unintended pink/purple Material surface inheritance. This closes the emulator dark-mode rendered-evidence gap only. Representative physical-device/OEM rendering, assistive-technology acceptance, and downstream GLAZE UI consumer acceptance remain open.
+
+### Verified empty Dashboard first-run refinement
+
+GoreeCloud Since now presents the no-data state as a cohesive first-run surface rather than separating the explanation from its primary action:
+
+- the empty Dashboard displays the canonical Since launcher mark already packaged by the application;
+- `No trackers yet` is presented as the empty-state heading instead of a status chip;
+- the explanatory copy uses normal body hierarchy;
+- `Add tracker` is a full-width primary action inside the empty-state card, eliminating the large visual gap between message and action;
+- populated dashboards retain the floating `Add tracker` action;
+- empty-state list padding no longer reserves floating-action clearance that is not used.
+
+PR #30 exact candidate `9b23193e733a350866511e29596b9339d1999823` passed Android Development Foundation run `35989103579` / #97 with the canonical-identity/manifest guard, JVM tests, Android lint, APK assembly, Room-schema verification, Android 16 instrumentation `OK (18 tests)`, and all ten light/dark rendered scenes. The empty Dashboard light/dark evidence was visually reviewed and showed the intended in-card branding/action hierarchy without clipping, text corruption, or dark-mode contrast defects.
+
+PR #30 was squash-merged as `979972f2564b6ebd63ed59aeb658cbf4cd261eb1`. Exact merged-main run `35989719467` / #98 also passed Android 16 instrumentation `OK (18 tests)` and produced:
+
+- `since-runtime-apks` artifact ID `10803354250`, digest `sha256:180b24d5661191c8e60a33b31946ab2a1050a5f514350399ef08b09796330a73`;
+- `since-rendered-ui` artifact ID `10803653756`, digest `sha256:d316677947be78aace4d6462b55e4e1e31963e9d4136e88a265b6ca0a2e99dc3`.
+
+This remains Development emulator evidence. Representative physical-device/OEM and assistive-technology acceptance remain open.
+
