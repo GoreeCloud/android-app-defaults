@@ -155,7 +155,9 @@ internal fun AchievementsScreen(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    modifier = Modifier.semantics { heading() },
+                    modifier = Modifier
+                        .testTag("achievements-screen")
+                        .semantics { heading() },
                     text = stringResourceCompat(R.string.achievements_title),
                     style = MaterialTheme.typography.displaySmall,
                 )
@@ -265,7 +267,9 @@ internal fun SettingsScreen(
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    modifier = Modifier.semantics { heading() },
+                    modifier = Modifier
+                        .testTag("settings-screen")
+                        .semantics { heading() },
                     text = stringResourceCompat(R.string.settings_title),
                     style = MaterialTheme.typography.displaySmall,
                 )
