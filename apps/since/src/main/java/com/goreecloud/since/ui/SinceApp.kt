@@ -42,6 +42,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -277,6 +278,11 @@ private fun Dashboard(
         return
     }
 
+    val dashboardTick by rememberMinuteTick(
+        clock = clock,
+        key = "dashboard",
+    )
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -299,6 +305,7 @@ private fun Dashboard(
             TrackerCard(
                 aggregate = aggregate,
                 clock = clock,
+                tick = dashboardTick,
                 onClick = { onOpenTracker(aggregate.tracker.id) },
             )
         }
@@ -340,13 +347,10 @@ private fun DashboardEmptyState(
 private fun TrackerCard(
     aggregate: TrackerAggregate,
     clock: Clock,
+    tick: Long,
     onClick: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
-    val tick by rememberMinuteTick(
-        clock = clock,
-        key = aggregate.tracker.id,
-    )
     val elapsed = remember(aggregate, tick, clock) {
         TimeEngine(clock).elapsedSince(
             startEpochMs = currentPeriod.startEpochMs,
@@ -708,7 +712,9 @@ private fun CreateTrackerScreen(
             )
 
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("title-field"),
                 value = title,
                 onValueChange = { title = it },
                 label = { Text(stringResource(R.string.title_label)) },
@@ -900,7 +906,9 @@ private fun EditTrackerScreen(
             )
 
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("title-field"),
                 value = title,
                 onValueChange = { title = it },
                 label = { Text(stringResource(R.string.title_label)) },
@@ -1028,7 +1036,9 @@ private fun StartEditorFields(
             style = MaterialTheme.typography.titleMedium,
         )
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("start-date-time-field"),
             value = startDateTime,
             onValueChange = onStartDateTimeChange,
             label = { Text(stringResource(R.string.start_date_time_label)) },
@@ -1037,7 +1047,9 @@ private fun StartEditorFields(
             enabled = enabled,
         )
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("start-zone-field"),
             value = startZoneId,
             onValueChange = onStartZoneIdChange,
             label = { Text(stringResource(R.string.start_zone_label)) },
