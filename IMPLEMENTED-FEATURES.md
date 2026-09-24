@@ -93,3 +93,16 @@ Current `main` additionally implements:
 PR #6 was squash-merged to `main` as `48d7c8342ad17e860b521690df5c817d84d92b7b`. Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Development Foundation run `35959431091` on attempt 2, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 `SinceDatabaseRuntimeTest` with `OK (10 tests)`. Attempt 1 failed before tests because that hosted runner did not expose readable/writable `/dev/kvm`; no source change or validation weakening was used before the successful exact-head rerun.
 
 Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
+
+
+### Active M1 accessibility and UI-evidence candidate
+
+The current Development candidate on `feature/since-accessibility-evidence` additionally implements:
+
+- one merged accessible tracker-card semantics unit containing title, tracker type, current elapsed summary, and the currently supported goal summary;
+- full-width selectable display-format rows with RadioButton role so the text label and control share one accessible touch target;
+- heading semantics on Dashboard, Details, Create, and Edit primary titles;
+- one shared lifecycle-aware Dashboard minute ticker instead of one ticker coroutine per tracker card;
+- Compose instrumentation dependencies and focused UI tests covering coherent card semantics, full-row display-format interaction, and custom-past-start create → Details → Edit persistence through the repository contract.
+
+**Candidate boundary:** this accessibility/UI evidence is not authoritative on `main` until the exact candidate passes build/lint/schema/manifest and Android 16 instrumentation gates and the reviewed pull request is merged.

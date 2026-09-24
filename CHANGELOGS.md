@@ -95,3 +95,21 @@ Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Develo
 ### Boundary
 
 Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 remain open. This does not establish GLAZE UI consumer acceptance, representative-device acceptance, Release Candidate, production, or Stable status.
+
+
+## 2026-09-24 — Since accessibility and UI-evidence candidate
+
+**Lifecycle:** Development candidate on `feature/since-accessibility-evidence`  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Coherent merged tracker-card accessibility semantics for supported card content.
+- Full-width selectable display-format rows with RadioButton semantics and label-sized touch targets.
+- Heading semantics on major Since screen titles.
+- Shared lifecycle-aware Dashboard minute ticker replacing per-card ticker coroutines.
+- Compose UI test infrastructure and instrumentation coverage for tracker-card semantics, display-format target behavior, and a custom-past-start create/Edit repository flow.
+
+### Boundary
+
+This entry describes candidate source only. Exact-head CI/runtime verification, review/merge integration, icon/accent mapping, representative accessibility acceptance, and later M2–M6 work remain open.
