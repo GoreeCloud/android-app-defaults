@@ -10,11 +10,12 @@
 
 ### M0 — Foundation stabilization
 
-**State:** In progress / awaiting exact-head CI and review.
+**State:** In progress — Development candidate implemented; independent review and integration remain pending.
 
-- Establish and verify the Android monorepo skeleton and `apps/since` application module.
+- Maintain the Android monorepo skeleton and independently installable `apps/since` application module.
 - Keep MVP operation local-first with no `INTERNET` permission.
 - Keep dependency and build versions explicit and reproducible.
+- Keep final reviewed-head CI green for unit tests, Android lint, Debug assembly, and the fail-closed manifest boundary.
 - Maintain truthful Development lifecycle and repository-native feature/change records.
 - Add a verified Gradle Wrapper when its binary/provenance can be introduced safely; current CI explicitly bootstraps Gradle 8.11.1.
 
