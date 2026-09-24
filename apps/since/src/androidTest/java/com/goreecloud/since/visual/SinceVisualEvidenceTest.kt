@@ -32,11 +32,11 @@ class SinceVisualEvidenceTest {
     fun capturePrincipalSinceFlow() {
         try {
             setNightMode(UiModeManager.MODE_NIGHT_NO)
-            composeRule.onNodeWithText("Since").assertIsDisplayed()
+            waitUntilDisplayed("Since")
             capture("dashboard-empty")
 
             setNightMode(UiModeManager.MODE_NIGHT_YES)
-            composeRule.onNodeWithText("Since").assertIsDisplayed()
+            waitUntilDisplayed("Since")
             capture("dashboard-empty-dark")
 
             composeRule.onNodeWithText("Add tracker").performClick()
@@ -59,7 +59,7 @@ class SinceVisualEvidenceTest {
             capture("dashboard-populated-dark")
 
             setNightMode(UiModeManager.MODE_NIGHT_NO)
-            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+            waitUntilDisplayed("Read daily")
             capture("dashboard-populated")
 
             composeRule.onNodeWithText("Read daily").performClick()
@@ -79,6 +79,20 @@ class SinceVisualEvidenceTest {
         } finally {
             runCatching { setNightMode(UiModeManager.MODE_NIGHT_NO) }
         }
+    }
+
+    private fun waitUntilDisplayed(text: String) {
+        var lastFailure: AssertionError? = null
+        repeat(24) {
+            try {
+                composeRule.onNodeWithText(text).assertIsDisplayed()
+                return
+            } catch (failure: AssertionError) {
+                lastFailure = failure
+                Thread.sleep(250)
+            }
+        }
+        throw lastFailure ?: AssertionError("Timed out waiting for displayed text: $text")
     }
 
     private fun setNightMode(mode: Int) {
