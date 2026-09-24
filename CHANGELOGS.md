@@ -253,3 +253,24 @@ The canonical source was rendered and reviewed at 512 px, 128 px, 48 px, 32 px, 
 
 This change establishes and packages the application launcher identity. Per-tracker icon/accent selection remains a separate Development feature. Consumer APK/runtime verification remains governed by the exact android-app-defaults candidate and CI evidence.
 
+## 2026-09-24 — Since visual hierarchy refinement
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1
+
+### Refined
+
+- Increased Dashboard primary-action emphasis for `Add tracker`.
+- Added an explicit elapsed-time label and improved tracker-card reading hierarchy.
+- Rebalanced Tracker Details from a large accent-filled hero surface to neutral layered surfaces with restrained teal emphasis.
+- Removed unequal color treatment between Permanent Event and Streak in the chooser.
+- Applied consistent rounded Glaze geometry to Create/Edit text fields.
+
+### Verification
+
+PR #24 exact head `ee3d69886644840c00aff2df9b5f72962ed6109b` passed Android Development Foundation run `35981477112` / #81 with Android 16 instrumentation `OK (18 tests)` and rendered-evidence capture, then merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`.
+
+Post-merge exact-main run `35982116803` / #82 also passed with Android 16 instrumentation `OK (18 tests)`. Exact-main rendered artifact `since-rendered-ui` ID `10800344407` has digest `sha256:be77a211a844a1d84b2d3028721e85009f5694e58e957aa380fea752e3f4777d`, and exact-main runtime APK artifact `since-runtime-apks` ID `10800732670` has digest `sha256:7abf1a90e5881a9804d213effb45f68256c5d23ee585559395949f6670d2c0b2`.
+
+The exact-main principal rendered flow was reviewed after CI. This does not establish representative physical-device/OEM, native-language, assistive-technology, Release Candidate, production, or Stable acceptance.
+
