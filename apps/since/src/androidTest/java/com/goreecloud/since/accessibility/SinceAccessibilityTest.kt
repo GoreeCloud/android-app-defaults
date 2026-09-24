@@ -145,7 +145,7 @@ class SinceAccessibilityTest {
             .assertHasClickAction()
             .performClick()
         composeRule.onNodeWithTag("start-date-picker-dialog").assertIsDisplayed()
-        composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.onNodeWithText("Done").performClick()
 
         composeRule
             .onNodeWithTag("start-time-picker")
@@ -153,7 +153,7 @@ class SinceAccessibilityTest {
             .assertHasClickAction()
             .performClick()
         composeRule.onNodeWithTag("start-time-picker-dialog").assertIsDisplayed()
-        composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.onNodeWithText("Done").performClick()
 
         composeRule.onNodeWithText("Save").performScrollTo().performClick()
 
