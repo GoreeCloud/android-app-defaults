@@ -1,6 +1,6 @@
 # Android App Defaults — Changelogs
 
-## 2026-09-24 — Since Home, Achievements, and Settings navigation candidate
+## 2026-09-24 — Since Home, Achievements, and Settings navigation integration
 
 **Lifecycle:** Development  
 **Tracking:** GitHub issue #1, PR #39
@@ -17,11 +17,11 @@
 
 ### Verification
 
-Exact implementation candidate `a0681407ecec1b10727be4eda0667804318efc16` passed Android Development Foundation run `36071596131` / #148, including build/JVM/lint/schema/manifest checks, Android 16 instrumentation, and rendered-evidence upload. After that exact-head success, repository documentation was reconciled in the same PR; the final documentation-bearing head therefore requires its own fresh exact-head validation before merge.
+Final exact candidate `d11a3aabfe9aac3f8fbdae05558e026b87c50156` passed Android Development Foundation run `36072370515` / #152, including build/JVM/lint/schema/manifest checks, Android 16 instrumentation `OK (21 tests)`, and rendered-evidence upload. PR #39 was squash-merged as `43cdfc8659de25e0d8829fed593d7f0a914e5965`. Exact merged-main run `36073050400` / #153 also passed with Android 16 instrumentation `OK (21 tests)`, producing `since-runtime-apks` artifact `10838389459` (`sha256:bf1b34d54c453d24d57a28c2b2d6ec12577fa043e2ddb621d21927913b1027cb`) and 20-scene `since-rendered-ui` artifact `10838444438` (`sha256:51275298f6efed8246718ee67f9fac35a8b379195c02a32275b9cd1ed55443df`). Exact-main Settings, Data & recovery, About dark, and Achievements dark scenes were visually reviewed and retained readable contrast, unclipped primary content, clear selected navigation state, and truthful Planned Backup/Restore treatment.
 
 ### Boundary
 
-Backup and Restore are not implemented recovery operations. This candidate does not add network access, advertising, analytics, a cloud dependency, or new dangerous permissions. Representative-device, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
+Backup and Restore are not implemented recovery operations. This integration does not add network access, advertising, analytics, a cloud dependency, or new dangerous permissions. GitHub records show no submitted review on PR #39 before merge, so independent-review process acceptance remains open. Representative-device, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance also remain open.
 
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
