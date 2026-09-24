@@ -118,13 +118,21 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithTag("nav-settings").performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
         capture("settings")
+        composeRule.onNodeWithTag("settings-backup").performScrollTo()
+        capture("settings-recovery")
+        composeRule.onNodeWithText("App version").performScrollTo()
+        capture("settings-about")
 
         composeRule.runOnIdle {
             darkTheme = true
         }
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
+        composeRule.onNodeWithTag("settings-screen").performScrollTo().assertIsDisplayed()
         capture("settings-dark")
+        composeRule.onNodeWithTag("settings-backup").performScrollTo()
+        capture("settings-recovery-dark")
+        composeRule.onNodeWithText("App version").performScrollTo()
+        capture("settings-about-dark")
 
         composeRule.onNodeWithTag("nav-achievements").performClick()
         composeRule.onNodeWithTag("achievements-screen").assertIsDisplayed()
