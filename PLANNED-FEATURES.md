@@ -20,7 +20,7 @@
 
 ### M1 — Persistent tracker fundamentals
 
-**State:** In progress — persistence foundation verified and merged; persistent create/Dashboard/Details candidate active on `feature/since-create-dashboard`.
+**State:** In progress — persistence foundation plus persistent create/Dashboard/Details flow are verified and merged; remaining editor/support behavior stays open.
 
 Verified on `main`:
 - Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with committed compiler-generated schema and CI drift detection.
@@ -28,15 +28,12 @@ Verified on `main`:
 - Permanent-event single-period, period chronology, and streak-only positive-goal invariants.
 - Transactional tracker + initial period + optional goal creation.
 - Repository/domain mapping boundary and Android 16 runtime invariant tests.
-
-Active candidate:
-- Tracker Type Chooser.
-- Create Tracker with validation before mutation and persistent save.
-- Reactive populated Dashboard.
+- PR #4 persistent user flow merged as `3cc9788513c100e0ca3fedb336dd57a1b3b87e84` after exact candidate `be534fc98e1fc7020296779f0e71cd4d48ae6778` passed run `35956066300` with `SinceDatabaseRuntimeTest` `OK (8 tests)`.
+- Tracker Type Chooser, validated Create Tracker and persistent save.
+- Reactive populated Dashboard and tracker-card Details navigation.
 - Tracker Details backed by persisted tracker/period/goal state and derived `TimeEngine`.
 - Persisted display-format changes from Details.
-- Shared application clock for repository and UI time derivation.
-- Runtime tests for validated creation, aggregate reactivity, and display-format persistence.
+- Shared application clock plus lifecycle-aware minute refresh for visible elapsed values.
 
 Still open within M1:
 - User-selected past start date/time and explicit zone editing.

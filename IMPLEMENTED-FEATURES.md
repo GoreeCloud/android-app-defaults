@@ -13,6 +13,8 @@ The exact pre-merge candidate `a945cee18ef0924d7ef5360e5f252231c446753d` passed 
 
 PR #3 was squash-merged to `main` as `2de009f3c3b1288eef9374d702198438eeead731`. Its exact candidate `9a4268c08b5d442d858cebaf2d4e06a4bb552a34` passed Android Development Foundation run `35954179931`, including build/lint/unit/schema-drift checks and KVM-accelerated Android 16 execution of `SinceDatabaseRuntimeTest` with `OK (4 tests)`. Merged-main readback verified the Room source, committed schema, fail-closed manifest, and runtime workflow.
 
+PR #4 was squash-merged to `main` as `3cc9788513c100e0ca3fedb336dd57a1b3b87e84`. Its exact candidate `be534fc98e1fc7020296779f0e71cd4d48ae6778` passed Android Development Foundation run `35956066300`, including manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and KVM-accelerated Android 16 execution of `SinceDatabaseRuntimeTest` with `OK (8 tests)`. Merged-main readback verified the persistent create/Dashboard/Details source landed.
+
 This is Development evidence only. It does not establish representative-device acceptance, GLAZE UI consumer conformance, complete Integral Platform System acceptance, Release Candidate, production, or Stable qualification.
 
 ## Repository Development foundation
@@ -54,9 +56,9 @@ This is Development evidence only. It does not establish representative-device a
 - Lazy application-level database/repository wiring.
 - Android runtime coverage for critical invariants and persistent close/reopen behavior.
 
-### Active persistent create/Dashboard/Details candidate
+### Verified persistent create, Dashboard, and Details flow
 
-The current Development candidate additionally implements:
+Current `main` additionally implements:
 
 - Reactive active-tracker aggregate observation across tracker, period, and goal tables.
 - Tracker Type Chooser for Permanent Event vs Streak.
@@ -65,12 +67,11 @@ The current Development candidate additionally implements:
 - Populated Dashboard cards with locally derived elapsed summaries and optional goal summaries.
 - Tracker-card navigation into persisted Tracker Details.
 - Details hero elapsed value, stored start date/time/zone, note, optional goal summary, and deliberate persisted Days/Weeks/Months/Years display-format selection.
-- Minute-aligned foreground ticker because visible elapsed summaries include minutes; no persistent timer or background ticker is introduced.
+- Lifecycle-aware minute-aligned ticker because visible elapsed summaries include minutes; updates stop when the screen lifecycle is inactive, and no persistent timer or background ticker is introduced.
 - Shared application clock across repository and UI time derivation.
 - Fail-closed clock inconsistency, save failure, and display-format update states.
 - Android runtime coverage for validated repository creation, aggregate reactivity, and persisted display-format changes.
 
-**Candidate boundary:** these user-facing additions are not authoritative on `main` until the exact current branch head passes the applicable build/runtime gates and the reviewed pull request is merged.
 
 ## Material limitations
 
