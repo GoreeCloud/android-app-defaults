@@ -62,7 +62,7 @@ Verified on `main` through PR #16 and PR #19:
 - Automated keyboard-focus evidence verifying Cancel → Tab → Save focus movement and Enter activation (`OK (17 tests)` on PR #19 exact candidate and exact merged-main run `35968638222`).
 
 Still open within M1:
-- Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
+- Curated per-tracker icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE tracker icon/accent key mapping; no product key catalog was invented. The canonical Since application launcher identity is implemented separately through GoreeCloud Branding Assets.
 - Preferences DataStore only for application preferences that are actually implemented.
 - Representative TalkBack and large-font visual acceptance.
 - Automated keyboard-focus traversal/activation evidence is verified on `main` through PR #19; representative physical-keyboard/external-switch acceptance remains open.

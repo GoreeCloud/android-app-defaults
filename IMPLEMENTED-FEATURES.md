@@ -186,3 +186,19 @@ Exact source-bearing candidate `7c77ab28811b4aedecc733e0479dd5b57edda0d4` passed
 
 This establishes bounded Android-emulator rendered evidence only. Human visual acceptance, representative physical-device/OEM rendering, TalkBack/assistive-technology acceptance, and full downstream GLAZE UI consumer acceptance remain open.
 
+### Verified canonical application identity source
+
+GoreeCloud Since now packages a traceable adaptive Android launcher identity derived from the approved canonical source in `GoreeCloud/branding-assets`:
+
+- canonical source: `products/since/app-icon.svg`;
+- canonical source Git blob: `a107f860759e745ff16f2b5bf1954b93fbb17937`;
+- canonical branding integration: `8c27acbdf7c83624a7396fdb4d7589f0643b4cc0` / branding PR #25;
+- canonical branding post-merge validation: run #93 / `35979255165`;
+- Android adaptive normal and round launcher declarations;
+- Android 13+ monochrome/themed icon support;
+- consumer-repository `BRANDING.md` provenance contract and manifest/build guard coverage.
+
+The identity uses an open elapsed-time ring, start-point node, and restrained clock hands as the product identity lock. Canonical artwork was reviewed at 512 px, 128 px, 48 px, 32 px, and grayscale before publication.
+
+Per-tracker icon/accent selection remains a separate Development feature and remains blocked on an approved Since-specific GLAZE mapping. Application launcher identity does not satisfy or bypass that tracker-level mapping requirement.
+
