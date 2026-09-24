@@ -97,10 +97,10 @@ Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Develo
 Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 remain open. This does not establish GLAZE UI consumer acceptance, representative-device acceptance, Release Candidate, production, or Stable status.
 
 
-## 2026-09-24 — Since editor accessibility candidate
+## 2026-09-24 — Since editor accessibility and UI evidence
 
-**Lifecycle:** Development candidate on `feature/since-editor-accessibility`  
-**Tracking:** GitHub issue #1
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #9
 
 ### Added
 
@@ -113,6 +113,10 @@ Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 
 - Compose UI test dependencies scoped to Android instrumentation/debug builds.
 - Android 16 runtime CI acceleration detection: KVM is used when available; otherwise the required instrumentation suite runs with software acceleration instead of being skipped.
 
+### Verification and integration
+
+Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Development Foundation run `35963071718`, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (13 tests)`. The runtime job now keeps instrumentation mandatory while selecting KVM when available or software acceleration otherwise. PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`; draft PR #8 was closed unmerged after its non-overlapping useful work was consolidated.
+
 ### Boundary
 
-This entry describes candidate source only. Exact-head CI/runtime, merge verification, representative-device TalkBack/large-font/switch-access evidence, GLAZE UI consumer acceptance, and all later M2–M6 work remain open.
+Representative-device TalkBack/large-font/keyboard/switch-access, localization/RTL, approved Since-specific icon/accent mapping, downstream GLAZE UI consumer acceptance, and all later M2–M6 work remain open.
