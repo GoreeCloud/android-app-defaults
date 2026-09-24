@@ -52,9 +52,10 @@ Verified on `main` through PR #9:
 - Android 16 runtime instrumentation remains mandatory with KVM detection and software-acceleration fallback.
 - Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed run `35963071718` with Android 16 instrumentation `OK (13 tests)` and was squash-merged as `5b14c58af68b8748e71f6af0c462650d06e852d6`.
 
-Active automated-evidence candidate:
+Verified on `main` through PR #12:
 - 2× font-scale Create-editor reachability instrumentation.
 - Forced RTL Create-editor reachability and heading instrumentation.
+- Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed run `35965422146` with Android 16 instrumentation `OK (15 tests)` and was squash-merged as `634623f03954bcb1e1d53107e5187b7c724b40c4`.
 
 Still open within M1:
 - Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
