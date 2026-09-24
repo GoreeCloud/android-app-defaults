@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface TrackerRepository {
     fun observeActiveTrackers(): Flow<List<Tracker>>
 
+    fun observeActiveTrackerAggregates(): Flow<List<TrackerAggregate>>
+
     suspend fun createTracker(draft: ValidatedTrackerDraft): TrackerAggregate
 
     suspend fun loadTracker(trackerId: String): TrackerAggregate?
