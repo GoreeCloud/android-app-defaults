@@ -99,7 +99,7 @@ Icon/accent selection, streak reset/history/statistics, archive/search/settings,
 
 ### Date and time picker candidate
 
-PR #34 replaces manual local date/time typing in the Create and Edit Tracker surfaces with separate Material 3 Date and Time picker controls while preserving the existing local-time plus explicit IANA ZoneId storage and validation contract. The time picker respects the device 12/24-hour preference; English and Arabic labels and Compose picker-reachability coverage are included. This remains Development evidence until exact-head validation and integration are complete.
+PR #34 replaces manual local date/time typing in the Create and Edit Tracker surfaces with separate Material 3 Date and Time picker controls while preserving the existing local-time plus explicit IANA ZoneId storage and validation contract. The time picker respects the device 12/24-hour preference; English and Arabic labels and Compose picker-reachability coverage are included. This is Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
 
 ### Verified custom-start and Edit Tracker flow
 
