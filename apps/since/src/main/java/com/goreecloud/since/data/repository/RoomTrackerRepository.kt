@@ -30,10 +30,8 @@ class RoomTrackerRepository(
 
     override fun observeActiveTrackerAggregates(): Flow<List<TrackerAggregate>> =
         dao.observeActiveTrackedEvents().map { rows ->
-            rows.map { row ->
-                checkNotNull(dao.readAggregate(row.id)) {
-                    "Observed tracker disappeared before its aggregate could be read."
-                }.toDomain()
+            rows.mapNotNull { row ->
+                dao.readAggregate(row.id)?.toDomain()
             }
         }
 
