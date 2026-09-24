@@ -206,3 +206,26 @@ Exact visual implementation candidate `41a61992a76a8c7475c98666d8db5993913b0c50`
 
 This is a Development visual refinement. It does not establish representative physical-device visual acceptance, complete downstream Glaze UI consumer conformance, Release Candidate, production, or Stable status. Tracker persistence, time calculation, validation, and schema behavior are unchanged.
 
+## 2026-09-24 — Since rendered visual evidence and surface hierarchy
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #22
+
+### Added
+
+- Android 16 full-device screenshot capture for the empty Dashboard, tracker-type chooser, Create Streak, Tracker Details, and populated Dashboard.
+- CI extraction and publication of the rendered PNGs as the `since-rendered-ui` artifact.
+
+### Improved
+
+- Defined the complete light/dark Material 3 surface-container hierarchy used by Since so cards, dialogs, and editor sections no longer inherit unrelated default pink/purple surface tones.
+- Kept the deep-teal application identity while moving durable content surfaces toward a calm neutral Glaze-compatible hierarchy.
+
+### Verification
+
+Exact source-bearing candidate `7c77ab28811b4aedecc733e0479dd5b57edda0d4` passed Android Development Foundation run `35976727631` / #73. The build lane passed the local-only manifest guard, JVM tests, Android lint, APK assembly, and Room-schema drift verification. Android 16 runtime instrumentation passed and uploaded rendered artifact `since-rendered-ui` ID `10798890114`, digest `sha256:c6f865e01296ed28da2a7c2059e60bf4af367e6220dacce88b570df526928cc5`.
+
+### Boundary
+
+Rendered emulator evidence is not human visual acceptance or representative physical-device/OEM acceptance. Downstream GLAZE UI V1.6 consumer acceptance, assistive-technology acceptance, Release Candidate, production, and Stable remain open.
+
