@@ -890,7 +890,9 @@ private fun GoalEditorDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("goal-amount-field"),
                     value = amountText,
                     onValueChange = {
                         amountText = it.filter(Char::isDigit)
