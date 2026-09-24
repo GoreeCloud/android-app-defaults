@@ -46,10 +46,15 @@ echo "Collecting rendered GoreeCloud Since evidence."
 mkdir -p ci-screenshots
 for screenshot in \
   dashboard-empty \
+  dashboard-empty-dark \
   tracker-type-chooser \
+  tracker-type-chooser-dark \
   create-streak \
+  create-streak-dark \
   tracker-details \
-  dashboard-populated
+  tracker-details-dark \
+  dashboard-populated \
+  dashboard-populated-dark
 do
     destination="ci-screenshots/${screenshot}.png"
     adb exec-out run-as "$APP_PACKAGE" cat "files/visual-evidence/${screenshot}.png" > "$destination"
