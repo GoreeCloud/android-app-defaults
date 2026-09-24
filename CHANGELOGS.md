@@ -67,3 +67,27 @@ Exact candidate `be534fc98e1fc7020296779f0e71cd4d48ae6778` passed Android Develo
 ### Boundary
 
 Custom past-start editing, icon/accent selection, Edit, streak reset/history/statistics, full goal progress/editor, archive/search/settings, portability/recovery, GLAZE UI consumer acceptance, complete platform-system conformance, representative-device acceptance, Release Candidate, production, and Stable remain open.
+
+
+## 2026-09-23 — Since custom start and Edit Tracker candidate
+
+**Lifecycle:** Development candidate on `feature/since-edit-start`  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Strict local date/time plus explicit IANA ZoneId input for tracker starts.
+- Explicit DST resolver: nonexistent gap times fail closed; ambiguous fall-back times use the earlier valid offset.
+- Create Tracker support for user-selected past start/date/time and zone.
+- Edit Tracker path from Details for title, note, current start/date/time/zone, and default display format.
+- Transactional edit boundary that updates only tracker metadata and the one open current period.
+- Closed-history protection preventing a current streak start from moving before the latest closed period end.
+- JVM resolver regressions plus Android runtime edit/history integrity tests.
+
+### Deferred
+
+Icon/accent selection remains open. GLAZE UI V1.6.0 is the verified current Stable shared target, but no approved Since-specific icon/accent key catalog was verified. The candidate therefore does not invent application-specific GLAZE keys or claim downstream GLAZE consumer conformance.
+
+### Boundary
+
+This entry describes candidate source only. The exact head still requires build, lint, schema, manifest, Android 16 runtime, review/protection, and merge verification before it can be described as implemented on `main`. M2–M6 remain open.

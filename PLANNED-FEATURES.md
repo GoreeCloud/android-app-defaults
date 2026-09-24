@@ -35,12 +35,17 @@ Verified on `main`:
 - Persisted display-format changes from Details.
 - Shared application clock plus lifecycle-aware minute refresh for visible elapsed values.
 
+Active candidate on `feature/since-edit-start`:
+- User-selected past local date/time with explicit IANA zone editing.
+- Deterministic DST gap/overlap resolution.
+- Edit Tracker for title, note, default display format, and open current-period start/date/time/zone.
+- Closed streak history remains immutable; an edited current start cannot precede the latest closed-period end.
+- JVM and Android runtime tests for the new resolver and edit boundary.
+
 Still open within M1:
-- User-selected past start date/time and explicit zone editing.
-- Curated local icon and approved accent selection.
-- Edit Tracker, including current-period start editing.
+- Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
 - Preferences DataStore only for application preferences that are actually implemented.
-- Additional UI/accessibility/runtime evidence required by those behaviors.
+- Additional UI/accessibility/runtime evidence required by the new editor behaviors.
 
 ### M2 — Streak reset, history, and goals
 
