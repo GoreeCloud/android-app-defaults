@@ -157,8 +157,8 @@ class SinceAccessibilityTest {
             .assertHasClickAction()
             .performClick()
         composeRule.onNodeWithTag("start-zone-picker-dialog").assertIsDisplayed()
-        composeRule.onNodeWithTag("start-zone-search").performTextInput("America/Chicago")
-        composeRule.onNodeWithTag("start-zone-option-America/Chicago").performClick()
+        composeRule.onNodeWithTag("start-zone-search").performTextInput("Asia/Tokyo")
+        composeRule.onNodeWithTag("start-zone-option-Asia/Tokyo").performClick()
 
         composeRule.onNodeWithText("Save").performScrollTo().performClick()
 
@@ -174,7 +174,7 @@ class SinceAccessibilityTest {
         composeRule.onNodeWithText("First car edited").assertIsDisplayed()
         assertEquals("First car edited", repository.current.single().tracker.title)
         assertEquals(
-            "America/Chicago",
+            "Asia/Tokyo",
             repository.current.single().periods.single().startZoneId,
         )
     }
