@@ -14,8 +14,20 @@ for forbidden in (
         print(f"forbidden Since MVP permission found: {forbidden}", file=sys.stderr)
         sys.exit(1)
 
-if "com.goreecloud.since" not in Path("apps/since/build.gradle.kts").read_text(encoding="utf-8"):
+required_fragments = (
+    'android:allowBackup="false"',
+    'android:usesCleartextTraffic="false"',
+    'android:exported="true"',
+)
+
+for required in required_fragments:
+    if required not in text:
+        print(f"required fail-closed manifest setting missing: {required}", file=sys.stderr)
+        sys.exit(1)
+
+build = Path("apps/since/build.gradle.kts").read_text(encoding="utf-8")
+if 'applicationId = "com.goreecloud.since"' not in build:
     print("Since application identity is missing from Gradle configuration", file=sys.stderr)
     sys.exit(1)
 
-print("Since manifest boundary verified: no network or location permission declarations.")
+print("Since manifest boundary verified: local-only, fail-closed backup/cleartext settings, launcher-only exported activity.")

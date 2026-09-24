@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -77,12 +76,10 @@ private fun DashboardEmptyState(
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
-        Button(
-            modifier = Modifier.padding(top = 24.dp),
-            onClick = { /* The floating action exposes the truthful Development boundary. */ },
-            enabled = false,
-        ) {
-            Text("No trackers yet")
-        }
+        Text(
+            modifier = Modifier.padding(top = 16.dp),
+            text = "No trackers yet",
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
