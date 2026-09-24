@@ -108,7 +108,8 @@ Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 
 - Merged clickable tracker-card semantics so visible title/type/elapsed/goal content is exposed as one coherent accessible unit.
 - Full-row selectable display-format choices and a full-row streak-goal toggle, while suppressing redundant child radio/switch focus stops.
 - Assertive live-region semantics for validation, start-input, save, and display-format update errors.
-- Compose UI instrumentation coverage for headings, tracker-card click semantics, selectable display-format rows, scroll-reachable Save action, and assertive validation errors.
+- Compose UI instrumentation coverage for headings, tracker-card click semantics, selectable display-format rows, scroll-reachable Save action, assertive validation errors, and custom-past-start Create → Details → Edit persistence.
+- One shared lifecycle-aware Dashboard minute ticker replacing per-card ticker coroutines.
 - Compose UI test dependencies scoped to Android instrumentation/debug builds.
 - Android 16 runtime CI acceleration detection: KVM is used when available; otherwise the required instrumentation suite runs with software acceleration instead of being skipped.
 
