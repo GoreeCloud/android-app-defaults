@@ -27,7 +27,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,6 +54,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -441,18 +441,16 @@ private fun TrackerDetailsScreen(
 private fun rememberMinuteTick(
     clock: Clock,
     key: String,
-) = produceState(
-    initialValue = clock.millis(),
-    key1 = key,
-    key2 = clock,
-) {
-    while (true) {
-        val now = clock.millis()
-        value = now
-        val untilNextMinute = 60_000L - (now % 60_000L)
-        delay(untilNextMinute.coerceIn(1_000L, 60_000L))
+) = remember(clock, key) {
+    flow {
+        while (true) {
+            val now = clock.millis()
+            emit(now)
+            val untilNextMinute = 60_000L - (now % 60_000L)
+            delay(untilNextMinute.coerceIn(1_000L, 60_000L))
+        }
     }
-}
+}.collectAsStateWithLifecycle(initialValue = clock.millis())
 
 @Composable
 private fun elapsedSummary(
