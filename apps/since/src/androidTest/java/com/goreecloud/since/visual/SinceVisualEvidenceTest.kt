@@ -44,7 +44,9 @@ class SinceVisualEvidenceTest {
             composeRule.onNodeWithText("Choose tracker type").assertIsDisplayed()
             capture("tracker-type-chooser")
 
-            composeRule.onNodeWithText("A resettable period whose history will be preserved.").performClick()
+            composeRule.onNodeWithText(
+                "A resettable period whose history will be preserved."
+            ).performClick()
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
             capture("create-streak")
 
@@ -55,28 +57,31 @@ class SinceVisualEvidenceTest {
             composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
             capture("tracker-details")
 
+            composeRule.onNodeWithText("Back").performClick()
+            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+            capture("dashboard-populated")
+
             setNightMode(UiModeManager.MODE_NIGHT_YES)
+            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+            capture("dashboard-populated-dark")
+
+            composeRule.onNodeWithText("Read daily").performClick()
             composeRule.onNodeWithText("Read daily").assertIsDisplayed()
             composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
             capture("tracker-details-dark")
 
             composeRule.onNodeWithText("Back").performClick()
-            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
-            capture("dashboard-populated-dark")
-
             composeRule.onNodeWithText("Add tracker").performClick()
             composeRule.onNodeWithText("Choose tracker type").assertIsDisplayed()
             capture("tracker-type-chooser-dark")
 
-            composeRule.onNodeWithText("A resettable period whose history will be preserved.").performClick()
+            composeRule.onNodeWithText(
+                "A resettable period whose history will be preserved."
+            ).performClick()
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
             capture("create-streak-dark")
 
             composeRule.onNodeWithText("Cancel").performClick()
-            setNightMode(UiModeManager.MODE_NIGHT_NO)
-            composeRule.onNodeWithText("Since").assertIsDisplayed()
-            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
-            capture("dashboard-populated")
         } finally {
             runCatching { setNightMode(UiModeManager.MODE_NIGHT_NO) }
         }
