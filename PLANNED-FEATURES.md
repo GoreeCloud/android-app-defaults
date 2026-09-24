@@ -57,12 +57,21 @@ Verified on `main` through PR #12:
 - Forced RTL Create-editor reachability and heading instrumentation.
 - Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed run `35965422146` with Android 16 instrumentation `OK (15 tests)` and was squash-merged as `634623f03954bcb1e1d53107e5187b7c724b40c4`.
 
+Verified on main through PR #16:
+- Arabic resources now cover the complete current 51-string UI surface.
+- English and Arabic locale metadata and RTL support are present.
+- Android runtime evidence verifies Arabic resource resolution and RTL configuration.
+- Candidate 3867afe88e6570f647b65dfa224c5b67708d998c passed run 35967471510 with Android 16 instrumentation OK (16 tests) and merged as d204cbd4464539a15b8f1ed6e0d9e9dfef4ddbb7.
+
+Active candidate:
+- Android 16 keyboard-focus evidence for Cancel to Save focus traversal and keyboard activation in the Create editor.
+
 Still open within M1:
-- Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.
+- Curated local icon and approved accent selection remains blocked on an approved Since-specific GLAZE mapping.
 - Preferences DataStore only for application preferences that are actually implemented.
 - Representative TalkBack and large-font visual acceptance.
-- Keyboard/switch-access acceptance.
-- Arabic localization is the active M1 candidate for the current UI resource surface; translation review, future-feature localization, and representative-device RTL acceptance remain open until separately verified.
+- Representative hardware-keyboard and assistive-input acceptance beyond automated keyboard evidence.
+- Native-speaker Arabic review, future-feature localization, and representative-device RTL acceptance.
 - Rendered visual acceptance required before Stable qualification.
 
 ### M2 — Streak reset, history, and goals
