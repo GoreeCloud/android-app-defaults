@@ -1611,7 +1611,7 @@ private fun StartEditorFields(
             modifier = Modifier.weight(1f),
             label = stringResource(R.string.start_date_label),
             value = DateTimeFormatter
-                .ofLocalizedDate(FormatStyle.MEDIUM)
+                .ofLocalizedDate(FormatStyle.SHORT)
                 .format(startLocalDateTime.toLocalDate()),
             testTag = "start-date-picker",
             enabled = enabled,
