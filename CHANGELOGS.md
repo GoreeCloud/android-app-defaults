@@ -2,7 +2,7 @@
 
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
-## 2026-09-24 — Since searchable time-zone picker candidate
+## 2026-09-24 — Since searchable time-zone picker integration
 
 **Lifecycle:** Development  
 **Tracking:** GitHub issue #1, PR #37
@@ -17,7 +17,9 @@ This repository-local record is the authoritative human-readable change history 
 
 ### Verification
 
-PR #37 carries this Development interaction refinement. Exact-head Android Development Foundation validation is required before merge.
+PR #37 was squash-merged to `main` as `700d6084f5f9268727a17ad593fab5412feab801` after exact-head Android Development Foundation run `36063174272` / #132 passed on candidate `ef3e3fa84aa7d3975c8cb087c423f88e1d158d52`, including build, JVM tests, Android lint, Room schema verification, manifest/privacy guard, APK assembly, Android 16 runtime instrumentation, and rendered UI evidence.
+
+Post-merge Android Development Foundation run `36063794046` / #133 then passed on the merged `main` commit, including the same build/runtime gates and rendered visual evidence.
 
 ### Boundary
 
