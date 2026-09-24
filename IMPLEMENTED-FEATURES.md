@@ -202,3 +202,19 @@ The identity uses an open elapsed-time ring, start-point node, and restrained cl
 
 Per-tracker icon/accent selection remains a separate Development feature and remains blocked on an approved Since-specific GLAZE mapping. Application launcher identity does not satisfy or bypass that tracker-level mapping requirement.
 
+### Verified visual hierarchy refinement
+
+GoreeCloud Since now includes a second evidence-backed presentation refinement on authoritative Development source:
+
+- Dashboard `Add tracker` is presented as the primary action rather than a low-emphasis container action.
+- Tracker cards expose an explicit `Elapsed` label and a calmer value hierarchy.
+- Tracker Details uses neutral layered surfaces with teal emphasis reserved for the tracker chip and elapsed value instead of filling the entire hero card with an accent color.
+- Permanent Event and Streak choices use equal neutral chooser treatment so the interface does not imply a preselection.
+- Create/Edit text fields use the same rounded Glaze geometry as the surrounding section surfaces.
+
+PR #24 exact head `ee3d69886644840c00aff2df9b5f72962ed6109b` passed Android Development Foundation run `35981477112` / #81, including Android 16 instrumentation `OK (18 tests)` and rendered-evidence upload, and merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`.
+
+Exact-main run `35982116803` / #82 then passed the build, unit-test, lint, schema, canonical-identity guard, and Android 16 runtime lanes with `OK (18 tests)`. Exact-main rendered artifact `since-rendered-ui` ID `10800344407` has digest `sha256:be77a211a844a1d84b2d3028721e85009f5694e58e957aa380fea752e3f4777d`; exact-main runtime APK artifact `since-runtime-apks` ID `10800732670` has digest `sha256:7abf1a90e5881a9804d213effb45f68256c5d23ee585559395949f6670d2c0b2`.
+
+The exact-main rendered Dashboard and Tracker Details were visually reviewed after run #82. No clipping, accidental pink/purple Material surface inheritance, chooser preselection styling, or broken hierarchy was observed in the captured principal flow. This remains emulator evidence; representative physical-device/OEM and assistive-technology acceptance remain separate.
+
