@@ -300,3 +300,27 @@ Human review of all ten exact-main scenes found no clipping, text corruption, un
 ### Boundary
 
 This closes the bounded Android-emulator dark-mode rendered-evidence gap. Representative physical-device/OEM, native-language, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
+
+## 2026-09-24 — Since empty Dashboard first-run refinement
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #30
+
+### Improved
+
+- Replaced the empty Dashboard's detached floating `Add tracker` action with a full-width primary action inside the first-run surface.
+- Added the canonical Since launcher mark to the empty-state card.
+- Promoted `No trackers yet` from status-chip treatment to a true empty-state heading.
+- Rebalanced supporting copy and removed unused floating-action bottom clearance from the empty state.
+- Preserved the floating `Add tracker` action for populated dashboards.
+
+### Verification and integration
+
+Exact PR #30 candidate `9b23193e733a350866511e29596b9339d1999823` passed Android Development Foundation run `35989103579` / #97 with Android 16 instrumentation `OK (18 tests)` and all ten light/dark rendered scenes. Visual review of the empty Dashboard evidence confirmed the intended branded hierarchy and found no clipping, text corruption, or unreadable dark-mode contrast.
+
+PR #30 was squash-merged as `979972f2564b6ebd63ed59aeb658cbf4cd261eb1`. Exact merged-main run `35989719467` / #98 also passed with Android 16 instrumentation `OK (18 tests)`, producing runtime artifact `10803354250` with digest `sha256:180b24d5661191c8e60a33b31946ab2a1050a5f514350399ef08b09796330a73` and rendered artifact `10803653756` with digest `sha256:d316677947be78aace4d6462b55e4e1e31963e9d4136e88a265b6ca0a2e99dc3`.
+
+### Boundary
+
+This is a presentation-only Development refinement. Tracker semantics, persistence, permissions, networking, time calculations, and lifecycle state are unchanged. Representative physical-device/OEM, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
+
