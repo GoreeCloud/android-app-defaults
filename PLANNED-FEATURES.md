@@ -67,7 +67,7 @@ Still open within M1:
 - Representative TalkBack and large-font visual acceptance.
 - Automated keyboard-focus traversal/activation evidence is verified on `main` through PR #19; representative physical-keyboard/external-switch acceptance remains open.
 - Arabic localization for the current 51-string UI surface plus packaged RTL/resource verification is verified on `main` through PR #16; native-language translation review, future-feature localization, Arabic TalkBack, and representative-device RTL acceptance remain open.
-- Automated Android 16 rendered evidence now exists for the principal Since flow; human visual review and representative physical-device/OEM visual acceptance remain required before Stable qualification.
+- Automated Android 16 light/dark rendered evidence and human review now exist for the principal Since flow; representative physical-device/OEM visual acceptance remains required before Stable qualification.
 
 ### M2 — Streak reset, history, and goals
 

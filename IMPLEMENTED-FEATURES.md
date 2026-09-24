@@ -216,5 +216,25 @@ Exact PR #24 candidate `ee3d69886644840c00aff2df9b5f72962ed6109b` passed Android
 
 PR #24 was squash-merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`. Exact merged-main run `35982116803` / #82 also passed Android 16 instrumentation `OK (18 tests)` and produced `since-runtime-apks` artifact ID `10800732670`, digest `sha256:7abf1a90e5881a9804d213effb45f68256c5d23ee585559395949f6670d2c0b2`, plus `since-rendered-ui` artifact ID `10800344407`, digest `sha256:be77a211a844a1d84b2d3028721e85009f5694e58e957aa380fea752e3f4777d`.
 
-This remains bounded emulator and CI evidence. Representative physical-device/OEM rendering, dark-mode rendered acceptance, native-language review, representative TalkBack/large-font/RTL/keyboard/switch acceptance, and full downstream GLAZE UI consumer acceptance remain open.
+This remains bounded emulator and CI evidence. Representative physical-device/OEM rendering, native-language review, representative TalkBack/large-font/RTL/keyboard/switch acceptance, and full downstream GLAZE UI consumer acceptance remain open.
 
+
+
+### Verified dual-theme Android rendered evidence
+
+The current Development source now captures the principal Since flow in both light and dark modes on Android 16:
+
+- empty Dashboard;
+- tracker-type chooser;
+- Create Streak;
+- Tracker Details;
+- populated Dashboard.
+
+PR #27 exact final head `2b387c57fbb603857bfbe5dc70c909acea483377` passed Android Development Foundation run `35986151222` / #91 with the manifest/canonical-identity guard, JVM tests, Android lint, APK assembly, Room-schema drift verification, Android 16 instrumentation `OK (18 tests)`, and successful upload of all ten rendered scenes.
+
+PR #27 was squash-merged as `eb8975dca84d2db613b05af07f7b4b9d3f1ed027`. Exact merged-main run `35986755499` / #92 also passed Android 16 instrumentation `OK (18 tests)` and produced:
+
+- `since-runtime-apks` artifact ID `10802144523`, digest `sha256:6d2271641128def6c8d846b00bf0295ca34ae77fc9321975120caf91a012a034`;
+- `since-rendered-ui` artifact ID `10802244368`, digest `sha256:1e4ecc14b94128dc1849311a1decb52b7ccdcf0c240994d8aae279822f51e866`.
+
+Human review of the ten exact-main scenes verified readable light/dark contrast, preserved content hierarchy, and no clipping, text corruption, or reappearance of the unintended pink/purple Material surface inheritance. This closes the emulator dark-mode rendered-evidence gap only. Representative physical-device/OEM rendering, assistive-technology acceptance, and downstream GLAZE UI consumer acceptance remain open.
