@@ -40,7 +40,9 @@ import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
 import java.time.Clock
-import java.time.Duration
+import com.goreecloud.since.domain.model.DisplayFormat
+import com.goreecloud.since.domain.time.ElapsedResult
+import com.goreecloud.since.domain.time.TimeEngine
 
 internal enum class TopLevelDestination {
     HOME,
@@ -105,9 +107,19 @@ internal fun AchievementsScreen(
     clock: Clock,
 ) {
     val streaks = aggregates.filter { it.tracker.kind == TrackerKind.STREAK }
-    val maxOpenStreakMillis = streaks.maxOfOrNull { aggregate ->
+    val timeEngine = remember(clock) { TimeEngine(clock) }
+    val maxOpenStreakDays = streaks.maxOfOrNull { aggregate ->
         val openPeriod = aggregate.periods.single { it.endEpochMs == null }
-        (clock.millis() - openPeriod.startEpochMs).coerceAtLeast(0L)
+        when (
+            val elapsed = timeEngine.elapsedSince(
+                startEpochMs = openPeriod.startEpochMs,
+                zoneId = openPeriod.startZoneId,
+                format = DisplayFormat.DAYS,
+            )
+        ) {
+            ElapsedResult.ClockInconsistency -> 0L
+            is ElapsedResult.Value -> elapsed.breakdown.days
+        }
     } ?: 0L
 
     val achievements = listOf(
@@ -129,12 +141,12 @@ internal fun AchievementsScreen(
         AchievementUi(
             title = stringResourceCompat(R.string.achievement_seven_days),
             description = stringResourceCompat(R.string.achievement_seven_days_description),
-            unlocked = maxOpenStreakMillis >= Duration.ofDays(7).toMillis(),
+            unlocked = maxOpenStreakDays >= 7L,
         ),
         AchievementUi(
             title = stringResourceCompat(R.string.achievement_thirty_days),
             description = stringResourceCompat(R.string.achievement_thirty_days_description),
-            unlocked = maxOpenStreakMillis >= Duration.ofDays(30).toMillis(),
+            unlocked = maxOpenStreakDays >= 30L,
         ),
     )
     val unlockedCount = achievements.count { it.unlocked }
