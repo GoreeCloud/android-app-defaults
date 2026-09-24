@@ -9,7 +9,7 @@
 
 PR #2 was squash-merged to `main` as `8afd4eecc1a374443f7a7b7da72eb19e79dfc4e1`.
 
-The exact pre-merge candidate `a945cee18ef0924d7ef5360e5f252231c446753d` passed Android Development Foundation run #4 / `35947248482`, including the local-only manifest guard, JVM tests, Android lint, and Debug assembly. Merged-`main` source readback verified the expected files and fail-closed manifest state. No separate post-merge workflow run was visible at the baseline readback checkpoint.
+The exact pre-merge candidate `a945cee18ef0924d7ef5360e5f252231c446753d` passed Android Development Foundation run #4 / `35947248482`, including the local-only manifest guard, JVM tests, Android lint, and Debug assembly. Merged-`main` source readback verified the expected files and fail-closed manifest state.
 
 This is Development evidence only. It does not establish representative-device acceptance, GLAZE UI consumer conformance, complete Integral Platform System acceptance, Release Candidate, production, or Stable qualification.
 
@@ -20,7 +20,7 @@ This is Development evidence only. It does not establish representative-device a
 - Pull-request and main-branch Android CI that verifies the Since permission boundary and runs Since JVM tests, Android lint, and Debug assembly.
 - Required repository-native feature-state and changelog records.
 
-## GoreeCloud Since — implemented Development source
+## GoreeCloud Since — implemented Development source on `main`
 
 ### Independent Android application shell
 
@@ -30,7 +30,6 @@ This is Development evidence only. It does not establish representative-device a
 - Automatic Android backup is disabled pending an approved Since Everkeep/system-backup policy.
 - Cleartext traffic is disabled.
 - Single-activity Jetpack Compose shell and initial Dashboard empty state.
-- Truthful Development notice when the Add action is invoked while persistent tracker creation remains incomplete.
 
 ### Core tracker domain model
 
@@ -47,22 +46,26 @@ This is Development evidence only. It does not establish representative-device a
 - Fail-closed clock-inconsistency result when the observed end instant precedes the start.
 - Focused JVM regression coverage for a spring daylight-saving transition, month-end arithmetic, leap-day year arithmetic, week/day/hour decomposition, and reversed-clock behavior.
 
-### Room persistence candidate on `feature/since-persistence`
+## Active persistence candidate — PR #3 / `feature/since-persistence`
 
-The current branch adds Development-candidate source for:
+The parent persistence branch contains candidate-only Development source for Room schema v1, transactional tracker aggregate creation, database-level period/goal invariants, committed schema evidence, and Android 16 invariant tests. These items are not authoritative on `main` until PR #3 completes exact-head validation and merge/readback.
 
-- Room 3.0.3 database `since.db`, schema version 1, with the compiler-generated v1 schema committed for migration review and CI drift detection.
-- `tracked_events`, `event_periods`, and `event_goals` entities using the specified column identities and cascading foreign keys.
-- Unique `(event_id, sequence)` period ordering.
-- App-owned SQLite setup for the one-open-period partial unique index that Room's current `Index` annotation cannot express.
-- Database triggers rejecting invalid period chronology, additional periods for permanent events, and goals attached to non-streak trackers.
-- Transactional aggregate creation of tracker + initial open period + optional goal with stable manual sort ordering.
-- Repository mapping that keeps Room entities out of the domain/UI contract.
-- Lazy application-level database/repository wiring.
-- Android runtime tests intended to verify the partial-index and trigger invariants on API 36, including close/reopen behavior for the persistent database.
+## Stacked create-flow candidate — `feature/since-create-flow`
 
-**Candidate boundary:** the persistence items above are not authoritative on `main` until their exact branch head passes build/lint/unit/schema-drift and API 36 runtime validation and the reviewed change is merged.
+This branch adds candidate-only Development source, dependent on the PR #3 persistence line, for:
+
+- Persistent Dashboard observation of complete tracker aggregates behind the repository boundary.
+- Dashboard populated state with stable tracker cards.
+- Tracker Type Chooser for Permanent Event and Streak.
+- Create Tracker flow with title, optional note, default Start = Now, current IANA ZoneId, Days/Weeks/Months/Years display format, and optional streak goal amount/unit.
+- Save-time `TrackerDraftValidator` validation before database mutation.
+- Atomic persistence through the parent repository transaction, followed by return to the populated Dashboard.
+- Foreground-only elapsed-summary refresh derived from persisted timestamps through `TimeEngine`; no persistent timer/background service is introduced.
+- Fail-closed clock-inconsistency presentation and generic save-failure presentation.
+- Android runtime coverage of validated repository creation, persisted initial period/goal, aggregate observation, and exactly one open period.
+
+**Candidate boundary:** this stacked source is not authoritative on `main` and must not be treated as merged M1 functionality until its parent persistence line is accepted, the stack is reconciled with the authoritative base, exact-head validation passes, and its own reviewed PR is merged.
 
 ## Material limitations
 
-Persistent tracker creation is not yet connected to the Compose UI. Edit/details flows, atomic streak reset, history, goal UI, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`.
+Custom past start date/time selection, explicit start-zone editing, icon/accent selection, Edit, Tracker Details, atomic streak reset/history, complete goal editing/progress, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`.
