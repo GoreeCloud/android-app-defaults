@@ -281,8 +281,8 @@ class SinceAccessibilityTest {
 
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithText("Edit goal").performClick()
-        composeRule.onNodeWithTag("goal-amount-field").performTextClearance()
-        composeRule.onNodeWithTag("goal-amount-field").performTextInput("14")
+        composeRule.onNodeWithTag("goal-amount-field", useUnmergedTree = true).performTextClearance()
+        composeRule.onNodeWithTag("goal-amount-field", useUnmergedTree = true).performTextInput("14")
         composeRule.onNodeWithText("Save").performClick()
         composeRule.waitForIdle()
 
