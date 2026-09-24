@@ -253,3 +253,26 @@ The canonical source was rendered and reviewed at 512 px, 128 px, 48 px, 32 px, 
 
 This change establishes and packages the application launcher identity. Per-tracker icon/accent selection remains a separate Development feature. Consumer APK/runtime verification remains governed by the exact android-app-defaults candidate and CI evidence.
 
+## 2026-09-24 — Since visual hierarchy refinement
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #24
+
+### Improved
+
+- Increased primary-action emphasis for **Add tracker** on the Dashboard.
+- Separated the **Elapsed** label from the value and reduced value scale on populated tracker cards.
+- Replaced the large accent-filled Details hero with a neutral durable surface and focused teal state/value emphasis.
+- Made Permanent Event and Streak chooser options visually neutral and equivalent so the UI does not imply that either type is preselected or recommended.
+- Applied consistent rounded Glaze geometry to Create/Edit text fields.
+
+### Verification and integration
+
+Exact candidate `ee3d69886644840c00aff2df9b5f72962ed6109b` passed Android Development Foundation run `35981477112` / #81 with Android 16 instrumentation `OK (18 tests)` and exact-head rendered visual evidence. Human review of all five rendered scenes found no clipping, text corruption, unintended pink/purple Material inheritance, broken field geometry, or loss of content hierarchy.
+
+PR #24 was squash-merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`. Exact merged-main run `35982116803` / #82 passed Android 16 instrumentation `OK (18 tests)`, producing `since-runtime-apks` artifact ID `10800732670` with digest `sha256:7abf1a90e5881a9804d213effb45f68256c5d23ee585559395949f6670d2c0b2` and `since-rendered-ui` artifact ID `10800344407` with digest `sha256:be77a211a844a1d84b2d3028721e85009f5694e58e957aa380fea752e3f4777d`.
+
+### Boundary
+
+This is Development presentation refinement and emulator evidence, not representative physical-device/OEM, dark-mode, assistive-technology, complete downstream GLAZE UI consumer acceptance, Release Candidate, production, or Stable acceptance.
+
