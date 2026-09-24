@@ -172,3 +172,17 @@ Exact source candidate `41a61992a76a8c7475c98666d8db5993913b0c50` passed Android
 
 Representative physical-device visual acceptance and full downstream GLAZE UI consumer acceptance remain open release obligations.
 
+### Verified rendered emulator visual evidence
+
+The current Development source includes an Android-rendered visual-evidence lane for the principal Since flow:
+
+- launches the real `MainActivity` on the Android 16 emulator;
+- captures the empty Dashboard, tracker-type chooser, Create Streak, Tracker Details, and populated Dashboard as full-device PNG evidence;
+- extracts the evidence from the target app sandbox after instrumentation succeeds;
+- publishes the images as the `since-rendered-ui` GitHub Actions artifact;
+- verifies that the exact rendered source uses an explicit neutral surface-container hierarchy rather than inheriting unrelated Material defaults that previously introduced an unintended pink/purple cast into cards and editor sections.
+
+Exact source-bearing candidate `7c77ab28811b4aedecc733e0479dd5b57edda0d4` passed Android Development Foundation run #73 / `35976727631`, including Android 16 instrumentation and successful rendered-evidence upload. Artifact `since-rendered-ui` ID `10798890114` has digest `sha256:c6f865e01296ed28da2a7c2059e60bf4af367e6220dacce88b570df526928cc5`.
+
+This establishes bounded Android-emulator rendered evidence only. Human visual acceptance, representative physical-device/OEM rendering, TalkBack/assistive-technology acceptance, and full downstream GLAZE UI consumer acceptance remain open.
+

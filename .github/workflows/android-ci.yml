@@ -103,3 +103,10 @@ jobs:
           disable-animations: true
           disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
           script: bash scripts/run_since_android_tests.sh
+
+      - name: Upload Since rendered visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: since-rendered-ui
+          path: ci-screenshots/*.png
+          if-no-files-found: error
