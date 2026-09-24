@@ -73,9 +73,28 @@ Current `main` additionally implements:
 - Android runtime coverage for validated repository creation, aggregate reactivity, and persisted display-format changes.
 
 
+### Verified M2 goal progress and editor candidate
+
+PR #32 adds the bounded first M2 slice without changing the Room v1 schema or the local-only permission boundary:
+
+- calendar-aware goal target estimation for Days, Weeks, Months, and Years using the persisted current-period start and IANA zone;
+- current goal percent/progress display that may truthfully exceed 100% while elapsed tracking continues;
+- localized estimated completion in the current period zone;
+- streak-only goal add/edit/remove persistence with amount range 1–100,000;
+- preserved goal creation timestamp across edits and goal removal that does not alter tracker period history;
+- fail-closed clock inconsistency and untrusted/invalid amount handling;
+- English and Arabic goal-progress/editor resources;
+- JVM coverage for DST, month-end, leap-day, completion, >100%, reset/new-period progress, and backward-clock behavior;
+- Android runtime persistence/reactivity coverage plus Compose goal editor update/remove coverage.
+
+Exact candidate `024a910d9410e1a4e7644d5651be7224a1752b2a` passed Android Development Foundation run `35994826843`: build, JVM tests, Android lint, Debug application/instrumentation assembly, Room schema drift verification, local-only/canonical-identity guard, and Android 16 instrumentation all succeeded. This documentation reconciliation advances the branch again, so a fresh exact-head workflow is required before merge.
+
+This remains Development evidence. Atomic streak reset, preserved History, longest-streak/reset-count statistics, representative-device acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable qualification remain open.
+
+
 ## Material limitations
 
-Icon/accent selection, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection and Edit Tracker are verified on `main` and are not limitations.
+Icon/accent selection, streak reset/history/statistics, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the PR #32 goal progress/editor candidate are not represented as open limitations after that candidate is integrated.
 
 
 ### Verified custom-start and Edit Tracker flow
