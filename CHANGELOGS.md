@@ -2,6 +2,25 @@
 
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
+## 2026-09-24 — Since deterministic visual evidence follow-up
+
+**Lifecycle:** Development  
+**Tracking:** Follow-up to PR #34 post-merge validation
+
+### Changed
+
+- Reworked Since rendered visual evidence so light/dark screenshots switch the Compose theme in-place instead of recreating the instrumentation host Activity.
+- Moved the reusable fake tracker repository into shared Android-test support so accessibility and visual tests exercise the same deterministic repository contract.
+- Added an explicit optional theme selector to `SinceTheme` for deterministic test rendering while preserving system-theme behavior by default.
+
+### Reason
+
+PR #34 merged successfully after exact-head validation, but its first post-merge Android Development Foundation run exposed an intermittent visual-evidence timeout during Android night-mode Activity recreation. The functional picker and repository tests were not the failing gate; the failure was isolated to rendered-evidence theme switching.
+
+### Boundary
+
+This follow-up does not change production data, chronology, network/privacy permissions, persisted schema, release classification, Production acceptance, or Stable status.
+
 ## 2026-09-24 — Since date and time picker candidate
 
 **Lifecycle:** Development  
