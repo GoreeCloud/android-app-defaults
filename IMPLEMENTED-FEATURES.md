@@ -105,5 +105,6 @@ The current Development candidate on `feature/since-editor-accessibility` additi
 - full-row toggleable streak-goal activation with the visual switch removed as a redundant accessibility focus stop;
 - assertive live-region semantics for validation, start-input, save, and display-format failure messages;
 - Android Compose instrumentation coverage for heading semantics, coherent clickable tracker cards, full-row selectable format behavior, scroll-reachable editor actions, and assertive validation errors.
+- Android 16 runtime CI keeps instrumentation mandatory while using KVM when available and software emulator acceleration when the hosted runner lacks usable `/dev/kvm`.
 
 **Candidate boundary:** this source is not authoritative on `main` until the exact candidate passes the applicable build/lint/schema/Android-runtime gates and the reviewed pull request is merged. Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.

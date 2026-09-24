@@ -110,6 +110,7 @@ Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 
 - Assertive live-region semantics for validation, start-input, save, and display-format update errors.
 - Compose UI instrumentation coverage for headings, tracker-card click semantics, selectable display-format rows, scroll-reachable Save action, and assertive validation errors.
 - Compose UI test dependencies scoped to Android instrumentation/debug builds.
+- Android 16 runtime CI acceleration detection: KVM is used when available; otherwise the required instrumentation suite runs with software acceleration instead of being skipped.
 
 ### Boundary
 
