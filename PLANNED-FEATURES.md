@@ -23,12 +23,12 @@
 **State:** In progress — persistence foundation candidate on `feature/since-persistence`.
 
 Current tranche:
-- Add Room schema v1 for `tracked_events`, `event_periods`, and `event_goals` with committed schema export.
+- Maintain the committed compiler-generated Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with CI drift detection.
 - Enforce exactly one open current period per tracker at the SQLite boundary.
 - Enforce permanent-event single-period, valid period chronology, and streak-only positive goals at the database boundary.
 - Create tracker + initial period + optional goal as one transaction.
 - Keep Room entities behind a repository/domain mapping boundary.
-- Validate the database invariants on Android 16 in CI.
+- Validate the database invariants on Android 16 in CI, including persistent close/reopen behavior.
 
 Still open within M1:
 - Connect persistent creation to the Compose tracker type chooser and Create screen.
@@ -36,7 +36,6 @@ Still open within M1:
 - Implement Edit and Tracker Details.
 - Add Preferences DataStore only for settings that are actually implemented.
 - Add additional persistence/query tests required by the UI flows.
-- Reconcile and commit the compiler-generated Room schema for exact migration-review evidence.
 
 ### M2 — Streak reset, history, and goals
 
