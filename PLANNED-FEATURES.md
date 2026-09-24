@@ -35,12 +35,12 @@ Verified on `main`:
 - Persisted display-format changes from Details.
 - Shared application clock plus lifecycle-aware minute refresh for visible elapsed values.
 
-Active candidate on `feature/since-edit-start`:
+Verified on `main` through PR #6:
 - User-selected past local date/time with explicit IANA zone editing.
 - Deterministic DST gap/overlap resolution.
 - Edit Tracker for title, note, default display format, and open current-period start/date/time/zone.
 - Closed streak history remains immutable; an edited current start cannot precede the latest closed-period end.
-- JVM and Android runtime tests for the new resolver and edit boundary.
+- Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed run `35959431091` with Android 16 `SinceDatabaseRuntimeTest` `OK (10 tests)` and was squash-merged as `48d7c8342ad17e860b521690df5c817d84d92b7b`.
 
 Still open within M1:
 - Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.

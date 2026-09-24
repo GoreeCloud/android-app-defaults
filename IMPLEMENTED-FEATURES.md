@@ -78,9 +78,9 @@ Current `main` additionally implements:
 Custom past-start selection, icon/accent selection, Edit Tracker, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`.
 
 
-### Active custom-start and Edit Tracker candidate
+### Verified custom-start and Edit Tracker flow
 
-The current Development candidate on `feature/since-edit-start` additionally implements:
+Current `main` additionally implements:
 
 - strict local start input using `YYYY-MM-DD HH:MM` plus an explicit IANA ZoneId;
 - deterministic DST handling that rejects nonexistent gap times and resolves fall-back overlaps to the earlier valid offset;
@@ -90,4 +90,6 @@ The current Development candidate on `feature/since-edit-start` additionally imp
 - JVM coverage for ordinary, gap, overlap, malformed date/time, and invalid-zone resolution;
 - Android runtime coverage for successful current-period edits and closed-history conflict rejection.
 
-**Candidate boundary:** this source is not authoritative on `main` until the exact candidate passes applicable CI/runtime gates and the reviewed pull request is merged. Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
+PR #6 was squash-merged to `main` as `48d7c8342ad17e860b521690df5c817d84d92b7b`. Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Development Foundation run `35959431091` on attempt 2, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 `SinceDatabaseRuntimeTest` with `OK (10 tests)`. Attempt 1 failed before tests because that hosted runner did not expose readable/writable `/dev/kvm`; no source change or validation weakening was used before the successful exact-head rerun.
+
+Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
