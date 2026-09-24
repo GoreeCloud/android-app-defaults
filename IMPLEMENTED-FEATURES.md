@@ -73,9 +73,9 @@ Current `main` additionally implements:
 - Android runtime coverage for validated repository creation, aggregate reactivity, and persisted display-format changes.
 
 
-### Verified M2 goal progress and editor candidate
+### Verified M2 goal progress and editor
 
-PR #32 adds the bounded first M2 slice without changing the Room v1 schema or the local-only permission boundary:
+PR #32 integrated the bounded first M2 slice without changing the Room v1 schema or the local-only permission boundary:
 
 - calendar-aware goal target estimation for Days, Weeks, Months, and Years using the persisted current-period start and IANA zone;
 - current goal percent/progress display that may truthfully exceed 100% while elapsed tracking continues;
@@ -87,14 +87,14 @@ PR #32 adds the bounded first M2 slice without changing the Room v1 schema or th
 - JVM coverage for DST, month-end, leap-day, completion, >100%, reset/new-period progress, and backward-clock behavior;
 - Android runtime persistence/reactivity coverage plus Compose goal editor update/remove coverage.
 
-PR #32 carries this bounded M2 goal-progress/editor implementation with build, JVM, Android lint, Debug application/instrumentation assembly, Room schema-drift, local-only/canonical-identity, and Android 16 runtime validation. The final exact-head result is authoritative in the GitHub pull-request/workflow record rather than duplicated as a moving pre-merge SHA here; any head change requires fresh exact-head validation before merge.
+PR #32 was merged to `main` as `d6ad738ebdd559f8275a85ff2e8c4952c339f2a8`; PR #33 then stabilized the rendered-evidence synchronization path and merged as `a9d1101e964eb16b0718c4a3fc857f33dcc1ae9c`. The goal progress/editor functionality is current Development source.
 
 This remains Development evidence. Atomic streak reset, preserved History, longest-streak/reset-count statistics, representative-device acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable qualification remain open.
 
 
 ## Material limitations
 
-Icon/accent selection, streak reset/history/statistics, archive/search, export/import, validated backup/restore implementation, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the PR #32 goal progress/editor candidate are not represented as open limitations after that candidate is integrated.
+Icon/accent selection, streak reset/history/statistics, archive/search, export/import, validated backup/restore implementation, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the integrated PR #32 goal progress/editor functionality are not represented as open limitations.
 
 
 ### Integrated date and time picker flow
@@ -114,9 +114,9 @@ PR #37 was squash-merged as `700d6084f5f9268727a17ad593fab5412feab801`. Exact ca
 This remains Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
 
 
-### Top-level navigation, Achievements, and Settings Development candidate
+### Verified top-level navigation, Achievements, and Settings integration
 
-PR #39 adds the owner-requested top-level Android surfaces without changing the Room v1 schema or local-only permission boundary:
+PR #39 integrated the owner-requested top-level Android surfaces without changing the Room v1 schema or local-only permission boundary:
 
 - persistent phone bottom navigation for **Home**, **Achievements**, and **Settings**;
 - local-only deterministic achievements for first tracker, first streak, first goal, seven-day streak, and thirty-day streak, using the existing calendar-aware Since time semantics;
@@ -127,7 +127,7 @@ PR #39 adds the owner-requested top-level Android surfaces without changing the 
 - Compose coverage for top-level reachability, theme selection, fail-closed Backup/Restore dialogs, privacy/security visibility, and app-version visibility;
 - light/dark Android-rendered evidence for Achievements and Settings, including recovery and About/privacy/security views.
 
-Exact candidate `a0681407ecec1b10727be4eda0667804318efc16` passed Android Development Foundation run `36071596131` / #148, including the local-only manifest guard, JVM tests, Android lint, Debug application/instrumentation assembly, Room schema-drift verification, Android 16 instrumentation, and rendered-evidence upload. This is exact-head candidate evidence only; PR #39 remains subject to independent review and guarded integration.
+Final exact candidate `d11a3aabfe9aac3f8fbdae05558e026b87c50156` passed Android Development Foundation run `36072370515` / #152 with Android 16 instrumentation `OK (21 tests)` and rendered-evidence upload. PR #39 was then squash-merged as `43cdfc8659de25e0d8829fed593d7f0a914e5965`; exact merged-main run `36073050400` / #153 also passed with Android 16 instrumentation `OK (21 tests)`. The exact-main run produced `since-runtime-apks` artifact `10838389459` (`sha256:bf1b34d54c453d24d57a28c2b2d6ec12577fa043e2ddb621d21927913b1027cb`) and 20-scene `since-rendered-ui` artifact `10838444438` (`sha256:51275298f6efed8246718ee67f9fac35a8b379195c02a32275b9cd1ed55443df`). GitHub records show no submitted review on PR #39 before merge, so independent-review process acceptance remains open even though the source is integrated and CI-verified.
 
 This remains Development evidence. Backup/Restore implementation, representative-device and assistive-technology acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable qualification remain open.
 
