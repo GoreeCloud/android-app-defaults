@@ -181,6 +181,7 @@ class SinceAccessibilityTest {
 
         composeRule
             .onNodeWithText("Target amount")
+            .performScrollTo()
             .assertIsDisplayed()
     }
 
