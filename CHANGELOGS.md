@@ -43,10 +43,10 @@ Exact candidate `9a4268c08b5d442d858cebaf2d4e06a4bb552a34` passed Android Develo
 
 Historical failed workflow attempts remain part of the change history for the concrete defects they exposed; they are not reused as final-head evidence.
 
-## 2026-09-23 — Since persistent creation, Dashboard, and Details candidate
+## 2026-09-23 — Since persistent creation, Dashboard, and Details
 
-**Lifecycle:** Development candidate on `feature/since-create-dashboard`  
-**Tracking:** GitHub issue #1
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #4
 
 ### Added
 
@@ -54,12 +54,16 @@ Historical failed workflow attempts remain part of the change history for the co
 - Tracker Type Chooser for Permanent Event and Streak.
 - Create Tracker screen with validation before mutation, Start = Now/current IANA ZoneId, display format, and optional streak goal.
 - Atomic repository-backed tracker/current-period/goal persistence.
-- Populated Dashboard cards with minute-updated calendar-aware elapsed summaries.
+- Populated Dashboard cards with lifecycle-aware minute-updated calendar-aware elapsed summaries.
 - Tracker Details with selectable elapsed hero, persisted start date/time/zone, note, goal summary, and deliberate persisted display-format changes.
 - Shared application clock across repository and UI calculation boundaries.
 - Kotlin validated-draft copy-visibility hardening.
 - Android runtime coverage for validated creation, aggregate reactivity, and display-format persistence.
 
+### Verification and integration
+
+Exact candidate `be534fc98e1fc7020296779f0e71cd4d48ae6778` passed Android Development Foundation run `35956066300`, including manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and KVM-accelerated Android 16 `SinceDatabaseRuntimeTest` with `OK (8 tests)`. PR #4 was squash-merged to `main` as `3cc9788513c100e0ca3fedb336dd57a1b3b87e84`, followed by merged-source readback.
+
 ### Boundary
 
-This entry describes candidate source only. Custom past-start editing, icon/accent selection, Edit, streak reset/history/statistics, full goal progress/editor, archive/search/settings, portability/recovery, GLAZE UI consumer acceptance, complete platform-system conformance, representative-device acceptance, Release Candidate, production, and Stable remain open.
+Custom past-start editing, icon/accent selection, Edit, streak reset/history/statistics, full goal progress/editor, archive/search/settings, portability/recovery, GLAZE UI consumer acceptance, complete platform-system conformance, representative-device acceptance, Release Candidate, production, and Stable remain open.

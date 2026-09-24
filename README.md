@@ -8,7 +8,7 @@ The repository is in **Development**. GoreeCloud Since is the first application 
 
 Verified `main` contains the independent Android application foundation and Room persistence foundation: local-only/fail-closed manifest behavior, calendar-aware elapsed-time semantics, Room schema v1, SQLite invariants, transactional tracker aggregate creation, repository/domain mapping, committed schema evidence, and Android 16 runtime database tests.
 
-The active M1 candidate adds the first persistent user-facing path: tracker type choice, validated persistent creation, populated Dashboard cards, persisted Tracker Details, and deliberate persisted display-format changes. Custom past-start editing, icon/accent selection, Edit, reset/history, goal progress/editor, archive/search/settings, portability/recovery, platform-system acceptance, and release gates remain open.
+Current `main` also includes the first persistent user-facing path: tracker type choice, validated persistent creation, populated Dashboard cards, persisted Tracker Details, lifecycle-aware minute updates, and deliberate persisted display-format changes. Custom past-start editing, icon/accent selection, Edit, reset/history, goal progress/editor, archive/search/settings, portability/recovery, platform-system acceptance, and release gates remain open.
 
 This is not Release Candidate, production, Stable, representative-device, complete GLAZE UI consumer acceptance, or complete Integral Platform System conformance.
 
