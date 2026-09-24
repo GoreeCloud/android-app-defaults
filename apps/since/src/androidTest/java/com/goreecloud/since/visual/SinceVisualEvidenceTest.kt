@@ -72,6 +72,8 @@ class SinceVisualEvidenceTest {
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
             capture("create-streak-dark")
 
+            composeRule.onNodeWithText("Cancel").performClick()
+            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
             setNightMode(UiModeManager.MODE_NIGHT_NO)
             composeRule.onNodeWithText("Since").assertIsDisplayed()
             composeRule.onNodeWithText("Read daily").assertIsDisplayed()
