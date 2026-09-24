@@ -94,7 +94,7 @@ This remains Development evidence. Atomic streak reset, preserved History, longe
 
 ## Material limitations
 
-Icon/accent selection, streak reset/history/statistics, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the PR #32 goal progress/editor candidate are not represented as open limitations after that candidate is integrated.
+Icon/accent selection, streak reset/history/statistics, archive/search, export/import, validated backup/restore implementation, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the PR #32 goal progress/editor candidate are not represented as open limitations after that candidate is integrated.
 
 
 ### Integrated date and time picker flow
@@ -112,6 +112,24 @@ Current `main` removes the remaining manual IANA time-zone entry from Create and
 PR #37 was squash-merged as `700d6084f5f9268727a17ad593fab5412feab801`. Exact candidate `ef3e3fa84aa7d3975c8cb087c423f88e1d158d52` passed Android Development Foundation run `36063174272` / #132, and merged `main` then passed run `36063794046` / #133, including build/JVM/lint/schema/manifest checks, APK assembly, Android 16 runtime instrumentation, and rendered UI evidence.
 
 This remains Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
+
+
+### Top-level navigation, Achievements, and Settings Development candidate
+
+PR #39 adds the owner-requested top-level Android surfaces without changing the Room v1 schema or local-only permission boundary:
+
+- persistent phone bottom navigation for **Home**, **Achievements**, and **Settings**;
+- local-only deterministic achievements for first tracker, first streak, first goal, seven-day streak, and thirty-day streak, using the existing calendar-aware Since time semantics;
+- a persisted Preferences DataStore theme preference with **System**, **Light**, and **Dark** choices;
+- visible **Backup** and **Restore** settings that remain explicitly Planned/fail-closed until a validated recovery format, integrity checks, and restore acceptance exist;
+- **Privacy**, **Security**, **App version**, and Development build-status information;
+- English and Arabic resources for the new navigation, achievement, and settings surfaces;
+- Compose coverage for top-level reachability, theme selection, fail-closed Backup/Restore dialogs, privacy/security visibility, and app-version visibility;
+- light/dark Android-rendered evidence for Achievements and Settings, including recovery and About/privacy/security views.
+
+Exact candidate `a0681407ecec1b10727be4eda0667804318efc16` passed Android Development Foundation run `36071596131` / #148, including the local-only manifest guard, JVM tests, Android lint, Debug application/instrumentation assembly, Room schema-drift verification, Android 16 instrumentation, and rendered-evidence upload. This is exact-head candidate evidence only; PR #39 remains subject to independent review and guarded integration.
+
+This remains Development evidence. Backup/Restore implementation, representative-device and assistive-technology acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable qualification remain open.
 
 ### Verified custom-start and Edit Tracker flow
 

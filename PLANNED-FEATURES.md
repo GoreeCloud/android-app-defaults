@@ -63,7 +63,7 @@ Verified on `main` through PR #16 and PR #19:
 
 Still open within M1:
 - Curated per-tracker icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE tracker icon/accent key mapping; no product key catalog was invented. The canonical Since application launcher identity is implemented separately through GoreeCloud Branding Assets.
-- Preferences DataStore only for application preferences that are actually implemented.
+- Preferences DataStore is now introduced only for the implemented System/Light/Dark theme preference in PR #39; additional preferences remain gated on real implemented behavior.
 - Representative TalkBack and large-font visual acceptance.
 - Automated keyboard-focus traversal/activation evidence is verified on `main` through PR #19; representative physical-keyboard/external-switch acceptance remains open.
 - Arabic localization for the current 51-string UI surface plus packaged RTL/resource verification is verified on `main` through PR #16; native-language translation review, future-feature localization, Arabic TalkBack, and representative-device RTL acceptance remain open.
@@ -82,7 +82,7 @@ Still open within M1:
 
 **State:** Planned.
 
-- Search, sorting, archive/restore, delete safeguards, settings, and About/Privacy.
+- Search, sorting, archive/restore, and delete safeguards remain planned. PR #39 implements the bounded top-level Settings/About baseline (theme, fail-closed Backup/Restore entries, privacy/security information, app version/build status) while validated portability/recovery behavior remains open.
 - Versioned JSON export using Android Storage Access Framework.
 - Fail-closed validated import with review before mutation; prefer Replace import until safe merge semantics are fully designed.
 - Room migration tests using committed historical schema files.

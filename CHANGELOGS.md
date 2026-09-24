@@ -1,5 +1,28 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-24 — Since Home, Achievements, and Settings navigation candidate
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #39
+
+### Added
+
+- Persistent phone bottom navigation for Home, Achievements, and Settings.
+- Local-only deterministic achievement presentation for first tracker, first streak, first goal, seven-day streak, and thirty-day streak, using the existing calendar-aware Since time model.
+- Persisted System/Light/Dark theme preference.
+- Settings sections for appearance, data/recovery, privacy/security, and About/application version.
+- Visible Backup and Restore entry points that remain explicitly Planned and fail closed until validated recovery exists.
+- English and Arabic strings plus Compose top-level navigation/settings coverage.
+- Light/dark rendered evidence for Achievements and Settings, including recovery and About/privacy/security views.
+
+### Verification
+
+Exact implementation candidate `a0681407ecec1b10727be4eda0667804318efc16` passed Android Development Foundation run `36071596131` / #148, including build/JVM/lint/schema/manifest checks, Android 16 instrumentation, and rendered-evidence upload. After that exact-head success, repository documentation was reconciled in the same PR; the final documentation-bearing head therefore requires its own fresh exact-head validation before merge.
+
+### Boundary
+
+Backup and Restore are not implemented recovery operations. This candidate does not add network access, advertising, analytics, a cloud dependency, or new dangerous permissions. Representative-device, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
+
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
 ## 2026-09-24 — Since searchable time-zone picker integration

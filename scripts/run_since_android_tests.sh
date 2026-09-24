@@ -56,7 +56,15 @@ for screenshot in \
   tracker-details \
   tracker-details-dark \
   dashboard-populated \
-  dashboard-populated-dark
+  dashboard-populated-dark \
+  achievements \
+  achievements-dark \
+  settings \
+  settings-dark \
+  settings-recovery \
+  settings-recovery-dark \
+  settings-about \
+  settings-about-dark
 do
     destination="ci-screenshots/${screenshot}.png"
     adb exec-out run-as "$APP_PACKAGE" cat "files/visual-evidence/${screenshot}.png" > "$destination"
