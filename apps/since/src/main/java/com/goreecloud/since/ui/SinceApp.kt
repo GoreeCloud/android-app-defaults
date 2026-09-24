@@ -366,11 +366,6 @@ private fun DashboardEmptyState() {
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.headlineSmall,
             )
-            Text(
-                text = stringResource(R.string.add_tracker),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-            )
         }
     }
 }
@@ -538,7 +533,7 @@ private fun TrackerDetailsScreen(
                     )
                     Text(
                         text = stringResource(R.string.elapsed_label),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.72f),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.labelLarge,
                     )
                     SelectionContainer {
@@ -783,7 +778,7 @@ private fun TrackerTypeChooser(
                         )
                         Text(
                             text = stringResource(R.string.streak_description),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.76f),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
