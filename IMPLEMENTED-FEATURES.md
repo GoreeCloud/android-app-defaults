@@ -111,3 +111,14 @@ Current `main` additionally implements:
 PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`. Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Development Foundation run `35963071718`: local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (13 tests)`. The runtime gate now detects emulator acceleration and keeps instrumentation mandatory, using KVM when available and software acceleration otherwise. Draft PR #8 was closed unmerged after its useful non-overlapping work was consolidated into PR #9.
 
 Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, localization/RTL acceptance, approved Since-specific icon/accent mapping, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
+
+
+### Active large-font and RTL automated-evidence candidate
+
+The current Development candidate adds CI-level accessibility/layout evidence without claiming representative-device acceptance:
+
+- forced 2× font-scale Compose instrumentation verifies the Create editor keeps the title, start date/time, zone field, and Save action reachable through its scroll container;
+- forced RTL layout-direction instrumentation verifies the Create heading, title field, zone field, and Save action remain reachable;
+- these tests run in the existing mandatory Android 16 instrumentation lane.
+
+**Candidate boundary:** automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
