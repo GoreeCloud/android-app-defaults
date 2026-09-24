@@ -111,6 +111,32 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
         capture("dashboard-populated")
 
+        composeRule.onNodeWithTag("nav-achievements").performClick()
+        composeRule.onNodeWithTag("achievements-screen").assertIsDisplayed()
+        capture("achievements")
+
+        composeRule.onNodeWithTag("nav-settings").performClick()
+        composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
+        capture("settings")
+
+        composeRule.runOnIdle {
+            darkTheme = true
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
+        capture("settings-dark")
+
+        composeRule.onNodeWithTag("nav-achievements").performClick()
+        composeRule.onNodeWithTag("achievements-screen").assertIsDisplayed()
+        capture("achievements-dark")
+
+        composeRule.runOnIdle {
+            darkTheme = false
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("nav-home").performClick()
+        composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
         capture("tracker-details")
