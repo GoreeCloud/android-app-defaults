@@ -75,7 +75,7 @@ Current `main` additionally implements:
 
 ## Material limitations
 
-Custom past-start selection, icon/accent selection, Edit Tracker, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`.
+Icon/accent selection, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection and Edit Tracker are verified on `main` and are not limitations.
 
 
 ### Verified custom-start and Edit Tracker flow
