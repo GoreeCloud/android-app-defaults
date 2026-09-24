@@ -109,8 +109,10 @@ class SinceVisualEvidenceTest {
         composeRule.waitUntil(timeoutMillis = 10_000) {
             val currentActivity = runCatching { composeRule.activity }.getOrNull()
             currentActivity != null &&
-                currentActivity.resources.configuration.uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK == expectedNightMask &&
+                (
+                    currentActivity.resources.configuration.uiMode and
+                        Configuration.UI_MODE_NIGHT_MASK
+                ) == expectedNightMask &&
                 (
                     previousNightMask == expectedNightMask ||
                         currentActivity !== activityBeforeChange
