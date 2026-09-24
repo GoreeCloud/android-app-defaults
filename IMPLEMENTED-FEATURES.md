@@ -97,6 +97,10 @@ This remains Development evidence. Atomic streak reset, preserved History, longe
 Icon/accent selection, streak reset/history/statistics, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the PR #32 goal progress/editor candidate are not represented as open limitations after that candidate is integrated.
 
 
+### Date and time picker candidate
+
+PR #34 replaces manual local date/time typing in the Create and Edit Tracker surfaces with separate Material 3 Date and Time picker controls while preserving the existing local-time plus explicit IANA ZoneId storage and validation contract. The time picker respects the device 12/24-hour preference; English and Arabic labels and Compose picker-reachability coverage are included. This remains Development evidence until exact-head validation and integration are complete.
+
 ### Verified custom-start and Edit Tracker flow
 
 Current `main` additionally implements:
@@ -123,7 +127,7 @@ Current `main` additionally implements:
 - full-row selectable display-format options with the visual radio control removed as a redundant accessibility focus stop;
 - full-row toggleable streak-goal activation with the visual switch removed as a redundant accessibility focus stop;
 - assertive live-region semantics for validation, start-input, save, and display-format failure messages;
-- Android Compose instrumentation coverage for heading semantics, coherent clickable tracker cards, full-row selectable format behavior, scroll-reachable editor actions, assertive validation errors, and custom-past-start Create → Details → Edit persistence through the repository contract.
+- Android Compose instrumentation coverage for heading semantics, coherent clickable tracker cards, full-row selectable format behavior, scroll-reachable editor actions, assertive validation errors, Date/Time picker reachability, and Create → Details → Edit persistence through the repository contract.
 - one shared lifecycle-aware Dashboard minute ticker instead of one ticker coroutine per tracker card; Details retains its own ticker only while the Details screen is active.
 - Android 16 runtime CI keeps instrumentation mandatory while using KVM when available and software emulator acceleration when the hosted runner lacks usable `/dev/kvm`.
 
