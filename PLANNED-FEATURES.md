@@ -67,7 +67,7 @@ Still open within M1:
 - Representative TalkBack and large-font visual acceptance.
 - Automated keyboard-focus traversal/activation evidence is verified on `main` through PR #19; representative physical-keyboard/external-switch acceptance remains open.
 - Arabic localization for the current 51-string UI surface plus packaged RTL/resource verification is verified on `main` through PR #16; native-language translation review, future-feature localization, Arabic TalkBack, and representative-device RTL acceptance remain open.
-- Rendered visual acceptance required before Stable qualification.
+- Automated Android 16 rendered evidence now exists for the principal Since flow; human visual review and representative physical-device/OEM visual acceptance remain required before Stable qualification.
 
 ### M2 — Streak reset, history, and goals
 
@@ -102,7 +102,7 @@ Still open within M1:
 
 Evaluate and integrate all nine Integral Platform Systems as applicable: GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, GoreeCloud Policy, and GoreeCloud Observability.
 
-The temporary Compose Material 3 substrate in the current Since Development shell is **not** GLAZE UI conformance. The current approved GLAZE UI Android mapping must be verified and adopted before any conformance claim.
+The current dedicated Since Compose theme is an application-local presentation mapping informed by the Stable GLAZE UI V1.6 direction, with bounded Android-emulator rendered evidence. It is **not** by itself downstream GLAZE UI consumer conformance. The applicable approved Android mapping, human/device evidence, and repository-local conformance requirements must still be verified before any conformance claim.
 
 ### M6 — Release acceptance
 
