@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -365,20 +364,11 @@ private fun TrackerCard(
             displayFormatLabel(goal.targetUnit),
         )
     }
-    val accessibilityDescription = listOfNotNull(
-        aggregate.tracker.title,
-        kindLabel,
-        elapsedLabel,
-        goalLabel,
-    ).joinToString(separator = ". ")
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("tracker-card-" + aggregate.tracker.id)
-            .semantics(mergeDescendants = true) {
-                contentDescription = accessibilityDescription
-            },
+            .semantics(mergeDescendants = true) {},
         onClick = onClick,
     ) {
         Column(

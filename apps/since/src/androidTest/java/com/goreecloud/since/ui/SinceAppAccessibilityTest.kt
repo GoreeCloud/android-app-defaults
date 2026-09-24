@@ -1,6 +1,6 @@
 package com.goreecloud.since.ui
 
-import androidx.compose.ui.test.assertContentDescriptionContains
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
@@ -68,9 +68,9 @@ class SinceAppAccessibilityTest {
         composeRule
             .onNodeWithTag("tracker-card-accessibility")
             .assertHasClickAction()
-            .assertContentDescriptionContains("Read daily")
-            .assertContentDescriptionContains("Streak")
-            .assertContentDescriptionContains("Goal: 30 Days")
+            .assertTextContains("Read daily")
+            .assertTextContains("Streak")
+            .assertTextContains("Goal: 30 Days")
     }
 
     @Test
