@@ -72,11 +72,9 @@ Current `main` additionally implements:
 - Fail-closed clock inconsistency, save failure, and display-format update states.
 - Android runtime coverage for validated repository creation, aggregate reactivity, and persisted display-format changes.
 
-
 ## Material limitations
 
-Custom past-start selection, icon/accent selection, Edit Tracker, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`.
-
+Icon/accent selection, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection and Edit Tracker are verified on `main` and are not limitations.
 
 ### Verified custom-start and Edit Tracker flow
 
@@ -93,7 +91,6 @@ Current `main` additionally implements:
 PR #6 was squash-merged to `main` as `48d7c8342ad17e860b521690df5c817d84d92b7b`. Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Development Foundation run `35959431091` on attempt 2, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 `SinceDatabaseRuntimeTest` with `OK (10 tests)`. Attempt 1 failed before tests because that hosted runner did not expose readable/writable `/dev/kvm`; no source change or validation weakening was used before the successful exact-head rerun.
 
 Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
-
 
 ### Verified editor accessibility and UI evidence
 
@@ -112,7 +109,6 @@ PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`.
 
 Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, localization/RTL acceptance, approved Since-specific icon/accent mapping, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
 
-
 ### Verified large-font and RTL automated evidence
 
 Current `main` adds CI-level accessibility/layout evidence without claiming representative-device acceptance:
@@ -124,7 +120,6 @@ Current `main` adds CI-level accessibility/layout evidence without claiming repr
 PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`. Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Development Foundation run `35965422146`, including manifest guard, JVM tests, Android lint, app/test APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (15 tests)`.
 
 Automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
-
 
 ### Active keyboard-focus evidence candidate
 

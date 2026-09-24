@@ -20,7 +20,7 @@
 
 ### M1 — Persistent tracker fundamentals
 
-**State:** In progress — persistence foundation plus persistent create/Dashboard/Details flow are verified and merged; remaining editor/support behavior stays open.
+**State:** In progress — persistence, create/Dashboard/Details, custom-start/Edit, and automated accessibility evidence are verified and merged; remaining M1 support/acceptance work stays open.
 
 Verified on `main`:
 - Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with committed compiler-generated schema and CI drift detection.
