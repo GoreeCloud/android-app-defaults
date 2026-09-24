@@ -113,12 +113,14 @@ PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`.
 Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, localization/RTL acceptance, approved Since-specific icon/accent mapping, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
 
 
-### Active large-font and RTL automated-evidence candidate
+### Verified large-font and RTL automated evidence
 
-The current Development candidate adds CI-level accessibility/layout evidence without claiming representative-device acceptance:
+Current `main` adds CI-level accessibility/layout evidence without claiming representative-device acceptance:
 
 - forced 2× font-scale Compose instrumentation verifies the Create editor keeps the title, start date/time, zone field, and Save action reachable through its scroll container;
 - forced RTL layout-direction instrumentation verifies the Create heading, title field, zone field, and Save action remain reachable;
 - these tests run in the existing mandatory Android 16 instrumentation lane.
 
-**Candidate boundary:** automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
+PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`. Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Development Foundation run `35965422146`, including manifest guard, JVM tests, Android lint, app/test APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (15 tests)`.
+
+Automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.

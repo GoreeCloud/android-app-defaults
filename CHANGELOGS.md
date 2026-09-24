@@ -122,16 +122,20 @@ Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Develo
 Representative-device TalkBack/large-font/keyboard/switch-access, localization/RTL, approved Since-specific icon/accent mapping, downstream GLAZE UI consumer acceptance, and all later M2–M6 work remain open.
 
 
-## 2026-09-24 — Since large-font and RTL automated-evidence candidate
+## 2026-09-24 — Since large-font and RTL automated evidence
 
-**Lifecycle:** Development candidate on `feature/since-large-font-rtl-ci`  
-**Tracking:** GitHub issue #1
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #12
 
 ### Added
 
 - Compose instrumentation at 2× font scale verifying primary Create-editor fields and Save remain scroll-reachable.
 - Forced RTL layout-direction instrumentation verifying the Create heading, title, zone field, and Save action remain reachable.
 - Coverage remains in the mandatory Android 16 instrumentation lane.
+
+### Verification and integration
+
+Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Development Foundation run `35965422146`, including manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (15 tests)`. PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`.
 
 ### Boundary
 
