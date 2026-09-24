@@ -7,7 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Goal
@@ -56,8 +56,8 @@ class SinceTopLevelNavigationTest {
             assertEquals(ThemePreference.DARK, selectedTheme)
         }
 
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
         composeRule.onNodeWithTag("settings-backup")
-            .performScrollTo()
             .assertIsDisplayed()
             .assertHasClickAction()
             .performClick()
@@ -66,7 +66,6 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithText("Done").performClick()
 
         composeRule.onNodeWithTag("settings-restore")
-            .performScrollTo()
             .assertIsDisplayed()
             .assertHasClickAction()
             .performClick()
@@ -74,15 +73,12 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithText("App version")
-            .performScrollTo()
-            .assertIsDisplayed()
-        composeRule.onNodeWithText("Privacy")
-            .performScrollTo()
-            .assertIsDisplayed()
-        composeRule.onNodeWithText("Security")
-            .performScrollTo()
-            .assertIsDisplayed()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithText("Privacy").assertIsDisplayed()
+        composeRule.onNodeWithText("Security").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithText("App version").assertIsDisplayed()
 
         composeRule.onNodeWithTag("nav-achievements").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("achievements-screen").assertIsDisplayed()
