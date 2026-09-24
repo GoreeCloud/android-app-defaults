@@ -202,3 +202,19 @@ The identity uses an open elapsed-time ring, start-point node, and restrained cl
 
 Per-tracker icon/accent selection remains a separate Development feature and remains blocked on an approved Since-specific GLAZE mapping. Application launcher identity does not satisfy or bypass that tracker-level mapping requirement.
 
+### Verified Since visual hierarchy refinement
+
+The current Development source includes the follow-up Android presentation refinement integrated through PR #24:
+
+- the Dashboard `Add tracker` action uses primary emphasis instead of a low-emphasis container treatment;
+- populated tracker cards separate the **Elapsed** label from the time value and reduce elapsed-value scale for calmer hierarchy;
+- Tracker Details uses a neutral durable content surface rather than a large accent-filled panel while retaining teal emphasis for the tracker type and elapsed value;
+- Permanent Event and Streak options in the tracker-type chooser use equal neutral surfaces so accent color does not imply a preselected or recommended tracker type;
+- Create/Edit text fields use the same rounded Glaze geometry as the surrounding editor surfaces.
+
+Exact PR #24 candidate `ee3d69886644840c00aff2df9b5f72962ed6109b` passed Android Development Foundation run `35981477112` / #81 with the manifest/canonical-identity guard, JVM tests, Android lint, APK assembly, Room-schema drift verification, Android 16 instrumentation `OK (18 tests)`, and rendered-evidence upload. Human review of the five exact-head emulator scenes found no clipping, text corruption, unintended Material pink/purple inheritance, broken field geometry, or loss of content hierarchy.
+
+PR #24 was squash-merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`. Exact merged-main run `35982116803` / #82 also passed Android 16 instrumentation `OK (18 tests)` and produced `since-runtime-apks` artifact ID `10800732670`, digest `sha256:7abf1a90e5881a9804d213effb45f68256c5d23ee585559395949f6670d2c0b2`, plus `since-rendered-ui` artifact ID `10800344407`, digest `sha256:be77a211a844a1d84b2d3028721e85009f5694e58e957aa380fea752e3f4777d`.
+
+This remains bounded emulator and CI evidence. Representative physical-device/OEM rendering, dark-mode rendered acceptance, native-language review, representative TalkBack/large-font/RTL/keyboard/switch acceptance, and full downstream GLAZE UI consumer acceptance remain open.
+
