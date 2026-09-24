@@ -42,12 +42,15 @@ Verified on `main` through PR #6:
 - Closed streak history remains immutable; an edited current start cannot precede the latest closed-period end.
 - Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed run `35959431091` with Android 16 `SinceDatabaseRuntimeTest` `OK (10 tests)` and was squash-merged as `48d7c8342ad17e860b521690df5c817d84d92b7b`.
 
-Active candidate on `feature/since-editor-accessibility`:
+Verified on `main` through PR #9:
 - Explicit screen heading semantics.
 - Coherent TalkBack grouping for tracker cards.
 - Full-row accessible display-format radio choices and streak-goal toggle target.
 - Assertive error live regions.
-- Android Compose accessibility instrumentation tests.
+- One shared lifecycle-aware Dashboard minute ticker rather than one ticker coroutine per card.
+- Android Compose accessibility instrumentation including the custom-past-start Create → Details → Edit persistence flow.
+- Android 16 runtime instrumentation remains mandatory with KVM detection and software-acceleration fallback.
+- Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed run `35963071718` with Android 16 instrumentation `OK (13 tests)` and was squash-merged as `5b14c58af68b8748e71f6af0c462650d06e852d6`.
 
 Still open within M1:
 - Curated local icon and approved accent selection. This remains blocked on an approved Since-specific GLAZE icon/accent key mapping; no product key catalog was invented.

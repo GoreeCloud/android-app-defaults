@@ -95,9 +95,9 @@ PR #6 was squash-merged to `main` as `48d7c8342ad17e860b521690df5c817d84d92b7b`.
 Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
 
 
-### Active editor accessibility candidate
+### Verified editor accessibility and UI evidence
 
-The current Development candidate on `feature/since-editor-accessibility` additionally implements:
+Current `main` additionally implements:
 
 - explicit heading semantics for Dashboard, Create, Edit, and Tracker Details headings;
 - coherent merged tracker-card semantics so title, tracker type, elapsed summary, and optional goal content present through one clickable accessibility unit;
@@ -108,4 +108,6 @@ The current Development candidate on `feature/since-editor-accessibility` additi
 - one shared lifecycle-aware Dashboard minute ticker instead of one ticker coroutine per tracker card; Details retains its own ticker only while the Details screen is active.
 - Android 16 runtime CI keeps instrumentation mandatory while using KVM when available and software emulator acceleration when the hosted runner lacks usable `/dev/kvm`.
 
-**Candidate boundary:** this source is not authoritative on `main` until the exact candidate passes the applicable build/lint/schema/Android-runtime gates and the reviewed pull request is merged. Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
+PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`. Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Development Foundation run `35963071718`: local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (13 tests)`. The runtime gate now detects emulator acceleration and keeps instrumentation mandatory, using KVM when available and software acceleration otherwise. Draft PR #8 was closed unmerged after its useful non-overlapping work was consolidated into PR #9.
+
+Representative TalkBack device acceptance, large-font visual acceptance, switch-access/keyboard acceptance, localization/RTL acceptance, approved Since-specific icon/accent mapping, and complete downstream GLAZE UI consumer acceptance remain separate release obligations.
