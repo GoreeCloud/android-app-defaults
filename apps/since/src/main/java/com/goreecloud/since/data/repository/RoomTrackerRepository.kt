@@ -93,6 +93,15 @@ class RoomTrackerRepository(
         trackerId: String,
     ): TrackerAggregate? = dao.readAggregate(trackerId)?.toDomain()
 
+    override suspend fun updateDisplayFormat(
+        trackerId: String,
+        displayFormat: DisplayFormat,
+    ): Boolean = dao.updateDisplayFormat(
+        eventId = trackerId,
+        displayFormat = displayFormat.name,
+        updatedAtEpochMs = clock.millis(),
+    ) == 1
+
     private fun PersistedTrackerAggregate.toDomain(): TrackerAggregate =
         TrackerAggregate(
             tracker = tracker.toDomain(),

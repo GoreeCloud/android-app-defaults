@@ -1,5 +1,6 @@
 package com.goreecloud.since.domain.repository
 
+import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Tracker
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.validation.ValidatedTrackerDraft
@@ -13,4 +14,9 @@ interface TrackerRepository {
     suspend fun createTracker(draft: ValidatedTrackerDraft): TrackerAggregate
 
     suspend fun loadTracker(trackerId: String): TrackerAggregate?
+
+    suspend fun updateDisplayFormat(
+        trackerId: String,
+        displayFormat: DisplayFormat,
+    ): Boolean
 }

@@ -21,6 +21,7 @@ import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -244,6 +245,39 @@ class SinceDatabaseRuntimeTest {
         }
     }
 
+
+    @Test
+    fun displayFormatUpdatePersistsAndReemitsAggregate() = runBlocking {
+        val now = Instant.parse("2026-09-23T18:00:00Z")
+        val clock = Clock.fixed(now, ZoneId.of("UTC"))
+        val repository = RoomTrackerRepository(dao = dao, clock = clock)
+        val tracker = trackerEntity(id = "format-event", kind = TrackerKind.EVENT)
+        dao.createTrackerAggregate(
+            tracker = tracker,
+            initialPeriod = periodEntity(
+                id = "format-period",
+                eventId = tracker.id,
+                sequence = 0,
+                start = 1_000L,
+            ),
+            goal = null,
+        )
+
+        val changed = async(start = CoroutineStart.UNDISPATCHED) {
+            withTimeout(5_000) {
+                repository.observeActiveTrackerAggregates().first { aggregates ->
+                    aggregates.singleOrNull()?.tracker?.defaultDisplayFormat == DisplayFormat.MONTHS
+                }
+            }
+        }
+
+        assertTrue(repository.updateDisplayFormat(tracker.id, DisplayFormat.MONTHS))
+        assertEquals(DisplayFormat.MONTHS, changed.await().single().tracker.defaultDisplayFormat)
+        assertEquals(
+            DisplayFormat.MONTHS,
+            repository.loadTracker(tracker.id)!!.tracker.defaultDisplayFormat,
+        )
+    }
 
     @Test
     fun aggregateObservationReactsToPeriodChanges() = runBlocking {

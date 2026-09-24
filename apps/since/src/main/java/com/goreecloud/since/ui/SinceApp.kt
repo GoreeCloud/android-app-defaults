@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -49,7 +50,10 @@ import com.goreecloud.since.domain.validation.TrackerDraft
 import com.goreecloud.since.domain.validation.TrackerDraftValidation
 import com.goreecloud.since.domain.validation.TrackerDraftValidator
 import java.time.Clock
+import java.time.Instant
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -66,8 +70,10 @@ fun SinceApp(
 
     var showTypeChooser by rememberSaveable { mutableStateOf(false) }
     var editorKindName by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var validationErrors by remember { mutableStateOf(emptyList<String>()) }
     var saveFailed by rememberSaveable { mutableStateOf(false) }
+    var detailUpdateFailed by rememberSaveable { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
 
     val editorKind = editorKindName?.let { runCatching { TrackerKind.valueOf(it) }.getOrNull() }
@@ -97,7 +103,9 @@ fun SinceApp(
                         scope.launch {
                             runCatching {
                                 repository.createTracker(validation.draft)
-                            }.onSuccess {
+                            }.onSuccess { created ->
+                                selectedTrackerId = created.tracker.id
+                                detailUpdateFailed = false
                                 editorKindName = null
                             }.onFailure {
                                 saveFailed = true
@@ -111,10 +119,43 @@ fun SinceApp(
         return
     }
 
+    val selectedAggregate = selectedTrackerId?.let { trackerId ->
+        aggregates.firstOrNull { it.tracker.id == trackerId }
+    }
+    if (selectedAggregate != null) {
+        TrackerDetailsScreen(
+            aggregate = selectedAggregate,
+            clock = clock,
+            updateFailed = detailUpdateFailed,
+            onBack = {
+                selectedTrackerId = null
+                detailUpdateFailed = false
+            },
+            onDisplayFormatChange = { format ->
+                if (format != selectedAggregate.tracker.defaultDisplayFormat) {
+                    detailUpdateFailed = false
+                    scope.launch {
+                        val updated = runCatching {
+                            repository.updateDisplayFormat(
+                                trackerId = selectedAggregate.tracker.id,
+                                displayFormat = format,
+                            )
+                        }.getOrDefault(false)
+                        if (!updated) detailUpdateFailed = true
+                    }
+                }
+            },
+        )
+        return
+    }
+
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { showTypeChooser = true },
+                onClick = {
+                    selectedTrackerId = null
+                    showTypeChooser = true
+                },
                 content = { Text(stringResource(R.string.add_tracker)) },
             )
         },
@@ -123,6 +164,10 @@ fun SinceApp(
             innerPadding = innerPadding,
             aggregates = aggregates,
             clock = clock,
+            onOpenTracker = { trackerId ->
+                detailUpdateFailed = false
+                selectedTrackerId = trackerId
+            },
         )
     }
 
@@ -144,6 +189,7 @@ private fun Dashboard(
     innerPadding: PaddingValues,
     aggregates: List<TrackerAggregate>,
     clock: Clock,
+    onOpenTracker: (String) -> Unit,
 ) {
     if (aggregates.isEmpty()) {
         DashboardEmptyState(innerPadding)
@@ -171,6 +217,7 @@ private fun Dashboard(
             TrackerCard(
                 aggregate = aggregate,
                 clock = clock,
+                onClick = { onOpenTracker(aggregate.tracker.id) },
             )
         }
     }
@@ -210,18 +257,13 @@ private fun DashboardEmptyState(
 private fun TrackerCard(
     aggregate: TrackerAggregate,
     clock: Clock,
+    onClick: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
-    val tick by produceState(
-        initialValue = clock.millis(),
-        key1 = aggregate.tracker.id,
-        key2 = clock,
-    ) {
-        while (true) {
-            value = clock.millis()
-            delay(30_000)
-        }
-    }
+    val tick by rememberMinuteTick(
+        clock = clock,
+        key = aggregate.tracker.id,
+    )
     val elapsed = remember(aggregate, tick, clock) {
         TimeEngine(clock).elapsedSince(
             startEpochMs = currentPeriod.startEpochMs,
@@ -232,6 +274,7 @@ private fun TrackerCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
     ) {
         Column(
             modifier = Modifier.padding(18.dp),
@@ -242,10 +285,7 @@ private fun TrackerCard(
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = when (aggregate.tracker.kind) {
-                    TrackerKind.EVENT -> stringResource(R.string.tracker_kind_event)
-                    TrackerKind.STREAK -> stringResource(R.string.tracker_kind_streak)
-                },
+                text = trackerKindLabel(aggregate.tracker.kind),
                 style = MaterialTheme.typography.labelLarge,
             )
             Text(
@@ -267,6 +307,154 @@ private fun TrackerCard(
 }
 
 @Composable
+private fun TrackerDetailsScreen(
+    aggregate: TrackerAggregate,
+    clock: Clock,
+    updateFailed: Boolean,
+    onBack: () -> Unit,
+    onDisplayFormatChange: (DisplayFormat) -> Unit,
+) {
+    val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
+    val tick by rememberMinuteTick(
+        clock = clock,
+        key = "details-" + aggregate.tracker.id,
+    )
+    val elapsed = remember(aggregate, tick, clock) {
+        TimeEngine(clock).elapsedSince(
+            startEpochMs = currentPeriod.startEpochMs,
+            zoneId = currentPeriod.startZoneId,
+            format = aggregate.tracker.defaultDisplayFormat,
+        )
+    }
+    val startedOn = remember(currentPeriod.startEpochMs, currentPeriod.startZoneId) {
+        val zone = ZoneId.of(currentPeriod.startZoneId)
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+            .format(Instant.ofEpochMilli(currentPeriod.startEpochMs).atZone(zone))
+    }
+
+    Scaffold { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            TextButton(onClick = onBack) {
+                Text(stringResource(R.string.back))
+            }
+
+            Text(
+                text = aggregate.tracker.title,
+                style = MaterialTheme.typography.headlineMedium,
+            )
+            Text(
+                text = trackerKindLabel(aggregate.tracker.kind),
+                style = MaterialTheme.typography.labelLarge,
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = stringResource(R.string.elapsed_label),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                SelectionContainer {
+                    Text(
+                        text = elapsedSummary(elapsed),
+                        style = MaterialTheme.typography.displaySmall,
+                    )
+                }
+            }
+
+            FormatSelector(
+                title = stringResource(R.string.display_format_label),
+                selected = aggregate.tracker.defaultDisplayFormat,
+                enabled = true,
+                onSelect = onDisplayFormatChange,
+            )
+
+            if (updateFailed) {
+                Text(
+                    text = stringResource(R.string.display_format_update_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.started_on_label),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = startedOn,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text = currentPeriod.startZoneId,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
+            aggregate.goal?.let { goal ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = stringResource(R.string.goal_label),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.goal_summary,
+                            goal.targetAmount,
+                            displayFormatLabel(goal.targetUnit),
+                        ),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(R.string.goal_progress_deferred),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.note_label),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = aggregate.tracker.note ?: stringResource(R.string.no_note),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.details_development_boundary),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
+
+@Composable
+private fun rememberMinuteTick(
+    clock: Clock,
+    key: String,
+) = produceState(
+    initialValue = clock.millis(),
+    key1 = key,
+    key2 = clock,
+) {
+    while (true) {
+        val now = clock.millis()
+        value = now
+        val untilNextMinute = 60_000L - (now % 60_000L)
+        delay(untilNextMinute.coerceIn(1_000L, 60_000L))
+    }
+}
+
+@Composable
 private fun elapsedSummary(
     elapsed: ElapsedResult,
 ): String = when (elapsed) {
@@ -277,18 +465,50 @@ private fun elapsedSummary(
         val breakdown = elapsed.breakdown
         when (breakdown.format) {
             DisplayFormat.DAYS ->
-                stringResource(R.string.elapsed_days_short, breakdown.days)
+                stringResource(
+                    R.string.elapsed_days_detail,
+                    breakdown.days,
+                    breakdown.hours,
+                    breakdown.minutes,
+                )
 
             DisplayFormat.WEEKS ->
-                stringResource(R.string.elapsed_weeks_short, breakdown.weeks)
+                stringResource(
+                    R.string.elapsed_weeks_detail,
+                    breakdown.weeks,
+                    breakdown.days,
+                    breakdown.hours,
+                    breakdown.minutes,
+                )
 
             DisplayFormat.MONTHS ->
-                stringResource(R.string.elapsed_months_short, breakdown.months)
+                stringResource(
+                    R.string.elapsed_months_detail,
+                    breakdown.months,
+                    breakdown.days,
+                    breakdown.hours,
+                    breakdown.minutes,
+                )
 
             DisplayFormat.YEARS ->
-                stringResource(R.string.elapsed_years_short, breakdown.years)
+                stringResource(
+                    R.string.elapsed_years_detail,
+                    breakdown.years,
+                    breakdown.months,
+                    breakdown.days,
+                    breakdown.hours,
+                    breakdown.minutes,
+                )
         }
     }
+}
+
+@Composable
+private fun trackerKindLabel(
+    kind: TrackerKind,
+): String = when (kind) {
+    TrackerKind.EVENT -> stringResource(R.string.tracker_kind_event)
+    TrackerKind.STREAK -> stringResource(R.string.tracker_kind_streak)
 }
 
 @Composable

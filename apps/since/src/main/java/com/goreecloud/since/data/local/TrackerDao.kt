@@ -46,6 +46,17 @@ abstract class TrackerDao {
     )
     abstract suspend fun openPeriodCount(eventId: String): Int
 
+    @Query(
+        "UPDATE tracked_events " +
+            "SET default_display_format = :displayFormat, updated_at_epoch_ms = :updatedAtEpochMs " +
+            "WHERE id = :eventId AND is_archived = 0"
+    )
+    abstract suspend fun updateDisplayFormat(
+        eventId: String,
+        displayFormat: String,
+        updatedAtEpochMs: Long,
+    ): Int
+
     @Insert
     abstract suspend fun insertTrackedEvent(entity: TrackedEventEntity)
 

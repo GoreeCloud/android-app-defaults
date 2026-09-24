@@ -28,11 +28,19 @@
     <string name="goal_unit_label">Target unit</string>
     <string name="goal_summary">Goal: %1$d %2$s</string>
 
-    <string name="elapsed_days_short">%1$d d</string>
-    <string name="elapsed_weeks_short">%1$d wk</string>
-    <string name="elapsed_months_short">%1$d mo</string>
-    <string name="elapsed_years_short">%1$d yr</string>
+    <string name="elapsed_label">Elapsed</string>
+    <string name="elapsed_days_detail">%1$d d · %2$d h · %3$d min</string>
+    <string name="elapsed_weeks_detail">%1$d wk · %2$d d · %3$d h · %4$d min</string>
+    <string name="elapsed_months_detail">%1$d mo · %2$d d · %3$d h · %4$d min</string>
+    <string name="elapsed_years_detail">%1$d yr · %2$d mo · %3$d d · %4$d h · %5$d min</string>
     <string name="clock_inconsistency">Check device clock</string>
+
+    <string name="back">Back</string>
+    <string name="started_on_label">Started on</string>
+    <string name="no_note">No note</string>
+    <string name="display_format_update_failed">Could not update the display format.</string>
+    <string name="goal_progress_deferred">Progress and estimated completion remain in the M2 goal increment.</string>
+    <string name="details_development_boundary">Edit, archive, delete, reset/history, goal progress, and sharing remain in later Development increments.</string>
 
     <string name="save">Save</string>
     <string name="saving">Saving…</string>
