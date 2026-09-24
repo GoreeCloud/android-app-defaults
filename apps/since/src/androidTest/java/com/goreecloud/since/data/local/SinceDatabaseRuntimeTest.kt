@@ -4,8 +4,16 @@ import android.content.Context
 import androidx.sqlite.SQLiteException
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.goreecloud.since.data.repository.RoomTrackerRepository
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.TrackerKind
+import com.goreecloud.since.domain.validation.TrackerDraft
+import com.goreecloud.since.domain.validation.TrackerDraftValidation
+import com.goreecloud.since.domain.validation.TrackerDraftValidator
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -101,6 +109,42 @@ class SinceDatabaseRuntimeTest {
         }
 
         assertEquals(1, dao.readAggregate(tracker.id)!!.periods.size)
+    }
+
+    @Test
+    fun repositoryCreatesValidatedStreakAndEmitsDashboardAggregate() = runBlocking {
+        val now = Instant.parse("2026-09-23T18:00:00Z")
+        val clock = Clock.fixed(now, ZoneId.of("UTC"))
+        val generatedIds = mutableListOf("tracker-created", "period-created").iterator()
+        val repository = RoomTrackerRepository(
+            dao = dao,
+            clock = clock,
+            idFactory = { generatedIds.next() },
+        )
+        val validation = TrackerDraftValidator(clock).validate(
+            TrackerDraft(
+                title = "  Read daily  ",
+                note = "  Keep going.  ",
+                kind = TrackerKind.STREAK,
+                startEpochMs = now.minusSeconds(60).toEpochMilli(),
+                startZoneId = "America/Chicago",
+                displayFormat = DisplayFormat.DAYS,
+                goalAmount = 30,
+                goalUnit = DisplayFormat.DAYS,
+            )
+        )
+        val validated = (validation as TrackerDraftValidation.Valid).draft
+
+        val created = repository.createTracker(validated)
+        val observed = repository.observeActiveTrackerAggregates().first().single()
+
+        assertEquals("tracker-created", created.tracker.id)
+        assertEquals("Read daily", created.tracker.title)
+        assertEquals("Keep going.", created.tracker.note)
+        assertEquals(TrackerKind.STREAK, observed.tracker.kind)
+        assertEquals("period-created", observed.periods.single().id)
+        assertEquals(30, observed.goal!!.targetAmount)
+        assertEquals(1, dao.openPeriodCount(observed.tracker.id))
     }
 
     @Test
