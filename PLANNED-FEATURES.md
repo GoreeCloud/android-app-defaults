@@ -20,22 +20,30 @@
 
 ### M1 — Persistent tracker fundamentals
 
-**State:** In progress — persistence foundation candidate on `feature/since-persistence`.
+**State:** In progress — persistence foundation verified and merged; persistent create/Dashboard/Details candidate active on `feature/since-create-dashboard`.
 
-Current tranche:
-- Maintain the committed compiler-generated Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with CI drift detection.
-- Enforce exactly one open current period per tracker at the SQLite boundary.
-- Enforce permanent-event single-period, valid period chronology, and streak-only positive goals at the database boundary.
-- Create tracker + initial period + optional goal as one transaction.
-- Keep Room entities behind a repository/domain mapping boundary.
-- Validate the database invariants on Android 16 in CI, including persistent close/reopen behavior.
+Verified on `main`:
+- Room schema v1 for `tracked_events`, `event_periods`, and `event_goals`, with committed compiler-generated schema and CI drift detection.
+- Exactly one open current period per tracker enforced at SQLite boundary.
+- Permanent-event single-period, period chronology, and streak-only positive-goal invariants.
+- Transactional tracker + initial period + optional goal creation.
+- Repository/domain mapping boundary and Android 16 runtime invariant tests.
+
+Active candidate:
+- Tracker Type Chooser.
+- Create Tracker with validation before mutation and persistent save.
+- Reactive populated Dashboard.
+- Tracker Details backed by persisted tracker/period/goal state and derived `TimeEngine`.
+- Persisted display-format changes from Details.
+- Shared application clock for repository and UI time derivation.
+- Runtime tests for validated creation, aggregate reactivity, and display-format persistence.
 
 Still open within M1:
-- Connect persistent creation to the Compose tracker type chooser and Create screen.
-- Implement populated Dashboard state.
-- Implement Edit and Tracker Details.
-- Add Preferences DataStore only for settings that are actually implemented.
-- Add additional persistence/query tests required by the UI flows.
+- User-selected past start date/time and explicit zone editing.
+- Curated local icon and approved accent selection.
+- Edit Tracker, including current-period start editing.
+- Preferences DataStore only for application preferences that are actually implemented.
+- Additional UI/accessibility/runtime evidence required by those behaviors.
 
 ### M2 — Streak reset, history, and goals
 
