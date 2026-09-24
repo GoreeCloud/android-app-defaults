@@ -76,3 +76,18 @@ Current `main` additionally implements:
 ## Material limitations
 
 Custom past-start selection, icon/accent selection, Edit Tracker, streak reset/history/statistics, full goal progress/editor behavior, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`.
+
+
+### Active custom-start and Edit Tracker candidate
+
+The current Development candidate on `feature/since-edit-start` additionally implements:
+
+- strict local start input using `YYYY-MM-DD HH:MM` plus an explicit IANA ZoneId;
+- deterministic DST handling that rejects nonexistent gap times and resolves fall-back overlaps to the earlier valid offset;
+- Create Tracker support for user-selected past start date/time and zone;
+- Edit Tracker from Details for title, note, current open-period start/date/time/zone, and default display format;
+- atomic persistence updates that never rewrite closed streak history and reject moving the open current period before the latest closed-period end;
+- JVM coverage for ordinary, gap, overlap, malformed date/time, and invalid-zone resolution;
+- Android runtime coverage for successful current-period edits and closed-history conflict rejection.
+
+**Candidate boundary:** this source is not authoritative on `main` until the exact candidate passes applicable CI/runtime gates and the reviewed pull request is merged. Icon/accent selection remains unimplemented because the current GLAZE UI authority exposes shared icon/color contracts but no approved Since-specific icon/accent key catalog was verified.
