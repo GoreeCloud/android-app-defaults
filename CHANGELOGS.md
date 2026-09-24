@@ -5,7 +5,7 @@ This repository-local record is the authoritative human-readable change history 
 ## 2026-09-24 — Since deterministic visual evidence follow-up
 
 **Lifecycle:** Development  
-**Tracking:** Follow-up to PR #34 post-merge validation
+**Tracking:** PR #35; follow-up to PR #34 post-merge validation
 
 ### Changed
 
@@ -17,11 +17,15 @@ This repository-local record is the authoritative human-readable change history 
 
 PR #34 merged successfully after exact-head validation, but its first post-merge Android Development Foundation run exposed an intermittent visual-evidence timeout during Android night-mode Activity recreation. The functional picker and repository tests were not the failing gate; the failure was isolated to rendered-evidence theme switching.
 
+### Verification
+
+PR #35 was squash-merged to `main` as `0996b3294e54a855e354cba70b6d95e9b48fc695`. Android Development Foundation run `36054602137` then passed on that merged `main` commit, including build/unit/lint/schema/manifest checks, Android 16 runtime instrumentation, and rendered visual evidence.
+
 ### Boundary
 
 This follow-up does not change production data, chronology, network/privacy permissions, persisted schema, release classification, Production acceptance, or Stable status.
 
-## 2026-09-24 — Since date and time picker candidate
+## 2026-09-24 — Since date and time picker integration
 
 **Lifecycle:** Development  
 **Tracking:** GitHub issue #1, PR #34
@@ -35,7 +39,7 @@ This follow-up does not change production data, chronology, network/privacy perm
 
 ### Verification
 
-PR #34 carries this Development interaction refinement. Exact-head Android Development Foundation validation is required before merge.
+PR #34 was squash-merged to `main` as `287987eac4d11fe837d4b201f58f5b31fa38cccf` after exact-head Android Development Foundation validation. Its first post-merge run exposed only an intermittent rendered-evidence night-mode recreation timeout; PR #35 isolated and corrected that evidence path without changing tracker behavior. The resulting merged `main` commit `0996b3294e54a855e354cba70b6d95e9b48fc695` passed Android Development Foundation run `36054602137`, including Android 16 instrumentation and rendered UI evidence.
 
 ### Boundary
 
