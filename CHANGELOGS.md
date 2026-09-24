@@ -156,3 +156,19 @@ This is CI-level Development evidence only. It does not establish representative
 ### Boundary
 
 Exact candidate `3867afe88e6570f647b65dfa224c5b67708d998c` passed run `35967471510` with Android 16 instrumentation `OK (16 tests)` and was squash-merged to `main` as `d204cbd4464539a15b8f1ed6e0d9e9dfef4ddbb7`. Native-speaker review, representative-device RTL/TalkBack acceptance, additional input-device acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable status remain open.
+
+
+## 2026-09-24 — Since input-navigation evidence candidate
+
+**Lifecycle:** Development candidate  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Android Compose instrumentation requests keyboard input mode.
+- The Create editor Cancel action is focused and Tab traversal is checked to move to Save.
+- Enter activation of the focused Save action is checked through the existing validation-error outcome.
+
+### Boundary
+
+This is automated Android 16 input-navigation evidence only. Representative hardware-input and assistive-device acceptance, TalkBack/large-font visual acceptance, localization review, GLAZE consumer acceptance, and M2–M6 remain open.
