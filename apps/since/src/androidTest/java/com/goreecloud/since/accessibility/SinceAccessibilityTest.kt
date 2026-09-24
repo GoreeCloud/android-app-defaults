@@ -158,7 +158,7 @@ class SinceAccessibilityTest {
             .performClick()
         composeRule.onNodeWithTag("start-zone-picker-dialog").assertIsDisplayed()
         composeRule.onNodeWithTag("start-zone-search").performTextInput("America/Chicago")
-        composeRule.onNodeWithText("America/Chicago").performClick()
+        composeRule.onNodeWithTag("start-zone-option-America/Chicago").performClick()
 
         composeRule.onNodeWithText("Save").performScrollTo().performClick()
 
