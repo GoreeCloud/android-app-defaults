@@ -109,7 +109,7 @@ This remains Development evidence only; it does not establish a release, deploym
 
 Current `main` additionally implements:
 
-- strict local start input using `YYYY-MM-DD HH:MM` plus an explicit IANA ZoneId;
+- picker-based local start date/time selection backed by the existing validated local date/time representation plus an explicit IANA ZoneId;
 - deterministic DST handling that rejects nonexistent gap times and resolves fall-back overlaps to the earlier valid offset;
 - Create Tracker support for user-selected past start date/time and zone;
 - Edit Tracker from Details for title, note, current open-period start/date/time/zone, and default display format;
