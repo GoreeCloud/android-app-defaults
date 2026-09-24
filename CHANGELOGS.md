@@ -17,7 +17,7 @@ This repository-local record is the authoritative human-readable change history 
 - Tracker-draft validation for title/note limits, IANA time zones, future starts, and streak-only bounded goals.
 - Injected-clock calendar-aware `TimeEngine` with Days, Weeks, Months, and Years decomposition and fail-closed reversed-clock behavior.
 - JVM regression tests covering daylight-saving, month-end, leap-day, week/day/hour, validation, and clock-inconsistency cases.
-- Initial Compose Dashboard empty state with an explicit Development boundary for not-yet-implemented persistent tracker creation.
+- Initial Compose Dashboard empty state.
 - Baseline GitHub Actions workflow for manifest policy validation, JVM tests, Android lint, and Debug assembly.
 - Mandatory `IMPLEMENTED-FEATURES.md`, `PLANNED-FEATURES.md`, and `CHANGELOGS.md` repository records.
 
@@ -25,12 +25,12 @@ This repository-local record is the authoritative human-readable change history 
 
 Exact candidate `a945cee18ef0924d7ef5360e5f252231c446753d` passed Android Development Foundation run #4 / `35947248482`. PR #2 was guarded-squash merged to `main` as `8afd4eecc1a374443f7a7b7da72eb19e79dfc4e1`, and merged source readback verified the expected files and manifest state.
 
-No separate post-merge workflow run was visible at the integration readback checkpoint. This is Development evidence, not Release Candidate, production, representative-device, GLAZE UI consumer, complete platform-system, or Stable acceptance.
+This is Development evidence, not Release Candidate, production, representative-device, GLAZE UI consumer, complete platform-system, or Stable acceptance.
 
 ## 2026-09-23 — Since persistence foundation candidate
 
 **Lifecycle:** Development candidate on `feature/since-persistence`  
-**Tracking:** GitHub issue #1
+**Tracking:** GitHub issue #1, PR #3
 
 ### Added
 
@@ -41,10 +41,31 @@ No separate post-merge workflow run was visible at the integration readback chec
 - Transactional tracker aggregate creation and repository/domain mapping boundaries.
 - Lazy application-level database and repository wiring.
 - API 36 instrumentation coverage for the critical database invariants, including persistent database close/reopen behavior.
-- CI schema artifact upload and Android 16 runtime-invariant lane.
-- PR-workflow concurrency that cancels superseded heads so stale emulator jobs do not consume validation capacity, plus build-lane Android-test APK compilation to fail instrumentation compile errors before emulator provisioning.
-- Runtime CI now transfers the exact build-lane application/test APK artifacts to an API 36 default emulator image, installs them directly with ADB, and invokes AndroidJUnitRunner directly. This avoids the opaque Gradle/UTP install path that previously failed before any Since test executed while preserving the Android 16 runtime gate.
+- CI schema artifact upload, application/instrumentation APK compilation, and Android 16 runtime-invariant lane.
+- Superseded-head workflow cancellation so stale emulator jobs do not consume final validation capacity.
+- Direct runtime transport of the build-lane APK artifacts rather than treating a second Gradle/UTP build as equivalent evidence.
 
 ### Boundary
 
-This entry describes candidate source only. The first persistence CI attempt (#6 / `35948301985`) failed on an overloaded Kotlin mapping reference and was corrected without rewriting history. The compiler-generated schema from the repaired build lane was retrieved and committed exactly. The persistence foundation is not authoritative on `main` until the final exact-head build/lint/unit/schema-drift/API 36 runtime validation succeeds and the reviewed pull request is merged.
+This entry describes candidate source only. Historical failed workflow attempts remain evidence for the defects they exposed and are not reused as final-head validation. PR #3 remains unmerged until its current exact-head build/runtime gates and applicable review/protection conditions pass.
+
+## 2026-09-23 — Since persistent creation and Dashboard candidate
+
+**Lifecycle:** Stacked Development candidate on `feature/since-create-flow`  
+**Dependency:** `feature/since-persistence` / PR #3  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Persistent Dashboard aggregate observation behind the repository/domain boundary.
+- Tracker Type Chooser for Permanent Event and Streak.
+- Create Tracker screen with title, optional note, Start = Now/current IANA ZoneId, Days/Weeks/Months/Years display format, and optional streak goal amount/unit.
+- Validation before mutation and atomic repository-backed tracker/current-period/goal creation.
+- Populated Dashboard cards with foreground-derived elapsed summaries and optional goal summaries.
+- Fail-closed clock-inconsistency and save-failure presentation.
+- Android runtime coverage of normalized/validated streak creation, persisted current period/goal, aggregate observation, and one-open-period behavior.
+- Kotlin copy-visibility hardening for the validated draft type.
+
+### Boundary
+
+This is a stacked candidate, not authoritative `main` state. Custom past date/time, editable zone, icon/accent selection, Edit, Details, streak reset/history, full goal management, and remaining M1–M6 acceptance remain open. The child line must be reconciled whenever PR #3 changes and cannot be merged independently of its parent persistence foundation.
