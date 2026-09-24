@@ -2,6 +2,28 @@
 
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
+## 2026-09-24 — Since M2 goal progress and editor candidate
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #32
+
+### Added
+
+- Calendar-aware Days/Weeks/Months/Years goal target estimation from the current period start and stored IANA zone.
+- Current-period goal percent, progress indicator, >=100% completion state, and estimated completion.
+- Streak-only goal add/edit/remove persistence without a Room schema change.
+- Preservation of goal creation timestamp across edits and period-history preservation on goal removal.
+- English/Arabic goal editor and progress resources.
+- JVM, Android runtime, and Compose UI coverage for the new goal behavior.
+
+### Verification
+
+Exact candidate `024a910d9410e1a4e7644d5651be7224a1752b2a` passed Android Development Foundation run `35994826843`. This documentation commit advances the candidate and therefore requires a fresh exact-head run before merge.
+
+### Boundary
+
+Atomic reset, History, longest-streak/reset-count statistics, representative-device acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable remain open.
+
 ## 2026-09-23 — GoreeCloud Since Development foundation
 
 **Lifecycle:** Development  
