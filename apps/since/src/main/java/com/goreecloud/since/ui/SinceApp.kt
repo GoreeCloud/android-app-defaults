@@ -31,7 +31,7 @@ fun SinceApp() {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showDevelopmentBoundary = true },
-                text = { Text(stringResource(R.string.add_tracker)) },
+                content = { Text(stringResource(R.string.add_tracker)) },
             )
         },
     ) { innerPadding ->
