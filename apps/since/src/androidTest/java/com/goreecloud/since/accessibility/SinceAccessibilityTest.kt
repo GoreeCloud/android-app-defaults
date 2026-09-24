@@ -280,7 +280,7 @@ class SinceAccessibilityTest {
         val originalPeriod = repository.current.single().periods.single()
 
         composeRule.onNodeWithText("Read daily").performClick()
-        composeRule.onNodeWithText("Edit goal").performClick()
+        composeRule.onNodeWithText("Edit goal").performScrollTo().performClick()
         composeRule.onNodeWithTag("goal-amount-field", useUnmergedTree = true).performTextClearance()
         composeRule.onNodeWithTag("goal-amount-field", useUnmergedTree = true).performTextInput("14")
         composeRule.onNodeWithText("Save").performClick()
@@ -289,7 +289,7 @@ class SinceAccessibilityTest {
         assertEquals(14, repository.current.single().goal!!.targetAmount)
         assertEquals(originalPeriod, repository.current.single().periods.single())
 
-        composeRule.onNodeWithText("Edit goal").performClick()
+        composeRule.onNodeWithText("Edit goal").performScrollTo().performClick()
         composeRule.onNodeWithText("Remove goal").performClick()
         composeRule.onNodeWithText("Remove").performClick()
         composeRule.waitForIdle()
