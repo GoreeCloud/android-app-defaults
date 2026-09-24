@@ -51,6 +51,8 @@ for screenshot in \
   tracker-type-chooser-dark \
   create-streak \
   create-streak-dark \
+  time-zone-picker \
+  time-zone-picker-dark \
   tracker-details \
   tracker-details-dark \
   dashboard-populated \
