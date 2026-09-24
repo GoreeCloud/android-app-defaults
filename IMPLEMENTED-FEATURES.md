@@ -105,11 +105,13 @@ PR #34 was squash-merged as `287987eac4d11fe837d4b201f58f5b31fa38cccf`. PR #35 t
 
 This remains Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
 
-### Searchable time-zone picker candidate
+### Integrated searchable time-zone picker
 
-PR #37 removes the remaining manual IANA time-zone entry from Create and Edit Tracker. The candidate presents the stored ZoneId through a full-width picker, supports search by IANA city/region identifier and UTC offset, shows the offset applicable to the selected local start time, and offers the device time zone as a one-tap choice. The underlying validated local date/time + explicit ZoneId model and DST rules remain unchanged. English/Arabic resources, Compose interaction coverage, and light/dark rendered picker evidence are included.
+Current `main` removes the remaining manual IANA time-zone entry from Create and Edit Tracker. The stored ZoneId is presented through a full-width picker that supports search by IANA city/region identifier and UTC offset, shows the offset applicable to the selected local start time, and offers the device time zone as a one-tap choice. The underlying validated local date/time + explicit ZoneId model and DST rules remain unchanged. English/Arabic resources, deterministic Compose interaction coverage, and light/dark rendered picker evidence are included.
 
-This remains Development candidate evidence until exact-head validation and integration are complete.
+PR #37 was squash-merged as `700d6084f5f9268727a17ad593fab5412feab801`. Exact candidate `ef3e3fa84aa7d3975c8cb087c423f88e1d158d52` passed Android Development Foundation run `36063174272` / #132, and merged `main` then passed run `36063794046` / #133, including build/JVM/lint/schema/manifest checks, APK assembly, Android 16 runtime instrumentation, and rendered UI evidence.
+
+This remains Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
 
 ### Verified custom-start and Edit Tracker flow
 
