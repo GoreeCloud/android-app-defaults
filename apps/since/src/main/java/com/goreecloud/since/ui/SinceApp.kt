@@ -1910,6 +1910,7 @@ private fun TimeZonePickerDialog(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .testTag("start-zone-option-${option.zoneId}")
                                     .selectable(
                                         selected = selectedZoneId == option.zoneId,
                                         role = Role.RadioButton,
