@@ -216,5 +216,23 @@ Exact PR #24 candidate `ee3d69886644840c00aff2df9b5f72962ed6109b` passed Android
 
 PR #24 was squash-merged as `7862a4de6ecebbebbd5466f82d8a2867e7be49e8`. Exact merged-main run `35982116803` / #82 also passed Android 16 instrumentation `OK (18 tests)` and produced `since-runtime-apks` artifact ID `10800732670`, digest `sha256:7abf1a90e5881a9804d213effb45f68256c5d23ee585559395949f6670d2c0b2`, plus `since-rendered-ui` artifact ID `10800344407`, digest `sha256:be77a211a844a1d84b2d3028721e85009f5694e58e957aa380fea752e3f4777d`.
 
-This remains bounded emulator and CI evidence. Representative physical-device/OEM rendering, dark-mode rendered acceptance, native-language review, representative TalkBack/large-font/RTL/keyboard/switch acceptance, and full downstream GLAZE UI consumer acceptance remain open.
+This remains bounded emulator and CI evidence. Light- and dark-mode Android 16 rendered evidence now exists for the principal flow and has been human-reviewed; representative physical-device/OEM rendering, native-language review, representative TalkBack/large-font/RTL/keyboard/switch acceptance, and full downstream GLAZE UI consumer acceptance remain open.
+
+### Verified light and dark rendered evidence
+
+The Android-rendered evidence lane now covers the principal GoreeCloud Since Development flow in both light and dark presentation:
+
+- empty Dashboard;
+- tracker-type chooser;
+- Create Streak;
+- Tracker Details;
+- populated Dashboard.
+
+PR #27 exact final head `2b387c57fbb603857bfbe5dc70c909acea483377` passed Android Development Foundation run `35986151222` / #91 with the build/unit/lint/schema/canonical-identity lane green, Android 16 instrumentation `OK (18 tests)`, and all ten required full-device PNG scenes uploaded. The evidence flow uses Android application night mode, waits for the real Activity configuration to reach the requested night mask, minimizes day/night recreation, and uses stable tracker-type test tags instead of ambiguous text matching.
+
+PR #27 was squash-merged as `eb8975dca84d2db613b05af07f7b4b9d3f1ed027`. Exact merged-main run `35986755499` / #92 also passed Android 16 instrumentation `OK (18 tests)`. Exact-main runtime APK artifact `since-runtime-apks` ID `10802144523` has digest `sha256:6d2271641128def6c8d846b00bf0295ca34ae77fc9321975120caf91a012a034`; exact-main rendered artifact `since-rendered-ui` ID `10802244368` has digest `sha256:1e4ecc14b94128dc1849311a1decb52b7ccdcf0c240994d8aae279822f51e866`.
+
+All ten exact-main images were downloaded and visually reviewed. The dark surfaces preserve the teal/neutral hierarchy, text remains legible, tracker-type choices retain equal visual weight, editor geometry is intact, and no clipping, unintended pink/purple Material fallback, or obvious contrast/layout defect was observed in the captured principal flow.
+
+This closes the bounded emulator dark-mode rendered-evidence gap only. Representative physical-device/OEM, native-language, TalkBack, large-font, RTL, physical-keyboard/external-switch, and downstream GLAZE UI consumer acceptance remain separate evidence gates.
 
