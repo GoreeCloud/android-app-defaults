@@ -229,3 +229,27 @@ Exact source-bearing candidate `7c77ab28811b4aedecc733e0479dd5b57edda0d4` passed
 
 Rendered emulator evidence is not human visual acceptance or representative physical-device/OEM acceptance. Downstream GLAZE UI V1.6 consumer acceptance, assistive-technology acceptance, Release Candidate, production, and Stable remain open.
 
+## 2026-09-24 — Since canonical application identity
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Canonical GoreeCloud Since application identity provenance through `apps/since/BRANDING.md`.
+- Android adaptive launcher icon packaging for normal and round presentation.
+- Android 13+ monochrome/themed launcher-icon support.
+- Manifest/build guard requirements that prevent the Since APK from silently reverting to a generic or placeholder launcher identity.
+
+### Canonical source
+
+The authoritative source is `GoreeCloud/branding-assets/products/since/app-icon.svg`, exact Git blob `a107f860759e745ff16f2b5bf1954b93fbb17937`, integrated to canonical branding main as `8c27acbdf7c83624a7396fdb4d7589f0643b4cc0` through branding PR #25. Post-merge branding validation run #93 / `35979255165` passed.
+
+### Visual review
+
+The canonical source was rendered and reviewed at 512 px, 128 px, 48 px, 32 px, and in grayscale before publication. The elapsed-ring/start-node geometry remained recognizable without clipping, distortion, text dependence, or color-only differentiation.
+
+### Boundary
+
+This change establishes and packages the application launcher identity. Per-tracker icon/accent selection remains a separate Development feature. Consumer APK/runtime verification remains governed by the exact android-app-defaults candidate and CI evidence.
+
