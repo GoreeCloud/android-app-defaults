@@ -126,13 +126,30 @@ PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`
 Automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
 
 
-### Active Arabic localization candidate
+### Verified Arabic localization and RTL resource evidence
 
-The current Development candidate on `feature/since-arabic-localization` adds bounded Android localization support without changing persistence, permissions, networking, schema, or tracker behavior.
+Current `main` adds bounded Android localization support without changing persistence, permissions, networking, schema, or tracker behavior.
 
 - provides Arabic translations for the complete current 51-string Since UI resource surface while preserving the product name **Since**;
 - declares English and Arabic through Android locale metadata;
 - retains `android:supportsRtl="true"`;
 - adds Android instrumentation that creates an Arabic configuration context, verifies RTL layout direction, and verifies representative Arabic resource resolution.
 
-**Candidate boundary:** this is not authoritative on `main` until the exact branch head passes applicable CI/runtime gates and the reviewed pull request is merged. It does not establish translation review by a native-language reviewer, representative-device RTL visual acceptance, TalkBack acceptance in Arabic, keyboard/external-switch acceptance, complete localization coverage for future features, or downstream GLAZE UI consumer acceptance.
+PR #16 was squash-merged to `main` as `d204cbd4464539a15b8f1ed6e0d9e9dfef4ddbb7`. Exact candidate `3867afe88e6570f647b65dfa224c5b67708d998c` passed Android Development Foundation run `35967471510`, including the local-only manifest guard, JVM tests, Android lint, app/test APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (16 tests)` with Arabic RTL/resource verification.
+
+This does not establish native-language translation review, representative-device RTL visual acceptance, Arabic TalkBack acceptance, physical keyboard/external-switch acceptance, complete localization coverage for future features, or downstream GLAZE UI consumer acceptance.
+
+
+### Verified keyboard-focus automated evidence
+
+Current `main` also includes focused Android Compose keyboard-navigation evidence:
+
+- instrumentation explicitly requests keyboard input mode;
+- the Create editor Cancel action receives focus;
+- Tab advances focus from Cancel to Save;
+- Enter activates the focused Save action and surfaces the existing validation error;
+- only the focused test opts into the experimental Compose testing APIs required by the current Compose UI dependency.
+
+PR #19 was squash-merged to `main` as `a24942ce244b2182d72aadde0f57eb10bebc8f5c`. Exact candidate `bdc89ec81fae8a195e7f611efa4ca0f81c614650` passed Android Development Foundation run `35968237474` with Android 16 instrumentation `OK (17 tests)`. Exact merged-main run `35968638222` also passed `OK (17 tests)` and produced unexpired Development artifact `since-runtime-apks` ID `10794409287`.
+
+This is automated emulator evidence only. Representative physical-keyboard/external-switch acceptance, representative-device TalkBack/large-font visual acceptance, native-language Arabic review, representative-device RTL acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable remain open.
