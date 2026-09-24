@@ -97,9 +97,13 @@ This remains Development evidence. Atomic streak reset, preserved History, longe
 Icon/accent selection, streak reset/history/statistics, archive/search/settings, export/import, recovery integration, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the PR #32 goal progress/editor candidate are not represented as open limitations after that candidate is integrated.
 
 
-### Date and time picker candidate
+### Integrated date and time picker flow
 
-PR #34 replaces manual local date/time typing in the Create and Edit Tracker surfaces with separate Material 3 Date and Time picker controls while preserving the existing local-time plus explicit IANA ZoneId storage and validation contract. The time picker respects the device 12/24-hour preference; English and Arabic labels and Compose picker-reachability coverage are included. This is Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
+Current `main` replaces manual local date/time typing in the Create and Edit Tracker surfaces with separate Material 3 Date and Time picker controls while preserving the existing local-time plus explicit IANA ZoneId storage and validation contract. The time picker respects the device 12/24-hour preference; English and Arabic labels and Compose picker-reachability coverage are included.
+
+PR #34 was squash-merged as `287987eac4d11fe837d4b201f58f5b31fa38cccf`. PR #35 then stabilized deterministic light/dark rendered evidence and was squash-merged as `0996b3294e54a855e354cba70b6d95e9b48fc695`. Android Development Foundation run `36054602137` passed on that merged `main` commit, including build/unit/lint/schema/manifest checks, Android 16 runtime instrumentation, and rendered UI evidence.
+
+This remains Development evidence only; it does not establish a release, deployment, Production acceptance, or Stable status.
 
 ### Verified custom-start and Edit Tracker flow
 
