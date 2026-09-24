@@ -39,47 +39,41 @@ class SinceVisualEvidenceTest {
             composeRule.onNodeWithText("Since").assertIsDisplayed()
             capture("dashboard-empty-dark")
 
-            setNightMode(UiModeManager.MODE_NIGHT_NO)
             composeRule.onNodeWithText("Add tracker").performClick()
             composeRule.onNodeWithText("Choose tracker type").assertIsDisplayed()
-            capture("tracker-type-chooser")
+            capture("tracker-type-chooser-dark")
 
-            composeRule.onNodeWithText(
-                "A resettable period whose history will be preserved."
-            ).performClick()
+            composeRule.onNodeWithTag("tracker-type-streak").performClick()
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
-            capture("create-streak")
+            capture("create-streak-dark")
 
             composeRule.onNodeWithTag("title-field").performTextInput("Read daily")
             composeRule.onNodeWithText("Save").performScrollTo().performClick()
 
             composeRule.onNodeWithText("Read daily").assertIsDisplayed()
             composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
-            capture("tracker-details")
+            capture("tracker-details-dark")
 
             composeRule.onNodeWithText("Back").performClick()
             composeRule.onNodeWithText("Read daily").assertIsDisplayed()
-            capture("dashboard-populated")
-
-            setNightMode(UiModeManager.MODE_NIGHT_YES)
-            composeRule.onNodeWithText("Read daily").assertIsDisplayed()
             capture("dashboard-populated-dark")
 
-            composeRule.onNodeWithText("Read daily").performClick()
+            setNightMode(UiModeManager.MODE_NIGHT_NO)
             composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+            capture("dashboard-populated")
+
+            composeRule.onNodeWithText("Read daily").performClick()
             composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
-            capture("tracker-details-dark")
+            capture("tracker-details")
 
             composeRule.onNodeWithText("Back").performClick()
             composeRule.onNodeWithText("Add tracker").performClick()
             composeRule.onNodeWithText("Choose tracker type").assertIsDisplayed()
-            capture("tracker-type-chooser-dark")
+            capture("tracker-type-chooser")
 
-            composeRule.onNodeWithText(
-                "A resettable period whose history will be preserved."
-            ).performClick()
+            composeRule.onNodeWithTag("tracker-type-streak").performClick()
             composeRule.onNodeWithText("Create Streak").assertIsDisplayed()
-            capture("create-streak-dark")
+            capture("create-streak")
 
             composeRule.onNodeWithText("Cancel").performClick()
         } finally {
