@@ -2,6 +2,27 @@
 
 This repository-local record is the authoritative human-readable change history for `GoreeCloud/android-app-defaults`.
 
+## 2026-09-24 — Since searchable time-zone picker candidate
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #37
+
+### Changed
+
+- Replaced manual IANA time-zone typing in Create/Edit Tracker with a full-width selectable Time zone control.
+- Added a searchable picker across available IANA zones, matching city/region identifiers and UTC offsets.
+- Shows each zone's UTC offset for the selected local start time and provides a one-tap device-time-zone option.
+- Preserved the existing local date/time + explicit ZoneId storage contract, deterministic DST handling, `Use now`, persistence semantics, and closed-history protections.
+- Added English/Arabic picker resources, Date/Time/Zone Compose interaction coverage, and light/dark rendered evidence for the new picker surface.
+
+### Verification
+
+PR #37 carries this Development interaction refinement. Exact-head Android Development Foundation validation is required before merge.
+
+### Boundary
+
+This does not change the Room schema, chronology rules, network/privacy permissions, representative-device acceptance, Release Candidate, production, or Stable status.
+
 ## 2026-09-24 — Since deterministic visual evidence follow-up
 
 **Lifecycle:** Development  
