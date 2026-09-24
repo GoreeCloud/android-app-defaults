@@ -130,6 +130,7 @@ Current `main` additionally implements:
 - Android Compose instrumentation coverage for heading semantics, coherent clickable tracker cards, full-row selectable format behavior, scroll-reachable editor actions, assertive validation errors, Date/Time picker reachability, and Create → Details → Edit persistence through the repository contract.
 - one shared lifecycle-aware Dashboard minute ticker instead of one ticker coroutine per tracker card; Details retains its own ticker only while the Details screen is active.
 - Android 16 runtime CI keeps instrumentation mandatory while using KVM when available and software emulator acceleration when the hosted runner lacks usable `/dev/kvm`.
+- Rendered light/dark visual evidence uses deterministic in-place Compose theme selection rather than Activity recreation; persistence and recreation behavior remain the responsibility of dedicated runtime tests.
 
 PR #9 was squash-merged to `main` as `5b14c58af68b8748e71f6af0c462650d06e852d6`. Exact candidate `b0ccc4e1f00c089ad8257f50ffb167df4b9e7af6` passed Android Development Foundation run `35963071718`: local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (13 tests)`. The runtime gate now detects emulator acceleration and keeps instrumentation mandatory, using KVM when available and software acceleration otherwise. Draft PR #8 was closed unmerged after its useful non-overlapping work was consolidated into PR #9.
 
