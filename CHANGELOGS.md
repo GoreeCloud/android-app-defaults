@@ -140,3 +140,19 @@ Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Develo
 ### Boundary
 
 This is CI-level Development evidence only. It does not establish representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, downstream GLAZE consumer acceptance, Release Candidate, production, or Stable status.
+
+
+## 2026-09-24 — Since Arabic localization candidate
+
+**Lifecycle:** Development candidate on `feature/since-arabic-localization`  
+**Tracking:** GitHub issue #1
+
+### Added
+
+- Arabic translations for all current Since Android string resources, with the product name **Since** preserved as the product identity.
+- Android locale metadata declaring English and Arabic.
+- Android instrumentation that verifies an Arabic configuration resolves RTL layout direction and representative localized resources.
+
+### Boundary
+
+This is a Development candidate until exact-head CI/runtime verification and reviewed integration complete. It does not establish native-speaker translation acceptance, representative-device RTL visual acceptance, Arabic TalkBack acceptance, keyboard/external-switch acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, or Stable status.

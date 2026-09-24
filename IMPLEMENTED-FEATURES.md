@@ -124,3 +124,15 @@ Current `main` adds CI-level accessibility/layout evidence without claiming repr
 PR #12 was squash-merged to `main` as `634623f03954bcb1e1d53107e5187b7c724b40c4`. Exact candidate `17464fd4c8fa13ed0b3123ae26b28effa01fee57` passed Android Development Foundation run `35965422146`, including manifest guard, JVM tests, Android lint, app/test APK assembly, Room-schema drift verification, and Android 16 instrumentation `OK (15 tests)`.
 
 Automated large-font and forced-RTL evidence is not representative-device TalkBack, visual-regression, keyboard/switch-access, translation/localization, or downstream GLAZE consumer acceptance.
+
+
+### Active Arabic localization candidate
+
+The current Development candidate on `feature/since-arabic-localization` adds bounded Android localization support without changing persistence, permissions, networking, schema, or tracker behavior.
+
+- provides Arabic translations for the complete current 51-string Since UI resource surface while preserving the product name **Since**;
+- declares English and Arabic through Android locale metadata;
+- retains `android:supportsRtl="true"`;
+- adds Android instrumentation that creates an Arabic configuration context, verifies RTL layout direction, and verifies representative Arabic resource resolution.
+
+**Candidate boundary:** this is not authoritative on `main` until the exact branch head passes applicable CI/runtime gates and the reviewed pull request is merged. It does not establish translation review by a native-language reviewer, representative-device RTL visual acceptance, TalkBack acceptance in Arabic, keyboard/external-switch acceptance, complete localization coverage for future features, or downstream GLAZE UI consumer acceptance.
