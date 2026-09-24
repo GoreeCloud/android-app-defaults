@@ -69,10 +69,10 @@ Exact candidate `be534fc98e1fc7020296779f0e71cd4d48ae6778` passed Android Develo
 Custom past-start editing, icon/accent selection, Edit, streak reset/history/statistics, full goal progress/editor, archive/search/settings, portability/recovery, GLAZE UI consumer acceptance, complete platform-system conformance, representative-device acceptance, Release Candidate, production, and Stable remain open.
 
 
-## 2026-09-23 — Since custom start and Edit Tracker candidate
+## 2026-09-23 — Since custom start and Edit Tracker
 
-**Lifecycle:** Development candidate on `feature/since-edit-start`  
-**Tracking:** GitHub issue #1
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #6
 
 ### Added
 
@@ -88,6 +88,10 @@ Custom past-start editing, icon/accent selection, Edit, streak reset/history/sta
 
 Icon/accent selection remains open. GLAZE UI V1.6.0 is the verified current Stable shared target, but no approved Since-specific icon/accent key catalog was verified. The candidate therefore does not invent application-specific GLAZE keys or claim downstream GLAZE consumer conformance.
 
+### Verification and integration
+
+Exact candidate `89775713a83726df94e9592bf81358d81772d62f` passed Android Development Foundation run `35959431091` on attempt 2, including the local-only manifest guard, JVM tests, Android lint, application/instrumentation APK assembly, Room-schema drift verification, and Android 16 `SinceDatabaseRuntimeTest` with `OK (10 tests)`. Attempt 1 failed before tests because one hosted runner did not expose readable/writable `/dev/kvm`; the exact same source was rerun without weakening validation. PR #6 was then squash-merged to `main` as `48d7c8342ad17e860b521690df5c817d84d92b7b`, followed by merged-source readback.
+
 ### Boundary
 
-This entry describes candidate source only. The exact head still requires build, lint, schema, manifest, Android 16 runtime, review/protection, and merge verification before it can be described as implemented on `main`. M2–M6 remain open.
+Icon/accent selection, remaining M1 accessibility/preferences work, and M2–M6 remain open. This does not establish GLAZE UI consumer acceptance, representative-device acceptance, Release Candidate, production, or Stable status.
