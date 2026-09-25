@@ -677,9 +677,20 @@ private fun TrackerDetailsScreen(
         aggregate.periods.filter { it.endEpochMs != null }
     }
     val longestPeriod = remember(aggregate.periods, tick, clock) {
-        aggregate.periods.maxByOrNull { period ->
-            (period.endEpochMs ?: clock.millis()) - period.startEpochMs
-        }
+        val nowEpochMs = clock.millis()
+        val timeEngine = TimeEngine(clock)
+        aggregate.periods.maxWithOrNull(
+            Comparator { first, second ->
+                timeEngine.compareCalendarElapsed(
+                    firstStart = Instant.ofEpochMilli(first.startEpochMs),
+                    firstEnd = Instant.ofEpochMilli(first.endEpochMs ?: nowEpochMs),
+                    firstZone = ZoneId.of(first.startZoneId),
+                    secondStart = Instant.ofEpochMilli(second.startEpochMs),
+                    secondEnd = Instant.ofEpochMilli(second.endEpochMs ?: nowEpochMs),
+                    secondZone = ZoneId.of(second.startZoneId),
+                )
+            }
+        )
     }
     val longestElapsed = longestPeriod?.let { period ->
         remember(period, aggregate.tracker.defaultDisplayFormat, tick, clock) {
