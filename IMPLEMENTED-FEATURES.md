@@ -220,22 +220,29 @@ Current Development source additionally includes a dedicated GoreeCloud Since An
 - two-column selectable display-format controls that preserve radio-button semantics and touch targets;
 - larger tracker-type option surfaces and clearer Create/Edit section grouping;
 - normal user-facing screens no longer expose implementation/development deferral copy;
-- Android edge-to-edge layout. Current `main` does not reliably synchronize system-bar icon appearance when an app-selected theme differs from the device theme; PR #43 carries the bounded correction candidate.
+- Android edge-to-edge layout with app-theme-aware status/navigation system-bar icon appearance integrated by PR #43.
 
 Exact source candidate `41a61992a76a8c7475c98666d8db5993913b0c50` passed Android Development Foundation run #67 / `35973932878`, including Android 16 instrumentation with all 17 tests passing.
 
 Representative physical-device visual acceptance and full downstream GLAZE UI consumer acceptance remain open release obligations.
 
+
+### Verified app-theme system-bar synchronization
+
+PR #43 corrected the owner-reported Dark-mode status-bar contrast defect without changing tracker persistence, Room schema, local-only permissions, or chronology behavior. Exact candidate `13480c0c64c4611edb0f2d84ef91263bd22b3831` passed Android Development Foundation run `36077943497` / #159 and merged to `main` as `60031a0632ae169c22c8a2a52eed6b5678646f0d`. Exact merged-main run `36079029190` / #160 also passed and produced `since-runtime-apks` artifact `10841491294` (sha256:`a414f1367eab9e9f1d1c831820c1787bdc6cbcb01aef169903a29d95eca36a44`) plus `since-rendered-ui` artifact `10841271832` (sha256:`396353f0ec6b8c645320720f86f090fd1e6b625fa7b205306b8b8a8885dd2859`).
+
+Merged-main rendered review confirms the reported dark-mode status-bar defect is corrected in the Android 16 evidence: the time and status icons are light and readable against the dark Since background. Representative physical-device/OEM system-bar behavior, gesture/three-button navigation-mode acceptance, and full downstream GLAZE UI consumer acceptance remain open.
+
 ### Verified rendered emulator visual evidence
 
 The current Development source includes an Android-rendered visual-evidence lane for the principal Since flow:
 
-- launches the real `MainActivity` on the Android 16 emulator;
+- launches the real Since Compose UI in an Android 16 instrumentation host using the production `SinceTheme`; this rendered-evidence test does not independently prove `MainActivity` startup behavior;
 - captures the empty Dashboard, tracker-type chooser, Create Streak, Tracker Details, and populated Dashboard as full-device PNG evidence;
 - extracts the evidence from the target app sandbox after instrumentation succeeds;
 - publishes the images as the `since-rendered-ui` GitHub Actions artifact;
 - verifies that the exact rendered source uses an explicit neutral surface-container hierarchy rather than inheriting unrelated Material defaults that previously introduced an unintended pink/purple cast into cards and editor sections.
-- Prior rendered evidence applied a test-only system-bar appearance override, so it did not validate production status/navigation icon contrast. PR #43 removes that override and moves the behavior into production `SinceTheme`.
+- Prior rendered evidence applied a test-only system-bar appearance override, so it did not validate production status/navigation icon contrast. PR #43 removed that override and moved the behavior into production `SinceTheme`.
 
 Exact source-bearing candidate `7c77ab28811b4aedecc733e0479dd5b57edda0d4` passed Android Development Foundation run #73 / `35976727631`, including Android 16 instrumentation and successful rendered-evidence upload. Artifact `since-rendered-ui` ID `10798890114` has digest `sha256:c6f865e01296ed28da2a7c2059e60bf4af367e6220dacce88b570df526928cc5`.
 
