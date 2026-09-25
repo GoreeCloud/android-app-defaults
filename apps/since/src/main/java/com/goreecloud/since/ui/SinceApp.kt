@@ -1230,7 +1230,7 @@ private fun StreakHistoryScreen(
                                 } else {
                                     stringResource(
                                         R.string.history_period_number,
-                                        period.sequence,
+                                        period.sequence + 1,
                                     )
                                 },
                                 color = if (isCurrent) {
@@ -1356,7 +1356,9 @@ private fun ResetStreakDialog(
                 )
 
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("reset-reason"),
                     value = reason,
                     onValueChange = {
                         reason = it
@@ -1371,7 +1373,9 @@ private fun ResetStreakDialog(
                 )
 
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("reset-note"),
                     value = note,
                     onValueChange = {
                         note = it
