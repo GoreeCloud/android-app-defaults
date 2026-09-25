@@ -119,4 +119,40 @@
     <string name="saving">Saving…</string>
     <string name="save_failed">Could not save this tracker. No partial tracker should be retained.</string>
     <string name="cancel">Cancel</string>
+
+    <string name="statistics_label">Statistics</string>
+    <string name="current_streak_label">Current streak</string>
+    <string name="longest_streak_label">Longest streak</string>
+    <string name="reset_count_label">Reset count</string>
+    <string name="last_reset_label">Last reset</string>
+    <string name="no_history_value">No completed history yet</string>
+
+    <string name="history_label">History</string>
+    <string name="history_summary">%1$d completed periods preserved</string>
+    <string name="view_history">View history</string>
+    <string name="history_title">%1$s history</string>
+    <string name="history_completed_count">%1$d completed periods</string>
+    <string name="history_current">Current</string>
+    <string name="history_period_number">Period %1$d</string>
+    <string name="history_started">Started</string>
+    <string name="history_ended">Ended</string>
+    <string name="history_duration">Duration</string>
+
+    <string name="reset_streak_title">Reset streak</string>
+    <string name="reset_streak_supporting">Close the current period and begin a new one without deleting your history.</string>
+    <string name="reset_streak">Reset streak</string>
+    <string name="resetting">Resetting…</string>
+    <string name="reset_failed">Could not reset this streak. Your existing history was left unchanged.</string>
+    <string name="reset_history_explanation">The current period will be preserved in History and a new period will begin at the reset time.</string>
+    <string name="reset_time_label">Reset time</string>
+    <string name="reset_zone_picker_hint">Choose the time zone that applies to this reset time.</string>
+    <string name="reset_use_now">Use now</string>
+    <string name="reset_reason_label">Reason</string>
+    <string name="reset_reason_optional">Optional · up to 120 characters</string>
+    <string name="reset_note_label">Reset note</string>
+    <string name="reset_note_optional">Optional · up to 2,000 characters</string>
+    <string name="reset_before_start_error">Reset time cannot be before the current streak start.</string>
+    <string name="reset_future_error">Reset time cannot be later than now.</string>
+    <string name="reset_reason_length_error">Reset reason must be 120 characters or fewer.</string>
+    <string name="reset_note_length_error">Reset note must be 2,000 characters or fewer.</string>
 </resources>
