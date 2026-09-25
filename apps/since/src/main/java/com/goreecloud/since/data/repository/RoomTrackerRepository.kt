@@ -134,6 +134,44 @@ class RoomTrackerRepository(
     override suspend fun removeGoal(trackerId: String): Boolean =
         dao.removeGoal(trackerId)
 
+    override suspend fun resetStreak(
+        trackerId: String,
+        resetEpochMs: Long,
+        resetZoneId: String,
+        reason: String?,
+        note: String?,
+    ): TrackerAggregate? {
+        val existing = dao.readAggregate(trackerId)?.toDomain() ?: return null
+        if (existing.tracker.kind != TrackerKind.STREAK) return null
+
+        val normalizedReason = reason?.trim()?.takeIf { it.isNotEmpty() }
+        val normalizedNote = note?.trim()?.takeIf { it.isNotEmpty() }
+        if (normalizedReason != null && normalizedReason.length > 120) return null
+        if (normalizedNote != null && normalizedNote.length > 2_000) return null
+        if (runCatching { java.time.ZoneId.of(resetZoneId) }.isFailure) return null
+
+        val currentPeriod = existing.periods.singleOrNull { it.endEpochMs == null } ?: return null
+        val now = clock.millis()
+        if (resetEpochMs < currentPeriod.startEpochMs || resetEpochMs > now) return null
+
+        val nextPeriodId = idFactory().also { generated ->
+            require(generated.isNotBlank())
+            require(existing.periods.none { it.id == generated }) {
+                "Generated reset period ID must be unique within the tracker."
+            }
+        }
+
+        return dao.resetStreak(
+            eventId = trackerId,
+            nextPeriodId = nextPeriodId,
+            resetEpochMs = resetEpochMs,
+            resetZoneId = resetZoneId,
+            reason = normalizedReason,
+            note = normalizedNote,
+            nowEpochMs = now,
+        )?.toDomain()
+    }
+
     private fun PersistedTrackerAggregate.toDomain(): TrackerAggregate =
         TrackerAggregate(
             tracker = tracker.toDomain(),
