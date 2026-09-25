@@ -55,6 +55,10 @@ for screenshot in \
   time-zone-picker-dark \
   tracker-details \
   tracker-details-dark \
+  reset-streak \
+  reset-streak-dark \
+  history \
+  history-dark \
   dashboard-populated \
   dashboard-populated-dark \
   achievements \
