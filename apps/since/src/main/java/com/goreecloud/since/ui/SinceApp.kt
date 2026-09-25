@@ -642,9 +642,13 @@ private fun TrackerDetailsScreen(
     clock: Clock,
     updateFailed: Boolean,
     goalUpdateFailed: Boolean,
+    resetFailed: Boolean,
     isGoalSaving: Boolean,
+    isResetting: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onResetStreak: (Long, String, String?, String?) -> Unit,
     onDisplayFormatChange: (DisplayFormat) -> Unit,
     onUpdateGoal: (Int, DisplayFormat) -> Unit,
     onRemoveGoal: () -> Unit,
@@ -668,6 +672,40 @@ private fun TrackerDetailsScreen(
     }
 
     var showGoalEditor by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
+    var showResetDialog by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
+    val closedPeriods = remember(aggregate.periods) {
+        aggregate.periods.filter { it.endEpochMs != null }
+    }
+    val longestPeriod = remember(aggregate.periods, tick, clock) {
+        aggregate.periods.maxByOrNull { period ->
+            (period.endEpochMs ?: clock.millis()) - period.startEpochMs
+        }
+    }
+    val longestElapsed = longestPeriod?.let { period ->
+        remember(period, aggregate.tracker.defaultDisplayFormat, tick, clock) {
+            TimeEngine(clock).elapsedBetween(
+                start = Instant.ofEpochMilli(period.startEpochMs),
+                end = Instant.ofEpochMilli(period.endEpochMs ?: clock.millis()),
+                zone = ZoneId.of(period.startZoneId),
+                format = aggregate.tracker.defaultDisplayFormat,
+            )
+        }
+    }
+    val lastResetText = remember(closedPeriods) {
+        closedPeriods
+            .maxByOrNull { it.endEpochMs ?: Long.MIN_VALUE }
+            ?.let { period ->
+                val endEpochMs = checkNotNull(period.endEpochMs)
+                val endZoneId = period.endZoneId ?: period.startZoneId
+                DateTimeFormatter
+                    .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                    .format(
+                        Instant
+                            .ofEpochMilli(endEpochMs)
+                            .atZone(ZoneId.of(endZoneId))
+                    )
+            }
+    }
     val goalEstimate = aggregate.goal?.let { goal ->
         remember(aggregate, tick, clock) {
             GoalEstimator(clock).estimate(
@@ -895,6 +933,104 @@ private fun TrackerDetailsScreen(
                 }
             }
 
+            if (aggregate.tracker.kind == TrackerKind.STREAK) {
+                SectionCard {
+                    Text(
+                        text = stringResource(R.string.statistics_label),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    DetailValueRow(
+                        label = stringResource(R.string.current_streak_label),
+                        value = elapsedSummary(elapsed),
+                    )
+                    DetailValueRow(
+                        label = stringResource(R.string.longest_streak_label),
+                        value = longestElapsed?.let { elapsedSummary(it) }
+                            ?: stringResource(R.string.no_history_value),
+                    )
+                    DetailValueRow(
+                        label = stringResource(R.string.reset_count_label),
+                        value = closedPeriods.size.toString(),
+                    )
+                    if (lastResetText != null) {
+                        DetailValueRow(
+                            label = stringResource(R.string.last_reset_label),
+                            value = lastResetText,
+                        )
+                    }
+                }
+
+                SectionCard {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.history_label),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = stringResource(
+                                    R.string.history_summary,
+                                    closedPeriods.size,
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        TextButton(
+                            modifier = Modifier.testTag("open-history"),
+                            onClick = onOpenHistory,
+                        ) {
+                            Text(stringResource(R.string.view_history))
+                        }
+                    }
+                }
+
+                SectionCard {
+                    Text(
+                        text = stringResource(R.string.reset_streak_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = stringResource(R.string.reset_streak_supporting),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("reset-streak"),
+                        onClick = { showResetDialog = true },
+                        enabled = !isResetting,
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        Text(
+                            if (isResetting) {
+                                stringResource(R.string.resetting)
+                            } else {
+                                stringResource(R.string.reset_streak)
+                            }
+                        )
+                    }
+                    if (resetFailed) {
+                        Text(
+                            modifier = Modifier.semantics {
+                                liveRegion = LiveRegionMode.Assertive
+                            },
+                            text = stringResource(R.string.reset_failed),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
+
             SectionCard {
                 Text(
                     text = stringResource(R.string.note_label),
@@ -907,6 +1043,19 @@ private fun TrackerDetailsScreen(
                 )
             }
         }
+    }
+
+    if (showResetDialog && aggregate.tracker.kind == TrackerKind.STREAK) {
+        ResetStreakDialog(
+            currentPeriod = currentPeriod,
+            clock = clock,
+            isSaving = isResetting,
+            onDismiss = { showResetDialog = false },
+            onConfirm = { resetEpochMs, resetZoneId, reason, note ->
+                onResetStreak(resetEpochMs, resetZoneId, reason, note)
+                showResetDialog = false
+            },
+        )
     }
 
     if (showGoalEditor && aggregate.tracker.kind == TrackerKind.STREAK) {
