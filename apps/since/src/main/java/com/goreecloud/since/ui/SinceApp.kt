@@ -1803,6 +1803,10 @@ private fun StartEditorFields(
     startInputErrors: List<String>,
     enabled: Boolean,
     onUseNow: () -> Unit,
+    headingRes: Int = R.string.start_label,
+    zoneHintRes: Int = R.string.start_zone_picker_hint,
+    useNowRes: Int = R.string.use_now,
+    testTagPrefix: String = "start",
 ) {
     val context = LocalContext.current
     val fallbackZone = remember(startZoneId) {
@@ -1824,7 +1828,7 @@ private fun StartEditorFields(
     var showTimeZonePicker by rememberSaveable { mutableStateOf(false) }
 
     Text(
-        text = stringResource(R.string.start_label),
+        text = stringResource(headingRes),
         style = MaterialTheme.typography.titleMedium,
     )
 
@@ -1838,7 +1842,7 @@ private fun StartEditorFields(
             value = DateTimeFormatter
                 .ofLocalizedDate(FormatStyle.SHORT)
                 .format(startLocalDateTime.toLocalDate()),
-            testTag = "start-date-picker",
+            testTag = testTagPrefix + "-date-picker",
             enabled = enabled,
             onClick = { showDatePicker = true },
         )
@@ -1848,7 +1852,7 @@ private fun StartEditorFields(
             value = DateTimeFormatter
                 .ofLocalizedTime(FormatStyle.SHORT)
                 .format(startLocalDateTime.toLocalTime()),
-            testTag = "start-time-picker",
+            testTag = testTagPrefix + "-time-picker",
             enabled = enabled,
             onClick = { showTimePicker = true },
         )
@@ -1858,13 +1862,13 @@ private fun StartEditorFields(
         modifier = Modifier.fillMaxWidth(),
         label = stringResource(R.string.start_zone_label),
         value = startZoneId,
-        testTag = "start-zone-picker",
+        testTag = testTagPrefix + "-zone-picker",
         enabled = enabled,
         onClick = { showTimeZonePicker = true },
     )
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
-        text = stringResource(R.string.start_zone_picker_hint),
+        text = stringResource(zoneHintRes),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
     )
@@ -1872,7 +1876,7 @@ private fun StartEditorFields(
         onClick = onUseNow,
         enabled = enabled,
     ) {
-        Text(stringResource(R.string.use_now))
+        Text(stringResource(useNowRes))
     }
     if (startInputErrors.isNotEmpty()) {
         Text(
