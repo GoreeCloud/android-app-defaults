@@ -108,6 +108,15 @@ abstract class TrackerDao {
     ): Int
 
     @Query(
+        "UPDATE tracked_events SET updated_at_epoch_ms = :updatedAtEpochMs " +
+            "WHERE id = :eventId AND is_archived = 0"
+    )
+    protected abstract suspend fun touchTracker(
+        eventId: String,
+        updatedAtEpochMs: Long,
+    ): Int
+
+    @Query(
         "UPDATE event_goals SET target_amount = :targetAmount, target_unit = :targetUnit, " +
             "updated_at_epoch_ms = :updatedAtEpochMs WHERE event_id = :eventId"
     )
@@ -256,6 +265,12 @@ abstract class TrackerDao {
         check(openPeriodCount(eventId) == 1) {
             "streak reset did not leave exactly one open current period"
         }
+        check(
+            touchTracker(
+                eventId = eventId,
+                updatedAtEpochMs = nowEpochMs,
+            ) == 1
+        ) { "streak reset did not update exactly one tracker mutation timestamp" }
 
         return readAggregate(eventId)
     }

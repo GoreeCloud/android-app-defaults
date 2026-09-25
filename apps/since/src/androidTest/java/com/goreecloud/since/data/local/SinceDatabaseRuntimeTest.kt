@@ -503,6 +503,7 @@ class SinceDatabaseRuntimeTest {
         assertEquals(resetAt.toEpochMilli(), current.startEpochMs)
         assertEquals("America/Chicago", current.startZoneId)
         assertEquals(30, reset.goal!!.targetAmount)
+        assertEquals(now.toEpochMilli(), reset.tracker.updatedAtEpochMs)
     }
 
     @Test
@@ -554,6 +555,7 @@ class SinceDatabaseRuntimeTest {
         val preserved = repository.loadTracker(streak.id)!!
         assertEquals(1, preserved.periods.size)
         assertEquals(null, preserved.periods.single().endEpochMs)
+        assertEquals(10_000L, preserved.tracker.updatedAtEpochMs)
         assertEquals(1, dao.openPeriodCount(streak.id))
     }
 
