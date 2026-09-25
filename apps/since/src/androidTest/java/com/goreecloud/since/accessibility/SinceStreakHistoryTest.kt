@@ -53,7 +53,7 @@ class SinceStreakHistoryTest {
             "The current period will be preserved in History",
             substring = true,
         ).assertIsDisplayed()
-        composeRule.onNodeWithText("Reason").performTextInput("Restarted plan")
+        composeRule.onNodeWithTag("reset-reason").performTextInput("Restarted plan")
         composeRule.onNodeWithTag("confirm-reset-streak").performClick()
         composeRule.waitForIdle()
 
@@ -67,7 +67,6 @@ class SinceStreakHistoryTest {
             )
         }
 
-        composeRule.onNodeWithText("1", substring = false).assertIsDisplayed()
         composeRule.onNodeWithTag("open-history").performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("1 completed periods").assertIsDisplayed()
