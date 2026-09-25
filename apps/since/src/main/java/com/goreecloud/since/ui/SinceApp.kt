@@ -987,7 +987,11 @@ private fun TrackerDetailsScreen(
                             )
                             Text(
                                 text = stringResource(
-                                    R.string.history_summary,
+                                    if (closedPeriods.size == 1) {
+                                        R.string.history_summary_one
+                                    } else {
+                                        R.string.history_summary_other
+                                    },
                                     closedPeriods.size,
                                 ),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1164,7 +1168,11 @@ private fun StreakHistoryScreen(
                     )
                     Text(
                         text = stringResource(
-                            R.string.history_completed_count,
+                            if (orderedPeriods.count { it.endEpochMs != null } == 1) {
+                                R.string.history_completed_count_one
+                            } else {
+                                R.string.history_completed_count_other
+                            },
                             orderedPeriods.count { it.endEpochMs != null },
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

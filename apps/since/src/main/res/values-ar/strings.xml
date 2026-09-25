@@ -129,10 +129,10 @@
     <string name="no_history_value">لا يوجد سجل مكتمل بعد</string>
 
     <string name="history_label">السجل</string>
-    <string name="history_summary">تم الاحتفاظ بـ %1$d فترة مكتملة</string>
+    <string name="history_summary_one">تم الاحتفاظ بـ %1$d فترة مكتملة</string>\n    <string name="history_summary_other">تم الاحتفاظ بـ %1$d فترة مكتملة</string>
     <string name="view_history">عرض السجل</string>
     <string name="history_title">سجل %1$s</string>
-    <string name="history_completed_count">%1$d فترة مكتملة</string>
+    <string name="history_completed_count_one">%1$d فترة مكتملة</string>\n    <string name="history_completed_count_other">%1$d فترة مكتملة</string>
     <string name="history_current">الحالية</string>
     <string name="history_period_number">الفترة %1$d</string>
     <string name="history_started">بدأت</string>

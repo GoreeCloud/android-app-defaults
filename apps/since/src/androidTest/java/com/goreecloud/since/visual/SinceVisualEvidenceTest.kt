@@ -100,7 +100,7 @@ class SinceVisualEvidenceTest {
 
         composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("1 completed periods").assertIsDisplayed()
+        composeRule.onNodeWithText("1 completed period").assertIsDisplayed()
         capture("history-dark")
         composeRule.onNodeWithText("Back").performClick()
         composeRule.onNodeWithText("Elapsed").assertIsDisplayed()

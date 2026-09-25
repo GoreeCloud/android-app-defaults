@@ -81,7 +81,7 @@ class SinceStreakHistoryTest {
 
         composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("1 completed periods").assertIsDisplayed()
+        composeRule.onNodeWithText("1 completed period").assertIsDisplayed()
         composeRule.onNodeWithText("Restarted plan").assertIsDisplayed()
         composeRule.onNodeWithText("Note saved").assertIsDisplayed()
         composeRule.onNodeWithText("Private reflection").assertDoesNotExist()
