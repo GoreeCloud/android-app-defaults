@@ -111,8 +111,11 @@ fun SinceApp(
     var saveFailed by rememberSaveable { mutableStateOf(false) }
     var detailUpdateFailed by rememberSaveable { mutableStateOf(false) }
     var goalUpdateFailed by rememberSaveable { mutableStateOf(false) }
+    var resetFailed by rememberSaveable { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     var isGoalSaving by remember { mutableStateOf(false) }
+    var isResetting by remember { mutableStateOf(false) }
+    var historyTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var topLevelDestinationName by rememberSaveable {
         mutableStateOf(TopLevelDestination.HOME.name)
     }
@@ -169,6 +172,18 @@ fun SinceApp(
     }
     val editingAggregate = editingTrackerId?.let { trackerId ->
         aggregates.firstOrNull { it.tracker.id == trackerId }
+    }
+    val historyAggregate = historyTrackerId?.let { trackerId ->
+        aggregates.firstOrNull { it.tracker.id == trackerId }
+    }
+
+    if (historyAggregate != null && historyAggregate.tracker.kind == TrackerKind.STREAK) {
+        StreakHistoryScreen(
+            aggregate = historyAggregate,
+            clock = clock,
+            onBack = { historyTrackerId = null },
+        )
+        return
     }
 
     if (editingAggregate != null) {
@@ -236,17 +251,41 @@ fun SinceApp(
             clock = clock,
             updateFailed = detailUpdateFailed,
             goalUpdateFailed = goalUpdateFailed,
+            resetFailed = resetFailed,
             isGoalSaving = isGoalSaving,
+            isResetting = isResetting,
             onBack = {
                 selectedTrackerId = null
                 editingTrackerId = null
+                historyTrackerId = null
                 detailUpdateFailed = false
                 goalUpdateFailed = false
+                resetFailed = false
             },
             onEdit = {
                 validationErrors = emptyList()
                 saveFailed = false
                 editingTrackerId = selectedAggregate.tracker.id
+            },
+            onOpenHistory = {
+                historyTrackerId = selectedAggregate.tracker.id
+            },
+            onResetStreak = { resetEpochMs, resetZoneId, reason, note ->
+                resetFailed = false
+                isResetting = true
+                scope.launch {
+                    val updated = runCatching {
+                        repository.resetStreak(
+                            trackerId = selectedAggregate.tracker.id,
+                            resetEpochMs = resetEpochMs,
+                            resetZoneId = resetZoneId,
+                            reason = reason,
+                            note = note,
+                        )
+                    }.getOrNull()
+                    resetFailed = updated == null
+                    isResetting = false
+                }
             },
             onDisplayFormatChange = { format ->
                 if (format != selectedAggregate.tracker.defaultDisplayFormat) {
