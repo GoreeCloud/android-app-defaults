@@ -33,7 +33,7 @@ class SinceMainActivitySystemBarsTest {
                 activity.window.decorView,
             )
             assertTrue(controller.isAppearanceLightStatusBars)
-            assertTrue(controller.isAppearanceLightNavigationBars)
+            assertFalse(controller.isAppearanceLightNavigationBars)
         }
         capture("main-activity-light")
 
