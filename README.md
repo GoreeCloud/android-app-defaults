@@ -2,6 +2,12 @@
 
 A privacy-focused monorepo of lightweight replacements for common Android default and utility apps. Each app remains independently installable and maintainable while sharing architecture, UI components, privacy controls, accessibility features, themes, utilities, and development standards.
 
+## Project governance
+
+- [PROJECT-SPECIFICATIONS.md](PROJECT-SPECIFICATIONS.md) — authoritative project scope, requirements, architecture, privacy/security, and acceptance requirements.
+- [PROJECT-RECORD.md](PROJECT-RECORD.md) — significant project history, governance decisions, migration evidence, and repository transitions.
+
+
 ## Current Development state
 
 The repository is in **Development**. GoreeCloud Since is the first application module under `apps/since/`.
