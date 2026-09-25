@@ -120,4 +120,47 @@
     <string name="saving">جارٍ الحفظ…</string>
     <string name="save_failed">تعذر حفظ هذا المتتبّع. يجب ألا يتم الاحتفاظ بأي متتبّع جزئي.</string>
     <string name="cancel">إلغاء</string>
+
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_achievements">الإنجازات</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <string name="achievements_title">الإنجازات</string>
+    <string name="achievements_summary">تم فتح %1$d من %2$d</string>
+    <string name="achievements_privacy_note">يتم احتساب الإنجازات على هذا الجهاز من بيانات المتتبعات المحلية.</string>
+    <string name="achievement_first_tracker">أول متتبّع</string>
+    <string name="achievement_first_tracker_description">أنشئ أول حدث أو سلسلة لك.</string>
+    <string name="achievement_first_streak">أول سلسلة</string>
+    <string name="achievement_first_streak_description">ابدأ أول سلسلة قابلة لإعادة الضبط.</string>
+    <string name="achievement_goal_setter">تحديد هدف</string>
+    <string name="achievement_goal_setter_description">أضف هدف مدة إلى سلسلة.</string>
+    <string name="achievement_seven_days">سبعة أيام</string>
+    <string name="achievement_seven_days_description">حافظ على سلسلة حالية واحدة لمدة سبعة أيام على الأقل.</string>
+    <string name="achievement_thirty_days">ثلاثون يومًا</string>
+    <string name="achievement_thirty_days_description">حافظ على سلسلة حالية واحدة لمدة ثلاثين يومًا على الأقل.</string>
+
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_summary">تحكّم في مظهر Since وحماية بياناتك ومعلومات الإصدار الحالي.</string>
+    <string name="settings_appearance">المظهر</string>
+    <string name="settings_theme">السمة</string>
+    <string name="theme_system">استخدام إعداد النظام</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_dark">داكن</string>
+    <string name="settings_data_recovery">النسخ الاحتياطي والاستعادة</string>
+    <string name="settings_backup">نسخ احتياطي</string>
+    <string name="settings_backup_supporting">أنشئ نسخة قابلة للنقل من بيانات Since.</string>
+    <string name="settings_restore">استعادة</string>
+    <string name="settings_restore_supporting">استعد نسخة احتياطية من Since بعد التحقق منها.</string>
+    <string name="settings_planned">مخطط</string>
+    <string name="settings_backup_not_ready">لم يتم تنفيذ النسخ الاحتياطي في إصدار التطوير هذا بعد. سيبقي Since هذا الإجراء غير متاح بدلًا من الادعاء بأن بياناتك محمية.</string>
+    <string name="settings_restore_not_ready">لم يتم تنفيذ الاستعادة في إصدار التطوير هذا بعد. لن يقدم Since إجراء استعادة حتى يتم تنفيذ التحقق وسلوك الاسترداد.</string>
+    <string name="settings_privacy_security">الخصوصية والأمان</string>
+    <string name="settings_privacy">الخصوصية</string>
+    <string name="settings_privacy_supporting">يبقى التتبع الأساسي محليًا ولا يتطلب الإصدار الأولي اتصالًا بالشبكة.</string>
+    <string name="settings_security">الأمان</string>
+    <string name="settings_security_supporting">لا يلزم أي إذن وقت تشغيل خطير للتتبع الأساسي. وتظل عناصر التحكم الأمنية الإضافية خاضعة لقبول Wardveil.</string>
+    <string name="settings_about">حول التطبيق</string>
+    <string name="settings_app_version">إصدار التطبيق</string>
+    <string name="settings_build_status">حالة الإصدار</string>
+    <string name="settings_development_build">إصدار تطوير — ليس Stable ولم يتم اعتماده للإنتاج.</string>
 </resources>
