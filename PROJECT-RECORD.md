@@ -42,6 +42,8 @@ At the same verification point:
 
 ## 2026-09-24 — Project-governance migration candidate
 
+Migration pull request: [PR #45](https://github.com/GoreeCloud/android-app-defaults/pull/45).
+
 This branch introduces:
 - `PROJECT-SPECIFICATIONS.md` as the canonical repository-local normative project specification;
 - `PROJECT-RECORD.md` as the significant historical/governance record;
