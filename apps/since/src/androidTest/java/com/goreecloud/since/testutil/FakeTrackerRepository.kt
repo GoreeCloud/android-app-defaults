@@ -143,6 +143,57 @@ internal class FakeTrackerRepository(
         return true
     }
 
+    override suspend fun resetStreak(
+        trackerId: String,
+        resetEpochMs: Long,
+        resetZoneId: String,
+        reason: String?,
+        note: String?,
+    ): TrackerAggregate? {
+        val existing = loadTracker(trackerId) ?: return null
+        if (existing.tracker.kind != TrackerKind.STREAK) return null
+        if (runCatching { java.time.ZoneId.of(resetZoneId) }.isFailure) return null
+        val current = existing.periods.singleOrNull { it.endEpochMs == null } ?: return null
+        val now = clock.millis()
+        if (resetEpochMs < current.startEpochMs || resetEpochMs > now) return null
+
+        val normalizedReason = reason?.trim()?.takeIf { it.isNotEmpty() }
+        val normalizedNote = note?.trim()?.takeIf { it.isNotEmpty() }
+        if (normalizedReason != null && normalizedReason.length > 120) return null
+        if (normalizedNote != null && normalizedNote.length > 2_000) return null
+
+        val nextSequence = (existing.periods.maxOfOrNull { it.sequence } ?: current.sequence) + 1
+        val closed = current.copy(
+            endEpochMs = resetEpochMs,
+            endZoneId = resetZoneId,
+            resetReason = normalizedReason,
+            resetNote = normalizedNote,
+            updatedAtEpochMs = now,
+        )
+        val next = TrackerPeriod(
+            id = trackerId + "-period-" + nextSequence,
+            trackerId = trackerId,
+            sequence = nextSequence,
+            startEpochMs = resetEpochMs,
+            startZoneId = resetZoneId,
+            endEpochMs = null,
+            endZoneId = null,
+            resetReason = null,
+            resetNote = null,
+            createdAtEpochMs = now,
+            updatedAtEpochMs = now,
+        )
+        val updated = existing.copy(
+            tracker = existing.tracker.copy(updatedAtEpochMs = now),
+            periods = existing.periods
+                .map { period -> if (period.id == current.id) closed else period } + next,
+        )
+        aggregates.value = aggregates.value.map { row ->
+            if (row.tracker.id == trackerId) updated else row
+        }
+        return updated
+    }
+
     override suspend fun updateDisplayFormat(
         trackerId: String,
         displayFormat: DisplayFormat,

@@ -120,4 +120,43 @@
     <string name="saving">جارٍ الحفظ…</string>
     <string name="save_failed">تعذر حفظ هذا المتتبّع. يجب ألا يتم الاحتفاظ بأي متتبّع جزئي.</string>
     <string name="cancel">إلغاء</string>
+
+    <string name="statistics_label">الإحصاءات</string>
+    <string name="current_streak_label">السلسلة الحالية</string>
+    <string name="longest_streak_label">أطول سلسلة</string>
+    <string name="reset_count_label">عدد مرات إعادة الضبط</string>
+    <string name="last_reset_label">آخر إعادة ضبط</string>
+    <string name="no_history_value">لا يوجد سجل مكتمل بعد</string>
+
+    <string name="history_label">السجل</string>
+    <string name="history_summary_one">تم الاحتفاظ بـ %1$d فترة مكتملة</string>
+    <string name="history_summary_other">تم الاحتفاظ بـ %1$d فترة مكتملة</string>
+    <string name="view_history">عرض السجل</string>
+    <string name="history_title">سجل %1$s</string>
+    <string name="history_completed_count_one">%1$d فترة مكتملة</string>
+    <string name="history_completed_count_other">%1$d فترة مكتملة</string>
+    <string name="history_current">الحالية</string>
+    <string name="history_period_number">الفترة %1$d</string>
+    <string name="history_started">بدأت</string>
+    <string name="history_ended">انتهت</string>
+    <string name="history_duration">المدة</string>
+
+    <string name="reset_streak_title">إعادة ضبط السلسلة</string>
+    <string name="reset_streak_supporting">أغلق الفترة الحالية وابدأ فترة جديدة دون حذف السجل.</string>
+    <string name="reset_streak">إعادة ضبط السلسلة</string>
+    <string name="resetting">جارٍ إعادة الضبط…</string>
+    <string name="reset_failed">تعذر إعادة ضبط هذه السلسلة. تم ترك السجل الحالي دون تغيير.</string>
+    <string name="reset_history_explanation">سيتم الاحتفاظ بالفترة الحالية في السجل وستبدأ فترة جديدة في وقت إعادة الضبط.</string>
+    <string name="reset_time_label">وقت إعادة الضبط</string>
+    <string name="reset_zone_picker_hint">اختر المنطقة الزمنية التي تنطبق على وقت إعادة الضبط هذا.</string>
+    <string name="reset_use_now">استخدام الآن</string>
+    <string name="reset_reason_label">السبب</string>
+    <string name="reset_reason_optional">اختياري · حتى 120 حرفًا</string>
+    <string name="reset_note_label">ملاحظة إعادة الضبط</string>
+    <string name="reset_note_saved">تم حفظ الملاحظة</string>
+    <string name="reset_note_optional">اختياري · حتى 2,000 حرف</string>
+    <string name="reset_before_start_error">لا يمكن أن يكون وقت إعادة الضبط قبل بداية السلسلة الحالية.</string>
+    <string name="reset_future_error">لا يمكن أن يكون وقت إعادة الضبط بعد الوقت الحالي.</string>
+    <string name="reset_reason_length_error">يجب ألا يزيد سبب إعادة الضبط عن 120 حرفًا.</string>
+    <string name="reset_note_length_error">يجب ألا تزيد ملاحظة إعادة الضبط عن 2,000 حرف.</string>
 </resources>

@@ -33,4 +33,12 @@ interface TrackerRepository {
     ): Goal?
 
     suspend fun removeGoal(trackerId: String): Boolean
+
+    suspend fun resetStreak(
+        trackerId: String,
+        resetEpochMs: Long,
+        resetZoneId: String,
+        reason: String?,
+        note: String?,
+    ): TrackerAggregate?
 }
