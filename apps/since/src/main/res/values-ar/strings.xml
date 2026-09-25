@@ -151,6 +151,7 @@
     <string name="reset_reason_label">السبب</string>
     <string name="reset_reason_optional">اختياري · حتى 120 حرفًا</string>
     <string name="reset_note_label">ملاحظة إعادة الضبط</string>
+    <string name="reset_note_saved">تم حفظ الملاحظة</string>
     <string name="reset_note_optional">اختياري · حتى 2,000 حرف</string>
     <string name="reset_before_start_error">لا يمكن أن يكون وقت إعادة الضبط قبل بداية السلسلة الحالية.</string>
     <string name="reset_future_error">لا يمكن أن يكون وقت إعادة الضبط بعد الوقت الحالي.</string>

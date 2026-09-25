@@ -1273,16 +1273,10 @@ private fun StreakHistoryScreen(
                                 value = reason,
                             )
                         }
-                        period.resetNote?.let { note ->
-                            Text(
-                                text = stringResource(R.string.reset_note_label),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.labelLarge,
-                            )
-                            Text(
-                                text = note,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodyMedium,
+                        if (period.resetNote != null) {
+                            DetailValueRow(
+                                label = stringResource(R.string.reset_note_label),
+                                value = stringResource(R.string.reset_note_saved),
                             )
                         }
                     }

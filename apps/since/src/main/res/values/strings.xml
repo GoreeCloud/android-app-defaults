@@ -150,6 +150,7 @@
     <string name="reset_reason_label">Reason</string>
     <string name="reset_reason_optional">Optional · up to 120 characters</string>
     <string name="reset_note_label">Reset note</string>
+    <string name="reset_note_saved">Note saved</string>
     <string name="reset_note_optional">Optional · up to 2,000 characters</string>
     <string name="reset_before_start_error">Reset time cannot be before the current streak start.</string>
     <string name="reset_future_error">Reset time cannot be later than now.</string>

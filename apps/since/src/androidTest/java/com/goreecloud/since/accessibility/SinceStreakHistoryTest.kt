@@ -6,6 +6,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -62,6 +63,7 @@ class SinceStreakHistoryTest {
             substring = true,
         ).assertIsDisplayed()
         composeRule.onNodeWithTag("reset-reason").performTextInput("Restarted plan")
+        composeRule.onNodeWithTag("reset-note").performTextInput("Private reflection")
         composeRule.onNodeWithTag("confirm-reset-streak").performClick()
         composeRule.waitForIdle()
 
@@ -82,7 +84,32 @@ class SinceStreakHistoryTest {
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("1 completed periods").assertIsDisplayed()
         composeRule.onNodeWithText("Restarted plan").assertIsDisplayed()
+        composeRule.onNodeWithText("Note saved").assertIsDisplayed()
+        composeRule.onNodeWithText("Private reflection").assertDoesNotExist()
         composeRule.onNodeWithText("Current").assertIsDisplayed()
+    }
+
+    @Test
+    fun derivedStatisticsUsePersistedPeriods() {
+        val repository = FakeTrackerRepository(
+            initial = listOf(statisticsAggregate()),
+            clock = clock,
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithText("Longest streak").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("3 d · 0 h · 0 min").assertIsDisplayed()
+        composeRule.onNodeWithText("Reset count").assertIsDisplayed()
+        composeRule.onNodeWithText("Last reset").assertIsDisplayed()
     }
 
     @Test
@@ -146,6 +173,67 @@ class SinceStreakHistoryTest {
         composeRule.onNodeWithTag("open-history").performScrollTo().assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("Back").assertIsDisplayed()
+    }
+
+    private fun statisticsAggregate(): TrackerAggregate {
+        val trackerId = "tracker-statistics"
+        return TrackerAggregate(
+            tracker = Tracker(
+                id = trackerId,
+                title = "Read daily",
+                note = null,
+                kind = TrackerKind.STREAK,
+                iconKey = null,
+                accentKey = null,
+                defaultDisplayFormat = DisplayFormat.DAYS,
+                sortOrder = 0,
+                isArchived = false,
+                createdAtEpochMs = now.minusSeconds(604_800).toEpochMilli(),
+                updatedAtEpochMs = now.minusSeconds(86_400).toEpochMilli(),
+            ),
+            periods = listOf(
+                TrackerPeriod(
+                    id = "period-0",
+                    trackerId = trackerId,
+                    sequence = 0,
+                    startEpochMs = now.minusSeconds(604_800).toEpochMilli(),
+                    startZoneId = "UTC",
+                    endEpochMs = now.minusSeconds(345_600).toEpochMilli(),
+                    endZoneId = "UTC",
+                    resetReason = "First reset",
+                    resetNote = null,
+                    createdAtEpochMs = now.minusSeconds(604_800).toEpochMilli(),
+                    updatedAtEpochMs = now.minusSeconds(345_600).toEpochMilli(),
+                ),
+                TrackerPeriod(
+                    id = "period-1",
+                    trackerId = trackerId,
+                    sequence = 1,
+                    startEpochMs = now.minusSeconds(345_600).toEpochMilli(),
+                    startZoneId = "UTC",
+                    endEpochMs = now.minusSeconds(172_800).toEpochMilli(),
+                    endZoneId = "UTC",
+                    resetReason = "Second reset",
+                    resetNote = null,
+                    createdAtEpochMs = now.minusSeconds(345_600).toEpochMilli(),
+                    updatedAtEpochMs = now.minusSeconds(172_800).toEpochMilli(),
+                ),
+                TrackerPeriod(
+                    id = "period-2",
+                    trackerId = trackerId,
+                    sequence = 2,
+                    startEpochMs = now.minusSeconds(86_400).toEpochMilli(),
+                    startZoneId = "UTC",
+                    endEpochMs = null,
+                    endZoneId = null,
+                    resetReason = null,
+                    resetNote = null,
+                    createdAtEpochMs = now.minusSeconds(86_400).toEpochMilli(),
+                    updatedAtEpochMs = now.minusSeconds(86_400).toEpochMilli(),
+                ),
+            ),
+            goal = null,
+        )
     }
 
     private fun sampleAggregate(): TrackerAggregate {
