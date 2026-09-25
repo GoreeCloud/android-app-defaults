@@ -237,7 +237,7 @@ Merged-main rendered review confirms the reported dark-mode status-bar defect is
 
 The current Development source includes an Android-rendered visual-evidence lane for the principal Since flow:
 
-- launches the real `MainActivity` on the Android 16 emulator;
+- launches the real Since Compose UI in an Android 16 instrumentation host using the production `SinceTheme`; this rendered-evidence test does not independently prove `MainActivity` startup behavior;
 - captures the empty Dashboard, tracker-type chooser, Create Streak, Tracker Details, and populated Dashboard as full-device PNG evidence;
 - extracts the evidence from the target app sandbox after instrumentation succeeds;
 - publishes the images as the `since-rendered-ui` GitHub Actions artifact;
