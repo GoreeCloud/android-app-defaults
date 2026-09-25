@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.goreecloud.since.domain.model.DisplayFormat
+import com.goreecloud.since.domain.model.Goal
 import com.goreecloud.since.domain.model.Tracker
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
@@ -53,6 +54,7 @@ class SinceStreakHistoryTest {
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithText("Statistics").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Reset count").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("6%").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
         composeRule.onNodeWithText(
@@ -71,7 +73,9 @@ class SinceStreakHistoryTest {
                 "Restarted plan",
                 aggregate.periods.single { it.endEpochMs != null }.resetReason,
             )
+            assertEquals(30, aggregate.goal!!.targetAmount)
         }
+        composeRule.onNodeWithText("0%").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
@@ -174,7 +178,13 @@ class SinceStreakHistoryTest {
                     updatedAtEpochMs = now.minusSeconds(172_800).toEpochMilli(),
                 )
             ),
-            goal = null,
+            goal = Goal(
+                trackerId = trackerId,
+                targetAmount = 30,
+                targetUnit = DisplayFormat.DAYS,
+                createdAtEpochMs = now.minusSeconds(172_800).toEpochMilli(),
+                updatedAtEpochMs = now.minusSeconds(172_800).toEpochMilli(),
+            ),
         )
     }
 }
