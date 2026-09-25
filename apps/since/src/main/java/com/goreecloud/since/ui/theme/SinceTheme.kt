@@ -118,7 +118,10 @@ private fun SinceSystemBars(darkTheme: Boolean) {
         activity.window.statusBarColor = background
         activity.window.navigationBarColor = background
         activity.window.isNavigationBarContrastEnforced = false
-        WindowCompat.getInsetsController(activity.window, view).apply {
+        WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        ).apply {
             isAppearanceLightStatusBars = !darkTheme
             isAppearanceLightNavigationBars = !darkTheme
         }
