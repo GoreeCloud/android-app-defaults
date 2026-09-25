@@ -1,6 +1,11 @@
 package com.goreecloud.since.accessibility
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -73,6 +78,69 @@ class SinceStreakHistoryTest {
         composeRule.onNodeWithText("1 completed periods").assertIsDisplayed()
         composeRule.onNodeWithText("Restarted plan").assertIsDisplayed()
         composeRule.onNodeWithText("Current").assertIsDisplayed()
+    }
+
+    @Test
+    fun largeFontResetAndHistoryKeepPrimaryActionsReachable() {
+        val repository = FakeTrackerRepository(
+            initial = listOf(sampleAggregate()),
+            clock = clock,
+        )
+
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalDensity provides Density(
+                    density = 1f,
+                    fontScale = 2f,
+                )
+            ) {
+                MaterialTheme {
+                    SinceApp(
+                        repository = repository,
+                        clock = clock,
+                    )
+                }
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithTag("reset-streak").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithTag("open-history").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("Back").assertIsDisplayed()
+    }
+
+    @Test
+    fun forcedRtlResetAndHistoryKeepPrimaryActionsReachable() {
+        val repository = FakeTrackerRepository(
+            initial = listOf(sampleAggregate()),
+            clock = clock,
+        )
+
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalLayoutDirection provides LayoutDirection.Rtl,
+            ) {
+                MaterialTheme {
+                    SinceApp(
+                        repository = repository,
+                        clock = clock,
+                    )
+                }
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithTag("reset-streak").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithTag("open-history").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("Back").assertIsDisplayed()
     }
 
     private fun sampleAggregate(): TrackerAggregate {
