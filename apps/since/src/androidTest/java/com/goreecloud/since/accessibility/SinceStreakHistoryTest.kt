@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Tracker
@@ -45,10 +46,10 @@ class SinceStreakHistoryTest {
         }
 
         composeRule.onNodeWithText("Read daily").performClick()
-        composeRule.onNodeWithText("Statistics").assertIsDisplayed()
-        composeRule.onNodeWithText("Reset count").assertIsDisplayed()
+        composeRule.onNodeWithText("Statistics").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Reset count").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithTag("reset-streak").performClick()
+        composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
         composeRule.onNodeWithText(
             "The current period will be preserved in History",
             substring = true,
@@ -67,7 +68,7 @@ class SinceStreakHistoryTest {
             )
         }
 
-        composeRule.onNodeWithTag("open-history").performClick()
+        composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("1 completed periods").assertIsDisplayed()
         composeRule.onNodeWithText("Restarted plan").assertIsDisplayed()
