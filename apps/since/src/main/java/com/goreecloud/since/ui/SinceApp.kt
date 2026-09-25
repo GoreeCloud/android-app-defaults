@@ -111,8 +111,11 @@ fun SinceApp(
     var saveFailed by rememberSaveable { mutableStateOf(false) }
     var detailUpdateFailed by rememberSaveable { mutableStateOf(false) }
     var goalUpdateFailed by rememberSaveable { mutableStateOf(false) }
+    var resetFailed by rememberSaveable { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     var isGoalSaving by remember { mutableStateOf(false) }
+    var isResetting by remember { mutableStateOf(false) }
+    var historyTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var topLevelDestinationName by rememberSaveable {
         mutableStateOf(TopLevelDestination.HOME.name)
     }
@@ -169,6 +172,18 @@ fun SinceApp(
     }
     val editingAggregate = editingTrackerId?.let { trackerId ->
         aggregates.firstOrNull { it.tracker.id == trackerId }
+    }
+    val historyAggregate = historyTrackerId?.let { trackerId ->
+        aggregates.firstOrNull { it.tracker.id == trackerId }
+    }
+
+    if (historyAggregate != null && historyAggregate.tracker.kind == TrackerKind.STREAK) {
+        StreakHistoryScreen(
+            aggregate = historyAggregate,
+            clock = clock,
+            onBack = { historyTrackerId = null },
+        )
+        return
     }
 
     if (editingAggregate != null) {
@@ -236,17 +251,41 @@ fun SinceApp(
             clock = clock,
             updateFailed = detailUpdateFailed,
             goalUpdateFailed = goalUpdateFailed,
+            resetFailed = resetFailed,
             isGoalSaving = isGoalSaving,
+            isResetting = isResetting,
             onBack = {
                 selectedTrackerId = null
                 editingTrackerId = null
+                historyTrackerId = null
                 detailUpdateFailed = false
                 goalUpdateFailed = false
+                resetFailed = false
             },
             onEdit = {
                 validationErrors = emptyList()
                 saveFailed = false
                 editingTrackerId = selectedAggregate.tracker.id
+            },
+            onOpenHistory = {
+                historyTrackerId = selectedAggregate.tracker.id
+            },
+            onResetStreak = { resetEpochMs, resetZoneId, reason, note ->
+                resetFailed = false
+                isResetting = true
+                scope.launch {
+                    val updated = runCatching {
+                        repository.resetStreak(
+                            trackerId = selectedAggregate.tracker.id,
+                            resetEpochMs = resetEpochMs,
+                            resetZoneId = resetZoneId,
+                            reason = reason,
+                            note = note,
+                        )
+                    }.getOrNull()
+                    resetFailed = updated == null
+                    isResetting = false
+                }
             },
             onDisplayFormatChange = { format ->
                 if (format != selectedAggregate.tracker.defaultDisplayFormat) {
@@ -603,9 +642,13 @@ private fun TrackerDetailsScreen(
     clock: Clock,
     updateFailed: Boolean,
     goalUpdateFailed: Boolean,
+    resetFailed: Boolean,
     isGoalSaving: Boolean,
+    isResetting: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onOpenHistory: () -> Unit,
+    onResetStreak: (Long, String, String?, String?) -> Unit,
     onDisplayFormatChange: (DisplayFormat) -> Unit,
     onUpdateGoal: (Int, DisplayFormat) -> Unit,
     onRemoveGoal: () -> Unit,
@@ -629,6 +672,51 @@ private fun TrackerDetailsScreen(
     }
 
     var showGoalEditor by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
+    var showResetDialog by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
+    val closedPeriods = remember(aggregate.periods) {
+        aggregate.periods.filter { it.endEpochMs != null }
+    }
+    val longestPeriod = remember(aggregate.periods, tick, clock) {
+        val nowEpochMs = clock.millis()
+        val timeEngine = TimeEngine(clock)
+        aggregate.periods.maxWithOrNull(
+            Comparator { first, second ->
+                timeEngine.compareCalendarElapsed(
+                    firstStart = Instant.ofEpochMilli(first.startEpochMs),
+                    firstEnd = Instant.ofEpochMilli(first.endEpochMs ?: nowEpochMs),
+                    firstZone = ZoneId.of(first.startZoneId),
+                    secondStart = Instant.ofEpochMilli(second.startEpochMs),
+                    secondEnd = Instant.ofEpochMilli(second.endEpochMs ?: nowEpochMs),
+                    secondZone = ZoneId.of(second.startZoneId),
+                )
+            }
+        )
+    }
+    val longestElapsed = longestPeriod?.let { period ->
+        remember(period, aggregate.tracker.defaultDisplayFormat, tick, clock) {
+            TimeEngine(clock).elapsedBetween(
+                start = Instant.ofEpochMilli(period.startEpochMs),
+                end = Instant.ofEpochMilli(period.endEpochMs ?: clock.millis()),
+                zone = ZoneId.of(period.startZoneId),
+                format = aggregate.tracker.defaultDisplayFormat,
+            )
+        }
+    }
+    val lastResetText = remember(closedPeriods) {
+        closedPeriods
+            .maxByOrNull { it.endEpochMs ?: Long.MIN_VALUE }
+            ?.let { period ->
+                val endEpochMs = checkNotNull(period.endEpochMs)
+                val endZoneId = period.endZoneId ?: period.startZoneId
+                DateTimeFormatter
+                    .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                    .format(
+                        Instant
+                            .ofEpochMilli(endEpochMs)
+                            .atZone(ZoneId.of(endZoneId))
+                    )
+            }
+    }
     val goalEstimate = aggregate.goal?.let { goal ->
         remember(aggregate, tick, clock) {
             GoalEstimator(clock).estimate(
@@ -856,6 +944,108 @@ private fun TrackerDetailsScreen(
                 }
             }
 
+            if (aggregate.tracker.kind == TrackerKind.STREAK) {
+                SectionCard {
+                    Text(
+                        text = stringResource(R.string.statistics_label),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    DetailValueRow(
+                        label = stringResource(R.string.current_streak_label),
+                        value = elapsedSummary(elapsed),
+                    )
+                    DetailValueRow(
+                        label = stringResource(R.string.longest_streak_label),
+                        value = longestElapsed?.let { elapsedSummary(it) }
+                            ?: stringResource(R.string.no_history_value),
+                    )
+                    DetailValueRow(
+                        label = stringResource(R.string.reset_count_label),
+                        value = closedPeriods.size.toString(),
+                    )
+                    if (lastResetText != null) {
+                        DetailValueRow(
+                            label = stringResource(R.string.last_reset_label),
+                            value = lastResetText,
+                        )
+                    }
+                }
+
+                SectionCard {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            Text(
+                                text = stringResource(R.string.history_label),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text(
+                                text = stringResource(
+                                    if (closedPeriods.size == 1) {
+                                        R.string.history_summary_one
+                                    } else {
+                                        R.string.history_summary_other
+                                    },
+                                    closedPeriods.size,
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        TextButton(
+                            modifier = Modifier.testTag("open-history"),
+                            onClick = onOpenHistory,
+                        ) {
+                            Text(stringResource(R.string.view_history))
+                        }
+                    }
+                }
+
+                SectionCard {
+                    Text(
+                        text = stringResource(R.string.reset_streak_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = stringResource(R.string.reset_streak_supporting),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("reset-streak"),
+                        onClick = { showResetDialog = true },
+                        enabled = !isResetting,
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        Text(
+                            if (isResetting) {
+                                stringResource(R.string.resetting)
+                            } else {
+                                stringResource(R.string.reset_streak)
+                            }
+                        )
+                    }
+                    if (resetFailed) {
+                        Text(
+                            modifier = Modifier.semantics {
+                                liveRegion = LiveRegionMode.Assertive
+                            },
+                            text = stringResource(R.string.reset_failed),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
+
             SectionCard {
                 Text(
                     text = stringResource(R.string.note_label),
@@ -868,6 +1058,19 @@ private fun TrackerDetailsScreen(
                 )
             }
         }
+    }
+
+    if (showResetDialog && aggregate.tracker.kind == TrackerKind.STREAK) {
+        ResetStreakDialog(
+            currentPeriod = currentPeriod,
+            clock = clock,
+            isSaving = isResetting,
+            onDismiss = { showResetDialog = false },
+            onConfirm = { resetEpochMs, resetZoneId, reason, note ->
+                onResetStreak(resetEpochMs, resetZoneId, reason, note)
+                showResetDialog = false
+            },
+        )
     }
 
     if (showGoalEditor && aggregate.tracker.kind == TrackerKind.STREAK) {
@@ -891,6 +1094,376 @@ private fun TrackerDetailsScreen(
             },
         )
     }
+}
+
+@Composable
+private fun DetailValueRow(
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = label,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = value,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.End,
+        )
+    }
+}
+
+@Composable
+private fun StreakHistoryScreen(
+    aggregate: TrackerAggregate,
+    clock: Clock,
+    onBack: () -> Unit,
+) {
+    val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
+    val orderedPeriods = remember(aggregate.periods) {
+        listOf(currentPeriod) +
+            aggregate.periods
+                .filter { it.endEpochMs != null }
+                .sortedByDescending { it.sequence }
+    }
+    val tick by rememberMinuteTick(
+        clock = clock,
+        key = "history-" + aggregate.tracker.id,
+    )
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .testTag("history-screen"),
+            contentPadding = PaddingValues(
+                start = 20.dp,
+                top = 16.dp,
+                end = 20.dp,
+                bottom = 32.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    TextButton(onClick = onBack) {
+                        Text(stringResource(R.string.back))
+                    }
+                    Text(
+                        modifier = Modifier.semantics { heading() },
+                        text = stringResource(R.string.history_title, aggregate.tracker.title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Text(
+                        text = stringResource(
+                            if (orderedPeriods.count { it.endEpochMs != null } == 1) {
+                                R.string.history_completed_count_one
+                            } else {
+                                R.string.history_completed_count_other
+                            },
+                            orderedPeriods.count { it.endEpochMs != null },
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+
+            items(
+                items = orderedPeriods,
+                key = { it.id },
+            ) { period ->
+                val isCurrent = period.endEpochMs == null
+                val endEpochMs = period.endEpochMs ?: tick
+                val duration = remember(
+                    period,
+                    endEpochMs,
+                    aggregate.tracker.defaultDisplayFormat,
+                    clock,
+                ) {
+                    TimeEngine(clock).elapsedBetween(
+                        start = Instant.ofEpochMilli(period.startEpochMs),
+                        end = Instant.ofEpochMilli(endEpochMs),
+                        zone = ZoneId.of(period.startZoneId),
+                        format = aggregate.tracker.defaultDisplayFormat,
+                    )
+                }
+                val startText = remember(period.startEpochMs, period.startZoneId) {
+                    DateTimeFormatter
+                        .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                        .format(
+                            Instant
+                                .ofEpochMilli(period.startEpochMs)
+                                .atZone(ZoneId.of(period.startZoneId))
+                        )
+                }
+                val endText = period.endEpochMs?.let { completedAt ->
+                    val zoneId = period.endZoneId ?: period.startZoneId
+                    remember(completedAt, zoneId) {
+                        DateTimeFormatter
+                            .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                            .format(
+                                Instant
+                                    .ofEpochMilli(completedAt)
+                                    .atZone(ZoneId.of(zoneId))
+                            )
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = if (isCurrent) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                text = if (isCurrent) {
+                                    stringResource(R.string.history_current)
+                                } else {
+                                    stringResource(
+                                        R.string.history_period_number,
+                                        period.sequence + 1,
+                                    )
+                                },
+                                color = if (isCurrent) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+
+                        DetailValueRow(
+                            label = stringResource(R.string.history_started),
+                            value = startText,
+                        )
+                        if (endText != null) {
+                            DetailValueRow(
+                                label = stringResource(R.string.history_ended),
+                                value = endText,
+                            )
+                        }
+                        DetailValueRow(
+                            label = stringResource(R.string.history_duration),
+                            value = elapsedSummary(duration),
+                        )
+                        period.resetReason?.let { reason ->
+                            DetailValueRow(
+                                label = stringResource(R.string.reset_reason_label),
+                                value = reason,
+                            )
+                        }
+                        if (period.resetNote != null) {
+                            DetailValueRow(
+                                label = stringResource(R.string.reset_note_label),
+                                value = stringResource(R.string.reset_note_saved),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResetStreakDialog(
+    currentPeriod: com.goreecloud.since.domain.model.TrackerPeriod,
+    clock: Clock,
+    isSaving: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (Long, String, String?, String?) -> Unit,
+) {
+    val defaultZoneId = ZoneId.systemDefault().id
+    var resetDateTime by rememberSaveable(currentPeriod.id) {
+        mutableStateOf(TrackerStartInput.format(clock.millis(), defaultZoneId))
+    }
+    var resetZoneId by rememberSaveable(currentPeriod.id) {
+        mutableStateOf(defaultZoneId)
+    }
+    var reason by rememberSaveable(currentPeriod.id) { mutableStateOf("") }
+    var note by rememberSaveable(currentPeriod.id) { mutableStateOf("") }
+    var inputErrors by remember { mutableStateOf(emptyList<String>()) }
+
+    val beforeStartError = stringResource(R.string.reset_before_start_error)
+    val futureError = stringResource(R.string.reset_future_error)
+    val reasonLengthError = stringResource(R.string.reset_reason_length_error)
+    val noteLengthError = stringResource(R.string.reset_note_length_error)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                modifier = Modifier.semantics { heading() },
+                text = stringResource(R.string.reset_streak_title),
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.reset_history_explanation),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+
+                StartEditorFields(
+                    clock = clock,
+                    startDateTime = resetDateTime,
+                    onStartDateTimeChange = {
+                        resetDateTime = it
+                        inputErrors = emptyList()
+                    },
+                    startZoneId = resetZoneId,
+                    onStartZoneIdChange = {
+                        resetZoneId = it
+                        inputErrors = emptyList()
+                    },
+                    startInputErrors = inputErrors,
+                    enabled = !isSaving,
+                    onUseNow = {
+                        val currentZoneId = ZoneId.systemDefault().id
+                        resetZoneId = currentZoneId
+                        resetDateTime = TrackerStartInput.format(
+                            clock.millis(),
+                            currentZoneId,
+                        )
+                        inputErrors = emptyList()
+                    },
+                    headingRes = R.string.reset_time_label,
+                    zoneHintRes = R.string.reset_zone_picker_hint,
+                    useNowRes = R.string.reset_use_now,
+                    testTagPrefix = "reset",
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("reset-reason"),
+                    value = reason,
+                    onValueChange = {
+                        reason = it
+                        inputErrors = emptyList()
+                    },
+                    label = { Text(stringResource(R.string.reset_reason_label)) },
+                    supportingText = {
+                        Text(stringResource(R.string.reset_reason_optional))
+                    },
+                    singleLine = true,
+                    enabled = !isSaving,
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("reset-note"),
+                    value = note,
+                    onValueChange = {
+                        note = it
+                        inputErrors = emptyList()
+                    },
+                    label = { Text(stringResource(R.string.reset_note_label)) },
+                    supportingText = {
+                        Text(stringResource(R.string.reset_note_optional))
+                    },
+                    minLines = 2,
+                    enabled = !isSaving,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                modifier = Modifier.testTag("confirm-reset-streak"),
+                onClick = {
+                    val errors = mutableListOf<String>()
+                    when (
+                        val reset = TrackerStartInput.resolve(
+                            resetDateTime,
+                            resetZoneId,
+                        )
+                    ) {
+                        is TrackerStartResolution.Invalid -> {
+                            errors += reset.errors
+                        }
+
+                        is TrackerStartResolution.Valid -> {
+                            if (reset.start.epochMs < currentPeriod.startEpochMs) {
+                                errors += beforeStartError
+                            }
+                            if (reset.start.epochMs > clock.millis()) {
+                                errors += futureError
+                            }
+                            if (reason.trim().length > 120) {
+                                errors += reasonLengthError
+                            }
+                            if (note.trim().length > 2_000) {
+                                errors += noteLengthError
+                            }
+
+                            if (errors.isEmpty()) {
+                                onConfirm(
+                                    reset.start.epochMs,
+                                    reset.start.zoneId,
+                                    reason,
+                                    note,
+                                )
+                            }
+                        }
+                    }
+                    inputErrors = errors
+                },
+                enabled = !isSaving,
+            ) {
+                Text(
+                    if (isSaving) {
+                        stringResource(R.string.resetting)
+                    } else {
+                        stringResource(R.string.reset_streak)
+                    }
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isSaving,
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
 }
 
 @Composable
@@ -1615,6 +2188,10 @@ private fun StartEditorFields(
     startInputErrors: List<String>,
     enabled: Boolean,
     onUseNow: () -> Unit,
+    headingRes: Int = R.string.start_label,
+    zoneHintRes: Int = R.string.start_zone_picker_hint,
+    useNowRes: Int = R.string.use_now,
+    testTagPrefix: String = "start",
 ) {
     val context = LocalContext.current
     val fallbackZone = remember(startZoneId) {
@@ -1636,7 +2213,7 @@ private fun StartEditorFields(
     var showTimeZonePicker by rememberSaveable { mutableStateOf(false) }
 
     Text(
-        text = stringResource(R.string.start_label),
+        text = stringResource(headingRes),
         style = MaterialTheme.typography.titleMedium,
     )
 
@@ -1650,7 +2227,7 @@ private fun StartEditorFields(
             value = DateTimeFormatter
                 .ofLocalizedDate(FormatStyle.SHORT)
                 .format(startLocalDateTime.toLocalDate()),
-            testTag = "start-date-picker",
+            testTag = testTagPrefix + "-date-picker",
             enabled = enabled,
             onClick = { showDatePicker = true },
         )
@@ -1660,7 +2237,7 @@ private fun StartEditorFields(
             value = DateTimeFormatter
                 .ofLocalizedTime(FormatStyle.SHORT)
                 .format(startLocalDateTime.toLocalTime()),
-            testTag = "start-time-picker",
+            testTag = testTagPrefix + "-time-picker",
             enabled = enabled,
             onClick = { showTimePicker = true },
         )
@@ -1670,13 +2247,13 @@ private fun StartEditorFields(
         modifier = Modifier.fillMaxWidth(),
         label = stringResource(R.string.start_zone_label),
         value = startZoneId,
-        testTag = "start-zone-picker",
+        testTag = testTagPrefix + "-zone-picker",
         enabled = enabled,
         onClick = { showTimeZonePicker = true },
     )
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
-        text = stringResource(R.string.start_zone_picker_hint),
+        text = stringResource(zoneHintRes),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
     )
@@ -1684,7 +2261,7 @@ private fun StartEditorFields(
         onClick = onUseNow,
         enabled = enabled,
     ) {
-        Text(stringResource(R.string.use_now))
+        Text(stringResource(useNowRes))
     }
     if (startInputErrors.isNotEmpty()) {
         Text(

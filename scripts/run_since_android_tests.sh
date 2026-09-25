@@ -47,6 +47,8 @@ mkdir -p ci-screenshots
 for screenshot in \
   dashboard-empty \
   dashboard-empty-dark \
+  main-activity-light \
+  main-activity-dark \
   tracker-type-chooser \
   tracker-type-chooser-dark \
   create-streak \
@@ -55,6 +57,10 @@ for screenshot in \
   time-zone-picker-dark \
   tracker-details \
   tracker-details-dark \
+  reset-streak \
+  reset-streak-dark \
+  history \
+  history-dark \
   dashboard-populated \
   dashboard-populated-dark \
   achievements \

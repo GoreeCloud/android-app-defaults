@@ -91,6 +91,32 @@ abstract class TrackerDao {
     ): Int
 
     @Query(
+        "UPDATE event_periods SET " +
+            "end_epoch_ms = :resetEpochMs, end_zone_id = :resetZoneId, " +
+            "reset_reason = :reason, reset_note = :note, " +
+            "updated_at_epoch_ms = :updatedAtEpochMs " +
+            "WHERE id = :periodId AND event_id = :eventId AND end_epoch_ms IS NULL"
+    )
+    protected abstract suspend fun closeCurrentPeriod(
+        eventId: String,
+        periodId: String,
+        resetEpochMs: Long,
+        resetZoneId: String,
+        reason: String?,
+        note: String?,
+        updatedAtEpochMs: Long,
+    ): Int
+
+    @Query(
+        "UPDATE tracked_events SET updated_at_epoch_ms = :updatedAtEpochMs " +
+            "WHERE id = :eventId AND is_archived = 0"
+    )
+    protected abstract suspend fun touchTracker(
+        eventId: String,
+        updatedAtEpochMs: Long,
+    ): Int
+
+    @Query(
         "UPDATE event_goals SET target_amount = :targetAmount, target_unit = :targetUnit, " +
             "updated_at_epoch_ms = :updatedAtEpochMs WHERE event_id = :eventId"
     )
@@ -184,6 +210,67 @@ abstract class TrackerDao {
                 updatedAtEpochMs = updatedAtEpochMs,
             ) == 1
         ) { "tracker edit did not update exactly one open current period" }
+
+        return readAggregate(eventId)
+    }
+
+    @Transaction
+    open suspend fun resetStreak(
+        eventId: String,
+        nextPeriodId: String,
+        resetEpochMs: Long,
+        resetZoneId: String,
+        reason: String?,
+        note: String?,
+        nowEpochMs: Long,
+    ): PersistedTrackerAggregate? {
+        val tracker = readTrackedEvent(eventId) ?: return null
+        if (tracker.isArchived || tracker.kind != TrackerKind.STREAK.name) return null
+        if (resetZoneId.isBlank() || nextPeriodId.isBlank()) return null
+        if (resetEpochMs > nowEpochMs) return null
+
+        val periods = readPeriods(eventId)
+        val current = periods.singleOrNull { it.endEpochMs == null } ?: return null
+        if (resetEpochMs < current.startEpochMs) return null
+        val nextSequence = (periods.maxOfOrNull { it.sequence } ?: current.sequence) + 1
+
+        check(
+            closeCurrentPeriod(
+                eventId = eventId,
+                periodId = current.id,
+                resetEpochMs = resetEpochMs,
+                resetZoneId = resetZoneId,
+                reason = reason,
+                note = note,
+                updatedAtEpochMs = nowEpochMs,
+            ) == 1
+        ) { "streak reset did not close exactly one current period" }
+
+        insertPeriod(
+            EventPeriodEntity(
+                id = nextPeriodId,
+                eventId = eventId,
+                sequence = nextSequence,
+                startEpochMs = resetEpochMs,
+                startZoneId = resetZoneId,
+                endEpochMs = null,
+                endZoneId = null,
+                resetReason = null,
+                resetNote = null,
+                createdAtEpochMs = nowEpochMs,
+                updatedAtEpochMs = nowEpochMs,
+            )
+        )
+
+        check(openPeriodCount(eventId) == 1) {
+            "streak reset did not leave exactly one open current period"
+        }
+        check(
+            touchTracker(
+                eventId = eventId,
+                updatedAtEpochMs = nowEpochMs,
+            ) == 1
+        ) { "streak reset did not update exactly one tracker mutation timestamp" }
 
         return readAggregate(eventId)
     }
