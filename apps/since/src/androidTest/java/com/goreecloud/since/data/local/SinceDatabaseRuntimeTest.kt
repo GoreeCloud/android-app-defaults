@@ -454,6 +454,123 @@ class SinceDatabaseRuntimeTest {
     }
 
     @Test
+    fun repositoryResetStreakClosesHistoryAndStartsNextPeriodAtomically() = runBlocking {
+        val now = Instant.parse("2026-09-24T18:00:00Z")
+        val resetAt = now.minusSeconds(3_600)
+        val generatedIds = mutableListOf("reset-next-period").iterator()
+        val repository = RoomTrackerRepository(
+            dao = dao,
+            clock = Clock.fixed(now, ZoneId.of("UTC")),
+            idFactory = { generatedIds.next() },
+        )
+        val tracker = trackerEntity(id = "reset-streak", kind = TrackerKind.STREAK)
+        dao.createTrackerAggregate(
+            tracker = tracker,
+            initialPeriod = periodEntity(
+                id = "reset-period-0",
+                eventId = tracker.id,
+                sequence = 0,
+                start = now.minusSeconds(86_400).toEpochMilli(),
+            ),
+            goal = EventGoalEntity(
+                eventId = tracker.id,
+                targetAmount = 30,
+                targetUnit = DisplayFormat.DAYS.name,
+                createdAtEpochMs = 10_000L,
+                updatedAtEpochMs = 10_000L,
+            ),
+        )
+
+        val reset = repository.resetStreak(
+            trackerId = tracker.id,
+            resetEpochMs = resetAt.toEpochMilli(),
+            resetZoneId = "America/Chicago",
+            reason = "  Restarted plan  ",
+            note = "  Kept for history.  ",
+        )
+
+        assertNotNull(reset)
+        assertEquals(2, reset!!.periods.size)
+        assertEquals(1, dao.openPeriodCount(tracker.id))
+        val closed = reset.periods.single { it.endEpochMs != null }
+        assertEquals(resetAt.toEpochMilli(), closed.endEpochMs)
+        assertEquals("America/Chicago", closed.endZoneId)
+        assertEquals("Restarted plan", closed.resetReason)
+        assertEquals("Kept for history.", closed.resetNote)
+        val current = reset.periods.single { it.endEpochMs == null }
+        assertEquals(1, current.sequence)
+        assertEquals("reset-next-period", current.id)
+        assertEquals(resetAt.toEpochMilli(), current.startEpochMs)
+        assertEquals("America/Chicago", current.startZoneId)
+        assertEquals(30, reset.goal!!.targetAmount)
+    }
+
+    @Test
+    fun repositoryResetStreakRejectsInvalidChronologyAndPermanentEvents() = runBlocking {
+        val now = Instant.parse("2026-09-24T18:00:00Z")
+        val clock = Clock.fixed(now, ZoneId.of("UTC"))
+        val repository = RoomTrackerRepository(dao = dao, clock = clock)
+        val streak = trackerEntity(id = "reset-invalid", kind = TrackerKind.STREAK)
+        val start = now.minusSeconds(7_200).toEpochMilli()
+        dao.createTrackerAggregate(
+            tracker = streak,
+            initialPeriod = periodEntity(
+                id = "reset-invalid-period",
+                eventId = streak.id,
+                sequence = 0,
+                start = start,
+            ),
+            goal = null,
+        )
+
+        assertEquals(
+            null,
+            repository.resetStreak(
+                trackerId = streak.id,
+                resetEpochMs = start - 1,
+                resetZoneId = "UTC",
+                reason = null,
+                note = null,
+            ),
+        )
+        assertEquals(
+            null,
+            repository.resetStreak(
+                trackerId = streak.id,
+                resetEpochMs = now.plusSeconds(1).toEpochMilli(),
+                resetZoneId = "UTC",
+                reason = null,
+                note = null,
+            ),
+        )
+        assertEquals(1, dao.openPeriodCount(streak.id))
+        assertEquals(1, repository.loadTracker(streak.id)!!.periods.size)
+
+        val event = trackerEntity(id = "reset-event", kind = TrackerKind.EVENT)
+        dao.createTrackerAggregate(
+            tracker = event,
+            initialPeriod = periodEntity(
+                id = "reset-event-period",
+                eventId = event.id,
+                sequence = 0,
+                start = start,
+            ),
+            goal = null,
+        )
+        assertEquals(
+            null,
+            repository.resetStreak(
+                trackerId = event.id,
+                resetEpochMs = now.minusSeconds(60).toEpochMilli(),
+                resetZoneId = "UTC",
+                reason = null,
+                note = null,
+            ),
+        )
+        assertEquals(1, repository.loadTracker(event.id)!!.periods.size)
+    }
+
+    @Test
     fun aggregateObservationReactsToPeriodChanges() = runBlocking {
         val clock = Clock.fixed(Instant.parse("2026-09-23T18:00:00Z"), ZoneId.of("UTC"))
         val repository = RoomTrackerRepository(dao = dao, clock = clock)
