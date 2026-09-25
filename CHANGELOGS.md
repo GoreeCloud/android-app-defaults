@@ -1,5 +1,25 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
+
+**Lifecycle:** Development  
+**Tracking:** GitHub issue #1, PR #43
+
+### Fixed
+
+- Synchronize Android status-bar and navigation-bar icon appearance with the resolved Since System/Light/Dark theme instead of leaving icon contrast tied to the device appearance selected when edge-to-edge was enabled.
+- Keep the system-bar surfaces aligned with the active Since background while preserving edge-to-edge layout.
+- Move system-bar appearance handling into production `SinceTheme` so in-app theme changes update the operating-system chrome immediately.
+- Remove the visual-test-only system-bar override. Rendered evidence now exercises the production system-bar behavior rather than compensating for it inside the test harness.
+
+### Reason
+
+User-provided runtime screenshots of the Development build showed black status-bar time and status icons against the near-black Since Dark background. Source review confirmed the production theme did not update system-bar icon appearance when the app-selected theme differed from the device theme, while the visual-evidence test applied its own correct override and therefore masked the defect.
+
+### Verification boundary
+
+PR #43 is an unmerged Development correction candidate. Exact-head Android Development Foundation validation and review/integration gates remain required. This correction does not change tracker data, Room schema, network/privacy permissions, recovery behavior, Release Candidate, production, or Stable status.
+
 ## 2026-09-24 — Since Home, Achievements, and Settings navigation integration
 
 **Lifecycle:** Development  
@@ -17,7 +37,7 @@
 
 ### Verification
 
-Final exact candidate `d11a3aabfe9aac3f8fbdae05558e026b87c50156` passed Android Development Foundation run `36072370515` / #152, including build/JVM/lint/schema/manifest checks, Android 16 instrumentation `OK (21 tests)`, and rendered-evidence upload. PR #39 was squash-merged as `43cdfc8659de25e0d8829fed593d7f0a914e5965`. Exact merged-main run `36073050400` / #153 also passed with Android 16 instrumentation `OK (21 tests)`, producing `since-runtime-apks` artifact `10838389459` (`sha256:bf1b34d54c453d24d57a28c2b2d6ec12577fa043e2ddb621d21927913b1027cb`) and 20-scene `since-rendered-ui` artifact `10838444438` (`sha256:51275298f6efed8246718ee67f9fac35a8b379195c02a32275b9cd1ed55443df`). Exact-main Settings, Data & recovery, About dark, and Achievements dark scenes were visually reviewed and retained readable contrast, unclipped primary content, clear selected navigation state, and truthful Planned Backup/Restore treatment.
+Final exact candidate `d11a3aabfe9aac3f8fbdae05558e026b87c50156` passed Android Development Foundation run `36072370515` / #152, including build/JVM/lint/schema/manifest checks, Android 16 instrumentation `OK (21 tests)`, and rendered-evidence upload. PR #39 was squash-merged as `43cdfc8659de25e0d8829fed593d7f0a914e5965`. Exact merged-main run `36073050400` / #153 also passed with Android 16 instrumentation `OK (21 tests)`, producing `since-runtime-apks` artifact `10838389459` (`sha256:bf1b34d54c453d24d57a28c2b2d6ec12577fa043e2ddb621d21927913b1027cb`) and 20-scene `since-rendered-ui` artifact `10838444438` (`sha256:51275298f6efed8246718ee67f9fac35a8b379195c02a32275b9cd1ed55443df`). Exact-main Settings, Data & recovery, About dark, and Achievements dark scenes were visually reviewed for application content, selected navigation state, clipping, and Planned Backup/Restore treatment. Later runtime feedback exposed a separate production system-bar contrast defect when the app-selected Dark theme differs from the device theme; the rendered-evidence test had applied a test-only system-bar override, so those screenshots were not valid proof of production system-bar icon contrast.
 
 ### Boundary
 
