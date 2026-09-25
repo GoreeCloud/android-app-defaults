@@ -117,7 +117,7 @@ private fun SinceSystemBars(darkTheme: Boolean) {
         val activity = view.context.findActivity() ?: return@SideEffect
         activity.window.statusBarColor = background
         activity.window.navigationBarColor = background
-        activity.window.isNavigationBarContrastEnforced = false
+        activity.window.isNavigationBarContrastEnforced = !darkTheme
         WindowCompat.getInsetsController(
             activity.window,
             activity.window.decorView,
