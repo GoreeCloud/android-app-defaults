@@ -1,6 +1,6 @@
 # Android App Defaults — Changelogs
 
-## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
+## 2026-09-24 — Since dark-mode system-bar contrast correction integration
 
 **Lifecycle:** Development  
 **Tracking:** GitHub issue #1, PR #43
@@ -16,9 +16,13 @@
 
 User-provided runtime screenshots of the Development build showed black status-bar time and status icons against the near-black Since Dark background. Source review confirmed the production theme did not update system-bar icon appearance when the app-selected theme differed from the device theme, while the visual-evidence test applied its own correct override and therefore masked the defect.
 
-### Verification boundary
+### Verification and integration
 
-PR #43 is an unmerged Development correction candidate. Exact-head Android Development Foundation validation and review/integration gates remain required. This correction does not change tracker data, Room schema, network/privacy permissions, recovery behavior, Release Candidate, production, or Stable status.
+Exact candidate `13480c0c64c4611edb0f2d84ef91263bd22b3831` passed Android Development Foundation run `36077943497` / #159. PR #43 then merged to `main` as `60031a0632ae169c22c8a2a52eed6b5678646f0d`. Exact merged-main Android Development Foundation run `36079029190` / #160 passed and produced `since-runtime-apks` artifact `10841491294` (sha256:`a414f1367eab9e9f1d1c831820c1787bdc6cbcb01aef169903a29d95eca36a44`) and `since-rendered-ui` artifact `10841271832` (sha256:`396353f0ec6b8c645320720f86f090fd1e6b625fa7b205306b8b8a8885dd2859`). Human readback of merged-main `dashboard-empty-dark.png` confirms the reported dark-mode status-bar time/status icons are now light and readable against the dark Since surface.
+
+### Boundary
+
+This correction does not change tracker data, Room schema, network/privacy permissions, recovery behavior, Release Candidate, production, or Stable status. GitHub records show no submitted review on PR #43 before merge, and current `main` is unprotected with no active repository rulesets; review/protection governance acceptance therefore remains open. Representative physical-device/OEM system-bar behavior, gesture/three-button navigation-mode acceptance, assistive-technology acceptance, downstream GLAZE UI consumer acceptance, Release Candidate, production, and Stable qualification remain separate gates.
 
 ## 2026-09-24 — Since Home, Achievements, and Settings navigation integration
 
