@@ -71,10 +71,9 @@ class SinceStreakHistoryTest {
             val aggregate = repository.current.single()
             assertEquals(2, aggregate.periods.size)
             assertEquals(1, aggregate.periods.count { it.endEpochMs == null })
-            assertEquals(
-                "Restarted plan",
-                aggregate.periods.single { it.endEpochMs != null }.resetReason,
-            )
+            val closed = aggregate.periods.single { it.endEpochMs != null }
+            assertEquals("Restarted plan", closed.resetReason)
+            assertEquals("Private reflection", closed.resetNote)
             assertEquals(30, aggregate.goal!!.targetAmount)
             assertEquals(now.toEpochMilli(), aggregate.tracker.updatedAtEpochMs)
         }

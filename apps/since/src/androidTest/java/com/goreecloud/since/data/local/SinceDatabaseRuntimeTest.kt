@@ -560,6 +560,65 @@ class SinceDatabaseRuntimeTest {
     }
 
     @Test
+    fun repositoryResetStreakRejectsInvalidZoneAndOversizedMetadataWithoutMutation() = runBlocking {
+        val now = Instant.parse("2026-09-24T18:00:00Z")
+        val repository = RoomTrackerRepository(
+            dao = dao,
+            clock = Clock.fixed(now, ZoneId.of("UTC")),
+        )
+        val streak = trackerEntity(id = "reset-input-validation", kind = TrackerKind.STREAK)
+        val start = now.minusSeconds(7_200).toEpochMilli()
+        dao.createTrackerAggregate(
+            tracker = streak,
+            initialPeriod = periodEntity(
+                id = "reset-input-validation-period",
+                eventId = streak.id,
+                sequence = 0,
+                start = start,
+            ),
+            goal = null,
+        )
+
+        suspend fun assertRejected(
+            resetZoneId: String,
+            reason: String?,
+            note: String?,
+        ) {
+            assertEquals(
+                null,
+                repository.resetStreak(
+                    trackerId = streak.id,
+                    resetEpochMs = now.minusSeconds(60).toEpochMilli(),
+                    resetZoneId = resetZoneId,
+                    reason = reason,
+                    note = note,
+                ),
+            )
+            val unchanged = repository.loadTracker(streak.id)!!
+            assertEquals(1, unchanged.periods.size)
+            assertEquals(null, unchanged.periods.single().endEpochMs)
+            assertEquals(10_000L, unchanged.tracker.updatedAtEpochMs)
+            assertEquals(1, dao.openPeriodCount(streak.id))
+        }
+
+        assertRejected(
+            resetZoneId = "Not/A_Real_Zone",
+            reason = null,
+            note = null,
+        )
+        assertRejected(
+            resetZoneId = "UTC",
+            reason = "r".repeat(121),
+            note = null,
+        )
+        assertRejected(
+            resetZoneId = "UTC",
+            reason = null,
+            note = "n".repeat(2_001),
+        )
+    }
+
+    @Test
     fun repositoryResetStreakRejectsInvalidChronologyAndPermanentEvents() = runBlocking {
         val now = Instant.parse("2026-09-24T18:00:00Z")
         val clock = Clock.fixed(now, ZoneId.of("UTC"))
