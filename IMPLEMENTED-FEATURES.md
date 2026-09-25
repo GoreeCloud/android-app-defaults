@@ -220,7 +220,7 @@ Current Development source additionally includes a dedicated GoreeCloud Since An
 - two-column selectable display-format controls that preserve radio-button semantics and touch targets;
 - larger tracker-type option surfaces and clearer Create/Edit section grouping;
 - normal user-facing screens no longer expose implementation/development deferral copy;
-- explicit Android edge-to-edge system-bar appearance handling.
+- Android edge-to-edge layout. Current `main` does not reliably synchronize system-bar icon appearance when an app-selected theme differs from the device theme; PR #43 carries the bounded correction candidate.
 
 Exact source candidate `41a61992a76a8c7475c98666d8db5993913b0c50` passed Android Development Foundation run #67 / `35973932878`, including Android 16 instrumentation with all 17 tests passing.
 
@@ -235,6 +235,7 @@ The current Development source includes an Android-rendered visual-evidence lane
 - extracts the evidence from the target app sandbox after instrumentation succeeds;
 - publishes the images as the `since-rendered-ui` GitHub Actions artifact;
 - verifies that the exact rendered source uses an explicit neutral surface-container hierarchy rather than inheriting unrelated Material defaults that previously introduced an unintended pink/purple cast into cards and editor sections.
+- Prior rendered evidence applied a test-only system-bar appearance override, so it did not validate production status/navigation icon contrast. PR #43 removes that override and moves the behavior into production `SinceTheme`.
 
 Exact source-bearing candidate `7c77ab28811b4aedecc733e0479dd5b57edda0d4` passed Android Development Foundation run #73 / `35976727631`, including Android 16 instrumentation and successful rendered-evidence upload. Artifact `since-rendered-ui` ID `10798890114` has digest `sha256:c6f865e01296ed28da2a7c2059e60bf4af367e6220dacce88b570df526928cc5`.
 
