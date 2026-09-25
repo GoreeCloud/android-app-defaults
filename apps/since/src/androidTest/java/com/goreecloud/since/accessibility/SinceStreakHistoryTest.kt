@@ -74,6 +74,7 @@ class SinceStreakHistoryTest {
                 aggregate.periods.single { it.endEpochMs != null }.resetReason,
             )
             assertEquals(30, aggregate.goal!!.targetAmount)
+            assertEquals(now.toEpochMilli(), aggregate.tracker.updatedAtEpochMs)
         }
         composeRule.onNodeWithText("0%").performScrollTo().assertIsDisplayed()
 

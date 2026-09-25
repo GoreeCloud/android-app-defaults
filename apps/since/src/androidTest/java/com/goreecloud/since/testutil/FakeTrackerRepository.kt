@@ -184,6 +184,7 @@ internal class FakeTrackerRepository(
             updatedAtEpochMs = now,
         )
         val updated = existing.copy(
+            tracker = existing.tracker.copy(updatedAtEpochMs = now),
             periods = existing.periods
                 .map { period -> if (period.id == current.id) closed else period } + next,
         )
