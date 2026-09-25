@@ -91,6 +91,17 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
         capture("tracker-details-dark")
 
+        composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        capture("reset-streak-dark")
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
+        composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
+        capture("history-dark")
+        composeRule.onNodeWithText("Back").performClick()
+        composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
+
         composeRule.onNodeWithText("Back").performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
         capture("dashboard-populated-dark")
@@ -142,6 +153,17 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
         capture("tracker-details")
+
+        composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        capture("reset-streak")
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
+        composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
+        capture("history")
+        composeRule.onNodeWithText("Back").performClick()
+        composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
 
         composeRule.onNodeWithText("Back").performClick()
         composeRule.onNodeWithText("Add tracker").performClick()
