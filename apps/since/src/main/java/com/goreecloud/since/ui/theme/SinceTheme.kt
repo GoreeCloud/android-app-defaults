@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 
 private val SinceLightColors = lightColorScheme(
     primary = Color(0xFF0F656A),
@@ -131,15 +132,22 @@ private fun SinceSystemBars(darkTheme: Boolean) {
                     darkScrim = darkBackground,
                 )
             },
-            navigationBarStyle = if (darkTheme) {
-                SystemBarStyle.dark(darkBackground)
-            } else {
-                SystemBarStyle.light(
-                    scrim = lightBackground,
-                    darkScrim = darkBackground,
-                )
-            },
+            navigationBarStyle = SystemBarStyle.dark(darkBackground),
         )
+
+        // Android 15+ ignores navigationBarColor for gesture navigation, but three-button
+        // navigation still renders a real navigation surface. Keep that surface dark with
+        // light navigation symbols in both Since themes so OEM/platform fallback behavior
+        // cannot produce white controls on the light application background.
+        activity.window.navigationBarColor = darkBackground
+        activity.window.isNavigationBarContrastEnforced = true
+        WindowCompat.getInsetsController(
+            activity.window,
+            activity.window.decorView,
+        ).apply {
+            isAppearanceLightStatusBars = !darkTheme
+            isAppearanceLightNavigationBars = false
+        }
     }
 }
 
