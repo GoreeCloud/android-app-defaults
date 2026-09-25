@@ -47,6 +47,8 @@ mkdir -p ci-screenshots
 for screenshot in \
   dashboard-empty \
   dashboard-empty-dark \
+  main-activity-light \
+  main-activity-dark \
   tracker-type-chooser \
   tracker-type-chooser-dark \
   create-streak \
