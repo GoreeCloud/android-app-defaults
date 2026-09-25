@@ -1082,6 +1082,374 @@ private fun TrackerDetailsScreen(
 }
 
 @Composable
+private fun DetailValueRow(
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = label,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = value,
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.End,
+        )
+    }
+}
+
+@Composable
+private fun StreakHistoryScreen(
+    aggregate: TrackerAggregate,
+    clock: Clock,
+    onBack: () -> Unit,
+) {
+    val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
+    val orderedPeriods = remember(aggregate.periods) {
+        listOf(currentPeriod) +
+            aggregate.periods
+                .filter { it.endEpochMs != null }
+                .sortedByDescending { it.sequence }
+    }
+    val tick by rememberMinuteTick(
+        clock = clock,
+        key = "history-" + aggregate.tracker.id,
+    )
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .testTag("history-screen"),
+            contentPadding = PaddingValues(
+                start = 20.dp,
+                top = 16.dp,
+                end = 20.dp,
+                bottom = 32.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    TextButton(onClick = onBack) {
+                        Text(stringResource(R.string.back))
+                    }
+                    Text(
+                        modifier = Modifier.semantics { heading() },
+                        text = stringResource(R.string.history_title, aggregate.tracker.title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.history_completed_count,
+                            orderedPeriods.count { it.endEpochMs != null },
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+
+            items(
+                items = orderedPeriods,
+                key = { it.id },
+            ) { period ->
+                val isCurrent = period.endEpochMs == null
+                val endEpochMs = period.endEpochMs ?: tick
+                val duration = remember(
+                    period,
+                    endEpochMs,
+                    aggregate.tracker.defaultDisplayFormat,
+                    clock,
+                ) {
+                    TimeEngine(clock).elapsedBetween(
+                        start = Instant.ofEpochMilli(period.startEpochMs),
+                        end = Instant.ofEpochMilli(endEpochMs),
+                        zone = ZoneId.of(period.startZoneId),
+                        format = aggregate.tracker.defaultDisplayFormat,
+                    )
+                }
+                val startText = remember(period.startEpochMs, period.startZoneId) {
+                    DateTimeFormatter
+                        .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                        .format(
+                            Instant
+                                .ofEpochMilli(period.startEpochMs)
+                                .atZone(ZoneId.of(period.startZoneId))
+                        )
+                }
+                val endText = period.endEpochMs?.let { completedAt ->
+                    val zoneId = period.endZoneId ?: period.startZoneId
+                    remember(completedAt, zoneId) {
+                        DateTimeFormatter
+                            .ofLocalizedDateTime(FormatStyle.MEDIUM)
+                            .format(
+                                Instant
+                                    .ofEpochMilli(completedAt)
+                                    .atZone(ZoneId.of(zoneId))
+                            )
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = if (isCurrent) {
+                                MaterialTheme.colorScheme.primaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            },
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                text = if (isCurrent) {
+                                    stringResource(R.string.history_current)
+                                } else {
+                                    stringResource(
+                                        R.string.history_period_number,
+                                        period.sequence,
+                                    )
+                                },
+                                color = if (isCurrent) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+
+                        DetailValueRow(
+                            label = stringResource(R.string.history_started),
+                            value = startText,
+                        )
+                        if (endText != null) {
+                            DetailValueRow(
+                                label = stringResource(R.string.history_ended),
+                                value = endText,
+                            )
+                        }
+                        DetailValueRow(
+                            label = stringResource(R.string.history_duration),
+                            value = elapsedSummary(duration),
+                        )
+                        period.resetReason?.let { reason ->
+                            DetailValueRow(
+                                label = stringResource(R.string.reset_reason_label),
+                                value = reason,
+                            )
+                        }
+                        period.resetNote?.let { note ->
+                            Text(
+                                text = stringResource(R.string.reset_note_label),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                            Text(
+                                text = note,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResetStreakDialog(
+    currentPeriod: com.goreecloud.since.domain.model.TrackerPeriod,
+    clock: Clock,
+    isSaving: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (Long, String, String?, String?) -> Unit,
+) {
+    val defaultZoneId = ZoneId.systemDefault().id
+    var resetDateTime by rememberSaveable(currentPeriod.id) {
+        mutableStateOf(TrackerStartInput.format(clock.millis(), defaultZoneId))
+    }
+    var resetZoneId by rememberSaveable(currentPeriod.id) {
+        mutableStateOf(defaultZoneId)
+    }
+    var reason by rememberSaveable(currentPeriod.id) { mutableStateOf("") }
+    var note by rememberSaveable(currentPeriod.id) { mutableStateOf("") }
+    var inputErrors by remember { mutableStateOf(emptyList<String>()) }
+
+    val beforeStartError = stringResource(R.string.reset_before_start_error)
+    val futureError = stringResource(R.string.reset_future_error)
+    val reasonLengthError = stringResource(R.string.reset_reason_length_error)
+    val noteLengthError = stringResource(R.string.reset_note_length_error)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                modifier = Modifier.semantics { heading() },
+                text = stringResource(R.string.reset_streak_title),
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.reset_history_explanation),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+
+                StartEditorFields(
+                    clock = clock,
+                    startDateTime = resetDateTime,
+                    onStartDateTimeChange = {
+                        resetDateTime = it
+                        inputErrors = emptyList()
+                    },
+                    startZoneId = resetZoneId,
+                    onStartZoneIdChange = {
+                        resetZoneId = it
+                        inputErrors = emptyList()
+                    },
+                    startInputErrors = inputErrors,
+                    enabled = !isSaving,
+                    onUseNow = {
+                        val currentZoneId = ZoneId.systemDefault().id
+                        resetZoneId = currentZoneId
+                        resetDateTime = TrackerStartInput.format(
+                            clock.millis(),
+                            currentZoneId,
+                        )
+                        inputErrors = emptyList()
+                    },
+                    headingRes = R.string.reset_time_label,
+                    zoneHintRes = R.string.reset_zone_picker_hint,
+                    useNowRes = R.string.reset_use_now,
+                    testTagPrefix = "reset",
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = reason,
+                    onValueChange = {
+                        reason = it
+                        inputErrors = emptyList()
+                    },
+                    label = { Text(stringResource(R.string.reset_reason_label)) },
+                    supportingText = {
+                        Text(stringResource(R.string.reset_reason_optional))
+                    },
+                    singleLine = true,
+                    enabled = !isSaving,
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = note,
+                    onValueChange = {
+                        note = it
+                        inputErrors = emptyList()
+                    },
+                    label = { Text(stringResource(R.string.reset_note_label)) },
+                    supportingText = {
+                        Text(stringResource(R.string.reset_note_optional))
+                    },
+                    minLines = 2,
+                    enabled = !isSaving,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                modifier = Modifier.testTag("confirm-reset-streak"),
+                onClick = {
+                    val errors = mutableListOf<String>()
+                    when (
+                        val reset = TrackerStartInput.resolve(
+                            resetDateTime,
+                            resetZoneId,
+                        )
+                    ) {
+                        is TrackerStartResolution.Invalid -> {
+                            errors += reset.errors
+                        }
+
+                        is TrackerStartResolution.Valid -> {
+                            if (reset.start.epochMs < currentPeriod.startEpochMs) {
+                                errors += beforeStartError
+                            }
+                            if (reset.start.epochMs > clock.millis()) {
+                                errors += futureError
+                            }
+                            if (reason.trim().length > 120) {
+                                errors += reasonLengthError
+                            }
+                            if (note.trim().length > 2_000) {
+                                errors += noteLengthError
+                            }
+
+                            if (errors.isEmpty()) {
+                                onConfirm(
+                                    reset.start.epochMs,
+                                    reset.start.zoneId,
+                                    reason,
+                                    note,
+                                )
+                            }
+                        }
+                    }
+                    inputErrors = errors
+                },
+                enabled = !isSaving,
+            ) {
+                Text(
+                    if (isSaving) {
+                        stringResource(R.string.resetting)
+                    } else {
+                        stringResource(R.string.reset_streak)
+                    }
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isSaving,
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
 private fun GoalEditorDialog(
     currentGoal: com.goreecloud.since.domain.model.Goal?,
     currentPeriod: com.goreecloud.since.domain.model.TrackerPeriod,
