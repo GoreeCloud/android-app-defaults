@@ -128,10 +128,12 @@
     <string name="no_history_value">No completed history yet</string>
 
     <string name="history_label">History</string>
-    <string name="history_summary_one">%1$d completed period preserved</string>\n    <string name="history_summary_other">%1$d completed periods preserved</string>
+    <string name="history_summary_one">%1$d completed period preserved</string>
+    <string name="history_summary_other">%1$d completed periods preserved</string>
     <string name="view_history">View history</string>
     <string name="history_title">%1$s history</string>
-    <string name="history_completed_count_one">%1$d completed period</string>\n    <string name="history_completed_count_other">%1$d completed periods</string>
+    <string name="history_completed_count_one">%1$d completed period</string>
+    <string name="history_completed_count_other">%1$d completed periods</string>
     <string name="history_current">Current</string>
     <string name="history_period_number">Period %1$d</string>
     <string name="history_started">Started</string>
