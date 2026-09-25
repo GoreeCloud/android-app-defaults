@@ -2,7 +2,7 @@
 
 **Repository:** `GoreeCloud/android-app-defaults`  
 **Project type:** Android application monorepo  
-**Lifecycle:** Development  
+**Current project state:** Development; GoreeCloud Since component-level Platform Contract 2.0 lifecycle authority is not yet established and is tracked by issue #48  
 **Repository visibility:** Public  
 **Default branch:** `main`  
 **Current verified main snapshot:** `60031a0632ae169c22c8a2a52eed6b5678646f0d`  
