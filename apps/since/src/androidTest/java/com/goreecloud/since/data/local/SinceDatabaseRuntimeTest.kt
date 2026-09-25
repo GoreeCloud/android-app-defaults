@@ -506,6 +506,58 @@ class SinceDatabaseRuntimeTest {
     }
 
     @Test
+    fun repositoryResetStreakRollsBackIfNextPeriodInsertFails() = runBlocking {
+        val now = Instant.parse("2026-09-24T18:00:00Z")
+        val clock = Clock.fixed(now, ZoneId.of("UTC"))
+        val collisionPeriodId = "existing-period-id"
+        val repository = RoomTrackerRepository(
+            dao = dao,
+            clock = clock,
+            idFactory = { collisionPeriodId },
+        )
+        val streak = trackerEntity(id = "reset-rollback", kind = TrackerKind.STREAK)
+        val streakStart = now.minusSeconds(7_200).toEpochMilli()
+        dao.createTrackerAggregate(
+            tracker = streak,
+            initialPeriod = periodEntity(
+                id = "reset-rollback-period",
+                eventId = streak.id,
+                sequence = 0,
+                start = streakStart,
+            ),
+            goal = null,
+        )
+
+        val other = trackerEntity(id = "collision-owner", kind = TrackerKind.EVENT)
+        dao.createTrackerAggregate(
+            tracker = other,
+            initialPeriod = periodEntity(
+                id = collisionPeriodId,
+                eventId = other.id,
+                sequence = 0,
+                start = streakStart,
+            ),
+            goal = null,
+        )
+
+        val resetFailure = runCatching {
+            repository.resetStreak(
+                trackerId = streak.id,
+                resetEpochMs = now.minusSeconds(60).toEpochMilli(),
+                resetZoneId = "UTC",
+                reason = "Should roll back",
+                note = null,
+            )
+        }
+
+        assertTrue(resetFailure.isFailure)
+        val preserved = repository.loadTracker(streak.id)!!
+        assertEquals(1, preserved.periods.size)
+        assertEquals(null, preserved.periods.single().endEpochMs)
+        assertEquals(1, dao.openPeriodCount(streak.id))
+    }
+
+    @Test
     fun repositoryResetStreakRejectsInvalidChronologyAndPermanentEvents() = runBlocking {
         val now = Instant.parse("2026-09-24T18:00:00Z")
         val clock = Clock.fixed(now, ZoneId.of("UTC"))
