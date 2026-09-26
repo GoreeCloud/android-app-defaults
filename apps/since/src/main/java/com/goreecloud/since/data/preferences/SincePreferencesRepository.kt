@@ -1,8 +1,10 @@
 package com.goreecloud.since.data.preferences
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.IOException
@@ -25,8 +27,11 @@ class SincePreferencesRepository(
     private val context: Context,
 ) {
     private val themePreferenceKey = stringPreferencesKey("theme_preference")
+    private val onboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
+    private val onboardingStepKey = intPreferencesKey("onboarding_step")
+    private val contextualHintsEnabledKey = booleanPreferencesKey("contextual_hints_enabled")
 
-    val themePreference: Flow<ThemePreference> = context
+    private val preferences = context
         .sincePreferencesDataStore
         .data
         .catch { throwable ->
@@ -36,16 +41,66 @@ class SincePreferencesRepository(
                 throw throwable
             }
         }
-        .map { preferences ->
-            preferences[themePreferenceKey]
+
+    private val upgradedInstallationWithoutOnboardingState: Boolean by lazy {
+        runCatching {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            packageInfo.lastUpdateTime > packageInfo.firstInstallTime
+        }.getOrDefault(false)
+    }
+
+    val themePreference: Flow<ThemePreference> = preferences
+        .map { values ->
+            values[themePreferenceKey]
                 ?.let { stored -> runCatching { ThemePreference.valueOf(stored) }.getOrNull() }
                 ?: ThemePreference.SYSTEM
         }
         .distinctUntilChanged()
 
-    suspend fun setThemePreference(preference: ThemePreference) {
-        context.sincePreferencesDataStore.edit { preferences ->
-            preferences[themePreferenceKey] = preference.name
+    val onboardingComplete: Flow<Boolean> = preferences
+        .map { values ->
+            values[onboardingCompleteKey] ?: upgradedInstallationWithoutOnboardingState
         }
+        .distinctUntilChanged()
+
+    val onboardingStep: Flow<Int> = preferences
+        .map { values ->
+            values[onboardingStepKey]
+                ?.coerceIn(0, ONBOARDING_STEP_COUNT - 1)
+                ?: 0
+        }
+        .distinctUntilChanged()
+
+    val contextualHintsEnabled: Flow<Boolean> = preferences
+        .map { values -> values[contextualHintsEnabledKey] ?: true }
+        .distinctUntilChanged()
+
+    suspend fun setThemePreference(preference: ThemePreference) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[themePreferenceKey] = preference.name
+        }
+    }
+
+    suspend fun setOnboardingStep(step: Int) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[onboardingStepKey] = step.coerceIn(0, ONBOARDING_STEP_COUNT - 1)
+        }
+    }
+
+    suspend fun completeOnboarding() {
+        context.sincePreferencesDataStore.edit { values ->
+            values[onboardingCompleteKey] = true
+            values[onboardingStepKey] = 0
+        }
+    }
+
+    suspend fun setContextualHintsEnabled(enabled: Boolean) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[contextualHintsEnabledKey] = enabled
+        }
+    }
+
+    companion object {
+        const val ONBOARDING_STEP_COUNT = 3
     }
 }

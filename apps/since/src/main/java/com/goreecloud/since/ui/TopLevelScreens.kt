@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -19,6 +20,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -260,6 +262,9 @@ internal fun SettingsScreen(
     innerPadding: PaddingValues,
     themePreference: ThemePreference,
     onThemePreferenceChange: (ThemePreference) -> Unit,
+    contextualHintsEnabled: Boolean,
+    onContextualHintsEnabledChange: (Boolean) -> Unit,
+    onReplaySetup: () -> Unit,
 ) {
     var plannedDialog by remember { mutableStateOf<PlannedSetting?>(null) }
 
@@ -378,6 +383,52 @@ internal fun SettingsScreen(
                 SettingsInfoRow(
                     title = stringResourceCompat(R.string.settings_build_status),
                     supporting = stringResourceCompat(R.string.settings_development_build),
+                )
+            }
+        }
+
+        item {
+            SettingsSection(title = stringResourceCompat(R.string.settings_guidance)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("settings-contextual-hints")
+                        .toggleable(
+                            value = contextualHintsEnabled,
+                            role = Role.Switch,
+                            onValueChange = onContextualHintsEnabledChange,
+                        )
+                        .semantics(mergeDescendants = true) {}
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Text(
+                            text = stringResourceCompat(R.string.contextual_hints),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = stringResourceCompat(R.string.contextual_hints_supporting),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    Switch(
+                        modifier = Modifier.clearAndSetSemantics {},
+                        checked = contextualHintsEnabled,
+                        onCheckedChange = null,
+                    )
+                }
+                SettingsActionRow(
+                    title = stringResourceCompat(R.string.replay_setup),
+                    supporting = stringResourceCompat(R.string.replay_setup_supporting),
+                    status = stringResourceCompat(R.string.settings_open),
+                    testTag = "settings-replay-setup",
+                    onClick = onReplaySetup,
                 )
             }
         }

@@ -96,6 +96,9 @@ fun SinceApp(
     clock: Clock,
     themePreference: ThemePreference = ThemePreference.SYSTEM,
     onThemePreferenceChange: (ThemePreference) -> Unit = {},
+    contextualHintsEnabled: Boolean = true,
+    onContextualHintsEnabledChange: (Boolean) -> Unit = {},
+    onReplaySetup: () -> Unit = {},
 ) {
     val aggregates by repository
         .observeActiveTrackerAggregates()
@@ -367,6 +370,7 @@ fun SinceApp(
                 innerPadding = innerPadding,
                 aggregates = aggregates,
                 clock = clock,
+                contextualHintsEnabled = contextualHintsEnabled,
                 onAddTracker = onAddTracker,
                 onOpenTracker = { trackerId ->
                     detailUpdateFailed = false
@@ -385,6 +389,9 @@ fun SinceApp(
                 innerPadding = innerPadding,
                 themePreference = themePreference,
                 onThemePreferenceChange = onThemePreferenceChange,
+                contextualHintsEnabled = contextualHintsEnabled,
+                onContextualHintsEnabledChange = onContextualHintsEnabledChange,
+                onReplaySetup = onReplaySetup,
             )
         }
     }
@@ -407,6 +414,7 @@ private fun Dashboard(
     innerPadding: PaddingValues,
     aggregates: List<TrackerAggregate>,
     clock: Clock,
+    contextualHintsEnabled: Boolean,
     onAddTracker: () -> Unit,
     onOpenTracker: (String) -> Unit,
 ) {
@@ -441,6 +449,25 @@ private fun Dashboard(
                         text = stringResource(R.string.dashboard_empty_message),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
+
+        if (contextualHintsEnabled) {
+            item {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("home-contextual-hint"),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ) {
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                        text = stringResource(R.string.home_contextual_hint),
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }

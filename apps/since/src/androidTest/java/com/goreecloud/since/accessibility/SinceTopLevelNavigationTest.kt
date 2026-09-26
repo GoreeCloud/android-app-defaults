@@ -1,6 +1,10 @@
 package com.goreecloud.since.accessibility
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -21,6 +25,8 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -36,6 +42,8 @@ class SinceTopLevelNavigationTest {
     @Test
     fun homeAchievementsAndSettingsRemainReachable() {
         var selectedTheme = ThemePreference.SYSTEM
+        var contextualHintsEnabled by mutableStateOf(true)
+        var replayRequested = false
 
         composeRule.setContent {
             MaterialTheme {
@@ -44,6 +52,9 @@ class SinceTopLevelNavigationTest {
                     clock = clock,
                     themePreference = selectedTheme,
                     onThemePreferenceChange = { selectedTheme = it },
+                    contextualHintsEnabled = contextualHintsEnabled,
+                    onContextualHintsEnabledChange = { contextualHintsEnabled = it },
+                    onReplaySetup = { replayRequested = true },
                 )
             }
         }
@@ -80,6 +91,22 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
 
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
+        composeRule.onNodeWithTag("settings-contextual-hints")
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .performClick()
+        composeRule.runOnIdle {
+            assertFalse(contextualHintsEnabled)
+        }
+        composeRule.onNodeWithTag("settings-replay-setup")
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .performClick()
+        composeRule.runOnIdle {
+            assertTrue(replayRequested)
+        }
+
         composeRule.onNodeWithTag("nav-achievements").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("achievements-screen").assertIsDisplayed()
         composeRule.onNodeWithText("Getting started").assertIsDisplayed()
@@ -87,6 +114,29 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-home").assertHasClickAction().performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+    }
+
+    @Test
+    fun homeContextualHintFollowsGlobalPreference() {
+        var contextualHintsEnabled by mutableStateOf(true)
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = FakeTrackerRepository(emptyList()),
+                    clock = clock,
+                    contextualHintsEnabled = contextualHintsEnabled,
+                    onContextualHintsEnabledChange = { contextualHintsEnabled = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
+        composeRule.onNodeWithTag("nav-settings").performClick()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
+        composeRule.onNodeWithTag("settings-contextual-hints").performClick()
+        composeRule.onNodeWithTag("nav-home").performClick()
+        composeRule.onNodeWithTag("home-contextual-hint").assertDoesNotExist()
     }
 
     private fun sampleAggregate(): TrackerAggregate {

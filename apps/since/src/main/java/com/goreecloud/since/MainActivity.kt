@@ -6,10 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goreecloud.since.data.preferences.SincePreferencesRepository
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.ui.SinceApp
+import com.goreecloud.since.ui.SinceSetupWizard
 import com.goreecloud.since.ui.theme.SinceTheme
 import kotlinx.coroutines.launch
 
@@ -20,11 +27,23 @@ class MainActivity : ComponentActivity() {
         val sinceApplication = application as SinceApplication
 
         setContent {
-            val themePreference by sinceApplication.preferencesRepository
+            val preferencesRepository = sinceApplication.preferencesRepository
+            val themePreference by preferencesRepository
                 .themePreference
                 .collectAsStateWithLifecycle(initialValue = ThemePreference.SYSTEM)
+            val onboardingComplete by preferencesRepository
+                .onboardingComplete
+                .collectAsStateWithLifecycle(initialValue = false)
+            val onboardingStep by preferencesRepository
+                .onboardingStep
+                .collectAsStateWithLifecycle(initialValue = 0)
+            val contextualHintsEnabled by preferencesRepository
+                .contextualHintsEnabled
+                .collectAsStateWithLifecycle(initialValue = true)
             val systemDarkTheme = isSystemInDarkTheme()
             val scope = rememberCoroutineScope()
+            var replaySetup by rememberSaveable { mutableStateOf(false) }
+            var replayStep by rememberSaveable { mutableIntStateOf(0) }
             val darkTheme = when (themePreference) {
                 ThemePreference.SYSTEM -> systemDarkTheme
                 ThemePreference.LIGHT -> false
@@ -32,16 +51,63 @@ class MainActivity : ComponentActivity() {
             }
 
             SinceTheme(darkTheme = darkTheme) {
-                SinceApp(
-                    repository = sinceApplication.trackerRepository,
-                    clock = sinceApplication.clock,
-                    themePreference = themePreference,
-                    onThemePreferenceChange = { preference ->
-                        scope.launch {
-                            sinceApplication.preferencesRepository.setThemePreference(preference)
-                        }
-                    },
-                )
+                if (!onboardingComplete || replaySetup) {
+                    val currentStep = if (replaySetup) replayStep else onboardingStep
+                    SinceSetupWizard(
+                        currentStep = currentStep,
+                        replay = replaySetup,
+                        contextualHintsEnabled = contextualHintsEnabled,
+                        onContextualHintsEnabledChange = { enabled ->
+                            scope.launch {
+                                preferencesRepository.setContextualHintsEnabled(enabled)
+                            }
+                        },
+                        onStepChange = { step ->
+                            if (replaySetup) {
+                                replayStep = step
+                            } else {
+                                scope.launch {
+                                    preferencesRepository.setOnboardingStep(step)
+                                }
+                            }
+                        },
+                        onFinish = {
+                            if (replaySetup) {
+                                replayStep = 0
+                                replaySetup = false
+                            } else {
+                                scope.launch {
+                                    preferencesRepository.completeOnboarding()
+                                }
+                            }
+                        },
+                        onExitReplay = {
+                            replayStep = 0
+                            replaySetup = false
+                        },
+                    )
+                } else {
+                    SinceApp(
+                        repository = sinceApplication.trackerRepository,
+                        clock = sinceApplication.clock,
+                        themePreference = themePreference,
+                        onThemePreferenceChange = { preference ->
+                            scope.launch {
+                                preferencesRepository.setThemePreference(preference)
+                            }
+                        },
+                        contextualHintsEnabled = contextualHintsEnabled,
+                        onContextualHintsEnabledChange = { enabled ->
+                            scope.launch {
+                                preferencesRepository.setContextualHintsEnabled(enabled)
+                            }
+                        },
+                        onReplaySetup = {
+                            replayStep = 0
+                            replaySetup = true
+                        },
+                    )
+                }
             }
         }
     }

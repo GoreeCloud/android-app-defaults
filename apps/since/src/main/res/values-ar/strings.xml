@@ -25,7 +25,7 @@
     <string name="achievement_thirty_days_description">حافظ على سلسلة حالية واحدة لمدة ثلاثين يومًا على الأقل.</string>
 
     <string name="settings_title">الإعدادات</string>
-    <string name="settings_summary">المظهر والاسترداد والخصوصية والأمان ومعلومات التطبيق.</string>
+    <string name="settings_summary">المظهر والاسترداد والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
     <string name="settings_appearance">المظهر</string>
     <string name="settings_theme">السمة</string>
     <string name="theme_system">إعداد النظام</string>
@@ -159,4 +159,24 @@
     <string name="reset_future_error">لا يمكن أن يكون وقت إعادة الضبط بعد الوقت الحالي.</string>
     <string name="reset_reason_length_error">يجب ألا يزيد سبب إعادة الضبط عن 120 حرفًا.</string>
     <string name="reset_note_length_error">يجب ألا تزيد ملاحظة إعادة الضبط عن 2,000 حرف.</string>
+
+    <string name="setup_title">إعداد Since</string>
+    <string name="setup_review_title">مراجعة إعداد Since</string>
+    <string name="setup_progress">الخطوة %1$d من %2$d</string>
+    <string name="setup_role_title">تتبّع ما يهمك</string>
+    <string name="setup_role_body">يتتبّع Since الوقت المنقضي منذ أحداث مهمة والسلاسل القابلة لإعادة الضبط. ابدأ بتاريخ ووقت، ثم يحسب Since الزمن المنقضي من الطوابع الزمنية المحفوظة.</string>
+    <string name="setup_privacy_title">حافظ على التجربة الأساسية محلية</string>
+    <string name="setup_privacy_body">لا يتطلب إصدار التطوير هذا حسابًا أو اتصالاً بالشبكة للتتبّع الأساسي. يظل النسخ الاحتياطي والاستعادة مخططين وغير متاحين حتى يتم التحقق منهما بشكل منفصل.</string>
+    <string name="setup_guidance_title">اختر إرشاداتك</string>
+    <string name="setup_guidance_body">تشرح التلميحات السياقية الإجراءات المفيدة بالقرب من موضع استخدامها. يمكنك إيقاف التلميحات العادية الآن أو لاحقًا وإعادة تفعيلها من الإعدادات.</string>
+    <string name="setup_continue">متابعة</string>
+    <string name="setup_finish">إنهاء</string>
+    <string name="setup_return">العودة إلى Since</string>
+    <string name="settings_guidance">الإرشادات</string>
+    <string name="contextual_hints">التلميحات السياقية</string>
+    <string name="contextual_hints_supporting">اعرض نصائح اختيارية داخل التطبيق. تبقى رسائل الأمان والخصوصية والأخطاء ورسائل النظام المطلوبة ظاهرة.</string>
+    <string name="replay_setup">إعادة عرض الإعداد</string>
+    <string name="replay_setup_supporting">راجع إرشادات الاستخدام الأول دون إعادة ضبط المتتبعات أو حالة الإكمال.</string>
+    <string name="settings_open">فتح</string>
+    <string name="home_contextual_hint">تلميح: اضغط على متتبّع لمراجعة الوقت المنقضي والتفاصيل، أو أضف متتبّعًا جديدًا من الرئيسية.</string>
 </resources>

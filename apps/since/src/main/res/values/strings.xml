@@ -158,4 +158,24 @@
     <string name="reset_future_error">Reset time cannot be later than now.</string>
     <string name="reset_reason_length_error">Reset reason must be 120 characters or fewer.</string>
     <string name="reset_note_length_error">Reset note must be 2,000 characters or fewer.</string>
+
+    <string name="setup_title">Set up Since</string>
+    <string name="setup_review_title">Review Since setup</string>
+    <string name="setup_progress">Step %1$d of %2$d</string>
+    <string name="setup_role_title">Track what matters</string>
+    <string name="setup_role_body">Since tracks elapsed time from meaningful events and resettable streaks. Start with a date and time, then let Since calculate the elapsed time from stored timestamps.</string>
+    <string name="setup_privacy_title">Keep the core experience local</string>
+    <string name="setup_privacy_body">This Development build does not require an account or network access for core tracking. Backup and restore are still planned and remain unavailable until separately verified.</string>
+    <string name="setup_guidance_title">Choose your guidance</string>
+    <string name="setup_guidance_body">Contextual hints explain useful actions near the place you use them. You can turn ordinary hints off now or later and re-enable them from Settings.</string>
+    <string name="setup_continue">Continue</string>
+    <string name="setup_finish">Finish</string>
+    <string name="setup_return">Return to Since</string>
+    <string name="settings_guidance">Guidance</string>
+    <string name="contextual_hints">Contextual hints</string>
+    <string name="contextual_hints_supporting">Show optional in-app tips. Safety, privacy, error, and required system messages stay visible.</string>
+    <string name="replay_setup">Replay setup</string>
+    <string name="replay_setup_supporting">Review the first-use guidance without resetting your trackers or completion state.</string>
+    <string name="settings_open">Open</string>
+    <string name="home_contextual_hint">Hint: Tap a tracker to review its elapsed time and details, or add a new tracker from Home.</string>
 </resources>

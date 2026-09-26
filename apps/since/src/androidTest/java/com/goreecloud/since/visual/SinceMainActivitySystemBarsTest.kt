@@ -1,8 +1,10 @@
 package com.goreecloud.since.visual
 
 import android.graphics.Bitmap
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.core.view.WindowCompat
@@ -21,6 +23,16 @@ class SinceMainActivitySystemBarsTest {
 
     @Test
     fun mainActivitySystemBarsFollowExplicitLightAndDarkThemes() {
+        composeRule.onNodeWithTag("since-setup").assertIsDisplayed()
+        composeRule.onNodeWithTag("setup-continue").performClick()
+        composeRule.onNodeWithTag("setup-continue").performClick()
+        composeRule.onNodeWithTag("setup-finish").performClick()
+        composeRule.onNodeWithText("Since").assertIsDisplayed()
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.onNodeWithTag("since-setup").assertDoesNotExist()
+        composeRule.onNodeWithText("Since").assertIsDisplayed()
+
         composeRule.onNodeWithText("Settings").performClick()
         composeRule.onNodeWithText("Light").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Home").performClick()
