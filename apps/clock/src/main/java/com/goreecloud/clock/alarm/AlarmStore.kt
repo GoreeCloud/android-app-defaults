@@ -1,6 +1,7 @@
 package com.goreecloud.clock.alarm
 
 import android.content.Context
+import com.goreecloud.clock.widget.ClockWidgetUpdater
 import java.nio.charset.StandardCharsets
 import java.time.DayOfWeek
 import java.util.Base64
@@ -8,7 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class AlarmStore(context: Context) {
-    private val prefs = context.getSharedPreferences("clock_alarms", Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val prefs = appContext.getSharedPreferences("clock_alarms", Context.MODE_PRIVATE)
     private val mutableAlarms = MutableStateFlow(readAll())
 
     val alarms = mutableAlarms.asStateFlow()
@@ -67,6 +69,7 @@ class AlarmStore(context: Context) {
         val sorted = items.sortedWith(compareBy<Alarm> { it.hour }.thenBy { it.minute }.thenBy { it.id })
         prefs.edit().putString(KEY_ALARMS, sorted.joinToString("\n", transform = ::encode)).apply()
         mutableAlarms.value = sorted
+        ClockWidgetUpdater.updateAlarmWidgets(appContext)
     }
 
     private fun readAll(): List<Alarm> = prefs.getString(KEY_ALARMS, "")

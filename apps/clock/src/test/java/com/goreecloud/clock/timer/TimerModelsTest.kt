@@ -5,18 +5,57 @@ import org.junit.Test
 
 class TimerModelsTest {
     @Test
-    fun runningTimerUsesEndTime() {
+    fun runningTimerUsesMonotonicElapsedTime() {
         val timer = TimerEntry(
             id = 1,
             label = "",
             durationMillis = 60_000L,
             remainingMillis = 60_000L,
             running = true,
-            endAtEpochMillis = 100_000L,
+            startedElapsedRealtime = 10_000L,
+            startedWallMillis = 100_000L,
         )
 
-        assertEquals(25_000L, timer.remainingAt(75_000L))
-        assertEquals(0L, timer.remainingAt(120_000L))
+        assertEquals(
+            25_000L,
+            timer.remainingAt(nowEpochMillis = 500_000L, elapsedRealtime = 45_000L),
+        )
+    }
+
+    @Test
+    fun wallClockChangeDoesNotShiftTimerWithinSameBoot() {
+        val timer = TimerEntry(
+            id = 1,
+            label = "",
+            durationMillis = 60_000L,
+            remainingMillis = 60_000L,
+            running = true,
+            startedElapsedRealtime = 10_000L,
+            startedWallMillis = 100_000L,
+        )
+
+        assertEquals(
+            50_000L,
+            timer.remainingAt(nowEpochMillis = 9_000_000L, elapsedRealtime = 20_000L),
+        )
+    }
+
+    @Test
+    fun runningTimerFallsBackToWallClockAfterMonotonicReset() {
+        val timer = TimerEntry(
+            id = 1,
+            label = "",
+            durationMillis = 60_000L,
+            remainingMillis = 60_000L,
+            running = true,
+            startedElapsedRealtime = 80_000L,
+            startedWallMillis = 100_000L,
+        )
+
+        assertEquals(
+            50_000L,
+            timer.remainingAt(nowEpochMillis = 110_000L, elapsedRealtime = 5_000L),
+        )
     }
 
     @Test

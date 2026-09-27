@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.goreecloud.clock.ClockApplication
+import com.goreecloud.clock.widget.ClockWidgetUpdater
 
 class RescheduleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -18,5 +19,6 @@ class RescheduleReceiver : BroadcastReceiver() {
         val app = context.applicationContext as ClockApplication
         app.alarmScheduler.rescheduleAll()
         app.timerScheduler.rescheduleAll()
+        ClockWidgetUpdater.updateAll(context)
     }
 }

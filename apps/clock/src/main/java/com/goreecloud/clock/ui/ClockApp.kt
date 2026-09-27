@@ -75,8 +75,14 @@ fun ClockApp(
     var showSettings by remember { mutableStateOf(false) }
 
     LaunchedEffect(destinationRequest) {
-        if (destinationRequest == MainActivity.DESTINATION_ALARMS) {
-            destination = ClockDestination.ALARMS
+        val requested = when (destinationRequest) {
+            MainActivity.DESTINATION_CLOCK -> ClockDestination.CLOCK
+            MainActivity.DESTINATION_ALARMS -> ClockDestination.ALARMS
+            MainActivity.DESTINATION_TIMER -> ClockDestination.TIMER
+            else -> null
+        }
+        if (requested != null) {
+            destination = requested
             onDestinationConsumed()
         }
     }

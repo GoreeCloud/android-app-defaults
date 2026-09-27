@@ -1,13 +1,16 @@
 package com.goreecloud.clock.timer
 
 import android.content.Context
+import android.os.SystemClock
+import com.goreecloud.clock.widget.ClockWidgetUpdater
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class TimerStore(context: Context) {
-    private val prefs = context.getSharedPreferences("clock_timers", Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val prefs = appContext.getSharedPreferences("clock_timers", Context.MODE_PRIVATE)
     private val mutableTimers = MutableStateFlow(readAll())
     val timers = mutableTimers.asStateFlow()
 
@@ -25,34 +28,44 @@ class TimerStore(context: Context) {
             durationMillis = durationMillis,
             remainingMillis = durationMillis,
             running = false,
-            endAtEpochMillis = 0L,
+            startedElapsedRealtime = 0L,
+            startedWallMillis = 0L,
         )
         persist(current + item)
         return item
     }
 
     @Synchronized
-    fun start(id: Long, now: Long = System.currentTimeMillis()): TimerEntry? {
+    fun start(
+        id: Long,
+        nowEpochMillis: Long = System.currentTimeMillis(),
+        elapsedRealtime: Long = SystemClock.elapsedRealtime(),
+    ): TimerEntry? {
         val item = get(id) ?: return null
-        val remaining = item.remainingAt(now).let {
-            if (it <= 0L) item.durationMillis else it
-        }
+        val currentRemaining = item.remainingAt(nowEpochMillis, elapsedRealtime)
+        val remaining = if (currentRemaining <= 0L) item.durationMillis else currentRemaining
         val updated = item.copy(
             remainingMillis = remaining,
             running = true,
-            endAtEpochMillis = now + remaining,
+            startedElapsedRealtime = elapsedRealtime,
+            startedWallMillis = nowEpochMillis,
         )
         upsert(updated)
         return updated
     }
 
     @Synchronized
-    fun pause(id: Long, now: Long = System.currentTimeMillis()): TimerEntry? {
+    fun pause(
+        id: Long,
+        nowEpochMillis: Long = System.currentTimeMillis(),
+        elapsedRealtime: Long = SystemClock.elapsedRealtime(),
+    ): TimerEntry? {
         val item = get(id) ?: return null
         val updated = item.copy(
-            remainingMillis = item.remainingAt(now),
+            remainingMillis = item.remainingAt(nowEpochMillis, elapsedRealtime),
             running = false,
-            endAtEpochMillis = 0L,
+            startedElapsedRealtime = 0L,
+            startedWallMillis = 0L,
         )
         upsert(updated)
         return updated
@@ -64,7 +77,8 @@ class TimerStore(context: Context) {
         val updated = item.copy(
             remainingMillis = item.durationMillis,
             running = false,
-            endAtEpochMillis = 0L,
+            startedElapsedRealtime = 0L,
+            startedWallMillis = 0L,
         )
         upsert(updated)
         return updated
@@ -76,7 +90,8 @@ class TimerStore(context: Context) {
         val updated = item.copy(
             remainingMillis = 0L,
             running = false,
-            endAtEpochMillis = 0L,
+            startedElapsedRealtime = 0L,
+            startedWallMillis = 0L,
         )
         upsert(updated)
         return updated
@@ -97,14 +112,19 @@ class TimerStore(context: Context) {
         val sorted = items.sortedBy { it.id }
         prefs.edit().putString(KEY_TIMERS, sorted.joinToString("\n", transform = ::encode)).apply()
         mutableTimers.value = sorted
+        ClockWidgetUpdater.updateTimerWidgets(appContext)
     }
 
-    private fun readAll(): List<TimerEntry> = prefs.getString(KEY_TIMERS, "")
-        .orEmpty()
-        .lineSequence()
-        .filter { it.isNotBlank() }
-        .mapNotNull(::decode)
-        .toList()
+    private fun readAll(): List<TimerEntry> {
+        val nowWall = System.currentTimeMillis()
+        val nowElapsed = SystemClock.elapsedRealtime()
+        return prefs.getString(KEY_TIMERS, "")
+            .orEmpty()
+            .lineSequence()
+            .filter { it.isNotBlank() }
+            .mapNotNull { decode(it, nowWall, nowElapsed) }
+            .toList()
+    }
 
     private fun encode(item: TimerEntry): String {
         val label = Base64.getUrlEncoder().withoutPadding()
@@ -114,26 +134,56 @@ class TimerStore(context: Context) {
             item.durationMillis,
             item.remainingMillis,
             item.running,
-            item.endAtEpochMillis,
+            item.startedElapsedRealtime,
+            item.startedWallMillis,
             label,
         ).joinToString("|")
     }
 
-    private fun decode(raw: String): TimerEntry? = runCatching {
+    private fun decode(
+        raw: String,
+        nowWall: Long,
+        nowElapsed: Long,
+    ): TimerEntry? = runCatching {
         val parts = raw.split("|")
-        if (parts.size != 6) return@runCatching null
-        TimerEntry(
-            id = parts[0].toLong(),
-            durationMillis = parts[1].toLong(),
-            remainingMillis = parts[2].toLong(),
-            running = parts[3].toBooleanStrict(),
-            endAtEpochMillis = parts[4].toLong(),
-            label = String(
-                Base64.getUrlDecoder().decode(parts[5]),
-                StandardCharsets.UTF_8,
-            ),
-        )
+        when (parts.size) {
+            7 -> TimerEntry(
+                id = parts[0].toLong(),
+                durationMillis = parts[1].toLong(),
+                remainingMillis = parts[2].toLong(),
+                running = parts[3].toBooleanStrict(),
+                startedElapsedRealtime = parts[4].toLong(),
+                startedWallMillis = parts[5].toLong(),
+                label = decodeLabel(parts[6]),
+            )
+            6 -> {
+                val duration = parts[1].toLong()
+                val storedRemaining = parts[2].toLong()
+                val wasRunning = parts[3].toBooleanStrict()
+                val legacyEndAtWall = parts[4].toLong()
+                val migratedRemaining = if (wasRunning) {
+                    (legacyEndAtWall - nowWall).coerceIn(0L, duration)
+                } else {
+                    storedRemaining.coerceIn(0L, duration)
+                }
+                TimerEntry(
+                    id = parts[0].toLong(),
+                    durationMillis = duration,
+                    remainingMillis = migratedRemaining,
+                    running = wasRunning && migratedRemaining > 0L,
+                    startedElapsedRealtime = if (wasRunning && migratedRemaining > 0L) nowElapsed else 0L,
+                    startedWallMillis = if (wasRunning && migratedRemaining > 0L) nowWall else 0L,
+                    label = decodeLabel(parts[5]),
+                )
+            }
+            else -> null
+        }
     }.getOrNull()
+
+    private fun decodeLabel(raw: String): String = String(
+        Base64.getUrlDecoder().decode(raw),
+        StandardCharsets.UTF_8,
+    )
 
     private companion object {
         const val KEY_TIMERS = "timers"

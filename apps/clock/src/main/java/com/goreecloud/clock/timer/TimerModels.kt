@@ -1,16 +1,33 @@
 package com.goreecloud.clock.timer
 
+import android.os.SystemClock
+
 data class TimerEntry(
     val id: Long,
     val label: String,
     val durationMillis: Long,
     val remainingMillis: Long,
     val running: Boolean,
-    val endAtEpochMillis: Long,
+    val startedElapsedRealtime: Long,
+    val startedWallMillis: Long,
 ) {
-    fun remainingAt(nowEpochMillis: Long): Long =
-        if (running) (endAtEpochMillis - nowEpochMillis).coerceAtLeast(0L)
-        else remainingMillis.coerceAtLeast(0L)
+    fun remainingAt(
+        nowEpochMillis: Long = System.currentTimeMillis(),
+        elapsedRealtime: Long = SystemClock.elapsedRealtime(),
+    ): Long {
+        if (!running) return remainingMillis.coerceAtLeast(0L)
+
+        val elapsed = if (
+            startedElapsedRealtime > 0L &&
+            elapsedRealtime >= startedElapsedRealtime
+        ) {
+            elapsedRealtime - startedElapsedRealtime
+        } else {
+            (nowEpochMillis - startedWallMillis).coerceAtLeast(0L)
+        }
+
+        return (remainingMillis - elapsed).coerceAtLeast(0L)
+    }
 }
 
 object DurationFormatter {

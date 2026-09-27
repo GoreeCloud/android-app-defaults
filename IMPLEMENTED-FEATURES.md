@@ -314,3 +314,25 @@ PR #30 was squash-merged as `979972f2564b6ebd63ed59aeb658cbf4cd261eb1`. Exact me
 
 This remains Development emulator evidence. Representative physical-device/OEM and assistive-technology acceptance remain open.
 
+
+
+## GoreeCloud Clock — Draft PR #50 Development candidate
+
+The following source is implemented on the open Clock candidate branch and is not represented as authoritative `main` until integration:
+
+- independent Android application module `:apps:clock` with Development side-by-side package identity;
+- no Internet or network-state permission, disabled automatic backup, and disabled cleartext traffic;
+- digital and analog local clock displays with 12/24-hour preference, full-screen mode, and bedside mode;
+- saved world clocks with add/remove/reorder, IANA time-zone handling, UTC offsets, and DST-aware Java time semantics;
+- multiple local alarms with one-time/repeating schedules, labels, enable/disable/delete, vibration, configurable snooze, exact Android alarm scheduling, restart/time/time-zone restoration, notification actions, and full-screen alarm presentation;
+- multiple labeled timers with start/pause/resume/reset/delete, exact completion scheduling, persisted state, and monotonic elapsed-realtime countdown semantics that are isolated from wall-clock changes during the current boot;
+- stopwatch start/pause/resume/reset and persisted lap history;
+- System/Light/Dark theme selection, digital/analog preference, 12/24-hour preference, haptic preference, and reduced-motion preference;
+- home-screen Clock widget using platform TextClock behavior;
+- home-screen next-alarm widget with local schedule/label summary and direct Alarms navigation;
+- home-screen running-timer widget using platform Chronometer countdown behavior and direct Timer navigation;
+- widget refresh propagation when relevant local preferences, alarms, timers, or system time/time-zone state changes;
+- JVM regression coverage for alarm scheduling, timer monotonic/reboot-fallback semantics, duration formatting, stopwatch time-base behavior, and widget selection logic;
+- fail-closed Clock manifest validation that prohibits network permissions and constrains exported receivers to system lifecycle and app-widget entry points.
+
+These are Development source capabilities only. Clock-specific runtime/rendered acceptance, representative-device/OEM reliability, assistive-technology acceptance, production signing/distribution, and lifecycle promotion remain open.

@@ -455,3 +455,25 @@ PR #30 was squash-merged as `979972f2564b6ebd63ed59aeb658cbf4cd261eb1`. Exact me
 
 This is a presentation-only Development refinement. Tracker semantics, persistence, permissions, networking, time calculations, and lifecycle state are unchanged. Representative physical-device/OEM, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
 
+
+
+## Unreleased — GoreeCloud Clock Draft PR #50
+
+### Added
+
+- New independent `:apps:clock` Development application candidate.
+- Local digital/analog clock, world-clock, alarm, timer, and stopwatch surfaces.
+- Local-only preferences and persistence with no network permission.
+- Exact Android alarm/timer scheduling and reboot/time/time-zone restoration.
+- Clock, next-alarm, and running-timer home-screen widgets.
+- Repository-local Clock project specification and Development branding boundary.
+- Clock manifest privacy/export guard and focused JVM tests.
+
+### Changed
+
+- Running timers now use monotonic elapsed-realtime semantics during a boot session instead of depending on wall-clock epoch progression. A wall-clock fallback is retained only for reconstructing remaining time after a reboot resets the monotonic clock.
+- Repository CI includes a dedicated Clock test/lint/assemble/privacy-guard job.
+
+### Status
+
+This changelog entry describes an open Development candidate. It does not claim integration to `main`, representative-device acceptance, release, production, or Stable status.

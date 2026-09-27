@@ -136,6 +136,8 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_DESTINATION = "destination"
+        const val DESTINATION_CLOCK = "clock"
         const val DESTINATION_ALARMS = "alarms"
+        const val DESTINATION_TIMER = "timer"
     }
 }

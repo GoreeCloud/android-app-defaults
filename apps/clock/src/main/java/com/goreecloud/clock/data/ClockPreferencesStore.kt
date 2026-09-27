@@ -2,6 +2,7 @@ package com.goreecloud.clock.data
 
 import android.content.Context
 import android.text.format.DateFormat
+import com.goreecloud.clock.widget.ClockWidgetUpdater
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -26,8 +27,9 @@ data class ClockPreferences(
 )
 
 class ClockPreferencesStore(context: Context) {
-    private val prefs = context.getSharedPreferences("clock_preferences", Context.MODE_PRIVATE)
-    private val default24Hour = DateFormat.is24HourFormat(context)
+    private val appContext = context.applicationContext
+    private val prefs = appContext.getSharedPreferences("clock_preferences", Context.MODE_PRIVATE)
+    private val default24Hour = DateFormat.is24HourFormat(appContext)
 
     private val mutableState = MutableStateFlow(read())
     val state = mutableState.asStateFlow()
@@ -59,6 +61,7 @@ class ClockPreferencesStore(context: Context) {
     private fun update(block: android.content.SharedPreferences.Editor.() -> Unit) {
         prefs.edit().apply(block).apply()
         mutableState.value = read()
+        ClockWidgetUpdater.updateAll(appContext)
     }
 
     private fun read(): ClockPreferences {

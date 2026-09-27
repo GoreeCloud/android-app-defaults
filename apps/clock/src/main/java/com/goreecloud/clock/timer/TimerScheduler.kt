@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.SystemClock
 import com.goreecloud.clock.ClockApplication
 
 class TimerScheduler(private val context: Context) {
@@ -18,13 +19,14 @@ class TimerScheduler(private val context: Context) {
         if (!timer.running) return true
         if (!canScheduleExactAlarms()) return false
 
-        val triggerAt = maxOf(
-            timer.endAtEpochMillis,
-            System.currentTimeMillis() + 250L,
+        val remaining = timer.remainingAt(
+            nowEpochMillis = System.currentTimeMillis(),
+            elapsedRealtime = SystemClock.elapsedRealtime(),
         )
+        val triggerAtElapsed = SystemClock.elapsedRealtime() + remaining.coerceAtLeast(250L)
         alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAt,
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            triggerAtElapsed,
             pendingIntent(timer.id),
         )
         return true

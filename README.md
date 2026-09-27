@@ -4,7 +4,7 @@ A privacy-focused monorepo of lightweight replacements for common Android defaul
 
 ## Current Development state
 
-The repository is in **Development**. GoreeCloud Since is the first application module under `apps/since/`.
+The repository is in **Development**. Authoritative `main` contains GoreeCloud Since under `apps/since/`. Draft PR #50 carries the first GoreeCloud Clock candidate under `apps/clock/`; Clock is not represented as integrated into `main` until that PR is accepted.
 
 Verified `main` contains the independent Android application foundation and Room persistence foundation: local-only/fail-closed manifest behavior, calendar-aware elapsed-time semantics, Room schema v1, SQLite invariants, transactional tracker aggregate creation, repository/domain mapping, committed schema evidence, and Android 16 runtime database tests.
 
@@ -22,6 +22,8 @@ Until a verified Gradle Wrapper is added, CI bootstraps Gradle 8.11.1 explicitly
 
 ```bash
 gradle :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug :apps:since:assembleDebugAndroidTest
+
+gradle :apps:clock:testDebugUnitTest :apps:clock:lintDebug :apps:clock:assembleDebug
 ```
 
 ## Repository records
@@ -31,3 +33,12 @@ gradle :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleD
 - [Changelogs](CHANGELOGS.md)
 
 GitHub issue #1 tracks the current GoreeCloud Since Development and stabilization work.
+
+
+## GoreeCloud Clock Development candidate
+
+Draft PR #50 adds an independently installable, offline-first Clock application without adding Internet or network-state permission. The candidate includes local digital/analog clock displays, world clocks, alarms, multiple timers, stopwatch laps, full-screen/bedside presentation, local preferences, exact Android scheduling, reboot/time/time-zone restoration, and three home-screen widgets for clock, next-alarm, and running-timer information.
+
+Running timer elapsed-time semantics use Android's monotonic elapsed-realtime clock during a boot session, with a bounded wall-clock fallback only after reboot. This prevents manual/system wall-clock changes from incorrectly shifting an already-running timer.
+
+The Clock candidate remains Development. Source/build validation, widgets, or emulator evidence do not establish representative-device/OEM alarm delivery, Doze/reboot acceptance, accessibility acceptance, protected Development signing/update continuity, Release Candidate, production, or Stable status.

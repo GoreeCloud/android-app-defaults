@@ -115,3 +115,22 @@ The current dedicated Since Compose theme is an application-local presentation m
 ## Other Android App Defaults applications
 
 The broader Android App Defaults suite remains planned. No application other than the bounded Since Development source is represented by this repository as currently implemented.
+
+
+## GoreeCloud Clock — remaining work after Draft PR #50 foundation
+
+The Clock candidate still requires the following before broader qualification:
+
+- selectable alarm sounds with an Android-safe playback model;
+- gradual alarm-volume behavior with reliable stop/snooze/dismiss lifecycle handling;
+- richer alarm editing and upcoming-alarm presentation;
+- additional widget configuration, responsive widget sizing, and representative-launcher acceptance;
+- lock-screen/system surfaces only where supported by current Android APIs;
+- full haptic-preference application across applicable controls and alerts;
+- canonical GoreeCloud Clock branding from the authoritative branding repository;
+- Clock-specific Android runtime/instrumentation and rendered visual evidence;
+- TalkBack, Switch Access, hardware-keyboard, 200% text/reflow, RTL/localization, contrast, reduced-motion, and representative-device accessibility acceptance;
+- physical-device/OEM exact-alarm, notification, full-screen-intent, reboot, Doze, wall-clock-change, time-zone-change, and DST acceptance;
+- performance, memory, battery/wakeup, recovery/rollback, protected Development signing, monotonic versionCode/update-in-place, production signing/distribution, Release Candidate, production, and Stable/Anchor qualification.
+
+No planned item in this section is represented as implemented merely because it is recorded.

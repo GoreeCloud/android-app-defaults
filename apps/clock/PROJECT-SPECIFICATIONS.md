@@ -48,8 +48,9 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Multiple simultaneous timers.
 - Labels, start, pause, resume, reset, delete.
 - Exact completion scheduling and local state preservation.
-- Restart restoration for active timers.
-- Future work: richer presets, widget integration, and rendered/runtime acceptance evidence.
+- Monotonic elapsed-realtime countdown behavior within the current boot so wall-clock changes do not shift active timers.
+- Restart restoration for active timers using a wall-clock fallback only when the monotonic clock resets.
+- Future work: richer presets and rendered/runtime acceptance evidence.
 
 ### Stopwatch
 
@@ -67,11 +68,18 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 
 ### Widgets and system integration
 
-Planned after the application foundation is validated:
+The current Development candidate implements:
 
-- Home-screen clock widgets.
-- Alarm information widget.
-- Timer information widget where appropriate.
+- Home-screen clock widget using platform TextClock behavior.
+- Home-screen next-alarm information widget.
+- Home-screen running-timer information widget using platform Chronometer countdown behavior.
+- Direct widget navigation into the relevant Clock, Alarms, or Timer surface.
+- Local widget refresh when relevant preferences, alarms, timers, package/time/time-zone lifecycle state changes.
+
+Still planned:
+
+- Widget configuration and expanded responsive layouts.
+- Representative-launcher rendered/accessibility acceptance.
 - Lock-screen/system surfaces supported by Android.
 - Additional notification actions and platform integration where justified.
 
