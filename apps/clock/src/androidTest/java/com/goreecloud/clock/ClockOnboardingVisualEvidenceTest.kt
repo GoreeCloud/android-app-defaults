@@ -25,7 +25,7 @@ class ClockOnboardingVisualEvidenceTest {
         val store = (composeRule.activity.application as ClockApplication).preferencesStore
         store.setTheme(ThemePreference.LIGHT)
         store.setHintsEnabled(true)
-        store.replayOnboarding()
+        store.resetOnboardingGuidance()
         composeRule.waitForIdle()
     }
 
