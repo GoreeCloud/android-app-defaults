@@ -477,3 +477,10 @@ This is a presentation-only Development refinement. Tracker semantics, persisten
 ### Status
 
 This changelog entry describes an open Development candidate. It does not claim integration to `main`, representative-device acceptance, release, production, or Stable status.
+
+
+### Fixed — Clock visual acceptance follow-up
+
+- Reduced the normal analog clock face responsively on constrained handheld heights so the date, zone, full-screen action, and bedside action remain visible instead of being clipped below the viewport.
+- Replaced colored emoji bottom-navigation glyphs and wrapped text labels with monochrome GoreeCloud-owned vector-style Compose icons. The active destination remains visible in the top app bar and each navigation icon carries an accessibility content description.
+- Extended Android 16 navigation/visual tests so the analog face must keep both presentation actions reachable before rendered evidence is accepted.

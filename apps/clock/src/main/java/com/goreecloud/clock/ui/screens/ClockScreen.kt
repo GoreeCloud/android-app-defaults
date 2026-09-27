@@ -5,6 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ClockPreferences
@@ -89,13 +91,22 @@ fun ClockScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    BoxWithConstraints(
+        modifier = modifier.fillMaxSize(),
     ) {
+        val normalAnalogSize = when {
+            maxHeight >= 760.dp -> 252.dp
+            maxHeight >= 640.dp -> 216.dp
+            else -> 184.dp
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -117,6 +128,7 @@ fun ClockScreen(
             now = now,
             use24Hour = preferences.use24Hour,
             face = preferences.clockFace,
+            analogSize = normalAnalogSize,
         )
         Text(
             text = now.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
@@ -142,6 +154,7 @@ fun ClockScreen(
             onClick = { mode = PresentationMode.BEDSIDE },
         ) {
             Text("Bedside mode")
+        }
         }
     }
 }
@@ -204,6 +217,7 @@ private fun ClockFace(
     face: ClockFacePreference,
     forcedColor: Color? = null,
     large: Boolean = false,
+    analogSize: Dp? = null,
 ) {
     val color = forcedColor ?: MaterialTheme.colorScheme.onBackground
     if (face == ClockFacePreference.DIGITAL) {
@@ -219,7 +233,7 @@ private fun ClockFace(
         AnalogClock(
             now = now,
             color = color,
-            modifier = Modifier.size(if (large) 320.dp else 260.dp),
+            modifier = Modifier.size(analogSize ?: if (large) 320.dp else 216.dp),
         )
     }
 }

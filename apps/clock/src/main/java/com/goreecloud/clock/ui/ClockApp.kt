@@ -1,5 +1,6 @@
 package com.goreecloud.clock.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,8 +28,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContentColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.goreecloud.clock.MainActivity
 import com.goreecloud.clock.alarm.AlarmScheduler
@@ -45,12 +52,12 @@ import com.goreecloud.clock.ui.screens.StopwatchScreen
 import com.goreecloud.clock.ui.screens.TimerScreen
 import com.goreecloud.clock.ui.screens.WorldClockScreen
 
-private enum class ClockDestination(val label: String, val glyph: String) {
-    CLOCK("Clock", "◷"),
-    ALARMS("Alarms", "⏰"),
-    TIMER("Timer", "⌛"),
-    STOPWATCH("Stopwatch", "⏱"),
-    WORLD("World", "◎"),
+private enum class ClockDestination(val label: String) {
+    CLOCK("Clock"),
+    ALARMS("Alarms"),
+    TIMER("Timer"),
+    STOPWATCH("Stopwatch"),
+    WORLD("World"),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,8 +111,7 @@ fun ClockApp(
                     NavigationBarItem(
                         selected = destination == item,
                         onClick = { destination = item },
-                        icon = { Text(item.glyph) },
-                        label = { Text(item.label) },
+                        icon = { ClockDestinationIcon(item) },
                     )
                 }
             }
@@ -272,5 +278,160 @@ private fun ToggleRow(
     ) {
         Text(label)
         Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+
+@Composable
+private fun ClockDestinationIcon(destination: ClockDestination) {
+    val color = LocalContentColor.current
+    Canvas(
+        modifier = Modifier
+            .size(24.dp)
+            .semantics { contentDescription = destination.label },
+    ) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val strokeWidth = size.minDimension * 0.075f
+        val stroke = Stroke(width = strokeWidth)
+        val radius = size.minDimension * 0.34f
+
+        when (destination) {
+            ClockDestination.CLOCK -> {
+                drawCircle(color = color, radius = radius, center = center, style = stroke)
+                drawLine(
+                    color = color,
+                    start = center,
+                    end = Offset(center.x, center.y - radius * 0.58f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = color,
+                    start = center,
+                    end = Offset(center.x + radius * 0.52f, center.y),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+            }
+
+            ClockDestination.ALARMS -> {
+                val alarmCenter = Offset(center.x, center.y + size.height * 0.04f)
+                val alarmRadius = radius * 0.82f
+                drawCircle(color = color, radius = alarmRadius, center = alarmCenter, style = stroke)
+                drawLine(
+                    color = color,
+                    start = alarmCenter,
+                    end = Offset(alarmCenter.x, alarmCenter.y - alarmRadius * 0.5f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = color,
+                    start = alarmCenter,
+                    end = Offset(alarmCenter.x + alarmRadius * 0.46f, alarmCenter.y),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = color,
+                    start = Offset(center.x - alarmRadius * 0.78f, center.y - alarmRadius * 0.82f),
+                    end = Offset(center.x - alarmRadius * 0.35f, center.y - alarmRadius * 1.14f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = color,
+                    start = Offset(center.x + alarmRadius * 0.78f, center.y - alarmRadius * 0.82f),
+                    end = Offset(center.x + alarmRadius * 0.35f, center.y - alarmRadius * 1.14f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = color,
+                    start = Offset(center.x - alarmRadius * 0.58f, center.y + alarmRadius * 0.8f),
+                    end = Offset(center.x - alarmRadius * 0.82f, center.y + alarmRadius * 1.08f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = color,
+                    start = Offset(center.x + alarmRadius * 0.58f, center.y + alarmRadius * 0.8f),
+                    end = Offset(center.x + alarmRadius * 0.82f, center.y + alarmRadius * 1.08f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round,
+                )
+            }
+
+            ClockDestination.TIMER -> {
+                val left = center.x - radius * 0.72f
+                val right = center.x + radius * 0.72f
+                val top = center.y - radius
+                val bottom = center.y + radius
+                drawLine(color, Offset(left, top), Offset(right, top), strokeWidth, StrokeCap.Round)
+                drawLine(color, Offset(left, bottom), Offset(right, bottom), strokeWidth, StrokeCap.Round)
+                drawLine(color, Offset(left, top), center, strokeWidth, StrokeCap.Round)
+                drawLine(color, Offset(right, top), center, strokeWidth, StrokeCap.Round)
+                drawLine(color, center, Offset(left, bottom), strokeWidth, StrokeCap.Round)
+                drawLine(color, center, Offset(right, bottom), strokeWidth, StrokeCap.Round)
+            }
+
+            ClockDestination.STOPWATCH -> {
+                val watchCenter = Offset(center.x, center.y + size.height * 0.05f)
+                val watchRadius = radius * 0.9f
+                drawCircle(color = color, radius = watchRadius, center = watchCenter, style = stroke)
+                drawLine(
+                    color,
+                    Offset(center.x, watchCenter.y - watchRadius),
+                    Offset(center.x, watchCenter.y - watchRadius * 1.38f),
+                    strokeWidth,
+                    StrokeCap.Round,
+                )
+                drawLine(
+                    color,
+                    Offset(center.x - watchRadius * 0.35f, watchCenter.y - watchRadius * 1.38f),
+                    Offset(center.x + watchRadius * 0.35f, watchCenter.y - watchRadius * 1.38f),
+                    strokeWidth,
+                    StrokeCap.Round,
+                )
+                drawLine(
+                    color,
+                    Offset(center.x + watchRadius * 0.72f, watchCenter.y - watchRadius * 0.72f),
+                    Offset(center.x + watchRadius * 1.04f, watchCenter.y - watchRadius * 1.02f),
+                    strokeWidth,
+                    StrokeCap.Round,
+                )
+                drawLine(
+                    color,
+                    watchCenter,
+                    Offset(watchCenter.x + watchRadius * 0.42f, watchCenter.y - watchRadius * 0.46f),
+                    strokeWidth,
+                    StrokeCap.Round,
+                )
+            }
+
+            ClockDestination.WORLD -> {
+                drawCircle(color = color, radius = radius, center = center, style = stroke)
+                drawLine(
+                    color,
+                    Offset(center.x - radius, center.y),
+                    Offset(center.x + radius, center.y),
+                    strokeWidth,
+                    StrokeCap.Round,
+                )
+                drawLine(
+                    color,
+                    Offset(center.x, center.y - radius),
+                    Offset(center.x, center.y + radius),
+                    strokeWidth,
+                    StrokeCap.Round,
+                )
+                drawCircle(
+                    color = color,
+                    radius = radius * 0.5f,
+                    center = center,
+                    style = Stroke(width = strokeWidth * 0.8f),
+                )
+            }
+        }
     }
 }

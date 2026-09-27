@@ -3,6 +3,7 @@ package com.goreecloud.clock
 import android.graphics.Bitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,9 +36,11 @@ class ClockVisualEvidenceTest {
         capture("clock-digital")
 
         composeRule.onNodeWithText("Analog").performClick()
+        composeRule.onNodeWithText("Full-screen clock").assertIsDisplayed()
+        composeRule.onNodeWithText("Bedside mode").assertIsDisplayed()
         capture("clock-analog")
 
-        composeRule.onNodeWithText("Alarms").performClick()
+        composeRule.onNodeWithContentDescription("Alarms").performClick()
         composeRule.onNodeWithText("Add alarm").assertIsDisplayed()
         capture("alarms-empty")
         composeRule.onNodeWithText("Add alarm").performClick()
@@ -45,7 +48,7 @@ class ClockVisualEvidenceTest {
         capture("alarm-editor")
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithText("Timer").performClick()
+        composeRule.onNodeWithContentDescription("Timer").performClick()
         composeRule.onNodeWithText("Add timer").assertIsDisplayed()
         capture("timer-empty")
         composeRule.onNodeWithText("Add timer").performClick()
@@ -53,11 +56,11 @@ class ClockVisualEvidenceTest {
         capture("timer-editor")
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithText("Stopwatch").performClick()
+        composeRule.onNodeWithContentDescription("Stopwatch").performClick()
         composeRule.onNodeWithText("Laps").assertIsDisplayed()
         capture("stopwatch")
 
-        composeRule.onNodeWithText("World").performClick()
+        composeRule.onNodeWithContentDescription("World").performClick()
         composeRule.onNodeWithText("Local").assertIsDisplayed()
         capture("world-clock")
         composeRule.onNodeWithText("Add world clock").performClick()
@@ -73,7 +76,7 @@ class ClockVisualEvidenceTest {
         capture("settings-dark")
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithText("Clock").performClick()
+        composeRule.onNodeWithContentDescription("Clock").performClick()
         composeRule.onNodeWithText("Digital").performClick()
         composeRule.onNodeWithText("Digital").assertIsDisplayed()
         capture("clock-digital-dark")

@@ -2,6 +2,7 @@ package com.goreecloud.clock
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,22 +29,26 @@ class ClockNavigationTest {
     @Test
     fun principalClockSurfacesAndEditorsRemainReachable() {
         composeRule.onNodeWithText("Digital").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Analog").performClick()
+        composeRule.onNodeWithText("Full-screen clock").assertIsDisplayed()
+        composeRule.onNodeWithText("Bedside mode").assertIsDisplayed()
+        composeRule.onNodeWithText("Digital").performClick()
 
-        composeRule.onNodeWithText("Alarms").performClick()
+        composeRule.onNodeWithContentDescription("Alarms").performClick()
         composeRule.onNodeWithText("Add alarm").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("New alarm").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithText("Timer").performClick()
+        composeRule.onNodeWithContentDescription("Timer").performClick()
         composeRule.onNodeWithText("Add timer").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("New timer").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithText("Stopwatch").performClick()
+        composeRule.onNodeWithContentDescription("Stopwatch").performClick()
         composeRule.onNodeWithText("Laps").assertIsDisplayed()
         composeRule.onNodeWithText("Start").assertIsDisplayed()
 
-        composeRule.onNodeWithText("World").performClick()
+        composeRule.onNodeWithContentDescription("World").performClick()
         composeRule.onNodeWithText("Local").assertIsDisplayed()
         composeRule.onNodeWithText("Add world clock").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Add city").assertIsDisplayed()
@@ -54,7 +59,7 @@ class ClockNavigationTest {
         composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithText("Clock").performClick()
+        composeRule.onNodeWithContentDescription("Clock").performClick()
         composeRule.onNodeWithText("Digital").assertIsDisplayed()
     }
 }
