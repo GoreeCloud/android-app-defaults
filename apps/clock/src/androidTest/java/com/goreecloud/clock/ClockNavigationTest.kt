@@ -23,6 +23,9 @@ class ClockNavigationTest {
         val app = composeRule.activity.application as ClockApplication
         app.preferencesStore.setTheme(ThemePreference.LIGHT)
         app.preferencesStore.setClockFace(ClockFacePreference.DIGITAL)
+        app.preferencesStore.completeOnboarding()
+        app.preferencesStore.setHintsEnabled(true)
+        app.preferencesStore.resetDismissedHints()
         composeRule.waitForIdle()
     }
 
@@ -57,6 +60,8 @@ class ClockNavigationTest {
         composeRule.onNodeWithText("Settings").performClick()
         composeRule.onNodeWithText("Clock settings").assertIsDisplayed()
         composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
+        composeRule.onNodeWithText("Contextual hints").assertIsDisplayed()
+        composeRule.onNodeWithText("Replay onboarding").assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
         composeRule.onNodeWithContentDescription("Clock").performClick()

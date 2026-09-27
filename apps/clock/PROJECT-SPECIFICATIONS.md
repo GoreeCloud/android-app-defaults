@@ -66,6 +66,23 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Haptic preference and reduced-motion preference.
 - Future work: preference application to all supported interactions and dedicated accessibility acceptance.
 
+### First-use onboarding and contextual guidance
+
+The Development candidate implements:
+
+- A concise four-stage first-use flow: Welcome, Time & display, Guidance & permissions, and Ready.
+- Durable local onboarding step/completion state with interruption and ordinary restart resume.
+- Truthful permission/readiness explanations without requesting optional Android permissions at startup.
+- Replay from Settings without deleting product data or configuration.
+- Contextual hints enabled by default with a global toggle, per-hint dismissal, and reset support.
+- Alarm/timer reliability hints at the relevant workflows.
+
+Still required before acceptance:
+
+- Representative-device first-use/recovery behavior.
+- TalkBack, Switch Access, keyboard, 200% text/reflow, localization/RTL, and reduced-motion onboarding acceptance.
+- Upgrade-state migration acceptance as onboarding evolves.
+
 ### Widgets and system integration
 
 The current Development candidate implements:

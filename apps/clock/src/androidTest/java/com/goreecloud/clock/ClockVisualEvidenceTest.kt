@@ -27,6 +27,9 @@ class ClockVisualEvidenceTest {
         val app = composeRule.activity.application as ClockApplication
         app.preferencesStore.setTheme(ThemePreference.LIGHT)
         app.preferencesStore.setClockFace(ClockFacePreference.DIGITAL)
+        app.preferencesStore.completeOnboarding()
+        app.preferencesStore.setHintsEnabled(true)
+        app.preferencesStore.resetDismissedHints()
         composeRule.waitForIdle()
     }
 

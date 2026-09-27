@@ -134,3 +134,8 @@ The Clock candidate still requires the following before broader qualification:
 - performance, memory, battery/wakeup, recovery/rollback, protected Development signing, monotonic versionCode/update-in-place, production signing/distribution, Release Candidate, production, and Stable/Anchor qualification.
 
 No planned item in this section is represented as implemented merely because it is recorded.
+
+
+### Clock onboarding acceptance still required
+
+The Clock candidate now contains first-use onboarding and contextual-hint source, but the requirement is not fully accepted until exact-head automation and representative-device/form-factor/accessibility validation cover clean first use, interruption/resume, replay, hint dismissal/global disable/re-enable, large text, RTL/localization, keyboard/switch access, reduced motion, and upgrade persistence.

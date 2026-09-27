@@ -17,6 +17,23 @@ enum class ClockFacePreference {
     ANALOG,
 }
 
+enum class OnboardingStep(val id: String) {
+    WELCOME("welcome"),
+    TIME_DISPLAY("time_display"),
+    GUIDANCE("guidance"),
+    READY("ready");
+
+    companion object {
+        fun fromId(raw: String?): OnboardingStep =
+            entries.firstOrNull { it.id == raw } ?: WELCOME
+    }
+}
+
+object ClockHintIds {
+    const val ALARMS_RELIABILITY = "alarms_reliability_v1"
+    const val TIMER_RELIABILITY = "timer_reliability_v1"
+}
+
 data class ClockPreferences(
     val theme: ThemePreference,
     val use24Hour: Boolean,
@@ -24,6 +41,10 @@ data class ClockPreferences(
     val hapticsEnabled: Boolean,
     val reducedMotion: Boolean,
     val worldZones: List<String>,
+    val onboardingCompleted: Boolean,
+    val onboardingStep: OnboardingStep,
+    val hintsEnabled: Boolean,
+    val dismissedHints: Set<String>,
 )
 
 class ClockPreferencesStore(context: Context) {
@@ -58,10 +79,41 @@ class ClockPreferencesStore(context: Context) {
         putString(KEY_WORLD_ZONES, zones.distinct().joinToString(","))
     }
 
-    private fun update(block: android.content.SharedPreferences.Editor.() -> Unit) {
+    fun setOnboardingStep(step: OnboardingStep) = update(refreshWidgets = false) {
+        putString(KEY_ONBOARDING_STEP, step.id)
+    }
+
+    fun completeOnboarding() = update(refreshWidgets = false) {
+        putBoolean(KEY_ONBOARDING_COMPLETED, true)
+        putString(KEY_ONBOARDING_STEP, OnboardingStep.READY.id)
+    }
+
+    fun replayOnboarding() = update(refreshWidgets = false) {
+        putBoolean(KEY_ONBOARDING_COMPLETED, false)
+        putString(KEY_ONBOARDING_STEP, OnboardingStep.WELCOME.id)
+    }
+
+    fun setHintsEnabled(value: Boolean) = update(refreshWidgets = false) {
+        putBoolean(KEY_HINTS_ENABLED, value)
+    }
+
+    fun dismissHint(id: String) = update(refreshWidgets = false) {
+        putStringSet(KEY_DISMISSED_HINTS, readDismissedHints() + id)
+    }
+
+    fun resetDismissedHints() = update(refreshWidgets = false) {
+        putStringSet(KEY_DISMISSED_HINTS, emptySet())
+    }
+
+    private fun update(
+        refreshWidgets: Boolean = true,
+        block: android.content.SharedPreferences.Editor.() -> Unit,
+    ) {
         prefs.edit().apply(block).apply()
         mutableState.value = read()
-        ClockWidgetUpdater.updateAll(appContext)
+        if (refreshWidgets) {
+            ClockWidgetUpdater.updateAll(appContext)
+        }
     }
 
     private fun read(): ClockPreferences {
@@ -85,8 +137,15 @@ class ClockPreferencesStore(context: Context) {
             hapticsEnabled = prefs.getBoolean(KEY_HAPTICS, true),
             reducedMotion = prefs.getBoolean(KEY_REDUCED_MOTION, false),
             worldZones = zones,
+            onboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false),
+            onboardingStep = OnboardingStep.fromId(prefs.getString(KEY_ONBOARDING_STEP, null)),
+            hintsEnabled = prefs.getBoolean(KEY_HINTS_ENABLED, true),
+            dismissedHints = readDismissedHints(),
         )
     }
+
+    private fun readDismissedHints(): Set<String> =
+        prefs.getStringSet(KEY_DISMISSED_HINTS, emptySet()).orEmpty().toSet()
 
     private inline fun <reified T : Enum<T>> enumValueOrDefault(
         raw: String?,
@@ -100,5 +159,9 @@ class ClockPreferencesStore(context: Context) {
         const val KEY_HAPTICS = "haptics"
         const val KEY_REDUCED_MOTION = "reduced_motion"
         const val KEY_WORLD_ZONES = "world_zones"
+        const val KEY_ONBOARDING_COMPLETED = "onboarding_completed_v1"
+        const val KEY_ONBOARDING_STEP = "onboarding_step_v1"
+        const val KEY_HINTS_ENABLED = "contextual_hints_enabled_v1"
+        const val KEY_DISMISSED_HINTS = "dismissed_hint_ids_v1"
     }
 }

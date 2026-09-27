@@ -343,3 +343,18 @@ These are Development source capabilities only. Clock-specific runtime/rendered 
 Draft PR #50 now also carries a Clock-specific Android 16 instrumentation lane. The candidate instrumentation exercises top-level Clock, Alarms, Timer, Stopwatch, World, and Settings reachability plus the alarm/timer editor entry points. A dedicated rendered-evidence test captures representative light/dark Clock application scenes from Android UI automation and publishes them as a CI artifact.
 
 This is candidate validation source until the exact head passes the new runtime workflow. Emulator evidence does not substitute for physical-device/OEM alarm delivery, launcher-widget acceptance, assistive-technology acceptance, performance/power evidence, signing/distribution, or release qualification.
+
+
+### Clock first-use onboarding and contextual-guidance candidate
+
+Draft PR #50 now includes a Clock-specific implementation of the mandatory First-Use Onboarding and Contextual Hints v1.0.0 requirement:
+
+- four stable first-use stages: Welcome, Time & display, Guidance & permissions, and Ready;
+- durable local onboarding step/completion state that survives activity/process recreation and ordinary restarts;
+- no permission wall at startup: notification and exact-alarm state is explained truthfully, while native requests remain contextual to alarm/timer workflows;
+- replay from Clock Settings without erasing alarms, timers, stopwatch state, world clocks, or ordinary preferences;
+- contextual hints enabled by default, with a global Settings toggle, per-hint dismissal, and reset/re-enable support;
+- alarm and timer reliability hints close to the relevant workflows;
+- Android 16 instrumentation for first-use progression, restart/resume behavior, completion, replay, hint controls, and rendered onboarding evidence.
+
+This remains Development source until its exact candidate head passes the complete Clock source/runtime/rendered-evidence workflow. Representative-device accessibility, localization/RTL, form-factor, recovery, and user-experience acceptance remain separate.

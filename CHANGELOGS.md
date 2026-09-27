@@ -484,3 +484,16 @@ This changelog entry describes an open Development candidate. It does not claim 
 - Reduced the normal analog clock face responsively on constrained handheld heights so the date, zone, full-screen action, and bedside action remain visible instead of being clipped below the viewport.
 - Replaced colored emoji bottom-navigation glyphs and wrapped text labels with monochrome GoreeCloud-owned vector-style Compose icons. The active destination remains visible in the top app bar and each navigation icon carries an accessibility content description.
 - Extended Android 16 navigation/visual tests so the analog face must keep both presentation actions reachable before rendered evidence is accepted.
+
+
+### Added — Clock onboarding and contextual guidance
+
+- Added a four-stage local-first first-use flow with stable persisted step identifiers and restart-safe resume behavior.
+- Added truthful readiness messaging for local/offline operation, notification state, and exact-alarm state without front-loading Android permission prompts.
+- Added Settings controls for onboarding replay, contextual-hint enable/disable, and resetting dismissed hints.
+- Added dismissible contextual reliability guidance to Alarms and Timer.
+- Added Android 16 first-use/resume/replay/hint automation and rendered onboarding scenes.
+
+### Boundary
+
+The onboarding tranche is Development until exact-head CI/runtime evidence passes. Representative-device accessibility, localization/RTL, form-factor, recovery, and upgrade acceptance remain open.

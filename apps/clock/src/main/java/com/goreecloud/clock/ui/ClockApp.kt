@@ -2,6 +2,8 @@ package com.goreecloud.clock.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,12 +44,14 @@ import com.goreecloud.clock.MainActivity
 import com.goreecloud.clock.alarm.AlarmScheduler
 import com.goreecloud.clock.alarm.AlarmStore
 import com.goreecloud.clock.data.ClockPreferences
+import com.goreecloud.clock.data.ClockHintIds
 import com.goreecloud.clock.data.ClockPreferencesStore
 import com.goreecloud.clock.data.ThemePreference
 import com.goreecloud.clock.stopwatch.StopwatchStore
 import com.goreecloud.clock.timer.TimerScheduler
 import com.goreecloud.clock.timer.TimerStore
 import com.goreecloud.clock.ui.screens.AlarmScreen
+import com.goreecloud.clock.ui.screens.OnboardingScreen
 import com.goreecloud.clock.ui.screens.ClockScreen
 import com.goreecloud.clock.ui.screens.StopwatchScreen
 import com.goreecloud.clock.ui.screens.TimerScreen
@@ -81,6 +85,16 @@ fun ClockApp(
 ) {
     var destination by rememberSaveable { mutableStateOf(ClockDestination.CLOCK) }
     var showSettings by remember { mutableStateOf(false) }
+
+    if (!preferences.onboardingCompleted) {
+        OnboardingScreen(
+            preferences = preferences,
+            preferencesStore = preferencesStore,
+            exactAlarmAccess = exactAlarmAccess,
+            notificationAccess = notificationAccess,
+        )
+        return
+    }
 
     LaunchedEffect(destinationRequest) {
         val requested = when (destinationRequest) {
@@ -132,6 +146,7 @@ fun ClockApp(
             notificationAccess = notificationAccess,
             onRequestExactAlarmAccess = onRequestExactAlarmAccess,
             onRequestNotificationAccess = onRequestNotificationAccess,
+            onDismissHint = preferencesStore::dismissHint,
             onPresentationModeChanged = onPresentationModeChanged,
         )
     }
@@ -160,6 +175,7 @@ private fun DestinationContent(
     notificationAccess: Boolean,
     onRequestExactAlarmAccess: () -> Unit,
     onRequestNotificationAccess: () -> Unit,
+    onDismissHint: (String) -> Unit,
     onPresentationModeChanged: (Boolean, Boolean) -> Unit,
 ) {
     val modifier = Modifier.padding(padding)
@@ -179,6 +195,8 @@ private fun DestinationContent(
             notificationAccess = notificationAccess,
             onRequestExactAlarmAccess = onRequestExactAlarmAccess,
             onRequestNotificationAccess = onRequestNotificationAccess,
+            showHint = preferences.hintsEnabled && ClockHintIds.ALARMS_RELIABILITY !in preferences.dismissedHints,
+            onDismissHint = { onDismissHint(ClockHintIds.ALARMS_RELIABILITY) },
         )
         ClockDestination.TIMER -> TimerScreen(
             modifier = modifier,
@@ -188,6 +206,8 @@ private fun DestinationContent(
             notificationAccess = notificationAccess,
             onRequestExactAlarmAccess = onRequestExactAlarmAccess,
             onRequestNotificationAccess = onRequestNotificationAccess,
+            showHint = preferences.hintsEnabled && ClockHintIds.TIMER_RELIABILITY !in preferences.dismissedHints,
+            onDismissHint = { onDismissHint(ClockHintIds.TIMER_RELIABILITY) },
         )
         ClockDestination.STOPWATCH -> StopwatchScreen(
             modifier = modifier,
@@ -213,7 +233,10 @@ private fun SettingsDialog(
         onDismissRequest = onDismiss,
         title = { Text("Clock settings") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text("Theme", style = MaterialTheme.typography.titleMedium)
                 ThemePreference.entries.forEach { option ->
                     SelectionRow(
@@ -239,6 +262,26 @@ private fun SettingsDialog(
                     checked = preferences.reducedMotion,
                     onCheckedChange = preferencesStore::setReducedMotion,
                 )
+                ToggleRow(
+                    label = "Contextual hints",
+                    checked = preferences.hintsEnabled,
+                    onCheckedChange = preferencesStore::setHintsEnabled,
+                )
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = preferencesStore::resetDismissedHints,
+                ) {
+                    Text("Reset dismissed hints")
+                }
+                TextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        onDismiss()
+                        preferencesStore.replayOnboarding()
+                    },
+                ) {
+                    Text("Replay onboarding")
+                }
             }
         },
         confirmButton = {

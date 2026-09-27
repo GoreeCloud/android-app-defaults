@@ -44,6 +44,8 @@ fun TimerScreen(
     notificationAccess: Boolean,
     onRequestExactAlarmAccess: () -> Unit,
     onRequestNotificationAccess: () -> Unit,
+    showHint: Boolean,
+    onDismissHint: () -> Unit,
 ) {
     val timers by timerStore.timers.collectAsStateWithLifecycle()
     var showAdd by remember { mutableStateOf(false) }
@@ -62,6 +64,14 @@ fun TimerScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (showHint) {
+            ContextualHintCard(
+                title = "Timers keep steady time",
+                body = "Running timers use Android's monotonic clock, so changing the wall clock does not shift the countdown during the current boot.",
+                onDismiss = onDismissHint,
+            )
+        }
+
         if (!exactAlarmAccess) {
             TimerPermissionCard(
                 title = "Exact alarm access is required",

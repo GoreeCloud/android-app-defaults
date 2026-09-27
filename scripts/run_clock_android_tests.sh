@@ -42,6 +42,8 @@ echo "Collecting rendered GoreeCloud Clock evidence."
 rm -rf ci-clock-screenshots
 mkdir -p ci-clock-screenshots
 for screenshot in \
+  onboarding-welcome \
+  onboarding-guidance \
   clock-digital \
   clock-analog \
   alarms-empty \

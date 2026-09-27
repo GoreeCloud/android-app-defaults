@@ -48,6 +48,8 @@ fun AlarmScreen(
     notificationAccess: Boolean,
     onRequestExactAlarmAccess: () -> Unit,
     onRequestNotificationAccess: () -> Unit,
+    showHint: Boolean,
+    onDismissHint: () -> Unit,
 ) {
     val alarms by alarmStore.alarms.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf<Alarm?>(null) }
@@ -59,6 +61,14 @@ fun AlarmScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (showHint) {
+            ContextualHintCard(
+                title = "Reliable alarms, only when you need them",
+                body = "Alarm data stays on this device. Android notification and exact-alarm access are requested only for dependable alert delivery.",
+                onDismiss = onDismissHint,
+            )
+        }
+
         if (!exactAlarmAccess) {
             PermissionCard(
                 title = "Exact alarm access is required",
