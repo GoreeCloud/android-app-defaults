@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ThemePreference
@@ -60,8 +61,8 @@ class ClockNavigationTest {
         composeRule.onNodeWithText("Settings").performClick()
         composeRule.onNodeWithText("Clock settings").assertIsDisplayed()
         composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
-        composeRule.onNodeWithText("Contextual hints").assertIsDisplayed()
-        composeRule.onNodeWithText("Replay onboarding").assertIsDisplayed()
+        composeRule.onNodeWithText("Contextual hints").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Replay onboarding").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
         composeRule.onNodeWithContentDescription("Clock").performClick()

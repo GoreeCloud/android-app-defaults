@@ -35,7 +35,9 @@ class ClockOnboardingVisualEvidenceTest {
         capture("onboarding-welcome")
 
         composeRule.onNodeWithText("Continue").performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("Continue").performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("Guidance & permissions").assertIsDisplayed()
         capture("onboarding-guidance")
     }
