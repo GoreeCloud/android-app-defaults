@@ -30,7 +30,7 @@ class AlarmScheduler(private val context: Context) {
                 trigger.toInstant().toEpochMilli(),
                 showAlarmPendingIntent(),
             ),
-            operationPendingIntent(alarm, snooze = false),
+            operationPendingIntent(alarm.id, snooze = false),
         )
         return true
     }
@@ -40,7 +40,7 @@ class AlarmScheduler(private val context: Context) {
         val triggerAt = System.currentTimeMillis() + alarm.snoozeMinutes * 60_000L
         alarmManager.setAlarmClock(
             AlarmManager.AlarmClockInfo(triggerAt, showAlarmPendingIntent()),
-            operationPendingIntent(alarm, snooze = true),
+            operationPendingIntent(alarm.id, snooze = true),
         )
         return true
     }
@@ -68,11 +68,6 @@ class AlarmScheduler(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
-
-    private fun operationPendingIntent(alarm: Alarm, snooze: Boolean): PendingIntent =
-        operationPendingIntent(alarm.id, snooze).also { pending ->
-            // PendingIntent extras are populated by the Intent used to create it below.
-        }
 
     private fun operationPendingIntent(id: Long, snooze: Boolean): PendingIntent {
         val alarm = (context.applicationContext as ClockApplication).alarmStore.get(id)
