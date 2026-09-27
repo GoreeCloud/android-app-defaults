@@ -1,9 +1,9 @@
 package com.goreecloud.since.visual
 
 import android.graphics.Bitmap
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -30,7 +30,7 @@ class SinceMainActivitySystemBarsTest {
         composeRule.onNodeWithText("Since").assertIsDisplayed()
 
         composeRule.activityRule.scenario.recreate()
-        composeRule.onNodeWithTag("since-setup").assertDoesNotExist()
+        assertTrue(composeRule.onAllNodesWithTag("since-setup").fetchSemanticsNodes().isEmpty())
         composeRule.onNodeWithText("Since").assertIsDisplayed()
 
         composeRule.onNodeWithText("Settings").performClick()
