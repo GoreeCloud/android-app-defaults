@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -56,9 +55,8 @@ fun OnboardingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(horizontal = 24.dp, vertical = 28.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -82,19 +80,24 @@ fun OnboardingScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        when (step) {
-            OnboardingStep.WELCOME -> WelcomeStep()
-            OnboardingStep.TIME_DISPLAY -> TimeDisplayStep(preferences, preferencesStore)
-            OnboardingStep.GUIDANCE -> GuidanceStep(
-                preferences = preferences,
-                preferencesStore = preferencesStore,
-                exactAlarmAccess = exactAlarmAccess,
-                notificationAccess = notificationAccess,
-            )
-            OnboardingStep.READY -> ReadyStep(exactAlarmAccess, notificationAccess)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            when (step) {
+                OnboardingStep.WELCOME -> WelcomeStep()
+                OnboardingStep.TIME_DISPLAY -> TimeDisplayStep(preferences, preferencesStore)
+                OnboardingStep.GUIDANCE -> GuidanceStep(
+                    preferences = preferences,
+                    preferencesStore = preferencesStore,
+                    exactAlarmAccess = exactAlarmAccess,
+                    notificationAccess = notificationAccess,
+                )
+                OnboardingStep.READY -> ReadyStep(exactAlarmAccess, notificationAccess)
+            }
         }
-
-        Spacer(Modifier.padding(top = 4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
