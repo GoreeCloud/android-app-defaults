@@ -61,6 +61,13 @@ fun AlarmScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { adding = true },
+        ) {
+            Text("Add alarm")
+        }
+
         if (showHint) {
             ContextualHintCard(
                 title = "Reliable alarms, only when you need them",
@@ -84,13 +91,6 @@ fun AlarmScreen(
                 button = "Allow notifications",
                 onClick = onRequestNotificationAccess,
             )
-        }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { adding = true },
-        ) {
-            Text("Add alarm")
         }
 
         if (alarms.isEmpty()) {

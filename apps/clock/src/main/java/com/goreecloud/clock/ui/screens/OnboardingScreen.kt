@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
@@ -39,6 +40,11 @@ fun OnboardingScreen(
 ) {
     val step = preferences.onboardingStep
     val index = OnboardingStep.entries.indexOf(step).coerceAtLeast(0)
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(step) {
+        scrollState.scrollTo(0)
+    }
 
     BackHandler {
         when {
@@ -50,7 +56,7 @@ fun OnboardingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(horizontal = 24.dp, vertical = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {

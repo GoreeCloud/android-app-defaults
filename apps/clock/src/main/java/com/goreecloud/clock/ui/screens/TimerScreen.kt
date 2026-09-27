@@ -64,6 +64,13 @@ fun TimerScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { showAdd = true },
+        ) {
+            Text("Add timer")
+        }
+
         if (showHint) {
             ContextualHintCard(
                 title = "Timers keep steady time",
@@ -85,13 +92,6 @@ fun TimerScreen(
                 button = "Allow notifications",
                 onClick = onRequestNotificationAccess,
             )
-        }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { showAdd = true },
-        ) {
-            Text("Add timer")
         }
 
         if (timers.isEmpty()) {

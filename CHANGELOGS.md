@@ -504,3 +504,10 @@ The onboarding tranche is Development until exact-head CI/runtime evidence passe
 - Separated voluntary onboarding replay from first-use completion so replay can be interrupted, resumed, or closed without resetting a previously completed setup state.
 - Persisted onboarding progress and hint-control changes synchronously to reduce crash-window state loss.
 - Added a one-time onboarding schema migration that keeps existing Development installs with prior Clock state from being forced through a full first-use wizard solely because onboarding support was added.
+
+
+### Fixed — Clock onboarding viewport continuity
+
+- Reset the onboarding scroll position whenever the user advances or returns to a different onboarding stage so each new stage begins at its heading instead of inheriting the prior stage's scroll offset.
+- Kept Add alarm and Add timer as the first actionable controls on their screens, ahead of contextual guidance and permission-status cards, so primary creation actions remain immediately reachable on compact handheld viewports.
+- Retained the Android 16 display assertions that exposed these defects; the tests were not weakened.
