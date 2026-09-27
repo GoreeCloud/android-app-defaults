@@ -83,8 +83,19 @@ class AlarmReceiver : BroadcastReceiver() {
             }
             .build()
 
-        if (canPostNotifications(context)) {
-            NotificationManagerCompat.from(context).notify(notificationId(alarm.id), notification)
+        val canPostNotifications =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+        if (canPostNotifications) {
+            try {
+                NotificationManagerCompat.from(context)
+                    .notify(notificationId(alarm.id), notification)
+            } catch (_: SecurityException) {
+                runCatching { context.startActivity(alertIntent) }
+            }
         } else {
             runCatching { context.startActivity(alertIntent) }
         }
@@ -93,12 +104,5 @@ class AlarmReceiver : BroadcastReceiver() {
     companion object {
         fun notificationId(id: Long): Int =
             ((id xor (id ushr 32)).toInt() and 0x0FFFFFFF) or 0x10000000
-
-        private fun canPostNotifications(context: Context): Boolean =
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ) == PackageManager.PERMISSION_GRANTED
     }
 }

@@ -22,7 +22,13 @@ class TimerReceiver : BroadcastReceiver() {
         val timer = app.timerStore.complete(id) ?: return
         NotificationChannels.ensure(context)
 
-        if (!canPostNotifications(context)) return
+        val canPostNotifications =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+        if (!canPostNotifications) return
 
         val title = timer.label.ifBlank { "Timer" }
         val notification = NotificationCompat.Builder(context, NotificationChannels.TIMER_CHANNEL_ID)
@@ -33,18 +39,15 @@ class TimerReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(context).notify(notificationId(id), notification)
+        try {
+            NotificationManagerCompat.from(context).notify(notificationId(id), notification)
+        } catch (_: SecurityException) {
+            return
+        }
     }
 
     companion object {
         fun notificationId(id: Long): Int =
             ((id xor (id ushr 32)).toInt() and 0x0FFFFFFF) or 0x20000000
-
-        private fun canPostNotifications(context: Context): Boolean =
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ) == PackageManager.PERMISSION_GRANTED
     }
 }
