@@ -454,6 +454,24 @@ private fun Dashboard(
             }
         }
 
+        if (aggregates.isEmpty()) {
+            item {
+                DashboardEmptyState(onAddTracker = onAddTracker)
+            }
+        } else {
+            items(
+                items = aggregates,
+                key = { it.tracker.id },
+            ) { aggregate ->
+                TrackerCard(
+                    aggregate = aggregate,
+                    clock = clock,
+                    tick = dashboardTick,
+                    onClick = { onOpenTracker(aggregate.tracker.id) },
+                )
+            }
+        }
+
         if (contextualHintsEnabled) {
             item {
                 Surface(
@@ -470,24 +488,6 @@ private fun Dashboard(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-            }
-        }
-
-        if (aggregates.isEmpty()) {
-            item {
-                DashboardEmptyState(onAddTracker = onAddTracker)
-            }
-        } else {
-            items(
-                items = aggregates,
-                key = { it.tracker.id },
-            ) { aggregate ->
-                TrackerCard(
-                    aggregate = aggregate,
-                    clock = clock,
-                    tick = dashboardTick,
-                    onClick = { onOpenTracker(aggregate.tracker.id) },
-                )
             }
         }
     }
