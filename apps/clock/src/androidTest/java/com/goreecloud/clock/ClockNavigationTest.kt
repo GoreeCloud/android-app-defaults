@@ -30,7 +30,7 @@ class ClockNavigationTest {
     fun principalClockSurfacesAndEditorsRemainReachable() {
         composeRule.onNodeWithText("Digital").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Analog").performClick()
-        composeRule.onNodeWithText("Full-screen clock").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Full-screen clock").assertIsDisplayed()
         composeRule.onNodeWithText("Bedside mode").assertIsDisplayed()
         composeRule.onNodeWithText("Digital").performClick()
 

@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -94,17 +95,20 @@ fun ClockScreen(
     BoxWithConstraints(
         modifier = modifier.fillMaxSize(),
     ) {
+        val compactHeight = maxHeight < 620.dp
         val normalAnalogSize = when {
             maxHeight >= 760.dp -> 252.dp
             maxHeight >= 640.dp -> 216.dp
+            compactHeight -> 160.dp
             else -> 184.dp
         }
+        val contentSpacing = if (compactHeight) 10.dp else 18.dp
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+                .padding(if (compactHeight) 16.dp else 20.dp),
+            verticalArrangement = Arrangement.spacedBy(contentSpacing),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
         Row(
@@ -123,7 +127,7 @@ fun ClockScreen(
             )
         }
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(if (compactHeight) 0.dp else 6.dp))
         ClockFace(
             now = now,
             use24Hour = preferences.use24Hour,
@@ -132,28 +136,58 @@ fun ClockScreen(
         )
         Text(
             text = now.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")),
-            style = MaterialTheme.typography.titleLarge,
+            style = if (compactHeight) {
+                MaterialTheme.typography.titleMedium
+            } else {
+                MaterialTheme.typography.titleLarge
+            },
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
         Text(
             text = now.zone.id,
-            style = MaterialTheme.typography.bodyLarge,
+            style = if (compactHeight) {
+                MaterialTheme.typography.bodyMedium
+            } else {
+                MaterialTheme.typography.bodyLarge
+            },
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         Spacer(Modifier.weight(1f))
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { mode = PresentationMode.FULL_SCREEN },
-        ) {
-            Text("Full-screen clock")
-        }
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { mode = PresentationMode.BEDSIDE },
-        ) {
-            Text("Bedside mode")
+        if (compactHeight) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics { contentDescription = "Full-screen clock" },
+                    onClick = { mode = PresentationMode.FULL_SCREEN },
+                ) {
+                    Text("Full-screen")
+                }
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = { mode = PresentationMode.BEDSIDE },
+                ) {
+                    Text("Bedside mode")
+                }
+            }
+        } else {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { mode = PresentationMode.FULL_SCREEN },
+            ) {
+                Text("Full-screen clock")
+            }
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { mode = PresentationMode.BEDSIDE },
+            ) {
+                Text("Bedside mode")
+            }
         }
         }
     }

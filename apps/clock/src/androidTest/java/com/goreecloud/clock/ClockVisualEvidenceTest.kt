@@ -36,7 +36,7 @@ class ClockVisualEvidenceTest {
         capture("clock-digital")
 
         composeRule.onNodeWithText("Analog").performClick()
-        composeRule.onNodeWithText("Full-screen clock").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Full-screen clock").assertIsDisplayed()
         composeRule.onNodeWithText("Bedside mode").assertIsDisplayed()
         capture("clock-analog")
 
