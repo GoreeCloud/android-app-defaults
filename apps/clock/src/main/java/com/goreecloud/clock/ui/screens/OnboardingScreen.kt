@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -68,7 +67,7 @@ fun OnboardingScreen(
             OnboardingStep.READY -> ReadyStep(exactAlarmAccess, notificationAccess)
         }
 
-        Spacer(Modifier.weight(1f, fill = false))
+        Spacer(Modifier.padding(top = 4.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
