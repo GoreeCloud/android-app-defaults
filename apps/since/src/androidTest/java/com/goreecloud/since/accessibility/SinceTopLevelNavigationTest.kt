@@ -4,10 +4,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -136,7 +136,7 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
         composeRule.onNodeWithTag("settings-contextual-hints").performClick()
         composeRule.onNodeWithTag("nav-home").performClick()
-        composeRule.onNodeWithTag("home-contextual-hint").assertDoesNotExist()
+        assertTrue(composeRule.onAllNodesWithTag("home-contextual-hint").fetchSemanticsNodes().isEmpty())
     }
 
     private fun sampleAggregate(): TrackerAggregate {
