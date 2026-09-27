@@ -1,5 +1,6 @@
 package com.goreecloud.clock.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,9 +34,18 @@ fun OnboardingScreen(
     preferencesStore: ClockPreferencesStore,
     exactAlarmAccess: Boolean,
     notificationAccess: Boolean,
+    replayMode: Boolean,
+    onCancelReplay: () -> Unit,
 ) {
     val step = preferences.onboardingStep
     val index = OnboardingStep.entries.indexOf(step).coerceAtLeast(0)
+
+    BackHandler {
+        when {
+            index > 0 -> preferencesStore.setOnboardingStep(OnboardingStep.entries[index - 1])
+            replayMode -> onCancelReplay()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -44,11 +54,22 @@ fun OnboardingScreen(
             .padding(horizontal = 24.dp, vertical = 28.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        Text(
-            "GoreeCloud Clock",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "GoreeCloud Clock",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            if (replayMode) {
+                androidx.compose.material3.TextButton(onClick = onCancelReplay) {
+                    Text("Close replay")
+                }
+            }
+        }
         Text(
             "Step ${index + 1} of ${OnboardingStep.entries.size}",
             style = MaterialTheme.typography.labelMedium,

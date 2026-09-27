@@ -358,3 +358,6 @@ Draft PR #50 now includes a Clock-specific implementation of the mandatory First
 - Android 16 instrumentation for first-use progression, restart/resume behavior, completion, replay, hint controls, and rendered onboarding evidence.
 
 This remains Development source until its exact candidate head passes the complete Clock source/runtime/rendered-evidence workflow. Representative-device accessibility, localization/RTL, form-factor, recovery, and user-experience acceptance remain separate.
+
+
+Replay-state hardening keeps voluntary onboarding replay separate from genuine first-use completion. Replay persists independently, resumes after interruption, can be closed without invalidating prior completion, and does not turn an experienced user's next launch into mandatory first-use. A one-time onboarding schema migration also treats pre-onboarding Development installs with existing Clock state as already oriented.

@@ -86,12 +86,14 @@ fun ClockApp(
     var destination by rememberSaveable { mutableStateOf(ClockDestination.CLOCK) }
     var showSettings by remember { mutableStateOf(false) }
 
-    if (!preferences.onboardingCompleted) {
+    if (!preferences.onboardingCompleted || preferences.onboardingReplay) {
         OnboardingScreen(
             preferences = preferences,
             preferencesStore = preferencesStore,
             exactAlarmAccess = exactAlarmAccess,
             notificationAccess = notificationAccess,
+            replayMode = preferences.onboardingReplay,
+            onCancelReplay = preferencesStore::cancelOnboardingReplay,
         )
         return
     }

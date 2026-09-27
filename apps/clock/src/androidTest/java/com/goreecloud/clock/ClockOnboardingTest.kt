@@ -21,7 +21,7 @@ class ClockOnboardingTest {
         val store = (composeRule.activity.application as ClockApplication).preferencesStore
         store.setHintsEnabled(true)
         store.resetDismissedHints()
-        store.replayOnboarding()
+        store.resetOnboardingGuidance()
         composeRule.waitForIdle()
     }
 
@@ -52,6 +52,17 @@ class ClockOnboardingTest {
         composeRule.onNodeWithText("Contextual hints").assertIsDisplayed()
         composeRule.onNodeWithText("Replay onboarding").performClick()
         composeRule.onNodeWithText("Welcome to GoreeCloud Clock").assertIsDisplayed()
-        check(!store.state.value.onboardingCompleted)
+        check(store.state.value.onboardingCompleted)
+        check(store.state.value.onboardingReplay)
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Welcome to GoreeCloud Clock").assertIsDisplayed()
+        check(store.state.value.onboardingCompleted)
+
+        composeRule.onNodeWithText("Close replay").performClick()
+        composeRule.onNodeWithText("Digital").assertIsDisplayed()
+        check(store.state.value.onboardingCompleted)
+        check(!store.state.value.onboardingReplay)
     }
 }

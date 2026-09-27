@@ -497,3 +497,10 @@ This changelog entry describes an open Development candidate. It does not claim 
 ### Boundary
 
 The onboarding tranche is Development until exact-head CI/runtime evidence passes. Representative-device accessibility, localization/RTL, form-factor, recovery, and upgrade acceptance remain open.
+
+
+### Fixed - Clock onboarding state semantics
+
+- Separated voluntary onboarding replay from first-use completion so replay can be interrupted, resumed, or closed without resetting a previously completed setup state.
+- Persisted onboarding progress and hint-control changes synchronously to reduce crash-window state loss.
+- Added a one-time onboarding schema migration that keeps existing Development installs with prior Clock state from being forced through a full first-use wizard solely because onboarding support was added.
