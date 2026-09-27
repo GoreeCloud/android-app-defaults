@@ -91,4 +91,4 @@ All alarms, timers, stopwatch state, world-clock selections, and preferences are
 
 ## Development status
 
-The current foundation is Development, not Release Candidate, production, Stable, or complete GLAZE UI consumer acceptance. Source implementation and green CI do not substitute for representative physical-device alarm delivery, OEM behavior, Doze/reboot/time-zone testing, TalkBack/switch-access testing, large-text/RTL review, rendered visual acceptance, widget acceptance, signing, distribution, or release qualification.
+The current foundation is Development, not Release Candidate, production, Stable, or complete GLAZE UI consumer acceptance. The candidate includes Android 16 instrumentation and rendered-evidence automation, but emulator evidence does not substitute for representative physical-device alarm delivery, OEM behavior, Doze/reboot/time-zone testing, TalkBack/switch-access testing, large-text/RTL review, representative launcher-widget acceptance, signing, distribution, or release qualification.

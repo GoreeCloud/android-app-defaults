@@ -336,3 +336,10 @@ The following source is implemented on the open Clock candidate branch and is no
 - fail-closed Clock manifest validation that prohibits network permissions and constrains exported receivers to system lifecycle and app-widget entry points.
 
 These are Development source capabilities only. Clock-specific runtime/rendered acceptance, representative-device/OEM reliability, assistive-technology acceptance, production signing/distribution, and lifecycle promotion remain open.
+
+
+### Clock Android 16 runtime and rendered-evidence candidate
+
+Draft PR #50 now also carries a Clock-specific Android 16 instrumentation lane. The candidate instrumentation exercises top-level Clock, Alarms, Timer, Stopwatch, World, and Settings reachability plus the alarm/timer editor entry points. A dedicated rendered-evidence test captures representative light/dark Clock application scenes from Android UI automation and publishes them as a CI artifact.
+
+This is candidate validation source until the exact head passes the new runtime workflow. Emulator evidence does not substitute for physical-device/OEM alarm delivery, launcher-widget acceptance, assistive-technology acceptance, performance/power evidence, signing/distribution, or release qualification.

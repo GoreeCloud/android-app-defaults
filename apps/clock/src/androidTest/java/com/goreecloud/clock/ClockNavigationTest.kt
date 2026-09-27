@@ -1,0 +1,60 @@
+package com.goreecloud.clock
+
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.goreecloud.clock.data.ClockFacePreference
+import com.goreecloud.clock.data.ThemePreference
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class ClockNavigationTest {
+    @get:Rule
+    val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun resetPresentationPreferences() {
+        val app = composeRule.activity.application as ClockApplication
+        app.preferencesStore.setTheme(ThemePreference.LIGHT)
+        app.preferencesStore.setClockFace(ClockFacePreference.DIGITAL)
+        composeRule.waitForIdle()
+    }
+
+    @Test
+    fun principalClockSurfacesAndEditorsRemainReachable() {
+        composeRule.onNodeWithText("Digital").assertIsDisplayed().performClick()
+
+        composeRule.onNodeWithText("Alarms").performClick()
+        composeRule.onNodeWithText("Add alarm").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("New alarm").assertIsDisplayed()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithText("Timer").performClick()
+        composeRule.onNodeWithText("Add timer").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("New timer").assertIsDisplayed()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithText("Stopwatch").performClick()
+        composeRule.onNodeWithText("Laps").assertIsDisplayed()
+        composeRule.onNodeWithText("Start").assertIsDisplayed()
+
+        composeRule.onNodeWithText("World").performClick()
+        composeRule.onNodeWithText("Local").assertIsDisplayed()
+        composeRule.onNodeWithText("Add world clock").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Add city").assertIsDisplayed()
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        composeRule.onNodeWithText("Settings").performClick()
+        composeRule.onNodeWithText("Clock settings").assertIsDisplayed()
+        composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
+        composeRule.onNodeWithText("Done").performClick()
+
+        composeRule.onNodeWithText("Clock").performClick()
+        composeRule.onNodeWithText("Digital").assertIsDisplayed()
+    }
+}
