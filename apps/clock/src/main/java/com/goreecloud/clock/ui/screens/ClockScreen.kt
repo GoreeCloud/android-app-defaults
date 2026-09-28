@@ -82,6 +82,7 @@ fun ClockScreen(
             preferences = preferences,
             bedside = mode == PresentationMode.BEDSIDE,
             onExit = { mode = PresentationMode.NORMAL },
+            onHaptic = onHaptic,
         )
         return
     }
@@ -192,13 +193,19 @@ fun ClockScreen(
         } else {
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { mode = PresentationMode.FULL_SCREEN },
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    mode = PresentationMode.FULL_SCREEN
+                },
             ) {
                 Text("Full-screen clock")
             }
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { mode = PresentationMode.BEDSIDE },
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    mode = PresentationMode.BEDSIDE
+                },
             ) {
                 Text("Bedside mode")
             }
@@ -212,6 +219,7 @@ private fun FullClock(
     preferences: ClockPreferences,
     bedside: Boolean,
     onExit: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     var now by remember { mutableStateOf(ZonedDateTime.now()) }
     LaunchedEffect(Unit) {
@@ -251,7 +259,10 @@ private fun FullClock(
         }
         OutlinedButton(
             modifier = Modifier.align(Alignment.BottomCenter),
-            onClick = onExit,
+            onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                onExit()
+            },
         ) {
             Text("Exit")
         }
