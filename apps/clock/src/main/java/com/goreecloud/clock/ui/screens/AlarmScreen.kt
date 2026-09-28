@@ -44,6 +44,7 @@ import com.goreecloud.clock.alarm.AlarmSoundCatalog
 import com.goreecloud.clock.alarm.AlarmSoundOption
 import com.goreecloud.clock.alarm.AlarmStore
 import com.goreecloud.clock.alarm.UpcomingAlarmPolicy
+import com.goreecloud.clock.alarm.UpcomingAlarmPresentationPolicy
 import com.goreecloud.clock.ui.ClockHapticEvent
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -250,6 +251,11 @@ private fun UpcomingAlarmCard(
             Text(
                 "$dayLabel · $time",
                 style = MaterialTheme.typography.headlineSmall,
+            )
+            Text(
+                UpcomingAlarmPresentationPolicy.relativeSummary(now, trigger),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
             )
             Text(
                 alarm.label.ifBlank { "Alarm" },
