@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -837,48 +836,20 @@ private fun TrackerDetailsScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            if (aggregate.tracker.kind == TrackerKind.STREAK) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding(),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    tonalElevation = 3.dp,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        if (resetFailed) {
-                            Text(
-                                modifier = Modifier.semantics {
-                                    liveRegion = LiveRegionMode.Assertive
-                                },
-                                text = stringResource(R.string.reset_failed),
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                        StreakDetailActionButtons(
-                            stacked = LocalDensity.current.fontScale >= 1.5f,
-                            isResetting = isResetting,
-                            onOpenHistory = onOpenHistory,
-                            onReset = { showResetDialog = true },
-                        )
-                    }
-                }
-            }
-        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .padding(innerPadding),
         ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1166,6 +1137,37 @@ private fun TrackerDetailsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyLarge,
                 )
+            }
+        }
+
+            if (aggregate.tracker.kind == TrackerKind.STREAK) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    tonalElevation = 3.dp,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (resetFailed) {
+                            Text(
+                                modifier = Modifier.semantics {
+                                    liveRegion = LiveRegionMode.Assertive
+                                },
+                                text = stringResource(R.string.reset_failed),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        StreakDetailActionButtons(
+                            stacked = LocalDensity.current.fontScale >= 1.5f,
+                            isResetting = isResetting,
+                            onOpenHistory = onOpenHistory,
+                            onReset = { showResetDialog = true },
+                        )
+                    }
+                }
             }
         }
     }
