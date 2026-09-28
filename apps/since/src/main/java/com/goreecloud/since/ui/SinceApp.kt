@@ -1759,6 +1759,7 @@ private fun StreakDetailActionButtons(
         ) {
             Text(
                 text = stringResource(R.string.view_history),
+                style = if (stacked) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 softWrap = false,
             )
@@ -1779,29 +1780,20 @@ private fun StreakDetailActionButtons(
                 } else {
                     stringResource(R.string.reset_streak)
                 },
+                style = if (stacked) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 softWrap = false,
             )
         }
     }
 
-    if (stacked) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            history(Modifier.fillMaxWidth())
-            reset(Modifier.fillMaxWidth())
-        }
-    } else {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            history(Modifier.weight(1f))
-            reset(Modifier.weight(1f))
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(if (stacked) 6.dp else 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        history(Modifier.weight(1f))
+        reset(Modifier.weight(1f))
     }
 }
 
