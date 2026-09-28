@@ -1,5 +1,10 @@
 # Android App Defaults — Planned Features
 
+## September 28, 2026 — relative Next alarm candidate
+
+Draft PR #50 now enriches the already implemented exact-alarm-gated **Next alarm** surface with a tested, DST-safe relative countdown derived from the existing scheduled trigger instant. Exact candidate head `d47eb48611867b5d96b6239ea5681cbf007edbdf` passed Android Development Foundation run `36488720505`. Richer alarm presentation is therefore partially advanced, while representative-device DST/time-zone/clock-change, accessibility, delivery, sound/volume, widget, release, and Anchor acceptance remain open.
+
+
 ## 2026-09-28 Clock candidate continuation
 
 Draft PR #50 now applies the existing haptic-feedback preference across previously missed presentation-mode, world-clock, permission, guidance, alarm-dialog, and timer-dialog controls. Source coverage is broader, but representative physical-device haptic feel/latency/accessibility acceptance remains open and no Stable claim is made.
