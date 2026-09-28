@@ -1,5 +1,6 @@
 package com.goreecloud.clock.alarm
 
+import android.app.Activity
 import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
@@ -13,8 +14,16 @@ object AlarmSoundCatalog {
             AlarmSoundOption(AlarmSound.SILENT, "Silent"),
         )
         runCatching {
-            val manager = RingtoneManager(context).apply { setType(RingtoneManager.TYPE_ALARM) }
-            manager.cursor.use { cursor ->
+            val activity = context as? Activity
+            val manager = if (activity != null) {
+                RingtoneManager(activity)
+            } else {
+                RingtoneManager(context)
+            }.apply {
+                setType(RingtoneManager.TYPE_ALARM)
+            }
+            val cursor = manager.cursor
+            try {
                 var position = 0
                 while (cursor.moveToNext()) {
                     val uri = manager.getRingtoneUri(position++)
@@ -22,6 +31,11 @@ object AlarmSoundCatalog {
                     if (uri != null && !title.isNullOrBlank()) {
                         options += AlarmSoundOption(uri.toString(), title)
                     }
+                }
+            } finally {
+                if (activity == null) {
+                    @Suppress("DEPRECATION")
+                    cursor.deactivate()
                 }
             }
         }
