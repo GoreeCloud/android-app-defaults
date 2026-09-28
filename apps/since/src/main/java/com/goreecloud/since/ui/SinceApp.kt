@@ -98,6 +98,8 @@ fun SinceApp(
     onThemePreferenceChange: (ThemePreference) -> Unit = {},
     contextualHintsEnabled: Boolean = true,
     onContextualHintsEnabledChange: (Boolean) -> Unit = {},
+    homeContextualHintDismissed: Boolean = false,
+    onHomeContextualHintDismissedChange: (Boolean) -> Unit = {},
     onReplaySetup: () -> Unit = {},
 ) {
     val aggregates by repository
@@ -371,6 +373,10 @@ fun SinceApp(
                 aggregates = aggregates,
                 clock = clock,
                 contextualHintsEnabled = contextualHintsEnabled,
+                homeContextualHintDismissed = homeContextualHintDismissed,
+                onDismissHomeContextualHint = {
+                    onHomeContextualHintDismissedChange(true)
+                },
                 onAddTracker = onAddTracker,
                 onOpenTracker = { trackerId ->
                     detailUpdateFailed = false
@@ -415,6 +421,8 @@ private fun Dashboard(
     aggregates: List<TrackerAggregate>,
     clock: Clock,
     contextualHintsEnabled: Boolean,
+    homeContextualHintDismissed: Boolean,
+    onDismissHomeContextualHint: () -> Unit,
     onAddTracker: () -> Unit,
     onOpenTracker: (String) -> Unit,
 ) {
@@ -472,7 +480,7 @@ private fun Dashboard(
             }
         }
 
-        if (contextualHintsEnabled) {
+        if (contextualHintsEnabled && !homeContextualHintDismissed) {
             item {
                 Surface(
                     modifier = Modifier
@@ -482,11 +490,28 @@ private fun Dashboard(
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 ) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                        text = stringResource(R.string.home_contextual_hint),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Row(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            top = 10.dp,
+                            end = 8.dp,
+                            bottom = 10.dp,
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = stringResource(R.string.home_contextual_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        TextButton(
+                            modifier = Modifier.testTag("home-contextual-hint-dismiss"),
+                            onClick = onDismissHomeContextualHint,
+                        ) {
+                            Text(stringResource(R.string.dismiss_hint))
+                        }
+                    }
                 }
             }
         }
