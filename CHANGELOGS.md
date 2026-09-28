@@ -1,5 +1,11 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-28 — Since dashboard search/sort candidate
+
+- Added device-local tracker search across title and note.
+- Added deterministic Recent and Name dashboard sorting with unit coverage and English/Arabic labels.
+- Kept archive/delete/export/import and representative-device acceptance open.
+
 ## 2026-09-28 — Since contextual-hint dismissal and reset candidate
 
 **Lifecycle:** Development  
