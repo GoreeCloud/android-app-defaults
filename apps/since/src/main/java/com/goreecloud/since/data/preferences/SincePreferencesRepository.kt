@@ -30,6 +30,8 @@ class SincePreferencesRepository(
     private val onboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
     private val onboardingStepKey = intPreferencesKey("onboarding_step")
     private val contextualHintsEnabledKey = booleanPreferencesKey("contextual_hints_enabled")
+    private val homeContextualHintDismissedKey =
+        booleanPreferencesKey("home_contextual_hint_dismissed")
 
     private val preferences = context
         .sincePreferencesDataStore
@@ -75,6 +77,10 @@ class SincePreferencesRepository(
         .map { values -> values[contextualHintsEnabledKey] ?: true }
         .distinctUntilChanged()
 
+    val homeContextualHintDismissed: Flow<Boolean> = preferences
+        .map { values -> values[homeContextualHintDismissedKey] ?: false }
+        .distinctUntilChanged()
+
     suspend fun setThemePreference(preference: ThemePreference) {
         context.sincePreferencesDataStore.edit { values ->
             values[themePreferenceKey] = preference.name
@@ -97,6 +103,12 @@ class SincePreferencesRepository(
     suspend fun setContextualHintsEnabled(enabled: Boolean) {
         context.sincePreferencesDataStore.edit { values ->
             values[contextualHintsEnabledKey] = enabled
+        }
+    }
+
+    suspend fun setHomeContextualHintDismissed(dismissed: Boolean) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[homeContextualHintDismissedKey] = dismissed
         }
     }
 
