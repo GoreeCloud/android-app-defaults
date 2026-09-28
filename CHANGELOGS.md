@@ -1,5 +1,11 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-28 — Clock haptic-preference coverage candidate
+
+- Applied the existing haptic preference to previously missed full-screen/bedside controls and exit actions.
+- Added preference-governed feedback to world-clock dismissal, permission/guidance actions, and alarm/timer dialog controls.
+- Kept representative-device haptic acceptance and broader release gates open.
+
 ## 2026-09-28 — Clock timer-completion restart action candidate
 
 **Lifecycle:** Development  
