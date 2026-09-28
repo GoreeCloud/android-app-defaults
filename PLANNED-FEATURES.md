@@ -1,5 +1,9 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-28 Clock candidate continuation
+
+Draft PR #50 now applies the existing haptic-feedback preference across previously missed presentation-mode, world-clock, permission, guidance, alarm-dialog, and timer-dialog controls. Source coverage is broader, but representative physical-device haptic feel/latency/accessibility acceptance remains open and no Stable claim is made.
+
 **Record type:** Repository planned-feature inventory  
 **Repository:** `GoreeCloud/android-app-defaults`  
 **Lifecycle:** Development  
