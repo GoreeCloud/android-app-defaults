@@ -163,7 +163,12 @@ fun WorldClockScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showAdd = false }) {
+                TextButton(
+                    onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        showAdd = false
+                    },
+                ) {
                     Text("Cancel")
                 }
             },
