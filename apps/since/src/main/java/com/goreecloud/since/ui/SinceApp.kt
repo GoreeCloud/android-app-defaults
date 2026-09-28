@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -1147,7 +1148,12 @@ private fun TrackerDetailsScreen(
                     tonalElevation = 3.dp,
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            top = 8.dp,
+                            end = 16.dp,
+                            bottom = 16.dp,
+                        ),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         if (resetFailed) {
@@ -1746,28 +1752,34 @@ private fun StreakDetailActionButtons(
     val history: @Composable (Modifier) -> Unit = { modifier ->
         TextButton(
             modifier = modifier
-                .heightIn(min = 48.dp)
+                .height(if (stacked) 56.dp else 48.dp)
                 .testTag("open-history"),
             onClick = onOpenHistory,
         ) {
-            Text(stringResource(R.string.view_history))
+            Text(
+                text = stringResource(R.string.view_history),
+                maxLines = 1,
+                softWrap = false,
+            )
         }
     }
     val reset: @Composable (Modifier) -> Unit = { modifier ->
         Button(
             modifier = modifier
-                .heightIn(min = 48.dp)
+                .height(if (stacked) 56.dp else 48.dp)
                 .testTag("reset-streak"),
             onClick = onReset,
             enabled = !isResetting,
             shape = MaterialTheme.shapes.large,
         ) {
             Text(
-                if (isResetting) {
+                text = if (isResetting) {
                     stringResource(R.string.resetting)
                 } else {
                     stringResource(R.string.reset_streak)
-                }
+                },
+                maxLines = 1,
+                softWrap = false,
             )
         }
     }
