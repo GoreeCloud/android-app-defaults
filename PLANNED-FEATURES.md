@@ -1,5 +1,9 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-28 Since candidate continuation
+
+PR #49 now starts the local-management M3 slice with device-local dashboard search across tracker title/note and deterministic Recent/Name sorting. Pure unit coverage defines filtering and tie-breaking. Archive/delete/export/import and representative-device/accessibility acceptance remain open, so the broader M3 capability is not claimed complete.
+
 **Record type:** Repository planned-feature inventory  
 **Repository:** `GoreeCloud/android-app-defaults`  
 **Lifecycle:** Development  
