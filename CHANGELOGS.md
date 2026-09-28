@@ -1,5 +1,21 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-28 — Clock timer-completion restart action candidate
+
+**Lifecycle:** Development  
+**Tracking:** PR #50
+
+### Added
+
+- Timer-completion notifications now open the Timer surface when tapped.
+- Added a local **Restart** notification action that restarts the exact completed timer from its original duration, reschedules its exact completion alarm, updates persisted timer/widget state through existing stores, and dismisses the stale completion notification.
+- The action is an explicit in-app broadcast and adds no network, account, storage, microphone, or new permission authority.
+
+### Boundary
+
+Fresh exact-head Android validation is required. Representative-device notification, exact-alarm, Doze/OEM, accessibility, and power acceptance remain separate from this source change.
+
+
 ## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
 
 **Lifecycle:** Development  
