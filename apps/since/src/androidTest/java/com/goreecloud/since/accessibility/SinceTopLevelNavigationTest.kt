@@ -117,6 +117,39 @@ class SinceTopLevelNavigationTest {
     }
 
     @Test
+    fun homeContextualHintCanBeDismissedWithoutDisablingGlobalPreference() {
+        var contextualHintsEnabled by mutableStateOf(true)
+        var homeHintDismissed by mutableStateOf(false)
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = FakeTrackerRepository(emptyList()),
+                    clock = clock,
+                    contextualHintsEnabled = contextualHintsEnabled,
+                    onContextualHintsEnabledChange = { contextualHintsEnabled = it },
+                    homeContextualHintDismissed = homeHintDismissed,
+                    onHomeContextualHintDismissedChange = { homeHintDismissed = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
+        composeRule.onNodeWithTag("home-contextual-hint-dismiss")
+            .assertHasClickAction()
+            .performClick()
+        composeRule.runOnIdle {
+            assertTrue(contextualHintsEnabled)
+            assertTrue(homeHintDismissed)
+        }
+        assertTrue(
+            composeRule.onAllNodesWithTag("home-contextual-hint")
+                .fetchSemanticsNodes()
+                .isEmpty(),
+        )
+    }
+
+    @Test
     fun homeContextualHintFollowsGlobalPreference() {
         var contextualHintsEnabled by mutableStateOf(true)
 
