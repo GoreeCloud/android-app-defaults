@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -835,6 +836,65 @@ private fun TrackerDetailsScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            if (aggregate.tracker.kind == TrackerKind.STREAK) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding(),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    tonalElevation = 3.dp,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        if (resetFailed) {
+                            Text(
+                                modifier = Modifier.semantics {
+                                    liveRegion = LiveRegionMode.Assertive
+                                },
+                                text = stringResource(R.string.reset_failed),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            TextButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 48.dp)
+                                    .testTag("open-history"),
+                                onClick = onOpenHistory,
+                            ) {
+                                Text(stringResource(R.string.view_history))
+                            }
+                            Button(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 48.dp)
+                                    .testTag("reset-streak"),
+                                onClick = { showResetDialog = true },
+                                enabled = !isResetting,
+                                shape = MaterialTheme.shapes.large,
+                            ) {
+                                Text(
+                                    if (isResetting) {
+                                        stringResource(R.string.resetting)
+                                    } else {
+                                        stringResource(R.string.reset_streak)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -1103,12 +1163,7 @@ private fun TrackerDetailsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
-                        TextButton(
-                            modifier = Modifier.testTag("open-history"),
-                            onClick = onOpenHistory,
-                        ) {
-                            Text(stringResource(R.string.view_history))
-                        }
+
                     }
                 }
 
@@ -1122,32 +1177,7 @@ private fun TrackerDetailsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("reset-streak"),
-                        onClick = { showResetDialog = true },
-                        enabled = !isResetting,
-                        shape = MaterialTheme.shapes.large,
-                    ) {
-                        Text(
-                            if (isResetting) {
-                                stringResource(R.string.resetting)
-                            } else {
-                                stringResource(R.string.reset_streak)
-                            }
-                        )
-                    }
-                    if (resetFailed) {
-                        Text(
-                            modifier = Modifier.semantics {
-                                liveRegion = LiveRegionMode.Assertive
-                            },
-                            text = stringResource(R.string.reset_failed),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+
                 }
             }
 
