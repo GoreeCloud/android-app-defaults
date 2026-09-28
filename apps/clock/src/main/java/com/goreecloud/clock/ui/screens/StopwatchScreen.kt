@@ -8,24 +8,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goreecloud.clock.stopwatch.StopwatchResult
 import com.goreecloud.clock.stopwatch.StopwatchStore
-import com.goreecloud.clock.ui.ClockHapticEvent
 import com.goreecloud.clock.timer.DurationFormatter
+import com.goreecloud.clock.ui.ClockHapticEvent
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -34,9 +41,11 @@ fun StopwatchScreen(
     modifier: Modifier = Modifier,
     store: StopwatchStore,
     reducedMotion: Boolean,
+    use24Hour: Boolean,
     onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     val state by store.state.collectAsStateWithLifecycle()
+    val history by store.history.collectAsStateWithLifecycle()
     var tick by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
 
     LaunchedEffect(state.running, reducedMotion) {
@@ -84,6 +93,15 @@ fun StopwatchScreen(
 
         Text("Laps", style = MaterialTheme.typography.titleLarge)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (state.laps.isEmpty()) {
+                item {
+                    Text(
+                        "No laps yet",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
             itemsIndexed(state.laps.asReversed()) { reverseIndex, lapTotal ->
                 val originalIndex = state.laps.lastIndex - reverseIndex
                 val previous = if (originalIndex == 0) 0L else state.laps[originalIndex - 1]
@@ -100,6 +118,81 @@ fun StopwatchScreen(
                     }
                 }
             }
+
+            if (history.isNotEmpty()) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Recent results", style = MaterialTheme.typography.titleLarge)
+                        TextButton(
+                            onClick = {
+                                onHaptic(ClockHapticEvent.ACTION)
+                                store.clearHistory()
+                            },
+                        ) { Text("Clear all") }
+                    }
+                }
+
+                items(history, key = StopwatchResult::id) { result ->
+                    StopwatchResultCard(
+                        result = result,
+                        use24Hour = use24Hour,
+                        onDelete = {
+                            onHaptic(ClockHapticEvent.ACTION)
+                            store.deleteResult(result.id)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StopwatchResultCard(
+    result: StopwatchResult,
+    use24Hour: Boolean,
+    onDelete: () -> Unit,
+) {
+    val finished = remember(result.finishedAtWallMillis, use24Hour) {
+        val pattern = if (use24Hour) "MMM d, yyyy • HH:mm" else "MMM d, yyyy • h:mm a"
+        Instant.ofEpochMilli(result.finishedAtWallMillis)
+            .atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern(pattern))
+    }
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Text(
+                    DurationFormatter.format(result.elapsedMillis, showHundredths = true),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    finished,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    if (result.laps.isEmpty()) "No laps" else "${result.laps.size} laps",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            TextButton(onClick = onDelete) { Text("Delete") }
         }
     }
 }

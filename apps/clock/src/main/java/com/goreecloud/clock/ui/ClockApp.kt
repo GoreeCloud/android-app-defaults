@@ -229,6 +229,7 @@ private fun DestinationContent(
             modifier = modifier,
             store = stopwatchStore,
             reducedMotion = preferences.reducedMotion,
+            use24Hour = preferences.use24Hour,
             onHaptic = onHaptic,
         )
         ClockDestination.WORLD -> WorldClockScreen(

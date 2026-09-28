@@ -26,10 +26,34 @@ data class StopwatchState(
     }
 }
 
+data class StopwatchResult(
+    val id: Long,
+    val finishedAtWallMillis: Long,
+    val elapsedMillis: Long,
+    val laps: List<Long>,
+)
+
+object StopwatchResultFactory {
+    fun fromState(
+        state: StopwatchState,
+        id: Long,
+        finishedAtWallMillis: Long,
+        elapsedRealtime: Long,
+        wallMillis: Long,
+    ): StopwatchResult? {
+        val elapsed = state.elapsedAt(elapsedRealtime, wallMillis)
+        if (elapsed <= 0L) return null
+        return StopwatchResult(id, finishedAtWallMillis, elapsed, state.laps)
+    }
+}
+
 class StopwatchStore(context: Context) {
     private val prefs = context.getSharedPreferences("clock_stopwatch", Context.MODE_PRIVATE)
     private val mutableState = MutableStateFlow(read())
+    private val mutableHistory = MutableStateFlow(readHistory())
+
     val state = mutableState.asStateFlow()
+    val history = mutableHistory.asStateFlow()
 
     @Synchronized
     fun start(): StopwatchState {
@@ -60,9 +84,22 @@ class StopwatchStore(context: Context) {
 
     @Synchronized
     fun reset(): StopwatchState {
-        val updated = StopwatchState()
-        persist(updated)
-        return updated
+        val current = mutableState.value
+        val finishedAt = System.currentTimeMillis()
+        val elapsedRealtime = SystemClock.elapsedRealtime()
+        val nextId = maxOf(
+            finishedAt,
+            (mutableHistory.value.maxOfOrNull { it.id } ?: 0L) + 1L,
+        )
+        StopwatchResultFactory.fromState(
+            state = current,
+            id = nextId,
+            finishedAtWallMillis = finishedAt,
+            elapsedRealtime = elapsedRealtime,
+            wallMillis = finishedAt,
+        )?.let(::archive)
+
+        return StopwatchState().also(::persist)
     }
 
     @Synchronized
@@ -74,6 +111,25 @@ class StopwatchStore(context: Context) {
         return updated
     }
 
+    @Synchronized
+    fun deleteResult(id: Long) {
+        persistHistory(mutableHistory.value.filterNot { it.id == id })
+    }
+
+    @Synchronized
+    fun clearHistory() {
+        persistHistory(emptyList())
+    }
+
+    private fun archive(result: StopwatchResult) {
+        persistHistory(
+            (listOf(result) + mutableHistory.value)
+                .distinctBy { it.id }
+                .sortedByDescending { it.finishedAtWallMillis }
+                .take(MAX_HISTORY_RESULTS),
+        )
+    }
+
     private fun persist(value: StopwatchState) {
         prefs.edit()
             .putBoolean(KEY_RUNNING, value.running)
@@ -83,6 +139,16 @@ class StopwatchStore(context: Context) {
             .putString(KEY_LAPS, value.laps.joinToString(","))
             .apply()
         mutableState.value = value
+    }
+
+    private fun persistHistory(results: List<StopwatchResult>) {
+        val bounded = results
+            .sortedByDescending { it.finishedAtWallMillis }
+            .take(MAX_HISTORY_RESULTS)
+        prefs.edit()
+            .putString(KEY_HISTORY, bounded.joinToString("\n", transform = ::encodeResult))
+            .apply()
+        mutableHistory.value = bounded
     }
 
     private fun read(): StopwatchState = StopwatchState(
@@ -97,11 +163,42 @@ class StopwatchStore(context: Context) {
             .mapNotNull { it.toLongOrNull() },
     )
 
+    private fun readHistory(): List<StopwatchResult> = prefs.getString(KEY_HISTORY, "")
+        .orEmpty()
+        .lineSequence()
+        .filter { it.isNotBlank() }
+        .mapNotNull(::decodeResult)
+        .sortedByDescending { it.finishedAtWallMillis }
+        .take(MAX_HISTORY_RESULTS)
+        .toList()
+
+    private fun encodeResult(result: StopwatchResult): String = listOf(
+        result.id,
+        result.finishedAtWallMillis,
+        result.elapsedMillis,
+        result.laps.joinToString(","),
+    ).joinToString("|")
+
+    private fun decodeResult(raw: String): StopwatchResult? = runCatching {
+        val parts = raw.split("|", limit = 4)
+        if (parts.size != 4) return@runCatching null
+        StopwatchResult(
+            id = parts[0].toLong(),
+            finishedAtWallMillis = parts[1].toLong(),
+            elapsedMillis = parts[2].toLong(),
+            laps = parts[3].split(",")
+                .filter { it.isNotBlank() }
+                .mapNotNull { it.toLongOrNull() },
+        )
+    }.getOrNull()
+
     private companion object {
         const val KEY_RUNNING = "running"
         const val KEY_ACCUMULATED = "accumulated"
         const val KEY_STARTED_ELAPSED = "started_elapsed"
         const val KEY_STARTED_WALL = "started_wall"
         const val KEY_LAPS = "laps"
+        const val KEY_HISTORY = "history_v1"
+        const val MAX_HISTORY_RESULTS = 20
     }
 }
