@@ -59,6 +59,7 @@ class AlarmAlertActivity : ComponentActivity() {
     }
 
     private fun stopAlert() {
+        AlarmPlaybackService.stop(this)
         NotificationManagerCompat.from(this).cancel(AlarmReceiver.notificationId(alarmId))
         finishAndRemoveTask()
     }

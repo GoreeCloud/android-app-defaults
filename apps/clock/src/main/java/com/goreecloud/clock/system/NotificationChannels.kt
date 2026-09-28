@@ -7,27 +7,37 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 
 object NotificationChannels {
-    const val ALARM_CHANNEL_ID = "clock_alarms"
+    const val ALARM_PLAYBACK_CHANNEL_ID = "clock_alarm_playback_v2"
+    const val ALARM_FALLBACK_CHANNEL_ID = "clock_alarm_fallback_v1"
     const val TIMER_CHANNEL_ID = "clock_timers"
 
     fun ensure(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
 
-        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        val alarmAttributes = AudioAttributes.Builder()
+        val playbackChannel = NotificationChannel(
+            ALARM_PLAYBACK_CHANNEL_ID,
+            "Active alarms",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Visible controls while a GoreeCloud Clock alarm is ringing"
+            enableVibration(false)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            setSound(null, null)
+        }
+
+        val fallbackAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_ALARM)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-
-        val alarmChannel = NotificationChannel(
-            ALARM_CHANNEL_ID,
-            "Alarms",
+        val fallbackChannel = NotificationChannel(
+            ALARM_FALLBACK_CHANNEL_ID,
+            "Alarm fallback alerts",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
-            description = "GoreeCloud Clock alarm alerts"
+            description = "System fallback alert if active alarm playback cannot start"
             enableVibration(true)
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
-            setSound(alarmSound, alarmAttributes)
+            setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM), fallbackAttributes)
         }
 
         val timerChannel = NotificationChannel(
@@ -39,6 +49,6 @@ object NotificationChannels {
             enableVibration(true)
         }
 
-        manager.createNotificationChannels(listOf(alarmChannel, timerChannel))
+        manager.createNotificationChannels(listOf(playbackChannel, fallbackChannel, timerChannel))
     }
 }

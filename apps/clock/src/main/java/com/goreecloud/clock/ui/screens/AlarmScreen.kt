@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -18,6 +21,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,12 +31,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.clock.alarm.Alarm
 import com.goreecloud.clock.alarm.AlarmScheduler
+import com.goreecloud.clock.alarm.AlarmSound
+import com.goreecloud.clock.alarm.AlarmSoundCatalog
+import com.goreecloud.clock.alarm.AlarmSoundOption
 import com.goreecloud.clock.alarm.AlarmStore
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -142,6 +150,8 @@ fun AlarmScreen(
                     repeatDays = draft.repeatDays,
                     vibrate = draft.vibrate,
                     snoozeMinutes = draft.snoozeMinutes,
+                    soundKey = draft.soundKey,
+                    gradualVolumeSeconds = draft.gradualVolumeSeconds,
                 )
                 scheduler.schedule(saved)
                 adding = false
@@ -170,6 +180,7 @@ private fun AlarmCard(
     onEnabledChange: (Boolean) -> Unit,
     onDelete: () -> Unit,
 ) {
+    val context = LocalContext.current
     val time = LocalTime.of(alarm.hour, alarm.minute).format(
         DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm" else "h:mm a"),
     )
@@ -208,6 +219,15 @@ private fun AlarmCard(
                 "$repeat • Snooze ${alarm.snoozeMinutes} min",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            val gradual = if (alarm.gradualVolumeSeconds > 0) {
+                "Gradual ${alarm.gradualVolumeSeconds}s"
+            } else {
+                "Full volume"
+            }
+            Text(
+                "Sound: ${AlarmSoundCatalog.title(context, alarm.soundKey)} • $gradual",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             TextButton(onClick = onDelete) {
                 Text("Delete")
             }
@@ -236,6 +256,14 @@ private fun AlarmEditorDialog(
     var snooze by remember(existing?.id) {
         mutableStateOf((existing?.snoozeMinutes ?: 10).toString())
     }
+    val context = LocalContext.current
+    var soundKey by remember(existing?.id) {
+        mutableStateOf(existing?.soundKey ?: AlarmSound.DEFAULT)
+    }
+    var gradualVolumeSeconds by remember(existing?.id) {
+        mutableStateOf(existing?.gradualVolumeSeconds ?: 0)
+    }
+    var showSoundPicker by remember { mutableStateOf(false) }
 
     val parsedHour = hour.toIntOrNull()
     val parsedMinute = minute.toIntOrNull()
@@ -248,7 +276,12 @@ private fun AlarmEditorDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (existing == null) "New alarm" else "Edit alarm") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 430.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         modifier = Modifier.weight(1f),
@@ -298,6 +331,22 @@ private fun AlarmEditorDialog(
                     Text("Vibrate")
                     Switch(checked = vibrate, onCheckedChange = { vibrate = it })
                 }
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showSoundPicker = true },
+                ) {
+                    Text("Alarm sound: ${AlarmSoundCatalog.title(context, soundKey)}")
+                }
+                Text("Gradual volume", style = MaterialTheme.typography.titleSmall)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    items(listOf(0, 15, 30, 60)) { seconds ->
+                        FilterChip(
+                            selected = gradualVolumeSeconds == seconds,
+                            onClick = { gradualVolumeSeconds = seconds },
+                            label = { Text(if (seconds == 0) "Off" else "${seconds}s") },
+                        )
+                    }
+                }
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = snooze,
@@ -322,6 +371,8 @@ private fun AlarmEditorDialog(
                             repeatDays = repeatDays,
                             vibrate = vibrate,
                             snoozeMinutes = requireNotNull(parsedSnooze),
+                            soundKey = soundKey,
+                            gradualVolumeSeconds = gradualVolumeSeconds,
                         ),
                     )
                 },
@@ -331,6 +382,57 @@ private fun AlarmEditorDialog(
             OutlinedButton(onClick = onDismiss) {
                 Text("Cancel")
             }
+        },
+    )
+
+    if (showSoundPicker) {
+        AlarmSoundPickerDialog(
+            selectedKey = soundKey,
+            onSelected = {
+                soundKey = it
+                showSoundPicker = false
+            },
+            onDismiss = { showSoundPicker = false },
+        )
+    }
+}
+
+@Composable
+private fun AlarmSoundPickerDialog(
+    selectedKey: String,
+    onSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val options = remember { AlarmSoundCatalog.load(context) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose alarm sound") },
+        text = {
+            LazyColumn(
+                modifier = Modifier.heightIn(max = 360.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(options, key = AlarmSoundOption::key) { option ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelected(option.key) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = option.key == selectedKey,
+                            onClick = { onSelected(option.key) },
+                        )
+                        Text(option.title)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Done") }
         },
     )
 }

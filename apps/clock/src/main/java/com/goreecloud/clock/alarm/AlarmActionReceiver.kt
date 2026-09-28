@@ -15,6 +15,8 @@ class AlarmActionReceiver : BroadcastReceiver() {
         if (intent.action == ACTION_SNOOZE) {
             app.alarmStore.get(id)?.let(app.alarmScheduler::scheduleSnooze)
         }
+
+        AlarmPlaybackService.stop(context)
         NotificationManagerCompat.from(context).cancel(AlarmReceiver.notificationId(id))
     }
 

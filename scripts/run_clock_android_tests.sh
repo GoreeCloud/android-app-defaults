@@ -48,6 +48,7 @@ for screenshot in \
   clock-analog \
   alarms-empty \
   alarm-editor \
+  alarm-sound-picker \
   timer-empty \
   timer-editor \
   stopwatch \

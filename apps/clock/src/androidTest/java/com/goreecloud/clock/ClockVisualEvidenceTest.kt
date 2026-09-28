@@ -49,6 +49,10 @@ class ClockVisualEvidenceTest {
         composeRule.onNodeWithText("Add alarm").performClick()
         composeRule.onNodeWithText("New alarm").assertIsDisplayed()
         capture("alarm-editor")
+        composeRule.onNodeWithText("Alarm sound:", substring = true).performClick()
+        composeRule.onNodeWithText("Choose alarm sound").assertIsDisplayed()
+        capture("alarm-sound-picker")
+        composeRule.onNodeWithText("Done").performClick()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithContentDescription("Timer").performClick()

@@ -41,6 +41,11 @@ class ClockNavigationTest {
         composeRule.onNodeWithContentDescription("Alarms").performClick()
         composeRule.onNodeWithText("Add alarm").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("New alarm").assertIsDisplayed()
+        composeRule.onNodeWithText("Alarm sound:", substring = true).assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Choose alarm sound").assertIsDisplayed()
+        composeRule.onNodeWithText("System default").assertIsDisplayed()
+        composeRule.onNodeWithText("Done").performClick()
+        composeRule.onNodeWithText("Gradual volume").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithContentDescription("Timer").performClick()

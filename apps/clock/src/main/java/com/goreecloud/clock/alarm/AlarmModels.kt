@@ -3,6 +3,11 @@ package com.goreecloud.clock.alarm
 import java.time.DayOfWeek
 import java.time.ZonedDateTime
 
+object AlarmSound {
+    const val DEFAULT = "default"
+    const val SILENT = "silent"
+}
+
 data class Alarm(
     val id: Long,
     val hour: Int,
@@ -12,7 +17,21 @@ data class Alarm(
     val repeatDays: Set<DayOfWeek> = emptySet(),
     val vibrate: Boolean = true,
     val snoozeMinutes: Int = 10,
+    val soundKey: String = AlarmSound.DEFAULT,
+    val gradualVolumeSeconds: Int = 0,
 )
+
+object AlarmVolumeRamp {
+    private const val MINIMUM_AUDIBLE_VOLUME = 0.15f
+
+    fun volumeAt(elapsedMillis: Long, durationSeconds: Int): Float {
+        if (durationSeconds <= 0) return 1f
+        val durationMillis = durationSeconds * 1_000L
+        val progress = (elapsedMillis.coerceAtLeast(0L).toFloat() / durationMillis)
+            .coerceIn(0f, 1f)
+        return MINIMUM_AUDIBLE_VOLUME + (1f - MINIMUM_AUDIBLE_VOLUME) * progress
+    }
+}
 
 object AlarmScheduleCalculator {
     fun nextTrigger(
@@ -36,11 +55,8 @@ object AlarmScheduleCalculator {
                 .withSecond(0)
                 .withNano(0)
 
-            if (candidate.isAfter(now)) {
-                return candidate
-            }
+            if (candidate.isAfter(now)) return candidate
         }
-
         return null
     }
 }

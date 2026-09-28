@@ -17,6 +17,8 @@ allowed = {
     "android.permission.SCHEDULE_EXACT_ALARM",
     "android.permission.USE_EXACT_ALARM",
     "android.permission.USE_FULL_SCREEN_INTENT",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
 }
 unexpected = sorted(permission for permission in permissions if permission not in allowed)
 if unexpected:
@@ -83,3 +85,17 @@ for receiver in application.findall("receiver"):
         raise SystemExit(f"Widget receiver is missing provider metadata: {name}")
 
 print("Clock manifest privacy and component-export boundary verified.")
+
+
+services = application.findall("service")
+playback_services = [
+    node for node in services
+    if node.attrib.get(android + "name") == ".alarm.AlarmPlaybackService"
+]
+if len(playback_services) != 1:
+    raise SystemExit("Clock must declare exactly one AlarmPlaybackService.")
+playback_service = playback_services[0]
+if playback_service.attrib.get(android + "exported") != "false":
+    raise SystemExit("AlarmPlaybackService must remain internal.")
+if playback_service.attrib.get(android + "foregroundServiceType") != "mediaPlayback":
+    raise SystemExit("AlarmPlaybackService must use only the mediaPlayback foreground service type.")
