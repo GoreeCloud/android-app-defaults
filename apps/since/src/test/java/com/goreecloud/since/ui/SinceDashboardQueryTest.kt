@@ -4,6 +4,7 @@ import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Tracker
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
+import com.goreecloud.since.domain.model.TrackerPeriod
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -57,7 +58,7 @@ class SinceDashboardQueryTest {
             id = id,
             title = title,
             note = note,
-            kind = TrackerKind.PERMANENT,
+            kind = TrackerKind.EVENT,
             iconKey = null,
             accentKey = null,
             defaultDisplayFormat = DisplayFormat.DAYS,
@@ -66,7 +67,21 @@ class SinceDashboardQueryTest {
             createdAtEpochMs = 1,
             updatedAtEpochMs = updatedAt,
         ),
-        periods = emptyList(),
+        periods = listOf(
+            TrackerPeriod(
+                id = "$id-period",
+                trackerId = id,
+                sequence = 0,
+                startEpochMs = 0,
+                startZoneId = "UTC",
+                endEpochMs = null,
+                endZoneId = null,
+                resetReason = null,
+                resetNote = null,
+                createdAtEpochMs = 1,
+                updatedAtEpochMs = updatedAt,
+            ),
+        ),
         goal = null,
     )
 }
