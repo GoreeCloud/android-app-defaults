@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.goreecloud.clock.data.ClockFacePreference
@@ -48,6 +49,9 @@ class ClockVisualEvidenceTest {
         capture("alarms-empty")
         composeRule.onNodeWithText("Add alarm").performClick()
         composeRule.onNodeWithText("New alarm").assertIsDisplayed()
+        composeRule.onNodeWithText("Alarm sound:", substring = true)
+            .performScrollTo()
+            .assertIsDisplayed()
         capture("alarm-editor")
         composeRule.onNodeWithText("Alarm sound:", substring = true).performClick()
         composeRule.onNodeWithText("Choose alarm sound").assertIsDisplayed()
