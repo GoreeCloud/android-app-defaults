@@ -179,4 +179,7 @@
     <string name="settings_open">Open</string>
     <string name="home_contextual_hint">Hint: Tap a tracker to review its elapsed time and details, or add a new tracker from Home.</string>
     <string name="dismiss_hint">Dismiss</string>
+    <string name="reset_dismissed_hints">Reset dismissed hints</string>
+    <string name="reset_dismissed_hints_supporting">Show contextual tips you previously dismissed.</string>
+    <string name="settings_reset">Reset</string>
 </resources>
