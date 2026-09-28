@@ -1787,13 +1787,23 @@ private fun StreakDetailActionButtons(
         }
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(if (stacked) 6.dp else 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        history(Modifier.weight(1f))
-        reset(Modifier.weight(1f))
+    if (stacked) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            history(Modifier.fillMaxWidth())
+            reset(Modifier.fillMaxWidth())
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            history(Modifier.weight(1f))
+            reset(Modifier.weight(1f))
+        }
     }
 }
 
