@@ -100,6 +100,7 @@ fun SinceApp(
     onContextualHintsEnabledChange: (Boolean) -> Unit = {},
     homeContextualHintDismissed: Boolean = false,
     onHomeContextualHintDismissedChange: (Boolean) -> Unit = {},
+    onResetDismissedContextualHints: () -> Unit = {},
     onReplaySetup: () -> Unit = {},
 ) {
     val aggregates by repository
@@ -397,6 +398,7 @@ fun SinceApp(
                 onThemePreferenceChange = onThemePreferenceChange,
                 contextualHintsEnabled = contextualHintsEnabled,
                 onContextualHintsEnabledChange = onContextualHintsEnabledChange,
+                onResetDismissedContextualHints = onResetDismissedContextualHints,
                 onReplaySetup = onReplaySetup,
             )
         }
