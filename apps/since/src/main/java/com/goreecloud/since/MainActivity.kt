@@ -40,6 +40,9 @@ class MainActivity : ComponentActivity() {
             val contextualHintsEnabled by preferencesRepository
                 .contextualHintsEnabled
                 .collectAsStateWithLifecycle(initialValue = true)
+            val homeContextualHintDismissed by preferencesRepository
+                .homeContextualHintDismissed
+                .collectAsStateWithLifecycle(initialValue = false)
             val systemDarkTheme = isSystemInDarkTheme()
             val scope = rememberCoroutineScope()
             var replaySetup by rememberSaveable { mutableStateOf(false) }
@@ -100,6 +103,12 @@ class MainActivity : ComponentActivity() {
                         onContextualHintsEnabledChange = { enabled ->
                             scope.launch {
                                 preferencesRepository.setContextualHintsEnabled(enabled)
+                            }
+                        },
+                        homeContextualHintDismissed = homeContextualHintDismissed,
+                        onHomeContextualHintDismissedChange = { dismissed ->
+                            scope.launch {
+                                preferencesRepository.setHomeContextualHintDismissed(dismissed)
                             }
                         },
                         onReplaySetup = {
