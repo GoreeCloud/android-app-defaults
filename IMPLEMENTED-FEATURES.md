@@ -361,3 +361,20 @@ This remains Development source until its exact candidate head passes the comple
 
 
 Replay-state hardening keeps voluntary onboarding replay separate from genuine first-use completion. Replay persists independently, resumes after interruption, can be closed without invalidating prior completion, and does not turn an experienced user's next launch into mandatory first-use. A one-time onboarding schema migration also treats pre-onboarding Development installs with existing Clock state as already oriented.
+
+
+### Clock alarm audio Development candidate
+
+Draft PR #50 now also carries per-alarm audio configuration:
+
+- installed system alarm-sound selection with explicit System default and Silent options;
+- persisted per-alarm sound selection with backward migration from the earlier alarm record format;
+- configurable Off/15/30/60-second gradual volume ramp beginning at an audible floor and reaching full alarm-stream volume;
+- a bounded, internal media-playback foreground service used only while an alarm is actively ringing;
+- explicit alarm audio focus, USAGE_ALARM audio attributes, looping playback, per-alarm vibration lifecycle, and stop behavior shared by snooze/dismiss/full-screen alert actions;
+- a dedicated silent active-alarm notification channel to prevent duplicate channel audio, plus a system-default fallback channel if active playback cannot start;
+- no storage, microphone, account, Internet, or network-state permission added for alarm sound selection;
+- fail-closed manifest validation for the mediaPlayback foreground-service type and internal export boundary;
+- JVM volume-ramp coverage and Android 16 editor/sound-picker reachability/rendered-evidence coverage.
+
+This remains Development source until the newer exact head passes the complete source/runtime/rendered-evidence workflow. Audible playback quality, OEM alarm-stream behavior, DND interaction, selected-tone persistence, and physical snooze/dismiss lifecycle behavior remain representative-device acceptance work.
