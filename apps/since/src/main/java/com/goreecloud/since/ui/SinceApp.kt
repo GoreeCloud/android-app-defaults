@@ -29,6 +29,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -432,6 +433,18 @@ private fun Dashboard(
         clock = clock,
         key = "dashboard",
     )
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var sortName by rememberSaveable { mutableStateOf(SinceDashboardSort.RECENT.name) }
+    val dashboardSort = runCatching {
+        SinceDashboardSort.valueOf(sortName)
+    }.getOrDefault(SinceDashboardSort.RECENT)
+    val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
+        SinceDashboardQuery.apply(
+            aggregates = aggregates,
+            query = searchQuery,
+            sort = dashboardSort,
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -469,8 +482,46 @@ private fun Dashboard(
                 DashboardEmptyState(onAddTracker = onAddTracker)
             }
         } else {
+            item {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("dashboard-search"),
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text(stringResource(R.string.dashboard_search)) },
+                        singleLine = true,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.RECENT,
+                            onClick = { sortName = SinceDashboardSort.RECENT.name },
+                            label = { Text(stringResource(R.string.dashboard_sort_recent)) },
+                        )
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.TITLE,
+                            onClick = { sortName = SinceDashboardSort.TITLE.name },
+                            label = { Text(stringResource(R.string.dashboard_sort_name)) },
+                        )
+                    }
+                    if (visibleAggregates.isEmpty()) {
+                        Text(
+                            modifier = Modifier.testTag("dashboard-no-matches"),
+                            text = stringResource(R.string.dashboard_no_matches),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+            }
             items(
-                items = aggregates,
+                items = visibleAggregates,
                 key = { it.tracker.id },
             ) { aggregate ->
                 TrackerCard(
