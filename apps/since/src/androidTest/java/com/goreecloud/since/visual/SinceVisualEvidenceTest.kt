@@ -91,14 +91,14 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
         capture("tracker-details-dark")
 
-        composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithTag("reset-reason").performTextInput("Restarted plan")
         capture("reset-streak-dark")
         composeRule.onNodeWithTag("confirm-reset-streak").performClick()
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
+        composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("1 completed period").assertIsDisplayed()
         capture("history-dark")
