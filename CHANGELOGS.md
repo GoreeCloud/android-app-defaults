@@ -1,5 +1,12 @@
 # Android App Defaults — Changelogs
 
+## September 28, 2026 — Since persistent streak actions at large text
+
+Since tracker details now keep **History** and **Reset streak** in a persistent bottom action surface instead of burying those primary streak actions deep in the scrolling details body. Both controls preserve a 48 dp minimum interaction target and remain reachable when Android text is rendered at 2× scale; reset still requires its existing confirmation flow and all streak-history authority remains unchanged.
+
+The Android accessibility runtime test now requires these actions to be visibly reachable at large text and forced RTL without a preparatory scroll. This corrects the prior exact-head Android 16 failure where the off-screen reset action fell out of the active semantics tree. Fresh exact-head build/runtime evidence remains required.
+
+
 ## 2026-09-28 — Since dashboard search/sort candidate
 
 - Added device-local tracker search across title and note.
