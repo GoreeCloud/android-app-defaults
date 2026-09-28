@@ -111,6 +111,11 @@ class MainActivity : ComponentActivity() {
                                 preferencesRepository.setHomeContextualHintDismissed(dismissed)
                             }
                         },
+                        onResetDismissedContextualHints = {
+                            scope.launch {
+                                preferencesRepository.resetDismissedContextualHints()
+                            }
+                        },
                         onReplaySetup = {
                             replayStep = 0
                             replaySetup = true
