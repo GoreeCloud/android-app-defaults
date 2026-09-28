@@ -1,6 +1,7 @@
 package com.goreecloud.clock
 
 import android.graphics.Bitmap
+import android.os.SystemClock
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -31,6 +32,8 @@ class ClockVisualEvidenceTest {
         app.preferencesStore.completeOnboarding()
         app.preferencesStore.setHintsEnabled(true)
         app.preferencesStore.resetDismissedHints()
+        app.stopwatchStore.reset()
+        app.stopwatchStore.clearHistory()
         composeRule.waitForIdle()
     }
 
@@ -70,6 +73,15 @@ class ClockVisualEvidenceTest {
         composeRule.onNodeWithContentDescription("Stopwatch").performClick()
         composeRule.onNodeWithText("Laps").assertIsDisplayed()
         capture("stopwatch")
+
+        val app = composeRule.activity.application as ClockApplication
+        app.stopwatchStore.start()
+        SystemClock.sleep(40L)
+        app.stopwatchStore.pause()
+        app.stopwatchStore.reset()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Recent results").assertIsDisplayed()
+        capture("stopwatch-history")
 
         composeRule.onNodeWithContentDescription("World").performClick()
         composeRule.onNodeWithText("Local").assertIsDisplayed()

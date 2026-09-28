@@ -390,3 +390,16 @@ Draft PR #50 now includes:
 - no new network access and no haptic-specific permission expansion; ordinary UI haptics use Android view feedback while alarm vibration remains controlled by each alarm's separate Vibrate setting.
 
 Alarm audio/haptic implementation remains Development. Exact-head automated/runtime evidence does not replace representative-device speaker, DND/audio-focus, vibration/tactile, lock-screen, OEM, accessibility, or power acceptance.
+
+
+### Clock stopwatch history candidate
+
+Draft PR #50 now also persists previous stopwatch results locally:
+
+- resetting any non-empty stopwatch session archives its total elapsed duration, finish timestamp, and recorded cumulative laps;
+- the Stopwatch surface shows up to 20 recent results using the active 12/24-hour preference;
+- individual results can be deleted and the history can be cleared without affecting the active stopwatch state;
+- empty resets do not create history noise;
+- history remains app-private and offline, with JVM coverage for result creation and Android 16 rendered evidence for the recent-results surface.
+
+This history tranche requires fresh exact-head validation. Run #216 / 36419206782 remains the accepted alarm-audio/haptic checkpoint on `feae932538b23846b09e0cf3ad6591e2a2acd10b`.

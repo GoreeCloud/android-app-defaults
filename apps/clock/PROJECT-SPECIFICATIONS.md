@@ -59,6 +59,7 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Start, pause, resume, reset.
 - Lap tracking with individual and cumulative lap times.
 - Background/process-recreation persistence using monotonic time while available, with a wall-clock fallback when the monotonic base resets.
+- Previous stopwatch results stored locally when a non-empty session is reset, with bounded recent-history retention and deletion/clear controls.
 
 ### Personalization
 

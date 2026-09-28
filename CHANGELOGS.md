@@ -523,4 +523,16 @@ The onboarding tranche is Development until exact-head CI/runtime evidence passe
 
 ### Boundary
 
-Run #215 / 36418113358 validates the selectable-sound/gradual-volume source and Android 16 emulator checkpoint on head `3d846f9cf0902a9499ecb68c962a2803ab73530e`. The haptic-application changes in the next candidate require their own exact-head validation. Representative-device audio, tactile, DND/device-policy, OEM, accessibility, and power acceptance remain open.
+Run #215 / 36418113358 validates selectable alarm sound and gradual volume on head `3d846f9cf0902a9499ecb68c962a2803ab73530e`. Run #216 / 36419206782 validates the haptic-preference application on head `feae932538b23846b09e0cf3ad6591e2a2acd10b` across all four configured jobs. Representative-device audio, tactile, DND/device-policy, OEM, accessibility, and power acceptance remain open.
+
+
+### Added — Clock previous stopwatch results
+
+- Resetting a non-empty stopwatch session now archives the completed duration, finish time, and lap totals locally.
+- Added a bounded Recent results list with 20-result retention, per-result deletion, and Clear all.
+- Empty stopwatch resets do not create history entries.
+- Added JVM coverage for result creation and Android 16 rendered-evidence capture for the history surface.
+
+### Boundary
+
+The stopwatch-history candidate requires its own exact-head source/runtime/rendered validation before it is treated as an accepted Development checkpoint.

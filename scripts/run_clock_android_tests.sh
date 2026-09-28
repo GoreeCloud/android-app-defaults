@@ -52,6 +52,7 @@ for screenshot in \
   timer-empty \
   timer-editor \
   stopwatch \
+  stopwatch-history \
   world-clock \
   world-clock-picker \
   settings \
