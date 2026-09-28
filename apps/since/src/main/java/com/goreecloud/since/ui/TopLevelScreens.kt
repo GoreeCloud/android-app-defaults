@@ -264,6 +264,7 @@ internal fun SettingsScreen(
     onThemePreferenceChange: (ThemePreference) -> Unit,
     contextualHintsEnabled: Boolean,
     onContextualHintsEnabledChange: (Boolean) -> Unit,
+    onResetDismissedContextualHints: () -> Unit,
     onReplaySetup: () -> Unit,
 ) {
     var plannedDialog by remember { mutableStateOf<PlannedSetting?>(null) }
@@ -423,6 +424,13 @@ internal fun SettingsScreen(
                         onCheckedChange = null,
                     )
                 }
+                SettingsActionRow(
+                    title = stringResourceCompat(R.string.reset_dismissed_hints),
+                    supporting = stringResourceCompat(R.string.reset_dismissed_hints_supporting),
+                    status = stringResourceCompat(R.string.settings_reset),
+                    testTag = "settings-reset-dismissed-hints",
+                    onClick = onResetDismissedContextualHints,
+                )
                 SettingsActionRow(
                     title = stringResourceCompat(R.string.replay_setup),
                     supporting = stringResourceCompat(R.string.replay_setup_supporting),
