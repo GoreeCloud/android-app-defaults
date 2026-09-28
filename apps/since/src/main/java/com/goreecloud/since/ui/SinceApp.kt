@@ -61,6 +61,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -859,38 +860,12 @@ private fun TrackerDetailsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            TextButton(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .heightIn(min = 48.dp)
-                                    .testTag("open-history"),
-                                onClick = onOpenHistory,
-                            ) {
-                                Text(stringResource(R.string.view_history))
-                            }
-                            Button(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .heightIn(min = 48.dp)
-                                    .testTag("reset-streak"),
-                                onClick = { showResetDialog = true },
-                                enabled = !isResetting,
-                                shape = MaterialTheme.shapes.large,
-                            ) {
-                                Text(
-                                    if (isResetting) {
-                                        stringResource(R.string.resetting)
-                                    } else {
-                                        stringResource(R.string.reset_streak)
-                                    }
-                                )
-                            }
-                        }
+                        StreakDetailActionButtons(
+                            stacked = LocalDensity.current.fontScale >= 1.5f,
+                            isResetting = isResetting,
+                            onOpenHistory = onOpenHistory,
+                            onReset = { showResetDialog = true },
+                        )
                     }
                 }
             }
@@ -1756,6 +1731,62 @@ private fun GoalEditorDialog(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun StreakDetailActionButtons(
+    stacked: Boolean,
+    isResetting: Boolean,
+    onOpenHistory: () -> Unit,
+    onReset: () -> Unit,
+) {
+    val history: @Composable (Modifier) -> Unit = { modifier ->
+        TextButton(
+            modifier = modifier
+                .heightIn(min = 48.dp)
+                .testTag("open-history"),
+            onClick = onOpenHistory,
+        ) {
+            Text(stringResource(R.string.view_history))
+        }
+    }
+    val reset: @Composable (Modifier) -> Unit = { modifier ->
+        Button(
+            modifier = modifier
+                .heightIn(min = 48.dp)
+                .testTag("reset-streak"),
+            onClick = onReset,
+            enabled = !isResetting,
+            shape = MaterialTheme.shapes.large,
+        ) {
+            Text(
+                if (isResetting) {
+                    stringResource(R.string.resetting)
+                } else {
+                    stringResource(R.string.reset_streak)
+                }
+            )
+        }
+    }
+
+    if (stacked) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            history(Modifier.fillMaxWidth())
+            reset(Modifier.fillMaxWidth())
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            history(Modifier.weight(1f))
+            reset(Modifier.weight(1f))
+        }
     }
 }
 
