@@ -1,9 +1,10 @@
 package com.goreecloud.clock
 
 import android.os.SystemClock
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -41,6 +42,6 @@ class ClockStopwatchHistoryTest {
         composeRule.onNodeWithText("Recent results").assertIsDisplayed()
         composeRule.onNodeWithText("Clear all").performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Recent results").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Recent results").assertCountEquals(0)
     }
 }
