@@ -112,6 +112,12 @@ class SincePreferencesRepository(
         }
     }
 
+    suspend fun resetDismissedContextualHints() {
+        context.sincePreferencesDataStore.edit { values ->
+            values[homeContextualHintDismissedKey] = false
+        }
+    }
+
     companion object {
         const val ONBOARDING_STEP_COUNT = 3
     }
