@@ -157,12 +157,12 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithText("Elapsed").assertIsDisplayed()
         capture("tracker-details")
 
-        composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         capture("reset-streak")
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
+        composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         capture("history")
         composeRule.onNodeWithText("Back").performClick()
