@@ -101,7 +101,10 @@ fun AlarmScreen(
             ContextualHintCard(
                 title = "Reliable alarms, only when you need them",
                 body = "Alarm data stays on this device. Android notification and exact-alarm access are requested only for dependable alert delivery.",
-                onDismiss = onDismissHint,
+                onDismiss = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onDismissHint()
+                },
             )
         }
 
@@ -110,7 +113,10 @@ fun AlarmScreen(
                 title = "Exact alarm access is required",
                 body = "Android requires special access for dependable alarm and timer delivery.",
                 button = "Allow exact alarms",
-                onClick = onRequestExactAlarmAccess,
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onRequestExactAlarmAccess()
+                },
             )
         }
         if (!notificationAccess) {
@@ -118,7 +124,10 @@ fun AlarmScreen(
                 title = "Notifications are disabled",
                 body = "Allow notifications so alarms and timer completions can alert you.",
                 button = "Allow notifications",
-                onClick = onRequestNotificationAccess,
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onRequestNotificationAccess()
+                },
             )
         }
 
@@ -470,7 +479,12 @@ private fun AlarmEditorDialog(
             ) { Text("Save") }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onDismiss()
+                },
+            ) {
                 Text("Cancel")
             }
         },
@@ -479,6 +493,7 @@ private fun AlarmEditorDialog(
     if (showSoundPicker) {
         AlarmSoundPickerDialog(
             selectedKey = soundKey,
+            onHaptic = onHaptic,
             onSelected = {
                 onHaptic(ClockHapticEvent.TICK)
                 soundKey = it
@@ -492,6 +507,7 @@ private fun AlarmEditorDialog(
 @Composable
 private fun AlarmSoundPickerDialog(
     selectedKey: String,
+    onHaptic: (ClockHapticEvent) -> Unit,
     onSelected: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -524,7 +540,12 @@ private fun AlarmSoundPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Done") }
+            TextButton(
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onDismiss()
+                },
+            ) { Text("Done") }
         },
     )
 }
