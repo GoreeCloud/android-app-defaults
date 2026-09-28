@@ -26,6 +26,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,10 +43,14 @@ import com.goreecloud.clock.alarm.AlarmSound
 import com.goreecloud.clock.alarm.AlarmSoundCatalog
 import com.goreecloud.clock.alarm.AlarmSoundOption
 import com.goreecloud.clock.alarm.AlarmStore
+import com.goreecloud.clock.alarm.UpcomingAlarmPolicy
 import com.goreecloud.clock.ui.ClockHapticEvent
 import java.time.DayOfWeek
 import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 @Composable
 fun AlarmScreen(
@@ -64,6 +69,17 @@ fun AlarmScreen(
     val alarms by alarmStore.alarms.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf<Alarm?>(null) }
     var adding by remember { mutableStateOf(false) }
+    var scheduleNow by remember { mutableStateOf(ZonedDateTime.now()) }
+
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            delay(30_000L)
+            scheduleNow = ZonedDateTime.now()
+        }
+    }
+    val upcomingAlarm = remember(alarms, scheduleNow) {
+        UpcomingAlarmPolicy.next(alarms, scheduleNow)
+    }
 
     Column(
         modifier = modifier
@@ -103,6 +119,15 @@ fun AlarmScreen(
                 body = "Allow notifications so alarms and timer completions can alert you.",
                 button = "Allow notifications",
                 onClick = onRequestNotificationAccess,
+            )
+        }
+
+        upcomingAlarm?.let { upcoming ->
+            UpcomingAlarmCard(
+                alarm = upcoming.alarm,
+                trigger = upcoming.trigger,
+                now = scheduleNow,
+                use24Hour = use24Hour,
             )
         }
 
@@ -183,6 +208,44 @@ fun AlarmScreen(
                 editing = null
             },
         )
+    }
+}
+
+@Composable
+private fun UpcomingAlarmCard(
+    alarm: Alarm,
+    trigger: ZonedDateTime,
+    now: ZonedDateTime,
+    use24Hour: Boolean,
+) {
+    val dayLabel = when (trigger.toLocalDate()) {
+        now.toLocalDate() -> "Today"
+        now.toLocalDate().plusDays(1) -> "Tomorrow"
+        else -> trigger.format(DateTimeFormatter.ofPattern("EEE, MMM d"))
+    }
+    val time = trigger.format(
+        DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm" else "h:mm a"),
+    )
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Text(
+                "Next alarm",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Text(
+                "$dayLabel · $time",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Text(
+                alarm.label.ifBlank { "Alarm" },
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
