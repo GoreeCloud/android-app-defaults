@@ -1,5 +1,12 @@
 # Android App Defaults — Changelogs
 
+## September 28, 2026 — relative Next alarm presentation
+
+Clock's existing exact-alarm-gated **Next alarm** card now adds a compact relative-time summary such as **In 2 h 15 min**, derived from the same scheduled trigger instant rather than a second scheduling path. The presentation policy uses instant duration so DST/local-clock representation does not distort the countdown, handles sub-minute and multi-day boundaries, and fails closed to **Due now** for a non-future trigger.
+
+Exact candidate head `d47eb48611867b5d96b6239ea5681cbf007edbdf` passed Android Development Foundation run `36488720505`, including Clock build/unit/lint, Clock Android 16 runtime, and the shared Since regression matrix. No scheduler, persistence, permission, telemetry, account, or network authority changed. Representative-device time-zone/DST/clock-change, accessibility, power, and real alarm-delivery acceptance remain open.
+
+
 ## September 28, 2026 — Clock next-alarm presentation candidate
 
 Clock now derives the next enabled alarm through the same deterministic local schedule calculation used by alarm delivery and surfaces it on the Alarms screen as **Next alarm** with Today/Tomorrow/date and local-time presentation only while Android exact-alarm scheduling access is available. The screen refreshes that presentation at a bounded 30-second cadence while visible; no new background service, permission, telemetry, account, or network path is introduced.
