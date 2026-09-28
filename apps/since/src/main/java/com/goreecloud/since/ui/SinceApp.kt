@@ -843,6 +843,40 @@ private fun TrackerDetailsScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
+            if (aggregate.tracker.kind == TrackerKind.STREAK) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    tonalElevation = 3.dp,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            top = 8.dp,
+                            end = 16.dp,
+                            bottom = 16.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (resetFailed) {
+                            Text(
+                                modifier = Modifier.semantics {
+                                    liveRegion = LiveRegionMode.Assertive
+                                },
+                                text = stringResource(R.string.reset_failed),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        StreakDetailActionButtons(
+                            stacked = LocalDensity.current.fontScale >= 1.5f,
+                            isResetting = isResetting,
+                            onOpenHistory = onOpenHistory,
+                            onReset = { showResetDialog = true },
+                        )
+                    }
+                }
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -1141,40 +1175,7 @@ private fun TrackerDetailsScreen(
             }
         }
 
-            if (aggregate.tracker.kind == TrackerKind.STREAK) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    tonalElevation = 3.dp,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            top = 8.dp,
-                            end = 16.dp,
-                            bottom = 16.dp,
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        if (resetFailed) {
-                            Text(
-                                modifier = Modifier.semantics {
-                                    liveRegion = LiveRegionMode.Assertive
-                                },
-                                text = stringResource(R.string.reset_failed),
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                        StreakDetailActionButtons(
-                            stacked = LocalDensity.current.fontScale >= 1.5f,
-                            isResetting = isResetting,
-                            onOpenHistory = onOpenHistory,
-                            onReset = { showResetDialog = true },
-                        )
-                    }
-                }
-            }
+
         }
     }
 
