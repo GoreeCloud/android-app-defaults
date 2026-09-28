@@ -182,4 +182,9 @@
     <string name="reset_dismissed_hints">Reset dismissed hints</string>
     <string name="reset_dismissed_hints_supporting">Show contextual tips you previously dismissed.</string>
     <string name="settings_reset">Reset</string>
+
+    <string name="dashboard_search">Search trackers</string>
+    <string name="dashboard_sort_recent">Recent</string>
+    <string name="dashboard_sort_name">Name</string>
+    <string name="dashboard_no_matches">No trackers match your search.</string>
 </resources>
