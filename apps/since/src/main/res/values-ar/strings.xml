@@ -183,4 +183,9 @@
     <string name="reset_dismissed_hints">إعادة إظهار التلميحات المخفية</string>
     <string name="reset_dismissed_hints_supporting">إظهار التلميحات السياقية التي أخفيتها سابقًا.</string>
     <string name="settings_reset">إعادة تعيين</string>
+
+    <string name="dashboard_search">البحث في المتتبعات</string>
+    <string name="dashboard_sort_recent">الأحدث</string>
+    <string name="dashboard_sort_name">الاسم</string>
+    <string name="dashboard_no_matches">لا توجد متتبعات تطابق بحثك.</string>
 </resources>
