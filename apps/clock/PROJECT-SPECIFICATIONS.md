@@ -40,7 +40,9 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Exact alarm scheduling while the app is backgrounded or closed.
 - Restoration after restart, package replacement, time changes, and time-zone changes.
 - Alarm notification and full-screen alert integration when Android permissions allow it.
-- Future work: selectable alarm sounds, gradual volume, richer dismiss/snooze interaction and acceptance evidence.
+- Selectable alarm sounds from Android alarm tones, including System default and Silent.
+- Optional gradual alarm volume over 15, 30, or 60 seconds.
+- Future work: richer dismiss/snooze interaction and representative-device audio acceptance.
 
 ### Timers
 
@@ -64,7 +66,8 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Digital/analog preference.
 - 12/24-hour preference.
 - Haptic preference and reduced-motion preference.
-- Future work: preference application to all supported interactions and dedicated accessibility acceptance.
+- Haptic preference applied to primary navigation, clock-mode, alarm/timer, stopwatch, world-clock, onboarding, Settings, and alarm-alert controls using Android system haptic feedback.
+- Future work: representative-device tactile/accessibility acceptance.
 
 ### First-use onboarding and contextual guidance
 

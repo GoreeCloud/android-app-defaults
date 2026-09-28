@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import com.goreecloud.clock.ClockApplication
+import com.goreecloud.clock.ui.ClockHapticEvent
+import com.goreecloud.clock.ui.rememberClockHapticFeedback
 import com.goreecloud.clock.ui.theme.ClockTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -44,15 +46,21 @@ class AlarmAlertActivity : ComponentActivity() {
             return
         }
 
+        val hapticsEnabled = app.preferencesStore.state.value.hapticsEnabled
         setContent {
             ClockTheme(darkTheme = isSystemInDarkTheme()) {
+                val onHaptic = rememberClockHapticFeedback(hapticsEnabled)
                 AlarmAlert(
                     alarm = alarm,
                     onSnooze = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         app.alarmScheduler.scheduleSnooze(alarm)
                         stopAlert()
                     },
-                    onDismiss = ::stopAlert,
+                    onDismiss = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        stopAlert()
+                    },
                 )
             }
         }

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.clock.stopwatch.StopwatchStore
+import com.goreecloud.clock.ui.ClockHapticEvent
 import com.goreecloud.clock.timer.DurationFormatter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -33,6 +34,7 @@ fun StopwatchScreen(
     modifier: Modifier = Modifier,
     store: StopwatchStore,
     reducedMotion: Boolean,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     val state by store.state.collectAsStateWithLifecycle()
     var tick by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
@@ -58,14 +60,26 @@ fun StopwatchScreen(
         )
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             if (state.running) {
-                Button(onClick = { store.pause() }) { Text("Pause") }
-                OutlinedButton(onClick = { store.lap() }) { Text("Lap") }
+                Button(onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    store.pause()
+                }) { Text("Pause") }
+                OutlinedButton(onClick = {
+                    onHaptic(ClockHapticEvent.TICK)
+                    store.lap()
+                }) { Text("Lap") }
             } else {
-                Button(onClick = { store.start() }) {
+                Button(onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    store.start()
+                }) {
                     Text(if (elapsed > 0L) "Resume" else "Start")
                 }
             }
-            OutlinedButton(onClick = { store.reset() }) { Text("Reset") }
+            OutlinedButton(onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                store.reset()
+            }) { Text("Reset") }
         }
 
         Text("Laps", style = MaterialTheme.typography.titleLarge)

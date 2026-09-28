@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ClockPreferences
+import com.goreecloud.clock.ui.ClockHapticEvent
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.cos
@@ -58,6 +59,7 @@ fun ClockScreen(
     modifier: Modifier = Modifier,
     preferences: ClockPreferences,
     onClockFaceChanged: (ClockFacePreference) -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
     onPresentationModeChanged: (Boolean, Boolean) -> Unit,
 ) {
     var mode by remember { mutableStateOf(PresentationMode.NORMAL) }
@@ -117,12 +119,18 @@ fun ClockScreen(
         ) {
             FilterChip(
                 selected = preferences.clockFace == ClockFacePreference.DIGITAL,
-                onClick = { onClockFaceChanged(ClockFacePreference.DIGITAL) },
+                onClick = {
+                    onHaptic(ClockHapticEvent.TICK)
+                    onClockFaceChanged(ClockFacePreference.DIGITAL)
+                },
                 label = { Text("Digital") },
             )
             FilterChip(
                 selected = preferences.clockFace == ClockFacePreference.ANALOG,
-                onClick = { onClockFaceChanged(ClockFacePreference.ANALOG) },
+                onClick = {
+                    onHaptic(ClockHapticEvent.TICK)
+                    onClockFaceChanged(ClockFacePreference.ANALOG)
+                },
                 label = { Text("Analog") },
             )
         }
@@ -164,13 +172,19 @@ fun ClockScreen(
                     modifier = Modifier
                         .weight(1f)
                         .semantics { contentDescription = "Full-screen clock" },
-                    onClick = { mode = PresentationMode.FULL_SCREEN },
+                    onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                mode = PresentationMode.FULL_SCREEN
+            },
                 ) {
                     Text("Full-screen")
                 }
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { mode = PresentationMode.BEDSIDE },
+                    onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                mode = PresentationMode.BEDSIDE
+            },
                 ) {
                     Text("Bedside mode")
                 }

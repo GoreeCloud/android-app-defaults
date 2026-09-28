@@ -42,6 +42,7 @@ import com.goreecloud.clock.alarm.AlarmSound
 import com.goreecloud.clock.alarm.AlarmSoundCatalog
 import com.goreecloud.clock.alarm.AlarmSoundOption
 import com.goreecloud.clock.alarm.AlarmStore
+import com.goreecloud.clock.ui.ClockHapticEvent
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -58,6 +59,7 @@ fun AlarmScreen(
     onRequestNotificationAccess: () -> Unit,
     showHint: Boolean,
     onDismissHint: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     val alarms by alarmStore.alarms.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf<Alarm?>(null) }
@@ -71,7 +73,10 @@ fun AlarmScreen(
     ) {
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { adding = true },
+            onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                adding = true
+            },
         ) {
             Text("Add alarm")
         }
@@ -118,8 +123,12 @@ fun AlarmScreen(
                 AlarmCard(
                     alarm = alarm,
                     use24Hour = use24Hour,
-                    onEdit = { editing = alarm },
+                    onEdit = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        editing = alarm
+                    },
                     onEnabledChange = { enabled ->
+                        onHaptic(ClockHapticEvent.ACTION)
                         val updated = alarmStore.setEnabled(alarm.id, enabled)
                         if (updated != null) {
                             if (enabled) {
@@ -130,6 +139,7 @@ fun AlarmScreen(
                         }
                     },
                     onDelete = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         scheduler.cancel(alarm.id)
                         alarmStore.delete(alarm.id)
                     },
@@ -142,7 +152,9 @@ fun AlarmScreen(
         AlarmEditorDialog(
             existing = null,
             onDismiss = { adding = false },
+            onHaptic = onHaptic,
             onSave = { draft ->
+                onHaptic(ClockHapticEvent.ACTION)
                 val saved = alarmStore.add(
                     hour = draft.hour,
                     minute = draft.minute,
@@ -163,7 +175,9 @@ fun AlarmScreen(
         AlarmEditorDialog(
             existing = alarm,
             onDismiss = { editing = null },
+            onHaptic = onHaptic,
             onSave = { updated ->
+                onHaptic(ClockHapticEvent.ACTION)
                 alarmStore.upsert(updated)
                 if (updated.enabled) scheduler.schedule(updated) else scheduler.cancel(updated.id)
                 editing = null
@@ -239,6 +253,7 @@ private fun AlarmCard(
 private fun AlarmEditorDialog(
     existing: Alarm?,
     onDismiss: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
     onSave: (Alarm) -> Unit,
 ) {
     val now = LocalTime.now()
@@ -313,6 +328,7 @@ private fun AlarmEditorDialog(
                         FilterChip(
                             selected = day in repeatDays,
                             onClick = {
+                                onHaptic(ClockHapticEvent.TICK)
                                 repeatDays = if (day in repeatDays) {
                                     repeatDays - day
                                 } else {
@@ -329,11 +345,20 @@ private fun AlarmEditorDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("Vibrate")
-                    Switch(checked = vibrate, onCheckedChange = { vibrate = it })
+                    Switch(
+                        checked = vibrate,
+                        onCheckedChange = {
+                            onHaptic(ClockHapticEvent.ACTION)
+                            vibrate = it
+                        },
+                    )
                 }
                 OutlinedButton(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = { showSoundPicker = true },
+                    onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        showSoundPicker = true
+                    },
                 ) {
                     Text("Alarm sound: ${AlarmSoundCatalog.title(context, soundKey)}")
                 }
@@ -342,7 +367,10 @@ private fun AlarmEditorDialog(
                     items(listOf(0, 15, 30, 60)) { seconds ->
                         FilterChip(
                             selected = gradualVolumeSeconds == seconds,
-                            onClick = { gradualVolumeSeconds = seconds },
+                            onClick = {
+                                onHaptic(ClockHapticEvent.TICK)
+                                gradualVolumeSeconds = seconds
+                            },
                             label = { Text(if (seconds == 0) "Off" else "${seconds}s") },
                         )
                     }
@@ -389,6 +417,7 @@ private fun AlarmEditorDialog(
         AlarmSoundPickerDialog(
             selectedKey = soundKey,
             onSelected = {
+                onHaptic(ClockHapticEvent.TICK)
                 soundKey = it
                 showSoundPicker = false
             },

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.clock.timer.DurationFormatter
+import com.goreecloud.clock.ui.ClockHapticEvent
 import com.goreecloud.clock.timer.TimerEntry
 import com.goreecloud.clock.timer.TimerScheduler
 import com.goreecloud.clock.timer.TimerStore
@@ -46,6 +47,7 @@ fun TimerScreen(
     onRequestNotificationAccess: () -> Unit,
     showHint: Boolean,
     onDismissHint: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     val timers by timerStore.timers.collectAsStateWithLifecycle()
     var showAdd by remember { mutableStateOf(false) }
@@ -66,7 +68,10 @@ fun TimerScreen(
     ) {
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { showAdd = true },
+            onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                showAdd = true
+            },
         ) {
             Text("Add timer")
         }
@@ -112,17 +117,21 @@ fun TimerScreen(
                     timer = timer,
                     now = now,
                     onStart = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         timerStore.start(timer.id)?.let(scheduler::schedule)
                     },
                     onPause = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         timerStore.pause(timer.id)
                         scheduler.cancel(timer.id)
                     },
                     onReset = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         timerStore.reset(timer.id)
                         scheduler.cancel(timer.id)
                     },
                     onDelete = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         scheduler.cancel(timer.id)
                         timerStore.delete(timer.id)
                     },
@@ -135,6 +144,7 @@ fun TimerScreen(
         AddTimerDialog(
             onDismiss = { showAdd = false },
             onAdd = { label, duration ->
+                onHaptic(ClockHapticEvent.ACTION)
                 timerStore.add(label, duration)
                 showAdd = false
             },

@@ -121,8 +121,7 @@ The broader Android App Defaults suite remains planned. No application other tha
 
 The Clock candidate still requires the following before broader qualification:
 
-- selectable alarm sounds with an Android-safe playback model;
-- gradual alarm-volume behavior with reliable stop/snooze/dismiss lifecycle handling;
+- representative-device alarm-audio acceptance across system/default/custom alarm tones, Silent, audio focus, DND/device policy, lock-screen/full-screen presentation, snooze/dismiss, and gradual-volume behavior;
 - richer alarm editing and upcoming-alarm presentation;
 - additional widget configuration, responsive widget sizing, and representative-launcher acceptance;
 - lock-screen/system surfaces only where supported by current Android APIs;

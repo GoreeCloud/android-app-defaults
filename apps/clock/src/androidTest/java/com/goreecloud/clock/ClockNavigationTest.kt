@@ -69,6 +69,7 @@ class ClockNavigationTest {
         composeRule.onNodeWithText("Settings").performClick()
         composeRule.onNodeWithText("Clock settings").assertIsDisplayed()
         composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
+        composeRule.onNodeWithText("Haptic feedback").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Contextual hints").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Replay onboarding").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()

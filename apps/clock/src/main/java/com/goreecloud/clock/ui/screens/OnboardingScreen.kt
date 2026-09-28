@@ -27,6 +27,7 @@ import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ClockPreferences
 import com.goreecloud.clock.data.ClockPreferencesStore
 import com.goreecloud.clock.data.OnboardingStep
+import com.goreecloud.clock.ui.ClockHapticEvent
 
 @Composable
 fun OnboardingScreen(
@@ -36,6 +37,7 @@ fun OnboardingScreen(
     notificationAccess: Boolean,
     replayMode: Boolean,
     onCancelReplay: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     val step = preferences.onboardingStep
     val index = OnboardingStep.entries.indexOf(step).coerceAtLeast(0)
@@ -88,12 +90,13 @@ fun OnboardingScreen(
         ) {
             when (step) {
                 OnboardingStep.WELCOME -> WelcomeStep()
-                OnboardingStep.TIME_DISPLAY -> TimeDisplayStep(preferences, preferencesStore)
+                OnboardingStep.TIME_DISPLAY -> TimeDisplayStep(preferences, preferencesStore, onHaptic)
                 OnboardingStep.GUIDANCE -> GuidanceStep(
                     preferences = preferences,
                     preferencesStore = preferencesStore,
                     exactAlarmAccess = exactAlarmAccess,
                     notificationAccess = notificationAccess,
+                    onHaptic = onHaptic,
                 )
                 OnboardingStep.READY -> ReadyStep(exactAlarmAccess, notificationAccess)
             }
@@ -107,6 +110,7 @@ fun OnboardingScreen(
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = {
+                        onHaptic(ClockHapticEvent.TICK)
                         preferencesStore.setOnboardingStep(OnboardingStep.entries[index - 1])
                     },
                 ) {
@@ -116,6 +120,7 @@ fun OnboardingScreen(
             Button(
                 modifier = Modifier.weight(1f),
                 onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
                     if (step == OnboardingStep.READY) {
                         preferencesStore.completeOnboarding()
                     } else {
@@ -156,6 +161,7 @@ private fun WelcomeStep() {
 private fun TimeDisplayStep(
     preferences: ClockPreferences,
     preferencesStore: ClockPreferencesStore,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(
@@ -181,19 +187,28 @@ private fun TimeDisplayStep(
             }
             Switch(
                 checked = preferences.use24Hour,
-                onCheckedChange = preferencesStore::setUse24Hour,
+                onCheckedChange = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    preferencesStore.setUse24Hour(it)
+                },
             )
         }
         Text("Default clock face", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             FilterChip(
                 selected = preferences.clockFace == ClockFacePreference.DIGITAL,
-                onClick = { preferencesStore.setClockFace(ClockFacePreference.DIGITAL) },
+                onClick = {
+                    onHaptic(ClockHapticEvent.TICK)
+                    preferencesStore.setClockFace(ClockFacePreference.DIGITAL)
+                },
                 label = { Text("Digital") },
             )
             FilterChip(
                 selected = preferences.clockFace == ClockFacePreference.ANALOG,
-                onClick = { preferencesStore.setClockFace(ClockFacePreference.ANALOG) },
+                onClick = {
+                    onHaptic(ClockHapticEvent.TICK)
+                    preferencesStore.setClockFace(ClockFacePreference.ANALOG)
+                },
                 label = { Text("Analog") },
             )
         }
@@ -206,6 +221,7 @@ private fun GuidanceStep(
     preferencesStore: ClockPreferencesStore,
     exactAlarmAccess: Boolean,
     notificationAccess: Boolean,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(
@@ -240,7 +256,10 @@ private fun GuidanceStep(
             }
             Switch(
                 checked = preferences.hintsEnabled,
-                onCheckedChange = preferencesStore::setHintsEnabled,
+                onCheckedChange = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    preferencesStore.setHintsEnabled(it)
+                },
             )
         }
     }

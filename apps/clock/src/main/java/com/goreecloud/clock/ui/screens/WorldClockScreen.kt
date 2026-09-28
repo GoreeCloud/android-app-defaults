@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.goreecloud.clock.ui.ClockHapticEvent
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -54,6 +55,7 @@ fun WorldClockScreen(
     use24Hour: Boolean,
     zones: List<String>,
     onZonesChanged: (List<String>) -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     var now by remember { mutableStateOf(Instant.now()) }
     var showAdd by remember { mutableStateOf(false) }
@@ -72,7 +74,10 @@ fun WorldClockScreen(
     ) {
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { showAdd = true },
+            onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                showAdd = true
+            },
         ) {
             Text("Add world clock")
         }
@@ -106,6 +111,7 @@ fun WorldClockScreen(
                             TextButton(
                                 enabled = index > 0,
                                 onClick = {
+                                    onHaptic(ClockHapticEvent.TICK)
                                     val updated = zones.toMutableList()
                                     val item = updated.removeAt(index)
                                     updated.add(index - 1, item)
@@ -115,6 +121,7 @@ fun WorldClockScreen(
                             TextButton(
                                 enabled = index < zones.lastIndex,
                                 onClick = {
+                                    onHaptic(ClockHapticEvent.TICK)
                                     val updated = zones.toMutableList()
                                     val item = updated.removeAt(index)
                                     updated.add(index + 1, item)
@@ -122,7 +129,10 @@ fun WorldClockScreen(
                                 },
                             ) { Text("Move down") }
                             TextButton(
-                                onClick = { onZonesChanged(zones.filterNot { it == zone }) },
+                                onClick = {
+                                    onHaptic(ClockHapticEvent.ACTION)
+                                    onZonesChanged(zones.filterNot { it == zone })
+                                },
                             ) { Text("Remove") }
                         }
                     }
@@ -142,6 +152,7 @@ fun WorldClockScreen(
                             modifier = Modifier.fillMaxWidth(),
                             enabled = city.zoneId !in zones && city.zoneId != ZoneId.systemDefault().id,
                             onClick = {
+                                onHaptic(ClockHapticEvent.ACTION)
                                 onZonesChanged(zones + city.zoneId)
                                 showAdd = false
                             },

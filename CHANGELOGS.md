@@ -511,3 +511,16 @@ The onboarding tranche is Development until exact-head CI/runtime evidence passe
 - Reset the onboarding scroll position whenever the user advances or returns to a different onboarding stage so each new stage begins at its heading instead of inheriting the prior stage's scroll offset.
 - Kept Add alarm and Add timer as the first actionable controls on their screens, ahead of contextual guidance and permission-status cards, so primary creation actions remain immediately reachable on compact handheld viewports.
 - Retained the Android 16 display assertions that exposed these defects; the tests were not weakened.
+
+
+### Added — Clock alarm sound, gradual volume, and haptic preference behavior
+
+- Added Android alarm-tone selection with System default and Silent options.
+- Added a foreground alarm playback service that loops the selected alarm tone, requests alarm audio focus, stops on snooze/dismiss, and falls back to the notification/full-screen path if playback cannot start.
+- Added optional gradual alarm volume over 15, 30, or 60 seconds with deterministic unit coverage.
+- Applied the existing Haptic feedback preference to primary in-app time-control/navigation actions and alarm snooze/dismiss controls while leaving each alarm's Vibrate setting independent.
+- Preserved the no-network boundary and limited new manifest capability to Android foreground media-playback support required by active alarm audio.
+
+### Boundary
+
+Run #215 / 36418113358 validates the selectable-sound/gradual-volume source and Android 16 emulator checkpoint on head `3d846f9cf0902a9499ecb68c962a2803ab73530e`. The haptic-application changes in the next candidate require their own exact-head validation. Representative-device audio, tactile, DND/device-policy, OEM, accessibility, and power acceptance remain open.

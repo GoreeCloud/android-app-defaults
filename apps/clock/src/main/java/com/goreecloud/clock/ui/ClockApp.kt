@@ -85,6 +85,7 @@ fun ClockApp(
 ) {
     var destination by rememberSaveable { mutableStateOf(ClockDestination.CLOCK) }
     var showSettings by remember { mutableStateOf(false) }
+    val onHaptic = rememberClockHapticFeedback(preferences.hapticsEnabled)
 
     if (!preferences.onboardingCompleted || preferences.onboardingReplay) {
         OnboardingScreen(
@@ -94,6 +95,7 @@ fun ClockApp(
             notificationAccess = notificationAccess,
             replayMode = preferences.onboardingReplay,
             onCancelReplay = preferencesStore::cancelOnboardingReplay,
+            onHaptic = onHaptic,
         )
         return
     }
@@ -116,7 +118,10 @@ fun ClockApp(
             TopAppBar(
                 title = { Text(destination.label) },
                 actions = {
-                    TextButton(onClick = { showSettings = true }) {
+                    TextButton(onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        showSettings = true
+                    }) {
                         Text("Settings")
                     }
                 },
@@ -127,7 +132,10 @@ fun ClockApp(
                 ClockDestination.entries.forEach { item ->
                     NavigationBarItem(
                         selected = destination == item,
-                        onClick = { destination = item },
+                        onClick = {
+                            onHaptic(ClockHapticEvent.TICK)
+                            destination = item
+                        },
                         icon = { ClockDestinationIcon(item) },
                     )
                 }
@@ -149,6 +157,7 @@ fun ClockApp(
             onRequestExactAlarmAccess = onRequestExactAlarmAccess,
             onRequestNotificationAccess = onRequestNotificationAccess,
             onDismissHint = preferencesStore::dismissHint,
+            onHaptic = onHaptic,
             onPresentationModeChanged = onPresentationModeChanged,
         )
     }
@@ -158,6 +167,7 @@ fun ClockApp(
             preferences = preferences,
             preferencesStore = preferencesStore,
             onDismiss = { showSettings = false },
+            onHaptic = onHaptic,
         )
     }
 }
@@ -178,6 +188,7 @@ private fun DestinationContent(
     onRequestExactAlarmAccess: () -> Unit,
     onRequestNotificationAccess: () -> Unit,
     onDismissHint: (String) -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
     onPresentationModeChanged: (Boolean, Boolean) -> Unit,
 ) {
     val modifier = Modifier.padding(padding)
@@ -186,6 +197,7 @@ private fun DestinationContent(
             modifier = modifier,
             preferences = preferences,
             onClockFaceChanged = preferencesStore::setClockFace,
+            onHaptic = onHaptic,
             onPresentationModeChanged = onPresentationModeChanged,
         )
         ClockDestination.ALARMS -> AlarmScreen(
@@ -199,6 +211,7 @@ private fun DestinationContent(
             onRequestNotificationAccess = onRequestNotificationAccess,
             showHint = preferences.hintsEnabled && ClockHintIds.ALARMS_RELIABILITY !in preferences.dismissedHints,
             onDismissHint = { onDismissHint(ClockHintIds.ALARMS_RELIABILITY) },
+            onHaptic = onHaptic,
         )
         ClockDestination.TIMER -> TimerScreen(
             modifier = modifier,
@@ -210,17 +223,20 @@ private fun DestinationContent(
             onRequestNotificationAccess = onRequestNotificationAccess,
             showHint = preferences.hintsEnabled && ClockHintIds.TIMER_RELIABILITY !in preferences.dismissedHints,
             onDismissHint = { onDismissHint(ClockHintIds.TIMER_RELIABILITY) },
+            onHaptic = onHaptic,
         )
         ClockDestination.STOPWATCH -> StopwatchScreen(
             modifier = modifier,
             store = stopwatchStore,
             reducedMotion = preferences.reducedMotion,
+            onHaptic = onHaptic,
         )
         ClockDestination.WORLD -> WorldClockScreen(
             modifier = modifier,
             use24Hour = preferences.use24Hour,
             zones = preferences.worldZones,
             onZonesChanged = preferencesStore::setWorldZones,
+            onHaptic = onHaptic,
         )
     }
 }
@@ -230,6 +246,7 @@ private fun SettingsDialog(
     preferences: ClockPreferences,
     preferencesStore: ClockPreferencesStore,
     onDismiss: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -244,7 +261,10 @@ private fun SettingsDialog(
                     SelectionRow(
                         label = option.name.lowercase().replaceFirstChar { it.uppercase() },
                         selected = preferences.theme == option,
-                        onClick = { preferencesStore.setTheme(option) },
+                        onClick = {
+                            onHaptic(ClockHapticEvent.TICK)
+                            preferencesStore.setTheme(option)
+                        },
                     )
                 }
 
@@ -252,32 +272,48 @@ private fun SettingsDialog(
                 ToggleRow(
                     label = "24-hour time",
                     checked = preferences.use24Hour,
-                    onCheckedChange = preferencesStore::setUse24Hour,
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setUse24Hour(it)
+                    },
                 )
                 ToggleRow(
                     label = "Haptic feedback",
                     checked = preferences.hapticsEnabled,
-                    onCheckedChange = preferencesStore::setHapticsEnabled,
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setHapticsEnabled(it)
+                    },
                 )
                 ToggleRow(
                     label = "Reduced motion",
                     checked = preferences.reducedMotion,
-                    onCheckedChange = preferencesStore::setReducedMotion,
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setReducedMotion(it)
+                    },
                 )
                 ToggleRow(
                     label = "Contextual hints",
                     checked = preferences.hintsEnabled,
-                    onCheckedChange = preferencesStore::setHintsEnabled,
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setHintsEnabled(it)
+                    },
                 )
                 TextButton(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = preferencesStore::resetDismissedHints,
+                    onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.resetDismissedHints()
+                    },
                 ) {
                     Text("Reset dismissed hints")
                 }
                 TextButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
                         onDismiss()
                         preferencesStore.replayOnboarding()
                     },
@@ -287,7 +323,10 @@ private fun SettingsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = {
+                onHaptic(ClockHapticEvent.ACTION)
+                onDismiss()
+            }) {
                 Text("Done")
             }
         },

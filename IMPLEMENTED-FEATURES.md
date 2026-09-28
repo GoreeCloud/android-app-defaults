@@ -378,3 +378,15 @@ Draft PR #50 now also carries per-alarm audio configuration:
 - JVM volume-ramp coverage and Android 16 editor/sound-picker reachability/rendered-evidence coverage.
 
 This remains Development source until the newer exact head passes the complete source/runtime/rendered-evidence workflow. Audible playback quality, OEM alarm-stream behavior, DND interaction, selected-tone persistence, and physical snooze/dismiss lifecycle behavior remain representative-device acceptance work.
+
+
+### Clock alarm audio and haptic interaction checkpoint
+
+Draft PR #50 now includes:
+
+- selectable alarm sounds backed by Android alarm-tone URIs, plus System default and Silent choices;
+- a looping foreground alarm playback service with alarm audio focus, fallback notification behavior, snooze/dismiss shutdown, vibration independence, and optional 15/30/60-second gradual-volume ramping;
+- primary Clock interaction haptics that honor the existing Haptic feedback preference across navigation, clock-mode selection, alarm/timer controls, stopwatch actions, world-clock management, onboarding, Settings, and alarm snooze/dismiss controls;
+- no new network access and no haptic-specific permission expansion; ordinary UI haptics use Android view feedback while alarm vibration remains controlled by each alarm's separate Vibrate setting.
+
+Alarm audio/haptic implementation remains Development. Exact-head automated/runtime evidence does not replace representative-device speaker, DND/audio-focus, vibration/tactile, lock-screen, OEM, accessibility, or power acceptance.
