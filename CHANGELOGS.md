@@ -1,5 +1,12 @@
 # Android App Defaults — Changelogs
 
+## September 28, 2026 — Clock next-alarm presentation candidate
+
+Clock now derives the next scheduled enabled alarm through the same deterministic local schedule calculation used by alarm delivery and surfaces it on the Alarms screen as **Next alarm** with Today/Tomorrow/date and local-time presentation. The screen refreshes that presentation at a bounded 30-second cadence while visible; no new background service, permission, telemetry, account, or network path is introduced.
+
+Focused unit coverage verifies earliest-occurrence selection, repeating-alarm ordering, disabled-alarm exclusion, and deterministic tie behavior through the existing schedule policy. Exact-head Android CI and representative-device time-zone/DST, clock-change, accessibility, power, and alarm-delivery acceptance remain open.
+
+
 ## 2026-09-28 — Clock haptic-preference coverage candidate
 
 - Applied the existing haptic preference to previously missed full-screen/bedside controls and exit actions.
