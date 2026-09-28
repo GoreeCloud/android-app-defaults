@@ -2,8 +2,8 @@ package com.goreecloud.clock.alarm
 
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class UpcomingAlarmPresentationPolicyTest {
     private val zone = ZoneId.of("America/Chicago")
