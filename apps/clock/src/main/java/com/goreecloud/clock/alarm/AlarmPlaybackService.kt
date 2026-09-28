@@ -1,6 +1,6 @@
 package com.goreecloud.clock.alarm
 
-import android.app.AudioManager
+import android.media.AudioManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -39,11 +39,6 @@ class AlarmPlaybackService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
         val alarmId = intent?.getLongExtra(AlarmScheduler.EXTRA_ALARM_ID, -1L) ?: -1L
         val alarm = (application as ClockApplication).alarmStore.get(alarmId)
         if (alarm == null) {
