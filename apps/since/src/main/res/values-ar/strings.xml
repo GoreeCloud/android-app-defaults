@@ -180,4 +180,7 @@
     <string name="settings_open">فتح</string>
     <string name="home_contextual_hint">تلميح: اضغط على متتبّع لمراجعة الوقت المنقضي والتفاصيل، أو أضف متتبّعًا جديدًا من الرئيسية.</string>
     <string name="dismiss_hint">إخفاء</string>
+    <string name="reset_dismissed_hints">إعادة إظهار التلميحات المخفية</string>
+    <string name="reset_dismissed_hints_supporting">إظهار التلميحات السياقية التي أخفيتها سابقًا.</string>
+    <string name="settings_reset">إعادة تعيين</string>
 </resources>
