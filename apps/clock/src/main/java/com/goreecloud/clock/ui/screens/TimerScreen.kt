@@ -80,7 +80,10 @@ fun TimerScreen(
             ContextualHintCard(
                 title = "Timers keep steady time",
                 body = "Running timers use Android's monotonic clock, so changing the wall clock does not shift the countdown during the current boot.",
-                onDismiss = onDismissHint,
+                onDismiss = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onDismissHint()
+                },
             )
         }
 
@@ -88,14 +91,20 @@ fun TimerScreen(
             TimerPermissionCard(
                 title = "Exact alarm access is required",
                 button = "Allow exact alarms",
-                onClick = onRequestExactAlarmAccess,
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onRequestExactAlarmAccess()
+                },
             )
         }
         if (!notificationAccess) {
             TimerPermissionCard(
                 title = "Notifications are disabled",
                 button = "Allow notifications",
-                onClick = onRequestNotificationAccess,
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onRequestNotificationAccess()
+                },
             )
         }
 
@@ -143,6 +152,7 @@ fun TimerScreen(
     if (showAdd) {
         AddTimerDialog(
             onDismiss = { showAdd = false },
+            onHaptic = onHaptic,
             onAdd = { label, duration ->
                 onHaptic(ClockHapticEvent.ACTION)
                 timerStore.add(label, duration)
@@ -193,6 +203,7 @@ private fun TimerCard(
 @Composable
 private fun AddTimerDialog(
     onDismiss: () -> Unit,
+    onHaptic: (ClockHapticEvent) -> Unit,
     onAdd: (String, Long) -> Unit,
 ) {
     var label by remember { mutableStateOf("") }
@@ -235,7 +246,12 @@ private fun AddTimerDialog(
             ) { Text("Add") }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
+            OutlinedButton(
+                onClick = {
+                    onHaptic(ClockHapticEvent.ACTION)
+                    onDismiss()
+                },
+            ) { Text("Cancel") }
         },
     )
 }
