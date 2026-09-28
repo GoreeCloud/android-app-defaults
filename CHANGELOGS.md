@@ -1,5 +1,21 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-28 — Since contextual-hint dismissal and reset candidate
+
+**Lifecycle:** Development  
+**Tracking:** PR #49
+
+### Added
+
+- Persistent individual dismissal for the optional Home contextual hint while preserving the separate global Contextual hints preference.
+- A Settings → Guidance **Reset dismissed hints** action that restores previously dismissed tips without resetting onboarding, trackers, goals, history, or theme settings.
+- English and Arabic UI strings plus Compose coverage proving a Home hint can be dismissed without disabling the global guidance preference.
+
+### Boundary
+
+Safety, privacy, validation, and required system messages are not governed by optional hint dismissal. This is Development source and requires fresh exact-head Android validation plus representative-device accessibility/localization acceptance.
+
+
 ## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
 
 **Lifecycle:** Development  
