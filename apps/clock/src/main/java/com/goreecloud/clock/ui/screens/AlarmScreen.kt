@@ -131,13 +131,15 @@ fun AlarmScreen(
             )
         }
 
-        upcomingAlarm?.let { upcoming ->
-            UpcomingAlarmCard(
-                alarm = upcoming.alarm,
-                trigger = upcoming.trigger,
-                now = scheduleNow,
-                use24Hour = use24Hour,
-            )
+        if (exactAlarmAccess) {
+            upcomingAlarm?.let { upcoming ->
+                UpcomingAlarmCard(
+                    alarm = upcoming.alarm,
+                    trigger = upcoming.trigger,
+                    now = scheduleNow,
+                    use24Hour = use24Hour,
+                )
+            }
         }
 
         if (alarms.isEmpty()) {
