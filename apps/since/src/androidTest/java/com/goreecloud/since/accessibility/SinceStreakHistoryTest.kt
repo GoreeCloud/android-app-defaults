@@ -56,7 +56,7 @@ class SinceStreakHistoryTest {
         composeRule.onNodeWithText("Reset count").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("6%").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithTag("reset-streak").performScrollTo().performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithText(
             "The current period will be preserved in History",
             substring = true,
@@ -78,7 +78,7 @@ class SinceStreakHistoryTest {
         }
         composeRule.onNodeWithText("0%").performScrollTo().assertIsDisplayed()
 
-        composeRule.onNodeWithTag("open-history").performScrollTo().performClick()
+        composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("1 completed period").assertIsDisplayed()
         composeRule.onNodeWithText("Restarted plan").assertIsDisplayed()
@@ -134,11 +134,11 @@ class SinceStreakHistoryTest {
         }
 
         composeRule.onNodeWithText("Read daily").performClick()
-        composeRule.onNodeWithTag("reset-streak").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithTag("open-history").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("Back").assertIsDisplayed()
     }
@@ -164,11 +164,11 @@ class SinceStreakHistoryTest {
         }
 
         composeRule.onNodeWithText("Read daily").performClick()
-        composeRule.onNodeWithTag("reset-streak").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
-        composeRule.onNodeWithTag("open-history").performScrollTo().assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("history-screen").assertIsDisplayed()
         composeRule.onNodeWithText("Back").assertIsDisplayed()
     }
