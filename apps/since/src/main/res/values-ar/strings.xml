@@ -179,4 +179,5 @@
     <string name="replay_setup_supporting">راجع إرشادات الاستخدام الأول دون إعادة ضبط المتتبعات أو حالة الإكمال.</string>
     <string name="settings_open">فتح</string>
     <string name="home_contextual_hint">تلميح: اضغط على متتبّع لمراجعة الوقت المنقضي والتفاصيل، أو أضف متتبّعًا جديدًا من الرئيسية.</string>
+    <string name="dismiss_hint">إخفاء</string>
 </resources>
