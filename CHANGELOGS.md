@@ -1,6 +1,17 @@
 # Android App Defaults — Changelogs
 
 
+## September 29, 2026 — Clock alarm repeat presets
+
+- Added **One time**, **Every day**, **Weekdays**, and **Weekends** quick presets to the existing alarm editor.
+- Kept individual weekday chips for custom schedules.
+- Added deterministic preset mapping/recognition policy with focused JVM coverage.
+- Added Android Compose acceptance that verifies Weekdays selects Monday–Friday and leaves the weekend unselected.
+- Reused the existing alarm persistence/scheduler path; no new schema, permission, background service, network, account, telemetry, or release authority was added.
+- Fresh exact-head Android Development Foundation validation remains required.
+
+
+
 ## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
 
 - Added deterministic repeat-schedule context to the existing **Next alarm** card.
