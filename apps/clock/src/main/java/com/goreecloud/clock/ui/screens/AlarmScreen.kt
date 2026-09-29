@@ -258,6 +258,11 @@ private fun UpcomingAlarmCard(
                 style = MaterialTheme.typography.bodyMedium,
             )
             Text(
+                UpcomingAlarmPresentationPolicy.repeatSummary(alarm.repeatDays),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
                 alarm.label.ifBlank { "Alarm" },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
