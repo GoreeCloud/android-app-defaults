@@ -2,11 +2,11 @@
 
 ## 2026-09-29 Since portability continuation
 
-PR #59 now also carries the first bounded M3 portability slice: user-initiated, versioned JSON export through Android's Storage Access Framework. The export is local-only and includes current tracker state, notes, full period/reset history, goals, archive state, and timestamps. **Backup** and **Restore** remain fail-closed; import validation, review-before-mutation, recovery evidence, representative document-provider/device acceptance, and exact-head CI remain open.
+PR #59 now also carries the first bounded M3 portability slice: user-initiated, versioned JSON export through Android's Storage Access Framework. The export is local-only and includes current tracker state, notes, full period/reset history, goals, archive state, and timestamps. Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`. **Backup** and **Restore** remain fail-closed; import validation, review-before-mutation, recovery evidence, and representative document-provider/device acceptance remain open.
 
 ## 2026-09-29 Since destructive-delete continuation
 
-The stacked Since candidate now implements the previously open permanent-delete safeguard: deletion is available only for already archived trackers, requires an explicit second confirmation, rejects active trackers at the DAO/repository boundary, and cascades the archived tracker’s dependent period/goal rows through existing Room foreign keys. Exact-head CI and representative-device/accessibility acceptance remain open. Export/import and validated recovery are still planned, so the broader M3 ownership/recovery milestone is not complete.
+The stacked Since candidate now implements the previously open permanent-delete safeguard: deletion is available only for already archived trackers, requires an explicit second confirmation, rejects active trackers at the DAO/repository boundary, and cascades the archived tracker’s dependent period/goal rows through existing Room foreign keys. The same PR #59 line now includes the validated-source JSON export slice described above. Representative-device/accessibility acceptance, import, and validated recovery remain open, so the broader M3 ownership/recovery milestone is not complete.
 
 ## 2026-09-28 Since candidate continuation
 
