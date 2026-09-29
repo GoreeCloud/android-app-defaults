@@ -1,5 +1,13 @@
 # Android App Defaults — Implemented Features
 
+
+## September 28, 2026 — Since reversible archive/restore candidate
+
+Since now uses the existing Room v1 `is_archived` field as a reversible local-management boundary without a schema migration. Tracker Details offers a confirmation-gated Archive action; archived trackers disappear from the active Dashboard but retain their current period, closed history, note, display format, and goal. Settings lists archived trackers and provides Restore back to Home.
+
+The repository exposes separate active and archived aggregate flows, archived trackers remain immutable through ordinary edit/reset/goal mutations, and Android coverage verifies Room history/goal preservation plus the user-visible Details → Settings → Restore round trip. English and Arabic resources are included. No delete, export/import, backup, account, or network authority is added. Fresh exact-head validation is required before this candidate is treated as verified.
+
+
 ## September 28, 2026 — Since persistent streak actions at large text
 
 Since tracker details now keep **History** and **Reset streak** in a persistent bottom action surface instead of burying those primary streak actions deep in the scrolling details body. Both controls preserve a 48 dp minimum interaction target and remain reachable when Android text is rendered at 2× scale; reset still requires its existing confirmation flow and all streak-history authority remains unchanged.
@@ -101,7 +109,7 @@ This remains Development evidence. Atomic streak reset, preserved History, longe
 
 ## Material limitations
 
-Icon/accent selection, streak reset/history/statistics, archive/search, export/import, validated backup/restore implementation, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Custom past-start selection, Edit Tracker, and the integrated PR #32 goal progress/editor functionality are not represented as open limitations.
+Icon/accent selection, permanent-delete safeguards, export/import, validated backup/restore implementation, widgets, milestone notifications, representative accessibility/visual acceptance, approved GLAZE UI consumer mapping, and accepted Integral Platform System integrations remain open in `PLANNED-FEATURES.md`. Search/sort and reversible archive/restore now exist only on the active Development candidate until integrated. Custom past-start selection, Edit Tracker, and the integrated PR #32 goal progress/editor functionality are not represented as open limitations.
 
 
 ### Integrated date and time picker flow
