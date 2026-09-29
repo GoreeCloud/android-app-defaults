@@ -18,7 +18,7 @@
 
 This file consolidates the former root `SPECIFICATIONS.md` with still-applicable requirements and historical context from Google Drive **Project Specification — Gallery.docx** (file ID `1kt0iQrPU0lvZsXw9wmRwhVOjoJ2VH0Ai`).
 
-The Drive source uses the former repository identity `GoreeCloud/goreecloud-gallery`; live GitHub and the canonical repository inventory identify the current repository as `GoreeCloud/gallery`.
+The Drive source used `GoreeCloud/goreecloud-gallery`, later reconciled to standalone `GoreeCloud/gallery`. The September 29 mandatory consolidation moved current active authority to `GoreeCloud/android-app-defaults` under `apps/gallery/`; both standalone names remain historical provenance.
 
 Current implementation claims are controlled by accepted repository evidence on `main`, especially `IMPLEMENTED-FEATURES.md`, `PLANNED-FEATURES.md`, `CHANGELOGS.md`, and the current source tree. Historical Drive or transitional-Fossify statements do not override newer first-party native implementation state.
 
