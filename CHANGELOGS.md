@@ -1,5 +1,16 @@
 # Android App Defaults — Changelogs
 
+## September 29, 2026 — Since fail-closed import review candidate
+
+- Added **Review import** under Settings → Data & recovery using an explicit Android Storage Access Framework document picker.
+- Added a 4 MiB bounded, strict UTF-8 parser for `goreecloud-since-export` schema v1.
+- Rejects unsupported/unknown/duplicate structure, duplicate identities, invalid enum/time-zone values, broken period/current-period invariants, invalid goals, malformed UTF-8, oversized input, and trailing JSON.
+- Shows only a validated aggregate summary; raw selected-file content and parser exception details are not projected into the UI.
+- Added Android runtime parser regressions for a valid export plus unsupported schema, unknown fields, trailing JSON, and duplicate tracker identity.
+- Preserved the recovery authority boundary: review performs no database mutation and **Restore** remains unavailable.
+
+**Acceptance boundary:** Development candidate stacked on PR #59. Fresh exact-head Android Development Foundation validation, representative document-provider/device and accessibility/localization review, safe Replace-style mutation/recovery semantics, review/protection, release, production, Stable, Seal, and Anchor gates remain open.
+
 ## September 29, 2026 — Since portable JSON export candidate
 
 - Added an explicit **Export data** action under Settings → Data & recovery.
