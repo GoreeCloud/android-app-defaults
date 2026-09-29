@@ -1,5 +1,17 @@
 # Android App Defaults — Changelogs
 
+
+## 2026-09-29 — Clock widget detail personalization candidate
+
+- Added local Settings toggles for Clock-widget date, Next-alarm secondary detail, and Timer status.
+- Kept all three enabled by default so existing widget presentation is unchanged after upgrade.
+- Applied preferences only to regular widget layouts; compact layouts continue hiding secondary detail to protect primary time/countdown readability.
+- Reused the existing widget refresh path so preference changes update installed widgets without adding background work.
+- Added pure presentation-policy unit coverage and Android recreation coverage for persisted controls.
+- Added no schema migration, network/account authority, telemetry, scheduling change, or new permission.
+- Fresh exact-head Android Development Foundation validation and representative-launcher acceptance remain required.
+
+
 ## September 28, 2026 — relative Next alarm presentation
 
 Clock's existing exact-alarm-gated **Next alarm** card now adds a compact relative-time summary such as **In 2 h 15 min**, derived from the same scheduled trigger instant rather than a second scheduling path. The presentation policy uses instant duration so DST/local-clock representation does not distort the countdown, handles sub-minute and multi-day boundaries, and fails closed to **Due now** for a non-future trigger.
