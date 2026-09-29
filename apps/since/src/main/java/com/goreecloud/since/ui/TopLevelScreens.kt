@@ -265,13 +265,17 @@ internal fun SettingsScreen(
     archivedTrackers: List<TrackerAggregate>,
     restoringTrackerId: String?,
     restoreFailedTrackerId: String?,
+    deletingTrackerId: String?,
+    deleteFailedTrackerId: String?,
     onRestoreTracker: (String) -> Unit,
+    onDeleteArchivedTracker: (String) -> Unit,
     contextualHintsEnabled: Boolean,
     onContextualHintsEnabledChange: (Boolean) -> Unit,
     onResetDismissedContextualHints: () -> Unit,
     onReplaySetup: () -> Unit,
 ) {
     var plannedDialog by remember { mutableStateOf<PlannedSetting?>(null) }
+    var pendingDeleteTrackerId by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
         modifier = Modifier
@@ -380,9 +384,12 @@ internal fun SettingsScreen(
                         ArchivedTrackerRow(
                             aggregate = aggregate,
                             restoring = restoringTrackerId == aggregate.tracker.id,
-                            restoreEnabled = restoringTrackerId == null,
+                            deleting = deletingTrackerId == aggregate.tracker.id,
+                            actionsEnabled = restoringTrackerId == null && deletingTrackerId == null,
                             restoreFailed = restoreFailedTrackerId == aggregate.tracker.id,
+                            deleteFailed = deleteFailedTrackerId == aggregate.tracker.id,
                             onRestore = { onRestoreTracker(aggregate.tracker.id) },
+                            onDelete = { pendingDeleteTrackerId = aggregate.tracker.id },
                         )
                     }
                 }
@@ -489,6 +496,36 @@ internal fun SettingsScreen(
             },
         )
     }
+
+    pendingDeleteTrackerId?.let { trackerId ->
+        AlertDialog(
+            onDismissRequest = {
+                if (deletingTrackerId == null) pendingDeleteTrackerId = null
+            },
+            title = { Text(stringResourceCompat(R.string.delete_archived_tracker_title)) },
+            text = { Text(stringResourceCompat(R.string.delete_archived_tracker_message)) },
+            confirmButton = {
+                TextButton(
+                    modifier = Modifier.testTag("confirm-delete-archived-tracker"),
+                    enabled = deletingTrackerId == null,
+                    onClick = {
+                        pendingDeleteTrackerId = null
+                        onDeleteArchivedTracker(trackerId)
+                    },
+                ) {
+                    Text(stringResourceCompat(R.string.delete_permanently))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = deletingTrackerId == null,
+                    onClick = { pendingDeleteTrackerId = null },
+                ) {
+                    Text(stringResourceCompat(R.string.cancel))
+                }
+            },
+        )
+    }
 }
 
 private enum class PlannedSetting {
@@ -526,9 +563,12 @@ private fun SettingsSection(
 private fun ArchivedTrackerRow(
     aggregate: TrackerAggregate,
     restoring: Boolean,
-    restoreEnabled: Boolean,
+    deleting: Boolean,
+    actionsEnabled: Boolean,
     restoreFailed: Boolean,
+    deleteFailed: Boolean,
     onRestore: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     Surface(
         modifier = Modifier
@@ -542,29 +582,37 @@ private fun ArchivedTrackerRow(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            Text(
+                text = aggregate.tracker.title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = stringResourceCompat(R.string.archived_tracker_supporting),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                TextButton(
+                    modifier = Modifier.testTag("delete-archived-tracker-" + aggregate.tracker.id),
+                    onClick = onDelete,
+                    enabled = actionsEnabled,
                 ) {
                     Text(
-                        text = aggregate.tracker.title,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Text(
-                        text = stringResourceCompat(R.string.archived_tracker_supporting),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium,
+                        if (deleting) {
+                            stringResourceCompat(R.string.deleting_tracker)
+                        } else {
+                            stringResourceCompat(R.string.delete_tracker)
+                        }
                     )
                 }
                 TextButton(
                     modifier = Modifier.testTag("restore-tracker-" + aggregate.tracker.id),
                     onClick = onRestore,
-                    enabled = restoreEnabled,
+                    enabled = actionsEnabled,
                 ) {
                     Text(
                         if (restoring) {
@@ -578,6 +626,13 @@ private fun ArchivedTrackerRow(
             if (restoreFailed) {
                 Text(
                     text = stringResourceCompat(R.string.restore_tracker_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (deleteFailed) {
+                Text(
+                    text = stringResourceCompat(R.string.delete_tracker_failed),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                 )
