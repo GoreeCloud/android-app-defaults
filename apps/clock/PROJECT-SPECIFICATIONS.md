@@ -52,7 +52,8 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Exact completion scheduling and local state preservation.
 - Monotonic elapsed-realtime countdown behavior within the current boot so wall-clock changes do not shift active timers.
 - Restart restoration for active timers using a wall-clock fallback only when the monotonic clock resets.
-- Future work: richer presets and rendered/runtime acceptance evidence.
+- Current stacked Development candidate adds quick presets for 1, 5, 10, 15, and 30 minutes plus 1 hour. Selecting a preset only prefills the existing timer editor; the user still confirms Add, and the new timer remains paused until explicitly started.
+- Remaining work: representative rendered/runtime accessibility acceptance and any future user-configurable preset model.
 
 ### Stopwatch
 
