@@ -1,0 +1,27 @@
+name: Execute mandatory app migration
+
+on:
+  push:
+    branches:
+      - migration/mandatory-camera-launcher-keyboard-gallery-20260929
+    paths:
+      - '.github/workflows/execute-mandatory-app-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out migration branch
+        uses: actions/checkout@v6
+        with:
+          ref: migration/mandatory-camera-launcher-keyboard-gallery-20260929
+          fetch-depth: 0
+
+      - name: Import exact application source revisions
+        run: bash scripts/migrate_mandatory_apps.sh
