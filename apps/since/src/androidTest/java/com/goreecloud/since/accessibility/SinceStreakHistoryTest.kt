@@ -1,5 +1,6 @@
 package com.goreecloud.since.accessibility
 
+import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
@@ -134,6 +135,17 @@ class SinceStreakHistoryTest {
         }
 
         composeRule.onNodeWithText("Read daily").performClick()
+        val resetNodes = composeRule
+            .onAllNodesWithTag("reset-streak", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+        val historyNodes = composeRule
+            .onAllNodesWithTag("open-history", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+        Log.i(
+            "SinceLargeFont",
+            "reset=" + resetNodes.joinToString { it.boundsInRoot.toString() } +
+                " history=" + historyNodes.joinToString { it.boundsInRoot.toString() },
+        )
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
