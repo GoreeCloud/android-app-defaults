@@ -1,5 +1,16 @@
 # Android App Defaults — Changelogs
 
+## September 29, 2026 — Since archived-only permanent deletion candidate
+
+- Added permanent tracker deletion only from the archived-tracker Settings surface.
+- Added an explicit second confirmation before deletion and clear copy that the operation removes the tracker, current period, reset history, note, and goal from the device.
+- Added a DAO guard requiring `is_archived = 1`; active trackers fail closed and cannot be deleted through this contract.
+- Relied on the existing Room foreign-key cascades for periods and goals, with runtime coverage verifying active-row rejection and complete archived-data removal.
+- Added English/Arabic UI strings and Compose coverage that proves tapping Delete alone does not mutate data before confirmation.
+
+**Acceptance boundary:** Development candidate stacked on the reversible archive/restore work. Exact-head CI, representative-device accessibility/visual acceptance, export/import, backup/restore, and release qualification remain open.
+
+
 
 ## September 28, 2026 — Since reversible archive/restore candidate
 
