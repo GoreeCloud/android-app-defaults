@@ -4,6 +4,8 @@ A privacy-focused monorepo of lightweight replacements for common Android defaul
 
 ## Current Development state
 
+**Current stacked Since candidate (September 29, 2026):** archived trackers gain a confirmation-gated permanent-delete path that rejects active trackers at the DAO/repository boundary and relies on existing Room foreign-key cascades for periods and goals. This remains unmerged Development work pending exact-head CI and representative-device/accessibility acceptance; export/import and validated backup/restore remain open.
+
 The repository is in **Development**. GoreeCloud Since is the first application module under `apps/since/`.
 
 Verified `main` contains the independent Android application foundation and Room persistence foundation: local-only/fail-closed manifest behavior, calendar-aware elapsed-time semantics, Room schema v1, SQLite invariants, transactional tracker aggregate creation, repository/domain mapping, committed schema evidence, and Android 16 runtime database tests.
