@@ -44,6 +44,7 @@
     <string name="settings_choose_file">اختيار ملف</string>
     <string name="settings_import_review_valid">تصدير صالح: %1$d متتبعات، منها %2$d مؤرشفة، و%3$d فترات، و%4$d أهداف. لم تتغير أي بيانات.</string>
     <string name="settings_import_review_invalid">تعذّر التحقق من هذا الملف كتصدير مدعوم من GoreeCloud Since. لم تتغير أي بيانات.</string>
+    <string name="settings_import_replacement_plan">معاينة الاستبدال: %1$d متتبعات حالية ← %2$d متتبعات مستوردة؛ تتطابق معرّفات %3$d من المتتبعات المستوردة مع البيانات الحالية. يظل تطبيق هذه الخطة معطلاً.</string>
     <string name="settings_backup">النسخ الاحتياطي</string>
     <string name="settings_backup_supporting">احمِ بيانات Since المحلية بنسخة احتياطية تم التحقق منها.</string>
     <string name="settings_restore">الاستعادة</string>
