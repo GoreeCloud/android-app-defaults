@@ -1,5 +1,13 @@
 # Android App Defaults — Implemented Features
 
+
+## September 28, 2026 — Clock timer quick-preset candidate
+
+A stacked Clock Development candidate now adds six bounded local quick presets to the existing New timer editor: 1, 5, 10, 15, and 30 minutes plus 1 hour. Choosing a preset only updates the existing hours/minutes/seconds fields; it does not create, start, schedule, or notify on a timer until the user explicitly confirms **Add** and later starts that timer.
+
+The preset catalog and duration-to-editor mapping are pure/tested model behavior, and Android UI coverage selects the 30-minute preset through the real dialog and verifies the resulting timer remains paused with a 30-minute duration. No new permission, network, widget, scheduling, persistence schema, or account authority is introduced. Exact-head CI is still required before this candidate is treated as verified Development evidence.
+
+
 ## September 29, 2026 — Clock adaptive widget sizing candidate
 
 Draft PR #50 now makes the Clock, next-alarm, and running-timer home-screen widgets react to Android launcher resize options. A shared deterministic policy selects regular presentation at the existing default sizes and a compact presentation when the launcher grants a narrow or short surface. Compact mode hides secondary date/status detail and reduces primary type scale while preserving the existing tap destination and local-only data boundary.
