@@ -1,6 +1,14 @@
 # Android App Defaults — Implemented Features
 
 
+## September 29, 2026 — Clock alarm repeat-preset candidate
+
+A stacked Clock Development candidate adds one-tap repeat presets to the existing local alarm editor: **One time**, **Every day**, **Weekdays**, and **Weekends**. Presets only replace the existing in-memory `repeatDays` selection; individual day chips remain available for custom schedules, and saving continues through the existing `Alarm` persistence and scheduler path without a format, permission, service, or authority change.
+
+A pure repeat-preset policy maps and recognizes the exact day sets, JVM coverage locks those mappings, and Android Compose coverage verifies that choosing **Weekdays** selects Monday–Friday while leaving Saturday/Sunday unselected. Fresh exact-head Android Development Foundation validation is required before this candidate is treated as verified. Representative-device accessibility, localization/RTL, alarm-delivery, and release acceptance remain open.
+
+
+
 ## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
 
 A stacked Clock Development candidate enriches the existing **Next alarm** card with deterministic repeat-schedule context derived only from the selected alarm's local `repeatDays` value. The presentation distinguishes **One time**, **Every day**, **Weekdays**, **Weekends**, and sorted custom day sets such as **Mon • Wed • Fri**.
