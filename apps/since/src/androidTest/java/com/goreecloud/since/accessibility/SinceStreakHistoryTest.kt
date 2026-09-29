@@ -10,8 +10,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.printToLog
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
@@ -136,7 +134,6 @@ class SinceStreakHistoryTest {
         }
 
         composeRule.onNodeWithText("Read daily").performClick()
-        composeRule.onRoot().printToLog("SinceLargeFontDetail")
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
