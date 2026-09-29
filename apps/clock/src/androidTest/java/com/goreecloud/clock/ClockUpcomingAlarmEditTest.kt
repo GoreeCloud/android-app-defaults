@@ -3,6 +3,7 @@ package com.goreecloud.clock
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -76,7 +77,9 @@ class ClockUpcomingAlarmEditTest {
             .assertIsDisplayed()
             .performClick()
         composeRule.onNodeWithText("Edit alarm").assertIsDisplayed()
-        composeRule.onNodeWithText("Morning review").assertIsDisplayed()
+        composeRule.onNodeWithTag("alarm-label-field")
+            .assertIsDisplayed()
+            .assertTextContains("Morning review")
         composeRule.onNodeWithText("Cancel").performClick()
         composeRule.onNodeWithTag("next-alarm-card").assertIsDisplayed()
     }
