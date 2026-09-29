@@ -40,6 +40,8 @@ interface TrackerRepository {
 
     suspend fun restoreTracker(trackerId: String): TrackerAggregate?
 
+    suspend fun deleteArchivedTracker(trackerId: String): Boolean
+
     suspend fun resetStreak(
         trackerId: String,
         resetEpochMs: Long,
