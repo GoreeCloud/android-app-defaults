@@ -1,6 +1,18 @@
 # Android App Defaults — Changelogs
 
 
+## September 29, 2026 — Clock Next-alarm widget repeat-context candidate
+
+- Reused the in-app Next alarm repeat-summary policy in the regular-size Next-alarm home-screen widget.
+- Secondary widget detail now composes the scheduled day with deterministic repeat context, for example **Tomorrow • Weekdays**.
+- Preserved the existing exact-alarm access warning as the higher-priority readiness message.
+- Preserved compact-layout suppression of secondary detail.
+- Added focused JVM coverage for detail composition.
+- Added no scheduler, alarm-store, permission, network, account, telemetry, schema, or background-work authority.
+- Fresh exact-head Android Development Foundation validation remains required.
+
+
+
 ## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
 
 - Added deterministic repeat-schedule context to the existing **Next alarm** card.
