@@ -81,3 +81,20 @@ This migration:
 ## Ongoing maintenance
 
 Update this file for significant architecture, repository rename/split, Android authority changes, platform-system boundary changes, production/recovery events, lifecycle promotions, migration decisions, or retirement. Routine implementation chronology remains in `CHANGELOGS.md`.
+
+## Legacy Drive roadmap migration ledger — preserved from Gallery PR #92
+
+Before the retired Gallery Drive roadmap could be discarded, legacy identifiers FR-001 through FR-009 were explicitly reconciled. This ledger is retained as historical migration provenance only; it does not restore Drive roadmap authority or duplicate Tasks Management.
+
+- **FR-001 — Roadmap reconciliation control.** Migrated into repository-native interpretation and maintenance rules; the former repository/Drive synchronization requirement is superseded.
+- **FR-002 — Tasks Management routing control.** Preserved by the requirement that actionable execution work remain in GoreeCloud Tasks Management when applicable.
+- **FR-003 — Evidence/lifecycle control.** Preserved as the requirement for authoritative implementation and verification before lifecycle promotion; the former Drive synchronization clause is retired.
+- **FR-004 — Glaze UI source migration.** Historical V1.3 Development work remains provenance, including legacy PR #74 exact head `85472206cc5aab479c3582c144574473ad4ae26a`, PR #75 exact head `e0cdb4edca25824d34ceac71dbc4bd954fffd96a`, and PR #76 exact head `6486b91cb8e29e75f3a483f521f69235542780ba`. The V1.3 target is superseded by later Gallery Glaze authority.
+- **FR-005 — Rendered/application acceptance.** Remains represented by current rendered, accessibility, adaptive-layout, performance, rollback, Human Visual Excellence, and representative-device acceptance obligations.
+- **FR-006 — First-party photo-editor acceptance.** Remains represented by crop/rotate/flip/reset/save-copy, recreation, output/orientation fidelity, metadata/color behavior, failure/cancellation, accessibility, and representative-device evidence obligations. Historical PR #75 source remains Development provenance only.
+- **FR-007 — Recycle Bin and destructive-operation acceptance.** Remains represented by physical-device/OEM/profile, permission, mixed-media, provider-failure, process-recreation, retention/expiry, and recovery obligations.
+- **FR-008 — Platform-system integration.** Earlier six-system wording was superseded by evaluation/acceptance of all applicable Integral Platform Systems: Manager, Privacy Shield, Wardveil Security, Everkeep, GLAZE UI, Mesh, Identity, Policy, and Observability; GoreeCloud Sync remains separately governed.
+- **FR-009 — Signing, packaging, release, and Stable gates.** Remains represented by signed release packaging, upgrade/recovery, rollback, Release Candidate, production acceptance, and Stable qualification obligations.
+
+Source provenance: legacy `GoreeCloud/gallery` PR #92, head `b85ace4251b47957e64bb1f836ade32eb47365bb`. Current lifecycle truth remains the monorepo feature records and verified repository evidence.
+
