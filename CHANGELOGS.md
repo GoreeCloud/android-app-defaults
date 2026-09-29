@@ -1,5 +1,17 @@
 # Android App Defaults — Changelogs
 
+
+## September 28, 2026 — Since reversible archive/restore candidate
+
+- Added confirmation-gated tracker archiving from Details.
+- Added reactive archived-tracker observation and an Archived trackers section in Settings with Restore actions.
+- Preserved tracker periods, reset history, notes, display format, and goals across archive/restore using the existing Room v1 `is_archived` column.
+- Kept ordinary edit, display-format, goal, and reset mutations fail-closed while a tracker is archived.
+- Added English/Arabic resources, Room runtime coverage, and Compose archive/restore navigation coverage.
+- Added no delete API, schema migration, network permission, account dependency, export/import, or backup authority.
+- Fresh exact-head Android Development Foundation validation remains required.
+
+
 ## September 28, 2026 — Since persistent streak actions at large text
 
 Since tracker details now keep **History** and **Reset streak** in a persistent bottom action surface instead of burying those primary streak actions deep in the scrolling details body. Both controls preserve a 48 dp minimum interaction target and remain reachable when Android text is rendered at 2× scale; reset still requires its existing confirmation flow and all streak-history authority remains unchanged.
