@@ -802,6 +802,40 @@ class SinceDatabaseRuntimeTest {
         assertEquals(30, active.goal?.targetAmount)
     }
 
+    @Test
+    fun deleteArchivedTrackerRejectsActiveAndCascadesArchivedData() = runBlocking {
+        val clock = Clock.fixed(Instant.parse("2026-09-29T12:00:00Z"), ZoneId.of("UTC"))
+        val repository = RoomTrackerRepository(dao = dao, clock = clock)
+        val tracker = trackerEntity(id = "delete-archived", kind = TrackerKind.STREAK)
+        dao.createTrackerAggregate(
+            tracker = tracker,
+            initialPeriod = periodEntity(
+                id = "delete-current",
+                eventId = tracker.id,
+                sequence = 0,
+                start = 1_000L,
+            ),
+            goal = EventGoalEntity(
+                eventId = tracker.id,
+                targetAmount = 21,
+                targetUnit = DisplayFormat.DAYS.name,
+                createdAtEpochMs = 10_000L,
+                updatedAtEpochMs = 10_000L,
+            ),
+        )
+
+        assertFalse(repository.deleteArchivedTracker(tracker.id))
+        assertNotNull(repository.loadTracker(tracker.id))
+
+        assertNotNull(repository.archiveTracker(tracker.id))
+        assertTrue(repository.deleteArchivedTracker(tracker.id))
+        assertNull(repository.loadTracker(tracker.id))
+        assertTrue(repository.observeActiveTrackerAggregates().first().isEmpty())
+        assertTrue(repository.observeArchivedTrackerAggregates().first().isEmpty())
+        assertTrue(dao.observeAllPeriods().first().isEmpty())
+        assertTrue(dao.observeAllGoals().first().isEmpty())
+    }
+
     private suspend fun expectSQLiteFailure(
         block: suspend () -> Unit,
     ) {
