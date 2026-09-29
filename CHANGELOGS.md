@@ -8,7 +8,9 @@
 - Added deterministic ordering, JSON escaping, stable UTC-date filenames, JVM coverage for the codec, English/Arabic copy, and Android UI reachability coverage.
 - Kept **Backup** and **Restore** fail-closed and separate. Export does not claim validated recovery, import safety, Everkeep backup, synchronization, or cloud authority.
 
-**Acceptance boundary:** Development candidate on PR #59. Fresh exact-head CI, representative-device document-provider behavior, accessibility/localization review, validated import/recovery, and release qualification remain open.
+**Validation:** Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`, including unit tests, lint, assembly, manifest/schema guards, Android 16 runtime instrumentation, and rendered-evidence upload.
+
+**Acceptance boundary:** Development candidate on PR #59. Representative-device document-provider behavior, accessibility/localization review, validated import/recovery, and release qualification remain open.
 
 ## September 29, 2026 — Since archived-only permanent deletion candidate
 
