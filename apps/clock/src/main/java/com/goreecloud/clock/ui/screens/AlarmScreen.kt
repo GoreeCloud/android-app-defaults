@@ -149,12 +149,7 @@ fun AlarmScreen(
         }
 
         if (alarms.isEmpty()) {
-            Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag("next-alarm-card")
-            .clickable(onClick = onEdit),
-    ) {
+            Card(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(20.dp)) {
                     Text("No alarms yet", style = MaterialTheme.typography.titleLarge)
                     Text(
@@ -249,7 +244,12 @@ private fun UpcomingAlarmCard(
     val time = trigger.format(
         DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm" else "h:mm a"),
     )
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("next-alarm-card")
+            .clickable(onClick = onEdit),
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),
