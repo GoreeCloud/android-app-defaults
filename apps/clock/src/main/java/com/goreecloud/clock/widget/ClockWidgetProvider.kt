@@ -4,6 +4,9 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.os.Bundle
+import android.util.TypedValue
+import android.view.View
 import android.text.format.DateFormat
 import android.widget.RemoteViews
 import com.goreecloud.clock.ClockApplication
@@ -19,6 +22,15 @@ class ClockWidgetProvider : AppWidgetProvider() {
         appWidgetIds.forEach { update(context, appWidgetManager, it) }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle,
+    ) {
+        update(context, appWidgetManager, appWidgetId, newOptions)
+    }
+
     companion object {
         private const val REQUEST_OPEN_CLOCK = 4101
 
@@ -32,13 +44,28 @@ class ClockWidgetProvider : AppWidgetProvider() {
             context: Context,
             manager: AppWidgetManager,
             appWidgetId: Int,
+            options: Bundle? = null,
         ) {
             val app = context.applicationContext as? ClockApplication
             val use24Hour = app?.preferencesStore?.state?.value?.use24Hour
                 ?: DateFormat.is24HourFormat(context)
             val timePattern = if (use24Hour) "HH:mm" else "h:mm a"
+            val widgetOptions = options ?: manager.getAppWidgetOptions(appWidgetId)
+            val compact = WidgetSizePolicy.presentation(
+                minWidthDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
+                minHeightDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT),
+            ) == WidgetPresentation.COMPACT
 
             val views = RemoteViews(context.packageName, R.layout.widget_clock).apply {
+                setViewVisibility(
+                    R.id.widget_clock_date,
+                    if (compact) View.GONE else View.VISIBLE,
+                )
+                setTextViewTextSize(
+                    R.id.widget_clock_time,
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (compact) 30f else 38f,
+                )
                 setCharSequence(R.id.widget_clock_time, "setFormat12Hour", timePattern)
                 setCharSequence(R.id.widget_clock_time, "setFormat24Hour", timePattern)
                 setCharSequence(R.id.widget_clock_date, "setFormat12Hour", "EEE, MMM d")
