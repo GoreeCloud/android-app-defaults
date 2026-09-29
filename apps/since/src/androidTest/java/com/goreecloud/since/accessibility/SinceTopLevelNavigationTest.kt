@@ -69,6 +69,11 @@ class SinceTopLevelNavigationTest {
         }
 
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("settings-export-data")
+            .assertIsDisplayed()
+            .assertHasClickAction()
+        composeRule.onNodeWithText("Export data").assertIsDisplayed()
+
         composeRule.onNodeWithTag("settings-backup")
             .assertIsDisplayed()
             .assertHasClickAction()
