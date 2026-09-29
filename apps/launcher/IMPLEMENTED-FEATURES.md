@@ -1,5 +1,10 @@
 # GoreeCloud Launcher — Implemented Features
 
+## 2026-09-29 — secondary-page compaction planning foundation
+
+Development source now includes a pure, fail-closed secondary-Home compaction planner. It preserves authoritative rank order for eligible 1×1 app rows, packs them deterministically into row-major cells, protects the canonical primary Home page, rejects unsupported/spanning rows, and refuses capacity overflow rather than spilling items across pages. The transactional mutation service and user-facing **Compact apps** action remain open acceptance work; this entry does not claim them as implemented.
+
+
 ## September 28, 2026 — accessible App Drawer page indicators
 
 Paged App Drawer layouts now keep the existing restrained **6/8 dp** visual dots inside explicit **48 dp** interaction surfaces. Each page target exposes a stable test tag plus a page-position accessibility label and selected state while preserving the compact Glaze visual treatment. Focused policy coverage locks the interaction floor separately from the visual-dot geometry.
