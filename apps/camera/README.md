@@ -1,5 +1,10 @@
 # GoreeCloud Camera
 
+> **Repository authority:** Active development is maintained in `GoreeCloud/android-app-defaults` under `apps/camera/`. The standalone `GoreeCloud/camera` repository is historical provenance only.
+>
+> **Project governance:** [PROJECT-SPECIFICATIONS.md](PROJECT-SPECIFICATIONS.md) is the canonical project specification and [PROJECT-RECORD.md](PROJECT-RECORD.md) preserves significant history and evidence.
+
+
 > Repository document version: **0.6.0**  
 > Product internal version: **0.1.0**  
 > Release lifecycle: **Concept**
