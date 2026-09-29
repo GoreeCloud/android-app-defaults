@@ -1,6 +1,8 @@
 package com.goreecloud.since.ui
 
 import android.text.format.DateFormat
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -73,6 +75,7 @@ import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
+import com.goreecloud.since.domain.portability.SinceExportJson
 import com.goreecloud.since.domain.repository.TrackerRepository
 import com.goreecloud.since.domain.time.ElapsedResult
 import com.goreecloud.since.domain.time.GoalEstimateResult
@@ -90,9 +93,11 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SinceApp(
@@ -115,6 +120,40 @@ fun SinceApp(
         .collectAsStateWithLifecycle(initialValue = emptyList())
     val scope = rememberCoroutineScope()
     val validator = remember(clock) { TrackerDraftValidator(clock) }
+    val context = LocalContext.current
+    var isExportingData by remember { mutableStateOf(false) }
+    var exportStatus by remember { mutableStateOf<SinceExportStatus?>(null) }
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        if (uri == null) {
+            isExportingData = false
+        } else {
+            val exportedAtEpochMs = clock.millis()
+            val snapshot = aggregates + archivedAggregates
+            scope.launch {
+                val succeeded = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val payload = SinceExportJson.encode(
+                            aggregates = snapshot,
+                            exportedAtEpochMs = exportedAtEpochMs,
+                        )
+                        val output = context.contentResolver.openOutputStream(uri, "wt")
+                            ?: error("Selected export destination could not be opened")
+                        output.bufferedWriter(Charsets.UTF_8).use { writer ->
+                            writer.write(payload)
+                        }
+                    }.isSuccess
+                }
+                exportStatus = if (succeeded) {
+                    SinceExportStatus.SUCCESS
+                } else {
+                    SinceExportStatus.FAILURE
+                }
+                isExportingData = false
+            }
+        }
+    }
 
     var showTypeChooser by rememberSaveable { mutableStateOf(false) }
     var editorKindName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -464,6 +503,20 @@ fun SinceApp(
                             deleteFailedTrackerId = trackerId
                         }
                         deletingTrackerId = null
+                    }
+                },
+                isExportingData = isExportingData,
+                exportStatus = exportStatus,
+                onExportData = {
+                    if (!isExportingData) {
+                        exportStatus = null
+                        isExportingData = true
+                        runCatching {
+                            exportLauncher.launch(SinceExportJson.fileName(clock.millis()))
+                        }.onFailure {
+                            isExportingData = false
+                            exportStatus = SinceExportStatus.FAILURE
+                        }
                     }
                 },
                 contextualHintsEnabled = contextualHintsEnabled,
