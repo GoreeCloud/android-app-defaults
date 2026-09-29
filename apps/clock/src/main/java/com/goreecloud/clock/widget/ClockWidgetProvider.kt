@@ -51,20 +51,15 @@ class ClockWidgetProvider : AppWidgetProvider() {
                 ?: DateFormat.is24HourFormat(context)
             val timePattern = if (use24Hour) "HH:mm" else "h:mm a"
             val widgetOptions = options ?: manager.getAppWidgetOptions(appWidgetId)
-            val presentation = WidgetSizePolicy.presentation(
+            val compact = WidgetSizePolicy.presentation(
                 minWidthDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
                 minHeightDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT),
-            )
-            val compact = presentation == WidgetPresentation.COMPACT
-            val showSecondaryDetail = WidgetDetailsPolicy.showSecondaryDetail(
-                presentation = presentation,
-                preferenceEnabled = app?.preferencesStore?.state?.value?.showWidgetDetails ?: true,
-            )
+            ) == WidgetPresentation.COMPACT
 
             val views = RemoteViews(context.packageName, R.layout.widget_clock).apply {
                 setViewVisibility(
                     R.id.widget_clock_date,
-                    if (showSecondaryDetail) View.VISIBLE else View.GONE,
+                    if (compact) View.GONE else View.VISIBLE,
                 )
                 setTextViewTextSize(
                     R.id.widget_clock_time,
