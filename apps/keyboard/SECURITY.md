@@ -1,85 +1,67 @@
 # GoreeCloud Keyboard Security
 
-GoreeCloud Keyboard is a Development-stage Android input method. Typed content, editor context, clipboard data, learned input, and usage-derived history are highly sensitive. Security and privacy behavior in this repository is therefore fail-closed and evidence-gated; source presence or successful CI does not establish production or Stable acceptance.
+GoreeCloud Keyboard is a Development-stage Android input method maintained in `GoreeCloud/android-app-defaults` under `apps/keyboard/`. Typed content, editor context, clipboard data, learned input, and usage-derived history are highly sensitive. Security and privacy behavior is fail-closed and evidence-gated; source presence or green CI does not establish production or Stable acceptance.
 
 ## Current trust boundary
 
-- The authored Android application requests no general Android permissions and does not request network access.
-- The IME service is exported only for the Android input-method role and requires `android.permission.BIND_INPUT_METHOD` from the binding system.
-- Android automatic application backup is disabled.
-- The current first-party suggestion path is local-only.
-- Missing or unknown editor metadata fails closed as sensitive and suggestions-suppressed.
-- Password/sensitive editors suppress suggestion collection, display, and acceptance and do not use surrounding-text inspection for the ordinary suggestion path.
-- Host editors that request no suggestions or no personalized learning are honored without weakening the stricter sensitive-editor policy.
-- Editor-start and editor-finish callbacks reset transient composing, suggestion, shift/layer, and presentation state so one editor session cannot silently lend policy or content context to another.
-- Current emoji recents and remembered emoji-category state are device-local. They are not network-backed or account-backed.
+- The Android application does not request general network access.
+- The IME service is exposed only for the Android input-method role and is protected by `android.permission.BIND_INPUT_METHOD`.
+- Android automatic application backup remains disabled for Keyboard-owned sensitive state.
+- Quill suggestions, correction, prediction, grammar assistance, emoji search, and swipe decoding are device-local.
+- Missing or unknown editor metadata fails closed toward the more restrictive editor policy.
+- Sensitive/password editors suppress suggestion capture/use, optional learning, swipe input, and other behavior that would expand text observation.
+- Editor-session transitions reset transient input state so one editor session does not silently lend policy or content context to another.
+- No telemetry, advertising, sponsorship, remote analytics, or remote learning authority is implied.
 
-## Text and editor-data handling
+## Typed text and editor context
 
-Keyboard must collect only the minimum text context required for the active, approved input behavior. New code must not treat availability of `InputConnection` as general authority to inspect or retain editor contents.
+Keyboard must collect only the minimum transient text context required for the active approved input behavior. Availability of `InputConnection` is not general authority to inspect, retain, export, synchronize, or log editor contents.
 
-The following data must not be persisted, transmitted, synchronized, logged, included in diagnostics, or placed in portability artifacts unless a separately reviewed capability explicitly authorizes the exact scope:
+Unless a separately reviewed capability explicitly authorizes the exact scope, do not persist, transmit, synchronize, back up, export, or log:
 
-- typed text or composing text;
-- surrounding editor contents;
+- typed or composing text;
+- surrounding editor content;
 - passwords, one-time codes, authentication tokens, recovery codes, or private keys;
-- suggestion or learned-input history;
+- raw gesture traces;
 - key-event history;
-- clipboard contents or clipboard history;
-- sensitive-editor contents or classifications tied to content;
-- application/editor identifiers derived from typing sessions;
+- sensitive-editor contents;
+- raw clipboard payloads outside the explicit local Clipboard-history boundary below;
 - telemetry identifiers or behavioral profiles.
 
-Ordinary operational logs and CI evidence must never include raw editor contents or clipboard payloads.
+## Optional local learning
+
+Optional learning is user-controlled and off by default. When enabled, Keyboard may retain only the bounded local word/bigram counters defined by the current implementation. Sensitive editors, host no-suggestions editors, and editors requesting Android no-personalized-learning are excluded from collection and from use of learned personalization. Learned data remains device-local and user-clearable.
+
+## Clipboard boundary
+
+The Keyboard-side Clipboard feature is not the future privileged GoreeCloud Secure Paste Broker.
+
+Current candidate behavior permits explicitly enabled, device-local encrypted text history with bounded retention. Saved clips are encrypted with Android Keystore-backed AES-GCM, history is bounded, Android-marked sensitive clips are never persisted, and derived smart-content fragments are not separately persisted. Clipboard content is excluded from backup, synchronization, Quill learning, prediction, correction, and personalization.
+
+Per-app **Allow / Ask / Paste only / Block** settings control Keyboard-side behavior only. A normal Android IME cannot revoke another application's operating-system clipboard authority.
 
 ## Portability and recovery
 
-The current Development portability contract is intentionally narrow: `goreecloud-keyboard-preferences/1` carries only the last emoji category explicitly selected by the user.
+Portable Keyboard preferences must remain privacy-minimized. Typed/editor content, learned text, raw clipboard history, credentials, secrets, and other usage-derived sensitive content must not silently enter export/import formats.
 
-The portability boundary must remain privacy-minimized:
-
-1. Validate the entire input before any write.
-2. Reject malformed, oversized, unsupported, tampered, expanded, or noncanonical input without partial mutation.
-3. Preserve preview-before-Apply import behavior.
-4. Preserve review/freeze-before-destination export behavior.
-5. Keep typed/editor content, learned input, emoji recents/frequency history, emoji search queries, clipboard data, credentials, secrets, and other usage-derived history outside the format.
-6. Treat Storage Access Framework selection as explicit user authority for one operation, not background storage or synchronization authority.
-7. Do not represent one-field preference transfer as complete backup, restore, Everkeep integration, or clean-target recovery.
-
-Any schema expansion requires separate privacy, retention, consent, recovery, compatibility, and threat review.
+Imports must validate the complete input before mutation and fail closed on malformed, oversized, unsupported, tampered, expanded, or noncanonical data. Export/import behavior must not be represented as complete backup, Everkeep recovery, or clean-target recovery unless those separate acceptance gates are satisfied.
 
 ## Accessibility and interaction security
 
-Virtual accessibility nodes, long-press alternates, emoji controls, suggestion controls, and other custom-drawn interaction surfaces must reuse existing semantic input paths rather than creating second editor-data or commit authorities.
+Accessibility nodes, long-press alternates, toolbar controls, Clipboard controls, setup surfaces, and custom-drawn input controls must reuse existing bounded action paths rather than creating independent text-read or commit authorities. Accessibility behavior may consume rendered geometry and labels needed for interaction, but it must not gain clipboard, persistence, network, surrounding-text, learning, or telemetry authority merely to expose semantics.
 
-Accessibility code may consume already-rendered control geometry and labels needed for interaction, but must not gain clipboard, persistence, network, surrounding-text, learned-input, or telemetry authority merely to expose accessible semantics.
+## Platform-system and dependency security
 
-Long-press alternate geometry and pointer hit testing must fail closed when a valid rendered target cannot be established. Pointer release must not commit an invisible or unresolved alternate.
+Keyboard must substantively address the applicable Integral Platform Systems: Manager, Privacy Shield, Wardveil Security, Everkeep, GLAZE UI, Mesh, Identity, Policy, and Observability. A manifest entry, label, icon, status card, or local defensive behavior is not by itself accepted runtime integration.
 
-## Secure Paste boundary
+Keep signing keys, keystores, passwords, reusable tokens, private keys, recovery secrets, and production credentials outside Git, issues, pull requests, logs, screenshots, and ordinary documentation.
 
-Secure Paste is planned architecture, not current enforcement. A normal Android IME cannot by itself revoke another application's operating-system clipboard authority. Any future Secure Paste implementation requires the separately approved Privacy Shield policy and privileged platform enforcement boundary described in the canonical project specification.
-
-Clipboard payloads must not be uploaded, synchronized, backed up, or associated with Identity by default. Any future clipboard persistence or synchronization is a separate capability requiring explicit user control and acceptance.
-
-## Platform-system integration
-
-Keyboard is a GoreeCloud application and must substantively address Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, and GoreeCloud Identity where applicable. Current `goreecloud.platform.yaml` remains the machine-readable repository declaration.
-
-A platform-system integration is not accepted merely because a manifest entry, icon, label, status card, or local defensive behavior exists. Acceptance requires the applicable runtime, authorization, privacy, security, resilience, failure-mode, accessibility, and evidence gates.
-
-## Dependency, source, and release security
-
-- Keep signing keys, keystores, passwords, reusable tokens, private keys, recovery secrets, and production credentials outside Git, issues, pull requests, CI logs, screenshots, and ordinary documentation.
-- Do not add ad, sponsorship, tracking, remote analytics, remote-learning, or remote-content dependencies as convenience features.
-- Any future network permission or remote assistance path requires explicit product authority, data minimization, endpoint documentation, authentication/authorization, failure handling, offline behavior, logging boundaries, Privacy Shield review, and Wardveil review before production acceptance.
-- Preserve exact-head CI and emulator evidence for source-sensitive changes.
-- Release signing and distribution remain separately governed and must not be inferred from debug APK success.
+Any future network permission, remote model, remote dictionary, voice-input service, media/GIF source, or remote assistance path requires explicit product authority, endpoint and retention documentation, authentication/authorization, offline/failure behavior, Privacy Shield review, Wardveil review, and acceptance before production use.
 
 ## Vulnerability handling
 
-Do not post raw sensitive text-entry data, clipboard payloads, credentials, private device details, or reusable secrets in public issues. Use the repository's private GitHub security-reporting channel when configured. If no private channel is available, disclose only the minimum non-sensitive information needed to establish the problem and request an appropriate private handoff before sharing sensitive reproduction material.
+Do not place raw typed text, clipboard payloads, credentials, private device details, or reusable secrets in public issues. Use GitHub private vulnerability reporting when available; otherwise disclose only the minimum non-sensitive information needed to establish the problem and arrange an appropriate private handoff.
 
 ## Release boundary
 
-Keyboard remains Development and nonconformant. Production or Stable qualification still requires current Glaze UI application acceptance, representative physical-device typing and latency validation, TalkBack/Switch Access/Voice Access/Touch Assistance and broader accessibility acceptance, RTL/localization and supported form-factor validation, accepted Privacy Shield/Wardveil/Everkeep/Identity/Mesh/Manager integration where applicable, protected signing/provenance, recovery acceptance, release verification, and explicit production approval.
+Keyboard remains Development. Production or Stable qualification still requires current GLAZE UI application acceptance, representative physical-device typing/latency testing, TalkBack/Switch Access/Voice Access/Touch Assistance and broader accessibility acceptance, RTL/localization and supported form-factor validation, accepted platform-system integrations where applicable, protected signing/provenance, recovery acceptance, release verification, and explicit production approval.
