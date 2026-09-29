@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -25,12 +26,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.clock.timer.DurationFormatter
 import com.goreecloud.clock.ui.ClockHapticEvent
 import com.goreecloud.clock.timer.TimerEntry
+import com.goreecloud.clock.timer.TimerPresetCatalog
 import com.goreecloud.clock.timer.TimerScheduler
 import com.goreecloud.clock.timer.TimerStore
 import kotlinx.coroutines.delay
@@ -211,6 +214,14 @@ private fun AddTimerDialog(
     var minutes by remember { mutableStateOf("5") }
     var seconds by remember { mutableStateOf("0") }
 
+    fun applyPreset(durationMillis: Long) {
+        val (presetHours, presetMinutes, presetSeconds) =
+            TimerPresetCatalog.fieldsFor(durationMillis)
+        hours = presetHours
+        minutes = presetMinutes
+        seconds = presetSeconds
+    }
+
     val h = hours.toLongOrNull() ?: -1L
     val m = minutes.toLongOrNull() ?: -1L
     val s = seconds.toLongOrNull() ?: -1L
@@ -232,6 +243,29 @@ private fun AddTimerDialog(
                     label = { Text("Label") },
                     singleLine = true,
                 )
+                Text(
+                    text = "Quick presets",
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(
+                        items = TimerPresetCatalog.defaults,
+                        key = { it.key },
+                    ) { preset ->
+                        OutlinedButton(
+                            modifier = Modifier.testTag("timer-preset-" + preset.key),
+                            onClick = {
+                                onHaptic(ClockHapticEvent.ACTION)
+                                applyPreset(preset.durationMillis)
+                            },
+                        ) {
+                            Text(preset.label)
+                        }
+                    }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     DurationField(Modifier.weight(1f), "Hours", hours) { hours = it }
                     DurationField(Modifier.weight(1f), "Minutes", minutes) { minutes = it }
