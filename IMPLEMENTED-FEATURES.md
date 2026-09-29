@@ -1,12 +1,20 @@
 # Android App Defaults — Implemented Features
 
+## September 29, 2026 — Since fail-closed import review candidate
+
+The stacked Since portability candidate now exposes **Review import** under Settings → Data & recovery. The user explicitly chooses a document through Android's Storage Access Framework; Since reads at most 4 MiB, requires strict UTF-8, and validates only the versioned `goreecloud-since-export` schema v1 before showing a summary of trackers, archived trackers, periods, and goals.
+
+Review fails closed for unsupported schema versions, unknown or duplicate fields, duplicate tracker/period identities, invalid enum or time-zone values, broken period chronology/current-period invariants, invalid goal shapes, trailing JSON, oversized input, malformed UTF-8, or ordinary read/parse failures. The review path has no repository/database mutation API and never applies the selected data.
+
+This advances the planned review-before-mutation recovery boundary without enabling **Restore**. Replace/import mutation, conflict handling, rollback, process-death recovery, representative document-provider/device behavior, independent review/protection, release, production, Stable, Seal, and Anchor acceptance remain open.
+
 ## September 29, 2026 — Since portable JSON export candidate
 
 The active Since candidate now exposes **Export data** as a user-initiated Android Storage Access Framework flow. The app proposes a `GoreeCloud-Since-YYYY-MM-DD.json` filename, writes only to the URI selected by the user, and requires no storage or network permission.
 
 The portable `goreecloud-since-export` schema v1 includes tracker IDs, titles, notes, kind, icon/accent keys when present, display format, sort/archive state, tracker timestamps, all period/reset history with zone IDs, and optional goals. The pure encoder sorts deterministically and escapes user text; JVM coverage locks the format identity, escaping, ordering, archive state, goal fields, and stable filename behavior. Settings exposes success/failure state and retains **Backup** and **Restore** as fail-closed planned controls.
 
-Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`, covering unit/lint/build/schema/manifest checks plus Android 16 runtime instrumentation and rendered evidence. This is candidate Development source, not validated restore/backup authority. Import/review-before-mutation semantics, representative document-provider/device behavior, broader recovery evidence, and release acceptance remain open.
+Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`, covering unit/lint/build/schema/manifest checks plus Android 16 runtime instrumentation and rendered evidence. This is candidate Development source, not validated restore/backup authority. A stacked follow-up now implements read-only import review; applying imported data, representative document-provider/device behavior, broader recovery evidence, and release acceptance remain open.
 
 ## September 29, 2026 — Since archived-only permanent deletion candidate
 
