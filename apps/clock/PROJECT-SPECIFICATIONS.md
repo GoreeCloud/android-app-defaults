@@ -34,6 +34,8 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 
 ### Alarms
 
+- The Development alarm editor includes one-tap repeat presets for **One time**, **Every day**, **Weekdays**, and **Weekends**, while retaining individual weekday chips for custom schedules. Presets only manipulate the existing local repeat-day set and reuse the existing save/schedule path.
+
 - Multiple alarms with create, edit, enable, disable, and delete.
 - One-time and repeating schedules.
 - Labels, vibration, configurable snooze.
