@@ -247,3 +247,5 @@ scripts/check_privacy.py
 scripts/check_room_cutover.py
 scripts/check_room_schema.py
 settings.gradle.kts
+app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionPolicy.kt
+app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionPolicyTest.kt
