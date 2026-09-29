@@ -12,6 +12,8 @@ interface TrackerRepository {
 
     fun observeActiveTrackerAggregates(): Flow<List<TrackerAggregate>>
 
+    fun observeArchivedTrackerAggregates(): Flow<List<TrackerAggregate>>
+
     suspend fun createTracker(draft: ValidatedTrackerDraft): TrackerAggregate
 
     suspend fun loadTracker(trackerId: String): TrackerAggregate?
@@ -33,6 +35,10 @@ interface TrackerRepository {
     ): Goal?
 
     suspend fun removeGoal(trackerId: String): Boolean
+
+    suspend fun archiveTracker(trackerId: String): TrackerAggregate?
+
+    suspend fun restoreTracker(trackerId: String): TrackerAggregate?
 
     suspend fun resetStreak(
         trackerId: String,
