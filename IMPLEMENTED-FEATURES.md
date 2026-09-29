@@ -1,5 +1,15 @@
 # Android App Defaults — Implemented Features
 
+
+## September 29, 2026 — Clock world-clock ordering persistence hardening
+
+Draft PR #50 now routes saved World Clock add/remove/reorder mutations through one deterministic local ordering policy. Saved zone IDs are trimmed, deduplicated while preserving first occurrence, and validated with `ZoneId`; malformed local preference entries are dropped fail-closed instead of reaching the World Clock renderer. The existing saved order continues to persist through the Clock preferences store without a schema or permission change.
+
+JVM coverage verifies normalization, add/remove/reorder behavior, and invalid-boundary moves. Android 16 instrumentation verifies a two-city reorder survives Activity recreation and that a subsequent removal is persisted. Exact source-bearing head `fe8fa6d2d293ce2da8af6ce2e11f2ddf994a1909` passed Android Development Foundation run `36510646015` / #273 across Clock build/unit/lint/manifest validation, Clock Android 16 instrumentation (**OK (6 tests)**) with rendered evidence, and both shared Since regression jobs.
+
+This remains Development evidence. No alarm/timer scheduling, persistence schema, network/account capability, telemetry, or new permission authority changed. Representative physical-device/OEM, RTL/localization, accessibility, launcher/widget, performance/power, signing, release, production, and Stable/Anchor acceptance remain open.
+
+
 ## September 28, 2026 — relative Next alarm presentation
 
 Clock's existing exact-alarm-gated **Next alarm** card now adds a compact relative-time summary such as **In 2 h 15 min**, derived from the same scheduled trigger instant rather than a second scheduling path. The presentation policy uses instant duration so DST/local-clock representation does not distort the countdown, handles sub-minute and multi-day boundaries, and fails closed to **Due now** for a non-future trigger.
