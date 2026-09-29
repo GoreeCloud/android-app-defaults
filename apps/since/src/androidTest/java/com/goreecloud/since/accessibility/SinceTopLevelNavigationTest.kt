@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
@@ -84,14 +85,14 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithText("Privacy").assertIsDisplayed()
         composeRule.onNodeWithText("Security").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithTag("settings-contextual-hints")
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -114,6 +115,42 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-home").assertHasClickAction().performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+    }
+
+    @Test
+    fun trackerCanBeArchivedAndRestoredFromSettings() {
+        val repository = FakeTrackerRepository(listOf(sampleAggregate()), clock = clock)
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithTag("archive-tracker")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+        composeRule.onNodeWithTag("confirm-archive-tracker")
+            .assertIsDisplayed()
+            .performClick()
+
+        composeRule.onNodeWithTag("nav-settings").assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("archived-tracker-tracker-top-level").assertIsDisplayed()
+        composeRule.onNodeWithTag("restore-tracker-tracker-top-level")
+            .assertHasClickAction()
+            .performClick()
+
+        composeRule.onNodeWithTag("nav-home").performClick()
+        composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+        composeRule.runOnIdle {
+            assertFalse(repository.current.single().tracker.isArchived)
+        }
     }
 
     @Test
@@ -166,7 +203,7 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithTag("settings-contextual-hints").performClick()
         composeRule.onNodeWithTag("nav-home").performClick()
         assertTrue(composeRule.onAllNodesWithTag("home-contextual-hint").fetchSemanticsNodes().isEmpty())
