@@ -1,4 +1,4 @@
-name: Execute mandatory app migration
+name: Execute mandatory app migration\n# migration-generation: 2
 
 on:
   push:
