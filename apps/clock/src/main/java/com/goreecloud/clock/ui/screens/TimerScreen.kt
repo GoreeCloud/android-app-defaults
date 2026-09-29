@@ -235,41 +235,70 @@ private fun AddTimerDialog(
         onDismissRequest = onDismiss,
         title = { Text("New timer") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = label,
-                    onValueChange = { label = it.take(80) },
-                    label = { Text("Label") },
-                    singleLine = true,
-                )
-                Text(
-                    text = "Quick presets",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(
-                        items = TimerPresetCatalog.defaults,
-                        key = { it.key },
-                    ) { preset ->
-                        OutlinedButton(
-                            modifier = Modifier.testTag("timer-preset-" + preset.key),
-                            onClick = {
-                                onHaptic(ClockHapticEvent.ACTION)
-                                applyPreset(preset.durationMillis)
-                            },
-                        ) {
-                            Text(preset.label)
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                item {
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = label,
+                        onValueChange = { label = it.take(80) },
+                        label = { Text("Label") },
+                        singleLine = true,
+                    )
+                }
+                item {
+                    Text(
+                        text = "Quick presets",
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+                item {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(
+                            items = TimerPresetCatalog.defaults,
+                            key = { it.key },
+                        ) { preset ->
+                            OutlinedButton(
+                                modifier = Modifier.testTag("timer-preset-" + preset.key),
+                                onClick = {
+                                    onHaptic(ClockHapticEvent.ACTION)
+                                    applyPreset(preset.durationMillis)
+                                },
+                            ) {
+                                Text(preset.label)
+                            }
                         }
                     }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DurationField(Modifier.weight(1f), "Hours", hours) { hours = it }
-                    DurationField(Modifier.weight(1f), "Minutes", minutes) { minutes = it }
-                    DurationField(Modifier.weight(1f), "Seconds", seconds) { seconds = it }
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        DurationField(
+                            Modifier
+                                .weight(1f)
+                                .testTag("timer-duration-hours"),
+                            "Hours",
+                            hours,
+                        ) { hours = it }
+                        DurationField(
+                            Modifier
+                                .weight(1f)
+                                .testTag("timer-duration-minutes"),
+                            "Minutes",
+                            minutes,
+                        ) { minutes = it }
+                        DurationField(
+                            Modifier
+                                .weight(1f)
+                                .testTag("timer-duration-seconds"),
+                            "Seconds",
+                            seconds,
+                        ) { seconds = it }
+                    }
                 }
             }
         },
