@@ -1,5 +1,13 @@
 # Android App Defaults — Implemented Features
 
+
+## September 29, 2026 — Clock widget detail personalization candidate
+
+A stacked Clock Development candidate adds three app-private Settings controls for secondary home-screen widget detail: the Clock widget date, Next alarm day/readiness detail, and Timer running/readiness status. Existing users keep the current presentation by default. Preference changes reuse the existing local widget refresh path, while compact launcher sizes continue to suppress secondary detail regardless of preference so primary time/countdown content remains prioritized.
+
+A shared pure presentation policy is unit-tested for regular/compact and enabled/disabled behavior, and Android Compose coverage verifies all three controls persist across Activity recreation. This changes presentation preferences only: no alarm/timer scheduling, persistence schema, permission, account, network, telemetry, or background authority is added. Exact-head CI and representative-launcher acceptance remain required before this tranche is accepted.
+
+
 ## September 29, 2026 — Clock adaptive widget sizing candidate
 
 Draft PR #50 now makes the Clock, next-alarm, and running-timer home-screen widgets react to Android launcher resize options. A shared deterministic policy selects regular presentation at the existing default sizes and a compact presentation when the launcher grants a narrow or short surface. Compact mode hides secondary date/status detail and reduces primary type scale while preserving the existing tap destination and local-only data boundary.
