@@ -11,7 +11,7 @@ GoreeCloud Camera, GoreeCloud Launcher, GoreeCloud Keyboard, and GoreeCloud Gall
 | Keyboard | `GoreeCloud/keyboard` | `041b5e0457f2b4d68dc96a416d5abc1f020646d7` | #97 |
 | Gallery | `GoreeCloud/gallery` | `3f7263c6e31a0af0f1a06b99491f608b96cc69ba` | #103 |
 
-The migration preserves the newest active Development integration heads at cutover rather than copying only legacy default-branch state. The four active legacy integration PRs were then closed as superseded, while their branches were retained as Git provenance.
+The migration preserves the newest active Development integration heads at cutover rather than copying only legacy default-branch state. The four active legacy integration PRs were then closed as superseded. Legacy branches remain temporarily available only while remaining unique work and references are reconciled.
 
 Repository-scoped `.github/` content and generated `artifacts/` are excluded from the nested application imports. Destination-root workflows own CI and source-integrity validation.
 
@@ -32,6 +32,17 @@ Keyboard and Gallery had successful relevant exact-head CI at cutover. Camera an
 
 No source-CI or migration-CI result changes product lifecycle status. These applications remain Development unless their own release criteria establish a later state.
 
-## Legacy repositories
+## Legacy repository retirement and deletion
 
-The four standalone repositories remain available as Git-history and migration provenance while open pull requests, issues, release references, external links, and other repository-native dependencies are reconciled. New product source development belongs in this monorepo after the migration cutover merges.
+The four standalone repositories are temporary migration sources, not permanent archives. New product source development belongs only in this monorepo after the migration cutover.
+
+Required completion state:
+
+1. Reconcile every remaining legacy branch, pull-request change, issue dependency, release reference, external link, and repository-native dependency that still carries unique required information or source.
+2. Preserve required substantive project history in the monorepo project records and migration provenance before destructive retirement.
+3. Verify the monorepo default branch contains the accepted migrated state and the four application paths remain buildable under destination CI.
+4. Remove or update stale references that would point users or automation at the standalone repositories.
+5. Delete `GoreeCloud/camera`, `GoreeCloud/launcher`, `GoreeCloud/keyboard`, and `GoreeCloud/gallery` after the preceding reconciliation is complete.
+6. Verify GitHub no longer reports those standalone repositories, then update the canonical GoreeCloud repository inventory from that live state.
+
+Repository deletion is a migration completion requirement. Until deletion is verified, the consolidation remains operationally incomplete even though active source ownership has already moved to this monorepo.
