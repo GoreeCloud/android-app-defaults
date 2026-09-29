@@ -1,6 +1,6 @@
 # GoreeCloud Gallery — Project Specifications
 
-> **Current repository authority — September 29, 2026:** GoreeCloud Gallery is maintained in `GoreeCloud/android-app-defaults` under `apps/gallery/`. The standalone `GoreeCloud/gallery` repository is historical Git provenance only. The mandatory cutover imported exact Development revision `3f7263c6e31a0af0f1a06b99491f608b96cc69ba` and merged into monorepo `main` as `20ca33c7c0c565f361deda206c9c950154dec327`. This repository-location statement supersedes legacy repository or “current candidate” wording preserved below when that wording predates the cutover. Historical legacy PR/commit references remain valid evidence, but new project documentation maintenance belongs here.
+> **Current repository authority — September 29, 2026:** GoreeCloud Gallery is maintained in `GoreeCloud/android-app-defaults` under `apps/gallery/`. The standalone `GoreeCloud/gallery` repository is a temporary legacy source pending final reconciliation and required deletion. The mandatory cutover imported exact Development revision `3f7263c6e31a0af0f1a06b99491f608b96cc69ba` and merged into monorepo `main` as `20ca33c7c0c565f361deda206c9c950154dec327`. This repository-location statement supersedes legacy repository or “current candidate” wording preserved below when that wording predates the cutover. Historical legacy PR/commit references remain valid evidence, but new project documentation maintenance belongs here.
 
 
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/gallery/`)  
