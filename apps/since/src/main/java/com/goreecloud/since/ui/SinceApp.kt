@@ -564,6 +564,8 @@ fun SinceApp(
                 },
                 isReviewingImport = isReviewingImport,
                 importReviewResult = importReviewResult,
+                currentTrackerIds = (aggregates + archivedAggregates)
+                    .mapTo(linkedSetOf()) { it.tracker.id },
                 onReviewImport = {
                     if (!isReviewingImport && !isExportingData) {
                         importReviewResult = null
