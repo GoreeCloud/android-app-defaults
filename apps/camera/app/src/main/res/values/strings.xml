@@ -13,6 +13,8 @@
     <string name="capture_photo_content_description">Capture a JPEG photo to shared media</string>
     <string name="photo_status_ready">Photo capture ready</string>
     <string name="photo_capture_in_progress">Capturing photo…</string>
+    <string name="photo_self_timer_started">Photo timer: %1$d seconds</string>
+    <string name="photo_self_timer_cancelled">Photo timer cancelled</string>
     <string name="photo_saved">Photo saved: %1$s</string>
     <string name="photo_failed">Photo failed: %1$s</string>
     <string name="video_status_checking">Video/audio capability checking…</string>
@@ -58,6 +60,9 @@
     <string name="camera_settings_body">These settings change only this local Camera presentation. They do not grant permissions, upload captures, or change camera hardware authority.</string>
     <string name="composition_grid_off">Composition grid: Off</string>
     <string name="composition_grid_on">Composition grid: On</string>
+    <string name="self_timer_off">Photo self-timer: Off</string>
+    <string name="self_timer_3_seconds">Photo self-timer: 3 seconds</string>
+    <string name="self_timer_10_seconds">Photo self-timer: 10 seconds</string>
     <string name="volume_shutter_off">Volume keys capture photo: Off</string>
     <string name="volume_shutter_on">Volume keys capture photo: On</string>
 </resources>

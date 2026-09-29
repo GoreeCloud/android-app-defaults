@@ -2,7 +2,7 @@
 
 ## September 29, 2026 — Home horizontal-swipe arbitration correction
 
-The Home page gesture arbiter no longer permanently abandons a clear horizontal page swipe merely because a child Home surface consumed an earlier movement sample for press or long-press bookkeeping. Page selection still requires the existing horizontal-distance and direction-dominance thresholds, while the Activity now disables page-swipe arbitration whenever an app drag session is active so drag/drop and paging cannot compete for authority.
+The Home page gesture arbiter no longer permanently abandons a clear horizontal page swipe merely because a child Home surface consumed an earlier movement sample for press or long-press bookkeeping. Page selection still requires the existing horizontal-distance and direction-dominance thresholds, is committed only after pointer release so the Home subtree is not replaced mid-gesture, and is disabled whenever an app drag session is active so drag/drop and paging cannot compete for authority.
 
 This directly addresses the repeatable managed-emulator timeout in the primary-to-secondary-to-primary Home swipe acceptance flow. No page ordering, Room workspace mutation, Dock placement, or drag/drop persistence contract changes.
 

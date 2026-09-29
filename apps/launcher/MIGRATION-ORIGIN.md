@@ -7,7 +7,7 @@ This application is mandatorily migrated into  by the GoreeCloud owner directive
 - Source pull request at migration start: #248
 - Destination: 
 - Import exclusions: repository-scoped  metadata and generated  output.
-- Source validation at migration start: Android CI validate and transition-performance jobs passed, but the Android 16 Room/runtime job failed in secondaryHomeRendersMovedBuiltInWidget with a Compose performMeasureAndLayout exception.
+- Source validation at migration start: Android CI was in progress at the refreshed imported head at migration cutover; the immediately preceding head had a failing Android 16 Room/runtime test and was therefore not used as the final cutover revision.
 - Lifecycle boundary: this is a Development source migration. It does not establish Release Candidate, Stable, production, representative-device, or other unverified acceptance.
 - History boundary: the standalone source repository remains the historical Git provenance until repository-retirement reconciliation is complete.
 

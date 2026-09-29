@@ -139,34 +139,29 @@ internal fun Modifier.homePageSwipeNavigation(
             )
             var horizontalDistance = 0f
             var verticalDistance = 0f
-            var triggered = false
 
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Final)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
                 val delta = change.positionChange()
 
-                // Page navigation is decided from the complete gesture direction rather than
-                // permanently surrendering after a child consumes one movement sample. Home
-                // children legitimately consume press/long-press bookkeeping before horizontal
-                // intent is known; the caller disables this modifier during active drag/drop.
+                // Decide from the complete gesture, but do not replace the Home subtree while
+                // the pointer stream is still active. Child surfaces may consume press/long-press
+                // bookkeeping before horizontal intent is known; active drag/drop disables this
+                // modifier at the caller. Selection is applied only after pointer release.
                 horizontalDistance += delta.x
                 verticalDistance += delta.y
 
-                if (!triggered) {
+                if (!change.pressed) {
                     homePageSwipeTargetIndex(
                         currentIndex = currentIndex,
                         pageCount = pageCount,
                         horizontalDistancePx = horizontalDistance,
                         verticalDistancePx = verticalDistance,
                         minimumDistancePx = minimumDistancePx,
-                    )?.let { target ->
-                        triggered = true
-                        onPageSelected(target)
-                    }
+                    )?.let(onPageSelected)
+                    break
                 }
-
-                if (!change.pressed) break
             }
         }
     }

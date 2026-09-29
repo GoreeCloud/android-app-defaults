@@ -7,7 +7,7 @@ This application is mandatorily migrated into  by the GoreeCloud owner directive
 - Source pull request at migration start: #19
 - Destination: 
 - Import exclusions: repository-scoped  metadata and generated  output.
-- Source validation at migration start: Android Foundation validate passed at the imported head; runtime emulator jobs were still in progress at migration start.
+- Source validation at migration start: Android Foundation was in progress at the refreshed imported head at migration cutover.
 - Lifecycle boundary: this is a Development source migration. It does not establish Release Candidate, Stable, production, representative-device, or other unverified acceptance.
 - History boundary: the standalone source repository remains the historical Git provenance until repository-retirement reconciliation is complete.
 

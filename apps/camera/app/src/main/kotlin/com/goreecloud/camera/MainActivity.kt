@@ -10,6 +10,8 @@ import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.TextureView
@@ -26,6 +28,7 @@ import com.goreecloud.camera.camera.CameraSessionController
 import com.goreecloud.camera.camera.CameraSessionState
 import com.goreecloud.camera.guidance.CameraGuidancePolicy
 import com.goreecloud.camera.guidance.CameraGuidanceStore
+import com.goreecloud.camera.settings.CameraSelfTimerPolicy
 import com.goreecloud.camera.settings.CameraSettingsStore
 import com.goreecloud.camera.settings.CameraVolumeShutterPolicy
 import com.goreecloud.camera.ui.CompositionGridView
@@ -46,11 +49,13 @@ class MainActivity : Activity() {
     private lateinit var sessionController: CameraSessionController
     private lateinit var guidanceStore: CameraGuidanceStore
     private lateinit var settingsStore: CameraSettingsStore
+    private val selfTimerHandler = Handler(Looper.getMainLooper())
 
     private var guidanceDialog: Dialog? = null
     private var settingsDialog: Dialog? = null
     private var currentSessionState = CameraSessionState.IDLE
     private var videoCapabilityAvailable = false
+    private var pendingSelfTimer: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +68,9 @@ class MainActivity : Activity() {
             textureView = previewView,
             onStateChanged = { state, detail ->
                 currentSessionState = state
+                if (state != CameraSessionState.PREVIEWING && pendingSelfTimer != null) {
+                    cancelPendingSelfTimer(showStatus = true)
+                }
                 val stateText = getString(R.string.session_status, state.name.lowercase())
                 stateLabel.text = if (detail.isNullOrBlank()) stateText else "$stateText\n$detail"
 
@@ -128,7 +136,7 @@ class MainActivity : Activity() {
         }
 
         shutterButton.setOnClickListener {
-            capturePhotoFromUserAction()
+            requestPhotoCaptureFromUserAction()
         }
 
         videoButton.setOnClickListener {
@@ -144,12 +152,14 @@ class MainActivity : Activity() {
 
         settingsButton.setOnClickListener {
             if (guidanceStore.isFirstUseComplete()) {
+                cancelPendingSelfTimer(showStatus = true)
                 showSettingsMenu()
             }
         }
 
         guidanceButton.setOnClickListener {
             if (guidanceStore.isFirstUseComplete()) {
+                cancelPendingSelfTimer(showStatus = true)
                 showGuidanceMenu()
             }
         }
@@ -171,11 +181,13 @@ class MainActivity : Activity() {
     }
 
     override fun onPause() {
+        cancelPendingSelfTimer(showStatus = false)
         sessionController.stop()
         super.onPause()
     }
 
     override fun onDestroy() {
+        cancelPendingSelfTimer(showStatus = false)
         guidanceDialog?.dismiss()
         settingsDialog?.dismiss()
         sessionController.shutdown()
@@ -196,10 +208,48 @@ class MainActivity : Activity() {
                 modalSurfaceVisible = modalSurfaceVisible,
             )
         ) {
-            capturePhotoFromUserAction()
+            requestPhotoCaptureFromUserAction()
             return true
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun requestPhotoCaptureFromUserAction() {
+        if (currentSessionState != CameraSessionState.PREVIEWING || pendingSelfTimer != null) return
+
+        val timerSeconds = settingsStore.selfTimerSeconds()
+        if (timerSeconds == CameraSelfTimerPolicy.OFF_SECONDS) {
+            capturePhotoFromUserAction()
+            return
+        }
+
+        photoStatusLabel.text = getString(R.string.photo_self_timer_started, timerSeconds)
+        val action = Runnable {
+            pendingSelfTimer = null
+            val modalSurfaceVisible =
+                guidanceDialog?.isShowing == true || settingsDialog?.isShowing == true
+            if (currentSessionState == CameraSessionState.PREVIEWING && !modalSurfaceVisible) {
+                capturePhotoFromUserAction()
+            } else {
+                photoStatusLabel.text = getString(R.string.photo_self_timer_cancelled)
+            }
+            updateCaptureControls()
+        }
+        pendingSelfTimer = action
+        selfTimerHandler.postDelayed(action, timerSeconds * 1_000L)
+        updateCaptureControls()
+    }
+
+    private fun cancelPendingSelfTimer(showStatus: Boolean) {
+        val action = pendingSelfTimer ?: return
+        selfTimerHandler.removeCallbacks(action)
+        pendingSelfTimer = null
+        if (showStatus && ::photoStatusLabel.isInitialized) {
+            photoStatusLabel.text = getString(R.string.photo_self_timer_cancelled)
+        }
+        if (::shutterButton.isInitialized && ::videoButton.isInitialized) {
+            updateCaptureControls()
+        }
     }
 
     private fun capturePhotoFromUserAction() {
@@ -568,6 +618,9 @@ class MainActivity : Activity() {
         val gridButton = Button(this).apply {
             setAllCaps(false)
         }
+        val selfTimerButton = Button(this).apply {
+            setAllCaps(false)
+        }
         val volumeShutterButton = Button(this).apply {
             setAllCaps(false)
         }
@@ -581,6 +634,14 @@ class MainActivity : Activity() {
                 getString(R.string.composition_grid_on)
             } else {
                 getString(R.string.composition_grid_off)
+            }
+        }
+
+        fun renderSelfTimerButton() {
+            selfTimerButton.text = when (settingsStore.selfTimerSeconds()) {
+                CameraSelfTimerPolicy.THREE_SECONDS -> getString(R.string.self_timer_3_seconds)
+                CameraSelfTimerPolicy.TEN_SECONDS -> getString(R.string.self_timer_10_seconds)
+                else -> getString(R.string.self_timer_off)
             }
         }
 
@@ -599,6 +660,12 @@ class MainActivity : Activity() {
             renderGridButton()
             refreshCompositionGrid()
         }
+        selfTimerButton.setOnClickListener {
+            settingsStore.setSelfTimerSeconds(
+                CameraSelfTimerPolicy.nextSeconds(settingsStore.selfTimerSeconds()),
+            )
+            renderSelfTimerButton()
+        }
         volumeShutterButton.setOnClickListener {
             settingsStore.setVolumeShutterEnabled(
                 !settingsStore.isVolumeShutterEnabled(),
@@ -612,6 +679,7 @@ class MainActivity : Activity() {
         panel.addView(title, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         panel.addView(body, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         panel.addView(gridButton, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        panel.addView(selfTimerButton, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         panel.addView(volumeShutterButton, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         panel.addView(closeButton, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
 
@@ -622,6 +690,7 @@ class MainActivity : Activity() {
         }
         dialog.setContentView(panel)
         renderGridButton()
+        renderSelfTimerButton()
         renderVolumeShutterButton()
         dialog.show()
         dialog.window?.setLayout(MATCH_PARENT, WRAP_CONTENT)
@@ -773,7 +842,9 @@ class MainActivity : Activity() {
 
     private fun updateCaptureControls() {
         val cameraGranted = checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        shutterButton.isEnabled = cameraGranted && currentSessionState == CameraSessionState.PREVIEWING
+        val selfTimerIdle = pendingSelfTimer == null
+        shutterButton.isEnabled =
+            cameraGranted && currentSessionState == CameraSessionState.PREVIEWING && selfTimerIdle
 
         when (currentSessionState) {
             CameraSessionState.RECORDING -> {
@@ -782,7 +853,7 @@ class MainActivity : Activity() {
                 videoButton.contentDescription = getString(R.string.stop_video_content_description)
             }
             CameraSessionState.PREVIEWING -> {
-                videoButton.isEnabled = cameraGranted && videoCapabilityAvailable
+                videoButton.isEnabled = cameraGranted && videoCapabilityAvailable && selfTimerIdle
                 videoButton.text = getString(R.string.record_video)
                 videoButton.contentDescription = getString(R.string.record_video_content_description)
             }

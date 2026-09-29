@@ -40,6 +40,7 @@ REQUIRED_FILES = [
     VIDEO_NAMER,
     VIDEO_COMMITTER,
     SETTINGS_STORE,
+    CAMERA_ROOT / "settings" / "CameraSelfTimerPolicy.kt",
     COMPOSITION_GRID,
 ]
 
@@ -117,6 +118,8 @@ for required_fragment in (
     "R.string.video_recording",
     "sessionController.startVideoRecording()",
     "REQUEST_RECORD_AUDIO_PERMISSION ->",
+    "requestPhotoCaptureFromUserAction()",
+    "CameraSelfTimerPolicy.nextSeconds",
 ):
     if required_fragment not in activity_text:
         fail(f"capture UI/permission contract is missing: {required_fragment}")

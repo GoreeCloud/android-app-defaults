@@ -23,7 +23,7 @@ The preview/JPEG regression also passed on final PR #8 candidate `86d2d63f373ddb
 
 The current stacked candidate additionally implements a mandatory, resumable three-step first-use guide before preview, replayable **Help & guidance**, and a global contextual-hints preference. Guidance is presentation-only and does not expand Camera2, microphone, storage, network, cloud, or release authority.
 
-The stacked local-settings continuation adds two app-private controls: a persisted **Composition grid** toggle with a non-interactive rule-of-thirds overlay, and a default-on **Volume keys capture photo** preference. Volume Up/Down reuse the existing still-capture action only on the first key-down while the session is already PREVIEWING and no Camera modal is open; repeated key events, non-preview states, and modal surfaces fail closed. These controls add no Camera2 session, MediaStore, permission, microphone, network, account, or cloud authority and require fresh exact-head validation before they are treated as verified Development evidence.
+The stacked local-settings continuation adds three app-private controls: a persisted **Composition grid** toggle with a non-interactive rule-of-thirds overlay, a bounded **Photo self-timer** cycling Off → 3 seconds → 10 seconds, and a default-on **Volume keys capture photo** preference. Volume Up/Down reuse the existing still-capture action only on the first key-down while the session is already PREVIEWING and no Camera modal is open; repeated key events, non-preview states, and modal surfaces fail closed. These controls add no Camera2 session, MediaStore, permission, microphone, network, account, or cloud authority and require fresh exact-head validation before they are treated as verified Development evidence.
 
 Authoritative `main` commit `f6d414049f6ad4792a70da00903fead403dde58c` includes:
 
@@ -55,7 +55,7 @@ The video/audio implementation is **source/build verified**, not runtime qualifi
 
 - video/audio runtime qualification and microphone-routing evidence;
 - physical-device qualification and device-profile/quirk records;
-- broader local settings beyond the persisted composition-grid and volume-key shutter candidate;
+- broader local settings beyond the persisted composition-grid, self-timer, and volume-key shutter candidate;
 - robust interrupted/process-death photo and recording recovery;
 - zoom/focus/exposure controls and lens switching UI;
 - production Glaze UI components and acceptance;
