@@ -136,7 +136,7 @@ The Clock candidate still requires the following before broader qualification:
 
 - representative-device alarm-audio acceptance across system/default/custom alarm tones, Silent, audio focus, DND/device policy, lock-screen/full-screen presentation, snooze/dismiss, and gradual-volume behavior;
 - richer alarm editing and upcoming-alarm presentation;
-- additional widget configuration and representative-launcher acceptance; adaptive compact/regular sizing passed exact-source Android Development Foundation #281 on Draft PR #50 but remains pending representative-launcher acceptance;
+- widget personalization is partially advanced: adaptive compact/regular sizing passed exact-source Android Development Foundation #281, and the current candidate adds a global local **Show widget details** preference; per-widget configuration plus representative-launcher resize/theme/touch/accessibility/update acceptance remain planned;
 - lock-screen/system surfaces only where supported by current Android APIs;
 - full haptic-preference application across applicable controls and alerts;
 - canonical GoreeCloud Clock branding from the authoritative branding repository;
