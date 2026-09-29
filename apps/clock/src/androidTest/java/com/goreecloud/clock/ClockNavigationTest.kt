@@ -3,12 +3,14 @@ package com.goreecloud.clock
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ThemePreference
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +29,49 @@ class ClockNavigationTest {
         app.preferencesStore.completeOnboarding()
         app.preferencesStore.setHintsEnabled(true)
         app.preferencesStore.resetDismissedHints()
+        app.preferencesStore.setWorldZones(emptyList())
         composeRule.waitForIdle()
+    }
+
+    @Test
+    fun worldClockReorderPersistsAcrossActivityRecreation() {
+        val app = composeRule.activity.application as ClockApplication
+        app.preferencesStore.setWorldZones(listOf("Europe/London", "Asia/Tokyo"))
+        composeRule.activityRule.scenario.recreate()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("World").performClick()
+        composeRule.onNodeWithTag("world-clock-Europe_London").assertIsDisplayed()
+        composeRule.onNodeWithTag("world-clock-Asia_Tokyo").assertIsDisplayed()
+        composeRule.onNodeWithTag("world-clock-move-down-Europe_London").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(
+                listOf("Asia/Tokyo", "Europe/London"),
+                app.preferencesStore.state.value.worldZones,
+            )
+        }
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithContentDescription("World").performClick()
+        composeRule.onNodeWithTag("world-clock-Asia_Tokyo").assertIsDisplayed()
+        composeRule.onNodeWithTag("world-clock-Europe_London").assertIsDisplayed()
+
+        composeRule.runOnIdle {
+            assertEquals(
+                listOf("Asia/Tokyo", "Europe/London"),
+                app.preferencesStore.state.value.worldZones,
+            )
+        }
+
+        composeRule.onNodeWithTag("world-clock-remove-Asia_Tokyo").performClick()
+        composeRule.runOnIdle {
+            assertEquals(
+                listOf("Europe/London"),
+                app.preferencesStore.state.value.worldZones,
+            )
+        }
     }
 
     @Test
