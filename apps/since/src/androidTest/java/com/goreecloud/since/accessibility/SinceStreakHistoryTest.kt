@@ -1,6 +1,5 @@
 package com.goreecloud.since.accessibility
 
-import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
@@ -142,12 +141,18 @@ class SinceStreakHistoryTest {
         val historyNodes = composeRule
             .onAllNodesWithTag("open-history", useUnmergedTree = true)
             .fetchSemanticsNodes()
-        Log.i(
-            "SinceLargeFont",
-            "reset=" + resetNodes.joinToString { it.boundsInRoot.toString() } +
-                " history=" + historyNodes.joinToString { it.boundsInRoot.toString() },
-        )
-        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
+        try {
+            composeRule.onNodeWithTag("reset-streak").assertIsDisplayed()
+        } catch (error: AssertionError) {
+            throw AssertionError(
+                "Large-text action bounds: reset=" +
+                    resetNodes.joinToString { it.boundsInRoot.toString() } +
+                    " history=" +
+                    historyNodes.joinToString { it.boundsInRoot.toString() },
+                error,
+            )
+        }
+        composeRule.onNodeWithTag("reset-streak").performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
