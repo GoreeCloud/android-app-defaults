@@ -159,6 +159,9 @@ class RoomTrackerRepository(
             updatedAtEpochMs = clock.millis(),
         )?.toDomain()
 
+    override suspend fun deleteArchivedTracker(trackerId: String): Boolean =
+        dao.deleteArchivedTracker(trackerId)
+
     override suspend fun resetStreak(
         trackerId: String,
         resetEpochMs: Long,
