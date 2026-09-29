@@ -29,6 +29,7 @@ class ClockNavigationTest {
         app.preferencesStore.completeOnboarding()
         app.preferencesStore.setHintsEnabled(true)
         app.preferencesStore.resetDismissedHints()
+        app.preferencesStore.setShowWidgetDetails(true)
         app.preferencesStore.setWorldZones(emptyList())
         composeRule.waitForIdle()
     }
@@ -75,6 +76,24 @@ class ClockNavigationTest {
     }
 
     @Test
+    fun widgetDetailPreferencePersistsAcrossActivityRecreation() {
+        val app = composeRule.activity.application as ClockApplication
+
+        app.preferencesStore.setShowWidgetDetails(false)
+        composeRule.waitForIdle()
+        assertEquals(false, app.preferencesStore.state.value.showWidgetDetails)
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.waitForIdle()
+
+        val recreatedApp = composeRule.activity.application as ClockApplication
+        composeRule.runOnIdle {
+            assertEquals(false, recreatedApp.preferencesStore.state.value.showWidgetDetails)
+        }
+    }
+
+
+    @Test
     fun principalClockSurfacesAndEditorsRemainReachable() {
         composeRule.onNodeWithText("Digital").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Analog").performClick()
@@ -114,6 +133,7 @@ class ClockNavigationTest {
         composeRule.onNodeWithText("Clock settings").assertIsDisplayed()
         composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
         composeRule.onNodeWithText("Haptic feedback").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Show widget details").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Contextual hints").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Replay onboarding").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
