@@ -32,6 +32,12 @@
     <string name="theme_light">فاتحة</string>
     <string name="theme_dark">داكنة</string>
     <string name="settings_data_recovery">البيانات والاسترداد</string>
+    <string name="settings_export_data">تصدير البيانات</string>
+    <string name="settings_export_data_supporting">احفظ نسخة JSON ذات إصدار من عناوين المتتبعات والملاحظات والسجل والأهداف وحالة الأرشفة في موقع تختاره.</string>
+    <string name="settings_export">تصدير</string>
+    <string name="settings_exporting">جارٍ الحفظ…</string>
+    <string name="settings_export_success">تم حفظ التصدير. تظل الاستعادة غير متاحة حتى يتم تنفيذ التحقق من الاستيراد.</string>
+    <string name="settings_export_failed">تعذر كتابة ملف التصدير. لم تتغير بيانات Since.</string>
     <string name="settings_backup">النسخ الاحتياطي</string>
     <string name="settings_backup_supporting">احمِ بيانات Since المحلية بنسخة احتياطية تم التحقق منها.</string>
     <string name="settings_restore">الاستعادة</string>
