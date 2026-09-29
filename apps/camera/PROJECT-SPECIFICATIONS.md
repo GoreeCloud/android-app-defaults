@@ -6,7 +6,7 @@
 > Repository document version: **0.5.0**  
 > Product internal version: **0.1.0**  
 > Release lifecycle: **Concept**  
-> Repository: GoreeCloud/camera
+> Repository: `GoreeCloud/android-app-defaults` (`apps/camera/`)
 
 ## 1. Purpose and authority
 
