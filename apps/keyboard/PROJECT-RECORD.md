@@ -93,3 +93,17 @@ Legacy PR #99 copied `GoreeCloud-Keyboard-0.1.10.zip` into repository `artifacts
 
 The monorepo migration intentionally excludes generated `artifacts/` trees. Because the original authoritative Drive bytes still exist and match the legacy repository provenance exactly, the duplicate GitHub ZIP is not required for repository retirement.
 
+### Additional preserved Keyboard legacy source
+
+The following divergent legacy pull requests contain source/configuration worth retaining without treating their stale branch stacks as current implementation authority:
+
+- PR #59 — number-row/adaptive editor-action source: `docs/migrations/legacy-source/keyboard/pr-59-number-row-adaptive-editor-action.patch`. The number row exists in the cutover; the historical adaptive host editor-action policy does not and is retained for deliberate future restack.
+- PR #61 — Unicode NFC-normalized Quill matching: `docs/migrations/legacy-source/keyboard/pr-61-unicode-normalized-suggestions.patch`. Current feature authority still identifies Unicode-normalized matching as open quality work.
+- PR #56 — explicit virtual-node state descriptions: `docs/migrations/legacy-source/keyboard/pr-56-accessibility-state-semantics.patch`.
+- PR #57 — resource-backed alternate accessibility actions/copy: `docs/migrations/legacy-source/keyboard/pr-57-resource-backed-accessibility-actions.patch`.
+- PR #60 — configurable utility-toolbar model: `docs/migrations/legacy-source/keyboard/pr-60-configurable-utility-toolbar.patch`. Current Keyboard has a later real Emoji/Clipboard/Settings toolbar, so this is optional source material rather than accepted behavior.
+
+Repository hygiene from legacy PRs #58/#62 is retained directly in `apps/keyboard/SECURITY.md` and `apps/keyboard/.editorconfig`.
+
+These preserved patches are migration evidence/source reservoirs only. They do not change the current implemented/planned classification and require fresh current-monorepo integration and validation before any behavior can become authoritative.
+
