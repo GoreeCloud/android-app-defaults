@@ -2,7 +2,6 @@ package com.goreecloud.clock
 
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -79,6 +78,6 @@ class ClockUpcomingAlarmEditTest {
         composeRule.onNodeWithText("Edit alarm").assertIsDisplayed()
         composeRule.onNodeWithText("Morning review").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
-        composeRule.onNodeWithText("Edit alarm").assertDoesNotExist()
+        composeRule.onNodeWithTag("next-alarm-card").assertIsDisplayed()
     }
 }
