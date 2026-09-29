@@ -200,4 +200,10 @@
     <string name="restore_tracker">استعادة</string>
     <string name="restoring_tracker">جارٍ الاستعادة…</string>
     <string name="restore_tracker_failed">تعذرت استعادة هذا المتتبّع.</string>
+    <string name="delete_tracker">حذف</string>
+    <string name="deleting_tracker">جارٍ الحذف…</string>
+    <string name="delete_archived_tracker_title">حذف هذا المتتبّع نهائيًا؟</string>
+    <string name="delete_archived_tracker_message">سيؤدي هذا إلى إزالة المتتبّع المؤرشف وفترته الحالية وسجل إعادة الضبط والملاحظة والهدف من هذا الجهاز. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="delete_permanently">حذف نهائي</string>
+    <string name="delete_tracker_failed">تعذر حذف هذا المتتبّع. تُركت بياناته المحلية دون تغيير.</string>
 </resources>
