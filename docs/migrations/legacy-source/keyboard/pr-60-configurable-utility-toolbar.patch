@@ -1,0 +1,1737 @@
+# Preserved legacy source patch: GoreeCloud/keyboard PR #60
+# Title: Add configurable real-action utility toolbar
+# Source repository: GoreeCloud/keyboard
+# Base revision: 6dfd811b67c17373e20861bfcf78ad959d84eb14
+# Head revision: 1d0630e430e4967ff3cd772331808b9cfafbad59
+# Original PR: https://github.com/GoreeCloud/keyboard/pull/60
+# Disposition: the cutover has a later real Emoji/Clipboard/Settings toolbar, but the older configurable-toolbar model is not retained verbatim; preserve as optional source material without making it current authority.
+
+diff --git a/FEATURES.md b/FEATURES.md
+--- a/FEATURES.md
++++ b/FEATURES.md
+@@ -7,6 +7,8 @@
+ - Runtime input-method registration checks through Android `InputMethodManager`.
+ - QWERTY letter entry with shift, backspace, space, and editor-action controls.
+ - A dedicated 1–0 number row on the letters layer, enabled by default and user-controllable from the Android IME settings surface through a device-local Boolean presentation preference.
++- A configurable native utility toolbar that contains only real implemented controls: Emoji, Symbols, and Keyboard Settings. The toolbar master control and each action are independently user-configurable through device-local Boolean presentation preferences; if no actions are enabled, the toolbar collapses rather than rendering placeholders.
++- Toolbar Emoji and Symbols actions reuse the existing first-party layer-routing path; the Settings action routes through the IME service to the existing Keyboard settings activity. Toolbar controls use the existing Glaze interaction floor, press treatment, virtual accessibility-node path, resource-backed accessibility labels, and selected-state semantics for active Emoji/Symbols layers.
+ - Adaptive editor action presentation for Enter, Go, Search, Send, Next, Done, and Previous host semantics, with semantic accessibility labels and `performEditorAction()` dispatch for explicit host actions plus ordinary Enter fallback.
+ - Letters/symbols mode switching with a primary digit/common-punctuation page and a second first-party symbol page for brackets, operators, currency marks, and common typographic symbols.
+ - Direct `ABC`, `?123`, and `=\\<` navigation between implemented input layers.
+@@ -24,22 +26,22 @@
+ - Viewport-bounded long-press popup placement, shared render/hit-test geometry, pointer movement selection, cancellation, haptic feedback, and accessibility semantics.
+ - A privacy-minimized `goreecloud-keyboard-preferences/1` format containing exactly the last explicitly selected emoji category.
+ - Strict portable-preference validation/checksum integrity, category-only reader/writer seams, explicit user-controlled Android Storage Access Framework transfer, import preview before mutation, and export review/freeze before destination selection.
+-- A separate device-local keyboard presentation store for the number-row Boolean only; it does not contain typed text, composing context, suggestions, clipboard content, credentials, editor content, or usage-derived history and is intentionally outside the portable preference format.
++- A separate device-local keyboard presentation store for the number-row Boolean plus utility-toolbar visibility/action Booleans. It does not contain typed text, composing context, suggestions, clipboard content, credentials, editor content, or usage-derived history and is intentionally outside the portable preference format.
+ - GLAZE UI V1.3 / `1.3.0` Development mapping pinned to exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1` through the current stacked migration work.
+ - Frosted Neutral key surfaces, Light/Dark runtime selection, explicit Deep Dark source values, 48/56 dp interaction floors, control geometry, and deterministic state calibration inherited into the current V1.3 Development mapping.
+ - V1.3 Adaptive Resonance authority boundaries that keep typed/editor content outside color derivation and enable no environmental memory, remote color derivation, persistent sample history, semantic inference, telemetry, network lookup, or animated atmosphere.
+-- No Android network permission in the current foundation; emoji recents, emoji search, suggestions, alternates, local layout preferences, and portable preference transfer do not synchronize or emit telemetry.
+-- Unit, build, governance, and Android emulator validation paths covering registration, privacy lifecycle, Unicode deletion, suggestion authority, emoji search, portable preference boundaries, Glaze UI mapping, native interaction, the dedicated number row, adaptive action semantics, and accessibility state/action boundaries.
++- No Android network permission in the current foundation; emoji recents, emoji search, suggestions, alternates, local layout/toolbar preferences, and portable preference transfer do not synchronize or emit telemetry.
++- Unit, build, governance, and Android emulator validation paths covering registration, privacy lifecycle, Unicode deletion, suggestion authority, emoji search, portable preference boundaries, Glaze UI mapping, native interaction, the dedicated number row, configurable utility toolbar, adaptive action semantics, and accessibility state/action boundaries.
+ 
+ ## Development / acceptance work still required
+ 
+-- Complete rendered/native consumer acceptance against current GLAZE UI V1.3 across all keyboard and settings surfaces.
++- Complete rendered/native consumer acceptance against current GLAZE UI V1.3 across all keyboard and settings surfaces, including the utility-toolbar row and expanded settings content.
+ - Reduced Transparency / solid fallback, Reduced Motion, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, runtime Touch Assistance, RTL/localization, and Deep Dark runtime policy where applicable.
+ - Representative physical-device IME acceptance across supported Android/editor combinations.
+-- Complete TalkBack, Switch Access, Voice Access, Touch Assistance, and other claimed assistive-input acceptance.
++- Complete TalkBack, Switch Access, Voice Access, Touch Assistance, and other claimed assistive-input acceptance, including toolbar navigation/state behavior.
+ - Representative phone/tablet/foldable ergonomics, including one-handed/split/adaptive layouts where implemented.
+ - Representative physical-device latency, performance, power, and thermal acceptance.
+-- Human Visual Excellence review of the actual Keyboard consumer, including the five-row number-row layout and adaptive action-key states.
++- Human Visual Excellence review of the actual Keyboard consumer, including the five-row number-row layout, utility toolbar, suggestion strip, and adaptive action-key states.
+ - Broader composed-sequence coverage, complete grapheme segmentation, and additional language/locale input modes.
+ - Privacy Shield, Wardveil Security, Everkeep, Manager, Mesh, and Identity acceptance where applicable without expanding input-data authority.
+ - Complete approved backup/clean-target recovery scope beyond the current one-field portability primitive.
+@@ -49,7 +51,6 @@
+ 
+ The supplied Android-keyboard inspiration references establish the following active GoreeCloud product obligations. They remain Planned until implemented and accepted:
+ 
+-- A configurable utility toolbar with only real, governed actions.
+ - GoreeCloud Secure Paste, clipboard history, and pinned snippets with explicit Privacy Shield enforcement and user control.
+ - GIF and sticker discovery through approved content/privacy/security boundaries.
+ - Privacy-approved voice input.
+@@ -63,7 +64,7 @@ The supplied Android-keyboard inspiration references establish the following act
+ - One-handed, floating, split, tablet, foldable, and posture-aware keyboard experiences.
+ - Richer emoji, symbol, kaomoji, and specialized input discovery.
+ - GoreeCloud Quill writing assistance beyond the current local suggestion boundary.
+-- Governed Launcher, Search, and other GoreeCloud ecosystem actions through explicit platform contracts.
++- Additional governed Launcher, Search, and other GoreeCloud ecosystem actions through explicit platform contracts. New toolbar actions remain Planned until their underlying capability exists; a button alone is not implementation.
+ - Governed synchronization, backup/recovery, and portability where explicitly implemented.
+ 
+ All planned capabilities remain subject to GoreeCloud privacy, security, identity, continuity, integration, design, accessibility, and release acceptance requirements. Buttons, labels, placeholders, or decorative surfaces do not count as implementation evidence by themselves.
+
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -10,6 +10,7 @@ The current Android source includes:
+ - A first-party `KeyboardView` rendering, hit-testing, and pointer-input surface.
+ - Core QWERTY input, shift, backspace, space, and editor-action handling.
+ - A dedicated 1–0 number row on the letters layer, enabled by default and controllable through the Android IME settings surface with a device-local presentation preference.
++- A configurable native utility toolbar that exposes only implemented actions: Emoji, Symbols, and Keyboard Settings. The toolbar and each action can be enabled or hidden through device-local settings; an empty configured action set collapses rather than rendering placeholders.
+ - Adaptive editor action presentation for ordinary Enter plus Go, Search, Send, Next, Done, and Previous host semantics.
+ - First-party letters-and-symbols switching with `?123` / `ABC`, plus a second `=\\<` symbol page for brackets, operators, currency marks, and common typographic symbols.
+ - A bounded first-party emoji layer with deterministic Smileys, People, Nature, Food, Symbols, and Travel categories.
+@@ -19,28 +20,28 @@ The current Android source includes:
+ - A local GoreeCloud Quill suggestion boundary with deterministic prefix candidates, bounded typo correction, bounded transient capture, and suggestion commit authority tied to the exact candidates presented for the active editor session.
+ - Sensitive-editor and host no-suggestions privacy gating that suppresses suggestion capture, display, and acceptance and resets fail-closed at Android editor lifecycle boundaries.
+ - Privacy-by-default behavior with no Android network permission.
+-- A privacy-minimized `goreecloud-keyboard-preferences/1` portability format containing exactly the last explicitly selected emoji category, with explicit user-controlled Storage Access Framework import/export. The number-row preference remains device-local and is intentionally not added to that portable format.
++- A privacy-minimized `goreecloud-keyboard-preferences/1` portability format containing exactly the last explicitly selected emoji category, with explicit user-controlled Storage Access Framework import/export. The number-row and utility-toolbar presentation preferences remain device-local and are intentionally not added to that portable format.
+ - GLAZE UI V1.3 / `1.3.0` Development source/material mapping pinned to exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1` through the current stacked migration work.
+ - The inherited Frosted Neutral Light/Dark/Deep Dark source foundation, 48/56 dp interaction floors, deterministic pressed/focus behavior, and V1.3 Adaptive Resonance authority boundaries. Typed/editor content remains outside Adaptive Resonance color authority; environmental memory, remote color derivation, persistent sample history, semantic inference, telemetry, and animated atmosphere remain disabled.
+-- Android unit/build/governance and emulator validation infrastructure covering registration, interaction, privacy lifecycle, emoji search, Unicode deletion, alternate popup geometry/hit testing, portability, accessibility semantics, Glaze UI source boundaries, the dedicated number row, and adaptive editor-action presentation.
++- Android unit/build/governance and emulator validation infrastructure covering registration, interaction, privacy lifecycle, emoji search, Unicode deletion, alternate popup geometry/hit testing, portability, accessibility semantics, Glaze UI source boundaries, the dedicated number row, configurable utility toolbar, and adaptive editor-action presentation.
+ 
+ Current GLAZE UI V1.3 work remains Development/migration evidence only. Passing source or CI validation does not establish complete rendered consumer acceptance, physical-device acceptance, assistive-technology acceptance, Privacy Shield/Wardveil/Everkeep acceptance, Release Candidate qualification, or Stable status.
+ 
+ ## Inspiration-driven input-surface direction
+ 
+-The approved GoreeCloud Keyboard direction uses supplied Android-keyboard references as inspiration rather than as a design to copy. The target is a polished, spacious, Glaze-native input surface with a suggestion strip, optional number row, adaptive action key, direct symbols/emoji access, strong local behavior, and eventually a governed utility toolbar and adaptive layouts.
++The approved GoreeCloud Keyboard direction uses supplied Android-keyboard references as inspiration rather than as a design to copy. The target is a polished, spacious, Glaze-native input surface with a suggestion strip, optional number row, configurable real-action utility toolbar, adaptive action key, direct symbols/emoji access, strong local behavior, and eventually broader adaptive layouts.
+ 
+-The current implementation tranche adds the optional dedicated number row and adaptive action key as real behavior. Existing local suggestions, rounded Glaze key surfaces, Light/Dark system adaptation, emoji, symbols, and long-press alternates already align with that direction.
++The current Development implementation now includes the optional dedicated number row, adaptive action key, and a configurable toolbar whose current real actions are Emoji, Symbols, and Keyboard Settings. Existing local suggestions, rounded Glaze key surfaces, Light/Dark system adaptation, emoji, symbols, and long-press alternates also align with that direction.
+ 
+-Remaining approved inspiration goals are tracked as planned obligations: a configurable utility toolbar; Secure Paste/clipboard tools; GIF/sticker discovery; voice and translation; gesture typing and cursor/selection gestures; multilingual layouts and language switching; manual appearance controls; one-handed, floating, split, tablet/foldable/posture-aware layouts; richer dictionaries/correction; broader Quill assistance; and explicit governed GoreeCloud ecosystem actions. Placeholder buttons or decorative controls do not count as implementation.
++Remaining approved inspiration goals are tracked as planned obligations: Secure Paste/clipboard tools; GIF/sticker discovery; voice and translation; gesture typing and cursor/selection gestures; multilingual layouts and language switching; manual appearance controls; one-handed, floating, split, tablet/foldable/posture-aware layouts; richer dictionaries/correction; broader Quill assistance; and additional explicit governed GoreeCloud ecosystem actions. New toolbar buttons may be added only when their underlying capabilities are actually implemented and governed; placeholders or decorative controls do not count as implementation.
+ 
+ See `docs/development/keyboard-inspiration-input-surface.md` for the current Development boundary.
+ 
+ ## Product direction
+ 
+ GoreeCloud Keyboard is intended to become a beautiful, polished, feature-rich, privacy-first input platform while remaining fast, accessible, dependable, and native to supported platforms. Feature richness must remain substantive: behavior, privacy/security boundaries, accessibility, tests, lifecycle integration, and appropriate runtime acceptance are required before a capability is treated as implemented.
+ 
+-Private on-device recents are a convenience cache, not a general learned-language or usage-profile system. Any broader persistence, synchronization, backup, personalization, downloadable model, clipboard, voice, remote-content, or account-backed behavior requires separate Privacy Shield, Wardveil Security, Everkeep, Identity, Mesh, user-control, retention, and implementation acceptance as applicable.
++Private on-device recents are a convenience cache, not a general learned-language or usage-profile system. Device-local layout/toolbar choices are presentation state, not a portability or synchronization contract. Any broader persistence, synchronization, backup, personalization, downloadable model, clipboard, voice, remote-content, or account-backed behavior requires separate Privacy Shield, Wardveil Security, Everkeep, Identity, Mesh, user-control, retention, and implementation acceptance as applicable.
+ 
+ ## Documentation
+ 
+
+diff --git a/SECURITY.md b/SECURITY.md
+--- a/SECURITY.md
++++ b/SECURITY.md
+@@ -13,7 +13,8 @@ GoreeCloud Keyboard is a Development-stage Android input method. Typed content,
+ - Host editors that request no suggestions or no personalized learning are honored without weakening the stricter sensitive-editor policy.
+ - Editor-start and editor-finish callbacks reset transient composing, suggestion, shift/layer, and presentation state so one editor session cannot silently lend policy or content context to another.
+ - Current emoji recents and remembered emoji-category state are device-local. They are not network-backed or account-backed.
+-- The number-row preference is a device-local Boolean presentation choice. It is not part of the current portable preference format and grants no editor-content, clipboard, network, account, telemetry, or synchronization authority.
++- The number-row preference and utility-toolbar configuration are device-local Boolean presentation choices. They are not part of the current portable preference format and grant no editor-content, clipboard, network, account, telemetry, or synchronization authority.
++- The bounded utility toolbar exposes only implemented Emoji, Symbols, and Keyboard Settings actions. It does not create placeholder authority for Secure Paste, clipboard history, GIF/sticker, voice, translation, Launcher, Search, or other unimplemented capabilities.
+ 
+ ## Text and editor-data handling
+ 
+@@ -29,10 +30,22 @@ The following data must not be persisted, transmitted, synchronized, logged, inc
+ - clipboard contents or clipboard history;
+ - sensitive-editor contents or classifications tied to content;
+ - application/editor identifiers derived from typing sessions;
+-- telemetry identifiers or behavioral profiles.
++- telemetry identifiers or behavioral profiles;
++- utility-toolbar activation history.
+ 
+ Ordinary operational logs and CI evidence must never include raw editor contents or clipboard payloads.
+ 
++## Utility toolbar authority
++
++The configurable utility toolbar is a presentation and navigation surface, not a new data authority.
++
++- Emoji and Symbols reuse the existing first-party keyboard layer-routing path.
++- Keyboard Settings is requested through `KeyboardView.Listener` and is opened by `KeyboardService` through an explicit intent to the existing Keyboard settings activity.
++- `KeyboardView` does not gain generic activity-launch, clipboard, storage, editor-content, account, network, or platform-service authority merely because it can request the bounded Settings action.
++- Toolbar visibility/action choices are stored only in the existing private local keyboard-settings store and are excluded from `goreecloud-keyboard-preferences/1`.
++- A toolbar configuration with zero enabled actions collapses. Empty, decorative, or unimplemented controls must not be rendered as if they were capabilities.
++- Any future toolbar action must first have an implemented, governed underlying capability with the applicable Privacy Shield, Wardveil Security, Identity, Mesh, Everkeep, accessibility, and release boundaries. Adding an icon is not sufficient authority or evidence.
++
+ ## Portability and recovery
+ 
+ The current Development portability contract is intentionally narrow: `goreecloud-keyboard-preferences/1` carries only the last emoji category explicitly selected by the user.
+@@ -43,31 +56,33 @@ The portability boundary must remain privacy-minimized:
+ 2. Reject malformed, oversized, unsupported, tampered, expanded, or noncanonical input without partial mutation.
+ 3. Preserve preview-before-Apply import behavior.
+ 4. Preserve review/freeze-before-destination export behavior.
+-5. Keep typed/editor content, learned input, emoji recents/frequency history, emoji search queries, clipboard data, credentials, secrets, and other usage-derived history outside the format.
++5. Keep typed/editor content, learned input, emoji recents/frequency history, emoji search queries, clipboard data, credentials, secrets, utility-toolbar choices, number-row state, and other usage/presentation history outside the format unless a separately governed schema revision explicitly changes that boundary.
+ 6. Treat Storage Access Framework selection as explicit user authority for one operation, not background storage or synchronization authority.
+ 7. Do not represent one-field preference transfer as complete backup, restore, Everkeep integration, or clean-target recovery.
+ 
+ Any schema expansion requires separate privacy, retention, consent, recovery, compatibility, and threat review.
+ 
+ ## Accessibility and interaction security
+ 
+-Virtual accessibility nodes, long-press alternates, emoji controls, suggestion controls, and other custom-drawn interaction surfaces must reuse existing semantic input paths rather than creating second editor-data or commit authorities.
++Virtual accessibility nodes, toolbar controls, long-press alternates, emoji controls, suggestion controls, and other custom-drawn interaction surfaces must reuse existing semantic input paths rather than creating second editor-data or commit authorities.
+ 
+ Accessibility code may consume already-rendered control geometry and labels needed for interaction, but must not gain clipboard, persistence, network, surrounding-text, learned-input, or telemetry authority merely to expose accessible semantics.
+ 
++Toolbar controls use the same virtual-node provider and resource-backed accessibility labels as the rest of the custom-drawn surface. Selected Emoji/Symbols state is semantic presentation only and must not be treated as a privacy, security, protection, identity, or authorization state.
++
+ Long-press alternate geometry and pointer hit testing must fail closed when a valid rendered target cannot be established. Pointer release must not commit an invisible or unresolved alternate.
+ 
+ ## Secure Paste boundary
+ 
+ Secure Paste is planned architecture, not current enforcement. A normal Android IME cannot by itself revoke another application's operating-system clipboard authority. Any future Secure Paste implementation requires the separately approved Privacy Shield policy and privileged platform enforcement boundary described in the canonical project specification.
+ 
+-Clipboard payloads must not be uploaded, synchronized, backed up, or associated with Identity by default. Any future clipboard persistence or synchronization is a separate capability requiring explicit user control and acceptance.
++Clipboard payloads must not be uploaded, synchronized, backed up, or associated with Identity by default. Any future clipboard persistence or synchronization is a separate capability requiring explicit user control and acceptance. The current toolbar deliberately does not expose a Secure Paste control before that capability exists.
+ 
+ ## Platform-system integration
+ 
+ Keyboard is a GoreeCloud application and must substantively address Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, and GoreeCloud Identity where applicable. Current `goreecloud.platform.yaml` remains the machine-readable repository declaration.
+ 
+-A platform-system integration is not accepted merely because a manifest entry, icon, label, status card, or local defensive behavior exists. Acceptance requires the applicable runtime, authorization, privacy, security, resilience, failure-mode, accessibility, and evidence gates.
++A platform-system integration is not accepted merely because a manifest entry, icon, label, toolbar button, status card, or local defensive behavior exists. Acceptance requires the applicable runtime, authorization, privacy, security, resilience, failure-mode, accessibility, and evidence gates.
+ 
+ ## Dependency, source, and release security
+ 
+@@ -83,4 +98,4 @@ Do not post raw sensitive text-entry data, clipboard payloads, credentials, priv
+ 
+ ## Release boundary
+ 
+-Keyboard remains Development and nonconformant. Production or Stable qualification still requires current Glaze UI application acceptance, representative physical-device typing and latency validation, TalkBack/Switch Access/Voice Access/Touch Assistance and broader accessibility acceptance, RTL/localization and supported form-factor validation, accepted Privacy Shield/Wardveil/Everkeep/Identity/Mesh/Manager integration where applicable, protected signing/provenance, recovery acceptance, release verification, and explicit production approval.
++Keyboard remains Development and nonconformant. Production or Stable qualification still requires current Glaze UI application acceptance, representative physical-device typing and latency validation, Human Visual Excellence for the actual keyboard/toolbar/settings surfaces, TalkBack/Switch Access/Voice Access/Touch Assistance and broader accessibility acceptance, RTL/localization and supported form-factor validation, accepted Privacy Shield/Wardveil/Everkeep/Identity/Mesh/Manager integration where applicable, protected signing/provenance, recovery acceptance, release verification, and explicit production approval.
+
+diff --git a/SPECIFICATIONS.md b/SPECIFICATIONS.md
+--- a/SPECIFICATIONS.md
++++ b/SPECIFICATIONS.md
+@@ -14,6 +14,8 @@ GoreeCloud Keyboard must be beautiful, polished, cohesive, responsive, feature-r
+ - First-party `KeyboardView` rendering and pointer-input handling.
+ - QWERTY letters with shift, backspace, space, and adaptive editor action.
+ - A dedicated 1–0 number row above QWERTY on the letters layer. It is enabled by default and can be disabled/re-enabled from the Android IME settings surface through a device-local Boolean presentation preference.
++- A configurable utility toolbar rendered above the suggestion/navigation strip. The bounded current toolbar exposes only implemented real actions: Emoji, Symbols, and Keyboard Settings. Its master visibility and each action are controlled by device-local Boolean presentation preferences. A configuration with no enabled actions collapses the toolbar rather than rendering empty or placeholder controls.
++- Toolbar Emoji and Symbols actions reuse the existing layer-switching authority; Settings delegates through `KeyboardView.Listener` to `KeyboardService`, which opens the existing explicit `KeyboardPortablePreferencesActivity`. The view does not gain activity, editor, clipboard, storage, account, or network authority merely because the toolbar can request Settings.
+ - Adaptive action-key presentation for ordinary Enter plus Android Go, Search, Send, Next, Done, and Previous editor semantics. Explicit host actions use `InputConnection.performEditorAction()`; ordinary Enter remains the fallback when no explicit action applies or the host does not handle it.
+ - First-party letters/symbols mode switching with `?123`, `ABC`, and `=\\<` controls.
+ - Primary symbol page with digits and common punctuation plus a secondary first-party page with brackets, operators, currency marks, and common typographic symbols.
+@@ -24,12 +26,12 @@ GoreeCloud Keyboard must be beautiful, polished, cohesive, responsive, feature-r
+ - Bounded Unicode-aware backspace for common emoji modifiers, ZWJ-linked emoji, regional-indicator flags, keycaps, variation selectors, combining marks, and CRLF. Ambiguous truncated ordinary-field look-behind fails closed; sensitive editors retain one-code-point deletion without text look-behind.
+ - No Android network permission in the current application foundation.
+ - A privacy-minimized `goreecloud-keyboard-preferences/1` format containing exactly the last explicitly selected emoji category, with strict validation/checksum integrity, explicit user-controlled Storage Access Framework import/export, preview-before-write import, review/freeze-before-destination export, and no generic preference serialization.
+-- A separate device-local presentation store containing only the number-row Boolean. It is intentionally outside the portable preference format and must not contain typed text, composing context, suggestions, clipboard contents, credentials, editor content, or usage-derived history.
++- A separate device-local presentation store containing only the number-row Boolean and utility-toolbar visibility/action Booleans. It is intentionally outside the portable preference format and must not contain typed text, composing context, suggestions, clipboard contents, credentials, editor content, or usage-derived history.
+ - GLAZE UI V1.3 / `1.3.0` Development source/material mapping pinned to exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1` through the current stacked migration work.
+ - Inherited Frosted Neutral Light/Dark/Deep Dark source palettes, 4/8 dp spacing, 12 dp control-radius role, 48/56 dp interaction floors, optical geometry references, and deterministic pressed/selected/focus behavior. Runtime appearance selection remains Android Light/Dark only until separately accepted policy exists for additional modes.
+ - V1.3 Adaptive Resonance authority boundaries that keep typed/editor content outside color authority and enable no environmental memory, remote derivation, persistent sample history, semantic inference, telemetry, network lookup, or animated atmosphere.
+ - Experimental Glaze Motion evaluation remains historical/test-only and is not a production dependency or current Stable acceptance source.
+-- Android unit/build/governance and emulator validation infrastructure covers registration, native interaction, editor privacy lifecycle, emoji search, Unicode deletion, suggestion authority, portable preferences, accessibility semantics, Glaze UI mapping, alternate-popup geometry/hit testing, the dedicated number row, and adaptive action presentation.
++- Android unit/build/governance and emulator validation infrastructure covers registration, native interaction, editor privacy lifecycle, emoji search, Unicode deletion, suggestion authority, portable preferences, accessibility semantics, Glaze UI mapping, alternate-popup geometry/hit testing, the dedicated number row, configurable utility toolbar, and adaptive action presentation.
+ 
+ ## Native input behavior
+ 
+@@ -39,6 +41,20 @@ The default layer exposes an optional dedicated number row followed by QWERTY al
+ 
+ The number-row preference is a presentation choice. It does not grant additional editor observation authority and is not included in the current portable preference format.
+ 
++### Configurable utility toolbar
++
++When enabled with at least one selected action, the utility toolbar renders a separate Glaze-sized interaction row above the existing suggestion/navigation strip. The row is available across the current keyboard layers so its geometry does not disappear merely because the user switches from letters to symbols or emoji.
++
++The current bounded action set is deliberately limited to capabilities that already exist:
++
++- **Emoji** routes through the existing first-party emoji layer and closes a transient emoji-search query before returning to normal emoji navigation when necessary.
++- **Symbols** routes through the existing primary symbols layer.
++- **Keyboard Settings** requests the existing native settings activity through the IME service.
++
++Emoji and Symbols expose selected-state semantics when their corresponding layer is active. All toolbar controls use the same native virtual-accessibility-control system as the rest of the custom-drawn keyboard, with resource-backed spoken labels. No toolbar action is a placeholder for Secure Paste, GIF/sticker content, voice, translation, Launcher, Search, or another capability that has not yet been implemented under its governing authority.
++
++The toolbar's master visibility plus its three current action-visibility choices are low-sensitivity device-local presentation state. They are not included in `goreecloud-keyboard-preferences/1`, do not record toolbar use history, and do not authorize editor-content inspection, clipboard access, telemetry, account state, synchronization, or network access.
++
+ ### Editor action key
+ 
+ The right-side action key reflects host `EditorInfo.imeOptions` when Android supplies a supported explicit action. Supported semantic presentations are Go, Search, Send, Next, Done, and Previous. Fields that do not supply an applicable explicit action use ordinary Enter.
+@@ -47,7 +63,7 @@ The visual label and accessibility label are separate where useful; for example,
+ 
+ ### Primary symbols layer
+ 
+-Tap `?123` from letters to open the primary symbol page. It exposes digits and common punctuation. `ABC` returns directly to letters, while `=\\<` opens the secondary symbol page.
++Tap `?123` from letters or the utility toolbar's Symbols action to open the primary symbol page. It exposes digits and common punctuation. `ABC` returns directly to letters, while `=\\<` opens the secondary symbol page.
+ 
+ ### Secondary symbols layer
+ 
+@@ -80,59 +96,59 @@ The approved direction includes:
+ - spacious rounded keys and strong touch targets;
+ - a suggestion strip above the key field;
+ - optional dedicated number row;
++- a configurable real-action utility toolbar;
+ - adaptive action key;
+ - direct symbols, emoji, and long-press alternates;
+ - Light/Dark system-adaptive presentation;
+-- a future configurable utility toolbar for only real, governed actions;
+-- future Secure Paste/clipboard tools, GIF/sticker discovery, voice, translation, gesture typing, cursor/selection gestures, multilingual layouts, richer correction/dictionaries, manual appearance controls, one-handed/floating/split/adaptive form-factor layouts, broader Quill assistance, and governed GoreeCloud ecosystem actions.
++- future Secure Paste/clipboard tools, GIF/sticker discovery, voice, translation, gesture typing, cursor/selection gestures, multilingual layouts, richer correction/dictionaries, manual appearance controls, one-handed/floating/split/adaptive form-factor layouts, broader Quill assistance, and additional governed GoreeCloud ecosystem actions.
+ 
+-The dedicated number row and adaptive action key are implemented in the current Development tranche. Existing local suggestions, Glaze key geometry, Android Light/Dark adaptation, symbols, emoji, and long-press alternates already support the direction. The remaining items are active planned obligations and must not be represented as implemented through placeholder toolbar buttons or decorative surfaces.
++The dedicated number row, adaptive action key, and bounded configurable utility toolbar are implemented in the current Development stack. Existing local suggestions, Glaze key geometry, Android Light/Dark adaptation, symbols, emoji, and long-press alternates also support the direction. The remaining items are active planned obligations and must not be represented as implemented through placeholder toolbar buttons or decorative surfaces.
+ 
+ ## Privacy and security boundaries
+ 
+ ### Privacy Shield / Privacy Center
+ 
+ Keyboard input is highly sensitive. Current source minimizes observation, keeps ordinary suggestion work local, treats sensitive/no-active-editor contexts fail closed, and excludes typed text, composing/surrounding editor context, suggestions/learned input, emoji recents/frequency history, emoji search queries, clipboard data, key history, sensitive-editor contents, telemetry, Identity data, credentials, and cryptographic secrets from the portable preference format.
+ 
+-The number-row preference is low-sensitivity device-local presentation state. It adds no content observation and is not synchronized or exported by the current portability flow.
++The number-row and utility-toolbar preferences are low-sensitivity device-local presentation state. They add no content observation and are not synchronized or exported by the current portability flow. Toolbar activation history is not retained.
+ 
+ GLAZE UI presentation adds no observation authority. No production claim is made for future cloud-assisted input, clipboard history, voice input, translation, GIF/sticker content, synchronization, or account-backed personalization until explicit Privacy Shield policy, consent, retention, user-control, implementation, and runtime acceptance exist.
+ 
+ ### GoreeCloud Secure Paste — planned
+ 
+ GoreeCloud Keyboard is the planned primary user-facing IME surface for GoreeCloud Secure Paste. The intended architecture replaces passive cross-application clipboard reads with explicit user-mediated paste through a privileged Android/framework Secure Paste Broker governed by Privacy Shield. A normal Android IME cannot globally revoke another application's clipboard API authority and must not be represented as doing so.
+ 
+-Planned behavior includes a dedicated Paste action, per-application clipboard policy, optional expiration and Paste Once, stricter sensitive-item handling, minimized non-content evidence, Wardveil review for dangerous context-dependent payloads, and no clipboard payload backup/synchronization/Identity association by default. This capability remains Planned / Proposed until the privileged system enforcement path and applicable acceptance evidence exist.
++Planned behavior includes a dedicated Paste action, per-application clipboard policy, optional expiration and Paste Once, stricter sensitive-item handling, minimized non-content evidence, Wardveil review for dangerous context-dependent payloads, and no clipboard payload backup/synchronization/Identity association by default. This capability remains Planned / Proposed until the privileged system enforcement path and applicable acceptance evidence exist. No Secure Paste control is added to the current toolbar merely to imply implementation.
+ 
+ ### Wardveil Security / Security Center
+ 
+ The application does not treat UI state as security authority. Future downloadable dictionaries, models, themes, clipboard integrations, GIF/sticker providers, voice/input adapters, translation services, or other external content require explicit Wardveil validation appropriate to the object and execution boundary before production use.
+ 
+ ### Everkeep / Continuity Center
+ 
+-The current one-field portable preference codec plus bounded category-only local export/apply seams are Development portability primitives only. They are not complete Keyboard backup, clean-target recovery, synchronization, or Everkeep acceptance. The number-row preference, emoji recents, and other usage/presentation state are not silently included in portability or recovery scope.
++The current one-field portable preference codec plus bounded category-only local export/apply seams are Development portability primitives only. They are not complete Keyboard backup, clean-target recovery, synchronization, or Everkeep acceptance. The number-row preference, utility-toolbar preferences, emoji recents, and other usage/presentation state are not silently included in portability or recovery scope.
+ 
+ ### GoreeCloud Identity / Identity Center
+ 
+-The current native keyboard foundation does not require a GoreeCloud account to type, configure the number row, or use the local one-field transfer flow. Future account-backed personalization or synchronization must use GoreeCloud Identity for authentication/authorization and must not expose credential material to the input surface.
++The current native keyboard foundation does not require a GoreeCloud account to type, configure the number row or utility toolbar, or use the local one-field transfer flow. Future account-backed personalization or synchronization must use GoreeCloud Identity for authentication/authorization and must not expose credential material to the input surface.
+ 
+ ### GoreeCloud Mesh / Mesh Center
+ 
+-Current local typing does not depend on Mesh availability. Future cross-application/service capabilities must use governed GoreeCloud integration contracts rather than hidden coupling. Clipboard payloads, typed text, suggestion context, and other sensitive input data must not be transported over Mesh merely to establish integration or dashboard state.
++Current local typing and utility-toolbar navigation do not depend on Mesh availability. Future cross-application/service capabilities must use governed GoreeCloud integration contracts rather than hidden coupling. Clipboard payloads, typed text, suggestion context, and other sensitive input data must not be transported over Mesh merely to establish integration or dashboard state.
+ 
+ ### GoreeCloud Manager / Management Center
+ 
+-Keyboard may publish minimized operational/version/capability state to Manager when an accepted integration exists. Manager does not gain typed-text, editor-content, clipboard-payload, suggestion-history, or other sensitive input authority merely because it manages application lifecycle/configuration.
++Keyboard may publish minimized operational/version/capability state to Manager when an accepted integration exists. Manager does not gain typed-text, editor-content, clipboard-payload, suggestion-history, toolbar-use history, or other sensitive input authority merely because it manages application lifecycle/configuration.
+ 
+ ## GLAZE UI / Design Center
+ 
+ GLAZE UI V1.3 / `1.3.0` is the current Stable GoreeCloud design-system source target for this Development stack, pinned to exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1`. The repository's V1.3 migration remains Development until consumer acceptance is complete; the prior V1.2 baseline remains the rollback reference for this migration work.
+ 
+-The native `KeyboardView` consumes the inherited Frosted Neutral material foundation with Android Light/Dark runtime selection. V1.3 Adaptive Resonance does not authorize editor/typed-content color sampling. Environmental memory, remote color derivation, persistent sample history, semantic inference, telemetry, and animated atmosphere remain disabled in the Keyboard consumer.
++The native `KeyboardView` consumes the inherited Frosted Neutral material foundation with Android Light/Dark runtime selection. The configurable toolbar uses the existing key surface/stroke/state treatment and the 48 dp general interaction floor rather than introducing an unrelated visual language. V1.3 Adaptive Resonance does not authorize editor/typed-content color sampling. Environmental memory, remote color derivation, persistent sample history, semantic inference, telemetry, and animated atmosphere remain disabled in the Keyboard consumer.
+ 
+-Accessibility directives outrank cosmetic material behavior. Reduced Transparency, Reduced Motion, Increased Contrast, forced-colors/native equivalents, focus visibility, content legibility, target size, and task completion must remain valid even when blur/translucency/advanced effects are unavailable. The five-row number-row layout must preserve usable interaction geometry rather than shrinking keys solely to fit the extra row.
++Accessibility directives outrank cosmetic material behavior. Reduced Transparency, Reduced Motion, Increased Contrast, forced-colors/native equivalents, focus visibility, content legibility, target size, and task completion must remain valid even when blur/translucency/advanced effects are unavailable. The five-row number-row layout plus toolbar must preserve usable interaction geometry rather than shrinking controls solely to fit added chrome.
+ 
+-Local emoji search remains an application-local input-navigation capability and is not GoreeCloud Universal Search. Long-press alternates are transient application interaction, not Control Center. Glaze presentation semantics do not grant Universal Search, Control Center, security, privacy, identity, recovery, or other platform authority to Keyboard.
++Local emoji search remains an application-local input-navigation capability and is not GoreeCloud Universal Search. Long-press alternates and the utility toolbar are application interaction, not Control Center. The toolbar's Settings action opens the local Keyboard settings surface; it does not become a general Settings, Launcher, Search, privacy, security, identity, recovery, or management authority. Glaze presentation semantics grant none of those authorities.
+ 
+ Historical Glaze Motion evaluation remains test-only and provides no current production/conformance evidence.
+ 
+@@ -143,15 +159,15 @@ GoreeCloud Keyboard must evolve as a complete first-party input product rather t
+ - stronger local autocorrect, prediction, and user/language dictionaries;
+ - multilingual layouts and explicit language switching;
+ - gesture/swipe typing and cursor/text-selection gestures;
+-- configurable utility toolbar;
++- expansion of the configurable utility toolbar only when additional underlying actions are actually implemented and governed;
+ - richer emoji, symbol, kaomoji, GIF, sticker, and specialized input discovery through approved boundaries;
+ - GoreeCloud Secure Paste and privacy-governed clipboard history/pinned snippets;
+ - privacy-approved voice input/adapters and translation;
+ - one-handed, floating, split, tablet/foldable/posture-aware layouts;
+ - hardware-keyboard and accessibility-aware workflows where applicable;
+ - Quill-assisted writing through privacy-preserving boundaries;
+-- user-controlled manual appearance and input preferences beyond the currently implemented number-row choice;
+-- governed Launcher/Search/other GoreeCloud ecosystem actions; and
++- user-controlled manual appearance and input preferences beyond the currently implemented local presentation choices;
++- additional governed Launcher/Search/other GoreeCloud ecosystem actions; and
+ - explicitly governed portability, backup, recovery, and optional synchronization.
+ 
+ Feature richness must remain substantive. Buttons, placeholders, labels, decorative surfaces, or roadmap statements are not implementation evidence. Each capability requires functional behavior, native lifecycle integration, privacy/security boundaries, accessibility, testing, and appropriate runtime/release acceptance.
+@@ -161,12 +177,12 @@ Feature richness must remain substantive. Buttons, placeholders, labels, decorat
+ Development source or passing CI is not equivalent to production acceptance or Stable qualification. Production promotion requires evidence appropriate to the shipped platform, including:
+ 
+ - exact-revision source/build/test validation;
+-- complete GLAZE UI V1.3 consumer mapping for applicable keyboard and settings surfaces;
++- complete GLAZE UI V1.3 consumer mapping for applicable keyboard and settings surfaces, including the toolbar;
+ - Reduced Transparency, Reduced Motion, Increased Contrast, forced-colors/native equivalents, large text/reflow, RTL/localization, and Touch Assistance behavior;
+-- TalkBack, Switch Access, Voice Access, and other claimed assistive-input acceptance;
++- TalkBack, Switch Access, Voice Access, and other claimed assistive-input acceptance across keys, suggestions, emoji, alternates, toolbar, and settings;
+ - representative Android host-editor compatibility including adaptive action semantics;
+-- representative phone/tablet/foldable layout and ergonomics acceptance, including the five-row number-row configuration;
+-- representative physical-device typing, long-press/slide/release, latency, performance, power, and thermal acceptance;
++- representative phone/tablet/foldable layout and ergonomics acceptance, including the five-row number-row configuration plus toolbar;
++- representative physical-device typing, long-press/slide/release, toolbar reachability, latency, performance, power, and thermal acceptance;
+ - Human Visual Excellence review of the actual Keyboard consumer;
+ - Privacy Shield and Wardveil Security acceptance appropriate to a sensitive input surface;
+ - approved Everkeep continuity/recovery scope and clean-target recovery evidence where required;
+
+diff --git a/USER-MANUAL.md b/USER-MANUAL.md
+--- a/USER-MANUAL.md
++++ b/USER-MANUAL.md
+@@ -28,6 +28,29 @@ Open the Android settings entry for **GoreeCloud Keyboard settings** and change
+ 
+ The number-row choice is not included in the current portable preference export.
+ 
++## Configurable utility toolbar
++
++The current Development keyboard can show a dedicated utility toolbar above the suggestion/navigation strip. Unlike a placeholder toolbar, every visible current action is connected to implemented behavior:
++
++- **☺ / Emoji** opens the existing local emoji layer. If local emoji search is currently active, the toolbar Emoji action returns to normal emoji navigation rather than retaining the transient search query.
++- **?123 / Symbols** opens the existing primary symbols layer.
++- **⚙ / Keyboard settings** opens the existing GoreeCloud Keyboard settings activity.
++
++The Emoji or Symbols toolbar control exposes selected state when the corresponding layer is active. The controls are also exposed through the keyboard's native virtual accessibility-node surface with full spoken labels rather than relying on the compact visible glyph alone.
++
++### Configure toolbar visibility and actions
++
++Open **GoreeCloud Keyboard settings** and use the **Utility toolbar** section. You can:
++
++- turn the toolbar on or off;
++- show or hide the Emoji action;
++- show or hide the Symbols action; and
++- show or hide the Settings action.
++
++These choices are device-local presentation preferences. If the toolbar itself is enabled but all actions are hidden, GoreeCloud Keyboard collapses the row rather than showing empty or decorative controls. Toolbar choices are not included in the current portable preference export and do not record which toolbar actions you use.
++
++The current bounded toolbar does **not** include Secure Paste, clipboard history, GIF/sticker, voice, translation, Launcher, Search, or other controls whose underlying capability has not yet been implemented and accepted.
++
+ ## Adaptive action key
+ 
+ The right-side action key adapts to Android editor metadata when the host field requests a supported action. Depending on the field, it can represent:
+@@ -44,7 +67,7 @@ The accessibility label follows the semantic action. When Android does not provi
+ 
+ ## Type numbers and symbols
+ 
+-Tap **?123** from the letters layer to open the primary symbols page. It includes digits and common punctuation even when the dedicated letters-layer number row is disabled.
++Tap **?123** from the letters layer, or use the utility toolbar's Symbols action when enabled, to open the primary symbols page. It includes digits and common punctuation even when the dedicated letters-layer number row is disabled.
+ 
+ From the primary symbols page:
+ 
+@@ -57,7 +80,7 @@ Changing layers clears the temporary word context used for local suggestions. Sy
+ 
+ ## Emoji
+ 
+-Tap **☺** from the letters or symbols layers to open the bounded local emoji surface. The compact category strip exposes Smileys, People, Nature, Food, Travel, and Symbols with spoken accessibility labels. Emoji keys commit their complete Unicode `String` value, including supported multi-code-point sequences such as skin-tone variants, ZWJ sequences, flags, and variation-selector forms.
++Tap **☺** from the letters or symbols layers, or use the toolbar Emoji action when enabled, to open the bounded local emoji surface. The compact category strip exposes Smileys, People, Nature, Food, Travel, and Symbols with spoken accessibility labels. Emoji keys commit their complete Unicode `String` value, including supported multi-code-point sequences such as skin-tone variants, ZWJ sequences, flags, and variation-selector forms.
+ 
+ After you commit at least one emoji, a **Recent** control appears. Current recents behavior is intentionally privacy-bounded:
+ 
+@@ -81,7 +104,7 @@ The current source also exposes alternate-character actions through the native v
+ 
+ ## Local GoreeCloud Quill suggestions
+ 
+-For ordinary text fields, the suggestion strip can show local candidates derived from the current composing word and the keyboard's local Development dictionary.
++For ordinary text fields, the suggestion strip can show local candidates derived from the current composing word and the keyboard's local Development dictionary. When the utility toolbar is enabled, suggestions remain a separate row directly below it rather than being replaced by toolbar controls.
+ 
+ Tap a suggestion to replace the current composing prefix with that suggestion followed by a space.
+ 
+@@ -91,25 +114,27 @@ The current suggestion engine is intentionally bounded. It provides deterministi
+ 
+ For editor types classified as sensitive, GoreeCloud Keyboard suppresses suggestion collection, display, and acceptance and clears transient composing context at editor transitions. Backspace also avoids text look-behind in those sensitive editors.
+ 
++The utility toolbar does not relax this policy. Its current Emoji, Symbols, and Settings actions do not receive additional editor-content authority merely because the toolbar is visible in a sensitive field.
++
+ This is a Development privacy boundary, not a claim that the keyboard can independently verify every application's semantic use of a text field. Android's editor metadata remains part of the classification signal.
+ 
+ ## Portable emoji-category preference
+ 
+ The Keyboard settings surface also contains the existing explicit import/export flow for the last emoji category you deliberately selected.
+ 
+-That portable format contains only the selected emoji category. It does **not** include typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, or the number-row preference. Export and import use Android's Storage Access Framework so you explicitly choose the document source or destination; import is previewed before applying and export is reviewed/frozen before the destination is chosen.
++That portable format contains only the selected emoji category. It does **not** include typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, the number-row preference, or utility-toolbar settings. Export and import use Android's Storage Access Framework so you explicitly choose the document source or destination; import is previewed before applying and export is reviewed/frozen before the destination is chosen.
+ 
+ ## Network behavior
+ 
+-The current Android application foundation does **not** request Android network permission. Current Quill suggestions, emoji categories/recents/search, long-press alternates, and the number-row preference are local-only.
++The current Android application foundation does **not** request Android network permission. Current Quill suggestions, emoji categories/recents/search, long-press alternates, number-row behavior, and utility-toolbar settings/actions are local-only.
+ 
+ Future network-backed capabilities, if implemented, require separate user-control, Privacy Shield, security, identity, and acceptance work and must be documented before they can be treated as current behavior.
+ 
+ ## Appearance
+ 
+ The current stacked Development work targets GLAZE UI V1.3 / `1.3.0` using exact Stable integration revision `fc7cc91d2eace8da2371371c2855c24cbcb326a1`. This mapping remains Development evidence rather than complete Keyboard Stable acceptance.
+ 
+-The live keyboard currently follows Android Light/Dark night mode using the Glaze-derived material foundation. Deep Dark source values exist in the current migration stack, but the IME does not automatically select Deep Dark and this tranche does not add a manual appearance selector.
++The live keyboard currently follows Android Light/Dark night mode using the Glaze-derived material foundation. The utility toolbar reuses the current Frosted Neutral key surface, stroke, pressed-state treatment, and general interaction floor rather than introducing a separate visual system. Deep Dark source values exist in the current migration stack, but the IME does not automatically select Deep Dark and this tranche does not add a manual appearance selector.
+ 
+ V1.3 Adaptive Resonance does not authorize typed/editor-content color sampling. Current Keyboard source does not add editor-driven color extraction, environmental memory, remote derivation, persistent sample history, semantic inference, telemetry, or animated atmosphere.
+ 
+@@ -119,7 +144,6 @@ Complete rendered/accessibility GLAZE UI V1.3 acceptance, runtime Deep Dark poli
+ 
+ The approved input-surface direction includes several features that are **not current implementation claims**:
+ 
+-- configurable utility toolbar;
+ - GoreeCloud Secure Paste, clipboard history, and pinned snippets;
+ - GIF and sticker discovery;
+ - voice input;
+@@ -131,14 +155,16 @@ The approved input-surface direction includes several features that are **not cu
+ - manual Light/Dark appearance overrides and broader themes;
+ - one-handed, floating, split, tablet, foldable, and posture-aware layouts;
+ - broader Quill-assisted writing; and
+-- governed Launcher/Search/other GoreeCloud ecosystem actions.
++- additional governed Launcher/Search/other GoreeCloud ecosystem actions.
+ 
+-Placeholder buttons or decorative icons do not count as those features being implemented.
++The configurable toolbar is now implemented in bounded Development form for Emoji, Symbols, and Settings. New toolbar actions remain planned until their underlying capability is actually functional and governed. Placeholder buttons or decorative icons do not count as those features being implemented.
+ 
+ ## Current limitations
+ 
+ The Development implementation does not yet claim complete gesture typing, multilingual input, clipboard/Secure Paste tools, voice or translation, GIF/sticker content, one-handed/floating/split layouts, full tablet/foldable adaptation, complete accessibility acceptance, user dictionary synchronization, complete Unicode grapheme segmentation for every script, signed production packaging, or Stable release acceptance.
+ 
++The current toolbar itself is not a production-acceptance claim: representative device ergonomics, TalkBack/Switch Access/Voice Access, Touch Assistance, large-text/reflow, RTL/localization, tablet/foldable behavior, Human Visual Excellence, and release acceptance remain separate gates.
++
+ ## Privacy and security expectations
+ 
+ Do not interpret the absence of network permission as proof that every future keyboard feature is automatically safe. New content sources, downloadable dictionaries/models, synchronization, clipboard access, voice adapters, translation, account-backed personalization, or broader persisted usage history require their own GoreeCloud privacy, security, identity, continuity, and integration boundaries before production use.
+
+diff --git a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeMotionExperimentalKeyboardRuntimeTest.kt b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeMotionExperimentalKeyboardRuntimeTest.kt
+--- a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeMotionExperimentalKeyboardRuntimeTest.kt
++++ b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/GlazeMotionExperimentalKeyboardRuntimeTest.kt
+@@ -73,10 +73,10 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
+         val selected = mutableListOf<String>()
+         view.listener = listener(onSuggestion = { selected += it })
+ 
+-        val density = view.resources.displayMetrics.density
+-        val horizontalPadding = 6f * density
+-        val cellWidth = (view.width - horizontalPadding * 2f) / 3f
+-        dispatch(view, MotionEvent.ACTION_UP, horizontalPadding + cellWidth / 2f, 21f * density)
++        val helloBounds = view.accessibilityTargets()
++            .first { it.label == "Suggestion hello" }
++            .bounds
++        dispatch(view, MotionEvent.ACTION_UP, helloBounds.centerX(), helloBounds.centerY())
+ 
+         assertEquals("Suggestion hit-testing must remain authoritative", listOf("hello"), selected)
+         assertEquals("0.5.0", GlazeMotionExperimental.VERSION)
+@@ -97,25 +97,16 @@ class GlazeMotionExperimentalKeyboardRuntimeTest {
+             onLayerChanged = { layers += it }
+         )
+ 
+-        val density = view.resources.displayMetrics.density
+-        val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
+-        val gap = GlazeKeyboardTokens.Space1Dp * density
+-        val keyboardTop = (GlazeKeyboardTokens.SuggestionStripHeightDp + GlazeKeyboardTokens.Space2Dp) * density
+-        val rowHeight = (view.height - keyboardTop - gap * 5f) / 4f
+-        val bottomY = keyboardTop + 3f * (rowHeight + gap) + rowHeight / 2f
+-
+-        val bottomAvailable = view.width - horizontalPadding * 2f - gap * 3f
+-        val modeWidth = bottomAvailable * (1.2f / 7.9f)
+-        val moreModeX = horizontalPadding + modeWidth + gap + modeWidth / 2f
+-        dispatch(view, MotionEvent.ACTION_UP, moreModeX, bottomY)
++        val moreSymbolsBounds = view.accessibilityTargets()
++            .first { it.label == "More symbols" }
++            .bounds
++        dispatch(view, MotionEvent.ACTION_UP, moreSymbolsBounds.centerX(), moreSymbolsBounds.centerY())
+ 
+         assertEquals(listOf(KeyboardLayer.SYMBOLS_MORE), layers)
+ 
+         render(view)
+-        val topRowAvailable = view.width - horizontalPadding * 2f - gap * 9f
+-        val firstTextX = horizontalPadding + topRowAvailable / 10f / 2f
+-        val firstTextY = keyboardTop + rowHeight / 2f
+-        dispatch(view, MotionEvent.ACTION_UP, firstTextX, firstTextY)
++        val leftBracketBounds = view.accessibilityTargets().first { it.label == "[" }.bounds
++        dispatch(view, MotionEvent.ACTION_UP, leftBracketBounds.centerX(), leftBracketBounds.centerY())
+ 
+         assertEquals("Secondary symbol page must commit the rendered [ key", listOf("["), text)
+     }
+
+diff --git a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
+--- a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
++++ b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
+@@ -140,7 +140,42 @@ class KeyboardAccessibilityRuntimeTest {
+     }
+ 
+     @Test
+-    fun selectedVirtualStateTracksShiftAndEmojiCategoryPresentation() {
++    fun utilityToolbarSettingsActionIsAResourceBackedNativeVirtualControl() {
++        val view = createRenderedKeyboard()
++        view.setToolbarConfiguration(
++            KeyboardToolbarConfiguration(
++                enabled = true,
++                showEmoji = false,
++                showSymbols = false,
++                showSettings = true,
++            )
++        )
++        render(view)
++
++        val target = view.accessibilityTargets().first { it.id >= 5_000 }
++        assertEquals(
++            view.context.getString(R.string.accessibility_toolbar_settings),
++            target.label,
++        )
++        val provider = view.accessibilityNodeProvider
++        assertNotNull("Toolbar must remain available through the platform accessibility provider", provider)
++        val node = provider!!.createAccessibilityNodeInfo(target.id)
++        assertNotNull("Toolbar Settings node must be creatable", node)
++        assertEquals(target.label, node!!.contentDescription?.toString())
++        assertTrue(node.isClickable)
++
++        var settingsRequests = 0
++        view.listener = listener(onOpenSettings = { settingsRequests += 1 })
++        assertTrue(provider.performAction(target.id, AccessibilityNodeInfo.ACTION_CLICK, null))
++        assertEquals(
++            "Toolbar accessibility activation must reuse the normal Settings listener path",
++            1,
++            settingsRequests,
++        )
++    }
++
++    @Test
++    fun selectedVirtualStateTracksShiftEmojiCategoryAndToolbarPresentation() {
+         val view = createRenderedKeyboard()
+         var targets = view.accessibilityTargets()
+         var shift = targets.first { it.label == "Shift" }
+@@ -185,6 +220,16 @@ class KeyboardAccessibilityRuntimeTest {
+             view.context.getString(R.string.accessibility_state_selected),
+             selectedCategoryNode!!.stateDescription?.toString(),
+         )
++
++        val selectedToolbarEmoji = targets.first { it.id >= 5_000 && it.label == "Emoji" }
++        assertTrue("Toolbar Emoji must expose selected state on the emoji layer", selectedToolbarEmoji.selected)
++        val selectedToolbarNode = view.accessibilityNodeProvider!!
++            .createAccessibilityNodeInfo(selectedToolbarEmoji.id)
++        assertEquals(
++            "Selected toolbar state must be available without relying on visual treatment",
++            view.context.getString(R.string.accessibility_state_selected),
++            selectedToolbarNode!!.stateDescription?.toString(),
++        )
+     }
+ 
+     private fun createRenderedKeyboard(suggestions: List<String> = emptyList()): KeyboardView {
+@@ -207,6 +252,7 @@ class KeyboardAccessibilityRuntimeTest {
+     private fun listener(
+         onText: (String) -> Unit = {},
+         onSuggestion: (String) -> Unit = {},
++        onOpenSettings: () -> Unit = {},
+     ) = object : KeyboardView.Listener {
+         override fun onText(value: String) = onText(value)
+         override fun onSpace() = Unit
+@@ -215,5 +261,6 @@ class KeyboardAccessibilityRuntimeTest {
+         override fun onShift() = Unit
+         override fun onSuggestion(value: String) = onSuggestion(value)
+         override fun onLayerChanged(layer: KeyboardLayer) = Unit
++        override fun onOpenSettings() = onOpenSettings()
+     }
+ }
+
+diff --git a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt
+--- a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt
++++ b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt
+@@ -6,6 +6,7 @@ import android.view.View
+ import android.view.inputmethod.EditorInfo
+ import androidx.test.core.app.ApplicationProvider
+ import androidx.test.ext.junit.runners.AndroidJUnit4
++import org.junit.Assert.assertEquals
+ import org.junit.Assert.assertFalse
+ import org.junit.Assert.assertTrue
+ import org.junit.Test
+@@ -45,6 +46,83 @@ class KeyboardInputSurfaceRuntimeTest {
+         assertFalse(view.accessibilityTargets().any { it.label == "Done" })
+     }
+ 
++    @Test
++    fun configurableUtilityToolbarExposesOnlyEnabledRealActions() {
++        val view = createView()
++        view.setToolbarConfiguration(
++            KeyboardToolbarConfiguration(
++                enabled = true,
++                showEmoji = false,
++                showSymbols = false,
++                showSettings = true,
++            )
++        )
++        render(view)
++
++        val toolbarTargets = view.accessibilityTargets().filter { it.id >= 5_000 }
++        assertEquals(listOf("Keyboard settings"), toolbarTargets.map { it.label })
++
++        var settingsRequests = 0
++        view.listener = listener(onOpenSettings = { settingsRequests += 1 })
++        assertTrue(view.performAccessibilityTarget(toolbarTargets.single().id))
++        assertEquals("Toolbar Settings must route through the real listener action", 1, settingsRequests)
++
++        view.setToolbarConfiguration(
++            KeyboardToolbarConfiguration(
++                enabled = true,
++                showEmoji = false,
++                showSymbols = false,
++                showSettings = false,
++            )
++        )
++        render(view)
++        assertTrue(
++            "A toolbar with no enabled real actions must collapse instead of rendering placeholders",
++            view.accessibilityTargets().none { it.id >= 5_000 },
++        )
++    }
++
++    @Test
++    fun utilityToolbarLayerActionsReuseExistingLayerRouting() {
++        val view = createView()
++        val layers = mutableListOf<KeyboardLayer>()
++        view.listener = listener(onLayerChanged = { layers += it })
++        view.setToolbarConfiguration(
++            KeyboardToolbarConfiguration(
++                enabled = true,
++                showEmoji = false,
++                showSymbols = true,
++                showSettings = false,
++            )
++        )
++        render(view)
++
++        val symbols = view.accessibilityTargets().first { it.id >= 5_000 && it.label == "Symbols" }
++        assertTrue(view.performAccessibilityTarget(symbols.id))
++        assertEquals(listOf(KeyboardLayer.SYMBOLS), layers)
++
++        render(view)
++        val selectedSymbols = view.accessibilityTargets().first { it.id >= 5_000 && it.label == "Symbols" }
++        assertTrue("Toolbar Symbols must expose selected state on a symbol layer", selectedSymbols.selected)
++
++        view.setToolbarConfiguration(
++            KeyboardToolbarConfiguration(
++                enabled = true,
++                showEmoji = true,
++                showSymbols = false,
++                showSettings = false,
++            )
++        )
++        render(view)
++        val emoji = view.accessibilityTargets().first { it.id >= 5_000 && it.label == "Emoji" }
++        assertTrue(view.performAccessibilityTarget(emoji.id))
++        assertEquals(listOf(KeyboardLayer.SYMBOLS, KeyboardLayer.EMOJI), layers)
++
++        render(view)
++        val selectedEmoji = view.accessibilityTargets().first { it.id >= 5_000 && it.label == "Emoji" }
++        assertTrue("Toolbar Emoji must expose selected state on the emoji layer", selectedEmoji.selected)
++    }
++
+     @Test
+     fun numberRowPreferenceRemainsDeviceLocalAndExplicit() {
+         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+@@ -56,6 +134,37 @@ class KeyboardInputSurfaceRuntimeTest {
+         assertTrue(store.showNumberRow())
+     }
+ 
++    @Test
++    fun utilityToolbarPreferencesRemainDeviceLocalAndExplicit() {
++        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
++        val store = LocalKeyboardSettingsStore(context)
++
++        store.setShowUtilityToolbar(false)
++        store.setToolbarEmoji(false)
++        store.setToolbarSymbols(true)
++        store.setToolbarSettings(false)
++        var configuration = store.toolbarConfiguration()
++        assertFalse(configuration.enabled)
++        assertFalse(configuration.showEmoji)
++        assertTrue(configuration.showSymbols)
++        assertFalse(configuration.showSettings)
++
++        store.setShowUtilityToolbar(true)
++        store.setToolbarEmoji(true)
++        store.setToolbarSymbols(true)
++        store.setToolbarSettings(true)
++        configuration = store.toolbarConfiguration()
++        assertTrue(configuration.enabled)
++        assertEquals(
++            listOf(
++                KeyboardToolbarAction.EMOJI,
++                KeyboardToolbarAction.SYMBOLS,
++                KeyboardToolbarAction.SETTINGS,
++            ),
++            configuration.visibleActions(),
++        )
++    }
++
+     private fun createView(): KeyboardView {
+         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+         return KeyboardView(context).apply {
+@@ -78,4 +187,18 @@ class KeyboardInputSurfaceRuntimeTest {
+             ),
+         )
+     }
++
++    private fun listener(
++        onLayerChanged: (KeyboardLayer) -> Unit = {},
++        onOpenSettings: () -> Unit = {},
++    ) = object : KeyboardView.Listener {
++        override fun onText(value: String) = Unit
++        override fun onSpace() = Unit
++        override fun onBackspace() = Unit
++        override fun onEnter() = Unit
++        override fun onShift() = Unit
++        override fun onSuggestion(value: String) = Unit
++        override fun onLayerChanged(layer: KeyboardLayer) = onLayerChanged(layer)
++        override fun onOpenSettings() = onOpenSettings()
++    }
+ }
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardPortablePreferencesActivity.kt
+@@ -9,19 +9,20 @@ import android.view.ViewGroup
+ import android.widget.Button
+ import android.widget.CheckBox
+ import android.widget.LinearLayout
++import android.widget.ScrollView
+ import android.widget.TextView
+ import java.io.ByteArrayOutputStream
+ import java.io.IOException
+ 
+ /**
+  * Explicit user-controlled Keyboard settings and bounded portable-preference surface.
+  *
+- * The layout preference is device-local and low sensitivity. Portable transfer uses Android's
+- * Storage Access Framework so the user chooses every source or destination document. Export is
+- * reviewed and frozen to one typed category before a destination document is requested. Import
+- * selection validates and previews the one category before any local preference write. It requests
+- * no broad storage or network permission and does not expose typed text, emoji recents, clipboard
+- * state, search history, learned input, telemetry, Identity data, or credentials.
++ * Layout and toolbar preferences are device-local and low sensitivity. Portable transfer uses
++ * Android's Storage Access Framework so the user chooses every source or destination document.
++ * Export is reviewed and frozen to one typed category before a destination document is requested.
++ * Import selection validates and previews the one category before any local preference write. It
++ * requests no broad storage or network permission and does not expose typed text, emoji recents,
++ * clipboard state, search history, learned input, telemetry, Identity data, or credentials.
+  */
+ class KeyboardPortablePreferencesActivity : Activity() {
+     private lateinit var categoryStore: LocalEmojiCategoryStore
+@@ -45,7 +46,7 @@ class KeyboardPortablePreferencesActivity : Activity() {
+             setPadding(padding, padding, padding, padding)
+             layoutParams = ViewGroup.LayoutParams(
+                 ViewGroup.LayoutParams.MATCH_PARENT,
+-                ViewGroup.LayoutParams.MATCH_PARENT,
++                ViewGroup.LayoutParams.WRAP_CONTENT,
+             )
+         }
+ 
+@@ -68,6 +69,68 @@ class KeyboardPortablePreferencesActivity : Activity() {
+             setPadding(0, 0, 0, dp(20))
+         }, matchWidth())
+ 
++        content.addView(TextView(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_heading)
++            textSize = 18f
++        }, matchWidth())
++
++        val toolbarConfiguration = settingsStore.toolbarConfiguration()
++        val toolbarEnabled = CheckBox(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_enabled)
++            isChecked = toolbarConfiguration.enabled
++            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
++        }
++        val toolbarEmoji = CheckBox(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_emoji)
++            isChecked = toolbarConfiguration.showEmoji
++            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
++        }
++        val toolbarSymbols = CheckBox(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_symbols)
++            isChecked = toolbarConfiguration.showSymbols
++            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
++        }
++        val toolbarSettings = CheckBox(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_settings)
++            isChecked = toolbarConfiguration.showSettings
++            minHeight = dp(GlazeKeyboardTokens.GeneralInteractionFloorDp.toInt())
++        }
++
++        fun refreshToolbarActionState() {
++            val enabled = toolbarEnabled.isChecked
++            toolbarEmoji.isEnabled = enabled
++            toolbarSymbols.isEnabled = enabled
++            toolbarSettings.isEnabled = enabled
++        }
++
++        toolbarEnabled.setOnCheckedChangeListener { _, checked ->
++            settingsStore.setShowUtilityToolbar(checked)
++            refreshToolbarActionState()
++        }
++        toolbarEmoji.setOnCheckedChangeListener { _, checked ->
++            settingsStore.setToolbarEmoji(checked)
++        }
++        toolbarSymbols.setOnCheckedChangeListener { _, checked ->
++            settingsStore.setToolbarSymbols(checked)
++        }
++        toolbarSettings.setOnCheckedChangeListener { _, checked ->
++            settingsStore.setToolbarSettings(checked)
++        }
++        refreshToolbarActionState()
++
++        content.addView(toolbarEnabled, matchWidth())
++        content.addView(TextView(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_summary)
++            setPadding(0, 0, 0, dp(8))
++        }, matchWidth())
++        content.addView(toolbarEmoji, matchWidth())
++        content.addView(toolbarSymbols, matchWidth())
++        content.addView(toolbarSettings, matchWidth())
++        content.addView(TextView(this).apply {
++            text = getString(R.string.keyboard_settings_toolbar_actions_summary)
++            setPadding(0, 0, 0, dp(20))
++        }, matchWidth())
++
+         content.addView(TextView(this).apply {
+             text = getString(R.string.keyboard_settings_portability_heading)
+             textSize = 18f
+@@ -106,7 +169,10 @@ class KeyboardPortablePreferencesActivity : Activity() {
+         }
+         content.addView(statusView, matchWidth())
+ 
+-        setContentView(content)
++        setContentView(ScrollView(this).apply {
++            isFillViewport = true
++            addView(content)
++        })
+         refreshCategory()
+     }
+ 
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+@@ -1,5 +1,6 @@
+ package com.goreecloud.keyboard
+ 
++import android.content.Intent
+ import android.inputmethodservice.InputMethodService
+ import android.view.KeyEvent
+ import android.view.View
+@@ -33,6 +34,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+             view.setLayer(KeyboardLayer.LETTERS)
+             view.setShifted(shifted)
+             view.setNumberRowEnabled(settingsStore.showNumberRow())
++            view.setToolbarConfiguration(settingsStore.toolbarConfiguration())
+             view.setEditorAction(editorAction)
+             updateSuggestions()
+         }
+@@ -54,6 +56,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+         keyboardView?.setLayer(KeyboardLayer.LETTERS)
+         keyboardView?.setShifted(false)
+         keyboardView?.setNumberRowEnabled(settingsStore.showNumberRow())
++        keyboardView?.setToolbarConfiguration(settingsStore.toolbarConfiguration())
+         updateSuggestions()
+     }
+ 
+@@ -200,6 +203,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+         updateSuggestions()
+     }
+ 
++    override fun onOpenSettings() {
++        startActivity(
++            Intent(this, KeyboardPortablePreferencesActivity::class.java).apply {
++                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
++            }
++        )
++    }
++
+     private fun beginEditorSession(info: EditorInfo?) {
+         shifted = false
+         composingWord.clear()
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfiguration.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfiguration.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfiguration.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfiguration.kt
+@@ -0,0 +1,32 @@
++package com.goreecloud.keyboard
++
++/**
++ * Device-local presentation model for the bounded Keyboard utility toolbar.
++ *
++ * Every exposed action is backed by already-implemented local behavior. This model deliberately
++ * carries no editor content, clipboard data, usage history, account state, network authority, or
++ * portable/synchronized preference state.
++ */
++enum class KeyboardToolbarAction {
++    EMOJI,
++    SYMBOLS,
++    SETTINGS,
++}
++
++data class KeyboardToolbarConfiguration(
++    val enabled: Boolean = true,
++    val showEmoji: Boolean = true,
++    val showSymbols: Boolean = true,
++    val showSettings: Boolean = true,
++) {
++    fun visibleActions(): List<KeyboardToolbarAction> {
++        if (!enabled) return emptyList()
++        return buildList {
++            if (showEmoji) add(KeyboardToolbarAction.EMOJI)
++            if (showSymbols) add(KeyboardToolbarAction.SYMBOLS)
++            if (showSettings) add(KeyboardToolbarAction.SETTINGS)
++        }
++    }
++
++    fun isVisible(): Boolean = visibleActions().isNotEmpty()
++}
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt
+@@ -27,6 +27,7 @@ class KeyboardView @JvmOverloads constructor(
+         fun onShift()
+         fun onSuggestion(value: String)
+         fun onLayerChanged(layer: KeyboardLayer)
++        fun onOpenSettings() = Unit
+     }
+ 
+     var listener: Listener? = null
+@@ -49,6 +50,7 @@ class KeyboardView @JvmOverloads constructor(
+     private data class HitSuggestion(val bounds: RectF, val value: String)
+     private data class HitEmojiCategory(val bounds: RectF, val entry: EmojiStripEntry)
+     private data class HitEmojiSearchResult(val bounds: RectF, val result: EmojiSearchResult)
++    private data class HitToolbarAction(val bounds: RectF, val action: KeyboardToolbarAction)
+     private data class AlternatePopup(
+         val sourceBounds: RectF,
+         val values: List<String>,
+@@ -84,6 +86,7 @@ class KeyboardView @JvmOverloads constructor(
+     private val hitSuggestions = mutableListOf<HitSuggestion>()
+     private val hitEmojiCategories = mutableListOf<HitEmojiCategory>()
+     private val hitEmojiSearchResults = mutableListOf<HitEmojiSearchResult>()
++    private val hitToolbarActions = mutableListOf<HitToolbarAction>()
+     private val emojiRecentsStore = LocalEmojiRecentsStore(context)
+     private val emojiCategoryStore = LocalEmojiCategoryStore(context)
+     private val emojiRecents = EmojiRecents(initialValues = emojiRecentsStore.load())
+@@ -92,6 +95,7 @@ class KeyboardView @JvmOverloads constructor(
+     private var shifted = false
+     private var suggestions: List<String> = emptyList()
+     private var numberRowEnabled = true
++    private var toolbarConfiguration = KeyboardToolbarConfiguration()
+     private var editorAction: EditorActionPresentation = EditorActionPolicy.Enter
+     private var layer = KeyboardLayer.LETTERS
+     private var emojiCategory = emojiCategoryStore.load()
+@@ -144,14 +148,27 @@ class KeyboardView @JvmOverloads constructor(
+         invalidateStructure()
+     }
+ 
++    fun setToolbarConfiguration(value: KeyboardToolbarConfiguration) {
++        if (toolbarConfiguration == value) return
++        cancelAlternateInteraction()
++        toolbarConfiguration = value
++        requestLayout()
++        invalidateStructure()
++    }
++
+     fun setEditorAction(value: EditorActionPresentation) {
+         editorAction = value
+         invalidateStructure()
+     }
+ 
+     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+         val width = MeasureSpec.getSize(widthMeasureSpec)
+-        val preferredHeightDp = if (numberRowEnabled) 360f else 300f
++        val toolbarExtraDp = if (toolbarConfiguration.isVisible()) {
++            GlazeKeyboardTokens.GeneralInteractionFloorDp + GlazeKeyboardTokens.Space1Dp
++        } else {
++            0f
++        }
++        val preferredHeightDp = (if (numberRowEnabled) 360f else 300f) + toolbarExtraDp
+         val preferredHeight = (preferredHeightDp * resources.displayMetrics.density).toInt()
+         val height = resolveSize(preferredHeight, heightMeasureSpec)
+         setMeasuredDimension(width, height)
+@@ -165,17 +182,29 @@ class KeyboardView @JvmOverloads constructor(
+         hitSuggestions.clear()
+         hitEmojiCategories.clear()
+         hitEmojiSearchResults.clear()
++        hitToolbarActions.clear()
+ 
+         val rows = currentRows()
+         val density = resources.displayMetrics.density
+         val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
+         val gap = GlazeKeyboardTokens.Space1Dp * density
+-        val topArea = GlazeKeyboardTokens.SuggestionStripHeightDp * density
+-        val keyboardTop = topArea + GlazeKeyboardTokens.Space2Dp * density
++        val toolbarActions = toolbarConfiguration.visibleActions()
++        val toolbarHeight = if (toolbarActions.isEmpty()) {
++            0f
++        } else {
++            GlazeKeyboardTokens.GeneralInteractionFloorDp * density
++        }
++        val toolbarGap = if (toolbarActions.isEmpty()) 0f else gap
++        val suggestionTop = toolbarHeight + toolbarGap
++        val suggestionHeight = GlazeKeyboardTokens.SuggestionStripHeightDp * density
++        val keyboardTop = suggestionTop + suggestionHeight + GlazeKeyboardTokens.Space2Dp * density
+         val rowHeight = max(1f, (height - keyboardTop - gap * (rows.size + 1)) / rows.size)
+         val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density
+ 
+-        drawSuggestionStrip(canvas, horizontalPadding, topArea)
++        if (toolbarActions.isNotEmpty()) {
++            drawUtilityToolbar(canvas, horizontalPadding, toolbarActions, toolbarHeight)
++        }
++        drawSuggestionStrip(canvas, horizontalPadding, suggestionTop, suggestionHeight)
+ 
+         rows.forEachIndexed { rowIndex, row ->
+             val totalWeight = row.sumOf { it.weight.toDouble() }.toFloat()
+@@ -290,41 +319,100 @@ class KeyboardView @JvmOverloads constructor(
+         alternateSelectedPaint.color = palette.surfaceArgb
+     }
+ 
+-    private fun drawSuggestionStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
++    private fun drawUtilityToolbar(
++        canvas: Canvas,
++        horizontalPadding: Float,
++        actions: List<KeyboardToolbarAction>,
++        toolbarHeight: Float,
++    ) {
++        val density = resources.displayMetrics.density
++        val gap = GlazeKeyboardTokens.Space1Dp * density
++        val availableWidth = width - horizontalPadding * 2 - gap * (actions.size - 1)
++        val cellWidth = availableWidth / actions.size
++        val radius = GlazeKeyboardTokens.RadiusMediumDp * density
++
++        actions.forEachIndexed { index, action ->
++            val left = horizontalPadding + index * (cellWidth + gap)
++            val bounds = RectF(left, 0f, left + cellWidth, toolbarHeight)
++            canvas.drawRoundRect(bounds, radius, radius, keyPaint)
++            if (isToolbarActionSelected(action) || isPressedKey(bounds)) {
++                canvas.drawRoundRect(bounds, radius, radius, pressedKeyPaint)
++            }
++            canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
++            val baseline = bounds.centerY() - (suggestionPaint.descent() + suggestionPaint.ascent()) / 2
++            canvas.drawText(toolbarVisibleLabel(action), bounds.centerX(), baseline, suggestionPaint)
++            hitToolbarActions += HitToolbarAction(bounds, action)
++        }
++    }
++
++    private fun toolbarVisibleLabel(action: KeyboardToolbarAction): String = when (action) {
++        KeyboardToolbarAction.EMOJI -> "☺"
++        KeyboardToolbarAction.SYMBOLS -> "?123"
++        KeyboardToolbarAction.SETTINGS -> "⚙"
++    }
++
++    private fun toolbarAccessibilityLabel(action: KeyboardToolbarAction): String = when (action) {
++        KeyboardToolbarAction.EMOJI -> context.getString(R.string.accessibility_toolbar_emoji)
++        KeyboardToolbarAction.SYMBOLS -> context.getString(R.string.accessibility_toolbar_symbols)
++        KeyboardToolbarAction.SETTINGS -> context.getString(R.string.accessibility_toolbar_settings)
++    }
++
++    private fun isToolbarActionSelected(action: KeyboardToolbarAction): Boolean = when (action) {
++        KeyboardToolbarAction.EMOJI -> layer == KeyboardLayer.EMOJI
++        KeyboardToolbarAction.SYMBOLS -> layer == KeyboardLayer.SYMBOLS || layer == KeyboardLayer.SYMBOLS_MORE
++        KeyboardToolbarAction.SETTINGS -> false
++    }
++
++    private fun drawSuggestionStrip(
++        canvas: Canvas,
++        horizontalPadding: Float,
++        top: Float,
++        height: Float,
++    ) {
+         if (layer == KeyboardLayer.EMOJI) {
+             if (emojiSearchSession.snapshot().active) {
+-                drawEmojiSearchStrip(canvas, horizontalPadding, topArea)
++                drawEmojiSearchStrip(canvas, horizontalPadding, top, height)
+             } else {
+-                drawEmojiCategoryStrip(canvas, horizontalPadding, topArea)
++                drawEmojiCategoryStrip(canvas, horizontalPadding, top, height)
+             }
+             return
+         }
+         if (layer != KeyboardLayer.LETTERS) {
+-            val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
++            val baseline = top + height / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+             canvas.drawText("Symbols stay local", width / 2f, baseline, suggestionHintPaint)
+             return
+         }
+ 
+         if (suggestions.isEmpty()) {
+-            val baseline = topArea / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
++            val baseline = top + height / 2f - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+             canvas.drawText("Quill suggestions stay on-device", width / 2f, baseline, suggestionHintPaint)
+             return
+         }
+ 
+         val cellWidth = (width - horizontalPadding * 2) / suggestions.size
+         suggestions.forEachIndexed { index, suggestion ->
+-            val bounds = RectF(horizontalPadding + cellWidth * index, 0f, horizontalPadding + cellWidth * (index + 1), topArea)
++            val bounds = RectF(
++                horizontalPadding + cellWidth * index,
++                top,
++                horizontalPadding + cellWidth * (index + 1),
++                top + height,
++            )
+             val baseline = bounds.centerY() - (suggestionPaint.descent() + suggestionPaint.ascent()) / 2
+             canvas.drawText(suggestion, bounds.centerX(), baseline, suggestionPaint)
+             hitSuggestions += HitSuggestion(bounds, suggestion)
+         }
+     }
+ 
+-    private fun drawEmojiSearchStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
++    private fun drawEmojiSearchStrip(
++        canvas: Canvas,
++        horizontalPadding: Float,
++        top: Float,
++        height: Float,
++    ) {
+         val snapshot = emojiSearchSession.snapshot()
+         val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
+         val queryWidth = (width - horizontalPadding * 2) * 0.46f
+-        val queryBounds = RectF(horizontalPadding, 0f, horizontalPadding + queryWidth, topArea)
++        val queryBounds = RectF(horizontalPadding, top, horizontalPadding + queryWidth, top + height)
+         val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
+         canvas.drawRoundRect(queryBounds, radius, radius, keyPaint)
+         canvas.drawRoundRect(queryBounds, radius, radius, keyStrokePaint)
+@@ -337,7 +425,7 @@ class KeyboardView @JvmOverloads constructor(
+         val resultsWidth = width - horizontalPadding - resultsLeft
+         if (visibleResults.isEmpty()) {
+             val message = if (snapshot.query.isBlank()) "Type a name" else "No matches"
+-            val bounds = RectF(resultsLeft, 0f, width - horizontalPadding, topArea)
++            val bounds = RectF(resultsLeft, top, width - horizontalPadding, top + height)
+             val baseline = bounds.centerY() - (suggestionHintPaint.descent() + suggestionHintPaint.ascent()) / 2
+             canvas.drawText(message, bounds.centerX(), baseline, suggestionHintPaint)
+             return
+@@ -346,7 +434,7 @@ class KeyboardView @JvmOverloads constructor(
+         val cellWidth = (resultsWidth - gap * (visibleResults.size - 1)) / visibleResults.size
+         visibleResults.forEachIndexed { index, result ->
+             val left = resultsLeft + index * (cellWidth + gap)
+-            val bounds = RectF(left, 0f, left + cellWidth, topArea)
++            val bounds = RectF(left, top, left + cellWidth, top + height)
+             canvas.drawRoundRect(bounds, radius, radius, keyPaint)
+             canvas.drawRoundRect(bounds, radius, radius, keyStrokePaint)
+             val baseline = bounds.centerY() - (textPaint.descent() + textPaint.ascent()) / 2
+@@ -355,15 +443,20 @@ class KeyboardView @JvmOverloads constructor(
+         }
+     }
+ 
+-    private fun drawEmojiCategoryStrip(canvas: Canvas, horizontalPadding: Float, topArea: Float) {
++    private fun drawEmojiCategoryStrip(
++        canvas: Canvas,
++        horizontalPadding: Float,
++        top: Float,
++        height: Float,
++    ) {
+         val entries = EmojiStripModel.entries(hasRecents = emojiRecents.values().isNotEmpty())
+         val gap = GlazeKeyboardTokens.Space1Dp * resources.displayMetrics.density
+         val availableWidth = width - horizontalPadding * 2 - gap * (entries.size - 1)
+         val cellWidth = availableWidth / entries.size
+         val radius = GlazeKeyboardTokens.RadiusMediumDp * resources.displayMetrics.density
+         entries.forEachIndexed { index, entry ->
+             val left = horizontalPadding + index * (cellWidth + gap)
+-            val bounds = RectF(left, 0f, left + cellWidth, topArea)
++            val bounds = RectF(left, top, left + cellWidth, top + height)
+             val selected = when {
+                 entry.search -> false
+                 entry.recent -> showingEmojiRecents
+@@ -437,9 +530,10 @@ class KeyboardView @JvmOverloads constructor(
+         when (event.actionMasked) {
+             MotionEvent.ACTION_DOWN -> {
+                 cancelAlternateInteraction()
++                val toolbarHit = hitToolbarActions.lastOrNull { it.bounds.contains(event.x, event.y) }
+                 val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
+-                pressedKeyBounds = hit?.let { RectF(it.bounds) }
+-                if (hit != null && alternatesFor(hit).isNotEmpty()) {
++                pressedKeyBounds = toolbarHit?.let { RectF(it.bounds) } ?: hit?.let { RectF(it.bounds) }
++                if (toolbarHit == null && hit != null && alternatesFor(hit).isNotEmpty()) {
+                     pendingAlternateHit = hit
+                     postDelayed(showAlternatesRunnable, ViewConfiguration.getLongPressTimeout().toLong())
+                 }
+@@ -462,8 +556,9 @@ class KeyboardView @JvmOverloads constructor(
+                         pendingAlternateHit = null
+                     }
+                 }
++                val toolbarHit = hitToolbarActions.lastOrNull { it.bounds.contains(event.x, event.y) }
+                 val hit = hitKeys.lastOrNull { it.bounds.contains(event.x, event.y) }
+-                val nextBounds = hit?.let { RectF(it.bounds) }
++                val nextBounds = toolbarHit?.let { RectF(it.bounds) } ?: hit?.let { RectF(it.bounds) }
+                 if (nextBounds != pressedKeyBounds) {
+                     pressedKeyBounds = nextBounds
+                     invalidate()
+@@ -495,6 +590,10 @@ class KeyboardView @JvmOverloads constructor(
+             else -> return true
+         }
+ 
++        hitToolbarActions.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
++            return activateToolbarAction(hit)
++        }
++
+         hitEmojiSearchResults.lastOrNull { it.bounds.contains(event.x, event.y) }?.let { hit ->
+             return activateEmojiSearchResult(hit)
+         }
+@@ -555,6 +654,16 @@ class KeyboardView @JvmOverloads constructor(
+                 )
+             )
+         }
++        hitToolbarActions.forEachIndexed { index, hit ->
++            add(
++                KeyboardAccessibilityTarget(
++                    id = ACCESSIBILITY_TOOLBAR_BASE + index,
++                    bounds = RectF(hit.bounds),
++                    label = toolbarAccessibilityLabel(hit.action),
++                    selected = isToolbarActionSelected(hit.action),
++                )
++            )
++        }
+     }
+ 
+     internal fun accessibilityTarget(id: Int): KeyboardAccessibilityTarget? =
+@@ -569,8 +678,10 @@ class KeyboardView @JvmOverloads constructor(
+                 hitSuggestions.getOrNull(id - ACCESSIBILITY_SUGGESTION_BASE)?.let(::activateSuggestion) ?: false
+             id in ACCESSIBILITY_EMOJI_CATEGORY_BASE until ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE ->
+                 hitEmojiCategories.getOrNull(id - ACCESSIBILITY_EMOJI_CATEGORY_BASE)?.let(::activateEmojiCategory) ?: false
+-            id >= ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE ->
++            id in ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE until ACCESSIBILITY_TOOLBAR_BASE ->
+                 hitEmojiSearchResults.getOrNull(id - ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE)?.let(::activateEmojiSearchResult) ?: false
++            id >= ACCESSIBILITY_TOOLBAR_BASE ->
++                hitToolbarActions.getOrNull(id - ACCESSIBILITY_TOOLBAR_BASE)?.let(::activateToolbarAction) ?: false
+             else -> false
+         }
+     }
+@@ -589,6 +700,23 @@ class KeyboardView @JvmOverloads constructor(
+         Action.EMOJI_SEARCH_CLOSE -> "Close emoji search"
+     }
+ 
++    private fun activateToolbarAction(hit: HitToolbarAction): Boolean {
++        when (hit.action) {
++            KeyboardToolbarAction.EMOJI -> {
++                emojiSearchSession.close()
++                switchLayer(KeyboardLayer.EMOJI)
++            }
++            KeyboardToolbarAction.SYMBOLS -> switchLayer(KeyboardLayer.SYMBOLS)
++            KeyboardToolbarAction.SETTINGS -> {
++                listener?.onOpenSettings()
++                announceForAccessibility(toolbarAccessibilityLabel(hit.action))
++                invalidateStructure()
++            }
++        }
++        performClick()
++        return true
++    }
++
+     private fun activateEmojiSearchResult(hit: HitEmojiSearchResult): Boolean {
+         emojiRecents.record(hit.result.emoji)
+         emojiRecentsStore.save(emojiRecents.values())
+@@ -717,5 +845,6 @@ class KeyboardView @JvmOverloads constructor(
+         const val ACCESSIBILITY_SUGGESTION_BASE = 2_000
+         const val ACCESSIBILITY_EMOJI_CATEGORY_BASE = 3_000
+         const val ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE = 4_000
++        const val ACCESSIBILITY_TOOLBAR_BASE = 5_000
+     }
+ }
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/LocalKeyboardSettingsStore.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/LocalKeyboardSettingsStore.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/LocalKeyboardSettingsStore.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/LocalKeyboardSettingsStore.kt
+@@ -6,7 +6,9 @@ import android.content.Context
+  * Device-local, low-sensitivity presentation preferences for GoreeCloud Keyboard.
+  *
+  * This store must not contain typed text, composing context, suggestions, clipboard contents,
+- * credentials, editor content, or usage-derived history.
++ * credentials, editor content, or usage-derived history. Toolbar preferences select only which
++ * already-implemented local controls are visible; they are intentionally outside the portable
++ * preference format.
+  */
+ class LocalKeyboardSettingsStore(context: Context) {
+     private val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+@@ -18,9 +20,41 @@ class LocalKeyboardSettingsStore(context: Context) {
+         preferences.edit().putBoolean(KEY_SHOW_NUMBER_ROW, value).apply()
+     }
+ 
++    fun toolbarConfiguration(): KeyboardToolbarConfiguration = KeyboardToolbarConfiguration(
++        enabled = preferences.getBoolean(KEY_SHOW_UTILITY_TOOLBAR, DEFAULT_SHOW_UTILITY_TOOLBAR),
++        showEmoji = preferences.getBoolean(KEY_TOOLBAR_EMOJI, DEFAULT_TOOLBAR_EMOJI),
++        showSymbols = preferences.getBoolean(KEY_TOOLBAR_SYMBOLS, DEFAULT_TOOLBAR_SYMBOLS),
++        showSettings = preferences.getBoolean(KEY_TOOLBAR_SETTINGS, DEFAULT_TOOLBAR_SETTINGS),
++    )
++
++    fun setShowUtilityToolbar(value: Boolean) {
++        preferences.edit().putBoolean(KEY_SHOW_UTILITY_TOOLBAR, value).apply()
++    }
++
++    fun setToolbarEmoji(value: Boolean) {
++        preferences.edit().putBoolean(KEY_TOOLBAR_EMOJI, value).apply()
++    }
++
++    fun setToolbarSymbols(value: Boolean) {
++        preferences.edit().putBoolean(KEY_TOOLBAR_SYMBOLS, value).apply()
++    }
++
++    fun setToolbarSettings(value: Boolean) {
++        preferences.edit().putBoolean(KEY_TOOLBAR_SETTINGS, value).apply()
++    }
++
+     private companion object {
+         const val PREFERENCES_NAME = "goreecloud_keyboard_settings"
+         const val KEY_SHOW_NUMBER_ROW = "show_number_row"
++        const val KEY_SHOW_UTILITY_TOOLBAR = "show_utility_toolbar"
++        const val KEY_TOOLBAR_EMOJI = "toolbar_emoji"
++        const val KEY_TOOLBAR_SYMBOLS = "toolbar_symbols"
++        const val KEY_TOOLBAR_SETTINGS = "toolbar_settings"
++
+         const val DEFAULT_SHOW_NUMBER_ROW = true
++        const val DEFAULT_SHOW_UTILITY_TOOLBAR = true
++        const val DEFAULT_TOOLBAR_EMOJI = true
++        const val DEFAULT_TOOLBAR_SYMBOLS = true
++        const val DEFAULT_TOOLBAR_SETTINGS = true
+     }
+ }
+
+diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -12,19 +12,29 @@
+     <string name="accessibility_insert_alternate">Insert %1$s</string>
+     <string name="accessibility_alternates_announcement">Alternate characters: %1$s</string>
+     <string name="accessibility_inserted_alternate">Inserted alternate character %1$s</string>
++    <string name="accessibility_toolbar_emoji">Emoji</string>
++    <string name="accessibility_toolbar_symbols">Symbols</string>
++    <string name="accessibility_toolbar_settings">Keyboard settings</string>
+ 
+     <string name="keyboard_settings_title">GoreeCloud Keyboard settings</string>
+     <string name="keyboard_settings_typing_heading">Typing layout</string>
+     <string name="keyboard_settings_number_row">Show number row</string>
+     <string name="keyboard_settings_number_row_summary">Keep 1–0 visible above QWERTY. Changes apply the next time the keyboard opens.</string>
++    <string name="keyboard_settings_toolbar_heading">Utility toolbar</string>
++    <string name="keyboard_settings_toolbar_enabled">Show utility toolbar</string>
++    <string name="keyboard_settings_toolbar_summary">Show a compact row of real local actions above suggestions on the letters layer. Changes apply the next time the keyboard opens.</string>
++    <string name="keyboard_settings_toolbar_emoji">Show Emoji action</string>
++    <string name="keyboard_settings_toolbar_symbols">Show Symbols action</string>
++    <string name="keyboard_settings_toolbar_settings">Show Settings action</string>
++    <string name="keyboard_settings_toolbar_actions_summary">If all toolbar actions are hidden, the toolbar collapses instead of showing empty or placeholder controls.</string>
+     <string name="keyboard_settings_portability_heading">Portable preference</string>
+ 
+     <string name="portable_preferences_title">Portable preference</string>
+     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>
+     <string name="portable_preferences_current_category">Current category: %1$s</string>
+     <string name="portable_preferences_export">Export category preference</string>
+     <string name="portable_preferences_import">Import category preference</string>
+-    <string name="portable_preferences_privacy_note">Only this one category choice is portable. Typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, and sensitive editor content are not included.</string>
++    <string name="portable_preferences_privacy_note">Only this one category choice is portable. Typed text, emoji recents, search queries, suggestions, learned input, clipboard data, credentials, sensitive editor content, number-row state, and utility-toolbar choices are not included.</string>
+     <string name="portable_preferences_export_preview_title">Review category export</string>
+     <string name="portable_preferences_export_preview_message">This export will contain only the selected emoji category %1$s. The category is frozen now so the file cannot silently change while you choose its destination.</string>
+     <string name="portable_preferences_export_continue">Choose file</string>
+
+diff --git a/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfigurationTest.kt b/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfigurationTest.kt
+--- a/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfigurationTest.kt
++++ b/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfigurationTest.kt
+@@ -0,0 +1,56 @@
++package com.goreecloud.keyboard
++
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class KeyboardToolbarConfigurationTest {
++    @Test
++    fun defaultsExposeOnlyImplementedLocalActions() {
++        val configuration = KeyboardToolbarConfiguration()
++
++        assertTrue(configuration.enabled)
++        assertEquals(
++            listOf(
++                KeyboardToolbarAction.EMOJI,
++                KeyboardToolbarAction.SYMBOLS,
++                KeyboardToolbarAction.SETTINGS,
++            ),
++            configuration.visibleActions(),
++        )
++        assertTrue(configuration.isVisible())
++    }
++
++    @Test
++    fun disabledToolbarAndEmptyActionSetCollapseCleanly() {
++        assertTrue(
++            KeyboardToolbarConfiguration(enabled = false).visibleActions().isEmpty()
++        )
++        assertFalse(KeyboardToolbarConfiguration(enabled = false).isVisible())
++
++        val noActions = KeyboardToolbarConfiguration(
++            enabled = true,
++            showEmoji = false,
++            showSymbols = false,
++            showSettings = false,
++        )
++        assertTrue(noActions.visibleActions().isEmpty())
++        assertFalse(noActions.isVisible())
++    }
++
++    @Test
++    fun actionSelectionPreservesDeterministicToolbarOrder() {
++        val configuration = KeyboardToolbarConfiguration(
++            enabled = true,
++            showEmoji = true,
++            showSymbols = false,
++            showSettings = true,
++        )
++
++        assertEquals(
++            listOf(KeyboardToolbarAction.EMOJI, KeyboardToolbarAction.SETTINGS),
++            configuration.visibleActions(),
++        )
++    }
++}
+
+diff --git a/docs/development/keyboard-inspiration-input-surface.md b/docs/development/keyboard-inspiration-input-surface.md
+--- a/docs/development/keyboard-inspiration-input-surface.md
++++ b/docs/development/keyboard-inspiration-input-surface.md
+@@ -15,50 +15,69 @@ The target experience combines:
+ 
+ - a clean, spacious QWERTY surface with rounded Glaze UI key geometry;
+ - an optional dedicated 1–0 number row;
++- a configurable utility toolbar containing only real implemented/governed actions;
+ - a local suggestion strip above the key field;
+ - an adaptive editor action key for Enter, Go, Search, Send, Next, Done, and Previous semantics;
+ - direct symbols and emoji access with long-press alternates;
+ - Light/Dark system-adaptive presentation as the current runtime baseline;
+-- a future utility toolbar for explicitly implemented and governed tools such as Secure Paste/clipboard actions, emoji, GIF/sticker discovery, voice input, translation, settings, and approved GoreeCloud actions;
++- future toolbar expansion only after underlying capabilities such as Secure Paste/clipboard actions, GIF/sticker discovery, voice input, translation, and approved GoreeCloud actions actually exist under their governing boundaries;
+ - future compact, one-handed, floating, split, tablet, foldable, and posture-aware layouts;
+ - future gesture/swipe typing and cursor/text-selection gestures;
+ - future multilingual input, language switching, stronger local prediction/correction, dictionaries, and user-controlled personalization;
+ - privacy-first processing, with local operation by default and explicit approval/controls before any remote or sensitive-data capability; and
+ - deeper GoreeCloud integration only through approved platform contracts rather than hidden coupling.
+ 
+-## Implemented in this Development tranche
++## Implemented Development tranches
+ 
+-This tranche adds real behavior rather than placeholder controls:
++### 1. Dedicated number row
+ 
+-1. **Dedicated number row**
+-   - The native letters surface can render a separate 1–0 row above QWERTY.
+-   - It is enabled by default for the new inspiration-driven layout.
+-   - A device-local **Show number row** setting can disable or re-enable it.
+-   - The preference contains only the Boolean presentation choice and is not added to the portable preference format.
++- The native letters surface can render a separate 1–0 row above QWERTY.
++- It is enabled by default for the inspiration-driven layout.
++- A device-local **Show number row** setting can disable or re-enable it.
++- The preference contains only the Boolean presentation choice and is not added to the portable preference format.
+ 
+-2. **Adaptive editor action key**
+-   - The native action key now reflects Android `EditorInfo` action semantics.
+-   - Supported presentations are Go, Search, Send, Next, Done, Previous, and ordinary Enter.
+-   - The accessibility label follows the semantic action rather than relying on the visual glyph alone.
+-   - The service uses `InputConnection.performEditorAction()` for explicit host actions and falls back to the ordinary Enter key path when no action is applicable or the host does not handle it.
++### 2. Adaptive editor action key
+ 
+-3. **Input-surface sizing**
+-   - The preferred native keyboard height expands when the dedicated number row is enabled so the additional row does not silently shrink the designed key field into a denser layout.
+-   - Row spacing is derived from the actual row count.
++- The native action key reflects Android `EditorInfo` action semantics.
++- Supported presentations are Go, Search, Send, Next, Done, Previous, and ordinary Enter.
++- The accessibility label follows the semantic action rather than relying on the visual glyph alone.
++- The service uses `InputConnection.performEditorAction()` for explicit host actions and falls back to the ordinary Enter key path when no action is applicable or the host does not handle it.
+ 
+-4. **Settings surface**
+-   - Android IME settings now expose the number-row choice while preserving the existing bounded emoji-category import/export flow.
+-   - No network, clipboard, typed-text, learned-input, account, or telemetry authority is added.
++### 3. Input-surface sizing
++
++- The preferred native keyboard height expands when the dedicated number row is enabled so the additional row does not silently shrink the designed key field into a denser layout.
++- Row spacing is derived from the actual row count.
++
++### 4. Configurable real-action utility toolbar
++
++The next bounded Development tranche implements the previously planned toolbar as functional behavior rather than placeholder chrome.
++
++- The toolbar is a separate Glaze-sized row above the existing suggestion/navigation strip.
++- Current real actions are **Emoji**, **Symbols**, and **Keyboard Settings** only.
++- Emoji routes through the existing first-party emoji layer and exits transient emoji-search query mode when the toolbar action is explicitly used to return to normal emoji navigation.
++- Symbols routes through the existing primary symbol layer.
++- Settings routes through `KeyboardView.Listener` to `KeyboardService`, which opens the existing explicit Keyboard settings activity. The custom-drawn view does not gain generic activity-launch authority.
++- Emoji and Symbols expose selected-state semantics when their corresponding layer is active.
++- Toolbar controls are exposed through the existing native virtual accessibility-node system with resource-backed labels.
++- Toolbar controls use the existing Frosted Neutral key surface/stroke/pressed treatment and the current general interaction floor.
++- Toolbar master visibility plus per-action Emoji/Symbols/Settings choices are stored as device-local Boolean presentation preferences in the existing private keyboard-settings store.
++- If no real actions are enabled, the toolbar collapses instead of presenting an empty row or decorative controls.
++- Toolbar preferences remain outside `goreecloud-keyboard-preferences/1` and introduce no typed-text, clipboard, editor-content, learned-input, usage-history, network, account, telemetry, or synchronization authority.
++
++### 5. Settings surface
++
++- Android IME settings expose the number-row choice and the utility-toolbar master/per-action choices while preserving the existing bounded emoji-category import/export flow.
++- The settings surface is scrollable so the expanded Development configuration does not rely on a single-screen height assumption.
++- No network, clipboard, typed-text, learned-input, account, or telemetry authority is added.
+ 
+ ## Existing behavior aligned with the inspiration direction
+ 
+ The current Development stack already provides first-party rounded Glaze key surfaces, Light/Dark Android night-mode adaptation, a local Quill suggestion strip, symbols pages, bounded emoji categories/recents/offline search, local long-press alternates, haptic feedback, and native virtual accessibility controls.
+ 
+ ## Still planned — not implementation claims
+ 
+-The following approved inspiration goals remain active product obligations and are not represented as implemented by this tranche:
++The following approved inspiration goals remain active product obligations and are not represented as implemented by the current bounded toolbar tranche:
+ 
+-- configurable utility toolbar;
+ - Secure Paste/clipboard history and pinned snippets;
+ - GIF and sticker discovery;
+ - voice input;
+@@ -70,10 +89,10 @@ The following approved inspiration goals remain active product obligations and a
+ - one-handed, floating, split, tablet, foldable, and posture-aware layouts;
+ - richer local correction/prediction and dictionaries;
+ - approved Quill writing assistance beyond the current local suggestion boundary; and
+-- Launcher/Search/other GoreeCloud ecosystem actions through explicit governed integration contracts.
++- additional Launcher/Search/other GoreeCloud ecosystem actions through explicit governed integration contracts.
+ 
+-Placeholder toolbar icons or labels do not satisfy these obligations. Each capability must have functional behavior, privacy/security authority, accessibility semantics, tests, lifecycle integration, and appropriate runtime acceptance before it can move to the implemented list.
++The toolbar itself does not satisfy any future action merely by existing. Each added action must have functional behavior, privacy/security authority, accessibility semantics, tests, lifecycle integration, and appropriate runtime acceptance before it can be treated as implemented.
+ 
+ ## Acceptance boundary
+ 
+-This Development change does not establish Human Visual Excellence, representative physical-device ergonomics, TalkBack/Switch Access/Voice Access acceptance, Touch Assistance, large-text/reflow, RTL/localization, tablet/foldable acceptance, latency/performance/power acceptance, Privacy Shield/Wardveil/Everkeep acceptance, Release Candidate qualification, signing/distribution acceptance, or Stable status.
++This Development work does not establish Human Visual Excellence, representative physical-device ergonomics, TalkBack/Switch Access/Voice Access acceptance, Touch Assistance, large-text/reflow, RTL/localization, tablet/foldable acceptance, latency/performance/power acceptance, Privacy Shield/Wardveil/Everkeep acceptance, Release Candidate qualification, signing/distribution acceptance, or Stable status.
+
+diff --git a/scripts/check_keyboard_accessibility.py b/scripts/check_keyboard_accessibility.py
+--- a/scripts/check_keyboard_accessibility.py
++++ b/scripts/check_keyboard_accessibility.py
+@@ -5,6 +5,9 @@
+ VIEW = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardView.kt"
+ DELEGATE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt"
+ EDITOR_ACTION_POLICY = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/EditorActionPolicy.kt"
++TOOLBAR_CONFIGURATION = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardToolbarConfiguration.kt"
++SETTINGS_STORE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/LocalKeyboardSettingsStore.kt"
++SERVICE = ROOT / "android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt"
+ TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt"
+ INPUT_SURFACE_TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardInputSurfaceRuntimeTest.kt"
+ GRADLE = ROOT / "android/app/build.gradle.kts"
+@@ -27,6 +30,9 @@ def main() -> None:
+         VIEW,
+         DELEGATE,
+         EDITOR_ACTION_POLICY,
++        TOOLBAR_CONFIGURATION,
++        SETTINGS_STORE,
++        SERVICE,
+         TEST,
+         INPUT_SURFACE_TEST,
+         GRADLE,
+@@ -39,6 +45,9 @@ def main() -> None:
+     view_text = VIEW.read_text(encoding="utf-8")
+     delegate_text = DELEGATE.read_text(encoding="utf-8")
+     editor_action_text = EDITOR_ACTION_POLICY.read_text(encoding="utf-8")
++    toolbar_configuration_text = TOOLBAR_CONFIGURATION.read_text(encoding="utf-8")
++    settings_store_text = SETTINGS_STORE.read_text(encoding="utf-8")
++    service_text = SERVICE.read_text(encoding="utf-8")
+     test_text = TEST.read_text(encoding="utf-8")
+     input_surface_test_text = INPUT_SURFACE_TEST.read_text(encoding="utf-8")
+     gradle_text = GRADLE.read_text(encoding="utf-8")
+@@ -68,6 +77,25 @@ def main() -> None:
+         ),
+     )
+ 
++    require_all(
++        "configurable utility toolbar virtual-control integration",
++        view_text,
++        (
++            "private data class HitToolbarAction",
++            "private val hitToolbarActions = mutableListOf<HitToolbarAction>()",
++            "fun setToolbarConfiguration(value: KeyboardToolbarConfiguration)",
++            "drawUtilityToolbar(canvas, horizontalPadding, toolbarActions, toolbarHeight)",
++            "KeyboardToolbarAction.EMOJI ->",
++            "KeyboardToolbarAction.SYMBOLS ->",
++            "KeyboardToolbarAction.SETTINGS ->",
++            "listener?.onOpenSettings()",
++            "id = ACCESSIBILITY_TOOLBAR_BASE + index",
++            "id in ACCESSIBILITY_EMOJI_SEARCH_RESULT_BASE until ACCESSIBILITY_TOOLBAR_BASE",
++            "id >= ACCESSIBILITY_TOOLBAR_BASE",
++            "const val ACCESSIBILITY_TOOLBAR_BASE = 5_000",
++        ),
++    )
++
+     require_all(
+         "adaptive editor action accessibility policy",
+         editor_action_text,
+@@ -83,6 +111,48 @@ def main() -> None:
+         ),
+     )
+ 
++    require_all(
++        "utility toolbar configuration boundary",
++        toolbar_configuration_text,
++        (
++            "enum class KeyboardToolbarAction",
++            "EMOJI",
++            "SYMBOLS",
++            "SETTINGS",
++            "data class KeyboardToolbarConfiguration",
++            "fun visibleActions(): List<KeyboardToolbarAction>",
++            "fun isVisible(): Boolean = visibleActions().isNotEmpty()",
++        ),
++    )
++
++    require_all(
++        "device-local toolbar preference boundary",
++        settings_store_text,
++        (
++            "fun toolbarConfiguration(): KeyboardToolbarConfiguration",
++            "fun setShowUtilityToolbar(value: Boolean)",
++            "fun setToolbarEmoji(value: Boolean)",
++            "fun setToolbarSymbols(value: Boolean)",
++            "fun setToolbarSettings(value: Boolean)",
++            'const val KEY_SHOW_UTILITY_TOOLBAR = "show_utility_toolbar"',
++            'const val KEY_TOOLBAR_EMOJI = "toolbar_emoji"',
++            'const val KEY_TOOLBAR_SYMBOLS = "toolbar_symbols"',
++            'const val KEY_TOOLBAR_SETTINGS = "toolbar_settings"',
++        ),
++    )
++
++    require_all(
++        "IME toolbar routing boundary",
++        service_text,
++        (
++            "view.setToolbarConfiguration(settingsStore.toolbarConfiguration())",
++            "keyboardView?.setToolbarConfiguration(settingsStore.toolbarConfiguration())",
++            "override fun onOpenSettings()",
++            "Intent(this, KeyboardPortablePreferencesActivity::class.java)",
++            "Intent.FLAG_ACTIVITY_NEW_TASK",
++        ),
++    )
++
+     require_all(
+         "ExploreByTouchHelper delegate",
+         delegate_text,
+@@ -126,6 +196,9 @@ def main() -> None:
+             '<string name="accessibility_insert_alternate">',
+             '<string name="accessibility_alternates_announcement">',
+             '<string name="accessibility_inserted_alternate">',
++            '<string name="accessibility_toolbar_emoji">',
++            '<string name="accessibility_toolbar_symbols">',
++            '<string name="accessibility_toolbar_settings">',
+         ),
+     )
+ 
+@@ -150,18 +223,28 @@ def main() -> None:
+             "R.string.accessibility_state_off",
+             "R.string.accessibility_state_on",
+             "R.string.accessibility_state_selected",
++            "utilityToolbarSettingsActionIsAResourceBackedNativeVirtualControl",
++            "R.string.accessibility_toolbar_settings",
++            "onOpenSettings = { settingsRequests += 1 }",
+         ),
+     )
+ 
+     require_all(
+-        "adaptive editor action runtime evidence",
++        "input-surface runtime evidence",
+         input_surface_test_text,
+         (
+             "adaptiveEditorActionChangesTheRenderedAccessibilityContract",
+             "EditorActionPolicy.resolve(EditorInfo.IME_ACTION_DONE)",
+             'it.label == "Done"',
+             "EditorActionPolicy.resolve(EditorInfo.IME_ACTION_SEARCH)",
+             'it.label == "Search"',
++            "configurableUtilityToolbarExposesOnlyEnabledRealActions",
++            "utilityToolbarLayerActionsReuseExistingLayerRouting",
++            "utilityToolbarPreferencesRemainDeviceLocalAndExplicit",
++            "Keyboard settings",
++            "KeyboardToolbarAction.EMOJI",
++            "KeyboardToolbarAction.SYMBOLS",
++            "KeyboardToolbarAction.SETTINGS",
+         ),
+     )
+ 
+@@ -190,11 +273,12 @@ def main() -> None:
+ 
+     print(
+         "Keyboard virtual accessibility boundary passed: custom-drawn keys, semantic adaptive editor actions, "
+-        "suggestions, emoji categories, local emoji-search results, and bounded local key alternates expose "
+-        "actionable native accessibility semantics with resource-backed user-facing alternate actions and state "
+-        "descriptions, without editor, clipboard, persistence, or network authority in the accessibility delegate. "
+-        "Emoji-search query mode cannot gain alternate-commit authority. Representative translated-resource, RTL, "
+-        "TalkBack, and Switch Access physical-device acceptance remain separate."
++        "suggestions, emoji categories, local emoji-search results, configurable real-action utility-toolbar "
++        "controls, and bounded local key alternates expose actionable native accessibility semantics with "
++        "resource-backed user-facing toolbar/alternate actions and state descriptions, without editor, clipboard, "
++        "persistence, or network authority in the accessibility delegate. Emoji-search query mode cannot gain "
++        "alternate-commit authority. Representative translated-resource, RTL, TalkBack, and Switch Access "
++        "physical-device acceptance remain separate."
+     )
+ 
+ 
+
