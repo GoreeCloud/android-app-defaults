@@ -81,7 +81,7 @@ class ClockPreferencesStore(context: Context) {
     }
 
     fun setWorldZones(zones: List<String>) = update {
-        putString(KEY_WORLD_ZONES, zones.distinct().joinToString(","))
+        putString(KEY_WORLD_ZONES, WorldClockOrderPolicy.normalize(zones).joinToString(","))
     }
 
     fun setOnboardingStep(step: OnboardingStep) = update(refreshWidgets = false, synchronous = true) {
@@ -148,10 +148,11 @@ class ClockPreferencesStore(context: Context) {
             prefs.getString(KEY_CLOCK_FACE, null),
             ClockFacePreference.DIGITAL,
         )
-        val zones = prefs.getString(KEY_WORLD_ZONES, "")
-            .orEmpty()
-            .split(",")
-            .filter { it.isNotBlank() }
+        val zones = WorldClockOrderPolicy.normalize(
+            prefs.getString(KEY_WORLD_ZONES, "")
+                .orEmpty()
+                .split(",")
+        )
 
         return ClockPreferences(
             theme = theme,
