@@ -8,6 +8,29 @@ object AlarmSound {
     const val SILENT = "silent"
 }
 
+enum class AlarmRepeatPreset {
+    ONE_TIME,
+    EVERY_DAY,
+    WEEKDAYS,
+    WEEKENDS,
+}
+
+object AlarmRepeatPresetPolicy {
+    private val everyDay = DayOfWeek.entries.toSet()
+    private val weekdays = DayOfWeek.entries.filter { it.value <= DayOfWeek.FRIDAY.value }.toSet()
+    private val weekends = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+
+    fun daysFor(preset: AlarmRepeatPreset): Set<DayOfWeek> = when (preset) {
+        AlarmRepeatPreset.ONE_TIME -> emptySet()
+        AlarmRepeatPreset.EVERY_DAY -> everyDay
+        AlarmRepeatPreset.WEEKDAYS -> weekdays
+        AlarmRepeatPreset.WEEKENDS -> weekends
+    }
+
+    fun matchingPreset(days: Set<DayOfWeek>): AlarmRepeatPreset? =
+        AlarmRepeatPreset.entries.firstOrNull { days == daysFor(it) }
+}
+
 data class Alarm(
     val id: Long,
     val hour: Int,

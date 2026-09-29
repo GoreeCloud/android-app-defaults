@@ -34,10 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.clock.alarm.Alarm
+import com.goreecloud.clock.alarm.AlarmRepeatPreset
+import com.goreecloud.clock.alarm.AlarmRepeatPresetPolicy
 import com.goreecloud.clock.alarm.AlarmScheduler
 import com.goreecloud.clock.alarm.AlarmSound
 import com.goreecloud.clock.alarm.AlarmSoundCatalog
@@ -409,8 +412,41 @@ private fun AlarmEditorDialog(
                 )
                 Text("Repeat", style = MaterialTheme.typography.titleSmall)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    items(AlarmRepeatPreset.entries) { preset ->
+                        FilterChip(
+                            modifier = Modifier.testTag(
+                                "alarm-repeat-preset-" + preset.name.lowercase(),
+                            ),
+                            selected = AlarmRepeatPresetPolicy.matchingPreset(repeatDays) == preset,
+                            onClick = {
+                                onHaptic(ClockHapticEvent.TICK)
+                                repeatDays = AlarmRepeatPresetPolicy.daysFor(preset)
+                            },
+                            label = {
+                                Text(
+                                    when (preset) {
+                                        AlarmRepeatPreset.ONE_TIME -> "One time"
+                                        AlarmRepeatPreset.EVERY_DAY -> "Every day"
+                                        AlarmRepeatPreset.WEEKDAYS -> "Weekdays"
+                                        AlarmRepeatPreset.WEEKENDS -> "Weekends"
+                                    },
+                                )
+                            },
+                        )
+                    }
+                }
+                Text(
+                    "Custom days",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                LazyRow(
+                    modifier = Modifier.testTag("alarm-repeat-days"),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     items(DayOfWeek.entries) { day ->
                         FilterChip(
+                            modifier = Modifier.testTag("alarm-repeat-day-" + day.name.lowercase()),
                             selected = day in repeatDays,
                             onClick = {
                                 onHaptic(ClockHapticEvent.TICK)
