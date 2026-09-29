@@ -70,3 +70,10 @@ object WidgetSizePolicy {
         }
     }
 }
+
+object WidgetDetailsPolicy {
+    fun showSecondaryDetail(
+        presentation: WidgetPresentation,
+        preferenceEnabled: Boolean,
+    ): Boolean = presentation == WidgetPresentation.REGULAR && preferenceEnabled
+}
