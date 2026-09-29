@@ -110,6 +110,9 @@ fun SinceApp(
     val aggregates by repository
         .observeActiveTrackerAggregates()
         .collectAsStateWithLifecycle(initialValue = emptyList())
+    val archivedAggregates by repository
+        .observeArchivedTrackerAggregates()
+        .collectAsStateWithLifecycle(initialValue = emptyList())
     val scope = rememberCoroutineScope()
     val validator = remember(clock) { TrackerDraftValidator(clock) }
 
@@ -122,9 +125,13 @@ fun SinceApp(
     var detailUpdateFailed by rememberSaveable { mutableStateOf(false) }
     var goalUpdateFailed by rememberSaveable { mutableStateOf(false) }
     var resetFailed by rememberSaveable { mutableStateOf(false) }
+    var archiveFailed by rememberSaveable { mutableStateOf(false) }
+    var restoreFailedTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     var isGoalSaving by remember { mutableStateOf(false) }
     var isResetting by remember { mutableStateOf(false) }
+    var isArchiving by remember { mutableStateOf(false) }
+    var restoringTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var historyTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var topLevelDestinationName by rememberSaveable {
         mutableStateOf(TopLevelDestination.HOME.name)
@@ -262,8 +269,10 @@ fun SinceApp(
             updateFailed = detailUpdateFailed,
             goalUpdateFailed = goalUpdateFailed,
             resetFailed = resetFailed,
+            archiveFailed = archiveFailed,
             isGoalSaving = isGoalSaving,
             isResetting = isResetting,
+            isArchiving = isArchiving,
             onBack = {
                 selectedTrackerId = null
                 editingTrackerId = null
@@ -271,6 +280,7 @@ fun SinceApp(
                 detailUpdateFailed = false
                 goalUpdateFailed = false
                 resetFailed = false
+                archiveFailed = false
             },
             onEdit = {
                 validationErrors = emptyList()
@@ -279,6 +289,26 @@ fun SinceApp(
             },
             onOpenHistory = {
                 historyTrackerId = selectedAggregate.tracker.id
+            },
+            onArchive = {
+                archiveFailed = false
+                isArchiving = true
+                scope.launch {
+                    val archived = runCatching {
+                        repository.archiveTracker(selectedAggregate.tracker.id)
+                    }.getOrNull()
+                    if (archived == null) {
+                        archiveFailed = true
+                    } else {
+                        selectedTrackerId = null
+                        editingTrackerId = null
+                        historyTrackerId = null
+                        detailUpdateFailed = false
+                        goalUpdateFailed = false
+                        resetFailed = false
+                    }
+                    isArchiving = false
+                }
             },
             onResetStreak = { resetEpochMs, resetZoneId, reason, note ->
                 resetFailed = false
@@ -386,6 +416,7 @@ fun SinceApp(
                 onOpenTracker = { trackerId ->
                     detailUpdateFailed = false
                     goalUpdateFailed = false
+                    archiveFailed = false
                     selectedTrackerId = trackerId
                 },
             )
@@ -400,6 +431,22 @@ fun SinceApp(
                 innerPadding = innerPadding,
                 themePreference = themePreference,
                 onThemePreferenceChange = onThemePreferenceChange,
+                archivedTrackers = archivedAggregates,
+                restoringTrackerId = restoringTrackerId,
+                restoreFailedTrackerId = restoreFailedTrackerId,
+                onRestoreTracker = { trackerId ->
+                    restoreFailedTrackerId = null
+                    restoringTrackerId = trackerId
+                    scope.launch {
+                        val restored = runCatching {
+                            repository.restoreTracker(trackerId)
+                        }.getOrNull()
+                        if (restored == null) {
+                            restoreFailedTrackerId = trackerId
+                        }
+                        restoringTrackerId = null
+                    }
+                },
                 contextualHintsEnabled = contextualHintsEnabled,
                 onContextualHintsEnabledChange = onContextualHintsEnabledChange,
                 onResetDismissedContextualHints = onResetDismissedContextualHints,
@@ -751,11 +798,14 @@ private fun TrackerDetailsScreen(
     updateFailed: Boolean,
     goalUpdateFailed: Boolean,
     resetFailed: Boolean,
+    archiveFailed: Boolean,
     isGoalSaving: Boolean,
     isResetting: Boolean,
+    isArchiving: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onOpenHistory: () -> Unit,
+    onArchive: () -> Unit,
     onResetStreak: (Long, String, String?, String?) -> Unit,
     onDisplayFormatChange: (DisplayFormat) -> Unit,
     onUpdateGoal: (Int, DisplayFormat) -> Unit,
@@ -781,6 +831,7 @@ private fun TrackerDetailsScreen(
 
     var showGoalEditor by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
     var showResetDialog by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
+    var showArchiveDialog by rememberSaveable(aggregate.tracker.id) { mutableStateOf(false) }
     val closedPeriods = remember(aggregate.periods) {
         aggregate.periods.filter { it.endEpochMs != null }
     }
@@ -1178,10 +1229,69 @@ private fun TrackerDetailsScreen(
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
+
+            SectionCard {
+                Text(
+                    text = stringResource(R.string.archive_tracker),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = stringResource(R.string.archive_tracker_supporting),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                TextButton(
+                    modifier = Modifier.testTag("archive-tracker"),
+                    onClick = { showArchiveDialog = true },
+                    enabled = !isArchiving,
+                ) {
+                    Text(stringResource(R.string.archive))
+                }
+                if (archiveFailed) {
+                    Text(
+                        modifier = Modifier.semantics {
+                            liveRegion = LiveRegionMode.Assertive
+                        },
+                        text = stringResource(R.string.archive_failed),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
         }
 
 
         }
+    }
+
+    if (showArchiveDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isArchiving) showArchiveDialog = false
+            },
+            title = { Text(stringResource(R.string.archive_tracker_title)) },
+            text = { Text(stringResource(R.string.archive_tracker_message)) },
+            confirmButton = {
+                TextButton(
+                    modifier = Modifier.testTag("confirm-archive-tracker"),
+                    onClick = {
+                        showArchiveDialog = false
+                        onArchive()
+                    },
+                    enabled = !isArchiving,
+                ) {
+                    Text(stringResource(R.string.archive))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showArchiveDialog = false },
+                    enabled = !isArchiving,
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
     }
 
     if (showResetDialog && aggregate.tracker.kind == TrackerKind.STREAK) {
