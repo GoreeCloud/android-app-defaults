@@ -93,7 +93,7 @@ Still required before acceptance:
 The current Development candidate implements:
 
 - Home-screen clock widget using platform TextClock behavior.
-- Home-screen next-alarm information widget.
+- Home-screen next-alarm information widget with regular-size day/repeat context and exact-alarm readiness fallback.
 - Home-screen running-timer information widget using platform Chronometer countdown behavior.
 - Direct widget navigation into the relevant Clock, Alarms, or Timer surface.
 - Local widget refresh when relevant preferences, alarms, timers, package/time/time-zone lifecycle state changes.
