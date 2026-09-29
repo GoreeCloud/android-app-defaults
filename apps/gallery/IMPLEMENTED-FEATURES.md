@@ -2,7 +2,7 @@
 
 ## 2026-09-29 — bounded authorized local search
 
-Development source now routes rendered Gallery search through one bounded core contract over the already-authorized visible media snapshot. Search tokenizes case-insensitively across display name, album name, MIME type, and image/video kind, preserves snapshot order before existing presentation sorting, and caps results at 100. Photos, Videos, Favorites, opened albums, and album collection derivation all use the same contract. Search does not issue MediaStore queries, inspect media bytes, persist search history, or add network/storage authority.
+Development source now routes rendered Gallery search through one bounded core contract over the already-authorized visible media snapshot. Search tokenizes case-insensitively across display name, album name, MIME type, and image/video kind, preserves snapshot order before existing presentation sorting, and caps non-blank search results at 100 while leaving ordinary blank-query browsing untruncated. Photos, Videos, Favorites, opened albums, and album collection derivation all use the same contract. Search does not issue MediaStore queries, inspect media bytes, persist search history, or add network/storage authority.
 
 
 ### Local browsing presentation candidate
