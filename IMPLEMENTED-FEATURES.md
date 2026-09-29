@@ -1,5 +1,11 @@
 # Android App Defaults — Implemented Features
 
+## September 29, 2026 — Clock adaptive widget sizing candidate
+
+Draft PR #50 now makes the Clock, next-alarm, and running-timer home-screen widgets react to Android launcher resize options. A shared deterministic policy selects regular presentation at the existing default sizes and a compact presentation when the launcher grants a narrow or short surface. Compact mode hides secondary date/status detail and reduces primary type scale while preserving the existing tap destination and local-only data boundary.
+
+The provider metadata now advertises bounded smaller resize floors so supporting launchers can actually reach the compact layout. Focused JVM coverage verifies narrow-width, short-height, default-size, and missing-option behavior. This source remains a Development candidate until its exact head passes the Android Development Foundation workflow and representative-launcher resizing/accessibility acceptance is completed; no release or Stable claim is made.
+
 
 ## September 29, 2026 — Clock world-clock ordering persistence hardening
 
