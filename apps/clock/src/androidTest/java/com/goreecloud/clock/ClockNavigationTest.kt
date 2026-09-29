@@ -1,6 +1,8 @@
 package com.goreecloud.clock
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -121,6 +123,15 @@ class ClockNavigationTest {
         composeRule.onNodeWithContentDescription("Alarms").performClick()
         composeRule.onNodeWithText("Add alarm").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("New alarm").assertIsDisplayed()
+        composeRule.onNodeWithTag("alarm-repeat-preset-weekdays")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+        composeRule.onNodeWithTag("alarm-repeat-preset-weekdays").assertIsSelected()
+        composeRule.onNodeWithTag("alarm-repeat-day-monday").assertIsSelected()
+        composeRule.onNodeWithTag("alarm-repeat-day-friday").assertIsSelected()
+        composeRule.onNodeWithTag("alarm-repeat-day-saturday").assertIsNotSelected()
+        composeRule.onNodeWithTag("alarm-repeat-day-sunday").assertIsNotSelected()
         composeRule.onNodeWithText("Alarm sound:", substring = true)
             .performScrollTo()
             .assertIsDisplayed()
