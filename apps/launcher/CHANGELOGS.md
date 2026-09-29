@@ -2,9 +2,11 @@
 
 ## 2026-09-29 — Development continuation candidate
 
-- Added deterministic secondary-Home app-compaction planning with primary-page, unsupported-item, and capacity fail-closed guards.
-- Added focused JVM coverage and registered the new source/test paths in the migrated Launcher source manifest.
-- No Room mutation or user-facing compaction control is claimed by this slice.
+- Added deterministic secondary-Home app compaction with primary-page, unsupported-item, malformed-geometry, and capacity fail-closed guards.
+- Added a Room-authoritative service that rechecks the complete HOME snapshot through the existing compare-and-swap transaction before applying compacted placements.
+- Added an Edit Home **Compact** action only for eligible unlocked non-compact app-only secondary pages, including confirmation and explicit result feedback.
+- Added focused planner and Home-editor eligibility coverage and registered the new compaction service source in the migrated Launcher source manifest.
+- Representative-device/accessibility and broader runtime acceptance remain open; no release-state claim is made.
 
 
 ## September 29, 2026 — Home horizontal-swipe arbitration correction
