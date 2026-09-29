@@ -93,6 +93,13 @@ internal class FakeTrackerRepository(
     override suspend fun restoreTracker(trackerId: String): TrackerAggregate? =
         setArchiveState(trackerId = trackerId, isArchived = false)
 
+    override suspend fun deleteArchivedTracker(trackerId: String): Boolean {
+        val existing = aggregates.value.firstOrNull { it.tracker.id == trackerId } ?: return false
+        if (!existing.tracker.isArchived) return false
+        aggregates.value = aggregates.value.filterNot { it.tracker.id == trackerId }
+        return true
+    }
+
     private fun setArchiveState(
         trackerId: String,
         isArchived: Boolean,
