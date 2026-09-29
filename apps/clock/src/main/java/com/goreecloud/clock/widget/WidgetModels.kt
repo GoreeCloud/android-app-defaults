@@ -46,3 +46,27 @@ object TimerWidgetSelector {
         .filter { it.running }
         .minByOrNull { it.remainingAt(nowEpochMillis, elapsedRealtime) }
 }
+
+
+enum class WidgetPresentation {
+    COMPACT,
+    REGULAR,
+}
+
+object WidgetSizePolicy {
+    private const val COMPACT_WIDTH_DP = 160
+    private const val COMPACT_HEIGHT_DP = 90
+
+    fun presentation(
+        minWidthDp: Int,
+        minHeightDp: Int,
+    ): WidgetPresentation {
+        val widthIsCompact = minWidthDp > 0 && minWidthDp < COMPACT_WIDTH_DP
+        val heightIsCompact = minHeightDp > 0 && minHeightDp < COMPACT_HEIGHT_DP
+        return if (widthIsCompact || heightIsCompact) {
+            WidgetPresentation.COMPACT
+        } else {
+            WidgetPresentation.REGULAR
+        }
+    }
+}
