@@ -1,5 +1,12 @@
 # Android App Defaults — Implemented Features
 
+## September 29, 2026 — Since archived-only permanent deletion candidate
+
+The stacked Since candidate adds a deliberately narrow destructive boundary: a tracker must already be archived before the repository/DAO will delete it. Settings exposes Delete beside Restore for archived trackers, but permanent deletion requires a separate confirmation dialog and cannot be invoked for active Home trackers through the repository contract. Existing Room foreign keys cascade periods and goals only after that archived-row guard succeeds.
+
+Automated runtime coverage verifies that active deletion is rejected, archived deletion removes the aggregate plus dependent period/goal rows, and the UI does not mutate the tracker until the explicit permanent-delete confirmation is activated. This remains candidate evidence until the stacked line is integrated and revalidated.
+
+
 
 ## September 28, 2026 — Since reversible archive/restore candidate
 
