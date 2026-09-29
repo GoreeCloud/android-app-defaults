@@ -4,6 +4,8 @@
     android:initialLayout="@layout/widget_alarm"
     android:minWidth="180dp"
     android:minHeight="110dp"
+    android:minResizeWidth="120dp"
+    android:minResizeHeight="72dp"
     android:previewLayout="@layout/widget_alarm"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
