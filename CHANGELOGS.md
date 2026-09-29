@@ -1,6 +1,16 @@
 # Android App Defaults — Changelogs
 
 
+## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
+
+- Added deterministic repeat-schedule context to the existing **Next alarm** card.
+- One-time alarms show **One time**; full-week schedules show **Every day**; standard Monday–Friday and Saturday–Sunday sets show **Weekdays** and **Weekends**; other schedules use a stable weekday-ordered abbreviated list.
+- Reused the existing local alarm model only. No scheduler, trigger calculation, alarm storage, permission, background execution, account/network path, or telemetry authority changed.
+- Added focused JVM regression coverage for all grouping cases and custom-order determinism.
+- Fresh exact-head Android Development Foundation validation remains required. Representative-device localization/accessibility, clock/time-zone/DST behavior, and real alarm-delivery acceptance remain separate gates.
+
+
+
 ## 2026-09-29 — Clock widget detail personalization candidate
 
 - Added local Settings toggles for Clock-widget date, Next-alarm secondary detail, and Timer status.

@@ -1,9 +1,34 @@
 package com.goreecloud.clock.alarm
 
+import java.time.DayOfWeek
 import java.time.Duration
 import java.time.ZonedDateTime
 
 object UpcomingAlarmPresentationPolicy {
+    private val weekdays = setOf(
+        DayOfWeek.MONDAY,
+        DayOfWeek.TUESDAY,
+        DayOfWeek.WEDNESDAY,
+        DayOfWeek.THURSDAY,
+        DayOfWeek.FRIDAY,
+    )
+    private val weekends = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+
+    fun repeatSummary(repeatDays: Set<DayOfWeek>): String = when {
+        repeatDays.isEmpty() -> "One time"
+        repeatDays.size == DayOfWeek.entries.size -> "Every day"
+        repeatDays == weekdays -> "Weekdays"
+        repeatDays == weekends -> "Weekends"
+        else -> repeatDays
+            .sortedBy { it.value }
+            .joinToString(" • ") { day ->
+                day.name
+                    .take(3)
+                    .lowercase()
+                    .replaceFirstChar(Char::uppercase)
+            }
+    }
+
     fun relativeSummary(
         now: ZonedDateTime,
         trigger: ZonedDateTime,

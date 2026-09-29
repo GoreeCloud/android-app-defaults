@@ -42,6 +42,7 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Alarm notification and full-screen alert integration when Android permissions allow it.
 - Selectable alarm sounds from Android alarm tones, including System default and Silent.
 - Optional gradual alarm volume over 15, 30, or 60 seconds.
+- The local **Next alarm** presentation includes the selected trigger time, relative time-to-trigger, label, and deterministic one-time/repeat schedule context.
 - Future work: richer dismiss/snooze interaction and representative-device audio acceptance.
 
 ### Timers

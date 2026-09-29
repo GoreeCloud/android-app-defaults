@@ -1,6 +1,14 @@
 # Android App Defaults — Implemented Features
 
 
+## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
+
+A stacked Clock Development candidate enriches the existing **Next alarm** card with deterministic repeat-schedule context derived only from the selected alarm's local `repeatDays` value. The presentation distinguishes **One time**, **Every day**, **Weekdays**, **Weekends**, and sorted custom day sets such as **Mon • Wed • Fri**.
+
+The summary is presentation-only and does not create a second scheduling path, change the computed trigger, alter alarm persistence, request permissions, add background execution, or widen network/account authority. Focused JVM coverage locks the grouping and ordering rules. Fresh exact-head Android Development Foundation validation is required before this candidate is treated as verified; representative-device accessibility, localization, time-zone/DST, and real alarm-delivery acceptance remain open.
+
+
+
 ## September 29, 2026 — Clock widget detail personalization candidate
 
 A stacked Clock Development candidate adds three app-private Settings controls for secondary home-screen widget detail: the Clock widget date, Next alarm day/readiness detail, and Timer running/readiness status. Existing users keep the current presentation by default. Preference changes reuse the existing local widget refresh path, while compact launcher sizes continue to suppress secondary detail regardless of preference so primary time/countdown content remains prioritized.
