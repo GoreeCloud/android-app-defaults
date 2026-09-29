@@ -52,19 +52,14 @@ class AlarmWidgetProvider : AppWidgetProvider() {
             val now = ZonedDateTime.now()
             val next = NextAlarmSelector.select(app.alarmStore.alarms.value, now)
             val widgetOptions = options ?: manager.getAppWidgetOptions(appWidgetId)
-            val presentation = WidgetSizePolicy.presentation(
+            val compact = WidgetSizePolicy.presentation(
                 minWidthDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
                 minHeightDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT),
-            )
-            val compact = presentation == WidgetPresentation.COMPACT
-            val showSecondaryDetail = WidgetDetailsPolicy.showSecondaryDetail(
-                presentation = presentation,
-                preferenceEnabled = preferences.showWidgetDetails,
-            )
+            ) == WidgetPresentation.COMPACT
             val views = RemoteViews(context.packageName, R.layout.widget_alarm).apply {
                 setViewVisibility(
                     R.id.widget_alarm_detail,
-                    if (showSecondaryDetail) View.VISIBLE else View.GONE,
+                    if (compact) View.GONE else View.VISIBLE,
                 )
                 setTextViewTextSize(
                     R.id.widget_alarm_time,
