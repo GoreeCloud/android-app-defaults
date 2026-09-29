@@ -25,7 +25,9 @@ object AuthorizedMediaSearch {
             .split(Regex("\\s+"))
             .filter { it.isNotBlank() }
 
-        if (tokens.isEmpty()) return items.take(boundedLimit)
+        // A blank query is ordinary browsing, not a search result set. Preserve the complete
+        // already-authorized snapshot so opening/closing Search never truncates the library.
+        if (tokens.isEmpty()) return items
 
         return items.asSequence()
             .filter { item ->
