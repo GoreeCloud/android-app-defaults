@@ -4,7 +4,7 @@ A privacy-focused monorepo of lightweight replacements for common Android defaul
 
 ## Mandatory app repository consolidation
 
-Camera, Launcher, Keyboard, and Gallery are maintained in this monorepo under `apps/camera/`, `apps/launcher/`, `apps/keyboard/`, and `apps/gallery/`. The mandatory cutover merged through PR #62 as `20ca33c7c0c565f361deda206c9c950154dec327`. Their standalone repositories are historical Git provenance only; new product development belongs here. The imported revisions remain Development snapshots and the repository move does not imply release or Stable acceptance. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
+Camera, Launcher, Keyboard, and Gallery are maintained in this monorepo under `apps/camera/`, `apps/launcher/`, `apps/keyboard/`, and `apps/gallery/`. The mandatory cutover merged through PR #62 as `20ca33c7c0c565f361deda206c9c950154dec327`. Their standalone repositories are temporary legacy provenance pending reconciliation and required repository deletion; new product development belongs here. The imported revisions remain Development snapshots and the repository move does not imply release or Stable acceptance. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
 
 ## Current Development state
 
