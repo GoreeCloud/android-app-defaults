@@ -269,6 +269,9 @@ internal fun SettingsScreen(
     deleteFailedTrackerId: String?,
     onRestoreTracker: (String) -> Unit,
     onDeleteArchivedTracker: (String) -> Unit,
+    isExportingData: Boolean,
+    exportStatus: SinceExportStatus?,
+    onExportData: () -> Unit,
     contextualHintsEnabled: Boolean,
     onContextualHintsEnabledChange: (Boolean) -> Unit,
     onResetDismissedContextualHints: () -> Unit,
@@ -349,6 +352,35 @@ internal fun SettingsScreen(
 
         item {
             SettingsSection(title = stringResourceCompat(R.string.settings_data_recovery)) {
+                SettingsActionRow(
+                    title = stringResourceCompat(R.string.settings_export_data),
+                    supporting = stringResourceCompat(R.string.settings_export_data_supporting),
+                    status = stringResourceCompat(
+                        if (isExportingData) R.string.settings_exporting else R.string.settings_export,
+                    ),
+                    testTag = "settings-export-data",
+                    enabled = !isExportingData,
+                    onClick = onExportData,
+                )
+                exportStatus?.let { status ->
+                    Text(
+                        modifier = Modifier
+                            .testTag("settings-export-status")
+                            .semantics { liveRegion = LiveRegionMode.Polite },
+                        text = stringResourceCompat(
+                            when (status) {
+                                SinceExportStatus.SUCCESS -> R.string.settings_export_success
+                                SinceExportStatus.FAILURE -> R.string.settings_export_failed
+                            },
+                        ),
+                        color = if (status == SinceExportStatus.FAILURE) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
                 SettingsActionRow(
                     title = stringResourceCompat(R.string.settings_backup),
                     supporting = stringResourceCompat(R.string.settings_backup_supporting),
@@ -528,6 +560,11 @@ internal fun SettingsScreen(
     }
 }
 
+internal enum class SinceExportStatus {
+    SUCCESS,
+    FAILURE,
+}
+
 private enum class PlannedSetting {
     BACKUP,
     RESTORE,
@@ -647,6 +684,7 @@ private fun SettingsActionRow(
     supporting: String,
     status: String,
     testTag: String,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     Surface(
@@ -654,6 +692,7 @@ private fun SettingsActionRow(
             .fillMaxWidth()
             .testTag(testTag),
         onClick = onClick,
+        enabled = enabled,
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
