@@ -1,5 +1,10 @@
 # GoreeCloud Launcher — Planned Features
 
+## 2026-09-29 — compaction continuation
+
+The canonical monorepo now carries the fail-closed planning half of secondary-page **Compact apps**. Remaining work is to bind the plan to the current Room-authoritative transactional mutation path, revalidate the complete HOME snapshot at commit time, expose the action only on eligible unlocked secondary pages, clear or reconcile edit-history state after successful compaction, and obtain runtime/representative-device/accessibility acceptance.
+
+
 ## 2026-09-28 candidate continuation
 
 Draft PR #248 now also carries a presentation-only app-drawer sort control for A–Z/Z–A ordering, with Unicode-stable tie-breaking and unit coverage. Drawer search result counts include matching user-profile folders as well as apps. This remains Development candidate behavior until the exact revision is accepted on authoritative main and representative-device/accessibility gates are satisfied.
