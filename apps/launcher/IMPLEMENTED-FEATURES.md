@@ -1,8 +1,10 @@
 # GoreeCloud Launcher — Implemented Features
 
-## 2026-09-29 — secondary-page compaction planning foundation
+## 2026-09-29 — transactional secondary-page Compact apps
 
-Development source now includes a pure, fail-closed secondary-Home compaction planner. It preserves authoritative rank order for eligible 1×1 app rows, packs them deterministically into row-major cells, protects the canonical primary Home page, rejects unsupported/spanning rows, and refuses capacity overflow rather than spilling items across pages. The transactional mutation service and user-facing **Compact apps** action remain open acceptance work; this entry does not claim them as implemented.
+Development source now implements bounded **Compact apps** for eligible unlocked secondary Home pages. The pure planner preserves authoritative app rank order and packs 1×1 apps deterministically from the top-left in row-major cells. The Room service rechecks the complete HOME page/item snapshot inside the existing compare-and-swap transaction before replacing rows, so concurrent workspace changes fail closed. Primary Home, folders, widgets, unsupported/spanning items, malformed geometry, and capacity overflow are excluded.
+
+Edit Home exposes **Compact** only when the rendered page is eligible and visibly non-compact. A confirmation dialog explains that app positions on that page will change, and runtime results provide explicit success/no-op/fail-closed feedback. Focused policy tests cover planner behavior and Home-editor eligibility. Representative-device/accessibility and managed-runtime acceptance remain separate gates.
 
 
 ## September 28, 2026 — accessible App Drawer page indicators
