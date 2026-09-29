@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Apply GoreeCloud Gallery gc.7 direct MySearchMenu overflow-menu correction."""
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+GALLERY_COMMIT = "b28299dc33821eee8d108a9880ce87876cf31443"
+COMMONS_COMMIT = "acfd352df1a1852d17a5f77def8b7ad6e522a5b6"
+VERSION_NAME = "1.0.0-gc.7"
+VERSION_CODE = "10007"
+
+
+def fail(message: str) -> None:
+    raise SystemExit(f"gc.7 patch failed: {message}")
+
+
+def read(path: Path) -> str:
+    if not path.is_file():
+        fail(f"missing {path}")
+    return path.read_text(encoding="utf-8")
+
+
+def write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def replace_once(path: Path, old: str, new: str, label: str) -> None:
+    content = read(path)
+    if content.count(old) != 1:
+        fail(f"expected one {label} match in {path}")
+    write(path, content.replace(old, new, 1))
+
+
+def verify(root: Path, expected: str, label: str) -> None:
+    actual = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+    if actual != expected:
+        fail(f"{label} checkout is {actual}, expected {expected}")
+
+
+def update_version(gallery: Path) -> None:
+    path = gallery / "gradle.properties"
+    content = read(path)
+    content, n1 = re.subn(
+        r"^VERSION_NAME=.*$", f"VERSION_NAME={VERSION_NAME}", content, count=1, flags=re.M
+    )
+    content, n2 = re.subn(
+        r"^VERSION_CODE=.*$", f"VERSION_CODE={VERSION_CODE}", content, count=1, flags=re.M
+    )
+    if n1 != 1 or n2 != 1:
+        fail("could not update version metadata")
+    write(path, content)
+
+
+def add_popup_resources(commons: Path) -> None:
+    values = commons / "commons/src/main/res/values/goreecloud_gallery_popup.xml"
+    write(
+        values,
+        '''<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        GoreeCloud Gallery owns this toolbar-overflow theme instead of inheriting the
+        Fossify Commons dark overflow style. MySearchMenu selects the correct theme
+        directly from the effective application background before its menu is shown.
+    -->
+    <style name="GoreeCloudGalleryPopupTextLight" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textColor">#14213D</item>
+    </style>
+
+    <style name="GoreeCloudGalleryPopupTextDark" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textColor">#F5F7FC</item>
+    </style>
+
+    <style name="GoreeCloudGalleryPopupListLight" parent="@android:style/Widget.ListView.DropDown">
+        <item name="android:background">@drawable/goreecloud_gallery_popup_bg_light</item>
+        <item name="android:textColor">#14213D</item>
+    </style>
+
+    <style name="GoreeCloudGalleryPopupListDark" parent="@android:style/Widget.ListView.DropDown">
+        <item name="android:background">@drawable/goreecloud_gallery_popup_bg_dark</item>
+        <item name="android:textColor">#F5F7FC</item>
+    </style>
+
+    <style name="GoreeCloudGalleryPopupMenuLight" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:background">@drawable/goreecloud_gallery_popup_bg_light</item>
+        <item name="android:popupBackground">@drawable/goreecloud_gallery_popup_bg_light</item>
+        <item name="android:textColor">#14213D</item>
+        <item name="android:textColorPrimary">#14213D</item>
+        <item name="android:textColorSecondary">#475569</item>
+        <item name="dropDownListViewStyle">@style/GoreeCloudGalleryPopupListLight</item>
+    </style>
+
+    <style name="GoreeCloudGalleryPopupMenuDark" parent="@style/Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:background">@drawable/goreecloud_gallery_popup_bg_dark</item>
+        <item name="android:popupBackground">@drawable/goreecloud_gallery_popup_bg_dark</item>
+        <item name="android:textColor">#F5F7FC</item>
+        <item name="android:textColorPrimary">#F5F7FC</item>
+        <item name="android:textColorSecondary">#CBD5E1</item>
+        <item name="dropDownListViewStyle">@style/GoreeCloudGalleryPopupListDark</item>
+    </style>
+
+    <style name="GoreeCloudGalleryPopupThemeLight" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:colorBackground">#F7F8FC</item>
+        <item name="android:textColor">#14213D</item>
+        <item name="android:textColorPrimary">#14213D</item>
+        <item name="android:textColorSecondary">#475569</item>
+        <item name="colorControlNormal">#14213D</item>
+        <item name="colorSurface">#F7F8FC</item>
+        <item name="colorOnSurface">#14213D</item>
+        <item name="actionOverflowMenuStyle">@style/GoreeCloudGalleryPopupMenuLight</item>
+        <item name="android:actionOverflowMenuStyle">@style/GoreeCloudGalleryPopupMenuLight</item>
+        <item name="popupMenuStyle">@style/GoreeCloudGalleryPopupMenuLight</item>
+        <item name="android:popupMenuStyle">@style/GoreeCloudGalleryPopupMenuLight</item>
+        <item name="textAppearanceLargePopupMenu">@style/GoreeCloudGalleryPopupTextLight</item>
+        <item name="textAppearanceSmallPopupMenu">@style/GoreeCloudGalleryPopupTextLight</item>

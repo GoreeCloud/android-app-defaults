@@ -1,0 +1,45 @@
+    styling = read(commons / "commons/src/main/kotlin/org/fossify/commons/extensions/Context-styling.kt")
+    strings = read(gallery / "app/src/main/res/values/strings.xml")
+
+    checks = [
+        (f"VERSION_NAME={VERSION_NAME}", props),
+        (f"VERSION_CODE={VERSION_CODE}", props),
+        (f'gradlePlugins-agp = "{COMMONS_AGP}"', catalog),
+        ('context.packageName.startsWith("com.goreecloud."', app_theme),
+        ('context.packageName.startsWith("com.goreecloud."', compose_extensions),
+        ('!packageName.startsWith("com.goreecloud.", true)', activity_extensions),
+        ('binding.customizationAppIconColorHolder.beVisibleIf(false)', customization),
+        (LIGHT_SURFACE, styling),
+        (DARK_SURFACE, styling),
+        ('name="app_icon_color_warning"', strings),
+        ('supported GoreeCloud apps', strings),
+    ]
+    for needle, haystack in checks:
+        if needle not in haystack:
+            fail(f"validation missing {needle!r}")
+
+    forbidden = "You are using a fake version of the app"
+    if forbidden in activity_extensions or forbidden in compose_extensions:
+        fail("Fossify counterfeit warning text still exists in patched Commons runtime")
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        fail("usage: build_goreecloud_gallery_gc3.py <gallery-root> <commons-root>")
+    gallery = Path(sys.argv[1]).resolve()
+    commons = Path(sys.argv[2]).resolve()
+    verify_checkout(gallery, GALLERY_COMMIT, "Gallery")
+    verify_checkout(commons, COMMONS_COMMIT, "Commons")
+    patch_commons_build_tool(commons)
+    patch_version(gallery)
+    patch_fake_version_boundary(commons)
+    patch_customization_identity(commons)
+    patch_glaze_app_bars(commons)
+    patch_gallery_strings(gallery)
+    patch_notice(gallery)
+    validate(gallery, commons)
+    print(f"Applied GoreeCloud Gallery {VERSION_NAME} acceptance corrections")
+
+
+if __name__ == "__main__":
+    main()

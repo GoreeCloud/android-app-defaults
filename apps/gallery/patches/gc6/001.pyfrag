@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""Apply GoreeCloud Gallery gc.6 real-device acceptance corrections."""
+from __future__ import annotations
+import re, subprocess, sys, xml.etree.ElementTree as ET
+from pathlib import Path
+
+for p, u in (("android", "http://schemas.android.com/apk/res/android"), ("app", "http://schemas.android.com/apk/res-auto"), ("tools", "http://schemas.android.com/tools")):
+    ET.register_namespace(p, u)
+GALLERY_COMMIT = "b28299dc33821eee8d108a9880ce87876cf31443"
+COMMONS_COMMIT = "acfd352df1a1852d17a5f77def8b7ad6e522a5b6"
+VERSION_NAME, VERSION_CODE = "1.0.0-gc.6", "10006"
+LIGHT_BG, LIGHT_FG, LIGHT_SECONDARY = "#F7F8FC", "#14213D", "#475569"
+DARK_BG, DARK_FG, DARK_SECONDARY = "#171C29", "#F5F7FC", "#CBD5E1"
+
+
+def fail(msg): raise SystemExit(f"gc.6 patch failed: {msg}")
+def read(p):
+    if not p.is_file(): fail(f"missing {p}")
+    return p.read_text(encoding="utf-8")
+def write(p, s): p.parent.mkdir(parents=True, exist_ok=True); p.write_text(s, encoding="utf-8")
+def replace(p, old, new):
+    s = read(p)
+    if s.count(old) != 1: fail(f"expected one match in {p}: {old!r}")
+    write(p, s.replace(old, new, 1))
+def regex(p, pattern, new, label):
+    s, n = re.subn(pattern, new, read(p), count=1, flags=re.S)
+    if n != 1: fail(f"could not patch {label} in {p}")
+    write(p, s)
+def verify(root, sha, label):
+    got = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+    if got != sha: fail(f"{label} checkout is {got}, expected {sha}")
+
+
+def version(g):
+    p = g / "gradle.properties"; s = read(p)
+    s, a = re.subn(r"^VERSION_NAME=.*$", f"VERSION_NAME={VERSION_NAME}", s, count=1, flags=re.M)
+    s, b = re.subn(r"^VERSION_CODE=.*$", f"VERSION_CODE={VERSION_CODE}", s, count=1, flags=re.M)
+    if a != 1 or b != 1: fail("version metadata")
+    write(p, s)
+
+
+def remove_id(path, view_id, remove_next_divider=False):
+    aid = "{http://schemas.android.com/apk/res/android}id"; tree = ET.parse(path); root = tree.getroot()
+    def walk(parent):
+        children = list(parent)
+        for i, child in enumerate(children):
+            if child.attrib.get(aid) == f"@+id/{view_id}":
+                parent.remove(child)
+                if remove_next_divider:
+                    rest = list(parent)
+                    if i < len(rest) and rest[i].tag == "include" and rest[i].attrib.get("layout") == "@layout/divider": parent.remove(rest[i])
+                return True
+            if walk(child): return True
+        return False
+    if not walk(root): fail(f"missing view {view_id}")
+    ET.indent(tree, space="    "); tree.write(path, encoding="unicode", xml_declaration=True)
+
+
+def thumbnails(g):
+    c = g / "app/src/main/kotlin/org/fossify/gallery/helpers/Config.kt"
+    replace(c, '''    var cropThumbnails: Boolean\n        get() = prefs.getBoolean(CROP_THUMBNAILS, true)\n        set(cropThumbnails) = prefs.edit().putBoolean(CROP_THUMBNAILS, cropThumbnails).apply()\n''', '''    var cropThumbnails: Boolean\n        get() = false\n        set(cropThumbnails) = prefs.edit().putBoolean(CROP_THUMBNAILS, false).apply()\n''')
+    replace(c, '''    var folderStyle: Int\n        get() = prefs.getInt(FOLDER_THUMBNAIL_STYLE, FOLDER_STYLE_ROUNDED_CORNERS)\n        set(folderStyle) = prefs.edit().putInt(FOLDER_THUMBNAIL_STYLE, folderStyle).apply()\n''', '''    var folderStyle: Int\n        get() = FOLDER_STYLE_ROUNDED_CORNERS\n        set(folderStyle) = prefs.edit().putInt(FOLDER_THUMBNAIL_STYLE, FOLDER_STYLE_ROUNDED_CORNERS).apply()\n''')
+    replace(c, '''    var fileRoundedCorners: Boolean\n        get() = prefs.getBoolean(FILE_ROUNDED_CORNERS, true)\n        set(fileRoundedCorners) = prefs.edit().putBoolean(FILE_ROUNDED_CORNERS, fileRoundedCorners).apply()\n''', '''    var fileRoundedCorners: Boolean\n        get() = true\n        set(fileRoundedCorners) = prefs.edit().putBoolean(FILE_ROUNDED_CORNERS, true).apply()\n''')
+
+    settings = g / "app/src/main/kotlin/org/fossify/gallery/activities/SettingsActivity.kt"
+    replace(settings, "        setupCropThumbnails()\n", "")
+    regex(settings, r'''\n    private fun setupCropThumbnails\(\) \{\n.*?\n    \}\n''', "\n", "square crop handler")
+
+    f = g / "app/src/main/kotlin/org/fossify/gallery/dialogs/ChangeFileThumbnailStyleDialog.kt"
+    replace(f, "            dialogFileStyleRoundedCorners.isChecked = config.fileRoundedCorners\n", "")
+    replace(f, "            dialogFileStyleRoundedCornersHolder.setOnClickListener { dialogFileStyleRoundedCorners.toggle() }\n", "")
+    replace(f, "        config.fileRoundedCorners = binding.dialogFileStyleRoundedCorners.isChecked\n", "        config.fileRoundedCorners = true\n")
+
+    d = g / "app/src/main/kotlin/org/fossify/gallery/dialogs/ChangeFolderThumbnailStyleDialog.kt"
+    replace(d, "import org.fossify.gallery.databinding.DirectoryItemGridSquareBinding\n", "")
+    replace(d, "                    setupStyle()\n", "")
+    regex(d, r'''\n    private fun setupStyle\(\) \{.*?\n    \}\n\n    private fun setupMediaCount''', "\n    private fun setupMediaCount", "folder style selector")
+    replace(d, '''            val useRoundedCornersLayout = binding.dialogRadioFolderStyle.checkedRadioButtonId == R.id.dialog_radio_folder_rounded_corners\n            binding.dialogFolderSampleHolder.removeAllViews()\n\n            val sampleBinding = if (useRoundedCornersLayout) {\n                DirectoryItemGridRoundedCornersBinding.inflate(activity.layoutInflater).toItemBinding()\n            } else {\n                DirectoryItemGridSquareBinding.inflate(activity.layoutInflater).toItemBinding()\n            }\n''', '''            binding.dialogFolderSampleHolder.removeAllViews()\n\n            val sampleBinding = DirectoryItemGridRoundedCornersBinding.inflate(activity.layoutInflater).toItemBinding()\n''')
+    replace(d, '''            if (useRoundedCornersLayout) {\n                val cornerRadius = root.resources.getDimension(org.fossify.commons.R.dimen.rounded_corner_radius_big).toInt()\n                builder = builder.transform(CenterCrop(), RoundedCorners(cornerRadius))\n                sampleBinding.dirName.setTextColor(activity.getProperTextColor())\n                sampleBinding.photoCnt.setTextColor(activity.getProperTextColor())\n            }\n''', '''            val cornerRadius = root.resources.getDimension(org.fossify.commons.R.dimen.rounded_corner_radius_big).toInt()\n            builder = builder.transform(CenterCrop(), RoundedCorners(cornerRadius))\n            sampleBinding.dirName.setTextColor(activity.getProperTextColor())\n            sampleBinding.photoCnt.setTextColor(activity.getProperTextColor())\n''')
+    regex(d, r'''        val style = when \(binding\.dialogRadioFolderStyle\.checkedRadioButtonId\) \{\n            R\.id\.dialog_radio_folder_square -> FOLDER_STYLE_SQUARE\n            else -> FOLDER_STYLE_ROUNDED_CORNERS\n        \}\n''', "        val style = FOLDER_STYLE_ROUNDED_CORNERS\n", "folder style save")
+
+    remove_id(g / "app/src/main/res/layout/activity_settings.xml", "settings_crop_thumbnails_holder")
+    remove_id(g / "app/src/main/res/layout/dialog_change_file_thumbnail_style.xml", "dialog_file_style_rounded_corners_holder")
+    remove_id(g / "app/src/main/res/layout/dialog_change_folder_thumbnail_style.xml", "dialog_radio_folder_style", True)
+
+
+def item(style, name, value):
+    for x in list(style):
+        if x.tag == "item" and x.attrib.get("name") == name: style.remove(x)
+    x = ET.SubElement(style, "item", {"name": name}); x.text = value
+
+def named(root, name, parent, values):
+    for x in list(root):
+        if x.tag == "style" and x.attrib.get("name") == name: root.remove(x)
+    s = ET.SubElement(root, "style", {"name": name, "parent": parent})
+    for k, v in values: item(s, k, v)
+
+def theme_file(path, overflow):
+    tree = ET.parse(path); root = tree.getroot(); s = next((x for x in root if x.tag == "style" and x.attrib.get("name") == "AppTheme"), None)
+    if s is None: fail(f"AppTheme missing in {path}")
+    item(s, "actionOverflowMenuStyle", f"@style/{overflow}"); item(s, "actionBarPopupTheme", "@style/GoreeCloud.PopupMenuTheme"); item(s, "toolbarStyle", "@style/GoreeCloud.Toolbar")
+    ET.indent(tree, space="    "); tree.write(path, encoding="unicode", xml_declaration=True)
+
+
+def popup(g, c):
+    day = g / "app/src/main/res/values/styles.xml"; night = g / "app/src/main/res/values-night/glaze_styles.xml"
+    day27 = g / "app/src/main/res/values-v27/glaze_styles.xml"; night27 = g / "app/src/main/res/values-night-v27/glaze_styles.xml"
+    for p, s in ((day, "TopPopupMenu.Overflow.Light"), (day27, "TopPopupMenu.Overflow.Light"), (night, "TopPopupMenu.Overflow.Dark"), (night27, "TopPopupMenu.Overflow.Dark")): theme_file(p, s)
+    for p, parent, bg, fg, secondary, overflow, menu in ((day, "ThemeOverlay.AppCompat.Light", LIGHT_BG, LIGHT_FG, LIGHT_SECONDARY, "TopPopupMenu.Overflow.Light", "AppTheme.PopupMenuLight"), (night, "ThemeOverlay.AppCompat.Dark", DARK_BG, DARK_FG, DARK_SECONDARY, "TopPopupMenu.Overflow.Dark", "AppTheme.PopupMenuDark")):
+        tree = ET.parse(p); root = tree.getroot()
+        named(root, "GoreeCloud.PopupMenuTheme", parent, [("android:colorBackground", bg), ("android:textColor", fg), ("android:textColorPrimary", fg), ("android:textColorSecondary", secondary), ("colorControlNormal", fg), ("colorSurface", bg), ("colorOnSurface", fg), ("actionOverflowMenuStyle", f"@style/{overflow}"), ("popupMenuStyle", f"@style/{menu}"), ("android:popupMenuStyle", f"@style/{menu}")])
+        named(root, "GoreeCloud.Toolbar", "Widget.Material3.Toolbar", [("popupTheme", "@style/GoreeCloud.PopupMenuTheme")])
+        ET.indent(tree, space="    "); tree.write(p, encoding="unicode", xml_declaration=True)
+    p = c / "commons/src/main/res/values/styles.xml"; tree = ET.parse(p); root = tree.getroot()
+    for name, fg, secondary in (("TopPopupMenu.Overflow.Light", LIGHT_FG, LIGHT_SECONDARY), ("TopPopupMenu.Overflow.Dark", DARK_FG, DARK_SECONDARY)):
+        s = next((x for x in root if x.tag == "style" and x.attrib.get("name") == name), None)
+        if s is None: fail(f"missing {name}")
+        item(s, "android:textColor", fg); item(s, "android:textColorPrimary", fg); item(s, "android:textColorSecondary", secondary)
+    ET.indent(tree, space="    "); tree.write(p, encoding="unicode", xml_declaration=True)

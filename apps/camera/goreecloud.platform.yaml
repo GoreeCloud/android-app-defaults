@@ -1,0 +1,139 @@
+# GoreeCloud Camera Platform Contract declaration
+# File internal version: 0.4.0
+# Declaration validity does not prove implementation or acceptance.
+
+schema_version: "0.4"
+
+component:
+  type: application
+  id: goreecloud-camera
+  product_name: GoreeCloud Camera
+  repository: GoreeCloud/goreecloud-camera
+
+lifecycle: concept
+version: "0.1.0"
+
+supported_platforms:
+  - android
+
+api:
+  versions: []
+  endpoints: []
+
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: "No GoreeCloud Manager integration is implemented or accepted in the Camera foundation."
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: "Current capture is local/offline, uses CAMERA plus just-in-time RECORD_AUDIO only for explicit video recording, and requests no Internet, location, broad-storage, or existing-media-library read authority; accepted Privacy Shield runtime policy and production privacy acceptance remain unestablished."
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: "Camera session ownership is centralized and the implementation uses pending MediaStore publication with handled-failure cleanup, but Wardveil Security runtime integration and acceptance do not yet exist."
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: "The implementation includes a bounded ordinary-JPEG MediaStore finalization path, but Everkeep continuity, preservation, portability acceptance, and runtime integration do not yet exist."
+  glaze_ui:
+    result: applicable-migration-required
+    version: null
+    evidence:
+      - README.md
+      - SPECIFICATIONS.md
+      - NOTES.md
+      - app/src/main/kotlin/com/goreecloud/camera/MainActivity.kt
+    notes: "The engineering Camera shell has no repository-local Glaze implementation. Current Official Stable consumer authority is GLAZE UI V1.6 / 1.6.0 at accepted release source a7180679ea851389e0f3004515f9a25f420e716d; deliberate migration and application-specific acceptance remain required."
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: "No Mesh coordination is implemented; remote and cross-device workflows remain future work."
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - FEATURE-ROADMAP.md
+    notes: "Core local capture does not require GoreeCloud Identity; future account-bound, remote, Lens, provenance, sharing, or synchronized workflows still require accepted Identity runtime boundaries."
+
+  policy:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - PRIVACY POLICY.md
+      - SECURITY.md
+    notes: "GoreeCloud Policy is applicable to future capture, privacy, security, metadata, remote, Lens, and consequential decisions, but no accepted Camera Policy runtime integration exists."
+
+  observability:
+    result: applicable-blocked
+    version: null
+    evidence:
+      - SPECIFICATIONS.md
+      - README.md
+      - .github/workflows/android.yml
+      - scripts/qualify_preview_runtime.sh
+      - scripts/qualify_video_audio_runtime.sh
+    notes: "CI and disposable-emulator diagnostics exist, but accepted privacy-minimized GoreeCloud Observability runtime health, metrics/events, dependency-health, provenance/freshness, alerting, representative-device telemetry, and production acceptance are not established."
+
+health:
+  health_endpoint: null
+  readiness_endpoint: null
+
+continuity:
+  backup:
+    required: false
+    requirements:
+      - "Camera does not own general media backup; downstream backup must respect capture privacy policy."
+  restore:
+    required: false
+    requirements:
+      - "Camera does not own general media-library restore; recoverable in-progress capture state remains a Camera reliability requirement beyond the bounded handled-failure cleanup in the current bounded implementation."
+  export:
+    required: true
+    requirements:
+      - "The bounded still-photo implementation publishes ordinary JPEG files through Android MediaStore so primary media remains user-owned and portable."
+      - "Metadata export must support privacy-aware policies when richer metadata controls are implemented."
+  portability:
+    required: true
+    requirements:
+      - "Primary captured media must remain usable without GoreeCloud Camera."
+      - "RAW, Motion Photo relationships, sidecars, and provenance data must remain portable when those features are implemented."
+
+external_dependencies: []
+
+compatibility:
+  platform_contract: "0.4"
+  glaze_ui_required: "1.6.0"
+  requires:
+    - goreecloud-platform-contract==0.4
+    - glaze-ui==1.6.0
+  provides:
+    - goreecloud-camera-android-concept-v1
+
+evidence:
+  acceptance_tests: []
+  release: []
+
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence: []
+  blockers:
+    - "No supported physical-device Camera preview or still-capture qualification evidence exists."
+    - "Android 16 emulator video/audio qualification exists on the current candidate, but physical-device/OEM video/audio, microphone routing/quality, thermal, power, and camera-quirk acceptance remain unestablished."
+    - "No application-specific acceptance exists for the nine Integral Platform Systems; Policy and Observability are explicitly evaluated as applicable-blocked under Contract 0.4."
+    - "The engineering Camera shell has not implemented or accepted current Official Stable GLAZE UI V1.6 / 1.6.0."
+    - "No release or production-acceptance evidence exists."
+    - "A recognized open-source repository license has not yet been selected."
