@@ -4,7 +4,7 @@ A privacy-focused monorepo of lightweight replacements for common Android defaul
 
 ## Current Development state
 
-**Current stacked Since candidate (September 29, 2026):** archived trackers gain a confirmation-gated permanent-delete path that rejects active trackers at the DAO/repository boundary and relies on existing Room foreign-key cascades for periods and goals. The same PR #59 line now adds an explicit user-selected **Export data** flow using Android's Storage Access Framework and a versioned local JSON format covering tracker state, notes, full period/reset history, goals, archive state, and timestamps. This remains unmerged Development work pending exact-head CI and representative-device/accessibility/document-provider acceptance. Import plus validated Backup/Restore remain fail-closed and open.
+**Current stacked Since candidate (September 29, 2026):** archived trackers gain a confirmation-gated permanent-delete path that rejects active trackers at the DAO/repository boundary and relies on existing Room foreign-key cascades for periods and goals. The same PR #59 line now adds an explicit user-selected **Export data** flow using Android's Storage Access Framework and a versioned local JSON format covering tracker state, notes, full period/reset history, goals, archive state, and timestamps. Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`, including Android 16 instrumentation. This remains unmerged Development work pending representative-device/accessibility/document-provider acceptance. Import plus validated Backup/Restore remain fail-closed and open.
 
 The repository is in **Development**. GoreeCloud Since is the first application module under `apps/since/`.
 
