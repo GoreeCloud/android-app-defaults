@@ -4,6 +4,8 @@
     android:initialLayout="@layout/widget_clock"
     android:minWidth="180dp"
     android:minHeight="90dp"
+    android:minResizeWidth="120dp"
+    android:minResizeHeight="64dp"
     android:previewLayout="@layout/widget_clock"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
