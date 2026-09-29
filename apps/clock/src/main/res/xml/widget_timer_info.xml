@@ -4,6 +4,8 @@
     android:initialLayout="@layout/widget_timer"
     android:minWidth="180dp"
     android:minHeight="110dp"
+    android:minResizeWidth="120dp"
+    android:minResizeHeight="72dp"
     android:previewLayout="@layout/widget_timer"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
