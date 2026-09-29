@@ -43,6 +43,7 @@
     <string name="settings_choose_file">Choose file</string>
     <string name="settings_import_review_valid">Valid export: %1$d trackers, %2$d archived, %3$d periods, %4$d goals. No data was changed.</string>
     <string name="settings_import_review_invalid">This file could not be validated as a supported GoreeCloud Since export. No data was changed.</string>
+    <string name="settings_import_replacement_plan">Replacement preview: %1$d current trackers → %2$d imported trackers; %3$d imported tracker IDs match current data. Applying this plan is still disabled.</string>
     <string name="settings_backup">Backup</string>
     <string name="settings_backup_supporting">Protect your local Since data with a validated backup.</string>
     <string name="settings_restore">Restore</string>
