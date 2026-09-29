@@ -1755,25 +1755,33 @@ private fun StreakDetailActionButtons(
     onOpenHistory: () -> Unit,
     onReset: () -> Unit,
 ) {
+    val actionMinHeight = if (stacked) 64.dp else 48.dp
+    val actionMaxLines = if (stacked) 2 else 1
+    val actionStyle = if (stacked) {
+        MaterialTheme.typography.labelMedium
+    } else {
+        MaterialTheme.typography.labelLarge
+    }
     val history: @Composable (Modifier) -> Unit = { modifier ->
         TextButton(
             modifier = modifier
-                .height(if (stacked) 56.dp else 48.dp)
+                .heightIn(min = actionMinHeight)
                 .testTag("open-history"),
             onClick = onOpenHistory,
         ) {
             Text(
                 text = stringResource(R.string.view_history),
-                style = if (stacked) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                softWrap = false,
+                style = actionStyle,
+                maxLines = actionMaxLines,
+                softWrap = stacked,
+                textAlign = TextAlign.Center,
             )
         }
     }
     val reset: @Composable (Modifier) -> Unit = { modifier ->
         Button(
             modifier = modifier
-                .height(if (stacked) 56.dp else 48.dp)
+                .heightIn(min = actionMinHeight)
                 .testTag("reset-streak"),
             onClick = onReset,
             enabled = !isResetting,
@@ -1785,30 +1793,21 @@ private fun StreakDetailActionButtons(
                 } else {
                     stringResource(R.string.reset_streak)
                 },
-                style = if (stacked) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                softWrap = false,
+                style = actionStyle,
+                maxLines = actionMaxLines,
+                softWrap = stacked,
+                textAlign = TextAlign.Center,
             )
         }
     }
 
-    if (stacked) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            history(Modifier.fillMaxWidth())
-            reset(Modifier.fillMaxWidth())
-        }
-    } else {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            history(Modifier.weight(1f))
-            reset(Modifier.weight(1f))
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        history(Modifier.weight(1f))
+        reset(Modifier.weight(1f))
     }
 }
 
