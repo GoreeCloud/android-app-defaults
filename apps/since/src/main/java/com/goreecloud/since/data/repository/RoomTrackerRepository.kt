@@ -40,6 +40,17 @@ class RoomTrackerRepository(
             }
         }
 
+    override fun observeArchivedTrackerAggregates(): Flow<List<TrackerAggregate>> =
+        combine(
+            dao.observeArchivedTrackedEvents(),
+            dao.observeAllPeriods(),
+            dao.observeAllGoals(),
+        ) { rows, _, _ ->
+            rows.mapNotNull { row ->
+                dao.readAggregate(row.id)?.toDomain()
+            }
+        }
+
     override suspend fun createTracker(
         draft: ValidatedTrackerDraft,
     ): TrackerAggregate {
@@ -133,6 +144,20 @@ class RoomTrackerRepository(
 
     override suspend fun removeGoal(trackerId: String): Boolean =
         dao.removeGoal(trackerId)
+
+    override suspend fun archiveTracker(trackerId: String): TrackerAggregate? =
+        dao.setTrackerArchived(
+            eventId = trackerId,
+            isArchived = true,
+            updatedAtEpochMs = clock.millis(),
+        )?.toDomain()
+
+    override suspend fun restoreTracker(trackerId: String): TrackerAggregate? =
+        dao.setTrackerArchived(
+            eventId = trackerId,
+            isArchived = false,
+            updatedAtEpochMs = clock.millis(),
+        )?.toDomain()
 
     override suspend fun resetStreak(
         trackerId: String,
