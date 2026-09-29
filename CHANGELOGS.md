@@ -585,4 +585,4 @@ The stopwatch-history and subsequent relative Next alarm source are included in 
 
 ### Boundary
 
-This adaptive-widget tranche is a Development candidate and requires fresh exact-head Android Development Foundation validation plus representative-launcher resize, theme, touch, and accessibility acceptance. It does not add configuration activities, permissions, networking, account state, release authority, or Stable status.
+Exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8` passed Android Development Foundation run #281 / `36511856286`, including Clock build/unit/lint/privacy checks, Clock Android 16 runtime instrumentation and rendered evidence, plus Since build/schema and Android 16 runtime regressions. Representative-launcher resize, theme, touch, accessibility, and update acceptance remain open. This tranche does not add configuration activities, permissions, networking, account state, release authority, or Stable status.

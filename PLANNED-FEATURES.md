@@ -2,7 +2,7 @@
 
 ## September 29, 2026 — Clock widget continuation
 
-Adaptive compact/regular sizing for the three Clock home-screen widgets is now implemented on Draft PR #50 as a Development candidate. Remaining widget work is configuration/personalization plus representative-launcher resize, touch, accessibility, theme, and update acceptance; those gates stay planned until verified.
+Adaptive compact/regular sizing for the three Clock home-screen widgets is implemented on Draft PR #50 and passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. Remaining widget work is configuration/personalization plus representative-launcher resize, touch, accessibility, theme, and update acceptance; those gates stay planned until verified.
 
 ## September 28, 2026 — relative Next alarm candidate
 
@@ -136,7 +136,7 @@ The Clock candidate still requires the following before broader qualification:
 
 - representative-device alarm-audio acceptance across system/default/custom alarm tones, Silent, audio focus, DND/device policy, lock-screen/full-screen presentation, snooze/dismiss, and gradual-volume behavior;
 - richer alarm editing and upcoming-alarm presentation;
-- additional widget configuration and representative-launcher acceptance; adaptive compact/regular sizing is implemented on the current Draft PR #50 candidate but remains pending exact-head and representative-launcher acceptance;
+- additional widget configuration and representative-launcher acceptance; adaptive compact/regular sizing passed exact-source Android Development Foundation #281 on Draft PR #50 but remains pending representative-launcher acceptance;
 - lock-screen/system surfaces only where supported by current Android APIs;
 - full haptic-preference application across applicable controls and alerts;
 - canonical GoreeCloud Clock branding from the authoritative branding repository;
