@@ -2,7 +2,7 @@
 
 ## 2026-09-28 Since candidate continuation
 
-PR #49 established the first local-management M3 slice with device-local Dashboard search and deterministic Recent/Name sorting. The stacked archive/restore candidate now adds reversible local archive state using the existing Room v1 field, confirmation from Details, an archived-tracker list in Settings, and restore back to Home without deleting period history or goals. Permanent delete safeguards, export/import, recovery, and representative-device/accessibility acceptance remain open, so M3 is not complete.
+PR #49 established the first local-management M3 slice with device-local Dashboard search and deterministic Recent/Name sorting. The stacked archive/restore candidate adds reversible local archive state using the existing Room v1 field, confirmation from Details, an archived-tracker list in Settings, and restore back to Home without deleting period history or goals. Source head `857c808ce05112f83426163cd84a96724741dfb5` passed Android Development Foundation #267 / `36507824384` with Android 16 instrumentation `OK (35 tests)`. Permanent delete safeguards, export/import, recovery, and representative-device/accessibility acceptance remain open, so M3 is not complete.
 
 **Record type:** Repository planned-feature inventory  
 **Repository:** `GoreeCloud/android-app-defaults`  
