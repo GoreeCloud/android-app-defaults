@@ -78,4 +78,36 @@ class WidgetModelsTest {
             ),
         )
     }
+    @Test
+    fun widgetSizePolicyUsesCompactPresentationForNarrowWidth() {
+        assertEquals(
+            WidgetPresentation.COMPACT,
+            WidgetSizePolicy.presentation(minWidthDp = 120, minHeightDp = 110),
+        )
+    }
+
+    @Test
+    fun widgetSizePolicyUsesCompactPresentationForShortHeight() {
+        assertEquals(
+            WidgetPresentation.COMPACT,
+            WidgetSizePolicy.presentation(minWidthDp = 180, minHeightDp = 72),
+        )
+    }
+
+    @Test
+    fun widgetSizePolicyKeepsRegularPresentationAtDefaultClockSize() {
+        assertEquals(
+            WidgetPresentation.REGULAR,
+            WidgetSizePolicy.presentation(minWidthDp = 180, minHeightDp = 90),
+        )
+    }
+
+    @Test
+    fun widgetSizePolicyFailsOpenToRegularWhenHostOptionsAreUnavailable() {
+        assertEquals(
+            WidgetPresentation.REGULAR,
+            WidgetSizePolicy.presentation(minWidthDp = 0, minHeightDp = 0),
+        )
+    }
+
 }
