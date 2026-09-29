@@ -55,14 +55,19 @@ class TimerWidgetProvider : AppWidgetProvider() {
                 elapsedRealtime = nowElapsed,
             )
             val widgetOptions = options ?: manager.getAppWidgetOptions(appWidgetId)
-            val compact = WidgetSizePolicy.presentation(
+            val presentation = WidgetSizePolicy.presentation(
                 minWidthDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
                 minHeightDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT),
-            ) == WidgetPresentation.COMPACT
+            )
+            val compact = presentation == WidgetPresentation.COMPACT
+            val showSecondaryDetail = WidgetDetailsPolicy.showSecondaryDetail(
+                presentation = presentation,
+                preferenceEnabled = app.preferencesStore.state.value.showWidgetDetails,
+            )
             val views = RemoteViews(context.packageName, R.layout.widget_timer).apply {
                 setViewVisibility(
                     R.id.widget_timer_status,
-                    if (compact) View.GONE else View.VISIBLE,
+                    if (showSecondaryDetail) View.VISIBLE else View.GONE,
                 )
                 setTextViewTextSize(
                     R.id.widget_timer_countdown,
