@@ -1,0 +1,179 @@
+name: Migrated Android apps CI
+
+on:
+  pull_request:
+    paths:
+      - 'apps/camera/**'
+      - 'apps/launcher/**'
+      - 'apps/keyboard/**'
+      - 'apps/gallery/**'
+      - '.github/workflows/migrated-android-apps-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/camera/**'
+      - 'apps/launcher/**'
+      - 'apps/keyboard/**'
+      - 'apps/gallery/**'
+      - '.github/workflows/migrated-android-apps-ci.yml'
+
+concurrency:
+  group: migrated-android-apps-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  camera:
+    name: Camera build, unit tests, lint, and source guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: apps/camera
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 9.6.0
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.6.0'
+      - name: Provision Android 17 compile SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOOLS_VERSION="15859902"
+          TOOLS_SHA256="4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583"
+          TOOLS_ZIP="$RUNNER_TEMP/commandlinetools-linux-${TOOLS_VERSION}_latest.zip"
+          TOOLS_ROOT="$RUNNER_TEMP/android-command-line-tools"
+          TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-${TOOLS_VERSION}_latest.zip"
+          curl --fail --location --silent --show-error "$TOOLS_URL" --output "$TOOLS_ZIP"
+          echo "$TOOLS_SHA256  $TOOLS_ZIP" | sha256sum --check --strict
+          rm -rf "$TOOLS_ROOT"
+          mkdir -p "$TOOLS_ROOT/latest"
+          unzip -q "$TOOLS_ZIP" -d "$TOOLS_ROOT/unpacked"
+          mv "$TOOLS_ROOT/unpacked/cmdline-tools"/* "$TOOLS_ROOT/latest/"
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          yes | "$TOOLS_ROOT/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --licenses >/dev/null || true
+          "$TOOLS_ROOT/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --channel=3 "platforms;android-37.0" "build-tools;36.0.0"
+      - name: Validate Camera source contract
+        run: python3 scripts/check_android_foundation.py
+      - name: Test, lint, and build Camera
+        run: gradle --no-daemon --stacktrace lintDebug testDebugUnitTest assembleDebug
+
+  launcher:
+    name: Launcher validation, unit tests, lint, and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      GOREECLOUD_DEV_VERSION_CODE: ${{ github.run_number }}
+    defaults:
+      run:
+        working-directory: apps/launcher
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.11.1'
+      - name: Validate Launcher privacy, identity, UI, motion, and Room boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_privacy.py
+          python3 scripts/check_manifest.py
+          python3 scripts/check_identity.py
+          python3 scripts/check_glaze_ui.py
+          python3 scripts/check_glaze_motion_evaluation.py
+          python3 scripts/check_room_cutover.py
+      - name: Test, lint, and build Launcher
+        run: gradle --no-daemon lintDebug testDebugUnitTest assembleDebug
+      - name: Verify Launcher Room schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_room_schema.py
+          if [ -n "$(git status --porcelain -- app/schemas)" ]; then
+            echo "Room schema history changed during generation and is not committed exactly."
+            git status --short -- app/schemas
+            exit 1
+          fi
+
+  keyboard:
+    name: Keyboard validation, unit tests, and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/keyboard
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.11.1'
+      - name: Validate Keyboard boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_glaze_motion_evaluation.py
+          python3 scripts/check_editor_privacy_lifecycle.py
+          python3 scripts/check_keyboard_accessibility.py
+          python3 scripts/check_repository_feature_records.py
+      - name: Test and build Keyboard
+        run: gradle --no-daemon :android:app:testDebugUnitTest :android:app:assembleDebug --stacktrace
+
+  gallery:
+    name: Gallery native core, adapter, unit tests, and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: apps/gallery/native
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.14.3
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.14.3'
+      - name: Test Gallery native core, adapter, and app
+        run: gradle :core:test :android-adapter:testDebugUnitTest :app:testDebugUnitTest --no-daemon
+      - name: Build Gallery native debug APK
+        run: gradle :app:assembleDebug --no-daemon
