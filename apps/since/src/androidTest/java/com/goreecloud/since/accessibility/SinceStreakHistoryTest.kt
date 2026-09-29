@@ -134,7 +134,11 @@ class SinceStreakHistoryTest {
             }
         }
 
-        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule
+            .onNodeWithText("Read daily")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule
                 .onAllNodesWithTag("reset-streak", useUnmergedTree = true)
