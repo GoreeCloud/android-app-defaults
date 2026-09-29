@@ -13,7 +13,32 @@ data class SinceImportReviewSummary(
     val periodCount: Int,
     val goalCount: Int,
     val exportedAtEpochMs: Long,
+    val trackerIds: Set<String>,
 )
+
+data class SinceImportReplacementPlan(
+    val currentTrackerCount: Int,
+    val importedTrackerCount: Int,
+    val matchingTrackerCount: Int,
+)
+
+object SinceImportReplacementPlanner {
+    fun plan(
+        summary: SinceImportReviewSummary,
+        currentTrackerIds: Set<String>,
+    ): SinceImportReplacementPlan {
+        val normalizedCurrentIds = currentTrackerIds
+            .asSequence()
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .toSet()
+        return SinceImportReplacementPlan(
+            currentTrackerCount = normalizedCurrentIds.size,
+            importedTrackerCount = summary.trackerCount,
+            matchingTrackerCount = summary.trackerIds.count { it in normalizedCurrentIds },
+        )
+    }
+}
 
 sealed interface SinceImportReviewResult {
     data class Valid(
@@ -83,6 +108,7 @@ object SinceImportReviewJson {
                 periodCount = trackers.periodCount,
                 goalCount = trackers.goalCount,
                 exportedAtEpochMs = exportedAt,
+                trackerIds = trackerIds.toSet(),
             ),
         )
     }
