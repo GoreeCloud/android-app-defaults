@@ -50,7 +50,7 @@ The migration:
 - creates root `PROJECT-RECORD.md`;
 - incorporates the newer repository `SPECIFICATIONS.md` as the implementation-aware baseline;
 - preserves the complete substantive Drive DOCX v1.0 specification as migrated requirement/provenance material;
-- reconciles the historical repository name `GoreeCloud/goreecloud-keyboard` to `GoreeCloud/keyboard` where it is a current reference;
+- records the earlier rename from `GoreeCloud/goreecloud-keyboard` to `GoreeCloud/keyboard`, and the later mandatory consolidation into `GoreeCloud/android-app-defaults` under `apps/keyboard/`;
 - updates repository navigation and related authority references; and
 - retires the competing root `SPECIFICATIONS.md` after incorporation.
 
