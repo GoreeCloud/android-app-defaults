@@ -1,5 +1,12 @@
 # Android App Defaults — Changelogs
 
+## 2026-09-29 — post-migration development gate correction
+
+- Corrected mandatory migration integrity CI so it verifies the immutable migration cutover commit against the pinned legacy repository revisions instead of requiring live canonical app trees to remain byte-identical forever.
+- Current `MIGRATION-ORIGIN.md` provenance pins remain validated on every affected pull request.
+- This preserves cutover evidence while allowing authorized development under `apps/camera`, `apps/launcher`, `apps/keyboard`, and `apps/gallery`.
+
+
 ## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
 
 **Lifecycle:** Development  
