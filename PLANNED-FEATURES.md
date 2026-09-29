@@ -2,7 +2,7 @@
 
 ## 2026-09-28 Since candidate continuation
 
-PR #49 now starts the local-management M3 slice with device-local dashboard search across tracker title/note and deterministic Recent/Name sorting. Pure unit coverage defines filtering and tie-breaking. Archive/delete/export/import and representative-device/accessibility acceptance remain open, so the broader M3 capability is not claimed complete.
+PR #49 established the first local-management M3 slice with device-local Dashboard search and deterministic Recent/Name sorting. The stacked archive/restore candidate now adds reversible local archive state using the existing Room v1 field, confirmation from Details, an archived-tracker list in Settings, and restore back to Home without deleting period history or goals. Permanent delete safeguards, export/import, recovery, and representative-device/accessibility acceptance remain open, so M3 is not complete.
 
 **Record type:** Repository planned-feature inventory  
 **Repository:** `GoreeCloud/android-app-defaults`  
@@ -86,7 +86,7 @@ Still open within M1:
 
 **State:** Planned.
 
-- Search, sorting, archive/restore, and delete safeguards remain planned. PR #39 integrated the bounded top-level Settings/About baseline (theme, fail-closed Backup/Restore entries, privacy/security information, app version/build status) while validated portability/recovery behavior remains open.
+- Search and deterministic Recent/Name sorting are implemented on the active Development line. Reversible archive/restore is implemented on the stacked archive candidate without a Room schema migration; permanent deletion and its safeguards remain planned. PR #39 integrated the bounded top-level Settings/About baseline (theme, fail-closed Backup/Restore entries, privacy/security information, app version/build status) while validated portability/recovery behavior remains open.
 - Versioned JSON export using Android Storage Access Framework.
 - Fail-closed validated import with review before mutation; prefer Replace import until safe merge semantics are fully designed.
 - Room migration tests using committed historical schema files.
