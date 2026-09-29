@@ -262,6 +262,10 @@ internal fun SettingsScreen(
     innerPadding: PaddingValues,
     themePreference: ThemePreference,
     onThemePreferenceChange: (ThemePreference) -> Unit,
+    archivedTrackers: List<TrackerAggregate>,
+    restoringTrackerId: String?,
+    restoreFailedTrackerId: String?,
+    onRestoreTracker: (String) -> Unit,
     contextualHintsEnabled: Boolean,
     onContextualHintsEnabledChange: (Boolean) -> Unit,
     onResetDismissedContextualHints: () -> Unit,
@@ -359,6 +363,29 @@ internal fun SettingsScreen(
                         plannedDialog = PlannedSetting.RESTORE
                     },
                 )
+            }
+        }
+
+        item {
+            SettingsSection(title = stringResourceCompat(R.string.archived_trackers)) {
+                if (archivedTrackers.isEmpty()) {
+                    Text(
+                        modifier = Modifier.testTag("archived-trackers-empty"),
+                        text = stringResourceCompat(R.string.archived_trackers_empty),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                } else {
+                    archivedTrackers.forEach { aggregate ->
+                        ArchivedTrackerRow(
+                            aggregate = aggregate,
+                            restoring = restoringTrackerId == aggregate.tracker.id,
+                            restoreEnabled = restoringTrackerId == null,
+                            restoreFailed = restoreFailedTrackerId == aggregate.tracker.id,
+                            onRestore = { onRestoreTracker(aggregate.tracker.id) },
+                        )
+                    }
+                }
             }
         }
 
@@ -491,6 +518,70 @@ private fun SettingsSection(
                 style = MaterialTheme.typography.titleLarge,
             )
             content()
+        }
+    }
+}
+
+@Composable
+private fun ArchivedTrackerRow(
+    aggregate: TrackerAggregate,
+    restoring: Boolean,
+    restoreEnabled: Boolean,
+    restoreFailed: Boolean,
+    onRestore: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("archived-tracker-" + aggregate.tracker.id),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Text(
+                        text = aggregate.tracker.title,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = stringResourceCompat(R.string.archived_tracker_supporting),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                TextButton(
+                    modifier = Modifier.testTag("restore-tracker-" + aggregate.tracker.id),
+                    onClick = onRestore,
+                    enabled = restoreEnabled,
+                ) {
+                    Text(
+                        if (restoring) {
+                            stringResourceCompat(R.string.restoring_tracker)
+                        } else {
+                            stringResourceCompat(R.string.restore_tracker)
+                        }
+                    )
+                }
+            }
+            if (restoreFailed) {
+                Text(
+                    text = stringResourceCompat(R.string.restore_tracker_failed),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     }
 }
