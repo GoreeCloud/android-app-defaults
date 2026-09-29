@@ -111,6 +111,7 @@ import com.goreecloud.launcher.core.workspace.db.LauncherDatabaseProvider
 import com.goreecloud.launcher.core.workspace.db.WorkspaceAuthoritativePlacementState
 import com.goreecloud.launcher.core.workspace.db.WorkspaceAuthoritativeWriteResult
 import com.goreecloud.launcher.core.workspace.db.WorkspaceFolderMutationResult
+import com.goreecloud.launcher.core.workspace.db.WorkspaceHomePageCompactionResult
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspacePagedHomeState
 import com.goreecloud.launcher.core.workspace.db.WorkspacePagedRoomMutationResult
@@ -1199,6 +1200,44 @@ class MainActivity : ComponentActivity() {
                                         ) {
                                             selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
                                         }
+                                    }
+                                }
+                            },
+                            onCompactHomePage = { pageId ->
+                                if (!launcherPreferences.layoutLocked) {
+                                    lifecycleScope.launch {
+                                        val result = workspaceRuntimeCoordinator.compactHomePage(
+                                            pageId = pageId,
+                                            columns = launcherPreferences.homeColumns,
+                                            rows = launcherPreferences.homeRows,
+                                        )
+                                        val message = when (result) {
+                                            is WorkspaceHomePageCompactionResult.Applied ->
+                                                "Compacted " + result.itemCount + " apps on this page"
+                                            WorkspaceHomePageCompactionResult.AlreadyCompact ->
+                                                "This Home page is already compact"
+                                            WorkspaceHomePageCompactionResult.PrimaryPageProtected ->
+                                                "Primary Home is protected"
+                                            WorkspaceHomePageCompactionResult.PageNotFound ->
+                                                "This Home page is no longer available"
+                                            WorkspaceHomePageCompactionResult.UnsupportedPageItems ->
+                                                "Compact apps is available only for app-only pages"
+                                            WorkspaceHomePageCompactionResult.CapacityExceeded ->
+                                                "The current Home grid cannot fit every app on this page"
+                                            WorkspaceHomePageCompactionResult.StoredWorkspaceChanged ->
+                                                "Home changed before compaction; no changes were applied"
+                                            WorkspaceHomePageCompactionResult.InvalidWorkspace,
+                                            WorkspaceHomePageCompactionResult.Reserved,
+                                            WorkspaceHomePageCompactionResult.Unavailable ->
+                                                "Home page compaction is not available right now"
+                                            is WorkspaceHomePageCompactionResult.Failed ->
+                                                "Home page compaction failed safely"
+                                        }
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            message,
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
                                     }
                                 }
                             },
