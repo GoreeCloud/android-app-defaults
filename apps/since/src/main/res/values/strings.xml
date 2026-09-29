@@ -31,6 +31,12 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_data_recovery">Data &amp; recovery</string>
+    <string name="settings_export_data">Export data</string>
+    <string name="settings_export_data_supporting">Save a versioned JSON copy of tracker titles, notes, history, goals, and archive state to a location you choose.</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_exporting">Saving…</string>
+    <string name="settings_export_success">Export saved. Restore remains unavailable until import validation is implemented.</string>
+    <string name="settings_export_failed">Could not write the export. Your Since data was not changed.</string>
     <string name="settings_backup">Backup</string>
     <string name="settings_backup_supporting">Protect your local Since data with a validated backup.</string>
     <string name="settings_restore">Restore</string>
