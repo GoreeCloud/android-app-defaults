@@ -40,13 +40,13 @@ data class ClockPreferences(
     val clockFace: ClockFacePreference,
     val hapticsEnabled: Boolean,
     val reducedMotion: Boolean,
-    val showWidgetDetails: Boolean = true,
     val worldZones: List<String>,
     val onboardingCompleted: Boolean,
     val onboardingReplay: Boolean,
     val onboardingStep: OnboardingStep,
     val hintsEnabled: Boolean,
     val dismissedHints: Set<String>,
+    val showWidgetDetails: Boolean = true,
 )
 
 class ClockPreferencesStore(context: Context) {
