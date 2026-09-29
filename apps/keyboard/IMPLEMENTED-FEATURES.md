@@ -1,5 +1,10 @@
 # GoreeCloud Keyboard — Implemented Features
 
+## 2026-09-29 — constrained-height touch-target preservation
+
+Development source now computes inter-row keyboard gaps from the actual row area instead of always reserving fixed 4 dp gaps. Under constrained IME height, whitespace compresses toward zero before key rows surrender space that could otherwise preserve the active Glaze interaction floor, including the larger Touch Assistance target. The policy is presentation-only and adds no input-data, learning, clipboard, network, or editor authority.
+
+
 ## September 28, 2026 — Clipboard policy selected-state accessibility
 
 Current-app Clipboard policy chips now expose Android selected state in addition to their visual treatment. Android 11+ also receives explicit **Selected / Not selected** state descriptions, so assistive technology can identify the active Allow / Ask / Paste only / Block policy without relying on color. Android runtime coverage verifies exactly one policy chip is selected for the current snapshot.
