@@ -93,6 +93,7 @@ app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceFolderRepos
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomeItemPageMover.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageContext.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionPolicy.kt
+app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionService.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceLegacyImportMapper.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspacePagedHomeObserver.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspacePagedRoomMutationRepository.kt
