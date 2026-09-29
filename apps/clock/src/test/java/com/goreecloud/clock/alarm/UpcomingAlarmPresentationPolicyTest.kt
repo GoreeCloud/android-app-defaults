@@ -1,5 +1,6 @@
 package com.goreecloud.clock.alarm
 
+import java.time.DayOfWeek
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import org.junit.Assert.assertEquals
@@ -7,6 +8,43 @@ import org.junit.Test
 
 class UpcomingAlarmPresentationPolicyTest {
     private val zone = ZoneId.of("America/Chicago")
+
+    @Test
+    fun repeatSummaryUsesStableHumanReadableGroups() {
+        assertEquals(
+            "One time",
+            UpcomingAlarmPresentationPolicy.repeatSummary(emptySet()),
+        )
+        assertEquals(
+            "Every day",
+            UpcomingAlarmPresentationPolicy.repeatSummary(DayOfWeek.entries.toSet()),
+        )
+        assertEquals(
+            "Weekdays",
+            UpcomingAlarmPresentationPolicy.repeatSummary(
+                setOf(
+                    DayOfWeek.MONDAY,
+                    DayOfWeek.TUESDAY,
+                    DayOfWeek.WEDNESDAY,
+                    DayOfWeek.THURSDAY,
+                    DayOfWeek.FRIDAY,
+                ),
+            ),
+        )
+        assertEquals(
+            "Weekends",
+            UpcomingAlarmPresentationPolicy.repeatSummary(
+                setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY),
+            ),
+        )
+        assertEquals(
+            "Mon • Wed • Fri",
+            UpcomingAlarmPresentationPolicy.repeatSummary(
+                setOf(DayOfWeek.FRIDAY, DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY),
+            ),
+        )
+    }
+
 
     @Test
     fun relativeSummaryUsesInstantDurationAcrossLocalClockChanges() {
