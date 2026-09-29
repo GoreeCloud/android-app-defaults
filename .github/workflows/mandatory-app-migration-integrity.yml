@@ -49,7 +49,7 @@ jobs:
             mv "$work/$app-MIGRATION-ORIGIN.md" "apps/$app/MIGRATION-ORIGIN.md"
           }
 
-          verify_app camera GoreeCloud/camera 9b02ca8c19d56868ed30b3d457631e582ef529cb
+          verify_app camera GoreeCloud/camera 209b89ca31cc23899f6c90d7ca12908281f0af0c
           verify_app launcher GoreeCloud/launcher 1eb8dd6d8178f6d730b100559e8f8d149501d18c
           verify_app keyboard GoreeCloud/keyboard 041b5e0457f2b4d68dc96a416d5abc1f020646d7
           verify_app gallery GoreeCloud/gallery 3f7263c6e31a0af0f1a06b99491f608b96cc69ba
@@ -58,7 +58,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -Fq '9b02ca8c19d56868ed30b3d457631e582ef529cb' apps/camera/MIGRATION-ORIGIN.md
+          grep -Fq '209b89ca31cc23899f6c90d7ca12908281f0af0c' apps/camera/MIGRATION-ORIGIN.md
           grep -Fq '1eb8dd6d8178f6d730b100559e8f8d149501d18c' apps/launcher/MIGRATION-ORIGIN.md
           grep -Fq '041b5e0457f2b4d68dc96a416d5abc1f020646d7' apps/keyboard/MIGRATION-ORIGIN.md
           grep -Fq '3f7263c6e31a0af0f1a06b99491f608b96cc69ba' apps/gallery/MIGRATION-ORIGIN.md
