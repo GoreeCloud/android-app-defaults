@@ -757,6 +757,51 @@ class SinceDatabaseRuntimeTest {
         assertEquals(14, changed.await().single().goal!!.targetAmount)
     }
 
+
+    @Test
+    fun archiveAndRestorePreserveTrackerHistoryAndGoal() = runBlocking {
+        val clock = Clock.fixed(Instant.parse("2026-09-28T20:00:00Z"), ZoneId.of("UTC"))
+        val repository = RoomTrackerRepository(dao = dao, clock = clock)
+        val tracker = trackerEntity(id = "archive-round-trip", kind = TrackerKind.STREAK)
+        dao.createTrackerAggregate(
+            tracker = tracker,
+            initialPeriod = periodEntity(
+                id = "archive-current",
+                eventId = tracker.id,
+                sequence = 0,
+                start = 1_000L,
+            ),
+            goal = EventGoalEntity(
+                eventId = tracker.id,
+                targetAmount = 30,
+                targetUnit = DisplayFormat.DAYS.name,
+                createdAtEpochMs = 10_000L,
+                updatedAtEpochMs = 10_000L,
+            ),
+        )
+
+        val archived = repository.archiveTracker(tracker.id)
+        assertNotNull(archived)
+        assertTrue(archived!!.tracker.isArchived)
+        assertTrue(repository.observeActiveTrackerAggregates().first().isEmpty())
+
+        val archivedList = repository.observeArchivedTrackerAggregates().first()
+        assertEquals(1, archivedList.size)
+        assertEquals(tracker.id, archivedList.single().tracker.id)
+        assertEquals(1, archivedList.single().periods.size)
+        assertEquals(30, archivedList.single().goal?.targetAmount)
+
+        val restored = repository.restoreTracker(tracker.id)
+        assertNotNull(restored)
+        assertFalse(restored!!.tracker.isArchived)
+        assertTrue(repository.observeArchivedTrackerAggregates().first().isEmpty())
+
+        val active = repository.observeActiveTrackerAggregates().first().single()
+        assertEquals(tracker.id, active.tracker.id)
+        assertEquals(1, active.periods.size)
+        assertEquals(30, active.goal?.targetAmount)
+    }
+
     private suspend fun expectSQLiteFailure(
         block: suspend () -> Unit,
     ) {
