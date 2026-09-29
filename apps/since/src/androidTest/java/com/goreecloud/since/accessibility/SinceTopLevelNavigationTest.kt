@@ -83,6 +83,7 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithText("Done").performClick()
 
         composeRule.onNodeWithTag("settings-restore")
+            .performScrollTo()
             .assertIsDisplayed()
             .assertHasClickAction()
             .performClick()
