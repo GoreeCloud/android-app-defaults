@@ -4,6 +4,9 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.os.Bundle
+import android.util.TypedValue
+import android.view.View
 import android.widget.RemoteViews
 import com.goreecloud.clock.ClockApplication
 import com.goreecloud.clock.MainActivity
@@ -20,6 +23,15 @@ class AlarmWidgetProvider : AppWidgetProvider() {
         appWidgetIds.forEach { update(context, appWidgetManager, it) }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle,
+    ) {
+        update(context, appWidgetManager, appWidgetId, newOptions)
+    }
+
     companion object {
         private const val REQUEST_OPEN_ALARMS = 4201
 
@@ -33,12 +45,33 @@ class AlarmWidgetProvider : AppWidgetProvider() {
             context: Context,
             manager: AppWidgetManager,
             appWidgetId: Int,
+            options: Bundle? = null,
         ) {
             val app = context.applicationContext as ClockApplication
             val preferences = app.preferencesStore.state.value
             val now = ZonedDateTime.now()
             val next = NextAlarmSelector.select(app.alarmStore.alarms.value, now)
-            val views = RemoteViews(context.packageName, R.layout.widget_alarm)
+            val widgetOptions = options ?: manager.getAppWidgetOptions(appWidgetId)
+            val compact = WidgetSizePolicy.presentation(
+                minWidthDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
+                minHeightDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT),
+            ) == WidgetPresentation.COMPACT
+            val views = RemoteViews(context.packageName, R.layout.widget_alarm).apply {
+                setViewVisibility(
+                    R.id.widget_alarm_detail,
+                    if (compact) View.GONE else View.VISIBLE,
+                )
+                setTextViewTextSize(
+                    R.id.widget_alarm_time,
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (compact) 24f else 30f,
+                )
+                setTextViewTextSize(
+                    R.id.widget_alarm_label,
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (compact) 13f else 14f,
+                )
+            }
 
             if (next == null) {
                 views.setTextViewText(R.id.widget_alarm_time, context.getString(R.string.widget_alarm_none))
