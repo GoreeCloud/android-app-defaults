@@ -571,4 +571,18 @@ Run #215 / 36418113358 validates selectable alarm sound and gradual volume on he
 
 ### Boundary
 
-The stopwatch-history candidate requires its own exact-head source/runtime/rendered validation before it is treated as an accepted Development checkpoint.
+The stopwatch-history and subsequent relative Next alarm source are included in exact head `60704e906962e3c5d74708866f2393df7ced6393`, which passed Android Development Foundation run #255 / `36489784031`. That closes the prior automated exact-head validation gap for those source slices; representative-device accessibility and interaction acceptance remain open.
+
+
+### Added — Clock adaptive home-screen widget sizing
+
+- Added a shared deterministic compact/regular widget presentation policy driven only by Android launcher size options.
+- Clock compact mode hides the secondary date and reduces the primary time scale.
+- Next-alarm compact mode hides secondary delivery/day detail while preserving the alarm time and label.
+- Running-timer compact mode hides secondary status detail while preserving the timer label and countdown/empty state.
+- Added bounded smaller resize floors in the three AppWidget provider declarations so compatible launchers can reach the compact presentation.
+- Added JVM coverage for narrow, short, default-size, and unavailable host-option behavior.
+
+### Boundary
+
+This adaptive-widget tranche is a Development candidate and requires fresh exact-head Android Development Foundation validation plus representative-launcher resize, theme, touch, and accessibility acceptance. It does not add configuration activities, permissions, networking, account state, release authority, or Stable status.
