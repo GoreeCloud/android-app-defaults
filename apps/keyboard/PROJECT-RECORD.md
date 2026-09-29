@@ -73,3 +73,23 @@ If a distinct historical specification artifact requires separate retention outs
 - `README.md` — project entry point and current Development orientation.
 
 Update this record when significant architecture, repository identity, governance, security/privacy, recovery, production, lifecycle, migration, deprecation, or retirement events occur.
+
+## Legacy-source retirement evidence — September 29, 2026
+
+### Arabic IME foundation from legacy PR #65
+
+Legacy `GoreeCloud/keyboard` PR #65 (`b86992dbcf54340562997630baeaabfd22c42b36`) contains unique Arabic/multilingual source that is not accepted in the imported cutover runtime. Current Keyboard feature authority still treats Arabic/multilingual layout work as planned rather than implemented. To prevent destructive repository retirement from discarding that implementation source, the exact changed-file patch is preserved at:
+
+`docs/migrations/legacy-source/keyboard/pr-65-arabic-ime-foundation.patch`
+
+The preserved patch is migration evidence/source material only. It does not make Arabic an accepted current capability, and any future multilingual implementation must be deliberately restacked onto the then-current monorepo Keyboard runtime and freshly validated.
+
+### Historical 0.1.10 Drive build artifact from legacy PR #99
+
+Legacy PR #99 copied `GoreeCloud-Keyboard-0.1.10.zip` into repository `artifacts/` solely as historical Development/build evidence. The original GoreeCloud Drive artifact remains available at file ID `1UWqim1mmnLsgdo8h-NrNTXyCAHpUWyud`. September 29 readback verified:
+
+- size: `2,487,754` bytes;
+- SHA-256: `1376def8e17ab2f2ba60c4b63bdebb05bd5ccdab99bdb1398ff3f0803690cf53`.
+
+The monorepo migration intentionally excludes generated `artifacts/` trees. Because the original authoritative Drive bytes still exist and match the legacy repository provenance exactly, the duplicate GitHub ZIP is not required for repository retirement.
+
