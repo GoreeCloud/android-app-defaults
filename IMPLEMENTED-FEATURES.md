@@ -1,5 +1,13 @@
 # Android App Defaults — Implemented Features
 
+## September 29, 2026 — Since portable JSON export candidate
+
+The active Since candidate now exposes **Export data** as a user-initiated Android Storage Access Framework flow. The app proposes a `GoreeCloud-Since-YYYY-MM-DD.json` filename, writes only to the URI selected by the user, and requires no storage or network permission.
+
+The portable `goreecloud-since-export` schema v1 includes tracker IDs, titles, notes, kind, icon/accent keys when present, display format, sort/archive state, tracker timestamps, all period/reset history with zone IDs, and optional goals. The pure encoder sorts deterministically and escapes user text; JVM coverage locks the format identity, escaping, ordering, archive state, goal fields, and stable filename behavior. Settings exposes success/failure state and retains **Backup** and **Restore** as fail-closed planned controls.
+
+This is candidate Development source, not validated restore/backup authority. Import/review-before-mutation semantics, representative document-provider/device behavior, broader recovery evidence, and release acceptance remain open.
+
 ## September 29, 2026 — Since archived-only permanent deletion candidate
 
 The stacked Since candidate adds a deliberately narrow destructive boundary: a tracker must already be archived before the repository/DAO will delete it. Settings exposes Delete beside Restore for archived trackers, but permanent deletion requires a separate confirmation dialog and cannot be invoked for active Home trackers through the repository contract. Existing Room foreign keys cascade periods and goals only after that archived-row guard succeeds.
