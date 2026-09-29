@@ -132,6 +132,28 @@ class WidgetModelsTest {
     }
 
     @Test
+    fun alarmWidgetDetailCombinesDayAndRepeatSchedule() {
+        assertEquals(
+            "Tomorrow • Weekdays",
+            AlarmWidgetDetailPolicy.summary(
+                dayLabel = "Tomorrow",
+                repeatSummary = "Weekdays",
+            ),
+        )
+    }
+
+    @Test
+    fun alarmWidgetDetailDropsBlankSegments() {
+        assertEquals(
+            "Today",
+            AlarmWidgetDetailPolicy.summary(
+                dayLabel = " Today ",
+                repeatSummary = " ",
+            ),
+        )
+    }
+
+    @Test
     fun widgetSizePolicyFailsOpenToRegularWhenHostOptionsAreUnavailable() {
         assertEquals(
             WidgetPresentation.REGULAR,
