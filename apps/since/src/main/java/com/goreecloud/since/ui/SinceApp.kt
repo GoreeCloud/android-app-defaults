@@ -76,6 +76,8 @@ import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
 import com.goreecloud.since.domain.portability.SinceExportJson
+import com.goreecloud.since.domain.portability.SinceImportReviewJson
+import com.goreecloud.since.domain.portability.SinceImportReviewResult
 import com.goreecloud.since.domain.repository.TrackerRepository
 import com.goreecloud.since.domain.time.ElapsedResult
 import com.goreecloud.since.domain.time.GoalEstimateResult
@@ -123,6 +125,8 @@ fun SinceApp(
     val context = LocalContext.current
     var isExportingData by remember { mutableStateOf(false) }
     var exportStatus by remember { mutableStateOf<SinceExportStatus?>(null) }
+    var isReviewingImport by remember { mutableStateOf(false) }
+    var importReviewResult by remember { mutableStateOf<SinceImportReviewResult?>(null) }
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
     ) { uri ->
@@ -151,6 +155,39 @@ fun SinceApp(
                     SinceExportStatus.FAILURE
                 }
                 isExportingData = false
+            }
+        }
+    }
+
+    val importReviewLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri == null) {
+            isReviewingImport = false
+        } else {
+            scope.launch {
+                val review = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val input = context.contentResolver.openInputStream(uri)
+                            ?: error("Selected import file could not be opened")
+                        val payloadBytes = input.use { stream ->
+                            val output = java.io.ByteArrayOutputStream()
+                            val buffer = ByteArray(8 * 1024)
+                            var total = 0
+                            while (true) {
+                                val read = stream.read(buffer)
+                                if (read < 0) break
+                                total += read
+                                check(total <= SinceImportReviewJson.MAX_IMPORT_BYTES)
+                                output.write(buffer, 0, read)
+                            }
+                            output.toByteArray()
+                        }
+                        SinceImportReviewJson.review(payloadBytes.toString(Charsets.UTF_8))
+                    }.getOrDefault(SinceImportReviewResult.Invalid)
+                }
+                importReviewResult = review
+                isReviewingImport = false
             }
         }
     }
@@ -508,7 +545,7 @@ fun SinceApp(
                 isExportingData = isExportingData,
                 exportStatus = exportStatus,
                 onExportData = {
-                    if (!isExportingData) {
+                    if (!isExportingData && !isReviewingImport) {
                         exportStatus = null
                         isExportingData = true
                         runCatching {
@@ -516,6 +553,22 @@ fun SinceApp(
                         }.onFailure {
                             isExportingData = false
                             exportStatus = SinceExportStatus.FAILURE
+                        }
+                    }
+                },
+                isReviewingImport = isReviewingImport,
+                importReviewResult = importReviewResult,
+                onReviewImport = {
+                    if (!isReviewingImport && !isExportingData) {
+                        importReviewResult = null
+                        isReviewingImport = true
+                        runCatching {
+                            importReviewLauncher.launch(
+                                arrayOf("application/json", "text/json", "text/plain"),
+                            )
+                        }.onFailure {
+                            isReviewingImport = false
+                            importReviewResult = SinceImportReviewResult.Invalid
                         }
                     }
                 },
