@@ -1,8 +1,12 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-29 Since import-review continuation
+
+A stacked Development candidate now implements the review-only half of the M3 import boundary: explicit SAF document selection, bounded strict UTF-8 input, schema-v1 structural/invariant validation, and a non-mutating summary before any future restore. Unsupported or malformed input fails closed. **No imported data can be applied yet.** Replace-style mutation, conflict handling, rollback/recovery, representative document-provider/device acceptance, and release gates remain planned.
+
 ## 2026-09-29 Since portability continuation
 
-PR #59 now also carries the first bounded M3 portability slice: user-initiated, versioned JSON export through Android's Storage Access Framework. The export is local-only and includes current tracker state, notes, full period/reset history, goals, archive state, and timestamps. Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`. **Backup** and **Restore** remain fail-closed; import validation, review-before-mutation, recovery evidence, and representative document-provider/device acceptance remain open.
+PR #59 now also carries the first bounded M3 portability slice: user-initiated, versioned JSON export through Android's Storage Access Framework. The export is local-only and includes current tracker state, notes, full period/reset history, goals, archive state, and timestamps. Source checkpoint `017ffc3792d31e022267a642a1b1397b29460687` passed Android Development Foundation #334 / run `36554163247`. **Backup** and applied **Restore** remain fail-closed. A stacked follow-up now adds read-only import validation/review; mutation, recovery evidence, and representative document-provider/device acceptance remain open.
 
 ## 2026-09-29 Since destructive-delete continuation
 
@@ -96,7 +100,7 @@ Still open within M1:
 
 - Search and deterministic Recent/Name sorting are implemented on the active Development line. Reversible archive/restore and archived-only permanent deletion are implemented on the stacked PR #59 candidate without a Room schema migration. PR #59 also adds a versioned JSON export through Android Storage Access Framework, while PR #39 provides the bounded top-level Settings/About baseline (theme, fail-closed Backup/Restore entries, privacy/security information, app version/build status).
 - Validate the PR #59 export path across representative document providers/devices and retain format compatibility as import/recovery evolves.
-- Fail-closed validated import with review before mutation; prefer Replace import until safe merge semantics are fully designed.
+- Read-only fail-closed import review is implemented on the current stacked candidate. Applying data remains unavailable; prefer Replace import when mutation/recovery semantics are implemented and verified rather than inventing unsafe merge behavior.
 - Room migration tests using committed historical schema files.
 - Tested process-death/reboot behavior and recovery evidence sufficient for the implemented scope.
 
