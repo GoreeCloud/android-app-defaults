@@ -29,7 +29,7 @@ class ClockStopwatchHistoryTest {
     }
 
     @Test
-    fun resetArchivesSessionAndHistoryCanBeCleared() {
+    fun resetArchivesSessionAndHistoryClearRequiresConfirmation() {
         val app = composeRule.activity.application as ClockApplication
 
         app.stopwatchStore.start()
@@ -41,6 +41,13 @@ class ClockStopwatchHistoryTest {
         composeRule.onNodeWithContentDescription("Stopwatch").performClick()
         composeRule.onNodeWithText("Recent results").assertIsDisplayed()
         composeRule.onNodeWithText("Clear all").performClick()
+        composeRule.onNodeWithText("Clear stopwatch history?").assertIsDisplayed()
+
+        composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.onNodeWithText("Recent results").assertIsDisplayed()
+
+        composeRule.onNodeWithText("Clear all").performClick()
+        composeRule.onNodeWithText("Clear history").performClick()
         composeRule.waitForIdle()
         composeRule.onAllNodesWithText("Recent results").assertCountEquals(0)
     }
