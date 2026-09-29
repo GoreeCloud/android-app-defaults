@@ -219,6 +219,42 @@ internal fun canDeleteHomePage(
         page.folderPlacements.isEmpty() &&
         page.unsupportedItemCount == 0
 
+internal fun canCompactHomePageApps(
+    page: WorkspaceRenderedHomePage,
+    homeColumns: Int,
+    homeRows: Int,
+    layoutLocked: Boolean,
+): Boolean {
+    if (
+        layoutLocked ||
+        homeColumns <= 0 ||
+        homeRows <= 0 ||
+        page.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        page.appPlacements.isEmpty() ||
+        page.widgetPlacements.isNotEmpty() ||
+        page.folderPlacements.isNotEmpty() ||
+        page.unsupportedItemCount != 0
+    ) {
+        return false
+    }
+    val capacity = homeColumns.toLong() * homeRows.toLong()
+    if (page.appPlacements.size.toLong() > capacity) return false
+
+    val validApps = page.appPlacements.all { app ->
+        app.cellX != null &&
+            app.cellY != null &&
+            app.cellX in 0 until homeColumns &&
+            app.cellY in 0 until homeRows &&
+            app.spanX == 1 &&
+            app.spanY == 1
+    }
+    if (!validApps) return false
+
+    return page.appPlacements.withIndex().any { (index, app) ->
+        app.cellX != index % homeColumns || app.cellY != index / homeColumns
+    }
+}
+
 internal fun homePageVisibleItemCount(page: WorkspaceRenderedHomePage): Int =
     page.appKeys.size +
         page.widgetPlacements.size +
