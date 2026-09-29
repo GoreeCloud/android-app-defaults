@@ -32,9 +32,9 @@ Over time, accepted `main` gained native media/album models, MediaStore normaliz
 
 ## Repository rename reconciliation
 
-The Drive source names the repository `GoreeCloud/goreecloud-gallery`. The authoritative repository has since been renamed/reconciled as `GoreeCloud/gallery`.
+The Drive source names the repository `GoreeCloud/goreecloud-gallery`. That repository was later renamed/reconciled as `GoreeCloud/gallery`, and the September 29 mandatory consolidation subsequently moved active development authority to `GoreeCloud/android-app-defaults` under `apps/gallery/`.
 
-The current repository identity controls new links, documentation, pull requests, and migration destination. The former name remains historical provenance only.
+The monorepo identity and `apps/gallery/` path control new development links, documentation, pull requests, and maintenance. Both standalone Gallery repository names remain historical provenance only.
 
 ## Drive specification interpretation
 
