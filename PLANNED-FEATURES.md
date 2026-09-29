@@ -1,5 +1,13 @@
 # Android App Defaults — Planned Features
 
+
+## September 29, 2026 — Clock Next-alarm widget repeat-context continuation
+
+The stacked Clock widget candidate now reuses the verified Next-alarm repeat-schedule presentation in the regular-size home-screen widget. Exact-alarm readiness still overrides secondary detail, and compact layouts continue suppressing that detail. This advances widget information density without adding scheduler, persistence, permission, network, account, telemetry, or background-service authority.
+
+Fresh exact-head Android Development Foundation validation and representative-launcher resize/theme/accessibility acceptance remain required. Per-widget-instance configuration, lock-screen/system surfaces, and additional notification/platform actions remain planned only where product need justifies them.
+
+
 ## September 29, 2026 — Clock widget continuation
 
 Adaptive compact/regular sizing on Draft PR #50 passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. The stacked widget-personalization candidate adds local Settings controls for the Clock date, Next alarm secondary detail, and Timer status; all default on to preserve current behavior and compact layouts still prioritize primary content. Remaining widget work is representative-launcher resize/touch/accessibility/theme/update acceptance, supported lock-screen/system surfaces, and any future per-widget-instance configuration justified by product need.
