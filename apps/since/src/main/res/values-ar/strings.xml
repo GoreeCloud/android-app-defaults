@@ -188,4 +188,16 @@
     <string name="dashboard_sort_recent">الأحدث</string>
     <string name="dashboard_sort_name">الاسم</string>
     <string name="dashboard_no_matches">لا توجد متتبعات تطابق بحثك.</string>
+    <string name="archive_tracker">أرشفة المتتبّع</string>
+    <string name="archive_tracker_supporting">أخفِ هذا المتتبّع من الرئيسية دون حذف سجله أو هدفه. يمكنك استعادته من الإعدادات.</string>
+    <string name="archive_tracker_title">أرشفة هذا المتتبّع؟</string>
+    <string name="archive_tracker_message">سينتقل المتتبّع خارج الرئيسية. تبقى الفترة الحالية والسجل والملاحظة والهدف محفوظة على هذا الجهاز ويمكن استعادتها.</string>
+    <string name="archive">أرشفة</string>
+    <string name="archive_failed">تعذرت أرشفة هذا المتتبّع. لم يتم حذف أي شيء.</string>
+    <string name="archived_trackers">المتتبّعات المؤرشفة</string>
+    <string name="archived_trackers_empty">لا توجد متتبّعات مؤرشفة.</string>
+    <string name="archived_tracker_supporting">مخفي من الرئيسية؛ يظل السجل المحلي محفوظًا.</string>
+    <string name="restore_tracker">استعادة</string>
+    <string name="restoring_tracker">جارٍ الاستعادة…</string>
+    <string name="restore_tracker_failed">تعذرت استعادة هذا المتتبّع.</string>
 </resources>
