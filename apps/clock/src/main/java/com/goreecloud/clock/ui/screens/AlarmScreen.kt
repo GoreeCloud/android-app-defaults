@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -139,12 +140,21 @@ fun AlarmScreen(
                     trigger = upcoming.trigger,
                     now = scheduleNow,
                     use24Hour = use24Hour,
+                    onEdit = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        editing = upcoming.alarm
+                    },
                 )
             }
         }
 
         if (alarms.isEmpty()) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("next-alarm-card")
+            .clickable(onClick = onEdit),
+    ) {
                 Column(Modifier.padding(20.dp)) {
                     Text("No alarms yet", style = MaterialTheme.typography.titleLarge)
                     Text(
@@ -229,6 +239,7 @@ private fun UpcomingAlarmCard(
     trigger: ZonedDateTime,
     now: ZonedDateTime,
     use24Hour: Boolean,
+    onEdit: () -> Unit,
 ) {
     val dayLabel = when (trigger.toLocalDate()) {
         now.toLocalDate() -> "Today"
