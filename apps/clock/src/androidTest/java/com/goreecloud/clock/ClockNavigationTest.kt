@@ -83,7 +83,10 @@ class ClockNavigationTest {
         composeRule.onNodeWithContentDescription("Timer").performClick()
         composeRule.onNodeWithText("Add timer").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Quick presets").assertIsDisplayed()
-        composeRule.onNodeWithTag("timer-preset-30m").assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("timer-preset-30m")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
         composeRule.onNodeWithText("Add").performClick()
 
         composeRule.onNodeWithText("30:00").assertIsDisplayed()
