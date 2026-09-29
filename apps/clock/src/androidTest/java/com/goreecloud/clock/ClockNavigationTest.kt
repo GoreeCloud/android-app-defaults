@@ -3,12 +3,14 @@ package com.goreecloud.clock
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ThemePreference
@@ -130,7 +132,11 @@ class ClockNavigationTest {
         composeRule.onNodeWithTag("alarm-repeat-preset-weekdays").assertIsSelected()
         composeRule.onNodeWithTag("alarm-repeat-day-monday").assertIsSelected()
         composeRule.onNodeWithTag("alarm-repeat-day-friday").assertIsSelected()
+        composeRule.onNodeWithTag("alarm-repeat-days")
+            .performScrollToNode(hasTestTag("alarm-repeat-day-saturday"))
         composeRule.onNodeWithTag("alarm-repeat-day-saturday").assertIsNotSelected()
+        composeRule.onNodeWithTag("alarm-repeat-days")
+            .performScrollToNode(hasTestTag("alarm-repeat-day-sunday"))
         composeRule.onNodeWithTag("alarm-repeat-day-sunday").assertIsNotSelected()
         composeRule.onNodeWithText("Alarm sound:", substring = true)
             .performScrollTo()
