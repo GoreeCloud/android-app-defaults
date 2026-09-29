@@ -141,18 +141,13 @@ class SinceStreakHistoryTest {
         val historyNodes = composeRule
             .onAllNodesWithTag("open-history", useUnmergedTree = true)
             .fetchSemanticsNodes()
-        try {
-            composeRule.onNodeWithTag("reset-streak").assertIsDisplayed()
-        } catch (error: AssertionError) {
-            throw AssertionError(
-                "Large-text action bounds: reset=" +
-                    resetNodes.joinToString { it.boundsInRoot.toString() } +
-                    " history=" +
-                    historyNodes.joinToString { it.boundsInRoot.toString() },
-                error,
-            )
-        }
-        composeRule.onNodeWithTag("reset-streak").performClick()
+        throw AssertionError(
+            "Large-text action bounds: reset=" +
+                resetNodes.joinToString { it.boundsInRoot.toString() } +
+                " history=" +
+                historyNodes.joinToString { it.boundsInRoot.toString() },
+        )
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
