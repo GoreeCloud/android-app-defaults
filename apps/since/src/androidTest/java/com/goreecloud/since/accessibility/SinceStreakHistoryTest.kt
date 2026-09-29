@@ -135,18 +135,16 @@ class SinceStreakHistoryTest {
         }
 
         composeRule.onNodeWithText("Read daily").performClick()
-        val resetNodes = composeRule
-            .onAllNodesWithTag("reset-streak", useUnmergedTree = true)
-            .fetchSemanticsNodes()
-        val historyNodes = composeRule
-            .onAllNodesWithTag("open-history", useUnmergedTree = true)
-            .fetchSemanticsNodes()
-        throw AssertionError(
-            "Large-text action bounds: reset=" +
-                resetNodes.joinToString { it.boundsInRoot.toString() } +
-                " history=" +
-                historyNodes.joinToString { it.boundsInRoot.toString() },
-        )
+        composeRule.waitUntil(timeoutMillis = 5_000) {
+            composeRule
+                .onAllNodesWithTag("reset-streak", useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty() &&
+                composeRule
+                    .onAllNodesWithTag("open-history", useUnmergedTree = true)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+        }
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
