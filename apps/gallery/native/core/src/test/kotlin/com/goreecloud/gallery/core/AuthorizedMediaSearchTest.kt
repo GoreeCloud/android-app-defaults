@@ -49,9 +49,12 @@ class AuthorizedMediaSearchTest {
     }
 
     @Test
-    fun blankQueryAndRequestedLimitRemainBounded() {
+    fun blankQueryPreservesBrowsingWhileActiveSearchRemainsBounded() {
         val items = (1..120).map { media(it.toString(), "photo-$it.jpg") }
-        assertEquals(listOf("1", "2", "3"), AuthorizedMediaSearch.search(items, "  ", limit = 3).map { it.id })
-        assertEquals(AuthorizedMediaSearch.MAX_RESULTS, AuthorizedMediaSearch.search(items, "photo", limit = 500).size)
+        assertEquals(items.map { it.id }, AuthorizedMediaSearch.search(items, "  ", limit = 3).map { it.id })
+        assertEquals(
+            AuthorizedMediaSearch.MAX_RESULTS,
+            AuthorizedMediaSearch.search(items, "photo", limit = 500).size,
+        )
     }
 }
