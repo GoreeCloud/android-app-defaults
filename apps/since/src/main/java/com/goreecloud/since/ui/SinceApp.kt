@@ -127,11 +127,13 @@ fun SinceApp(
     var resetFailed by rememberSaveable { mutableStateOf(false) }
     var archiveFailed by rememberSaveable { mutableStateOf(false) }
     var restoreFailedTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
+    var deleteFailedTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     var isGoalSaving by remember { mutableStateOf(false) }
     var isResetting by remember { mutableStateOf(false) }
     var isArchiving by remember { mutableStateOf(false) }
     var restoringTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
+    var deletingTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var historyTrackerId by rememberSaveable { mutableStateOf<String?>(null) }
     var topLevelDestinationName by rememberSaveable {
         mutableStateOf(TopLevelDestination.HOME.name)
@@ -434,8 +436,11 @@ fun SinceApp(
                 archivedTrackers = archivedAggregates,
                 restoringTrackerId = restoringTrackerId,
                 restoreFailedTrackerId = restoreFailedTrackerId,
+                deletingTrackerId = deletingTrackerId,
+                deleteFailedTrackerId = deleteFailedTrackerId,
                 onRestoreTracker = { trackerId ->
                     restoreFailedTrackerId = null
+                    deleteFailedTrackerId = null
                     restoringTrackerId = trackerId
                     scope.launch {
                         val restored = runCatching {
@@ -445,6 +450,20 @@ fun SinceApp(
                             restoreFailedTrackerId = trackerId
                         }
                         restoringTrackerId = null
+                    }
+                },
+                onDeleteArchivedTracker = { trackerId ->
+                    restoreFailedTrackerId = null
+                    deleteFailedTrackerId = null
+                    deletingTrackerId = trackerId
+                    scope.launch {
+                        val deleted = runCatching {
+                            repository.deleteArchivedTracker(trackerId)
+                        }.getOrDefault(false)
+                        if (!deleted) {
+                            deleteFailedTrackerId = trackerId
+                        }
+                        deletingTrackerId = null
                     }
                 },
                 contextualHintsEnabled = contextualHintsEnabled,
