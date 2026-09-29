@@ -1,5 +1,15 @@
 # Android App Defaults — Changelogs
 
+## September 29, 2026 — Since portable JSON export candidate
+
+- Added an explicit **Export data** action under Settings → Data & recovery.
+- Export uses Android's Storage Access Framework document picker and writes only to the destination the user selects; no broad storage permission is added.
+- Added versioned `goreecloud-since-export` schema v1 JSON containing tracker identity/state, titles, notes, display settings, archive state, complete period/reset history, goals, and timestamps.
+- Added deterministic ordering, JSON escaping, stable UTC-date filenames, JVM coverage for the codec, English/Arabic copy, and Android UI reachability coverage.
+- Kept **Backup** and **Restore** fail-closed and separate. Export does not claim validated recovery, import safety, Everkeep backup, synchronization, or cloud authority.
+
+**Acceptance boundary:** Development candidate on PR #59. Fresh exact-head CI, representative-device document-provider behavior, accessibility/localization review, validated import/recovery, and release qualification remain open.
+
 ## September 29, 2026 — Since archived-only permanent deletion candidate
 
 - Added permanent tracker deletion only from the archived-tracker Settings surface.
