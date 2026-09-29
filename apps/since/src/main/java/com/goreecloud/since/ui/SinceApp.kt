@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -837,15 +838,12 @@ private fun TrackerDetailsScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
+        bottomBar = {
             if (aggregate.tracker.kind == TrackerKind.STREAK) {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding(),
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     tonalElevation = 3.dp,
                 ) {
@@ -854,7 +852,7 @@ private fun TrackerDetailsScreen(
                             start = 16.dp,
                             top = 8.dp,
                             end = 16.dp,
-                            bottom = 16.dp,
+                            bottom = 8.dp,
                         ),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
@@ -877,6 +875,13 @@ private fun TrackerDetailsScreen(
                     }
                 }
             }
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+        ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
