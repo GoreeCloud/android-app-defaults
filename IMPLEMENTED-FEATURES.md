@@ -5,7 +5,7 @@
 
 Since now uses the existing Room v1 `is_archived` field as a reversible local-management boundary without a schema migration. Tracker Details offers a confirmation-gated Archive action; archived trackers disappear from the active Dashboard but retain their current period, closed history, note, display format, and goal. Settings lists archived trackers and provides Restore back to Home.
 
-The repository exposes separate active and archived aggregate flows, archived trackers remain immutable through ordinary edit/reset/goal mutations, and Android coverage verifies Room history/goal preservation plus the user-visible Details → Settings → Restore round trip. English and Arabic resources are included. No delete, export/import, backup, account, or network authority is added. Fresh exact-head validation is required before this candidate is treated as verified.
+The repository exposes separate active and archived aggregate flows, archived trackers remain immutable through ordinary edit/reset/goal mutations, and Android coverage verifies Room history/goal preservation plus the user-visible Details → Settings → Restore round trip. English and Arabic resources are included. No delete, export/import, backup, account, or network authority is added. Exact source head `857c808ce05112f83426163cd84a96724741dfb5` passed Android Development Foundation #267 / `36507824384`, including build/unit/lint/schema/manifest checks and Android 16 instrumentation `OK (35 tests)`.
 
 
 ## September 28, 2026 — Since persistent streak actions at large text
