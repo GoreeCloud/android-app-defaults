@@ -11,6 +11,7 @@ import android.widget.RemoteViews
 import com.goreecloud.clock.ClockApplication
 import com.goreecloud.clock.MainActivity
 import com.goreecloud.clock.R
+import com.goreecloud.clock.alarm.UpcomingAlarmPresentationPolicy
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -92,14 +93,19 @@ class AlarmWidgetProvider : AppWidgetProvider() {
                 val time = next.trigger.format(DateTimeFormatter.ofPattern(pattern))
                 val label = next.alarm.label.ifBlank { context.getString(R.string.widget_alarm_default_label) }
                 val day = NextAlarmSelector.dayLabel(next.trigger, now)
-                val exactStatus = if (app.alarmScheduler.canScheduleExactAlarms()) {
-                    day
+                val detail = if (app.alarmScheduler.canScheduleExactAlarms()) {
+                    AlarmWidgetDetailPolicy.summary(
+                        dayLabel = day,
+                        repeatSummary = UpcomingAlarmPresentationPolicy.repeatSummary(
+                            next.alarm.repeatDays,
+                        ),
+                    )
                 } else {
                     context.getString(R.string.widget_alarm_exact_access_needed)
                 }
                 views.setTextViewText(R.id.widget_alarm_time, time)
                 views.setTextViewText(R.id.widget_alarm_label, label)
-                views.setTextViewText(R.id.widget_alarm_detail, exactStatus)
+                views.setTextViewText(R.id.widget_alarm_detail, detail)
             }
 
             views.setOnClickPendingIntent(
