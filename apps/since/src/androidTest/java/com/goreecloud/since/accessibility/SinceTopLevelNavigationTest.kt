@@ -154,6 +154,45 @@ class SinceTopLevelNavigationTest {
     }
 
     @Test
+    fun archivedTrackerRequiresConfirmationBeforePermanentDelete() {
+        val repository = FakeTrackerRepository(listOf(sampleAggregate()), clock = clock)
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithTag("archive-tracker")
+            .performScrollTo()
+            .performClick()
+        composeRule.onNodeWithTag("confirm-archive-tracker").performClick()
+
+        composeRule.onNodeWithTag("nav-settings").performClick()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("delete-archived-tracker-tracker-top-level")
+            .assertHasClickAction()
+            .performClick()
+
+        composeRule.runOnIdle {
+            assertTrue(repository.current.single().tracker.isArchived)
+        }
+
+        composeRule.onNodeWithTag("confirm-delete-archived-tracker")
+            .assertIsDisplayed()
+            .performClick()
+
+        composeRule.runOnIdle {
+            assertTrue(repository.current.isEmpty())
+        }
+        composeRule.onNodeWithTag("archived-trackers-empty").assertIsDisplayed()
+    }
+
+    @Test
     fun homeContextualHintCanBeDismissedWithoutDisablingGlobalPreference() {
         var contextualHintsEnabled by mutableStateOf(true)
         var homeHintDismissed by mutableStateOf(false)
