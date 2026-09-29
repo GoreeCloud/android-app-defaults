@@ -1,5 +1,12 @@
 # GoreeCloud Gallery Changelogs
 
+## 2026-09-29 — Development continuation candidate
+
+- Added a bounded first-party authorized-media search contract capped at 100 results.
+- Wired Photos, Videos, Favorites, opened albums, and Albums collection rendering to the same local-only search policy.
+- Search remains confined to metadata already present in the Android-authorized snapshot and introduces no network or broader storage permission.
+
+
 ## September 29, 2026 — persistent local sort order candidate
 - Persisted **Newest first / Oldest first** instead of resetting the local browsing order on process launch.
 - The existing header sort control now writes the app-private preference, and Settings exposes the same choice directly.
