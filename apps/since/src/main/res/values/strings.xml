@@ -199,4 +199,10 @@
     <string name="restore_tracker">Restore</string>
     <string name="restoring_tracker">Restoring…</string>
     <string name="restore_tracker_failed">Could not restore this tracker.</string>
+    <string name="delete_tracker">Delete</string>
+    <string name="deleting_tracker">Deleting…</string>
+    <string name="delete_archived_tracker_title">Permanently delete this tracker?</string>
+    <string name="delete_archived_tracker_message">This removes the archived tracker, its current period, reset history, note, and goal from this device. This action cannot be undone.</string>
+    <string name="delete_permanently">Delete permanently</string>
+    <string name="delete_tracker_failed">Could not delete this tracker. Its local data was left unchanged.</string>
 </resources>
