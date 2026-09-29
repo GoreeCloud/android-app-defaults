@@ -30,6 +30,10 @@ class ClockNavigationTest {
         app.preferencesStore.setHintsEnabled(true)
         app.preferencesStore.resetDismissedHints()
         app.preferencesStore.setWorldZones(emptyList())
+        app.timerStore.timers.value.forEach { timer ->
+            app.timerScheduler.cancel(timer.id)
+            app.timerStore.delete(timer.id)
+        }
         composeRule.waitForIdle()
     }
 
@@ -71,6 +75,23 @@ class ClockNavigationTest {
                 listOf("Europe/London"),
                 app.preferencesStore.state.value.worldZones,
             )
+        }
+    }
+
+    @Test
+    fun timerQuickPresetCreatesExpectedLocalDuration() {
+        composeRule.onNodeWithContentDescription("Timer").performClick()
+        composeRule.onNodeWithText("Add timer").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Quick presets").assertIsDisplayed()
+        composeRule.onNodeWithTag("timer-preset-30m").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Add", exact = true).performClick()
+
+        composeRule.onNodeWithText("30:00").assertIsDisplayed()
+        composeRule.runOnIdle {
+            val app = composeRule.activity.application as ClockApplication
+            assertEquals(1, app.timerStore.timers.value.size)
+            assertEquals(30L * 60_000L, app.timerStore.timers.value.single().durationMillis)
+            assertEquals(false, app.timerStore.timers.value.single().running)
         }
     }
 
