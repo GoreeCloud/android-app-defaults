@@ -440,7 +440,10 @@ private fun AlarmEditorDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelMedium,
                 )
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                LazyRow(
+                    modifier = Modifier.testTag("alarm-repeat-days"),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     items(DayOfWeek.entries) { day ->
                         FilterChip(
                             modifier = Modifier.testTag("alarm-repeat-day-" + day.name.lowercase()),
