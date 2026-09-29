@@ -161,6 +161,7 @@ restart_app() {
 # First use is mandatory and begins at step 1.
 assert_text "Welcome to GoreeCloud Camera"
 assert_text "Step 1 of 3"
+assert_text "Camera preview and capture use this device. Volume keys capture photos by default; change that behavior, the photo self-timer, or the composition grid in Settings. This Development build does not upload captures or require a cloud account to take a photo or video."
 tap_text "Next"
 
 # Interruption/resume must persist the exact incomplete step.
