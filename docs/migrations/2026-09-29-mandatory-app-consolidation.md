@@ -6,7 +6,7 @@ GoreeCloud Camera, GoreeCloud Launcher, GoreeCloud Keyboard, and GoreeCloud Gall
 
 | Application | Legacy repository | Exact imported revision | Active source PR at migration start |
 | --- | --- | --- | --- |
-| Camera | `GoreeCloud/camera` | `9b02ca8c19d56868ed30b3d457631e582ef529cb` | #19 |
+| Camera | `GoreeCloud/camera` | `209b89ca31cc23899f6c90d7ca12908281f0af0c` | #19 |
 | Launcher | `GoreeCloud/launcher` | `1eb8dd6d8178f6d730b100559e8f8d149501d18c` | #248 |
 | Keyboard | `GoreeCloud/keyboard` | `041b5e0457f2b4d68dc96a416d5abc1f020646d7` | #97 |
 | Gallery | `GoreeCloud/gallery` | `3f7263c6e31a0af0f1a06b99491f608b96cc69ba` | #103 |
