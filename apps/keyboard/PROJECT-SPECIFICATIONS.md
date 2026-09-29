@@ -1,6 +1,6 @@
 # GoreeCloud Keyboard — Project Specifications
 
-> **Current repository authority — September 29, 2026:** GoreeCloud Keyboard is maintained in `GoreeCloud/android-app-defaults` under `apps/keyboard/`. The standalone `GoreeCloud/keyboard` repository is historical Git provenance only. The mandatory cutover imported exact Development revision `041b5e0457f2b4d68dc96a416d5abc1f020646d7` and merged into monorepo `main` as `20ca33c7c0c565f361deda206c9c950154dec327`. This repository-location statement supersedes legacy repository or “current candidate” wording preserved below when that wording predates the cutover. Historical legacy PR/commit references remain valid evidence, but new project-specification maintenance belongs here.
+> **Current repository authority — September 29, 2026:** GoreeCloud Keyboard is maintained in `GoreeCloud/android-app-defaults` under `apps/keyboard/`. The standalone `GoreeCloud/keyboard` repository is a temporary legacy source pending final reconciliation and required deletion. The mandatory cutover imported exact Development revision `041b5e0457f2b4d68dc96a416d5abc1f020646d7` and merged into monorepo `main` as `20ca33c7c0c565f361deda206c9c950154dec327`. This repository-location statement supersedes legacy repository or “current candidate” wording preserved below when that wording predates the cutover. Historical legacy PR/commit references remain valid evidence, but new project-specification maintenance belongs here.
 
 
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/keyboard/`)  
