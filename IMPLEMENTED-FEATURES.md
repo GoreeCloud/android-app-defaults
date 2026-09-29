@@ -1,5 +1,15 @@
 # Android App Defaults — Implemented Features
 
+
+## September 29, 2026 — Clock widget detail personalization candidate
+
+Draft PR #50 now adds a local **Show widget details** preference, enabled by default. When disabled, regular Clock widgets hide secondary information: the Clock widget date, next-alarm day/access detail, and running-timer status. Compact widgets continue to suppress secondary detail regardless of the preference so launcher-constrained layouts remain deterministic.
+
+The preference lives in the existing app-private Clock preference store, persists across Activity recreation, and reuses the existing widget refresh path. A pure presentation policy keeps the size and preference rules testable without introducing a second widget rendering path. Focused JVM coverage verifies regular/compact preference behavior, while Android instrumentation verifies the preference survives Activity recreation and Settings exposes the control.
+
+No new permission, network/account path, scheduler, alarm/timer state, widget tap destination, or persistence schema is introduced. Fresh exact-head Android Development Foundation validation is required before this candidate is treated as verified. Per-widget configuration and representative-launcher resize/theme/touch/accessibility acceptance remain open.
+
+
 ## September 29, 2026 — Clock adaptive widget sizing candidate
 
 Draft PR #50 now makes the Clock, next-alarm, and running-timer home-screen widgets react to Android launcher resize options. A shared deterministic policy selects regular presentation at the existing default sizes and a compact presentation when the launcher grants a narrow or short surface. Compact mode hides secondary date/status detail and reduces primary type scale while preserving the existing tap destination and local-only data boundary.
