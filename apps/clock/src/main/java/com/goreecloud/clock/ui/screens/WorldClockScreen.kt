@@ -23,7 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.goreecloud.clock.data.WorldClockOrderPolicy
 import com.goreecloud.clock.ui.ClockHapticEvent
 import java.time.Instant
 import java.time.ZoneId
@@ -93,7 +95,12 @@ fun WorldClockScreen(
         LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             itemsIndexed(zones, key = { _, zone -> zone }) { index, zone ->
                 val city = AvailableCities.firstOrNull { it.zoneId == zone }?.label ?: zone
-                Card(modifier = Modifier.fillMaxWidth()) {
+                val tag = zone.replace('/', '_')
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("world-clock-$tag"),
+                ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -109,29 +116,38 @@ fun WorldClockScreen(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             TextButton(
+                                modifier = Modifier.testTag("world-clock-move-up-$tag"),
                                 enabled = index > 0,
                                 onClick = {
                                     onHaptic(ClockHapticEvent.TICK)
-                                    val updated = zones.toMutableList()
-                                    val item = updated.removeAt(index)
-                                    updated.add(index - 1, item)
-                                    onZonesChanged(updated)
+                                    onZonesChanged(
+                                        WorldClockOrderPolicy.move(
+                                            zones = zones,
+                                            index = index,
+                                            offset = -1,
+                                        )
+                                    )
                                 },
                             ) { Text("Move up") }
                             TextButton(
+                                modifier = Modifier.testTag("world-clock-move-down-$tag"),
                                 enabled = index < zones.lastIndex,
                                 onClick = {
                                     onHaptic(ClockHapticEvent.TICK)
-                                    val updated = zones.toMutableList()
-                                    val item = updated.removeAt(index)
-                                    updated.add(index + 1, item)
-                                    onZonesChanged(updated)
+                                    onZonesChanged(
+                                        WorldClockOrderPolicy.move(
+                                            zones = zones,
+                                            index = index,
+                                            offset = 1,
+                                        )
+                                    )
                                 },
                             ) { Text("Move down") }
                             TextButton(
+                                modifier = Modifier.testTag("world-clock-remove-$tag"),
                                 onClick = {
                                     onHaptic(ClockHapticEvent.ACTION)
-                                    onZonesChanged(zones.filterNot { it == zone })
+                                    onZonesChanged(WorldClockOrderPolicy.remove(zones, zone))
                                 },
                             ) { Text("Remove") }
                         }
@@ -153,7 +169,7 @@ fun WorldClockScreen(
                             enabled = city.zoneId !in zones && city.zoneId != ZoneId.systemDefault().id,
                             onClick = {
                                 onHaptic(ClockHapticEvent.ACTION)
-                                onZonesChanged(zones + city.zoneId)
+                                onZonesChanged(WorldClockOrderPolicy.add(zones, city.zoneId))
                                 showAdd = false
                             },
                         ) {
