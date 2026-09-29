@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.goreecloud.clock.data.ClockFacePreference
 import com.goreecloud.clock.data.ThemePreference
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +30,9 @@ class ClockNavigationTest {
         app.preferencesStore.completeOnboarding()
         app.preferencesStore.setHintsEnabled(true)
         app.preferencesStore.resetDismissedHints()
+        app.preferencesStore.setShowClockWidgetDate(true)
+        app.preferencesStore.setShowAlarmWidgetDetail(true)
+        app.preferencesStore.setShowTimerWidgetStatus(true)
         app.preferencesStore.setWorldZones(emptyList())
         composeRule.waitForIdle()
     }
@@ -75,6 +79,38 @@ class ClockNavigationTest {
     }
 
     @Test
+    fun widgetDetailPreferencesPersistAcrossActivityRecreation() {
+        val app = composeRule.activity.application as ClockApplication
+
+        composeRule.onNodeWithText("Settings").performClick()
+        composeRule.onNodeWithTag("settings-widget-clock-date")
+            .performScrollTo()
+            .performClick()
+        composeRule.onNodeWithTag("settings-widget-alarm-detail")
+            .performScrollTo()
+            .performClick()
+        composeRule.onNodeWithTag("settings-widget-timer-status")
+            .performScrollTo()
+            .performClick()
+
+        composeRule.runOnIdle {
+            assertFalse(app.preferencesStore.state.value.showClockWidgetDate)
+            assertFalse(app.preferencesStore.state.value.showAlarmWidgetDetail)
+            assertFalse(app.preferencesStore.state.value.showTimerWidgetStatus)
+        }
+
+        composeRule.onNodeWithText("Done").performClick()
+        composeRule.activityRule.scenario.recreate()
+        composeRule.waitForIdle()
+
+        composeRule.runOnIdle {
+            assertFalse(app.preferencesStore.state.value.showClockWidgetDate)
+            assertFalse(app.preferencesStore.state.value.showAlarmWidgetDetail)
+            assertFalse(app.preferencesStore.state.value.showTimerWidgetStatus)
+        }
+    }
+
+    @Test
     fun principalClockSurfacesAndEditorsRemainReachable() {
         composeRule.onNodeWithText("Digital").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Analog").performClick()
@@ -114,6 +150,10 @@ class ClockNavigationTest {
         composeRule.onNodeWithText("Clock settings").assertIsDisplayed()
         composeRule.onNodeWithText("24-hour time").assertIsDisplayed()
         composeRule.onNodeWithText("Haptic feedback").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Widgets").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Show date in Clock widget").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Show detail in Next alarm widget").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Show status in Timer widget").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Contextual hints").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Replay onboarding").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
