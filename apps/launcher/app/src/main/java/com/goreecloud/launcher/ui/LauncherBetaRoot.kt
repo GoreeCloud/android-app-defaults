@@ -801,6 +801,7 @@ fun LauncherBetaRoot(
                 onCreateHomePage = onCreateHomePage,
                 onSelectHomePage = onSelectHomePage,
                 onDeleteHomePage = onDeleteHomePage,
+                onCompactHomePage = onCompactHomePage,
                 onSwipeHomePageLeft = onSwipeHomePageLeft,
                 onSwipeHomePageRight = onSwipeHomePageRight,
                 onManageFolders = {
@@ -1244,6 +1245,7 @@ private fun HomeSurface(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    onCompactHomePage: (String) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     onManageFolders: () -> Unit,
