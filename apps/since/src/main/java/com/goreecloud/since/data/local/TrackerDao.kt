@@ -22,6 +22,13 @@ abstract class TrackerDao {
     )
     abstract fun observeActiveTrackedEvents(): Flow<List<TrackedEventEntity>>
 
+    @Query(
+        "SELECT * FROM tracked_events " +
+            "WHERE is_archived = 1 " +
+            "ORDER BY updated_at_epoch_ms DESC, title COLLATE NOCASE, id"
+    )
+    abstract fun observeArchivedTrackedEvents(): Flow<List<TrackedEventEntity>>
+
     @Query("SELECT * FROM event_periods ORDER BY event_id, sequence")
     abstract fun observeAllPeriods(): Flow<List<EventPeriodEntity>>
 
@@ -63,6 +70,17 @@ abstract class TrackerDao {
         title: String,
         note: String?,
         displayFormat: String,
+        updatedAtEpochMs: Long,
+    ): Int
+
+    @Query(
+        "UPDATE tracked_events SET " +
+            "is_archived = :isArchived, updated_at_epoch_ms = :updatedAtEpochMs " +
+            "WHERE id = :eventId AND is_archived != :isArchived"
+    )
+    protected abstract suspend fun updateArchiveState(
+        eventId: String,
+        isArchived: Boolean,
         updatedAtEpochMs: Long,
     ): Int
 
@@ -317,6 +335,24 @@ abstract class TrackerDao {
         if (tracker.isArchived || tracker.kind != TrackerKind.STREAK.name) return false
         val existing = readGoal(eventId) ?: return true
         return deleteGoal(existing.eventId) == 1
+    }
+
+    @Transaction
+    open suspend fun setTrackerArchived(
+        eventId: String,
+        isArchived: Boolean,
+        updatedAtEpochMs: Long,
+    ): PersistedTrackerAggregate? {
+        val tracker = readTrackedEvent(eventId) ?: return null
+        if (tracker.isArchived == isArchived) return readAggregate(eventId)
+        check(
+            updateArchiveState(
+                eventId = eventId,
+                isArchived = isArchived,
+                updatedAtEpochMs = updatedAtEpochMs,
+            ) == 1
+        ) { "archive state did not update exactly one tracker row" }
+        return readAggregate(eventId)
     }
 
     @Transaction
