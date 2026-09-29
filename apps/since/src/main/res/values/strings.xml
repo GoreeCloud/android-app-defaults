@@ -187,4 +187,16 @@
     <string name="dashboard_sort_recent">Recent</string>
     <string name="dashboard_sort_name">Name</string>
     <string name="dashboard_no_matches">No trackers match your search.</string>
+    <string name="archive_tracker">Archive tracker</string>
+    <string name="archive_tracker_supporting">Hide this tracker from Home without deleting its history or goal. You can restore it from Settings.</string>
+    <string name="archive_tracker_title">Archive this tracker?</string>
+    <string name="archive_tracker_message">The tracker will move out of Home. Its current period, history, note, and goal stay on this device and can be restored.</string>
+    <string name="archive">Archive</string>
+    <string name="archive_failed">Could not archive this tracker. Nothing was deleted.</string>
+    <string name="archived_trackers">Archived trackers</string>
+    <string name="archived_trackers_empty">No archived trackers.</string>
+    <string name="archived_tracker_supporting">Hidden from Home; local history remains preserved.</string>
+    <string name="restore_tracker">Restore</string>
+    <string name="restoring_tracker">Restoring…</string>
+    <string name="restore_tracker_failed">Could not restore this tracker.</string>
 </resources>
