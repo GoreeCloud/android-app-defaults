@@ -3,6 +3,7 @@ package com.goreecloud.launcher.ui
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
+import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeApp
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -106,6 +107,88 @@ class HomePageManagerPolicyTest {
                 layoutLocked = false,
             ),
         )
+    }
+
+    @Test
+    fun scatteredSecondaryAppsCanBeCompactedWhenUnlocked() {
+        val secondary = WorkspaceRenderedHomePage(
+            pageId = "home:user:secondary",
+            rank = 1,
+            appKeys = listOf("a", "b", "c"),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp("a", 2, 2, 1, 1),
+                WorkspaceRenderedHomeApp("b", 0, 1, 1, 1),
+                WorkspaceRenderedHomeApp("c", 3, 4, 1, 1),
+            ),
+        )
+
+        assertTrue(
+            canCompactHomePageApps(
+                page = secondary,
+                homeColumns = 4,
+                homeRows = 5,
+                layoutLocked = false,
+            ),
+        )
+    }
+
+    @Test
+    fun compactionEligibilityFailsClosedForPrimaryLockedAndAlreadyCompactPages() {
+        val compactSecondary = WorkspaceRenderedHomePage(
+            pageId = "home:user:secondary",
+            rank = 1,
+            appKeys = listOf("a", "b"),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp("a", 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp("b", 1, 0, 1, 1),
+            ),
+        )
+        val primaryWithApps = primary.copy(
+            appKeys = listOf("a"),
+            appPlacements = listOf(WorkspaceRenderedHomeApp("a", 2, 2, 1, 1)),
+        )
+
+        assertFalse(canCompactHomePageApps(compactSecondary, 4, 5, false))
+        assertFalse(canCompactHomePageApps(compactSecondary.copy(
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp("a", 2, 2, 1, 1),
+                WorkspaceRenderedHomeApp("b", 1, 0, 1, 1),
+            ),
+        ), 4, 5, true))
+        assertFalse(canCompactHomePageApps(primaryWithApps, 4, 5, false))
+    }
+
+    @Test
+    fun compactionEligibilityRejectsWidgetsUnsupportedAndInvalidAppGeometry() {
+        val base = WorkspaceRenderedHomePage(
+            pageId = "home:user:secondary",
+            rank = 1,
+            appKeys = listOf("a"),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(WorkspaceRenderedHomeApp("a", 3, 3, 1, 1)),
+        )
+
+        assertFalse(
+            canCompactHomePageApps(
+                page = base.copy(unsupportedItemCount = 1),
+                homeColumns = 4,
+                homeRows = 5,
+                layoutLocked = false,
+            ),
+        )
+        assertFalse(
+            canCompactHomePageApps(
+                page = base.copy(
+                    appPlacements = listOf(WorkspaceRenderedHomeApp("a", 3, 3, 2, 1)),
+                ),
+                homeColumns = 4,
+                homeRows = 5,
+                layoutLocked = false,
+            ),
+        )
+        assertFalse(canCompactHomePageApps(base, 0, 5, false))
     }
 
     @Test
