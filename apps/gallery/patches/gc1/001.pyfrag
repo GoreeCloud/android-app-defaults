@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Apply the GoreeCloud Gallery gc.1 patchset to Fossify Gallery 1.13.1.
+
+This script intentionally keeps the upstream Kotlin namespace intact while giving the
+installable application a GoreeCloud package identity. It performs only deterministic,
+reviewable source transformations and fails closed when the expected upstream source
+shape is not present.
+"""
+
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+EXPECTED_UPSTREAM_COMMIT = "b28299dc33821eee8d108a9880ce87876cf31443"
+APP_ID = "com.goreecloud.gallery"
+APP_NAME = "GoreeCloud Gallery"
+VERSION_NAME = "1.0.0-gc.1"
+VERSION_CODE = "10001"
+GLAZE_PRIMARY = "#5865F2"
+GLAZE_ACCENT = "#8B5CF6"
+
+
+def fail(message: str) -> None:
+    raise SystemExit(f"goreecloud-gallery patch failed: {message}")
+
+
+def read(path: Path) -> str:
+    if not path.is_file():
+        fail(f"missing expected file: {path}")
+    return path.read_text(encoding="utf-8")
+
+
+def write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def replace_once(path: Path, old: str, new: str) -> None:
+    text = read(path)
+    count = text.count(old)
+    if count != 1:
+        fail(f"expected exactly one occurrence in {path}: {old!r}; found {count}")
+    write(path, text.replace(old, new, 1))
+
+
+def verify_upstream(root: Path) -> None:
+    commit = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+    if commit != EXPECTED_UPSTREAM_COMMIT:
+        fail(f"unexpected upstream commit {commit}; expected {EXPECTED_UPSTREAM_COMMIT}")
+
+    license_text = read(root / "LICENSE")
+    if "GNU GENERAL PUBLIC LICENSE" not in license_text or "Version 3" not in license_text:
+        fail("upstream GPL-3.0 license was not found as expected")
+
+
+def patch_build_identity(root: Path) -> None:
+    gradle = root / "app/build.gradle.kts"
+    replace_once(
+        gradle,
+        'applicationId = project.property("APP_ID").toString()',
+        f'applicationId = "{APP_ID}"',
+    )
+    replace_once(
+        gradle,
+        'applicationIdSuffix = ".debug"',
+        '// GoreeCloud: keep the debug build on the production package ID for direct APK installation.',
+    )
+
+    props = root / "gradle.properties"
+    text = read(props)
+    text, n1 = re.subn(r"^VERSION_NAME=.*$", f"VERSION_NAME={VERSION_NAME}", text, count=1, flags=re.MULTILINE)
+    text, n2 = re.subn(r"^VERSION_CODE=.*$", f"VERSION_CODE={VERSION_CODE}", text, count=1, flags=re.MULTILINE)
+    if n1 != 1 or n2 != 1:
+        fail("could not update version metadata")
+    # APP_ID remains org.fossify.gallery on purpose: it is the Kotlin/Android resource namespace.
+    write(props, text)
+
+
+def patch_branding(root: Path) -> None:
+    donottranslate = root / "app/src/main/res/values/donottranslate.xml"
+    replace_once(donottranslate, "<string name=\"app_name\">Fossify Gallery</string>", f"<string name=\"app_name\">{APP_NAME}</string>")
+    replace_once(donottranslate, "<string name=\"package_name\">org.fossify.gallery</string>", f"<string name=\"package_name\">{APP_ID}</string>")
+
+    # App launcher name and brand references are normalized across translations without
+    # altering the surrounding translated prose.
+    for strings in (root / "app/src/main/res").glob("values*/strings.xml"):
+        text = read(strings)
+        text = text.replace("Fossify Gallery", APP_NAME)
+        text = re.sub(
+            r'(<string name="app_launcher_name"[^>]*>).*?(</string>)',
+            rf"\1{APP_NAME}\2",
+            text,
+            count=1,
+        )
+        write(strings, text)
+
+    debug_strings = root / "app/src/debug/res/values/strings.xml"
+    if debug_strings.exists():
+        text = read(debug_strings).replace("Fossify Gallery", APP_NAME)
+        text = re.sub(
+            r'(<string name="app_launcher_name"[^>]*>).*?(</string>)',
+            rf"\1{APP_NAME}\2",
+            text,
+            count=1,
+        )
+        write(debug_strings, text)
+
+    manifest = root / "app/src/main/AndroidManifest.xml"
+    text = read(manifest)
+    original_queries = '''        <package android:name="org.fossify.gallery.debug" />
+        <package android:name="org.fossify.gallery" />'''
+    goreecloud_query = f'''        <package android:name="{APP_ID}" />'''
+    if original_queries not in text:
+        fail("could not find expected upstream package query block")
+    text = text.replace(original_queries, goreecloud_query, 1)

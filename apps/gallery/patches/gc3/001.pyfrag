@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Apply GoreeCloud Gallery gc.3 real-device acceptance corrections after gc.2."""
+
+from __future__ import annotations
+
+import html
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+GALLERY_COMMIT = "b28299dc33821eee8d108a9880ce87876cf31443"
+COMMONS_COMMIT = "acfd352df1a1852d17a5f77def8b7ad6e522a5b6"
+VERSION_NAME = "1.0.0-gc.3"
+VERSION_CODE = "10003"
+COMMONS_AGP = "9.0.1"
+LIGHT_SURFACE = "#EEF1FB"
+DARK_SURFACE = "#171C29"
+
+
+def fail(message: str) -> None:
+    raise SystemExit(f"gc.3 patch failed: {message}")
+
+
+def read(path: Path) -> str:
+    if not path.is_file():
+        fail(f"missing {path}")
+    return path.read_text(encoding="utf-8")
+
+
+def write(path: Path, text: str) -> None:
+    path.write_text(text, encoding="utf-8")
+
+
+def replace_once(path: Path, old: str, new: str) -> None:
+    text = read(path)
+    if text.count(old) != 1:
+        fail(f"expected one occurrence in {path}: {old!r}")
+    write(path, text.replace(old, new, 1))
+
+
+def verify_checkout(root: Path, expected: str, label: str) -> None:
+    actual = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+    if actual != expected:
+        fail(f"{label} checkout is {actual}, expected {expected}")
+
+
+def patch_commons_build_tool(commons: Path) -> None:
+    """Align the included Commons build with Gallery's AGP without changing source revision."""
+    catalog = commons / "gradle/libs.versions.toml"
+    replace_once(
+        catalog,
+        'gradlePlugins-agp = "9.0.0"',
+        f'gradlePlugins-agp = "{COMMONS_AGP}"',
+    )
+
+
+def patch_version(gallery: Path) -> None:
+    props = gallery / "gradle.properties"
+    text = read(props)
+    text, name_count = re.subn(
+        r"^VERSION_NAME=.*$", f"VERSION_NAME={VERSION_NAME}", text, count=1, flags=re.M
+    )
+    text, code_count = re.subn(
+        r"^VERSION_CODE=.*$", f"VERSION_CODE={VERSION_CODE}", text, count=1, flags=re.M
+    )
+    if name_count != 1 or code_count != 1:
+        fail("could not advance Gallery version metadata")
+    write(props, text)
+
+
+def patch_fake_version_boundary(commons: Path) -> None:
+    app_theme = commons / "commons/src/main/kotlin/org/fossify/commons/compose/theme/AppTheme.kt"
+    replace_once(
+        app_theme,
+        """@Composable\nprivate fun OnContentDisplayed() {\n    FakeVersionCheck()\n}\n""",
+        """@Composable\nprivate fun OnContentDisplayed() {\n    val context = LocalContext.current\n    if (!context.packageName.startsWith(\"com.goreecloud.\", ignoreCase = true)) {\n        FakeVersionCheck()\n    }\n}\n""",
+    )
+
+    compose_extensions = commons / "commons/src/main/kotlin/org/fossify/commons/compose/extensions/ComposeActivityExtensions.kt"
+    replace_once(
+        compose_extensions,
+        """fun FakeVersionCheck() {\n    val context = LocalContext.current\n""",
+        """fun FakeVersionCheck() {\n    val context = LocalContext.current\n    if (context.packageName.startsWith(\"com.goreecloud.\", ignoreCase = true)) return\n""",
+    )
+
+    activity_extensions = commons / "commons/src/main/kotlin/org/fossify/commons/compose/extensions/ActivityExtensions.kt"
+    text = read(activity_extensions)
+    if '!packageName.startsWith("com.goreecloud.", true)' not in text:
+        fail("gc.2 GoreeCloud fake-version package exception is missing")
+    old_label = """const val FAKE_VERSION_APP_LABEL =\n    \"You are using a fake version of the app. For your own safety download the original one from www.fossify.org. Thanks\""""
+    new_label = """const val FAKE_VERSION_APP_LABEL =\n    \"This package is not recognized as an official build.\""""
+    if old_label in text:
+        text = text.replace(old_label, new_label, 1)
+    write(activity_extensions, text)
+
+
+def patch_customization_identity(commons: Path) -> None:
+    activity = commons / "commons/src/main/kotlin/org/fossify/commons/activities/CustomizationActivity.kt"
+    anchor = """        showOrHideThankYouFeatures()\n        originalAppIconColor = baseConfig.appIconColor\n        updateLabelColors()\n"""
+    replacement = """        showOrHideThankYouFeatures()\n        originalAppIconColor = baseConfig.appIconColor\n        if (packageName.startsWith(\"com.goreecloud.\", ignoreCase = true)) {\n            // GoreeCloud uses one canonical launcher identity instead of Fossify's\n            // color-swappable launcher aliases. Hide the inherited control and its warning.\n            baseConfig.wasAppIconCustomizationWarningShown = true\n            binding.customizationAppIconColorHolder.beVisibleIf(false)\n        }\n        updateLabelColors()\n"""
+    replace_once(activity, anchor, replacement)
+
+
+def patch_glaze_app_bars(commons: Path) -> None:
+    styling = commons / "commons/src/main/kotlin/org/fossify/commons/extensions/Context-styling.kt"
+    old = """fun Context.getColoredMaterialStatusBarColor(): Int {\n    return when {\n        isDynamicTheme() -> resources.getColor(R.color.you_status_bar_color, theme)\n        else -> getProperPrimaryColor()\n    }\n}\n"""
+    new = f"""fun Context.getColoredMaterialStatusBarColor(): Int {{\n    return when {{\n        packageName.startsWith(\"com.goreecloud.\", true) ->\n            Color.parseColor(if (isSystemInDarkMode()) \"{DARK_SURFACE}\" else \"{LIGHT_SURFACE}\")\n        isDynamicTheme() -> resources.getColor(R.color.you_status_bar_color, theme)\n        else -> getProperPrimaryColor()\n    }}\n}}\n"""
+    replace_once(styling, old, new)
+
+
+def override_string(path: Path, name: str, value: str) -> None:
+    text = read(path)
+    escaped = html.escape(value, quote=False)
+    element = f'    <string name="{name}">{escaped}</string>'
+    pattern = re.compile(rf"\s*<string name=\"{re.escape(name)}\"[^>]*>.*?</string>", re.S)
+    if pattern.search(text):
+        text = pattern.sub("\n" + element, text, count=1)
+    elif "</resources>" in text:
+        text = text.replace("</resources>", element + "\n</resources>", 1)
+    else:
+        fail(f"no resources closing tag in {path}")
+    write(path, text)
+
+
+def patch_gallery_strings(gallery: Path) -> None:
+    strings = gallery / "app/src/main/res/values/strings.xml"
+    override_string(
+        strings,
+        "app_icon_color_warning",
+        "GoreeCloud Gallery uses a fixed GoreeCloud launcher icon. Launcher color switching is not used in this maintained fork.",
+    )
+    override_string(
+        strings,
+        "faq_6_text_commons",
+        "If the GoreeCloud Gallery launcher icon disappears after a launcher update, restart the launcher or reinstall GoreeCloud Gallery.",
+    )
+    override_string(strings, "apply_to_all_apps", "Apply theme to supported GoreeCloud apps")
+    override_string(
+        strings,
+        "global_theme_success",
+        "The current theme has been applied to supported GoreeCloud apps.",
+    )
+
+
+def patch_notice(gallery: Path) -> None:
+    notice = f"""GoreeCloud Gallery {VERSION_NAME}\n\nGoreeCloud Gallery is a GoreeCloud-maintained Android gallery fork based on Fossify Gallery\n1.13.1 and Fossify Commons 6.1.5. It remains offline-first and adds no analytics,\nadvertising, cloud account, remote API, or Internet permission.\n\ngc.3 closes the remaining real-device branding boundary found after gc.2: the inherited\nFossify counterfeit-build dialog is suppressed at both the AppTheme and FakeVersionCheck\nentry points for com.goreecloud packages, Fossify's green-icon recovery wording is replaced,\nand the inherited launcher-color control is hidden because GoreeCloud uses a canonical\nlauncher identity. Settings and customization app bars now use layered Glaze surfaces instead\nof a flat primary-color toolbar. The included Commons build remains pinned to its exact source\nrevision while its Android Gradle Plugin declaration is aligned with Gallery for build compatibility.\n\nUpstream copyright, source history, GNU GPL licensing, and third-party notices remain\napplicable. GoreeCloud rebranding does not remove those obligations.\n"""
+    write(gallery / "GOREECLOUD-NOTICE.md", notice)
+    write(gallery / "app/src/main/assets/goreecloud_notice.txt", notice)
+
+
+def validate(gallery: Path, commons: Path) -> None:
+    props = read(gallery / "gradle.properties")
+    catalog = read(commons / "gradle/libs.versions.toml")
+    app_theme = read(commons / "commons/src/main/kotlin/org/fossify/commons/compose/theme/AppTheme.kt")
+    compose_extensions = read(commons / "commons/src/main/kotlin/org/fossify/commons/compose/extensions/ComposeActivityExtensions.kt")
+    activity_extensions = read(commons / "commons/src/main/kotlin/org/fossify/commons/compose/extensions/ActivityExtensions.kt")
+    customization = read(commons / "commons/src/main/kotlin/org/fossify/commons/activities/CustomizationActivity.kt")

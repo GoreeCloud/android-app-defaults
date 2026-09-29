@@ -1,0 +1,114 @@
+    light = commons / "commons/src/main/res/drawable/top_popup_menu_bg_light.xml"
+    dark = commons / "commons/src/main/res/drawable/top_popup_menu_bg_dark.xml"
+    material_you = commons / "commons/src/main/res/drawable/dialog_you_background.xml"
+
+    light_xml = """<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F7F8FC" />
+            <corners android:radius="20dp" />
+            <stroke android:width="1dp" android:color="#1F5865F2" />
+            <padding android:left="4dp" android:top="10dp" android:right="4dp" android:bottom="10dp" />
+        </shape>
+    </item>
+</layer-list>
+"""
+    dark_xml = """<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#171C29" />
+            <corners android:radius="20dp" />
+            <stroke android:width="1dp" android:color="#338995FF" />
+            <padding android:left="4dp" android:top="10dp" android:right="4dp" android:bottom="10dp" />
+        </shape>
+    </item>
+</layer-list>
+"""
+    material_you_xml = """<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/you_dialog_background_color" />
+            <corners android:radius="20dp" />
+            <stroke android:width="1dp" android:color="#1F5865F2" />
+            <padding android:left="4dp" android:top="10dp" android:right="4dp" android:bottom="10dp" />
+        </shape>
+    </item>
+</layer-list>
+"""
+    write(light, light_xml)
+    write(dark, dark_xml)
+    # System default uses TopPopupMenuYou, which resolves to dialog_you_background.
+    write(material_you, material_you_xml)
+
+
+def patch_notice(gallery: Path) -> None:
+    notice = f"""GoreeCloud Gallery {VERSION_NAME}\n\nGoreeCloud Gallery is a GoreeCloud-maintained Android gallery fork based on Fossify Gallery\n1.13.1 and Fossify Commons 6.1.5. It remains offline-first and adds no analytics,\nadvertising, cloud account, remote API, or Internet permission.\n\ngc.4 is the first post-gc.3 Glaze UI acceptance refinement. Real-device gc.3 testing confirmed\nthat the counterfeit-build dialog is gone, launcher-color identity leakage is gone, and the\nSettings/customization app-bar correction works. gc.4 preserves those fixes while converting\ninteractive Settings and Appearance rows from a flat edge-to-edge list into softly elevated,\nrounded Glaze surfaces with intentional spacing. Overflow and system-theme popup/dialog\nsurfaces use 20dp rounded GoreeCloud geometry with restrained border depth. No Gallery\nfeature behavior or media-storage behavior is intentionally changed.\n\nUpstream copyright, source history, GNU GPL licensing, and third-party notices remain\napplicable. GoreeCloud rebranding does not remove those obligations.\n"""
+    write(gallery / "GOREECLOUD-NOTICE.md", notice)
+    write(gallery / "app/src/main/assets/goreecloud_notice.txt", notice)
+
+
+def validate(gallery: Path, commons: Path) -> None:
+    props = read(gallery / "gradle.properties")
+    settings = read(gallery / "app/src/main/res/layout/activity_settings.xml")
+    customization = read(commons / "commons/src/main/res/layout/activity_customization.xml")
+    popup_light = read(commons / "commons/src/main/res/drawable/top_popup_menu_bg_light.xml")
+    popup_dark = read(commons / "commons/src/main/res/drawable/top_popup_menu_bg_dark.xml")
+    material_you = read(commons / "commons/src/main/res/drawable/dialog_you_background.xml")
+
+    checks = [
+        (f"VERSION_NAME={VERSION_NAME}", props),
+        (f"VERSION_CODE={VERSION_CODE}", props),
+        ('@drawable/glaze_settings_row_background', settings),
+        ('android:elevation="1dp"', settings),
+        ('@drawable/glaze_settings_row_background', customization),
+        ('android:radius="20dp"', popup_light),
+        ('android:radius="20dp"', popup_dark),
+        ('android:radius="20dp"', material_you),
+        ('@color/you_dialog_background_color', material_you),
+        ('#F7F8FC', popup_light),
+        ('#171C29', popup_dark),
+    ]
+    for needle, haystack in checks:
+        if needle not in haystack:
+            fail(f"validation missing {needle!r}")
+    if settings.count('@drawable/glaze_settings_row_background') < 20:
+        fail("too few Settings rows received Glaze card treatment")
+
+    for xml_file in (
+        gallery / "app/src/main/res/drawable/glaze_settings_row_background.xml",
+        gallery / "app/src/main/res/layout/activity_settings.xml",
+        commons / "commons/src/main/res/drawable/glaze_settings_row_background.xml",
+        commons / "commons/src/main/res/drawable-night/glaze_settings_row_background.xml",
+        commons / "commons/src/main/res/layout/activity_customization.xml",
+        commons / "commons/src/main/res/drawable/top_popup_menu_bg_light.xml",
+        commons / "commons/src/main/res/drawable/top_popup_menu_bg_dark.xml",
+        commons / "commons/src/main/res/drawable/dialog_you_background.xml",
+    ):
+        try:
+            ET.parse(xml_file)
+        except ET.ParseError as exc:
+            fail(f"invalid XML in {xml_file}: {exc}")
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        fail("usage: build_goreecloud_gallery_gc4.py <gallery-root> <commons-root>")
+    gallery = Path(sys.argv[1]).resolve()
+    commons = Path(sys.argv[2]).resolve()
+    verify_checkout(gallery, GALLERY_COMMIT, "Gallery")
+    verify_checkout(commons, COMMONS_COMMIT, "Commons")
+    patch_version(gallery)
+    add_glaze_settings_cards(gallery, commons)
+    patch_settings_rows(gallery)
+    patch_customization_rows(commons)
+    patch_popup_surfaces(commons)
+    patch_notice(gallery)
+    validate(gallery, commons)
+    print(f"Applied GoreeCloud Gallery {VERSION_NAME} Glaze UI refinements")
+
+
+if __name__ == "__main__":
+    main()

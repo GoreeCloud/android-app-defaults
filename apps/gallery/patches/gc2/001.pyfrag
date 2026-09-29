@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Apply GoreeCloud Gallery gc.2 corrections after the gc.1 patchset."""
+
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+GALLERY_COMMIT = "b28299dc33821eee8d108a9880ce87876cf31443"
+COMMONS_COMMIT = "acfd352df1a1852d17a5f77def8b7ad6e522a5b6"
+APP_ID = "com.goreecloud.gallery"
+VERSION_NAME = "1.0.0-gc.2"
+VERSION_CODE = "10002"
+PRIMARY = "#5865F2"
+ACCENT = "#8B5CF6"
+LIGHT_BG = "#F7F8FC"
+LIGHT_SURFACE = "#EEF1FB"
+LIGHT_TEXT = "#14213D"
+DARK_BG = "#10131C"
+DARK_SURFACE = "#171C29"
+DARK_TEXT = "#F5F7FC"
+DARK_PRIMARY = "#8995FF"
+DARK_ACCENT = "#AD8BFF"
+
+
+def fail(msg: str) -> None:
+    raise SystemExit(f"gc.2 patch failed: {msg}")
+
+
+def read(path: Path) -> str:
+    if not path.is_file():
+        fail(f"missing {path}")
+    return path.read_text(encoding="utf-8")
+
+
+def write(path: Path, text: str) -> None:
+    path.write_text(text, encoding="utf-8")
+
+
+def replace_once(path: Path, old: str, new: str) -> None:
+    text = read(path)
+    if text.count(old) != 1:
+        fail(f"expected one occurrence in {path}: {old!r}")
+    write(path, text.replace(old, new, 1))
+
+
+def verify_checkout(root: Path, expected: str, name: str) -> None:
+    actual = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+    if actual != expected:
+        fail(f"{name} checkout is {actual}, expected {expected}")
+
+
+def patch_version(gallery: Path) -> None:
+    props = gallery / "gradle.properties"
+    text = read(props)
+    text, n1 = re.subn(r"^VERSION_NAME=.*$", f"VERSION_NAME={VERSION_NAME}", text, count=1, flags=re.M)
+    text, n2 = re.subn(r"^VERSION_CODE=.*$", f"VERSION_CODE={VERSION_CODE}", text, count=1, flags=re.M)
+    if n1 != 1 or n2 != 1:
+        fail("could not advance version metadata")
+    write(props, text)
+
+
+def patch_composite_build(gallery: Path) -> None:
+    settings = gallery / "settings.gradle.kts"
+    text = read(settings)
+    marker = 'include(":app")'
+    if marker not in text:
+        fail("Gallery settings.gradle.kts shape changed")
+    block = '''include(":app")
+
+// GoreeCloud gc.2: build the exact Fossify Commons 6.1.5 source locally so
+// legitimate fork-specific behavior and Glaze UI overrides are transparent.
+includeBuild("../upstream-commons") {
+    dependencySubstitution {
+        substitute(module("org.fossify:commons")).using(project(":commons"))
+    }
+}
+'''
+    write(settings, text.replace(marker, block, 1))
+
+
+def patch_gallery_identity(gallery: Path) -> None:
+    manifest = gallery / "app/src/main/AndroidManifest.xml"
+    text = read(manifest)
+    text, count = re.subn(r'@mipmap/ic_launcher[^"\s]*', '@drawable/ic_goreecloud_gallery', text)
+    if count < 2:
+        fail("expected launcher icon aliases in Gallery manifest")
+    write(manifest, text)
+
+    foss_bools = gallery / "app/src/foss/res/values/bools.xml"
+    replace_once(foss_bools, '<bool name="show_donate_in_about">true</bool>', '<bool name="show_donate_in_about">false</bool>')
+
+
+def patch_gallery_palette(gallery: Path) -> None:
+    app = gallery / "app/src/main/kotlin/org/fossify/gallery/App.kt"
+    old = f'''        val glazeDefaults = getSharedPreferences("goreecloud_glaze", MODE_PRIVATE)
+        if (!glazeDefaults.getBoolean("palette_applied", false)) {{
+            Config.newInstance(this).apply {{
+                primaryColor = Color.parseColor("{PRIMARY}")
+                accentColor = Color.parseColor("{ACCENT}")
+                customPrimaryColor = Color.parseColor("{PRIMARY}")
+                customAccentColor = Color.parseColor("{ACCENT}")
+            }}
+            glazeDefaults.edit().putBoolean("palette_applied", true).apply()
+        }}
+'''
+    new = f'''        val glazeDefaults = getSharedPreferences("goreecloud_glaze", MODE_PRIVATE)
+        if (glazeDefaults.getInt("palette_version", 0) < 2) {{
+            Config.newInstance(this).apply {{
+                isSystemThemeEnabled = true
+                isGlobalThemeEnabled = false
+                primaryColor = Color.parseColor("{PRIMARY}")
+                accentColor = Color.parseColor("{ACCENT}")
+                backgroundColor = Color.parseColor("{LIGHT_BG}")
+                textColor = Color.parseColor("{LIGHT_TEXT}")
+                appIconColor = Color.parseColor("{PRIMARY}")
+                lastIconColor = Color.parseColor("{PRIMARY}")
+                customPrimaryColor = Color.parseColor("{PRIMARY}")
+                customAccentColor = Color.parseColor("{ACCENT}")
+                customBackgroundColor = Color.parseColor("{LIGHT_BG}")
+                customTextColor = Color.parseColor("{LIGHT_TEXT}")
+                customAppIconColor = Color.parseColor("{PRIMARY}")
+            }}
+            glazeDefaults.edit().putInt("palette_version", 2).remove("palette_applied").apply()
+        }}
+'''
+    replace_once(app, old, new)
+
+
+def patch_gallery_resources(gallery: Path) -> None:
+    colors = gallery / "app/src/main/res/values/colors.xml"
+    text = read(colors)
+    additions = f'''
+    <!-- GoreeCloud gc.2 overrides for inherited Fossify Commons resources. -->
+    <color name="color_primary">{PRIMARY}</color>
+    <color name="color_primary_dark">{DARK_PRIMARY}</color>
+    <color name="color_accent">{ACCENT}</color>
+    <color name="default_primary_color">{PRIMARY}</color>
+    <color name="default_accent_color">{ACCENT}</color>
+    <color name="default_app_icon_color">{PRIMARY}</color>
+    <color name="default_background_color">{LIGHT_BG}</color>
+    <color name="default_text_color">{LIGHT_TEXT}</color>
+    <color name="glaze_surface_strong">{LIGHT_SURFACE}</color>
+'''
+    if "</resources>" not in text:
+        fail("Gallery colors.xml has no closing resources tag")
+    write(colors, text.replace("</resources>", additions + "</resources>", 1))
+
+    night = gallery / "app/src/main/res/values-night/glaze_colors.xml"
+    text = read(night)
+    additions = f'''
+    <color name="color_primary">{DARK_PRIMARY}</color>
+    <color name="color_primary_dark">{DARK_PRIMARY}</color>
+    <color name="color_accent">{DARK_ACCENT}</color>
+    <color name="default_primary_color">{DARK_PRIMARY}</color>
+    <color name="default_accent_color">{DARK_ACCENT}</color>
+    <color name="default_app_icon_color">{PRIMARY}</color>

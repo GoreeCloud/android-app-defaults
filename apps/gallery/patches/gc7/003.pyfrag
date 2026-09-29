@@ -1,0 +1,34 @@
+    # Preserve gc.6's no-square contract while changing only the overflow path.
+    for value in ("get() = false", "get() = FOLDER_STYLE_ROUNDED_CORNERS", "get() = true"):
+        if value not in config:
+            fail(f"gc.6 thumbnail invariant missing: {value}")
+    for forbidden, content in (
+        ("settings_crop_thumbnails", settings_xml),
+        ("dialog_file_style_rounded_corners", file_xml),
+        ("dialog_radio_folder_square", folder_xml),
+        ("dialog_radio_folder_rounded_corners", folder_xml),
+    ):
+        if forbidden in content:
+            fail(f"square thumbnail control returned: {forbidden}")
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        fail("usage: build_goreecloud_gallery_gc7.py <gallery-root> <commons-root>")
+
+    gallery = Path(sys.argv[1]).resolve()
+    commons = Path(sys.argv[2]).resolve()
+    verify(gallery, GALLERY_COMMIT, "Gallery")
+    verify(commons, COMMONS_COMMIT, "Commons")
+
+    update_version(gallery)
+    add_popup_resources(commons)
+    patch_search_toolbar(commons)
+    update_notice(gallery)
+    validate(gallery, commons)
+
+    print(f"Applied GoreeCloud Gallery {VERSION_NAME} direct toolbar overflow correction.")
+
+
+if __name__ == "__main__":
+    main()

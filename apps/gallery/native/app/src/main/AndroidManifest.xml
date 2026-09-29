@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
+    <application
+        android:name=".GalleryApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_gallery_launcher"
+        android:roundIcon="@mipmap/ic_gallery_launcher"
+        android:label="Gallery"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GoreeCloudGallery">
+        <activity
+            android:name=".PhotoEditorActivity"
+            android:exported="false"
+            android:label="Edit photo" />
+        <activity
+            android:name=".RecycleBinActivity"
+            android:exported="false"
+            android:label="Gallery Recycle Bin" />
+        <activity
+            android:name=".GalleryActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
