@@ -6,7 +6,7 @@ Adaptive compact/regular sizing on Draft PR #50 passed Android Development Found
 
 ## September 28, 2026 — relative Next alarm candidate
 
-Draft PR #50 now enriches the already implemented exact-alarm-gated **Next alarm** surface with a tested, DST-safe relative countdown derived from the existing scheduled trigger instant. Exact candidate head `d47eb48611867b5d96b6239ea5681cbf007edbdf` passed Android Development Foundation run `36488720505`. Richer alarm presentation is therefore partially advanced, while representative-device DST/time-zone/clock-change, accessibility, delivery, sound/volume, widget, release, and Anchor acceptance remain open.
+Draft PR #50 enriches the exact-alarm-gated **Next alarm** surface with a tested, DST-safe relative countdown derived from the existing scheduled trigger instant. The stacked repeat-summary candidate further adds deterministic **One time / Every day / Weekdays / Weekends / custom days** context from the already-persisted alarm schedule without changing scheduling authority. Richer alarm presentation remains partial: representative-device DST/time-zone/clock-change, localization/accessibility, delivery, sound/volume, widget, release, and Anchor acceptance remain open.
 
 
 ## 2026-09-28 Clock candidate continuation
