@@ -1,5 +1,8 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-29 Since portability continuation
+
+PR #59 now also carries the first bounded M3 portability slice: user-initiated, versioned JSON export through Android's Storage Access Framework. The export is local-only and includes current tracker state, notes, full period/reset history, goals, archive state, and timestamps. **Backup** and **Restore** remain fail-closed; import validation, review-before-mutation, recovery evidence, representative document-provider/device acceptance, and exact-head CI remain open.
 
 ## 2026-09-29 Since destructive-delete continuation
 
@@ -91,8 +94,8 @@ Still open within M1:
 
 **State:** Planned.
 
-- Search and deterministic Recent/Name sorting are implemented on the active Development line. Reversible archive/restore is implemented on the stacked archive candidate without a Room schema migration; permanent deletion and its safeguards remain planned. PR #39 integrated the bounded top-level Settings/About baseline (theme, fail-closed Backup/Restore entries, privacy/security information, app version/build status) while validated portability/recovery behavior remains open.
-- Versioned JSON export using Android Storage Access Framework.
+- Search and deterministic Recent/Name sorting are implemented on the active Development line. Reversible archive/restore and archived-only permanent deletion are implemented on the stacked PR #59 candidate without a Room schema migration. PR #59 also adds a versioned JSON export through Android Storage Access Framework, while PR #39 provides the bounded top-level Settings/About baseline (theme, fail-closed Backup/Restore entries, privacy/security information, app version/build status).
+- Validate the PR #59 export path across representative document providers/devices and retain format compatibility as import/recovery evolves.
 - Fail-closed validated import with review before mutation; prefer Replace import until safe merge semantics are fully designed.
 - Room migration tests using committed historical schema files.
 - Tested process-death/reboot behavior and recovery evidence sufficient for the implemented scope.
