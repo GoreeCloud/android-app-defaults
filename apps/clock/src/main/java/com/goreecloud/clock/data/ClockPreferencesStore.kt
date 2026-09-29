@@ -40,6 +40,9 @@ data class ClockPreferences(
     val clockFace: ClockFacePreference,
     val hapticsEnabled: Boolean,
     val reducedMotion: Boolean,
+    val showClockWidgetDate: Boolean,
+    val showAlarmWidgetDetail: Boolean,
+    val showTimerWidgetStatus: Boolean,
     val worldZones: List<String>,
     val onboardingCompleted: Boolean,
     val onboardingReplay: Boolean,
@@ -78,6 +81,18 @@ class ClockPreferencesStore(context: Context) {
 
     fun setReducedMotion(value: Boolean) = update {
         putBoolean(KEY_REDUCED_MOTION, value)
+    }
+
+    fun setShowClockWidgetDate(value: Boolean) = update {
+        putBoolean(KEY_WIDGET_CLOCK_DATE, value)
+    }
+
+    fun setShowAlarmWidgetDetail(value: Boolean) = update {
+        putBoolean(KEY_WIDGET_ALARM_DETAIL, value)
+    }
+
+    fun setShowTimerWidgetStatus(value: Boolean) = update {
+        putBoolean(KEY_WIDGET_TIMER_STATUS, value)
     }
 
     fun setWorldZones(zones: List<String>) = update {
@@ -160,6 +175,9 @@ class ClockPreferencesStore(context: Context) {
             clockFace = clockFace,
             hapticsEnabled = prefs.getBoolean(KEY_HAPTICS, true),
             reducedMotion = prefs.getBoolean(KEY_REDUCED_MOTION, false),
+            showClockWidgetDate = prefs.getBoolean(KEY_WIDGET_CLOCK_DATE, true),
+            showAlarmWidgetDetail = prefs.getBoolean(KEY_WIDGET_ALARM_DETAIL, true),
+            showTimerWidgetStatus = prefs.getBoolean(KEY_WIDGET_TIMER_STATUS, true),
             worldZones = zones,
             onboardingCompleted = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false),
             onboardingReplay = prefs.getBoolean(KEY_ONBOARDING_REPLAY, false),
@@ -178,7 +196,17 @@ class ClockPreferencesStore(context: Context) {
         val alreadyHasOnboardingState =
             prefs.contains(KEY_ONBOARDING_COMPLETED) || prefs.contains(KEY_ONBOARDING_STEP)
         val hasPriorProductState = prefs.all.keys.any { key ->
-            key in setOf(KEY_THEME, KEY_24_HOUR, KEY_CLOCK_FACE, KEY_HAPTICS, KEY_REDUCED_MOTION, KEY_WORLD_ZONES)
+            key in setOf(
+                KEY_THEME,
+                KEY_24_HOUR,
+                KEY_CLOCK_FACE,
+                KEY_HAPTICS,
+                KEY_REDUCED_MOTION,
+                KEY_WIDGET_CLOCK_DATE,
+                KEY_WIDGET_ALARM_DETAIL,
+                KEY_WIDGET_TIMER_STATUS,
+                KEY_WORLD_ZONES,
+            )
         } || listOf("clock_alarms", "clock_timers", "clock_stopwatch").any { name ->
             appContext.getSharedPreferences(name, Context.MODE_PRIVATE).all.isNotEmpty()
         }
@@ -210,6 +238,9 @@ class ClockPreferencesStore(context: Context) {
         const val KEY_CLOCK_FACE = "clock_face"
         const val KEY_HAPTICS = "haptics"
         const val KEY_REDUCED_MOTION = "reduced_motion"
+        const val KEY_WIDGET_CLOCK_DATE = "widget_clock_date"
+        const val KEY_WIDGET_ALARM_DETAIL = "widget_alarm_detail"
+        const val KEY_WIDGET_TIMER_STATUS = "widget_timer_status"
         const val KEY_WORLD_ZONES = "world_zones"
         const val KEY_ONBOARDING_SCHEMA = "onboarding_schema_version"
         const val KEY_ONBOARDING_COMPLETED = "onboarding_completed_v1"
