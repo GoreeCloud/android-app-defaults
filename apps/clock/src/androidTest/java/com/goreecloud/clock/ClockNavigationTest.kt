@@ -83,17 +83,16 @@ class ClockNavigationTest {
         composeRule.onNodeWithContentDescription("Timer").performClick()
         composeRule.onNodeWithText("Add timer").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Quick presets").assertIsDisplayed()
-        composeRule.onNodeWithTag("timer-preset-30m")
-            .performScrollTo()
+        composeRule.onNodeWithTag("timer-preset-1m")
             .assertIsDisplayed()
             .performClick()
         composeRule.onNodeWithText("Add").performClick()
 
-        composeRule.onNodeWithText("30:00").assertIsDisplayed()
+        composeRule.onNodeWithText("01:00").assertIsDisplayed()
         composeRule.runOnIdle {
             val app = composeRule.activity.application as ClockApplication
             assertEquals(1, app.timerStore.timers.value.size)
-            assertEquals(30L * 60_000L, app.timerStore.timers.value.single().durationMillis)
+            assertEquals(60_000L, app.timerStore.timers.value.single().durationMillis)
             assertEquals(false, app.timerStore.timers.value.single().running)
         }
     }
