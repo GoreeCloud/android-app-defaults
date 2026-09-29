@@ -9,7 +9,7 @@
 - Kept ordinary edit, display-format, goal, and reset mutations fail-closed while a tracker is archived.
 - Added English/Arabic resources, Room runtime coverage, and Compose archive/restore navigation coverage.
 - Added no delete API, schema migration, network permission, account dependency, export/import, or backup authority.
-- Fresh exact-head Android Development Foundation validation remains required.
+- Source head `857c808ce05112f83426163cd84a96724741dfb5` passed Android Development Foundation #267 / `36507824384`, including Android 16 instrumentation `OK (35 tests)`.
 
 
 ## September 28, 2026 — Since persistent streak actions at large text
