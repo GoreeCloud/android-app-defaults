@@ -1,8 +1,8 @@
 # GoreeCloud Launcher — Planned Features
 
-## 2026-09-29 — compaction continuation
+## 2026-09-29 — compaction acceptance continuation
 
-The canonical monorepo now carries the fail-closed planning half of secondary-page **Compact apps**. Remaining work is to bind the plan to the current Room-authoritative transactional mutation path, revalidate the complete HOME snapshot at commit time, expose the action only on eligible unlocked secondary pages, clear or reconcile edit-history state after successful compaction, and obtain runtime/representative-device/accessibility acceptance.
+Secondary-page **Compact apps** is now wired through the current Room-authoritative compare-and-swap mutation path and exposed in Edit Home only for eligible unlocked app-only pages. Remaining work is exact-head CI/runtime acceptance, representative-device and TalkBack/Switch Access review, large-text/form-factor validation, and any separately justified durable edit-history/undo semantics. No Production Acceptance, Stable, Seal, or Anchor claim is implied.
 
 
 ## 2026-09-28 candidate continuation
