@@ -11,7 +11,7 @@ Active source development moved from `GoreeCloud/camera` to `GoreeCloud/android-
 **Document Type:** Repository-Native Project Record  
 **Status:** Active  
 **Project:** GoreeCloud Camera  
-**Repository:** GoreeCloud/camera  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/camera/`)  
 **Authority:** Repository-local project record  
 **Last Updated:** 2026-09-27
 
@@ -21,7 +21,7 @@ The project specification and significant project history are being migrated fro
 
 The migration uses current GitHub main as authority for accepted implementation state and uses the Drive records for requirements and historical preservation. This prevents the older Drive snapshot from overwriting newer repository evidence.
 
-The migration also reconciles the historical repository name GoreeCloud/android-app-defaults (`apps/camera/`) to the live GoreeCloud/camera repository.
+The migration first reconciled the earlier `GoreeCloud/goreecloud-camera` name to the standalone `GoreeCloud/camera` repository. The September 29 mandatory consolidation subsequently moved active authority to `GoreeCloud/android-app-defaults` under `apps/camera/`; both older names are now historical provenance.
 
 The Drive project-specification sources remain protected until the migration pull request is accepted, the default-branch files are read back successfully, references are reconciled, and no migration discrepancy remains.
 
