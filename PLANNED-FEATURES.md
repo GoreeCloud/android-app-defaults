@@ -1,5 +1,13 @@
 # Android App Defaults — Planned Features
 
+
+## September 28, 2026 — Clock timer preset continuation
+
+The stacked Clock timer-preset candidate adds six local quick presets to the existing New timer editor without changing timer persistence or scheduling authority. Preset selection only fills the editor; confirmation and Start remain separate user actions. Model/unit coverage and Android UI coverage are included, but exact-head CI and representative 200% text, accessibility, RTL/localization, and device interaction acceptance remain required.
+
+Future timer-preset work is limited to evidence/acceptance and any separately justified user-configurable preset model; the fixed quick-preset source slice is no longer wholly planned once this candidate is integrated.
+
+
 ## September 29, 2026 — Clock widget continuation
 
 Adaptive compact/regular sizing for the three Clock home-screen widgets is implemented on Draft PR #50 and passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. Remaining widget work is configuration/personalization plus representative-launcher resize, touch, accessibility, theme, and update acceptance; those gates stay planned until verified.
