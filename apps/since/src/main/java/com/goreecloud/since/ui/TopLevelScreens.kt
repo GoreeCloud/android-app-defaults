@@ -43,6 +43,7 @@ import com.goreecloud.since.R
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
+import com.goreecloud.since.domain.portability.SinceImportReplacementPlanner
 import com.goreecloud.since.domain.portability.SinceImportReviewResult
 import java.time.Clock
 import com.goreecloud.since.domain.model.DisplayFormat
@@ -277,6 +278,7 @@ internal fun SettingsScreen(
     onExportData: () -> Unit,
     isReviewingImport: Boolean,
     importReviewResult: SinceImportReviewResult?,
+    currentTrackerIds: Set<String>,
     onReviewImport: () -> Unit,
     contextualHintsEnabled: Boolean,
     onContextualHintsEnabledChange: (Boolean) -> Unit,
@@ -425,6 +427,23 @@ internal fun SettingsScreen(
                         },
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (valid != null) {
+                        val plan = SinceImportReplacementPlanner.plan(
+                            summary = valid.summary,
+                            currentTrackerIds = currentTrackerIds,
+                        )
+                        Text(
+                            modifier = Modifier.testTag("settings-import-replacement-plan"),
+                            text = stringResourceCompat(
+                                R.string.settings_import_replacement_plan,
+                                plan.currentTrackerCount,
+                                plan.importedTrackerCount,
+                                plan.matchingTrackerCount,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
                 SettingsActionRow(
                     title = stringResourceCompat(R.string.settings_backup),
