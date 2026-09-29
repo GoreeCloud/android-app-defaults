@@ -110,4 +110,29 @@ class WidgetModelsTest {
         )
     }
 
+    @Test
+    fun widgetDetailsPolicyShowsSecondaryDetailOnlyForRegularEnabledWidgets() {
+        assertEquals(
+            true,
+            WidgetDetailsPolicy.showSecondaryDetail(
+                presentation = WidgetPresentation.REGULAR,
+                preferenceEnabled = true,
+            ),
+        )
+        assertEquals(
+            false,
+            WidgetDetailsPolicy.showSecondaryDetail(
+                presentation = WidgetPresentation.REGULAR,
+                preferenceEnabled = false,
+            ),
+        )
+        assertEquals(
+            false,
+            WidgetDetailsPolicy.showSecondaryDetail(
+                presentation = WidgetPresentation.COMPACT,
+                preferenceEnabled = true,
+            ),
+        )
+    }
+
 }
