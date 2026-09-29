@@ -12,8 +12,8 @@ declare -A SOURCE_REPOSITORY=(
 )
 
 declare -A SOURCE_SHA=(
-  [camera]="ee8c02e8fef536c1483218c55ff16c1cff1602d7"
-  [launcher]="717584c2164bae8415492a843f5579f665511077"
+  [camera]="9b02ca8c19d56868ed30b3d457631e582ef529cb"
+  [launcher]="1eb8dd6d8178f6d730b100559e8f8d149501d18c"
   [keyboard]="041b5e0457f2b4d68dc96a416d5abc1f020646d7"
   [gallery]="3f7263c6e31a0af0f1a06b99491f608b96cc69ba"
 )
@@ -26,8 +26,8 @@ declare -A SOURCE_PR=(
 )
 
 declare -A SOURCE_STATUS=(
-  [camera]="Android Foundation validate passed at the imported head; runtime emulator jobs were still in progress at migration start."
-  [launcher]="Android CI validate and transition-performance jobs passed, but the Android 16 Room/runtime job failed in secondaryHomeRendersMovedBuiltInWidget with a Compose performMeasureAndLayout exception."
+  [camera]="Android Foundation was in progress at the refreshed imported head at migration cutover."
+  [launcher]="Android CI was in progress at the refreshed imported head at migration cutover; the immediately preceding head had a failing Android 16 Room/runtime test and was therefore not used as the final cutover revision."
   [keyboard]="Android CI and Platform Contract passed at the imported head."
   [gallery]="Native Android App, Native Android Adapter, and Native Android Rendered Acceptance passed at the imported head."
 )
@@ -82,8 +82,8 @@ GoreeCloud Camera, GoreeCloud Launcher, GoreeCloud Keyboard, and GoreeCloud Gall
 
 | Application | Legacy repository | Exact imported revision | Active source PR at migration start |
 | --- | --- | --- | --- |
-| Camera | `GoreeCloud/camera` | `ee8c02e8fef536c1483218c55ff16c1cff1602d7` | #19 |
-| Launcher | `GoreeCloud/launcher` | `717584c2164bae8415492a843f5579f665511077` | #248 |
+| Camera | `GoreeCloud/camera` | `9b02ca8c19d56868ed30b3d457631e582ef529cb` | #19 |
+| Launcher | `GoreeCloud/launcher` | `1eb8dd6d8178f6d730b100559e8f8d149501d18c` | #248 |
 | Keyboard | `GoreeCloud/keyboard` | `041b5e0457f2b4d68dc96a416d5abc1f020646d7` | #97 |
 | Gallery | `GoreeCloud/gallery` | `3f7263c6e31a0af0f1a06b99491f608b96cc69ba` | #103 |
 
