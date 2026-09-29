@@ -4,7 +4,9 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.os.Bundle
 import android.os.SystemClock
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import com.goreecloud.clock.ClockApplication
@@ -20,6 +22,15 @@ class TimerWidgetProvider : AppWidgetProvider() {
         appWidgetIds.forEach { update(context, appWidgetManager, it) }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle,
+    ) {
+        update(context, appWidgetManager, appWidgetId, newOptions)
+    }
+
     companion object {
         private const val REQUEST_OPEN_TIMER = 4301
 
@@ -33,6 +44,7 @@ class TimerWidgetProvider : AppWidgetProvider() {
             context: Context,
             manager: AppWidgetManager,
             appWidgetId: Int,
+            options: Bundle? = null,
         ) {
             val app = context.applicationContext as ClockApplication
             val nowWall = System.currentTimeMillis()
@@ -42,7 +54,32 @@ class TimerWidgetProvider : AppWidgetProvider() {
                 nowEpochMillis = nowWall,
                 elapsedRealtime = nowElapsed,
             )
-            val views = RemoteViews(context.packageName, R.layout.widget_timer)
+            val widgetOptions = options ?: manager.getAppWidgetOptions(appWidgetId)
+            val compact = WidgetSizePolicy.presentation(
+                minWidthDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH),
+                minHeightDp = widgetOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT),
+            ) == WidgetPresentation.COMPACT
+            val views = RemoteViews(context.packageName, R.layout.widget_timer).apply {
+                setViewVisibility(
+                    R.id.widget_timer_status,
+                    if (compact) View.GONE else View.VISIBLE,
+                )
+                setTextViewTextSize(
+                    R.id.widget_timer_countdown,
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (compact) 24f else 30f,
+                )
+                setTextViewTextSize(
+                    R.id.widget_timer_empty,
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (compact) 16f else 18f,
+                )
+                setTextViewTextSize(
+                    R.id.widget_timer_label,
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (compact) 12f else 13f,
+                )
+            }
 
             if (timer == null) {
                 views.setViewVisibility(R.id.widget_timer_countdown, View.GONE)
