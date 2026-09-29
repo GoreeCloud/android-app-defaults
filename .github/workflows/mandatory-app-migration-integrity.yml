@@ -1,0 +1,65 @@
+name: Mandatory app migration integrity
+
+on:
+  pull_request:
+    paths:
+      - 'apps/camera/**'
+      - 'apps/launcher/**'
+      - 'apps/keyboard/**'
+      - 'apps/gallery/**'
+      - 'docs/migrations/2026-09-29-mandatory-app-consolidation.md'
+      - '.github/workflows/mandatory-app-migration-integrity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify imported source against pinned legacy revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+          trap 'rm -rf "$work"' EXIT
+
+          verify_app() {
+            app="$1"
+            repo="$2"
+            sha="$3"
+            src="$work/$app"
+
+            git clone --quiet --filter=blob:none --no-checkout "https://github.com/$repo.git" "$src"
+            git -C "$src" fetch --quiet --depth=1 origin "$sha"
+            git -C "$src" checkout --quiet --detach "$sha"
+            rm -rf "$src/.git" "$src/.github" "$src/artifacts"
+
+            cp "apps/$app/MIGRATION-ORIGIN.md" "$work/$app-MIGRATION-ORIGIN.md"
+            rm "apps/$app/MIGRATION-ORIGIN.md"
+            diff -ruN "$src" "apps/$app"
+            mv "$work/$app-MIGRATION-ORIGIN.md" "apps/$app/MIGRATION-ORIGIN.md"
+          }
+
+          verify_app camera GoreeCloud/camera ee8c02e8fef536c1483218c55ff16c1cff1602d7
+          verify_app launcher GoreeCloud/launcher 717584c2164bae8415492a843f5579f665511077
+          verify_app keyboard GoreeCloud/keyboard 041b5e0457f2b4d68dc96a416d5abc1f020646d7
+          verify_app gallery GoreeCloud/gallery 3f7263c6e31a0af0f1a06b99491f608b96cc69ba
+
+      - name: Verify migration provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'ee8c02e8fef536c1483218c55ff16c1cff1602d7' apps/camera/MIGRATION-ORIGIN.md
+          grep -Fq '717584c2164bae8415492a843f5579f665511077' apps/launcher/MIGRATION-ORIGIN.md
+          grep -Fq '041b5e0457f2b4d68dc96a416d5abc1f020646d7' apps/keyboard/MIGRATION-ORIGIN.md
+          grep -Fq '3f7263c6e31a0af0f1a06b99491f608b96cc69ba' apps/gallery/MIGRATION-ORIGIN.md
+          test -f docs/migrations/2026-09-29-mandatory-app-consolidation.md
