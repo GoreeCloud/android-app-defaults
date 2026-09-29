@@ -412,7 +412,9 @@ private fun AlarmEditorDialog(
                     )
                 }
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("alarm-label-field"),
                     value = label,
                     onValueChange = { label = it.take(80) },
                     label = { Text("Label") },
