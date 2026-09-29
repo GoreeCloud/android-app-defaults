@@ -2,7 +2,7 @@
 
 ## September 29, 2026 — Clock widget continuation
 
-Adaptive compact/regular sizing remains on Draft PR #50. The stacked widget-personalization candidate adds local Settings controls for the Clock date, Next alarm secondary detail, and Timer status; all default on to preserve current behavior and compact layouts still prioritize primary content. Remaining widget work is representative-launcher resize/touch/accessibility/theme/update acceptance, supported lock-screen/system surfaces, and any future per-widget-instance configuration justified by product need.
+Adaptive compact/regular sizing on Draft PR #50 passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. The stacked widget-personalization candidate adds local Settings controls for the Clock date, Next alarm secondary detail, and Timer status; all default on to preserve current behavior and compact layouts still prioritize primary content. Remaining widget work is representative-launcher resize/touch/accessibility/theme/update acceptance, supported lock-screen/system surfaces, and any future per-widget-instance configuration justified by product need.
 
 ## September 28, 2026 — relative Next alarm candidate
 
@@ -136,7 +136,7 @@ The Clock candidate still requires the following before broader qualification:
 
 - representative-device alarm-audio acceptance across system/default/custom alarm tones, Silent, audio focus, DND/device policy, lock-screen/full-screen presentation, snooze/dismiss, and gradual-volume behavior;
 - richer alarm editing and upcoming-alarm presentation;
-- representative-launcher acceptance for adaptive sizing and the stacked local widget-detail personalization controls; future per-widget-instance configuration remains planned only where justified;
+- representative-launcher acceptance for PR #50 adaptive sizing (exact-source CI #281 passed) and the stacked local widget-detail personalization controls; future per-widget-instance configuration remains planned only where justified;
 - lock-screen/system surfaces only where supported by current Android APIs;
 - full haptic-preference application across applicable controls and alerts;
 - canonical GoreeCloud Clock branding from the authoritative branding repository;
