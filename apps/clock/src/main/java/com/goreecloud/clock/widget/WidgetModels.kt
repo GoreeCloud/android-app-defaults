@@ -60,6 +60,15 @@ object WidgetDetailPolicy {
     ): Boolean = enabled && presentation == WidgetPresentation.REGULAR
 }
 
+object AlarmWidgetDetailPolicy {
+    fun summary(
+        dayLabel: String,
+        repeatSummary: String,
+    ): String = listOf(dayLabel.trim(), repeatSummary.trim())
+        .filter { it.isNotEmpty() }
+        .joinToString(" • ")
+}
+
 object WidgetSizePolicy {
     private const val COMPACT_WIDTH_DP = 160
     private const val COMPACT_HEIGHT_DP = 90
