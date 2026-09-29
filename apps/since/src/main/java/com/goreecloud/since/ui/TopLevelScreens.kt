@@ -43,6 +43,7 @@ import com.goreecloud.since.R
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
+import com.goreecloud.since.domain.portability.SinceImportReviewResult
 import java.time.Clock
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.time.ElapsedResult
@@ -274,6 +275,9 @@ internal fun SettingsScreen(
     isExportingData: Boolean,
     exportStatus: SinceExportStatus?,
     onExportData: () -> Unit,
+    isReviewingImport: Boolean,
+    importReviewResult: SinceImportReviewResult?,
+    onReviewImport: () -> Unit,
     contextualHintsEnabled: Boolean,
     onContextualHintsEnabledChange: (Boolean) -> Unit,
     onResetDismissedContextualHints: () -> Unit,
@@ -376,6 +380,45 @@ internal fun SettingsScreen(
                             },
                         ),
                         color = if (status == SinceExportStatus.FAILURE) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                SettingsActionRow(
+                    title = stringResourceCompat(R.string.settings_review_import),
+                    supporting = stringResourceCompat(R.string.settings_review_import_supporting),
+                    status = stringResourceCompat(
+                        if (isReviewingImport) {
+                            R.string.settings_reviewing_import
+                        } else {
+                            R.string.settings_choose_file
+                        },
+                    ),
+                    testTag = "settings-review-import",
+                    enabled = !isReviewingImport && !isExportingData,
+                    onClick = onReviewImport,
+                )
+                importReviewResult?.let { result ->
+                    val valid = result as? SinceImportReviewResult.Valid
+                    Text(
+                        modifier = Modifier
+                            .testTag("settings-import-review-status")
+                            .semantics { liveRegion = LiveRegionMode.Polite },
+                        text = if (valid == null) {
+                            stringResourceCompat(R.string.settings_import_review_invalid)
+                        } else {
+                            stringResourceCompat(
+                                R.string.settings_import_review_valid,
+                                valid.summary.trackerCount,
+                                valid.summary.archivedTrackerCount,
+                                valid.summary.periodCount,
+                                valid.summary.goalCount,
+                            )
+                        },
+                        color = if (valid == null) {
                             MaterialTheme.colorScheme.error
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
