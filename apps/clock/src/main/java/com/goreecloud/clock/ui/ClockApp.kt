@@ -295,14 +295,6 @@ private fun SettingsDialog(
                     },
                 )
                 ToggleRow(
-                    label = "Show widget details",
-                    checked = preferences.showWidgetDetails,
-                    onCheckedChange = {
-                        onHaptic(ClockHapticEvent.ACTION)
-                        preferencesStore.setShowWidgetDetails(it)
-                    },
-                )
-                ToggleRow(
                     label = "Contextual hints",
                     checked = preferences.hintsEnabled,
                     onCheckedChange = {
