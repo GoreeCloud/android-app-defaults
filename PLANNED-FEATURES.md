@@ -1,5 +1,11 @@
 # Android App Defaults — Planned Features
 
+
+## September 29, 2026 — Clock alarm repeat-preset continuation
+
+A stacked Clock candidate now partially advances richer alarm editing with one-tap **One time / Every day / Weekdays / Weekends** presets layered on the existing custom weekday chips. The change reuses the current local `repeatDays` model and scheduler path and adds no new alarm authority. Fresh exact-head validation is required; richer alarm editing beyond these presets, representative-device accessibility/localization, real delivery, and release qualification remain planned.
+
+
 ## September 29, 2026 — Clock widget continuation
 
 Adaptive compact/regular sizing on Draft PR #50 passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. The stacked widget-personalization candidate adds local Settings controls for the Clock date, Next alarm secondary detail, and Timer status; all default on to preserve current behavior and compact layouts still prioritize primary content. Remaining widget work is representative-launcher resize/touch/accessibility/theme/update acceptance, supported lock-screen/system surfaces, and any future per-widget-instance configuration justified by product need.
@@ -135,7 +141,7 @@ The broader Android App Defaults suite remains planned. No application other tha
 The Clock candidate still requires the following before broader qualification:
 
 - representative-device alarm-audio acceptance across system/default/custom alarm tones, Silent, audio focus, DND/device policy, lock-screen/full-screen presentation, snooze/dismiss, and gradual-volume behavior;
-- richer alarm editing and upcoming-alarm presentation;
+- richer alarm editing and upcoming-alarm presentation; repeat presets and repeat-summary presentation are now implemented on stacked Development candidates, while broader editor/presentation refinement and acceptance remain open;
 - representative-launcher acceptance for PR #50 adaptive sizing (exact-source CI #281 passed) and the stacked local widget-detail personalization controls; future per-widget-instance configuration remains planned only where justified;
 - lock-screen/system surfaces only where supported by current Android APIs;
 - full haptic-preference application across applicable controls and alerts;
