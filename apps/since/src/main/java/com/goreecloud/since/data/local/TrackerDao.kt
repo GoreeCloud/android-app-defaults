@@ -148,6 +148,9 @@ abstract class TrackerDao {
     @Query("DELETE FROM event_goals WHERE event_id = :eventId")
     protected abstract suspend fun deleteGoal(eventId: String): Int
 
+    @Query("DELETE FROM tracked_events WHERE id = :eventId AND is_archived = 1")
+    protected abstract suspend fun deleteArchivedTrackerRow(eventId: String): Int
+
     @Insert
     abstract suspend fun insertTrackedEvent(entity: TrackedEventEntity)
 
@@ -353,6 +356,13 @@ abstract class TrackerDao {
             ) == 1
         ) { "archive state did not update exactly one tracker row" }
         return readAggregate(eventId)
+    }
+
+    @Transaction
+    open suspend fun deleteArchivedTracker(eventId: String): Boolean {
+        val tracker = readTrackedEvent(eventId) ?: return false
+        if (!tracker.isArchived) return false
+        return deleteArchivedTrackerRow(eventId) == 1
     }
 
     @Transaction
