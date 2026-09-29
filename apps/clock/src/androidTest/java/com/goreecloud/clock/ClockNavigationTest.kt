@@ -88,7 +88,9 @@ class ClockNavigationTest {
             .performClick()
         composeRule.onNodeWithText("Add").performClick()
 
-        composeRule.onNodeWithText("01:00").assertIsDisplayed()
+        composeRule.onNodeWithText("01:00")
+            .performScrollTo()
+            .assertIsDisplayed()
         composeRule.runOnIdle {
             val app = composeRule.activity.application as ClockApplication
             assertEquals(1, app.timerStore.timers.value.size)
