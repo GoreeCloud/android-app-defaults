@@ -183,7 +183,13 @@ fun SinceApp(
                             }
                             output.toByteArray()
                         }
-                        SinceImportReviewJson.review(payloadBytes.toString(Charsets.UTF_8))
+                        val decoder = Charsets.UTF_8.newDecoder()
+                            .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                            .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                        val payload = decoder
+                            .decode(java.nio.ByteBuffer.wrap(payloadBytes))
+                            .toString()
+                        SinceImportReviewJson.review(payload)
                     }.getOrDefault(SinceImportReviewResult.Invalid)
                 }
                 importReviewResult = review
