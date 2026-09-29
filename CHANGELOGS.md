@@ -1,6 +1,16 @@
 # Android App Defaults — Changelogs
 
 
+## September 29, 2026 — Clock direct Next-alarm editing
+
+- Made the in-app **Next alarm** summary directly clickable.
+- Reused the existing **Edit alarm** dialog and existing save/reschedule path; ordinary alarm-card editing remains unchanged.
+- Added a stable `next-alarm-card` test tag and focused Compose acceptance covering open, alarm identity, and dismissal.
+- Added no new scheduler, persistence format, exact-alarm, notification, background, widget, permission, network, account, telemetry, signing, or release authority.
+- Fresh exact-head Android Development Foundation validation remains required.
+
+
+
 ## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
 
 - Added deterministic repeat-schedule context to the existing **Next alarm** card.

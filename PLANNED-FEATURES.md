@@ -1,5 +1,11 @@
 # Android App Defaults — Planned Features
 
+
+## September 29, 2026 — Clock direct Next-alarm edit continuation
+
+A stacked Clock candidate further advances richer upcoming-alarm presentation by making the in-app **Next alarm** summary open the existing alarm editor directly. It reuses the current local editor/store/scheduler path and adds no new delivery or persistence authority. Fresh exact-head validation, representative-device accessibility/localization, actual alarm delivery, and release acceptance remain open.
+
+
 ## September 29, 2026 — Clock widget continuation
 
 Adaptive compact/regular sizing on Draft PR #50 passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. The stacked widget-personalization candidate adds local Settings controls for the Clock date, Next alarm secondary detail, and Timer status; all default on to preserve current behavior and compact layouts still prioritize primary content. Remaining widget work is representative-launcher resize/touch/accessibility/theme/update acceptance, supported lock-screen/system surfaces, and any future per-widget-instance configuration justified by product need.

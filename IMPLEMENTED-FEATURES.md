@@ -1,6 +1,14 @@
 # Android App Defaults — Implemented Features
 
 
+## September 29, 2026 — Clock direct Next-alarm editing candidate
+
+A stacked Clock Development candidate makes the in-app **Next alarm** summary directly actionable. Selecting the summary opens the same existing **Edit alarm** dialog used by ordinary alarm cards, so users can move from the most relevant upcoming alarm to its existing local editor without finding the duplicate list row first.
+
+The interaction only sets the existing local `editing` state to the already-selected upcoming `Alarm`; saving continues through the existing `AlarmStore.upsert` and scheduler reschedule/cancel path. A focused Compose test creates an enabled repeating alarm, requires `next-alarm-card` to open **Edit alarm**, verifies the alarm label, and verifies dismissal. No alarm schema, scheduler, permission, background, notification, account, network, telemetry, widget, signing, or release authority is added. Fresh exact-head validation is required.
+
+
+
 ## September 29, 2026 — Clock upcoming alarm repeat-summary candidate
 
 A stacked Clock Development candidate enriches the existing **Next alarm** card with deterministic repeat-schedule context derived only from the selected alarm's local `repeatDays` value. The presentation distinguishes **One time**, **Every day**, **Weekdays**, **Weekends**, and sorted custom day sets such as **Mon • Wed • Fri**.

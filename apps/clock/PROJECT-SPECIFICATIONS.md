@@ -34,6 +34,8 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 
 ### Alarms
 
+- The in-app **Next alarm** summary is directly actionable in the Development candidate: selecting it opens the same existing alarm editor used by ordinary alarm cards. The interaction does not create a separate edit, persistence, or scheduling path.
+
 - Multiple alarms with create, edit, enable, disable, and delete.
 - One-time and repeating schedules.
 - Labels, vibration, configurable snooze.

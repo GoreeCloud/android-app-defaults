@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -139,6 +140,10 @@ fun AlarmScreen(
                     trigger = upcoming.trigger,
                     now = scheduleNow,
                     use24Hour = use24Hour,
+                    onEdit = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        editing = upcoming.alarm
+                    },
                 )
             }
         }
@@ -229,6 +234,7 @@ private fun UpcomingAlarmCard(
     trigger: ZonedDateTime,
     now: ZonedDateTime,
     use24Hour: Boolean,
+    onEdit: () -> Unit,
 ) {
     val dayLabel = when (trigger.toLocalDate()) {
         now.toLocalDate() -> "Today"
@@ -238,7 +244,12 @@ private fun UpcomingAlarmCard(
     val time = trigger.format(
         DateTimeFormatter.ofPattern(if (use24Hour) "HH:mm" else "h:mm a"),
     )
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("next-alarm-card")
+            .clickable(onClick = onEdit),
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp),
@@ -401,7 +412,9 @@ private fun AlarmEditorDialog(
                     )
                 }
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("alarm-label-field"),
                     value = label,
                     onValueChange = { label = it.take(80) },
                     label = { Text("Label") },

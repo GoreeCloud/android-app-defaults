@@ -71,7 +71,12 @@ fun OnboardingScreen(
                 color = MaterialTheme.colorScheme.primary,
             )
             if (replayMode) {
-                androidx.compose.material3.TextButton(onClick = onCancelReplay) {
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        onCancelReplay()
+                    },
+                ) {
                     Text("Close replay")
                 }
             }
