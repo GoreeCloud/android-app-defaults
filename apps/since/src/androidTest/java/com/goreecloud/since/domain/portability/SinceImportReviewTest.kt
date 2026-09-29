@@ -40,6 +40,15 @@ class SinceImportReviewTest {
         assertEquals(3, summary.periodCount)
         assertEquals(1, summary.goalCount)
         assertEquals(1_790_640_000_000L, summary.exportedAtEpochMs)
+        assertEquals(setOf("active", "archived"), summary.trackerIds)
+
+        val plan = SinceImportReplacementPlanner.plan(
+            summary = summary,
+            currentTrackerIds = setOf("active", "local-only"),
+        )
+        assertEquals(2, plan.currentTrackerCount)
+        assertEquals(2, plan.importedTrackerCount)
+        assertEquals(1, plan.matchingTrackerCount)
     }
 
     @Test
