@@ -2345,9 +2345,16 @@ private fun HomeEditorPageOverview(
         pageCount = { visiblePages.size + 1 },
     )
 
-    LaunchedEffect(initialPageIndex, visiblePages.size) {
-        if (pagerState.currentPage != initialPageIndex) {
-            pagerState.scrollToPage(initialPageIndex)
+    LaunchedEffect(initialPageId) {
+        val targetIndex = visiblePages.indexOfFirst { it.pageId == initialPageId }
+        if (targetIndex >= 0 && pagerState.currentPage != targetIndex) {
+            pagerState.scrollToPage(targetIndex)
+        }
+    }
+    LaunchedEffect(visiblePages.size) {
+        val lastPageIndex = visiblePages.size
+        if (pagerState.currentPage > lastPageIndex) {
+            pagerState.scrollToPage(lastPageIndex)
         }
     }
 
@@ -4444,7 +4451,6 @@ private fun HomeFavoriteTile(
                         dragging = true
                         dragOffset = Offset.Zero
                         dragStartCenter = tileBounds?.center
-                        onManageApp(app, tileBounds)
                     },
                     onDrag = { change, amount ->
                         change.consume()
@@ -4467,6 +4473,7 @@ private fun HomeFavoriteTile(
                             onEndLocalDrag(dragData, start + dragOffset)
                         } else {
                             onCancelLocalDrag()
+                            onManageApp(app, tileBounds)
                         }
                         dragging = false
                         dragOffset = Offset.Zero
