@@ -2216,11 +2216,13 @@ class MainActivity : ComponentActivity() {
                     ).show()
                 }
             } else {
-                when (workspaceRuntimeCoordinator.removeWidget(MANAGED_HOME_SEARCH_WIDGET_ID)) {
-                    is WorkspaceWidgetMutationResult.Removed,
-                    WorkspaceWidgetMutationResult.NotFound,
-                    -> Unit
-                    else -> Toast.makeText(
+                val result =
+                    workspaceRuntimeCoordinator.removeWidget(MANAGED_HOME_SEARCH_WIDGET_ID)
+                if (
+                    result !is WorkspaceWidgetMutationResult.Removed &&
+                    result != WorkspaceWidgetMutationResult.NotFound
+                ) {
+                    Toast.makeText(
                         this@MainActivity,
                         "The managed movable Search widget could not be removed.",
                         Toast.LENGTH_SHORT,
