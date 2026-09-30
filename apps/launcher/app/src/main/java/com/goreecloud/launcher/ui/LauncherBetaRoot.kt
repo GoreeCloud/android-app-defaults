@@ -2840,12 +2840,14 @@ private fun HomeAppGroupMoveDialog(
                 ) {
                     Text(
                         selectedAppKeys.size.toString() + " selected",
-                        modifier = Modifier.semantics {
-                            liveRegion = LiveRegionMode.Polite
-                            stateDescription =
-                                selectedAppKeys.size.toString() + " of " +
-                                    selectableAppKeys.size + " apps selected"
-                        },
+                        modifier = Modifier
+                            .testTag("launcher-home-group-selection-state")
+                            .semantics {
+                                liveRegion = LiveRegionMode.Polite
+                                stateDescription =
+                                    selectedAppKeys.size.toString() + " of " +
+                                        selectableAppKeys.size + " apps selected"
+                            },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
