@@ -1,5 +1,15 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since Development APK packaging correction
+
+- Retracted the owner-delivered APK that had been modified after assembly and re-signed only with a JAR/v1 signature; Android correctly rejected that transformed package because its modern APK Signing Block was no longer present.
+- Added build-time Development `versionCode` selection using `GOREECLOUD_DEV_VERSION_CODE`, with GitHub Actions run-number fallback for ordinary CI.
+- Added optional external persistent Development signing through the complete `GOREECLOUD_DEV_KEYSTORE_*` environment set, with fail-closed handling for partial configuration or a missing keystore file.
+- Added a protected manual **Since Development APK Distribution** workflow that builds through AGP, verifies package/version/signature identity with Android build tools, records exact-source and cryptographic provenance, and uploads the verified artifact.
+- Kept signing keys and passwords outside Git and kept ordinary pull-request CI explicitly separate from the protected owner-distribution signing boundary.
+
+**Acceptance boundary:** source support for correct protected Development packaging is implemented on this stacked candidate. The `since-development` environment secrets still require approved provisioning, and representative-device update-in-place acceptance remains open. No Production, Stable, Seal, or Anchor promotion is implied.
+
 ## September 29, 2026 — Since fail-closed import review candidate
 
 - Added **Review import** under Settings → Data & recovery using an explicit Android Storage Access Framework document picker.
