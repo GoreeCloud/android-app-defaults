@@ -665,7 +665,7 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
 
         assertEquals(
             WorkspacePagedRoomMutationResult.UpdatedItems(
-                listOf(
+                items = listOf(
                     WorkspacePagedRoomMutationResult.UpdatedItem(
                         itemId = "native:item:two",
                         pageId = "home:2",
@@ -682,7 +682,25 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
                         spanX = 1,
                         spanY = 1,
                     ),
-                )
+                ),
+                previousItems = listOf(
+                    WorkspacePagedRoomMutationResult.UpdatedItem(
+                        itemId = "native:item:two",
+                        pageId = "home:1",
+                        cellX = 0,
+                        cellY = 0,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                    WorkspacePagedRoomMutationResult.UpdatedItem(
+                        itemId = "native:item:three",
+                        pageId = "home:1",
+                        cellX = 1,
+                        cellY = 1,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                ),
             ),
             mover.moveAppGroupToPageCell(
                 sourcePageId = "home:1",
