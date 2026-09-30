@@ -62,6 +62,7 @@ import com.goreecloud.launcher.core.launcher.LauncherBuiltInWallpaperId
 import com.goreecloud.launcher.core.launcher.LauncherBuiltInWallpapers
 import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
+import com.goreecloud.launcher.core.launcher.LauncherDrawerProfileKind
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.LauncherExperiencePreferences
 import com.goreecloud.launcher.core.launcher.LauncherFileSearchPreferencesRepository
@@ -1916,9 +1917,13 @@ class MainActivity : ComponentActivity() {
         name: String,
         addToHome: Boolean,
         initialApp: LauncherActivityInfo?,
+        profileKind: LauncherDrawerProfileKind,
     ) {
         lifecycleScope.launch {
-            val folder = folderRepository.create(name)
+            val folder = folderRepository.create(
+                rawName = name,
+                profileKind = profileKind,
+            )
             if (folder == null) {
                 Toast.makeText(
                     this@MainActivity,
@@ -1927,8 +1932,16 @@ class MainActivity : ComponentActivity() {
                 ).show()
                 return@launch
             }
-            if (initialApp != null && initialApp.user == Process.myUserHandle()) {
-                if (!folderRepository.addApp(folder.id, initialApp.workspaceKey())) {
+            if (initialApp != null) {
+                val initialProfile = if (initialApp.user == Process.myUserHandle()) {
+                    LauncherDrawerProfileKind.USER
+                } else {
+                    LauncherDrawerProfileKind.WORK
+                }
+                if (
+                    initialProfile == folder.profileKind &&
+                    !folderRepository.addApp(folder.id, initialApp.workspaceKey())
+                ) {
                     Toast.makeText(
                         this@MainActivity,
                         "Folder created, but the app could not be added.",
@@ -1936,7 +1949,9 @@ class MainActivity : ComponentActivity() {
                     ).show()
                 }
             }
-            if (addToHome) addFolderToHomeInternal(folder)
+            if (addToHome && folder.profileKind == LauncherDrawerProfileKind.USER) {
+                addFolderToHomeInternal(folder)
+            }
         }
     }
 
@@ -1953,15 +1968,21 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun addAppToFolder(folderId: String, app: LauncherActivityInfo) {
-        if (app.user != Process.myUserHandle()) {
-            Toast.makeText(
-                this@MainActivity,
-                "Personal folders cannot contain apps from another profile.",
-                Toast.LENGTH_SHORT,
-            ).show()
-            return
-        }
         lifecycleScope.launch {
+            val folder = folderRepository.folders.first().firstOrNull { it.id == folderId }
+            val appProfile = if (app.user == Process.myUserHandle()) {
+                LauncherDrawerProfileKind.USER
+            } else {
+                LauncherDrawerProfileKind.WORK
+            }
+            if (folder == null || folder.profileKind != appProfile) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Folders cannot mix apps from different Android profiles.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                return@launch
+            }
             if (!folderRepository.addApp(folderId, app.workspaceKey())) {
                 Toast.makeText(
                     this@MainActivity,
@@ -1991,6 +2012,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun addFolderToHomeInternal(folder: LauncherFolder) {
+        if (folder.profileKind != LauncherDrawerProfileKind.USER) {
+            Toast.makeText(
+                this@MainActivity,
+                "Work folders stay in Work Apps and cannot be placed on personal Home.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
         val preferences = launcherPreferencesRepository.preferences.first()
         when (
             workspaceRuntimeCoordinator.addFolderToHome(
