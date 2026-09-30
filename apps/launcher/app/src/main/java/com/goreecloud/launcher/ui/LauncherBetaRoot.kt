@@ -10166,7 +10166,7 @@ internal fun LauncherFolderAppPickerSheet(
             }
             if (visibleApps.isEmpty()) {
                 Text(
-                    "No matching personal apps.",
+                    "No matching apps in this profile.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -10355,7 +10355,7 @@ private fun AppContextPopup(
     val isFavorite = key in workspace.favoriteKeys
     val isDocked = key in workspace.dockKeys
     val dockFull = !isDocked && workspace.dockKeys.size >= MAX_DOCK_ITEMS
-    val canAddToFolder = app.user == Process.myUserHandle()
+    val canAddToFolder = true
     val icon = rememberLauncherAppIcon(app)
     val shortcuts = rememberLauncherContextShortcuts(app)
     val appWidgets = remember(
