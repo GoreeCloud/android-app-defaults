@@ -10,6 +10,16 @@ Primary Home is intentionally excluded from this first visible group-edit tranch
 
 **Acceptance boundary:** this remains stacked Draft Development work. Primary-HOME group editing, mixed app/folder/widget group selection, direct drag-box/lasso selection, durable multi-step undo/redo, process-death-safe edit history, representative-device TalkBack/Switch Access/large-text/foldable acceptance, protected promotion, Release Candidate, Production, and Stable qualification remain open.
 
+## September 30, 2026 — Home swipe consumption correction
+
+**Change type:** Gesture arbitration correction; Development candidate.
+
+Home page swipe navigation now measures the raw pointer displacement of the completed gesture rather than the consumption-aware `positionChange()` value observed at the final pointer pass. This matches the existing arbitration contract: child Home content may consume movement for press or long-press bookkeeping without erasing an otherwise valid horizontal page swipe. Page selection is still committed only after pointer release, and the Activity continues to disable page-swipe handling while a Home app drag session is active.
+
+This correction responds to the Android 16 runtime failure surfaced by the restored monorepo Launcher instrumentation gate, where `horizontalSwipeSwitchesHomePagesAndReturns` timed out while the remaining runtime suite continued.
+
+**Acceptance boundary:** fresh exact-head Android 16 runtime evidence is required before this correction is treated as validated. Representative-device gesture/drag coexistence remains open.
+
 ## September 30, 2026 — atomic Home app group-movement foundation
 
 **Change type:** Workspace editing foundation; atomic Room mutation; Development candidate.
