@@ -13,12 +13,20 @@ import kotlinx.coroutines.flow.map
 
 private val Context.launcherFolderStore by preferencesDataStore(name = "launcher_folders")
 
+private const val WORK_FOLDER_ID_PREFIX = "work:"
+
 data class LauncherFolder(
     val id: String,
     val name: String,
     val appKeys: List<String>,
-    val profileKind: LauncherDrawerProfileKind = LauncherDrawerProfileKind.USER,
-)
+) {
+    val profileKind: LauncherDrawerProfileKind
+        get() = if (id.startsWith(WORK_FOLDER_ID_PREFIX)) {
+            LauncherDrawerProfileKind.WORK
+        } else {
+            LauncherDrawerProfileKind.USER
+        }
+}
 
 object LauncherFolderPolicy {
     const val MAX_NAME_LENGTH = 40
@@ -95,14 +103,21 @@ class LauncherFolderRepository(context: Context) {
         .map { values -> LauncherFolderCodec.decode(values[foldersKey]) }
         .distinctUntilChanged()
 
-    suspend fun create(rawName: String): LauncherFolder? {
+    suspend fun create(
+        rawName: String,
+        profileKind: LauncherDrawerProfileKind = LauncherDrawerProfileKind.USER,
+    ): LauncherFolder? {
         val name = LauncherFolderPolicy.normalizeName(rawName) ?: return null
         var created: LauncherFolder? = null
         dataStore.edit { values ->
             val current = LauncherFolderCodec.decode(values[foldersKey])
             if (current.size >= LauncherFolderPolicy.MAX_FOLDER_COUNT) return@edit
             val folder = LauncherFolder(
-                id = UUID.randomUUID().toString(),
+                id = if (profileKind == LauncherDrawerProfileKind.WORK) {
+                    WORK_FOLDER_ID_PREFIX + UUID.randomUUID().toString()
+                } else {
+                    UUID.randomUUID().toString()
+                },
                 name = name,
                 appKeys = emptyList(),
             )
