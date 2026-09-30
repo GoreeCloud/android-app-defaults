@@ -2697,6 +2697,13 @@ internal fun homeAppGroupAnchorAvailable(
     }
     val sourceMinX = selected.minOf { checkNotNull(it.cellX) }
     val sourceMinY = selected.minOf { checkNotNull(it.cellY) }
+    if (
+        targetPage.pageId == sourcePage.pageId &&
+        targetCellX == sourceMinX &&
+        targetCellY == sourceMinY
+    ) {
+        return false
+    }
     val selectedKeySet = selectedAppKeys.toSet()
 
     val targetApps = targetPage.appPlacements.filterNot { app ->
