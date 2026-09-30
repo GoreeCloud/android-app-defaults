@@ -109,6 +109,45 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun liveWidgetDragRequiresUnlockedNormalHomeSurfaceAndNamedSourcePage() {
+        assertTrue(
+            canStartWidgetLiveDrag(
+                layoutLocked = false,
+                editMode = false,
+                sourcePageId = "home:user:secondary",
+            ),
+        )
+        assertFalse(
+            canStartWidgetLiveDrag(
+                layoutLocked = true,
+                editMode = false,
+                sourcePageId = "home:user:secondary",
+            ),
+        )
+        assertFalse(
+            canStartWidgetLiveDrag(
+                layoutLocked = false,
+                editMode = true,
+                sourcePageId = "home:user:secondary",
+            ),
+        )
+        assertFalse(
+            canStartWidgetLiveDrag(
+                layoutLocked = false,
+                editMode = false,
+                sourcePageId = null,
+            ),
+        )
+        assertFalse(
+            canStartWidgetLiveDrag(
+                layoutLocked = false,
+                editMode = false,
+                sourcePageId = "",
+            ),
+        )
+    }
+
+    @Test
     fun horizontalHomeSwipeMovesBetweenAdjacentPages() {
         assertEquals(
             1,
