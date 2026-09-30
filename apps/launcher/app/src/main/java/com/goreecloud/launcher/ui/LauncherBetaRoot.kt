@@ -86,9 +86,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
@@ -2688,6 +2690,12 @@ internal fun canMoveHomeAppGroup(
             .eachCount()
             .count { (_, count) -> count == 1 } >= 2
 
+internal fun homeAppGroupSelectionSummary(
+    selectedCount: Int,
+    totalCount: Int,
+): String =
+    selectedCount.toString() + " of " + totalCount + " apps selected"
+
 internal fun homeAppGroupAnchorContentDescription(
     cellX: Int,
     cellY: Int,
@@ -2860,7 +2868,15 @@ private fun HomeAppGroupMoveDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        selectedAppKeys.size.toString() + " selected",
+                        homeAppGroupSelectionSummary(
+                            selectedCount = selectedAppKeys.size,
+                            totalCount = selectableAppKeys.size,
+                        ),
+                        modifier = Modifier
+                            .testTag("launcher-home-group-selection-summary")
+                            .semantics {
+                                liveRegion = LiveRegionMode.Polite
+                            },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -2931,6 +2947,7 @@ private fun HomeAppGroupMoveDialog(
 
                 Text(
                     "Destination page",
+                    modifier = Modifier.semantics { heading() },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -2957,6 +2974,7 @@ private fun HomeAppGroupMoveDialog(
 
                 Text(
                     "Destination anchor",
+                    modifier = Modifier.semantics { heading() },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
