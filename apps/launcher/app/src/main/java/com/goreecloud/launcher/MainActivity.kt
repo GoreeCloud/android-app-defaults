@@ -154,6 +154,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
+private data class PendingHomeAppGroupUndo(
+    val appKeys: List<String>,
+    val currentPageId: String,
+    val originalPageId: String,
+    val originalCellX: Int,
+    val originalCellY: Int,
+)
+
 class MainActivity : ComponentActivity() {
     private lateinit var appsRepository: LauncherAppsRepository
     private lateinit var launcherPreferencesRepository: LauncherPreferencesRepository
@@ -174,6 +182,7 @@ class MainActivity : ComponentActivity() {
         MutableStateFlow<LauncherPortableRestoreRecoveryCoordinator.Result?>(null)
     private var pendingAppWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
     private var showWallpaperPicker by mutableStateOf(false)
+    private var pendingHomeAppGroupUndo by mutableStateOf<PendingHomeAppGroupUndo?>(null)
     private var pendingSearchProviderSnapshot: LauncherSearchProviderPreferenceSnapshot? = null
     private var pendingSearchProviderId: String? = null
     private var pendingFileSearchProviderSnapshot: LauncherSearchProviderPreferenceSnapshot? = null
@@ -1202,6 +1211,39 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
+                            hasPendingHomeAppGroupUndo = pendingHomeAppGroupUndo != null,
+                            onUndoHomeAppGroupMove = {
+                                val pendingUndo = pendingHomeAppGroupUndo
+                                if (pendingUndo != null && !launcherPreferences.layoutLocked) {
+                                    lifecycleScope.launch {
+                                        val undoResult =
+                                            workspaceRuntimeCoordinator.moveHomeAppGroupToPageCell(
+                                                sourcePageId = pendingUndo.currentPageId,
+                                                appKeys = pendingUndo.appKeys,
+                                                targetPageId = pendingUndo.originalPageId,
+                                                columns = launcherPreferences.homeColumns,
+                                                rows = launcherPreferences.homeRows,
+                                                cellX = pendingUndo.originalCellX,
+                                                cellY = pendingUndo.originalCellY,
+                                            )
+                                        pendingHomeAppGroupUndo = null
+                                        if (undoResult is WorkspacePagedRoomMutationResult.UpdatedItems) {
+                                            selectedHomePageId = pendingUndo.originalPageId
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Group move undone.",
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        } else {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Undo is no longer available because the Home layout changed.",
+                                                Toast.LENGTH_LONG,
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            },
                             onMoveHomeAppGroupToPageCell = {
                                     sourcePageId, appKeys, targetPageId, cellX, cellY ->
                                 if (!launcherPreferences.layoutLocked) {
@@ -1217,6 +1259,26 @@ class MainActivity : ComponentActivity() {
                                                 cellY = cellY,
                                             )
                                         if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
+                                            val previousItems = result.previousItems
+                                            val originalPageId = previousItems
+                                                .map { it.pageId }
+                                                .distinct()
+                                                .singleOrNull()
+                                            pendingHomeAppGroupUndo =
+                                                if (
+                                                    originalPageId != null &&
+                                                    previousItems.size == appKeys.size
+                                                ) {
+                                                    PendingHomeAppGroupUndo(
+                                                        appKeys = appKeys.toList(),
+                                                        currentPageId = targetPageId,
+                                                        originalPageId = originalPageId,
+                                                        originalCellX = previousItems.minOf { it.cellX },
+                                                        originalCellY = previousItems.minOf { it.cellY },
+                                                    )
+                                                } else {
+                                                    null
+                                                }
                                             selectedHomePageId = targetPageId
                                             Toast.makeText(
                                                 this@MainActivity,
@@ -1224,6 +1286,7 @@ class MainActivity : ComponentActivity() {
                                                 Toast.LENGTH_SHORT,
                                             ).show()
                                         } else {
+                                            pendingHomeAppGroupUndo = null
                                             Toast.makeText(
                                                 this@MainActivity,
                                                 "Group move was not applied. Choose a free destination that keeps every app inside the Home grid.",
