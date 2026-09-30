@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — result-specific app-group recovery guidance
+
+**Change type:** Edit Home recovery feedback; local presentation; Development candidate.
+
+The group-move workflow now maps authoritative Room mutation results to specific recovery guidance instead of using only a generic failure path. Stale workspace snapshots, changed or missing selected apps, removed pages, Primary Home protection, invalid anchors, and temporarily unavailable Home storage receive distinct local messages while the existing in-dialog retry flow preserves the current selection and workspace state. Successful moves continue to report the moved-app count.
+
+No permission, network path, telemetry, credential, persistence schema, or workspace authority changes in this tranche.
+
+**Acceptance boundary:** Development source only. Durable multi-step undo/redo, process-death-safe edit history, representative-device accessibility/large-text/form-factor acceptance, required-status enforcement, Release Candidate, Production, and Stable qualification remain separate gates.
+
 ## September 30, 2026 — group-move rejection recovery
 
 **Change type:** Workspace editing resilience; failure recovery; accessible feedback; Development candidate.
