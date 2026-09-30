@@ -9000,6 +9000,7 @@ private fun LauncherFolderManagerSheet(
     folders: List<LauncherFolder>,
     appsByKey: Map<String, LauncherActivityInfo>,
     homeFolderIds: Set<String>,
+    profileKind: LauncherDrawerProfileKind,
     defaultAddToHome: Boolean,
     onCreate: (String, Boolean) -> Unit,
     onOpen: (LauncherFolder) -> Unit,
@@ -9007,8 +9008,11 @@ private fun LauncherFolderManagerSheet(
     onRemoveFromHome: (LauncherFolder) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var nameDraft by rememberSaveable { mutableStateOf("") }
-    var addToHome by rememberSaveable(defaultAddToHome) { mutableStateOf(defaultAddToHome) }
+    var nameDraft by rememberSaveable(profileKind.name) { mutableStateOf("") }
+    val homePlacementAllowed = profileKind == LauncherDrawerProfileKind.USER
+    var addToHome by rememberSaveable(defaultAddToHome, profileKind.name) {
+        mutableStateOf(defaultAddToHome && homePlacementAllowed)
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -9043,12 +9047,20 @@ private fun LauncherFolderManagerSheet(
                 }
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "New folder",
+                        if (profileKind == LauncherDrawerProfileKind.WORK) {
+                            "New Work folder"
+                        } else {
+                            "New folder"
+                        },
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        "Choose a name; then add your apps.",
+                        if (profileKind == LauncherDrawerProfileKind.WORK) {
+                            "Choose a name; this folder stays inside Work Apps."
+                        } else {
+                            "Choose a name; then add your apps."
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -9077,24 +9089,32 @@ private fun LauncherFolderManagerSheet(
                         placeholder = { Text("e.g. Banking, Work or Media") },
                         leadingIcon = { Text("▦") },
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                "Place on Home",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Text(
-                                "You can drag it later; it always remains in the app drawer.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                    if (homePlacementAllowed) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    "Place on Home",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                                Text(
+                                    "You can drag it later; it always remains in the app drawer.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(checked = addToHome, onCheckedChange = { addToHome = it })
                         }
-                        Switch(checked = addToHome, onCheckedChange = { addToHome = it })
+                    } else {
+                        Text(
+                            "Work folders stay in Work Apps and never mix apps with your personal profile.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     Button(
                         onClick = {
@@ -9171,16 +9191,24 @@ private fun LauncherFolderManagerSheet(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
-                                TextButton(
-                                    onClick = {
-                                        if (folder.id in homeFolderIds) {
-                                            onRemoveFromHome(folder)
-                                        } else {
-                                            onAddToHome(folder)
-                                        }
-                                    },
-                                ) {
-                                    Text(if (folder.id in homeFolderIds) "Remove Home" else "Add Home")
+                                if (homePlacementAllowed) {
+                                    TextButton(
+                                        onClick = {
+                                            if (folder.id in homeFolderIds) {
+                                                onRemoveFromHome(folder)
+                                            } else {
+                                                onAddToHome(folder)
+                                            }
+                                        },
+                                    ) {
+                                        Text(
+                                            if (folder.id in homeFolderIds) {
+                                                "Remove Home"
+                                            } else {
+                                                "Add Home"
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
