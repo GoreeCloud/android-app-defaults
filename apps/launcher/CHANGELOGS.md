@@ -1,5 +1,27 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — Room 3.0.3 transaction regression correction
+
+**Change type:** Persistence reliability; dependency correction; Android runtime test isolation; Development candidate.
+
+The Launcher Room plugin, runtime, and compiler move from 3.0.2 to 3.0.3 after exact Android 16 runtime evidence exposed `IllegalMonitorStateException` from a repeated guarded primary↔secondary HOME transaction. AndroidX Room 3.0.3 specifically fixes the `@Transaction` wrapper-function regression that can throw that exception. The change preserves the existing schema and Room-authoritative workspace design; it does not add a new persistence authority or migration.
+
+Two drawer lifecycle tests now also establish their expected visible primary-Home app through the Room-authoritative placement repository instead of assuming `ensureDefaults` rewrites an already initialized workspace. This removes suite-order dependence exposed by the new group-edit runtime coverage.
+
+**Acceptance boundary:** fresh exact-head build/lint/unit/schema/instrumentation-compilation and Android 16 runtime evidence is required. The dependency correction is Development evidence only and does not establish representative-device, Release Candidate, Production, or Stable acceptance.
+
+## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
+
+**Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
+
+The migrated Android-app monorepo now restores the Launcher Android 16 `connectedDebugAndroidTest` lane on the exact pull-request head and always preserves connected-test reports/results. The faster Launcher validation lane also compiles `debugAndroidTest` Kotlin before emulator startup so instrumentation-source errors fail early instead of consuming an emulator run.
+
+The restored gate exposed shared-state and interaction defects that are corrected in this candidate. The horizontal-swipe fixture now establishes its expected primary Home and persistent Dock through the Room-authoritative placement repository instead of assuming `ensureDefaults` rewrites an initialized workspace. In Edit Home, changing the page count no longer resets the preview pager to its original page, so creating from **+ Add Page** keeps the same carousel position and reveals the newly created page. On unlocked primary Home, a stationary long press still opens app management, while an actual long-press drag no longer opens that management surface at drag start and can complete its local cell move uninterrupted.
+
+No new permission, network path, telemetry, credential, or persistence authority is introduced.
+
+**Acceptance boundary:** fresh exact-head Launcher build/lint/unit/schema/instrumentation-compilation and Android 16 runtime evidence is required. Representative-device gesture, drag/drop, accessibility, performance/power, protected promotion, Release Candidate, Production, and Stable qualification remain separate gates.
+
 ## September 30, 2026 — atomic Home app group-movement foundation
 
 **Change type:** Workspace editing foundation; atomic Room mutation; Development candidate.
