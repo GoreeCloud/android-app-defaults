@@ -11,7 +11,8 @@ class LauncherFolderCodecTest {
             LauncherFolder(
                 id = "folder-a",
                 name = "Work & Notes",
-                appKeys = listOf("user:app.one", "user:app.two"),
+                appKeys = listOf("work:app.one", "work:app.two"),
+                profileKind = LauncherDrawerProfileKind.WORK,
             ),
             LauncherFolder(
                 id = "folder-b",
@@ -21,6 +22,17 @@ class LauncherFolderCodecTest {
         )
 
         assertEquals(folders, LauncherFolderCodec.decode(LauncherFolderCodec.encode(folders)))
+    }
+
+    @Test
+    fun legacyThreeColumnFoldersMigrateAsUserProfile() {
+        val legacy = "Zm9sZGVyLWxlZ2FjeQ\tTGVnYWN5\tdXNlcjphcHA"
+        val restored = LauncherFolderCodec.decode(legacy).single()
+
+        assertEquals("folder-legacy", restored.id)
+        assertEquals("Legacy", restored.name)
+        assertEquals(LauncherDrawerProfileKind.USER, restored.profileKind)
+        assertEquals(listOf("user:app"), restored.appKeys)
     }
 
     @Test
