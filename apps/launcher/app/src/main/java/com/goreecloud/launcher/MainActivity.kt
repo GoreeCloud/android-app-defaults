@@ -137,6 +137,7 @@ import com.goreecloud.launcher.ui.ReadOnlyPagedHomeSurface
 import com.goreecloud.launcher.ui.homePageCellAtPoint
 import com.goreecloud.launcher.ui.homePageEdgeDropTarget
 import com.goreecloud.launcher.ui.launcherAppDragData
+import com.goreecloud.launcher.ui.launcherGroupMoveFeedback
 import com.goreecloud.launcher.ui.launcherUsesDarkSystemBarIcons
 import com.goreecloud.launcher.ui.rootDropPoint
 import com.goreecloud.launcher.ui.theme.GlazeMetrics
@@ -1218,18 +1219,16 @@ class MainActivity : ComponentActivity() {
                                             )
                                         if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
                                             selectedHomePageId = targetPageId
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "Moved " + result.items.size + " apps.",
-                                                Toast.LENGTH_SHORT,
-                                            ).show()
-                                        } else {
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "Group move was not applied. Choose a free destination that keeps every app inside the Home grid.",
-                                                Toast.LENGTH_LONG,
-                                            ).show()
                                         }
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            launcherGroupMoveFeedback(result),
+                                            if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
+                                                Toast.LENGTH_SHORT
+                                            } else {
+                                                Toast.LENGTH_LONG
+                                            },
+                                        ).show()
                                     }
                                 }
                             },
