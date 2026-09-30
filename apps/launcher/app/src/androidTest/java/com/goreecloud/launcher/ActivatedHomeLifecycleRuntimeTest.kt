@@ -708,20 +708,24 @@ class ActivatedHomeLifecycleRuntimeTest {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
 
-                val runtime = WorkspaceProductionRuntimeCoordinator(
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
                     authorityRepository = repository,
                     workspaceDaoProvider = {
                         LauncherDatabaseProvider.get(context).workspaceDao()
                     },
                 )
-                if (candidateKey !in repository.state.first().favoriteKeys) {
-                    val preferences = LauncherPreferencesRepository(context).preferences.first()
-                    val write = runtime.toggleFavorite(
-                        key = candidateKey,
-                        homeColumns = preferences.homeColumns,
-                        homeRows = preferences.homeRows,
-                    )
-                    check(write is WorkspaceAuthoritativeWriteResult.Written)
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidateKey),
+                        dockKeys = emptyList(),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Drawer gesture fixture must establish its visible Home app authoritatively."
                 }
 
                 waitForDisplayedLabel(candidate.label.toString())
@@ -1258,6 +1262,25 @@ class ActivatedHomeLifecycleRuntimeTest {
             try {
                 withTimeout(15_000) {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
+                }
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = {
+                        LauncherDatabaseProvider.get(context).workspaceDao()
+                    },
+                )
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidateKey),
+                        dockKeys = emptyList(),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Home-button drawer fixture must establish its visible Home app authoritatively."
                 }
                 waitForDisplayedLabel(candidate.label.toString())
 
