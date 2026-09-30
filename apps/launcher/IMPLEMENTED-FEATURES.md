@@ -157,6 +157,7 @@ Validation:
 - Persisted Home-grid presets and application presentation settings.
 - Direct primary-Home drag placement into configured grid cells, including guarded occupied-cell swaps and empty-cell placement.
 - Persisted Home layout lock that gates implemented workspace mutation paths while ordinary launching and page selection remain usable.
+- Configured vertical Home gestures remain active on secondary Home pages as well as primary Home, with direction-dominance policy that leaves horizontal page swipes to the page-navigation arbiter.
 - Five-second intentional Home hold path for unlocking with progressive feedback, with Settings retained as the deterministic non-gesture path.
 - Room-backed authoritative workspace cutover/read foundations.
 - Multi-page Home projection, page selection, empty secondary-page creation, guarded secondary-page reordering, and guarded deletion of eligible empty secondary pages while rank-zero primary Home remains protected.
@@ -182,6 +183,8 @@ Validation:
 - Separate Apps surface with local application filtering and launching.
 - Persisted Grid, Compact, List, and Category presentation modes and related density/label/spacing controls.
 - User Apps / Work Apps projection from Android `LauncherApps` inventory when non-primary profile inventory exists.
+- Profile-aware folders are persisted with explicit User/Work ownership, legacy folder records migrate to User ownership, folder assignment is restricted to apps from the same Android profile, and Work folders remain isolated from personal Home.
+- App Drawer ordering supports **A–Z**, **Z–A**, **Most Recent**, and **Most Frequent**. Usage-based modes consume only the existing local Launcher launch-history store and fall back to deterministic label/key ordering for untracked entries and folders.
 - App drawer header retains profile/layout context and uses compact icon-first actions for sort, new-folder creation, and the owner-requested Launcher Settings shortcut; the drawer still has no explicit close button.
 - Downward swipe is the drawer's explicit in-surface dismissal path; Android HOME-button return remains normal system navigation.
 - Launcher Settings is reachable from **Edit Home → Settings** and the compact App Drawer gear. Empty-space Home long-press remains reserved for Edit Home, and Launcher-owned Universal Search does not add a duplicate direct Settings result. Historical stored gesture/Search compatibility values continue to fail safely through their supported routing.
