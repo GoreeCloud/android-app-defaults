@@ -2,21 +2,9 @@ name: Migrated Android apps CI
 
 on:
   pull_request:
-    paths:
-      - 'apps/camera/**'
-      - 'apps/launcher/**'
-      - 'apps/keyboard/**'
-      - 'apps/gallery/**'
-      - '.github/workflows/migrated-android-apps-ci.yml'
   push:
     branches:
       - main
-    paths:
-      - 'apps/camera/**'
-      - 'apps/launcher/**'
-      - 'apps/keyboard/**'
-      - 'apps/gallery/**'
-      - '.github/workflows/migrated-android-apps-ci.yml'
 
 concurrency:
   group: migrated-android-apps-${{ github.workflow }}-${{ github.ref }}
@@ -26,7 +14,72 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect migrated app changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      camera: ${{ steps.changes.outputs.camera }}
+      launcher: ${{ steps.changes.outputs.launcher }}
+      keyboard: ${{ steps.changes.outputs.keyboard }}
+      gallery: ${{ steps.changes.outputs.gallery }}
+
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - name: Detect affected migrated apps
+        id: changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            changed_files="$(git diff --name-only "$BASE_SHA...HEAD")"
+          else
+            if git rev-parse HEAD^ >/dev/null 2>&1; then
+              changed_files="$(git diff --name-only HEAD^ HEAD)"
+            else
+              changed_files="$(git show --pretty='' --name-only HEAD)"
+            fi
+          fi
+
+          printf '%s\n' "$changed_files"
+
+          run_all=false
+          if printf '%s\n' "$changed_files" |
+             grep -qxF '.github/workflows/migrated-android-apps-ci.yml'; then
+            run_all=true
+          fi
+
+          for app in camera launcher keyboard gallery; do
+            value=false
+
+            if [ "$run_all" = "true" ] ||
+               printf '%s\n' "$changed_files" | grep -q "^apps/${app}/"; then
+              value=true
+            fi
+
+            echo "${app}=${value}" >> "$GITHUB_OUTPUT"
+          done
+
   camera:
+    needs: changes
+    if: needs.changes.outputs.camera == 'true'
     name: Camera build, unit tests, lint, and source guard
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -39,6 +92,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -72,6 +130,8 @@ jobs:
         run: gradle --no-daemon --stacktrace lintDebug testDebugUnitTest assembleDebug
 
   launcher:
+    needs: changes
+    if: needs.changes.outputs.launcher == 'true'
     name: Launcher validation, unit tests, lint, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -86,6 +146,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -119,6 +184,8 @@ jobs:
           fi
 
   keyboard:
+    needs: changes
+    if: needs.changes.outputs.keyboard == 'true'
     name: Keyboard validation, unit tests, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -131,6 +198,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -152,6 +224,8 @@ jobs:
         run: gradle --no-daemon :android:app:testDebugUnitTest :android:app:assembleDebug --stacktrace
 
   gallery:
+    needs: changes
+    if: needs.changes.outputs.gallery == 'true'
     name: Gallery native core, adapter, unit tests, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -164,6 +238,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -177,3 +256,66 @@ jobs:
         run: gradle :core:test :android-adapter:testDebugUnitTest :app:testDebugUnitTest --no-daemon
       - name: Build Gallery native debug APK
         run: gradle :app:assembleDebug --no-daemon
+
+  required-gate:
+    name: Migrated Android apps required gate
+    if: always()
+    needs:
+      - changes
+      - camera
+      - launcher
+      - keyboard
+      - gallery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Require affected migrated-app validation
+        shell: bash
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+
+          CAMERA_CHANGED: ${{ needs.changes.outputs.camera }}
+          CAMERA_RESULT: ${{ needs.camera.result }}
+
+          LAUNCHER_CHANGED: ${{ needs.changes.outputs.launcher }}
+          LAUNCHER_RESULT: ${{ needs.launcher.result }}
+
+          KEYBOARD_CHANGED: ${{ needs.changes.outputs.keyboard }}
+          KEYBOARD_RESULT: ${{ needs.keyboard.result }}
+
+          GALLERY_CHANGED: ${{ needs.changes.outputs.gallery }}
+          GALLERY_RESULT: ${{ needs.gallery.result }}
+        run: |
+          set -euo pipefail
+
+          if [ "$CHANGES_RESULT" != "success" ]; then
+            echo "::error::Change detection result is $CHANGES_RESULT"
+            exit 1
+          fi
+
+          require_result() {
+            changed="$1"
+            result="$2"
+            name="$3"
+
+            if [ "$changed" = "true" ]; then
+              if [ "$result" != "success" ]; then
+                echo "::error::$name validation result is $result"
+                exit 1
+              fi
+            else
+              case "$result" in
+                success|skipped) ;;
+                *)
+                  echo "::error::$name unexpected result is $result"
+                  exit 1
+                  ;;
+              esac
+            fi
+          }
+
+          require_result "$CAMERA_CHANGED" "$CAMERA_RESULT" "Camera"
+          require_result "$LAUNCHER_CHANGED" "$LAUNCHER_RESULT" "Launcher"
+          require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RESULT" "Keyboard"
+          require_result "$GALLERY_CHANGED" "$GALLERY_RESULT" "Gallery"
