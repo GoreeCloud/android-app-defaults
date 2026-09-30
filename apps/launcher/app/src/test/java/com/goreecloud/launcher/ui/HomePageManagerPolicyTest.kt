@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeApp
+import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeFolder
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -598,6 +599,112 @@ class HomePageManagerPolicyTest {
                 ),
                 layoutLocked = false,
                 availableAppKeys = setOf(firstKey, secondKey),
+            ),
+        )
+    }
+
+
+    @Test
+    fun groupAnchorPreflightPreservesRigidGeometryAndRejectsOccupiedOrOutOfBoundsCells() {
+        val firstKey = "10:com.example.one/.Main"
+        val secondKey = "10:com.example.two/.Main"
+        val source = WorkspaceRenderedHomePage(
+            pageId = "home:user:source",
+            rank = 1,
+            appKeys = listOf(firstKey, secondKey),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 1, 1, 1, 1),
+            ),
+        )
+        val target = WorkspaceRenderedHomePage(
+            pageId = "home:user:target",
+            rank = 2,
+            appKeys = emptyList(),
+            unsupportedItemCount = 0,
+            folderPlacements = listOf(
+                WorkspaceRenderedHomeFolder(
+                    itemId = "folder:item",
+                    folderId = "folder:id",
+                    cellX = 0,
+                    cellY = 0,
+                ),
+            ),
+        )
+
+        assertFalse(
+            homeAppGroupAnchorAvailable(
+                sourcePage = source,
+                targetPage = target,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 0,
+                targetCellY = 0,
+            ),
+        )
+        assertTrue(
+            homeAppGroupAnchorAvailable(
+                sourcePage = source,
+                targetPage = target,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 1,
+                targetCellY = 2,
+            ),
+        )
+        assertFalse(
+            homeAppGroupAnchorAvailable(
+                sourcePage = source,
+                targetPage = target,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 3,
+                targetCellY = 4,
+            ),
+        )
+    }
+
+    @Test
+    fun samePageGroupAnchorPreflightIgnoresSelectedSourceCellsButKeepsOtherOccupancy() {
+        val firstKey = "10:com.example.one/.Main"
+        val secondKey = "10:com.example.two/.Main"
+        val thirdKey = "10:com.example.three/.Main"
+        val page = WorkspaceRenderedHomePage(
+            pageId = "home:user:secondary",
+            rank = 1,
+            appKeys = listOf(firstKey, secondKey, thirdKey),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
+                WorkspaceRenderedHomeApp(thirdKey, 2, 0, 1, 1),
+            ),
+        )
+
+        assertTrue(
+            homeAppGroupAnchorAvailable(
+                sourcePage = page,
+                targetPage = page,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 0,
+                targetCellY = 1,
+            ),
+        )
+        assertFalse(
+            homeAppGroupAnchorAvailable(
+                sourcePage = page,
+                targetPage = page,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 1,
+                targetCellY = 0,
             ),
         )
     }
