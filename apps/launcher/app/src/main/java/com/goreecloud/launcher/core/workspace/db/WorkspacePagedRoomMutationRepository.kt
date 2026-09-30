@@ -340,12 +340,12 @@ class WorkspacePagedRoomMutationRepository(
 
 
     /**
-     * Atomically moves a rigid group of existing secondary-HOME items to one exact anchor cell.
+     * Atomically moves a rigid group of existing HOME items to one exact anchor cell.
      *
      * The selected items keep their relative offsets and spans. The complete HOME page/item
      * snapshot is re-read and compared inside Room before any write is committed, so a concurrent
-     * workspace mutation fails closed instead of partially moving the group. Primary HOME remains
-     * protected in this first group-movement tranche.
+     * workspace mutation fails closed instead of partially moving the group. Primary HOME supports
+     * same-page repositioning only; primary↔secondary group transfer remains protected.
      */
     suspend fun moveHomeItems(
         grid: WorkspaceGridPlacement.Grid,
