@@ -237,10 +237,6 @@ class ActivatedHomeLifecycleRuntimeTest {
         var directlyAddedPageId: String? = null
 
         try {
-            preferencesRepository.setLayoutLocked(false)
-            withTimeout(10_000) {
-                preferencesRepository.preferences.first { !it.layoutLocked }
-            }
             val apps = withTimeout(10_000) {
                 LauncherAppsRepository(context).apps.first { candidates ->
                     candidates.any { it.componentName.packageName != context.packageName }
@@ -1078,6 +1074,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         }
 
         try {
+            preferencesRepository.setLayoutLocked(false)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first { !it.layoutLocked }
+            }
             val apps = withTimeout(10_000) {
                 LauncherAppsRepository(context).apps.first { candidates ->
                     candidates
