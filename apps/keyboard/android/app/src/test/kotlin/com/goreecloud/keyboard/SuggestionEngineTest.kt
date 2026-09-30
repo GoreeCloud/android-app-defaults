@@ -213,6 +213,26 @@ class SuggestionEngineTest {
     }
 
     @Test
+    fun matchesCanonicallyEquivalentAccentedText() {
+        val decomposedCafe = "cafe\u0301"
+
+        assertEquals(
+            listOf("café"),
+            engine.suggest(prefix = decomposedCafe, dictionary = listOf("café", "cafeteria")),
+        )
+    }
+
+    @Test
+    fun canonicalDuplicatesCollapseWithoutRewritingDictionarySpelling() {
+        val decomposedCafe = "cafe\u0301"
+
+        assertEquals(
+            listOf(decomposedCafe),
+            engine.suggest(prefix = "café", dictionary = listOf(decomposedCafe, "café")),
+        )
+    }
+
+    @Test
     fun returnsNothingForNonPositiveLimit() {
         assertEquals(emptyList<String>(), engine.suggest("go", listOf("good"), limit = 0))
     }

@@ -1,0 +1,179 @@
+name: Protected promotion gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: read
+  actions: read
+
+concurrency:
+  group: protected-promotion-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Protected promotion gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Determine applicable exact-head checks
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import subprocess
+
+          base = os.environ.get("BASE_SHA", "").strip()
+          head = os.environ["HEAD_SHA"].strip()
+          if not base or set(base) == {"0"}:
+              base = subprocess.check_output(["git", "rev-parse", f"{head}^"], text=True).strip()
+
+          changed = subprocess.check_output(
+              ["git", "diff", "--name-only", base, head],
+              text=True,
+          ).splitlines()
+
+          expected = {
+              "Since build, unit tests, lint, schema, and manifest guard",
+              "Since Android 16 runtime instrumentation",
+          }
+
+          app_checks = {
+              "camera": "Camera build, unit tests, lint, and source guard",
+              "launcher": "Launcher validation, unit tests, lint, and build",
+              "keyboard": "Keyboard validation, unit tests, and build",
+              "gallery": "Gallery native core, adapter, unit tests, and build",
+          }
+          for app, check in app_checks.items():
+              if any(path.startswith(f"apps/{app}/") for path in changed):
+                  expected.add(check)
+
+          migration_paths = (
+              "apps/camera/",
+              "apps/launcher/",
+              "apps/keyboard/",
+              "apps/gallery/",
+              "docs/migrations/2026-09-29-mandatory-app-consolidation.md",
+              ".github/workflows/mandatory-app-migration-integrity.yml",
+          )
+          if any(
+              any(path.startswith(prefix) if prefix.endswith("/") else path == prefix for prefix in migration_paths)
+              for path in changed
+          ):
+              expected.add("migration-provenance")
+
+          platform_paths = {
+              "apps/camera/goreecloud.platform.yaml",
+              "apps/launcher/goreecloud.platform.yaml",
+              "apps/keyboard/goreecloud.platform.yaml",
+              "apps/gallery/goreecloud.platform.yaml",
+              ".github/workflows/migrated-platform-contract.yml",
+          }
+          if any(path in platform_paths for path in changed):
+              expected.update({
+                  "Camera Platform Contract / Validate GoreeCloud Platform Contract and conformance",
+                  "Launcher Platform Contract / Validate GoreeCloud Platform Contract and conformance",
+                  "Keyboard Platform Contract / Validate GoreeCloud Platform Contract and conformance",
+                  "Gallery Platform Contract / Validate GoreeCloud Platform Contract and conformance",
+              })
+
+          out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "protected-promotion-expected.txt"
+          out.write_text("\n".join(sorted(expected)) + "\n", encoding="utf-8")
+          print("Changed paths:")
+          for path in changed:
+              print(f"  {path}")
+          print("Required exact-head checks:")
+          for name in sorted(expected):
+              print(f"  {name}")
+          PY
+
+      - name: Require applicable checks on this exact head
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import time
+          import urllib.request
+
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["REPOSITORY"]
+          sha = os.environ["HEAD_SHA"]
+          expected_path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "protected-promotion-expected.txt"
+          expected = {line.strip() for line in expected_path.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}",
+              "X-GitHub-Api-Version": "2022-11-28",
+              "User-Agent": "goreecloud-protected-promotion-gate",
+          }
+
+          deadline = time.time() + 45 * 60
+          while True:
+              req = urllib.request.Request(
+                  f"https://api.github.com/repos/{repo}/commits/{sha}/check-runs?per_page=100",
+                  headers=headers,
+              )
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  payload = json.load(response)
+
+              checks = {}
+              for item in payload.get("check_runs", []):
+                  name = item.get("name")
+                  if name in expected:
+                      checks[name] = (item.get("status"), item.get("conclusion"))
+
+              failed = {
+                  name: state
+                  for name, state in checks.items()
+                  if state[0] == "completed" and state[1] not in {"success", "neutral", "skipped"}
+              }
+              if failed:
+                  raise SystemExit(f"Required exact-head checks failed: {failed}")
+
+              missing = expected - checks.keys()
+              pending = {
+                  name: state
+                  for name, state in checks.items()
+                  if state[0] != "completed"
+              }
+              if not missing and not pending:
+                  print("All applicable exact-head checks completed successfully:")
+                  for name in sorted(expected):
+                      print(f"  {name}")
+                  break
+
+              if time.time() >= deadline:
+                  raise SystemExit(
+                      "Timed out waiting for required exact-head checks. "
+                      f"Missing={sorted(missing)} pending={pending}"
+                  )
+
+              print(f"Waiting: missing={sorted(missing)} pending={pending}")
+              time.sleep(20)
+          PY

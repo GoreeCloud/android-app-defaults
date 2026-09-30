@@ -37,7 +37,7 @@
     <string name="startup_guide_title">Welcome to GoreeCloud Camera</string>
     <string name="startup_step_progress">Step %1$d of %2$d</string>
     <string name="startup_step_local_title">Capture stays local by default</string>
-    <string name="startup_step_local_body">Camera preview and capture use this device. This Development build does not upload captures or require a cloud account to take a photo or video.</string>
+    <string name="startup_step_local_body">Camera preview and capture use this device. Volume keys capture photos by default; change that behavior, the photo self-timer, or the composition grid in Settings. This Development build does not upload captures or require a cloud account to take a photo or video.</string>
     <string name="startup_step_permissions_title">Permissions are requested when needed</string>
     <string name="startup_step_permissions_body">Camera permission enables the local preview and capture. Microphone permission is requested only when you choose to start video with audio. Denying microphone access leaves audio recording off.</string>
     <string name="startup_step_boundaries_title">Know the current Development boundary</string>
