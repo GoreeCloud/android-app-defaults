@@ -1401,7 +1401,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .performClick()
 
                 composeRule
-                    .onNodeWithText("Destination anchor", useUnmergedTree = true)
+                    .onNodeWithTag(
+                        "launcher-home-group-anchor-row-0",
+                        useUnmergedTree = true,
+                    )
                     .performScrollTo()
                 val anchorNode = composeRule
                     .onNodeWithTag(
