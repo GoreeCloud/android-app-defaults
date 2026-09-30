@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — visible Primary Home app-group repositioning
+
+The current stacked Development candidate extends **Edit Home → Move apps** to spatial Primary Home pages. When Primary Home is unlocked and has at least two uniquely resolvable positioned applications, the existing group editor can select the apps and choose an exact same-page anchor. Primary Home is the only destination offered for a Primary Home group; primary↔secondary transfer remains protected. The runtime first ensures the configured authoritative Primary Home spatial grid, then the atomic Room mover preserves selected relative geometry, spans, page identity, and ranks while validating every unselected Primary Home item for collision/bounds safety.
+
+Secondary group editing remains unchanged. The same rendered-state anchor preflight is used for Primary Home, and Room remains final authority through full-HOME snapshot validation.
+
+**Acceptance boundary:** this is Development source for same-page Primary Home application groups only. Primary↔secondary group transfer, mixed item-type groups, lasso/drag-box selection, durable recovery/history, and representative-device accessibility/direct-manipulation acceptance remain open.
+
 ## September 30, 2026 — recoverable group-move submission
 
 The stacked Development candidate no longer dismisses the group editor before the atomic Room write returns. It preserves selected apps and destination choices after a rejected request, blocks duplicate input while the write is in flight, provides inline assertive failure feedback, and closes only after confirmed success. Android 16 runtime coverage verifies locked-layout rejection leaves both selection and persisted geometry unchanged, then verifies the retained group can be retried successfully after unlocking.
