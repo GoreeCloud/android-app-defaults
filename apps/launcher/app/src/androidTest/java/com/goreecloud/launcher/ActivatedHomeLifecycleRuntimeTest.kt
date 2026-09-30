@@ -1307,10 +1307,8 @@ class ActivatedHomeLifecycleRuntimeTest {
                     workspaceDaoProvider = { dao },
                 )
                 runtime?.deleteEmptyHomePage(secondaryPageId)
-                check(
-                    runtime?.createHomePage(secondaryPageId) is
-                        WorkspacePagedRoomMutationResult.CreatedPage
-                )
+                val created = runtime?.createHomePage(secondaryPageId)
+                check(created is WorkspacePagedRoomMutationResult.CreatedPage)
                 check(
                     runtime?.moveHomeAppToPage(
                         sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
@@ -1363,18 +1361,20 @@ class ActivatedHomeLifecycleRuntimeTest {
                     }
                 waitForDisplayedTag("launcher-home-editor-fullscreen")
 
-                composeRule
-                    .onNodeWithTag(
-                        "launcher-home-editor-page-carousel",
-                        useUnmergedTree = true,
-                    )
-                    .performTouchInput {
-                        swipeLeft(
-                            startX = right - 24f,
-                            endX = left + 24f,
-                            durationMillis = 420,
+                repeat(created.rank) {
+                    composeRule
+                        .onNodeWithTag(
+                            "launcher-home-editor-page-carousel",
+                            useUnmergedTree = true,
                         )
-                    }
+                        .performTouchInput {
+                            swipeLeft(
+                                startX = right - 24f,
+                                endX = left + 24f,
+                                durationMillis = 420,
+                            )
+                        }
+                }
 
                 val groupActionTag = "launcher-home-editor-group-" + secondaryPageId
                 waitForDisplayedTag(groupActionTag)
