@@ -619,6 +619,44 @@ class HomePageManagerPolicyTest {
 
 
     @Test
+    fun groupMoveUndoCapturesOriginalPageAndBoundingAnchor() {
+        val firstKey = "10:com.example.one/.Main"
+        val secondKey = "10:com.example.two/.Main"
+        val page = WorkspaceRenderedHomePage(
+            pageId = "home:user:secondary",
+            rank = 1,
+            appKeys = listOf(firstKey, secondKey),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 2, 3, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 3, 4, 1, 1),
+            ),
+        )
+
+        assertEquals(
+            LauncherHomeAppGroupUndo(
+                originalPageId = "home:user:secondary",
+                movedPageId = "home:user:target",
+                appKeys = listOf(firstKey, secondKey),
+                originalAnchorX = 2,
+                originalAnchorY = 3,
+            ),
+            homeAppGroupUndoForMove(
+                sourcePage = page,
+                appKeys = listOf(firstKey, secondKey),
+                movedPageId = "home:user:target",
+            ),
+        )
+        assertNull(
+            homeAppGroupUndoForMove(
+                sourcePage = page,
+                appKeys = listOf(firstKey, firstKey),
+                movedPageId = "home:user:target",
+            ),
+        )
+    }
+
+    @Test
     fun groupAnchorPreflightPreservesRigidGeometryAndRejectsOccupiedOrOutOfBoundsCells() {
         val firstKey = "10:com.example.one/.Main"
         val secondKey = "10:com.example.two/.Main"
