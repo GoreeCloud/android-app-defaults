@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — primary Home same-page app-group reposition foundation
+
+The current Development candidate extends the atomic Room app-group primitive to same-page Primary Home repositioning. The runtime ensures Primary Home has authoritative spatial coordinates before resolving the selected app identities; selected ranks remain unchanged, unselected primary items participate in collision validation, and the final full-HOME snapshot compare-and-swap prevents partial movement or stale-state writes. Primary↔secondary group transfer remains protected.
+
+**Acceptance boundary:** this is a backend/runtime foundation, not a visible Primary Home multi-select surface. Exact-head CI/runtime evidence, visible interaction design, primary↔secondary group transfer semantics, undo/recovery, representative-device acceptance, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — stacked atomic Home app group-movement foundation
 
 Draft PR #80 implements the first backend tranche of Home group movement on top of the mandatory Android-app consolidation candidate. Two or more applications already placed on the same secondary Home page can be resolved as one group and moved atomically to an exact secondary-page anchor while preserving relative geometry and spans. The Room mutation validates the complete target geometry, rejects collisions/out-of-bounds/stale snapshots without partial writes, and deliberately blocks primary-HOME participation until its rank/compatibility behavior is separately reviewed. The production runtime coordinator now exposes this primitive for a later user-facing multi-select/group-edit experience, and Android runtime coverage exercises both rollback-on-collision and a successful cross-page group move.
