@@ -273,6 +273,10 @@ fun LauncherStartupWizard(
                                 summary = "Long-press an app in Apps, keep holding, and drag it to the exact primary Home cell or Dock position you want. On Home, keep holding a saved app at a left or right page edge briefly to switch pages, then release over the exact target cell. Long-press empty Home space for Edit Home; Launcher Settings is available there and from the gear in Apps.",
                             )
                             WizardInfoCard(
+                                title = "Move apps together",
+                                summary = "In Edit Home, secondary pages with at least two positioned apps show Move apps. Select the apps, choose a secondary destination page, then choose the top-left anchor cell. Launcher keeps the group’s relative arrangement, disables known invalid destinations, and preserves the current layout if the workspace changes before commit. Primary Home is not part of group movement yet.",
+                            )
+                            WizardInfoCard(
                                 title = "Move widgets directly",
                                 summary = "Long-press a Home widget and drag it to a free cell, or release it at a valid page edge to move it to the adjacent Home page. A stationary hold opens widget options, including Move to another Home page. Fresh starter layouts use movable Glance.",
                             )
@@ -290,7 +294,7 @@ fun LauncherStartupWizard(
                             )
                             WizardSwitchRow(
                                 title = "Show Launcher hints",
-                                summary = "Show short, dismissible hints for Apps, Search, Edit Home, exact app placement, and folder Add apps. You can show them again later from the searchable Launcher Settings home.",
+                                summary = "Show short, dismissible hints for Apps, Search, Edit Home, exact app placement, multi-app movement, and folder Add apps. You can show them again later from the searchable Launcher Settings home.",
                                 checked = showHints,
                                 onCheckedChange = { showHints = it },
                             )
@@ -389,6 +393,11 @@ fun LauncherHomeHintCard(
             )
             Text(
                 "Home apps: keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                "Edit Home: on a secondary page with at least two positioned apps, use Move apps to select the group, choose a destination page, and choose its top-left anchor cell.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
