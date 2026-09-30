@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — atomic Home app group-movement foundation
+
+**Change type:** Workspace editing foundation; atomic Room mutation; Development candidate.
+
+Draft PR #80 adds a Room-native atomic group-movement primitive for two or more existing applications on the same secondary Home page. The target cell is the top-left anchor of the selected group’s current bounding box, and every selected item keeps its relative cell offset and span. Colliding or out-of-bounds targets, malformed or duplicate selections, stale HOME snapshots, and primary-HOME participation fail closed without partially moving the group.
+
+The production runtime coordinator exposes this bounded operation for a future visible multi-select/group-edit surface. Android runtime coverage verifies that a rejected collision leaves the source group untouched and that a valid cross-page move commits the full selected group together while preserving an unrelated target-page item. The write continues to use the existing full HOME snapshot compare-and-swap transaction and introduces no new permission, network path, telemetry, credential, or external provider.
+
+**Acceptance boundary:** PR #80 remains Draft and is stacked on migration-finalization PR #75. Visible group selection/group-edit controls, primary-HOME group participation, durable multi-step undo/redo, process-death-safe edit history, representative-device accessibility/direct-manipulation acceptance, protected promotion, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 29, 2026 — legacy Room 3.0.2 reconciliation candidate
 
 Legacy Launcher PR #79 upgraded the Room 3 Gradle plugin, runtime, and compiler from 3.0.1 to 3.0.2, but that dependency delta was absent from the mandatory cutover tree. This candidate restores only that version change against the current Launcher source.

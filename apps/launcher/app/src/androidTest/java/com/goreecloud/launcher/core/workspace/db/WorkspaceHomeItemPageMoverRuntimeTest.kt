@@ -587,6 +587,153 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
         )
     }
 
+
+    @Test
+    fun appGroupMoveIsAtomicPreservesRelativeGeometryAndRejectsCollision() = runBlocking {
+        val authorityRepository = WorkspaceRepository(openDataStore())
+        authorityRepository.ensureDefaults(
+            favoriteKeys = listOf(APP_ONE),
+            dockKeys = emptyList(),
+        )
+        promoteRoomAuthority(authorityRepository)
+        val mutationRepository = WorkspacePagedRoomMutationRepository(
+            authorityRepository = authorityRepository,
+            workspaceDaoProvider = { database.workspaceDao() },
+        )
+        val mover = WorkspaceHomeItemPageMover(
+            authorityRepository = authorityRepository,
+            workspaceDaoProvider = { database.workspaceDao() },
+            mutationRepository = mutationRepository,
+        )
+        val grid = WorkspaceGridPlacement.Grid(columns = 4, rows = 5)
+
+        database.workspaceDao().upsertPages(
+            listOf(
+                WorkspacePageEntity("home:1", WorkspaceContainerType.HOME, 1),
+                WorkspacePageEntity("home:2", WorkspaceContainerType.HOME, 2),
+            )
+        )
+        database.workspaceDao().upsertItems(
+            listOf(
+                WorkspaceItemEntity(
+                    itemId = "native:item:two",
+                    pageId = "home:1",
+                    itemType = WorkspaceItemType.APP,
+                    appKey = APP_TWO,
+                    rank = 0,
+                    cellX = 0,
+                    cellY = 0,
+                ),
+                WorkspaceItemEntity(
+                    itemId = "native:item:three",
+                    pageId = "home:1",
+                    itemType = WorkspaceItemType.APP,
+                    appKey = APP_THREE,
+                    rank = 1,
+                    cellX = 1,
+                    cellY = 1,
+                ),
+                WorkspaceItemEntity(
+                    itemId = "native:item:blocker",
+                    pageId = "home:2",
+                    itemType = WorkspaceItemType.APP,
+                    appKey = APP_BLOCKER,
+                    rank = 0,
+                    cellX = 0,
+                    cellY = 0,
+                ),
+            )
+        )
+
+        assertEquals(
+            WorkspacePagedRoomMutationResult.InvalidWorkspace,
+            mover.moveAppGroupToPageCell(
+                sourcePageId = "home:1",
+                appKeys = listOf(APP_TWO, APP_THREE),
+                targetPageId = "home:2",
+                grid = grid,
+                targetCellX = 0,
+                targetCellY = 0,
+            ),
+        )
+        assertEquals(
+            listOf(APP_TWO, APP_THREE),
+            database.workspaceDao().readItems(listOf("home:1"))
+                .sortedBy { it.rank }
+                .mapNotNull { it.appKey },
+        )
+
+        assertEquals(
+            WorkspacePagedRoomMutationResult.UpdatedItems(
+                listOf(
+                    WorkspacePagedRoomMutationResult.UpdatedItem(
+                        itemId = "native:item:two",
+                        pageId = "home:2",
+                        cellX = 1,
+                        cellY = 2,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                    WorkspacePagedRoomMutationResult.UpdatedItem(
+                        itemId = "native:item:three",
+                        pageId = "home:2",
+                        cellX = 2,
+                        cellY = 3,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                )
+            ),
+            mover.moveAppGroupToPageCell(
+                sourcePageId = "home:1",
+                appKeys = listOf(APP_TWO, APP_THREE),
+                targetPageId = "home:2",
+                grid = grid,
+                targetCellX = 1,
+                targetCellY = 2,
+            ),
+        )
+
+        assertTrue(database.workspaceDao().readItems(listOf("home:1")).isEmpty())
+        val target = database.workspaceDao().readItems(listOf("home:2")).associateBy { it.appKey }
+        assertEquals(0, target.getValue(APP_BLOCKER).cellX)
+        assertEquals(0, target.getValue(APP_BLOCKER).cellY)
+        assertEquals(1, target.getValue(APP_TWO).cellX)
+        assertEquals(2, target.getValue(APP_TWO).cellY)
+        assertEquals(2, target.getValue(APP_THREE).cellX)
+        assertEquals(3, target.getValue(APP_THREE).cellY)
+
+        assertEquals(
+            WorkspacePagedRoomMutationResult.StoredWorkspaceChanged,
+            mutationRepository.moveHomeItems(
+                grid = grid,
+                itemIds = listOf("native:item:two", "native:item:three"),
+                sourcePageId = "home:1",
+                targetPageId = "home:2",
+                targetCellX = 1,
+                targetCellY = 2,
+            ),
+        )
+        assertEquals(
+            WorkspacePagedRoomMutationResult.PrimaryPageProtected,
+            mover.moveAppGroupToPageCell(
+                sourcePageId = "home:2",
+                appKeys = listOf(APP_TWO, APP_THREE),
+                targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                grid = grid,
+                targetCellX = 0,
+                targetCellY = 0,
+            ),
+        )
+        assertEquals(
+            WorkspacePostCutoverHealthResult.Healthy,
+            WorkspacePostCutoverHealthEvaluator(
+                repository = authorityRepository,
+                workspaceDaoProvider = { database.workspaceDao() },
+            ).evaluate(),
+        )
+    }
+
     private suspend fun promoteRoomAuthority(authorityRepository: WorkspaceRepository) {
         var state = authorityRepository.state.first { it.initialized }
         assertEquals(
@@ -615,5 +762,6 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
         const val APP_ONE = "10:com.example.one/.MainActivity"
         const val APP_TWO = "10:com.example.two/.MainActivity"
         const val APP_THREE = "10:com.example.three/.MainActivity"
+        const val APP_BLOCKER = "10:com.example.blocker/.MainActivity"
     }
 }

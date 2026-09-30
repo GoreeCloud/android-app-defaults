@@ -229,6 +229,96 @@ class WorkspaceHomeItemPageMover(
         )
     }
 
+
+    /**
+     * Resolves a group of secondary-HOME application identities and moves the group atomically.
+     *
+     * The target cell is the top-left anchor of the selected group's current bounding box.
+     * Relative app geometry is preserved. Primary HOME participation is deliberately blocked until
+     * a separately reviewed group-rank/primary-boundary design exists.
+     */
+    suspend fun moveAppGroupToPageCell(
+        sourcePageId: String,
+        appKeys: List<String>,
+        targetPageId: String,
+        grid: WorkspaceGridPlacement.Grid,
+        targetCellX: Int,
+        targetCellY: Int,
+    ): WorkspacePagedRoomMutationResult {
+        if (
+            sourcePageId.isBlank() ||
+            targetPageId.isBlank() ||
+            appKeys.size < 2 ||
+            appKeys.any { it.isBlank() } ||
+            appKeys.distinct().size != appKeys.size
+        ) {
+            return WorkspacePagedRoomMutationResult.InvalidWorkspace
+        }
+        if (
+            sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+            targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        ) {
+            return WorkspacePagedRoomMutationResult.PrimaryPageProtected
+        }
+
+        val state = authorityRepository.state.first()
+        if (!state.initialized || state.authority != WorkspaceAuthority.ROOM) {
+            return WorkspacePagedRoomMutationResult.Reserved
+        }
+        val dao = workspaceDaoOrNull() ?: return WorkspacePagedRoomMutationResult.Unavailable
+
+        return try {
+            val pages = dao.readPagesByContainer(WorkspaceContainerType.HOME)
+            if (
+                pages.isEmpty() ||
+                pages.firstOrNull()?.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+                pages.map { it.rank } != pages.indices.toList()
+            ) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+            if (pages.none { it.pageId == sourcePageId } || pages.none { it.pageId == targetPageId }) {
+                return WorkspacePagedRoomMutationResult.PageNotFound
+            }
+
+            val items = dao.readItems(pages.map { it.pageId })
+            val spatialItems = items.filterNot {
+                it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+            }
+            if (spatialItems.any { it.cellX == null || it.cellY == null }) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+
+            val requestedKeys = appKeys.toSet()
+            val candidates = spatialItems.filter {
+                it.pageId == sourcePageId &&
+                    it.itemType == WorkspaceItemType.APP &&
+                    it.appKey?.let(requestedKeys::contains) == true
+            }
+            val candidatesByKey = candidates.groupBy { it.appKey }
+            if (appKeys.any { candidatesByKey[it].isNullOrEmpty() }) {
+                return WorkspacePagedRoomMutationResult.ItemNotFound
+            }
+            if (appKeys.any { candidatesByKey.getValue(it).size != 1 }) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+
+            mutationRepository.moveHomeItems(
+                grid = grid,
+                itemIds = appKeys.map { key ->
+                    checkNotNull(candidatesByKey.getValue(key).single().itemId)
+                },
+                sourcePageId = sourcePageId,
+                targetPageId = targetPageId,
+                targetCellX = targetCellX,
+                targetCellY = targetCellY,
+            )
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            WorkspacePagedRoomMutationResult.Failed(exception::class.java.simpleName)
+        }
+    }
+
     private suspend fun moveAppAcrossPrimaryBoundary(
         sourcePageId: String,
         appKey: String,

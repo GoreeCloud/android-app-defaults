@@ -579,6 +579,33 @@ class WorkspaceProductionRuntimeCoordinator(
         return result
     }
 
+
+    suspend fun moveHomeAppGroupToPageCell(
+        sourcePageId: String,
+        appKeys: List<String>,
+        targetPageId: String,
+        columns: Int,
+        rows: Int,
+        cellX: Int,
+        cellY: Int,
+    ): WorkspacePagedRoomMutationResult {
+        val grid = runCatching {
+            WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
+        }.getOrNull() ?: return WorkspacePagedRoomMutationResult.InvalidWorkspace
+        val result = homeItemPageMover.moveAppGroupToPageCell(
+            sourcePageId = sourcePageId,
+            appKeys = appKeys,
+            targetPageId = targetPageId,
+            grid = grid,
+            targetCellX = cellX,
+            targetCellY = cellY,
+        )
+        if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
+            refresh()
+        }
+        return result
+    }
+
     suspend fun moveHomeAppToCellWithinPage(
         pageId: String,
         appKey: String,
