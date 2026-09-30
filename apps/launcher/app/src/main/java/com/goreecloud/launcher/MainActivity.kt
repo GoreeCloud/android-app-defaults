@@ -160,6 +160,7 @@ private data class PendingHomeAppGroupUndo(
     val originalPageId: String,
     val originalCellX: Int,
     val originalCellY: Int,
+    val expectedCurrentItems: List<WorkspacePagedRoomMutationResult.UpdatedItem>,
 )
 
 class MainActivity : ComponentActivity() {
@@ -1225,6 +1226,7 @@ class MainActivity : ComponentActivity() {
                                                 rows = launcherPreferences.homeRows,
                                                 cellX = pendingUndo.originalCellX,
                                                 cellY = pendingUndo.originalCellY,
+                                                expectedSourceItems = pendingUndo.expectedCurrentItems,
                                             )
                                         pendingHomeAppGroupUndo = null
                                         if (undoResult is WorkspacePagedRoomMutationResult.UpdatedItems) {
@@ -1275,6 +1277,7 @@ class MainActivity : ComponentActivity() {
                                                         originalPageId = originalPageId,
                                                         originalCellX = previousItems.minOf { it.cellX },
                                                         originalCellY = previousItems.minOf { it.cellY },
+                                                        expectedCurrentItems = result.items,
                                                     )
                                                 } else {
                                                     null
