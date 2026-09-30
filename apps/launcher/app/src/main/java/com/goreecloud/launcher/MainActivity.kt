@@ -829,9 +829,13 @@ class MainActivity : ComponentActivity() {
                 val routeHomeWidgetDrop: (LauncherWidgetDragData, Offset) -> Boolean =
                     route@{ drag, point ->
                         if (currentLauncherPreferences.layoutLocked) return@route false
-                        val widget = currentRenderedPages
-                            .asSequence()
-                            .flatMap { it.widgetPlacements.asSequence() }
+                        val renderedSourcePage = currentRenderedPages
+                            .firstOrNull { page ->
+                                page.widgetPlacements.any { it.itemId == drag.itemId }
+                            }
+                            ?: return@route false
+                        if (renderedSourcePage.pageId != drag.sourcePageId) return@route false
+                        val widget = renderedSourcePage.widgetPlacements
                             .firstOrNull { it.itemId == drag.itemId }
                             ?: return@route false
                         if (
