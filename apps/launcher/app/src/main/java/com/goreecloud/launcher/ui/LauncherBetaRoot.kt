@@ -194,6 +194,16 @@ internal data class LauncherAppDragData(
     val sourcePageId: String? = null,
 )
 
+internal data class LauncherFolderDragData(
+    val folderId: String,
+    val sourcePageId: String,
+)
+
+internal fun canStartFolderLiveDrag(
+    layoutLocked: Boolean,
+    sourcePageId: String?,
+): Boolean = !layoutLocked && !sourcePageId.isNullOrBlank()
+
 internal fun launcherFolderGridColumns(
     availableWidthDp: Float,
     largeText: Boolean,
@@ -324,6 +334,15 @@ internal fun LauncherAppDragData.toTransferData(): DragAndDropTransferData =
 
 internal fun DragAndDropEvent.launcherAppDragData(): LauncherAppDragData? =
     toAndroidDragEvent().localState as? LauncherAppDragData
+
+internal fun LauncherFolderDragData.toTransferData(): DragAndDropTransferData =
+    DragAndDropTransferData(
+        clipData = ClipData.newPlainText("GoreeCloud Launcher folder", "folder"),
+        localState = this,
+    )
+
+internal fun DragAndDropEvent.launcherFolderDragData(): LauncherFolderDragData? =
+    toAndroidDragEvent().localState as? LauncherFolderDragData
 
 internal fun DragAndDropEvent.rootDropPoint(): Offset =
     toAndroidDragEvent().let { event -> Offset(event.x, event.y) }
@@ -3188,6 +3207,7 @@ private fun HomeFavoritesGrid(
                     editMode = editMode,
                     layoutLocked = layoutLocked,
                     onOpen = { onOpenFolder(folder) },
+                    sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
                     onDrop = { selected, point ->
                         val edgeTarget = folderGridBounds?.let { bounds ->
                             homePageEdgeDropTarget(
@@ -3289,6 +3309,7 @@ private fun HomeFavoritesGrid(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeFolderTile(
     folder: LauncherFolder,
@@ -3296,6 +3317,7 @@ internal fun HomeFolderTile(
     showLabel: Boolean,
     editMode: Boolean,
     onOpen: () -> Unit,
+    sourcePageId: String? = null,
     labelOnWallpaper: Boolean = true,
     layoutLocked: Boolean = true,
     fixedGridGeometry: Boolean = false,
@@ -3347,12 +3369,26 @@ internal fun HomeFolderTile(
     }
     val previewApps = remember(folderApps) { folderApps.take(4) }
     val dragThreshold = with(LocalDensity.current) { 12.dp.toPx() }
+    val platformDragData = remember(folder.id, sourcePageId, layoutLocked) {
+        if (canStartFolderLiveDrag(layoutLocked, sourcePageId) && onDrop != null) {
+            LauncherFolderDragData(
+                folderId = folder.id,
+                sourcePageId = checkNotNull(sourcePageId),
+            )
+        } else {
+            null
+        }
+    }
     var tileBounds by remember(folder.id) { mutableStateOf<Rect?>(null) }
     var dragStart by remember(folder.id) { mutableStateOf<Offset?>(null) }
     var dragOffset by remember(folder.id) { mutableStateOf(Offset.Zero) }
     var dragging by remember(folder.id) { mutableStateOf(false) }
-    val moveGesture = if (layoutLocked || onDrop == null) Modifier else Modifier
-        .pointerInput(folder.id, dragThreshold) {
+    val moveGesture = when {
+        platformDragData != null -> Modifier.dragAndDropSource { _ ->
+            platformDragData.toTransferData()
+        }
+        layoutLocked || onDrop == null -> Modifier
+        else -> Modifier.pointerInput(folder.id, dragThreshold) {
             detectDragGesturesAfterLongPress(
                 onDragStart = {
                     dragStart = tileBounds?.center
@@ -3381,6 +3417,7 @@ internal fun HomeFolderTile(
                 },
             )
         }
+    }
     BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = 2.dp, vertical = 2.dp)

@@ -1379,6 +1379,7 @@ fun ReadOnlyPagedHomeSurface(
                                 editMode = false,
                                 layoutLocked = layoutLocked,
                                 onOpen = { openedFolderId = folder.id },
+                                sourcePageId = page.pageId,
                                 onDrop = { selected, dropPoint ->
                                     val edgeTarget = gridBounds?.let { bounds ->
                                         homePageEdgeDropTarget(
