@@ -22,6 +22,24 @@ The current build baseline is Android Gradle Plugin 8.10.1, Kotlin 2.1.21, Java 
 
 Until a verified Gradle Wrapper is added, CI bootstraps Gradle 8.11.1 explicitly.
 
+### Since Development package and update continuity
+
+The side-by-side Development package is `com.goreecloud.since.dev`. The build accepts a positive
+`GOREECLOUD_DEV_VERSION_CODE`; GitHub Actions falls back to `GITHUB_RUN_NUMBER` so CI candidates no
+longer reuse a fixed `versionCode = 1`.
+
+A protected persistent Development signer can be supplied only through the complete external
+`GOREECLOUD_DEV_KEYSTORE_PATH`, `GOREECLOUD_DEV_KEYSTORE_PASSWORD`,
+`GOREECLOUD_DEV_KEY_ALIAS`, and `GOREECLOUD_DEV_KEY_PASSWORD` environment-variable set.
+Partial signing configuration fails closed. No keystore or password belongs in Git.
+
+Ordinary pull-request CI intentionally uses the hosted runner's debug signer and is therefore
+**installability-only**, not an update-compatible owner distribution identity. CI reads the
+assembled APK back with Android build tools, requires the expected package/version identity,
+checks ZIP alignment, requires a modern APK Signing Block signature (v2 or v3), and records
+signature/checksum provenance. Owner-distribution APKs must be produced directly by Gradle with
+the protected Development signer; post-build manifest mutation and ad-hoc re-signing are prohibited.
+
 ```bash
 gradle :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug :apps:since:assembleDebugAndroidTest
 ```
