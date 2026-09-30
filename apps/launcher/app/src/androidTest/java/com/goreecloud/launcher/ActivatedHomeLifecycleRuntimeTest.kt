@@ -243,11 +243,13 @@ class ActivatedHomeLifecycleRuntimeTest {
                 .distinctBy { it.workspaceKey() }
             val firstApp = candidates[0]
             val secondApp = candidates[1]
-            firstKey = firstApp.workspaceKey()
-            secondKey = secondApp.workspaceKey()
+            val firstAppKey = firstApp.workspaceKey()
+            val secondAppKey = secondApp.workspaceKey()
+            firstKey = firstAppKey
+            secondKey = secondAppKey
 
             repository.ensureDefaults(
-                favoriteKeys = listOf(firstKey, secondKey),
+                favoriteKeys = listOf(firstAppKey, secondAppKey),
                 dockKeys = emptyList(),
             )
 
@@ -256,10 +258,11 @@ class ActivatedHomeLifecycleRuntimeTest {
                 withTimeout(15_000) {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
-                preferences = preferencesRepository.preferences.first()
+                val activePreferences = preferencesRepository.preferences.first()
+                preferences = activePreferences
                 val grid = WorkspaceGridPlacement.Grid(
-                    columns = preferences.homeColumns,
-                    rows = preferences.homeRows,
+                    columns = activePreferences.homeColumns,
+                    rows = activePreferences.homeRows,
                 )
                 val roomPlacement = WorkspaceRoomPlacementRepository(
                     authorityRepository = repository,
@@ -269,7 +272,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
                 check(
                     roomPlacement.replace(
-                        favoriteKeys = listOf(firstKey, secondKey),
+                        favoriteKeys = listOf(firstAppKey, secondAppKey),
                         dockKeys = emptyList(),
                         homeGrid = grid,
                     ) is WorkspaceRoomWriteResult.Written
@@ -288,10 +291,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 check(
                     runtime?.moveHomeAppToPage(
                         sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
-                        appKey = firstKey,
+                        appKey = firstAppKey,
                         targetPageId = secondaryPageId,
-                        primaryColumns = preferences.homeColumns,
-                        primaryRows = preferences.homeRows,
+                        primaryColumns = activePreferences.homeColumns,
+                        primaryRows = activePreferences.homeRows,
                         targetCellX = 0,
                         targetCellY = 0,
                     ) is WorkspacePagedRoomMutationResult.UpdatedItem
@@ -299,10 +302,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 check(
                     runtime?.moveHomeAppToPage(
                         sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
-                        appKey = secondKey,
+                        appKey = secondAppKey,
                         targetPageId = secondaryPageId,
-                        primaryColumns = preferences.homeColumns,
-                        primaryRows = preferences.homeRows,
+                        primaryColumns = activePreferences.homeColumns,
+                        primaryRows = activePreferences.homeRows,
                         targetCellX = 1,
                         targetCellY = 0,
                     ) is WorkspacePagedRoomMutationResult.UpdatedItem
@@ -313,7 +316,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                         val ready = state as? WorkspacePagedHomeState.Ready ?: return@first false
                         ready.pages.firstOrNull { it.pageId == secondaryPageId }
                             ?.appKeys
-                            ?.containsAll(listOf(firstKey, secondKey)) == true
+                            ?.containsAll(listOf(firstAppKey, secondAppKey)) == true
                     }
                 }
 
@@ -354,13 +357,13 @@ class ActivatedHomeLifecycleRuntimeTest {
                 waitForDisplayedTag("launcher-home-group-move-dialog")
                 composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-app-" + firstKey,
+                        "launcher-home-group-app-" + firstAppKey,
                         useUnmergedTree = true,
                     )
                     .performClick()
                 composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-app-" + secondKey,
+                        "launcher-home-group-app-" + secondAppKey,
                         useUnmergedTree = true,
                     )
                     .performClick()
@@ -375,8 +378,8 @@ class ActivatedHomeLifecycleRuntimeTest {
                 withTimeout(15_000) {
                     while (true) {
                         val byKey = dao.readItems(listOf(secondaryPageId)).associateBy { it.appKey }
-                        val first = byKey[firstKey]
-                        val second = byKey[secondKey]
+                        val first = byKey[firstAppKey]
+                        val second = byKey[secondAppKey]
                         if (
                             first?.cellX == 0 &&
                             first.cellY == 1 &&
@@ -1284,7 +1287,7 @@ class ActivatedHomeLifecycleRuntimeTest {
             val secondKey = secondApp.workspaceKey()
             val repository = WorkspaceRepository(context)
             repository.ensureDefaults(
-                favoriteKeys = listOf(firstKey, secondKey),
+                favoriteKeys = listOf(firstAppKey, secondAppKey),
                 dockKeys = emptyList(),
             )
 
@@ -1301,7 +1304,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                     workspaceDaoProvider = { dao },
                 )
                 val baseline = roomPlacement.replace(
-                    favoriteKeys = listOf(firstKey, secondKey),
+                    favoriteKeys = listOf(firstAppKey, secondAppKey),
                     dockKeys = emptyList(),
                     homeGrid = WorkspaceGridPlacement.Grid(
                         columns = preferences.homeColumns,
