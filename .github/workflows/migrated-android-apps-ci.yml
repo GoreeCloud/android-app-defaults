@@ -203,12 +203,11 @@ jobs:
           APPLICATION_ID="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
           VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionCode='\([^']*\)'.*/\1/p")"
           VERSION_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p")"
+          echo "Launcher APK identity: package=$APPLICATION_ID versionName=$VERSION_NAME versionCode=$VERSION_CODE"
           test "$APPLICATION_ID" = "com.goreecloud.launcher.dev"
           test "$VERSION_NAME" = "0.1.0-dev"
           test "$VERSION_CODE" = "$EXPECTED_LAUNCHER_VERSION_CODE"
-          "$APKSIGNER" verify --print-certs "$APK" > "$RUNNER_TEMP/launcher-apksigner.txt"
-          SIGNER_CERT_SHA256="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/launcher-apksigner.txt" | head -n 1)"
-          test -n "$SIGNER_CERT_SHA256"
+          "$APKSIGNER" verify --verbose "$APK"
           ARTIFACT_ROOT="artifact-launcher-android"
           rm -rf "$ARTIFACT_ROOT"
           mkdir -p "$ARTIFACT_ROOT"
@@ -225,7 +224,6 @@ jobs:
           run_number=$GITHUB_RUN_NUMBER
           run_attempt=$GITHUB_RUN_ATTEMPT
           signing_role=ci-debug-installability-only
-          signer_certificate_sha256=$SIGNER_CERT_SHA256
           update_in_place_continuity=not-established
           stable_release_authority=none
           EOF
