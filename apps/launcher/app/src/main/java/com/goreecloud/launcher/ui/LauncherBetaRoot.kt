@@ -3684,6 +3684,7 @@ private fun Modifier.observeStationaryLongPressReleaseWithoutConsuming(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeWidgetTile(
     widget: WorkspaceRenderedHomeWidget,
