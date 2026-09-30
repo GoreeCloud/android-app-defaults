@@ -1133,10 +1133,17 @@ fun LauncherBetaRoot(
     selectedFolderId
         ?.let { id -> folders.firstOrNull { it.id == id } }
         ?.let { folder ->
+            val folderAppsByKey = if (folder.profileKind == LauncherDrawerProfileKind.USER) {
+                rootAppsByKey
+            } else {
+                workAppsByKey
+            }
+            val homePlacementAllowed = folder.profileKind == LauncherDrawerProfileKind.USER
             LauncherFolderContentsSheet(
                 folder = folder,
-                appsByKey = rootAppsByKey,
-                isOnHome = folder.id in homeFolderIds,
+                appsByKey = folderAppsByKey,
+                isOnHome = homePlacementAllowed && folder.id in homeFolderIds,
+                homePlacementAllowed = homePlacementAllowed,
                 onLaunchApp = onLaunchApp,
                 onRemoveApp = { app -> onRemoveAppFromFolder(folder.id, app) },
                 onAddApps = {
@@ -1146,8 +1153,14 @@ fun LauncherBetaRoot(
                 onRename = { name -> onRenameFolder(folder.id, name) },
                 onAddToHome = { onAddFolderToHome(folder) },
                 onRemoveFromHome = { onRemoveFolderFromHome(folder) },
-                moveTargets = homePages.filter { page ->
-                    page.folderPlacements.none { placement -> placement.folderId == folder.id }
+                moveTargets = if (homePlacementAllowed) {
+                    homePages.filter { page ->
+                        page.folderPlacements.none { placement ->
+                            placement.folderId == folder.id
+                        }
+                    }
+                } else {
+                    emptyList()
                 },
                 onMoveToPage = { target ->
                     onMoveFolderToPage(folder, target)
@@ -1164,9 +1177,14 @@ fun LauncherBetaRoot(
     folderAppPickerId
         ?.let { id -> folders.firstOrNull { it.id == id } }
         ?.let { folder ->
+            val availableApps = if (folder.profileKind == LauncherDrawerProfileKind.USER) {
+                rootAppsByKey.values.toList()
+            } else {
+                workAppsByKey.values.toList()
+            }
             LauncherFolderAppPickerSheet(
                 folder = folder,
-                availableApps = rootAppsByKey.values.toList(),
+                availableApps = availableApps,
                 onAddApp = { app -> onAddAppToFolder(folder.id, app) },
                 onDismiss = {
                     folderAppPickerId = null
@@ -1176,14 +1194,29 @@ fun LauncherBetaRoot(
         }
 
     if (showFolderManager) {
+        val managerAppsByKey = if (
+            folderManagerProfileKind == LauncherDrawerProfileKind.USER
+        ) {
+            rootAppsByKey
+        } else {
+            workAppsByKey
+        }
         LauncherFolderManagerSheet(
-            folders = folders,
-            appsByKey = rootAppsByKey,
+            folders = folders.filter { folder ->
+                folder.profileKind == folderManagerProfileKind
+            },
+            appsByKey = managerAppsByKey,
             homeFolderIds = homeFolderIds,
+            profileKind = folderManagerProfileKind,
             defaultAddToHome = folderManagerAddToHome,
             onCreate = { name, addToHome ->
-                val initialApp = folderAssignmentAppKey?.let(rootAppsByKey::get)
-                onCreateFolder(name, addToHome, initialApp)
+                val initialApp = folderAssignmentAppKey?.let(allAppsByKey::get)
+                onCreateFolder(
+                    name,
+                    addToHome,
+                    initialApp,
+                    folderManagerProfileKind,
+                )
                 folderAssignmentAppKey = null
             },
             onOpen = { folder ->
@@ -1200,22 +1233,29 @@ fun LauncherBetaRoot(
     }
 
     if (!showFolderManager) folderAssignmentAppKey
-        ?.let(rootAppsByKey::get)
+        ?.let(allAppsByKey::get)
         ?.let { app ->
+            val appProfile = if (app.user == Process.myUserHandle()) {
+                LauncherDrawerProfileKind.USER
+            } else {
+                LauncherDrawerProfileKind.WORK
+            }
             LauncherFolderAssignmentSheet(
                 app = app,
-                folders = folders,
+                folders = folders.filter { folder -> folder.profileKind == appProfile },
                 onAssign = { folder ->
                     onAddAppToFolder(folder.id, app)
                     folderAssignmentAppKey = null
                 },
                 onCreateFolder = {
+                    folderManagerProfileName = appProfile.name
                     folderManagerAddToHome = false
                     showFolderManager = true
                 },
                 onDismiss = { folderAssignmentAppKey = null },
             )
         }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
