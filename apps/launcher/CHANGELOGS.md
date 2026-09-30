@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — Primary Home app-group editing
+
+**Change type:** Workspace editing UX; Primary Home same-page group repositioning; Development candidate.
+
+The validated Primary Home atomic group-reposition foundation is now exposed through **Edit Home → Move apps**. An unlocked spatial Primary Home with at least two uniquely resolvable apps can open the same explicit group selector used on secondary pages and choose a new exact same-page anchor. The group keeps its relative geometry, spans, page identity, and ranks. Rendered collision/bounds preflight disables invalid anchors, while the Room-authoritative full-HOME snapshot remains the final write authority.
+
+Primary Home groups are deliberately restricted to Primary Home. Primary↔secondary group transfer remains protected pending separate rank/recovery semantics. Secondary-page group movement remains unchanged. Startup/replayable guidance and the user manual now explain the current boundary.
+
+**Acceptance boundary:** visible Primary Home application-group repositioning is Development-only. Mixed item types, cross-boundary primary↔secondary group movement, durable multi-step recovery, representative-device accessibility/direct-manipulation, protected integration, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — group-move rejection recovery
 
 **Change type:** Workspace editing resilience; failure recovery; accessible feedback; Development candidate.
