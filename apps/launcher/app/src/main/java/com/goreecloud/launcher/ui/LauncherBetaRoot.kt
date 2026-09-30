@@ -200,6 +200,9 @@ internal data class LauncherAppDragData(
     val sourcePageId: String? = null,
 )
 
+internal typealias LauncherHomeAppGroupMoveRequest =
+    (String, List<String>, String, Int, Int, (Boolean) -> Unit) -> Unit
+
 internal fun launcherFolderGridColumns(
     availableWidthDp: Float,
     largeText: Boolean,
@@ -393,7 +396,7 @@ fun LauncherBetaRoot(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
-    onMoveHomeAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
+    onMoveHomeAppGroupToPageCell: LauncherHomeAppGroupMoveRequest,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     isDefaultHome: Boolean,
@@ -1251,7 +1254,7 @@ private fun HomeSurface(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
-    onMoveHomeAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
+    onMoveHomeAppGroupToPageCell: LauncherHomeAppGroupMoveRequest,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     onManageFolders: () -> Unit,
@@ -2243,7 +2246,7 @@ private fun HomeEditorSurface(
     initialPageId: String? = null,
     onSelectPage: (String) -> Unit,
     onDeletePage: (String) -> Unit,
-    onMoveAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
+    onMoveAppGroupToPageCell: LauncherHomeAppGroupMoveRequest,
     onDone: () -> Unit,
     onWallpaper: () -> Unit,
     onCreatePage: () -> Unit,
@@ -2344,7 +2347,7 @@ private fun HomeEditorPageOverview(
     onSelectPage: (String) -> Unit,
     onCreatePage: () -> Unit,
     onDeletePage: (String) -> Unit,
-    onMoveAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
+    onMoveAppGroupToPageCell: LauncherHomeAppGroupMoveRequest,
     modifier: Modifier = Modifier,
 ) {
     val visiblePages = pages
@@ -2603,15 +2606,19 @@ private fun HomeEditorPageOverview(
             apps = apps,
             homeColumns = homeColumns,
             homeRows = homeRows,
-            onMove = { appKeys, targetPageId, cellX, cellY ->
-                groupMoveSourcePageId = null
+            onMove = { appKeys, targetPageId, cellX, cellY, onResult ->
                 onMoveAppGroupToPageCell(
                     groupMoveSourcePage.pageId,
                     appKeys,
                     targetPageId,
                     cellX,
                     cellY,
-                )
+                ) { applied ->
+                    if (applied) {
+                        groupMoveSourcePageId = null
+                    }
+                    onResult(applied)
+                }
             },
             onDismiss = { groupMoveSourcePageId = null },
         )
@@ -2773,7 +2780,7 @@ private fun HomeAppGroupMoveDialog(
     apps: List<LauncherActivityInfo>,
     homeColumns: Int,
     homeRows: Int,
-    onMove: (List<String>, String, Int, Int) -> Unit,
+    onMove: (List<String>, String, Int, Int, (Boolean) -> Unit) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val columns = homeColumns.coerceIn(4, 6)
@@ -2809,9 +2816,15 @@ private fun HomeAppGroupMoveDialog(
     }
     val canChooseDestination = selectedAppKeys.size >= 2 && targetPageId.isNotBlank()
     val anchorHorizontalScrollState = rememberScrollState()
+    var moveInProgress by remember(sourcePage.pageId) { mutableStateOf(false) }
+    var moveFailureMessage by remember(sourcePage.pageId) { mutableStateOf<String?>(null) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            if (!moveInProgress) {
+                onDismiss()
+            }
+        },
         modifier = Modifier.testTag("launcher-home-group-move-dialog"),
         title = { Text("Move apps together") },
         text = {
@@ -2853,15 +2866,23 @@ private fun HomeAppGroupMoveDialog(
                     )
                     Row {
                         TextButton(
-                            onClick = { selectedKeys = selectableAppKeys.toSet() },
-                            enabled = selectedAppKeys.size < selectableAppKeys.size,
+                            onClick = {
+                                moveFailureMessage = null
+                                selectedKeys = selectableAppKeys.toSet()
+                            },
+                            enabled =
+                                !moveInProgress &&
+                                    selectedAppKeys.size < selectableAppKeys.size,
                             modifier = Modifier.testTag("launcher-home-group-select-all"),
                         ) {
                             Text("Select all")
                         }
                         TextButton(
-                            onClick = { selectedKeys = emptySet() },
-                            enabled = selectedKeys.isNotEmpty(),
+                            onClick = {
+                                moveFailureMessage = null
+                                selectedKeys = emptySet()
+                            },
+                            enabled = !moveInProgress && selectedKeys.isNotEmpty(),
                             modifier = Modifier.testTag("launcher-home-group-clear"),
                         ) {
                             Text("Clear")
@@ -2878,8 +2899,10 @@ private fun HomeAppGroupMoveDialog(
                             .testTag("launcher-home-group-app-" + key)
                             .toggleable(
                                 value = checked,
+                                enabled = !moveInProgress,
                                 role = Role.Checkbox,
                                 onValueChange = { selected ->
+                                    moveFailureMessage = null
                                     selectedKeys = if (selected) {
                                         selectedKeys + key
                                     } else {
@@ -2925,7 +2948,11 @@ private fun HomeAppGroupMoveDialog(
                 targetPages.forEach { target ->
                     FilterChip(
                         selected = target.pageId == targetPageId,
-                        onClick = { targetPageId = target.pageId },
+                        onClick = {
+                            moveFailureMessage = null
+                            targetPageId = target.pageId
+                        },
+                        enabled = !moveInProgress,
                         label = {
                             Text(
                                 if (target.pageId == sourcePage.pageId) {
@@ -2989,14 +3016,22 @@ private fun HomeAppGroupMoveDialog(
                                     )
                             Surface(
                                 onClick = {
+                                    moveInProgress = true
+                                    moveFailureMessage = null
                                     onMove(
                                         selectedAppKeys,
                                         targetPageId,
                                         cellX,
                                         cellY,
-                                    )
+                                    ) { applied ->
+                                        moveInProgress = false
+                                        if (!applied) {
+                                            moveFailureMessage =
+                                                "Move was not applied. Your selection is still here; choose another free destination and try again."
+                                        }
+                                    }
                                 },
-                                enabled = anchorAvailable,
+                                enabled = anchorAvailable && !moveInProgress,
                                 modifier = Modifier
                                     .size(width = 48.dp, height = 48.dp)
                                     .testTag(
@@ -3007,7 +3042,7 @@ private fun HomeAppGroupMoveDialog(
                                             "Anchor column " + (cellX + 1) +
                                                 ", row " + (cellY + 1)
                                         stateDescription =
-                                            if (anchorAvailable) {
+                                            if (anchorAvailable && !moveInProgress) {
                                                 "Available destination"
                                             } else {
                                                 "Unavailable destination"
@@ -3035,11 +3070,46 @@ private fun HomeAppGroupMoveDialog(
                         }
                     }
                 }
+
+                if (moveInProgress) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("launcher-home-group-move-progress"),
+                    )
+                    Text(
+                        "Applying group move…",
+                        modifier = Modifier
+                            .testTag("launcher-home-group-move-progress-state")
+                            .semantics {
+                                liveRegion = LiveRegionMode.Polite
+                                stateDescription = "Applying group move"
+                            },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                if (moveFailureMessage != null) {
+                    Text(
+                        moveFailureMessage.orEmpty(),
+                        modifier = Modifier
+                            .testTag("launcher-home-group-move-error")
+                            .semantics {
+                                liveRegion = LiveRegionMode.Assertive
+                            },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !moveInProgress,
+            ) {
                 Text("Cancel")
             }
         },

@@ -1203,8 +1203,16 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onMoveHomeAppGroupToPageCell = {
-                                    sourcePageId, appKeys, targetPageId, cellX, cellY ->
-                                if (!launcherPreferences.layoutLocked) {
+                                    sourcePageId,
+                                    appKeys,
+                                    targetPageId,
+                                    cellX,
+                                    cellY,
+                                    onResult,
+                                ->
+                                if (launcherPreferences.layoutLocked) {
+                                    onResult(false)
+                                } else {
                                     lifecycleScope.launch {
                                         val result =
                                             workspaceRuntimeCoordinator.moveHomeAppGroupToPageCell(
@@ -1223,12 +1231,9 @@ class MainActivity : ComponentActivity() {
                                                 "Moved " + result.items.size + " apps.",
                                                 Toast.LENGTH_SHORT,
                                             ).show()
+                                            onResult(true)
                                         } else {
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "Group move was not applied. Choose a free destination that keeps every app inside the Home grid.",
-                                                Toast.LENGTH_LONG,
-                                            ).show()
+                                            onResult(false)
                                         }
                                     }
                                 }

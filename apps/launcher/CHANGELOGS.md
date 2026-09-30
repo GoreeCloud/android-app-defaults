@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — group-move rejection recovery
+
+**Change type:** Workspace editing resilience; failure recovery; accessible feedback; Development candidate.
+
+The Edit Home group-move dialog now remains open until the Room-authoritative move actually succeeds. While a move is being applied, selection, destination controls, anchors, and Cancel are temporarily disabled to prevent duplicate submissions. A rejected request keeps the selected apps and destination state intact, restores interaction, and presents an assertive inline failure message so the user can choose another destination and retry without rebuilding the group.
+
+MainActivity now reports the authoritative atomic move outcome back to the editor instead of dismissing optimistically. A layout-lock change during an open group dialog fails closed. Android 16 runtime coverage deliberately locks Home after selecting two apps, verifies that the rejected move preserves the dialog, selection count, and stored cells, then unlocks and retries the same selection successfully.
+
+No persistence schema, permission, network, telemetry, credential, or workspace authority change is introduced.
+
+**Acceptance boundary:** this is stacked Development source. Durable multi-step undo/redo and process-death-safe edit recovery remain separate open obligations.
+
 ## September 30, 2026 — group-edit guidance and accessibility semantics
 
 **Change type:** Onboarding maintenance; accessibility; workspace editing guidance; Development candidate.

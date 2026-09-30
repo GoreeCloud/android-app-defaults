@@ -1452,7 +1452,43 @@ class ActivatedHomeLifecycleRuntimeTest {
                 check(anchorBounds.height >= 48f * density) {
                     "Group anchor controls must preserve the 48 dp interaction height floor."
                 }
+
+                preferencesRepository.setLayoutLocked(true)
+                withTimeout(10_000) {
+                    preferencesRepository.preferences.first { it.layoutLocked }
+                }
                 anchorNode.performClick()
+                waitForDisplayedTag("launcher-home-group-move-error")
+                assertEquals(
+                    "2 of 2 apps selected",
+                    composeRule
+                        .onNodeWithTag(
+                            "launcher-home-group-selection-state",
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNode()
+                        .config[SemanticsProperties.StateDescription],
+                )
+                val rejected = dao.readItems(listOf(secondaryPageId)).associateBy { it.appKey }
+                assertEquals(0, rejected.getValue(checkNotNull(firstKey)).cellX)
+                assertEquals(0, rejected.getValue(checkNotNull(firstKey)).cellY)
+                assertEquals(1, rejected.getValue(checkNotNull(secondKey)).cellX)
+                assertEquals(0, rejected.getValue(checkNotNull(secondKey)).cellY)
+
+                preferencesRepository.setLayoutLocked(false)
+                withTimeout(10_000) {
+                    preferencesRepository.preferences.first { !it.layoutLocked }
+                }
+                anchorNode.performClick()
+                composeRule.waitUntil(timeoutMillis = 15_000) {
+                    composeRule
+                        .onAllNodesWithTag(
+                            "launcher-home-group-move-dialog",
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isEmpty()
+                }
 
                 withTimeout(15_000) {
                     while (true) {
