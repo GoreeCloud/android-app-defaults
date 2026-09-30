@@ -3,6 +3,7 @@ package com.goreecloud.launcher.ui
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
+import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeApp
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -545,6 +546,58 @@ class HomePageManagerPolicyTest {
                 surfaceLeftPx = 0f,
                 surfaceRightPx = 60f,
                 edgeThresholdPx = 36f,
+            ),
+        )
+    }
+
+
+    @Test
+    fun appGroupMoveActionRequiresTwoAvailablePositionedAppsOnUnlockedSecondaryPage() {
+        val firstKey = "10:com.example.one/.Main"
+        val secondKey = "10:com.example.two/.Main"
+        val secondary = WorkspaceRenderedHomePage(
+            pageId = "home:user:secondary",
+            rank = 1,
+            appKeys = listOf(firstKey, secondKey),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
+            ),
+        )
+
+        assertTrue(
+            canMoveHomeAppGroup(
+                page = secondary,
+                layoutLocked = false,
+                availableAppKeys = setOf(firstKey, secondKey),
+            ),
+        )
+        assertFalse(
+            canMoveHomeAppGroup(
+                page = secondary,
+                layoutLocked = true,
+                availableAppKeys = setOf(firstKey, secondKey),
+            ),
+        )
+        assertFalse(
+            canMoveHomeAppGroup(
+                page = secondary,
+                layoutLocked = false,
+                availableAppKeys = setOf(firstKey),
+            ),
+        )
+        assertFalse(
+            canMoveHomeAppGroup(
+                page = primary.copy(
+                    appKeys = listOf(firstKey, secondKey),
+                    appPlacements = listOf(
+                        WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                        WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
+                    ),
+                ),
+                layoutLocked = false,
+                availableAppKeys = setOf(firstKey, secondKey),
             ),
         )
     }
