@@ -1,0 +1,11 @@
+.build/
+upstream-gallery/
+upstream-commons/
+dist/
+dex-validation/
+.gradle/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore

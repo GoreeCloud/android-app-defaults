@@ -1,0 +1,199 @@
+    <color name="default_background_color">{DARK_BG}</color>
+    <color name="default_text_color">{DARK_TEXT}</color>
+    <color name="glaze_surface_strong">{DARK_SURFACE}</color>
+'''
+    write(night, text.replace("</resources>", additions + "</resources>", 1))
+
+
+def patch_commons_fake_check(commons: Path) -> None:
+    activity = commons / "commons/src/main/kotlin/org/fossify/commons/compose/extensions/ActivityExtensions.kt"
+    old = '''    if (!packageName.startsWith("org.fossify.", true)) {
+        if ((0..50).random() == 10 || baseConfig.appRunCount % 100 == 0) {
+            showConfirmationDialog()
+        }
+    }
+'''
+    new = '''    if (!packageName.startsWith("org.fossify.", true) &&
+        !packageName.startsWith("com.goreecloud.", true)
+    ) {
+        if ((0..50).random() == 10 || baseConfig.appRunCount % 100 == 0) {
+            showConfirmationDialog()
+        }
+    }
+'''
+    replace_once(activity, old, new)
+
+
+def patch_commons_system_glaze(commons: Path) -> None:
+    base = commons / "commons/src/main/kotlin/org/fossify/commons/helpers/BaseConfig.kt"
+    text = read(base)
+    text = text.replace("import android.content.res.Configuration\n", "import android.content.res.Configuration\nimport android.graphics.Color\n", 1)
+    anchor = '''    companion object {
+        fun newInstance(context: Context) = BaseConfig(context)
+    }
+'''
+    helpers = '''    companion object {
+        fun newInstance(context: Context) = BaseConfig(context)
+    }
+
+    private fun useGoreeCloudSystemTheme(): Boolean =
+        context.packageName.startsWith("com.goreecloud.", ignoreCase = true) &&
+            prefs.getBoolean(IS_SYSTEM_THEME_ENABLED, isSPlus())
+
+    private fun isGoreeCloudDarkTheme(): Boolean =
+        context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+'''
+    if anchor not in text:
+        fail("Commons BaseConfig class shape changed")
+    text = text.replace(anchor, helpers, 1)
+
+    replacements = {
+        'get() = prefs.getInt(TEXT_COLOR, ContextCompat.getColor(context, R.color.default_text_color))':
+            f'get() = if (useGoreeCloudSystemTheme()) Color.parseColor(if (isGoreeCloudDarkTheme()) "{DARK_TEXT}" else "{LIGHT_TEXT}") else prefs.getInt(TEXT_COLOR, ContextCompat.getColor(context, R.color.default_text_color))',
+        'get() = prefs.getInt(BACKGROUND_COLOR, ContextCompat.getColor(context, R.color.default_background_color))':
+            f'get() = if (useGoreeCloudSystemTheme()) Color.parseColor(if (isGoreeCloudDarkTheme()) "{DARK_BG}" else "{LIGHT_BG}") else prefs.getInt(BACKGROUND_COLOR, ContextCompat.getColor(context, R.color.default_background_color))',
+        'get() = prefs.getInt(PRIMARY_COLOR, ContextCompat.getColor(context, R.color.default_primary_color))':
+            f'get() = if (useGoreeCloudSystemTheme()) Color.parseColor(if (isGoreeCloudDarkTheme()) "{DARK_PRIMARY}" else "{PRIMARY}") else prefs.getInt(PRIMARY_COLOR, ContextCompat.getColor(context, R.color.default_primary_color))',
+        'get() = prefs.getInt(ACCENT_COLOR, ContextCompat.getColor(context, R.color.default_accent_color))':
+            f'get() = if (useGoreeCloudSystemTheme()) Color.parseColor(if (isGoreeCloudDarkTheme()) "{DARK_ACCENT}" else "{ACCENT}") else prefs.getInt(ACCENT_COLOR, ContextCompat.getColor(context, R.color.default_accent_color))',
+    }
+    for old, new in replacements.items():
+        if text.count(old) != 1:
+            fail(f"Commons BaseConfig expected one getter: {old}")
+        text = text.replace(old, new, 1)
+    write(base, text)
+
+    styling = commons / "commons/src/main/kotlin/org/fossify/commons/extensions/Context-styling.kt"
+    replace_once(
+        styling,
+        'fun Context.isDynamicTheme() = isSPlus() && baseConfig.isSystemThemeEnabled',
+        'fun Context.isDynamicTheme() = isSPlus() && baseConfig.isSystemThemeEnabled && !packageName.startsWith("com.goreecloud.", true)',
+    )
+
+    dynamic = commons / "commons/src/main/kotlin/org/fossify/commons/compose/theme/DynamicTheme.kt"
+    replace_once(dynamic, "                else -> md_green_900", "                else -> Color(primaryColorInt)")
+
+
+def patch_commons_glaze_geometry(commons: Path) -> None:
+    shapes = commons / "commons/src/main/kotlin/org/fossify/commons/compose/theme/Shapes.kt"
+    text = read(shapes)
+    old = '''val Shapes = Shapes(
+    extraSmall = RoundedCornerShape(16.dp), //used by dropdown menu in M3
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(24.dp),
+)'''
+    new = '''val Shapes = Shapes(
+    extraSmall = RoundedCornerShape(22.dp), // GoreeCloud Glaze dropdown/menu geometry
+    small = RoundedCornerShape(14.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(30.dp),
+)'''
+    if old not in text:
+        fail("Commons Shapes.kt shape changed")
+    write(shapes, text.replace(old, new, 1))
+
+    dialogs = commons / "commons/src/main/kotlin/org/fossify/commons/compose/alert_dialog/AlertDialogsExtensions.kt"
+    text = read(dialogs)
+    text = text.replace("val dialogElevation = 0.dp", "val dialogElevation = 8.dp", 1)
+    old = '''fun Modifier.dialogBorder(): Modifier =
+    when (LocalTheme.current) {
+        is Theme.BlackAndWhite -> this.border(1.dp, light_grey_stroke, dialogShape)
+        else -> this
+    }
+'''
+    new = '''fun Modifier.dialogBorder(): Modifier =
+    when {
+        LocalContext.current.packageName.startsWith("com.goreecloud.", true) ->
+            this.border(1.dp, Color(0x335865F2), dialogShape)
+        LocalTheme.current is Theme.BlackAndWhite -> this.border(1.dp, light_grey_stroke, dialogShape)
+        else -> this
+    }
+'''
+    if old not in text:
+        fail("Commons dialog border shape changed")
+    write(dialogs, text.replace(old, new, 1))
+
+
+def patch_notice(gallery: Path) -> None:
+    notice = f'''GoreeCloud Gallery {VERSION_NAME}
+
+GoreeCloud Gallery is a GoreeCloud-maintained Android gallery fork based on Fossify Gallery
+1.13.1 and its Fossify Commons 6.1.5 dependency. The application remains offline-first and
+does not add analytics, advertising, cloud accounts, remote APIs, or an Internet permission.
+
+gc.2 corrects the maintained-fork identity boundary found during real-device acceptance:
+legitimate com.goreecloud packages no longer trigger the Fossify counterfeit warning, every
+launcher alias uses GoreeCloud iconography, the inherited Material-green fallback is removed,
+and System appearance now follows Android light/dark mode using GoreeCloud Glaze colors.
+Glaze UI geometry is also applied more deeply to menus and dialogs.
+
+Upstream copyright, source history, GNU GPL licensing, and third-party notices remain
+applicable. GoreeCloud rebranding does not remove those obligations.
+'''
+    write(gallery / "GOREECLOUD-NOTICE.md", notice)
+    write(gallery / "app/src/main/assets/goreecloud_notice.txt", notice)
+
+
+def validate(gallery: Path, commons: Path) -> None:
+    manifest = read(gallery / "app/src/main/AndroidManifest.xml")
+    props = read(gallery / "gradle.properties")
+    settings = read(gallery / "settings.gradle.kts")
+    app = read(gallery / "app/src/main/kotlin/org/fossify/gallery/App.kt")
+    fake = read(commons / "commons/src/main/kotlin/org/fossify/commons/compose/extensions/ActivityExtensions.kt")
+    dynamic = read(commons / "commons/src/main/kotlin/org/fossify/commons/compose/theme/DynamicTheme.kt")
+    styling = read(commons / "commons/src/main/kotlin/org/fossify/commons/extensions/Context-styling.kt")
+    shapes = read(commons / "commons/src/main/kotlin/org/fossify/commons/compose/theme/Shapes.kt")
+
+    required = [
+        (f"VERSION_NAME={VERSION_NAME}", props),
+        (f"VERSION_CODE={VERSION_CODE}", props),
+        ('includeBuild("../upstream-commons")', settings),
+        ('@drawable/ic_goreecloud_gallery', manifest),
+        ('palette_version", 0) < 2', app),
+        ('!packageName.startsWith("com.goreecloud.", true)', fake),
+        ('else -> Color(primaryColorInt)', dynamic),
+        ('!packageName.startsWith("com.goreecloud.", true)', styling),
+        ('extraLarge = RoundedCornerShape(30.dp)', shapes),
+    ]
+    for needle, haystack in required:
+        if needle not in haystack:
+            fail(f"validation missing {needle!r}")
+    if '@mipmap/ic_launcher' in manifest:
+        fail("an upstream launcher icon remains in the manifest")
+    if "android.permission.INTERNET" in manifest:
+        fail("Internet permission unexpectedly present")
+
+    for path in [
+        gallery / "app/src/main/res/values/colors.xml",
+        gallery / "app/src/main/res/values-night/glaze_colors.xml",
+        gallery / "app/src/main/res/drawable/ic_goreecloud_gallery.xml",
+    ]:
+        ET.parse(path)
+
+    print(f"Applied GoreeCloud Gallery {VERSION_NAME} real-device acceptance corrections")
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        fail("usage: build_goreecloud_gallery_gc2.py <Gallery checkout> <Commons checkout>")
+    gallery = Path(sys.argv[1]).resolve()
+    commons = Path(sys.argv[2]).resolve()
+    verify_checkout(gallery, GALLERY_COMMIT, "Gallery")
+    verify_checkout(commons, COMMONS_COMMIT, "Commons")
+    patch_version(gallery)
+    patch_composite_build(gallery)
+    patch_gallery_identity(gallery)
+    patch_gallery_palette(gallery)
+    patch_gallery_resources(gallery)
+    patch_commons_fake_check(commons)
+    patch_commons_system_glaze(commons)
+    patch_commons_glaze_geometry(commons)
+    patch_notice(gallery)
+    validate(gallery, commons)
+
+
+if __name__ == "__main__":
+    main()
