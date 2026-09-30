@@ -1304,6 +1304,7 @@ class MainActivity : ComponentActivity() {
                             onLaunchApp = launchApp,
                             onOpenAppInfo = appsRepository::openDetails,
                             onAddBuiltInWidget = ::addBuiltInWidget,
+                            onSetManagedHomeSearchEnabled = ::setManagedHomeSearchEnabled,
                             availableAndroidWidgets = availableAndroidWidgets,
                             availableIconPacks = availableIconPacks,
                             onPickInstalledAndroidWidget = { descriptor: LauncherWidgetProviderDescriptor ->
@@ -2193,6 +2194,42 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun setManagedHomeSearchEnabled(enabled: Boolean) {
+        lifecycleScope.launch {
+            if (enabled) {
+                val preferences = launcherPreferencesRepository.preferences.first()
+                val result = workspaceRuntimeCoordinator.addBuiltInWidget(
+                    itemId = MANAGED_HOME_SEARCH_WIDGET_ID,
+                    typeId = WorkspaceWidgetCatalog.SEARCH,
+                    columns = preferences.homeColumns,
+                    rows = preferences.homeRows,
+                )
+                if (result !is WorkspaceWidgetMutationResult.Added) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        if (result == WorkspaceWidgetMutationResult.NoSpace) {
+                            "No free Home space for movable Search yet. The bottom Search bar stays available."
+                        } else {
+                            "Movable Search could not be placed on Home."
+                        },
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            } else {
+                when (workspaceRuntimeCoordinator.removeWidget(MANAGED_HOME_SEARCH_WIDGET_ID)) {
+                    is WorkspaceWidgetMutationResult.Removed,
+                    WorkspaceWidgetMutationResult.NotFound,
+                    -> Unit
+                    else -> Toast.makeText(
+                        this@MainActivity,
+                        "The managed movable Search widget could not be removed.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+        }
+    }
+
     private fun removeWidget(widget: WorkspaceRenderedHomeWidget) {
         lifecycleScope.launch {
             val result = workspaceRuntimeCoordinator.removeWidget(widget.itemId)
@@ -2633,6 +2670,7 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         const val STARTER_GLANCE_WIDGET_ID = "widget:builtin:starter-glance-v1"
+        const val MANAGED_HOME_SEARCH_WIDGET_ID = "widget:builtin:managed-home-search-v1"
         const val GOOGLE_DRIVE_METADATA_READONLY_SCOPE =
             "https://www.googleapis.com/auth/drive.metadata.readonly"
     }
