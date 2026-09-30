@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — App Drawer usage sorting, profile-aware folders, and secondary-Home gesture parity
+
+The App Drawer now exposes four presentation orders: **A–Z**, **Z–A**, **Most Recent**, and **Most Frequent**. Recent/frequent ordering reuses the existing privacy-bounded Launcher-local launch history; no Android Usage Access, network telemetry, timestamps, or new permission is introduced.
+
+Folder state is now profile-aware. **User Apps** and **Work Apps** can each create and manage folders for their own profile, folder storage records the owning profile, legacy three-column folder records migrate as User-profile folders, and folder membership rejects cross-profile mixing. Work folders remain inside Work Apps and cannot be placed on personal Home.
+
+Configured vertical Home gestures now apply on secondary Home pages as well as primary Home, preserving swipe-up/swipe-down behavior while horizontal paging remains separately arbitrated. The Launcher Settings category overview also removes the redundant text arrow at the end of each row.
+
+Onboarding, the user manual, roadmap, and implemented-feature records are reconciled with this candidate.
+
+**Acceptance boundary:** Development candidate on PR #102. Fresh exact-head Android CI and representative-device User/Work profile, folder, drawer-sort, gesture arbitration, large-text, accessibility, and form-factor acceptance remain required. No Release Candidate, production, or Stable claim is made.
+
 ## September 30, 2026 — polished Calendar and Weather widgets
 
 Launcher now includes separate 2 × 2 **Calendar** and **Weather** built-ins. Calendar uses a cleaner local date hierarchy, while Weather combines local time with the existing opt-in condition presentation. Starter Glance remains compatible and receives a richer gradient treatment.
