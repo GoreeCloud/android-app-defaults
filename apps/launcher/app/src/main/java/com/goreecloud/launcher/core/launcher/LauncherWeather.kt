@@ -136,6 +136,14 @@ internal fun launcherWeatherIsHighWind(
  * local weather while avoiding unnecessary coordinate precision.
  */
 object LauncherWeather {
+    @Volatile
+    private var cacheEntry: LauncherWeatherCacheEntry? = null
+
+    fun cachedSnapshot(nowMillis: Long = System.currentTimeMillis()): LauncherWeatherSnapshot? =
+        cacheEntry
+            ?.takeIf { launcherWeatherCacheIsFresh(it.cachedAtMillis, nowMillis) }
+            ?.snapshot
+
     fun hasLocationPermission(context: Context): Boolean =
         ContextCompat.checkSelfPermission(
             context,
