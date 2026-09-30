@@ -86,12 +86,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -2824,6 +2827,12 @@ private fun HomeAppGroupMoveDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Text(
+                    "Apps",
+                    modifier = Modifier.semantics { heading() },
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -2831,6 +2840,14 @@ private fun HomeAppGroupMoveDialog(
                 ) {
                     Text(
                         selectedAppKeys.size.toString() + " selected",
+                        modifier = Modifier
+                            .testTag("launcher-home-group-selection-state")
+                            .semantics {
+                                liveRegion = LiveRegionMode.Polite
+                                stateDescription =
+                                    selectedAppKeys.size.toString() + " of " +
+                                        selectableAppKeys.size + " apps selected"
+                            },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -2901,6 +2918,7 @@ private fun HomeAppGroupMoveDialog(
 
                 Text(
                     "Destination page",
+                    modifier = Modifier.semantics { heading() },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -2927,6 +2945,7 @@ private fun HomeAppGroupMoveDialog(
 
                 Text(
                     "Destination anchor",
+                    modifier = Modifier.semantics { heading() },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -2987,6 +3006,12 @@ private fun HomeAppGroupMoveDialog(
                                         contentDescription =
                                             "Anchor column " + (cellX + 1) +
                                                 ", row " + (cellY + 1)
+                                        stateDescription =
+                                            if (anchorAvailable) {
+                                                "Available destination"
+                                            } else {
+                                                "Unavailable destination"
+                                            }
                                     },
                                 shape = RoundedCornerShape(GlazeMetrics.radiusSmall),
                                 color = if (anchorAvailable) {

@@ -5,6 +5,7 @@ import android.os.ParcelFileDescriptor
 import android.view.View
 import android.view.ViewConfiguration
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
@@ -1416,6 +1417,15 @@ class ActivatedHomeLifecycleRuntimeTest {
                     )
                     .performClick()
 
+                val selectionState = composeRule
+                    .onNodeWithTag(
+                        "launcher-home-group-selection-state",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNode()
+                    .config[SemanticsProperties.StateDescription]
+                assertEquals("2 of 2 apps selected", selectionState)
+
                 composeRule
                     .onNodeWithTag(
                         "launcher-home-group-anchor-section",
@@ -1429,7 +1439,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                     )
                 anchorNode.assertIsDisplayed()
                 anchorNode.assertHasClickAction()
-                val anchorBounds = anchorNode.fetchSemanticsNode().boundsInRoot
+                val anchorSemantics = anchorNode.fetchSemanticsNode()
+                assertEquals(
+                    "Available destination",
+                    anchorSemantics.config[SemanticsProperties.StateDescription],
+                )
+                val anchorBounds = anchorSemantics.boundsInRoot
                 val density = context.resources.displayMetrics.density
                 check(anchorBounds.width >= 48f * density) {
                     "Group anchor controls must preserve the 48 dp interaction width floor."
