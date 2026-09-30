@@ -337,7 +337,7 @@ internal fun DragAndDropEvent.launcherAppDragData(): LauncherAppDragData? =
 
 internal fun LauncherFolderDragData.toTransferData(): DragAndDropTransferData =
     DragAndDropTransferData(
-        clipData = ClipData.newPlainText("GoreeCloud Launcher folder", folderId),
+        clipData = ClipData.newPlainText("GoreeCloud Launcher folder", "folder"),
         localState = this,
     )
 
