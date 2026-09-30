@@ -350,6 +350,7 @@ class WorkspacePagedRoomMutationRepository(
     suspend fun moveHomeItems(
         grid: WorkspaceGridPlacement.Grid,
         itemIds: List<String>,
+        sourcePageId: String,
         targetPageId: String,
         targetCellX: Int,
         targetCellY: Int,
@@ -359,6 +360,7 @@ class WorkspacePagedRoomMutationRepository(
             itemIds.size < 2 ||
             itemIds.any { it.isBlank() } ||
             itemIds.distinct().size != itemIds.size ||
+            sourcePageId.isBlank() ||
             targetPageId.isBlank() ||
             targetCellX < 0 ||
             targetCellY < 0
@@ -395,8 +397,9 @@ class WorkspacePagedRoomMutationRepository(
             if (selectedItems.any { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }) {
                 return WorkspacePagedRoomMutationResult.PrimaryPageProtected
             }
-            val sourcePageId = selectedItems.map { it.pageId }.distinct().singleOrNull()
-                ?: return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            if (selectedItems.any { it.pageId != sourcePageId }) {
+                return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+            }
 
             val spatialItems = storedItems.filterNot {
                 it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
