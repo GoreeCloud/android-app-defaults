@@ -69,6 +69,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -142,11 +143,12 @@ internal fun Modifier.homePageSwipeNavigation(
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Final)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                // Read raw pointer displacement rather than positionChange(), because the
-                // latter is consumption-aware and can become zero after a child consumes movement
-                // for press/long-press bookkeeping. Page navigation owns only the final completed
-                // gesture decision; active drag/drop disables this modifier at the caller.
-                val delta = change.position - change.previousPosition
+                val delta = change.positionChange()
+
+                // Decide from the complete gesture, but do not replace the Home subtree while
+                // the pointer stream is still active. Child surfaces may consume press/long-press
+                // bookkeeping before horizontal intent is known; active drag/drop disables this
+                // modifier at the caller. Selection is applied only after pointer release.
                 horizontalDistance += delta.x
                 verticalDistance += delta.y
 
