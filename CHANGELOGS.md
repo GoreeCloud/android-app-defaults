@@ -1,5 +1,25 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since Development APK distribution hardening candidate
+
+- Replaced the fixed Development `versionCode = 1` assumption with a positive explicit
+  `GOREECLOUD_DEV_VERSION_CODE` and a GitHub Actions run-number fallback.
+- Added fail-closed external Development-signing configuration through the complete
+  `GOREECLOUD_DEV_KEYSTORE_*` environment-variable set while keeping all signing material outside Git.
+- Added exact-head checkout/readback to the Since build and Android 16 runtime lanes.
+- Added CI verification of `com.goreecloud.since.dev`, version name/code, ZIP alignment, APK signature
+  validity, presence of a modern v2/v3 APK Signing Block, and SHA-256/signature provenance.
+- Prohibited owner-distribution APKs from being produced by post-build manifest mutation or ad-hoc
+  JAR/v1-only re-signing. The owner-reported Android error **“package appears to be invalid”** exposed
+  this packaging defect in an earlier transformed artifact; that artifact was retracted from the
+  canonical GoreeCloud artifact location and replaced with the untouched CI APK for bounded
+  installability testing.
+
+**Acceptance boundary:** This source plumbing does not provision or expose a protected persistent
+Development keystore. Ordinary PR CI remains debug-signed/installability-only. Protected key
+provisioning, a trusted key-bearing distribution path, and representative-device update-in-place
+verification remain required before Since Development APKs can claim update continuity.
+
 ## September 29, 2026 — Since fail-closed import review candidate
 
 - Added **Review import** under Settings → Data & recovery using an explicit Android Storage Access Framework document picker.
