@@ -340,7 +340,7 @@ internal fun DragAndDropEvent.launcherAppDragData(): LauncherAppDragData? =
 
 internal fun LauncherWidgetDragData.toTransferData(): DragAndDropTransferData =
     DragAndDropTransferData(
-        clipData = ClipData.newPlainText("GoreeCloud Launcher widget", itemId),
+        clipData = ClipData.newPlainText("GoreeCloud Launcher widget", "widget"),
         localState = this,
     )
 
