@@ -1,0 +1,260 @@
+# Preserved legacy source patch: GoreeCloud/keyboard PR #57
+# Title: Resource-back Keyboard alternate accessibility actions
+# Source repository: GoreeCloud/keyboard
+# Base revision: da77a9ae4c39ee4dbb4ee1fafac5d9f17adf3410
+# Head revision: 9f5dd2e3e360af79899e250e78922a953366cbf7
+# Original PR: https://github.com/GoreeCloud/keyboard/pull/57
+# Disposition: resource-backed alternate accessibility copy/actions are not present verbatim in the cutover; preserve for current-runtime accessibility reconciliation.
+
+diff --git a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
+--- a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
++++ b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
+@@ -67,8 +67,19 @@ class KeyboardAccessibilityRuntimeTest {
+             "Keys with local alternates must expose ACTION_LONG_CLICK",
+             node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_LONG_CLICK },
+         )
++        assertEquals(
++            "Alternate discovery hint must come from the localized resource boundary",
++            view.context.getString(R.string.accessibility_alternates_available),
++            node.hintText?.toString(),
++        )
+ 
+-        val insertAcute = node.actionList.firstOrNull { it.label?.toString() == "Insert á" }
++        val expectedInsertAcute = view.context.getString(
++            R.string.accessibility_insert_alternate,
++            "á",
++        )
++        val insertAcute = node.actionList.firstOrNull {
++            it.label?.toString() == expectedInsertAcute
++        }
+         assertNotNull("Local acute-a alternate must be discoverable as a custom action", insertAcute)
+ 
+         val committed = mutableListOf<String>()
+@@ -118,9 +129,13 @@ class KeyboardAccessibilityRuntimeTest {
+             "Emoji-search query keys must not gain long-press alternate semantics",
+             qNode!!.isLongClickable,
+         )
++        val insertPrefix = view.context.getString(
++            R.string.accessibility_insert_alternate,
++            "",
++        ).trim()
+         assertFalse(
+             "Emoji-search query keys must not expose alternate custom actions",
+-            qNode.actionList.any { it.label?.toString()?.startsWith("Insert ") == true },
++            qNode.actionList.any { it.label?.toString()?.startsWith(insertPrefix) == true },
+         )
+     }
+ 
+@@ -135,7 +150,7 @@ class KeyboardAccessibilityRuntimeTest {
+         assertNotNull("Shift virtual node must be creatable", shiftNode)
+         assertEquals(
+             "Unshifted state must be available without relying on selection visuals",
+-            "Off",
++            view.context.getString(R.string.accessibility_state_off),
+             shiftNode!!.stateDescription?.toString(),
+         )
+ 
+@@ -150,7 +165,7 @@ class KeyboardAccessibilityRuntimeTest {
+         shiftNode = provider!!.createAccessibilityNodeInfo(shift.id)
+         assertEquals(
+             "Shifted state must be explicitly described",
+-            "On",
++            view.context.getString(R.string.accessibility_state_on),
+             shiftNode!!.stateDescription?.toString(),
+         )
+ 
+@@ -167,7 +182,7 @@ class KeyboardAccessibilityRuntimeTest {
+             .createAccessibilityNodeInfo(selectedCategories.single().id)
+         assertEquals(
+             "Selected emoji category must expose a textual state description",
+-            "Selected",
++            view.context.getString(R.string.accessibility_state_selected),
+             selectedCategoryNode!!.stateDescription?.toString(),
+         )
+     }
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt
+@@ -50,7 +50,9 @@ internal class KeyboardAccessibilityDelegate(
+     ) {
+         val target = keyboardView.accessibilityTarget(virtualViewId)
+         if (target == null) {
+-            node.contentDescription = "Unavailable keyboard control"
++            node.contentDescription = keyboardView.context.getString(
++                R.string.accessibility_unavailable_control,
++            )
+             node.className = "android.widget.Button"
+             node.isEnabled = false
+             node.setBoundsInParent(Rect(0, 0, 1, 1))
+@@ -69,13 +71,18 @@ internal class KeyboardAccessibilityDelegate(
+         val alternates = alternatesFor(target)
+         if (alternates.isNotEmpty()) {
+             node.isLongClickable = true
+-            node.hintText = "Alternate characters available"
++            node.hintText = keyboardView.context.getString(
++                R.string.accessibility_alternates_available,
++            )
+             node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK)
+             alternates.forEachIndexed { index, value ->
+                 node.addAction(
+                     AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                         alternateActionIds[index],
+-                        "Insert $value",
++                        keyboardView.context.getString(
++                            R.string.accessibility_insert_alternate,
++                            value,
++                        ),
+                     )
+                 )
+             }
+@@ -95,7 +102,10 @@ internal class KeyboardAccessibilityDelegate(
+         if (action == AccessibilityNodeInfo.ACTION_LONG_CLICK) {
+             if (alternates.isEmpty()) return false
+             keyboardView.announceForAccessibility(
+-                "Alternate characters: ${alternates.joinToString(separator = ", ")}",
++                keyboardView.context.getString(
++                    R.string.accessibility_alternates_announcement,
++                    alternates.joinToString(separator = ", "),
++                ),
+             )
+             sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_ANNOUNCEMENT)
+             return true
+@@ -106,7 +116,12 @@ internal class KeyboardAccessibilityDelegate(
+             val value = alternates.getOrNull(alternateIndex) ?: return false
+             keyboardView.listener?.onText(value)
+             keyboardView.performClick()
+-            keyboardView.announceForAccessibility("Inserted alternate character $value")
++            keyboardView.announceForAccessibility(
++                keyboardView.context.getString(
++                    R.string.accessibility_inserted_alternate,
++                    value,
++                ),
++            )
+             sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED)
+             return true
+         }
+
+diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -7,6 +7,11 @@
+     <string name="accessibility_state_on">On</string>
+     <string name="accessibility_state_off">Off</string>
+     <string name="accessibility_state_selected">Selected</string>
++    <string name="accessibility_unavailable_control">Unavailable keyboard control</string>
++    <string name="accessibility_alternates_available">Alternate characters available</string>
++    <string name="accessibility_insert_alternate">Insert %1$s</string>
++    <string name="accessibility_alternates_announcement">Alternate characters: %1$s</string>
++    <string name="accessibility_inserted_alternate">Inserted alternate character %1$s</string>
+ 
+     <string name="portable_preferences_title">Portable preference</string>
+     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>
+
+diff --git a/scripts/check_keyboard_accessibility.py b/scripts/check_keyboard_accessibility.py
+--- a/scripts/check_keyboard_accessibility.py
++++ b/scripts/check_keyboard_accessibility.py
+@@ -7,6 +7,7 @@
+ TEST = ROOT / "android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt"
+ GRADLE = ROOT / "android/app/build.gradle.kts"
+ ACTION_IDS = ROOT / "android/app/src/main/res/values/accessibility_ids.xml"
++STRINGS = ROOT / "android/app/src/main/res/values/strings.xml"
+ 
+ 
+ def fail(message: str) -> None:
+@@ -20,7 +21,7 @@ def require_all(label: str, text: str, markers: tuple[str, ...]) -> None:
+ 
+ 
+ def main() -> None:
+-    for path in (VIEW, DELEGATE, TEST, GRADLE, ACTION_IDS):
++    for path in (VIEW, DELEGATE, TEST, GRADLE, ACTION_IDS, STRINGS):
+         if not path.is_file():
+             fail(f"missing required evidence: {path.relative_to(ROOT)}")
+ 
+@@ -29,6 +30,7 @@ def main() -> None:
+     test_text = TEST.read_text(encoding="utf-8")
+     gradle_text = GRADLE.read_text(encoding="utf-8")
+     action_ids_text = ACTION_IDS.read_text(encoding="utf-8")
++    strings_text = STRINGS.read_text(encoding="utf-8")
+ 
+     require_all(
+         "KeyboardView virtual-control integration",
+@@ -63,23 +65,40 @@ def main() -> None:
+             'node.className = "android.widget.Button"',
+             "node.isClickable = true",
+             "node.isSelected = target.selected",
++            "node.stateDescription = stateDescriptionFor(target)",
+             "AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK",
+             "node.isLongClickable = true",
+-            'node.hintText = "Alternate characters available"',
++            "R.string.accessibility_alternates_available",
+             "AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK",
+-            '"Insert $value"',
++            "R.string.accessibility_insert_alternate",
+             "KeyAlternates.forKey(target.label)",
+             "emojiSearchKeyboardIsActive()",
+             'target.label == "Clear emoji search" || target.label == "Close emoji search"',
+             "override fun onPerformActionForVirtualView(",
+             "AccessibilityNodeInfo.ACTION_LONG_CLICK",
+-            '"Alternate characters: ${alternates.joinToString(separator = ", ")}"',
++            "R.string.accessibility_alternates_announcement",
++            "R.string.accessibility_inserted_alternate",
+             "keyboardView.listener?.onText(value)",
+             "keyboardView.performAccessibilityTarget(virtualViewId)",
+             "AccessibilityEvent.TYPE_VIEW_CLICKED",
+         ),
+     )
+ 
++    require_all(
++        "resource-backed accessibility copy",
++        strings_text,
++        (
++            '<string name="accessibility_state_on">',
++            '<string name="accessibility_state_off">',
++            '<string name="accessibility_state_selected">',
++            '<string name="accessibility_unavailable_control">',
++            '<string name="accessibility_alternates_available">',
++            '<string name="accessibility_insert_alternate">',
++            '<string name="accessibility_alternates_announcement">',
++            '<string name="accessibility_inserted_alternate">',
++        ),
++    )
++
+     require_all(
+         "Android virtual-node runtime evidence",
+         test_text,
+@@ -89,14 +108,18 @@ def main() -> None:
+             "AccessibilityNodeInfo.ACTION_CLICK",
+             "longPressAlternatesAreDiscoverableAndActionableThroughNativeNodeActions",
+             "AccessibilityNodeInfo.ACTION_LONG_CLICK",
+-            'it.label?.toString() == "Insert á"',
++            "R.string.accessibility_alternates_available",
++            "R.string.accessibility_insert_alternate",
+             '"Emoji-search query keys must not gain long-press alternate semantics"',
+             '"Emoji-search query keys must not expose alternate custom actions"',
+             "view.performAccessibilityTarget(hello.id)",
+             'it.label == "Search emoji"',
+             'it.label == "Clear emoji search"',
+             'it.label == "Close emoji search"',
+             'it.label == "Shift"',
++            "R.string.accessibility_state_off",
++            "R.string.accessibility_state_on",
++            "R.string.accessibility_state_selected",
+         ),
+     )
+ 
+@@ -126,9 +149,10 @@ def main() -> None:
+     print(
+         "Keyboard virtual accessibility boundary passed: custom-drawn keys, suggestions, emoji categories, "
+         "local emoji-search results, and bounded local key alternates expose actionable native accessibility "
+-        "semantics without editor, clipboard, persistence, or network authority. Emoji-search query mode cannot "
+-        "gain alternate-commit authority. Representative TalkBack/Switch Access physical-device acceptance remains "
+-        "separate."
++        "semantics with resource-backed user-facing alternate actions and state descriptions, without editor, "
++        "clipboard, persistence, or network authority. Emoji-search query mode cannot gain alternate-commit "
++        "authority. Representative translated-resource, RTL, TalkBack, and Switch Access physical-device "
++        "acceptance remain separate."
+     )
+ 
+ 
+

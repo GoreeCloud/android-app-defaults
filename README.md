@@ -4,11 +4,13 @@ A privacy-focused monorepo of lightweight replacements for common Android defaul
 
 ## Mandatory app repository consolidation
 
-Camera, Launcher, Keyboard, and Gallery are being consolidated into this monorepo under `apps/camera/`, `apps/launcher/`, `apps/keyboard/`, and `apps/gallery/`. The imported revisions are Development snapshots with exact legacy-repository provenance; migration does not imply release or Stable acceptance. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
+Camera, Launcher, Keyboard, and Gallery are maintained in this monorepo under `apps/camera/`, `apps/launcher/`, `apps/keyboard/`, and `apps/gallery/`. The mandatory cutover merged through PR #62 as `20ca33c7c0c565f361deda206c9c950154dec327`. Their standalone repositories are temporary legacy provenance pending reconciliation and required repository deletion; new product development belongs here. The imported revisions remain Development snapshots and the repository move does not imply release or Stable acceptance. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
 
 ## Current Development state
 
-The repository is in **Development**. Authoritative `main` contains GoreeCloud Since under `apps/since/`. Draft PR #50 carries the first GoreeCloud Clock candidate under `apps/clock/`; Clock is not represented as integrated into `main` until that PR is accepted.
+The repository is in **Development**. Current application modules include GoreeCloud Since plus the mandatorily consolidated Camera, Launcher, Keyboard, and Gallery projects under `apps/`.
+
+PR #50 carries the first GoreeCloud Clock candidate under `apps/clock/`; Clock is not represented as integrated into `main` until that PR is accepted.
 
 Verified `main` contains the independent Android application foundation and Room persistence foundation: local-only/fail-closed manifest behavior, calendar-aware elapsed-time semantics, Room schema v1, SQLite invariants, transactional tracker aggregate creation, repository/domain mapping, committed schema evidence, and Android 16 runtime database tests.
 
@@ -41,7 +43,7 @@ GitHub issue #1 tracks the current GoreeCloud Since Development and stabilizatio
 
 ## GoreeCloud Clock Development candidate
 
-Draft PR #50 adds an independently installable, offline-first Clock application without adding Internet or network-state permission. The candidate includes local digital/analog clock displays, world clocks, alarms, multiple timers, stopwatch laps, full-screen/bedside presentation, local preferences, exact Android scheduling, reboot/time/time-zone restoration, and three home-screen widgets for clock, next-alarm, and running-timer information.
+PR #50 adds an independently installable, offline-first Clock application without adding Internet or network-state permission. The candidate includes local digital/analog clock displays, world clocks, alarms, multiple timers, stopwatch laps, full-screen/bedside presentation, local preferences, exact Android scheduling, reboot/time/time-zone restoration, and three home-screen widgets for clock, next-alarm, and running-timer information.
 
 Running timer elapsed-time semantics use Android's monotonic elapsed-realtime clock during a boot session, with a bounded wall-clock fallback only after reboot. This prevents manual/system wall-clock changes from incorrectly shifting an already-running timer.
 

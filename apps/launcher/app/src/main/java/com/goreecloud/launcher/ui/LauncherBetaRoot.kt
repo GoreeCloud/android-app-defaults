@@ -188,6 +188,8 @@ enum class LauncherSurfaceMode { HOME, SEARCH, DRAWER, SETTINGS, THEME_MANAGER }
 
 internal enum class LauncherAppDragOrigin { HOME, DOCK, DRAWER }
 
+internal enum class LauncherAppContextOrigin { HOME, DOCK, DRAWER }
+
 internal data class LauncherAppDragData(
     val appKey: String,
     val origin: LauncherAppDragOrigin,
@@ -362,6 +364,7 @@ fun LauncherBetaRoot(
     homePageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
+    hiddenHomeSuggestionKeys: Set<String>,
     searchProviderPreferences: com.goreecloud.launcher.core.launcher.LauncherSearchProviderPreferenceDecodeResult?,
     fileSearchRoots: List<Uri>,
     homePageCount: Int,
@@ -417,6 +420,7 @@ fun LauncherBetaRoot(
     onReorderDockByDrop: (LauncherActivityInfo, String?) -> Unit,
     onMoveDock: (LauncherActivityInfo, WorkspaceMoveDirection) -> Unit,
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
+    onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
     onRequestUninstall: (LauncherActivityInfo) -> Unit,
     themeMode: GlazeThemeMode,
     onSetThemeMode: (GlazeThemeMode) -> Unit,
@@ -478,7 +482,7 @@ fun LauncherBetaRoot(
         .getOrDefault(LauncherSurfaceMode.HOME)
     var selectedApp by remember { mutableStateOf<LauncherActivityInfo?>(null) }
     var selectedAppAnchor by remember { mutableStateOf<Rect?>(null) }
-    var showDetailedAppOptions by remember { mutableStateOf(false) }
+    var selectedAppContextOrigin by remember { mutableStateOf(LauncherAppContextOrigin.DRAWER) }
     var selectedWidget by remember { mutableStateOf<WorkspaceRenderedHomeWidget?>(null) }
     var appWidgetChoices by remember { mutableStateOf<List<LauncherWidgetProviderDescriptor>>(emptyList()) }
     var appWidgetChoiceTitle by remember { mutableStateOf<String?>(null) }
@@ -613,7 +617,6 @@ fun LauncherBetaRoot(
                 if (!accepts(drag)) return
                 selectedApp = null
                 selectedAppAnchor = null
-                showDetailedAppOptions = false
                 homeEditMode = true
                 activeDrag = drag
                 dragPoint = null
@@ -651,7 +654,6 @@ fun LauncherBetaRoot(
     val beginLocalDrag: (LauncherAppDragData, Offset) -> Unit = { drag, point ->
         selectedApp = null
         selectedAppAnchor = null
-        showDetailedAppOptions = false
         homeEditMode = true
         activeDrag = drag
         dragPoint = point
@@ -674,7 +676,6 @@ fun LauncherBetaRoot(
         drawerSearchRequested = false
         selectedApp = null
         selectedAppAnchor = null
-        showDetailedAppOptions = false
         selectedWidget = null
         selectedFolderId = null
         folderAppPickerId = null
@@ -766,7 +767,9 @@ fun LauncherBetaRoot(
                 homePageTransition = homePageTransition,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
+                hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
                 homePageCount = homePageCount,
+                homeResetSequence = homeResetSequence,
                 homeEditorRequestSequence = homeEditorRequestSequence,
                 homeEditorInitialPageId = homeEditorInitialPageId,
                 homeLabelOverrides = homeLabelOverrides,
@@ -791,7 +794,6 @@ fun LauncherBetaRoot(
                     homeEditMode = false
                     selectedApp = null
                     selectedAppAnchor = null
-                    showDetailedAppOptions = false
                     selectedWidget = null
                     activeDrag = null
                     dragPoint = null
@@ -822,19 +824,18 @@ fun LauncherBetaRoot(
                     homeEditMode = true
                     selectedApp = null
                     selectedAppAnchor = null
-                    showDetailedAppOptions = false
                     selectedWidget = it
                 },
                 onOpenLauncherSearch = {
                     drawerSearchRequested = false
                     surfaceModeName = LauncherSurfaceMode.SEARCH.name
                 },
-                onManageApp = { app, anchor ->
+                onManageApp = { app, anchor, origin ->
                     homeEditMode = true
                     selectedWidget = null
                     selectedApp = app
                     selectedAppAnchor = anchor
-                    showDetailedAppOptions = false
+                    selectedAppContextOrigin = origin
                 },
                 onOpenDrawer = {
                     drawerSearchRequested =
@@ -908,7 +909,7 @@ fun LauncherBetaRoot(
                 onManageApp = { app, anchor ->
                     selectedApp = app
                     selectedAppAnchor = anchor
-                    showDetailedAppOptions = false
+                    selectedAppContextOrigin = LauncherAppContextOrigin.DRAWER
                 },
                 onOpenFolder = { folder -> selectedFolderId = folder.id },
                 onManageFolders = {
@@ -991,43 +992,24 @@ fun LauncherBetaRoot(
     }
 
     if (activeDrag == null) selectedApp?.let { app ->
-        if (showDetailedAppOptions || selectedAppAnchor == null) {
-            AppPlacementDialog(
-                app = app,
-                workspace = workspace,
-                layoutLocked = preferences.layoutLocked,
-                onToggleFavorite = { onToggleFavorite(app) },
-                onToggleDock = { onToggleDock(app) },
-                onMoveFavorite = { onMoveFavorite(app, it) },
-                targetPages = remember(homePages) {
-                    homeMoveTargetPages(
-                        pages = homePages,
-                        currentPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
-                    )
-                },
-                onMoveFavoriteToPage = { targetPageId ->
-                    onMoveFavoriteToPage(app, targetPageId)
-                },
-                onMoveDock = { onMoveDock(app, it) },
-                homeLabelOverride = homeLabelOverrides[app.workspaceKey()],
-                onSetHomeLabelOverride = { onSetHomeLabelOverride(app, it) },
-                onOpenAppInfo = { onOpenAppInfo(app) },
-                onRequestUninstall = { onRequestUninstall(app) },
-                onClose = {
-                    selectedApp = null
-                    selectedAppAnchor = null
-                    showDetailedAppOptions = false
-                },
-            )
-        } else {
+        selectedAppAnchor?.let { anchor ->
+            val appKey = app.workspaceKey()
             AppContextPopup(
                 app = app,
-                anchor = selectedAppAnchor!!,
+                anchor = anchor,
+                contextOrigin = selectedAppContextOrigin,
                 workspace = workspace,
                 layoutLocked = preferences.layoutLocked,
                 availableAndroidWidgets = availableAndroidWidgets,
-                onToggleFavorite = {
-                    onToggleFavorite(app)
+                onHomeAction = {
+                    if (
+                        selectedAppContextOrigin == LauncherAppContextOrigin.HOME &&
+                        appKey !in workspace.favoriteKeys
+                    ) {
+                        onSetHomeSuggestionHidden(appKey, true)
+                    } else {
+                        onToggleFavorite(app)
+                    }
                     selectedApp = null
                     selectedAppAnchor = null
                 },
@@ -1049,7 +1031,7 @@ fun LauncherBetaRoot(
                 onAddToFolder = {
                     selectedApp = null
                     selectedAppAnchor = null
-                    folderAssignmentAppKey = app.workspaceKey()
+                    folderAssignmentAppKey = appKey
                     if (folders.isEmpty()) {
                         folderManagerAddToHome = false
                         showFolderManager = true
@@ -1066,7 +1048,6 @@ fun LauncherBetaRoot(
                     selectedApp = null
                     selectedAppAnchor = null
                 },
-                onMoreOptions = { showDetailedAppOptions = true },
                 onClose = {
                     selectedApp = null
                     selectedAppAnchor = null
@@ -1220,7 +1201,9 @@ private fun HomeSurface(
     homePageTransition: LauncherHomePageTransition,
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
+    hiddenHomeSuggestionKeys: Set<String>,
     homePageCount: Int,
+    homeResetSequence: Long,
     homeEditorRequestSequence: Long,
     homeEditorInitialPageId: String?,
     homeLabelOverrides: Map<String, String>,
@@ -1260,7 +1243,7 @@ private fun HomeSurface(
     onCreateAndroidWidgetView: (Int) -> AppWidgetHostView?,
     onManageWidget: (WorkspaceRenderedHomeWidget) -> Unit,
     onOpenLauncherSearch: () -> Unit,
-    onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
+    onManageApp: (LauncherActivityInfo, Rect?, LauncherAppContextOrigin) -> Unit,
     onOpenDrawer: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenThemeManager: () -> Unit,
@@ -1286,6 +1269,7 @@ private fun HomeSurface(
         workspace.favoriteKeys,
         workspace.dockKeys,
         experiencePreferences.homeAppMode,
+        hiddenHomeSuggestionKeys,
     ) {
         LauncherHomeSuggestionsPolicy.selectKeys(
             mode = experiencePreferences.homeAppMode,
@@ -1294,7 +1278,9 @@ private fun HomeSurface(
             availableAppKeys = appsByKey.keys,
             favoriteKeys = workspace.favoriteKeys.toSet(),
             dockKeys = workspace.dockKeys.toSet(),
-        ).mapNotNull(appsByKey::get)
+        )
+            .filterNot(hiddenHomeSuggestionKeys::contains)
+            .mapNotNull(appsByKey::get)
     }
 
     LaunchedEffect(preferences.homeColumns, preferences.homeRows) {
@@ -1336,6 +1322,13 @@ private fun HomeSurface(
 
     LaunchedEffect(showHomeEditor) {
         onHomeEditorVisibilityChanged(showHomeEditor)
+    }
+
+    LaunchedEffect(homeResetSequence) {
+        if (homeResetSequence > 0L) {
+            showHomeEditor = false
+            showWidgetPicker = false
+        }
     }
     DisposableEffect(Unit) {
         onDispose {
@@ -1631,7 +1624,9 @@ private fun HomeSurface(
                     onEndLocalDrag = onEndLocalDrag,
                     onCancelLocalDrag = onCancelLocalDrag,
                     onLaunchApp = onLaunchApp,
-                    onManageApp = onManageApp,
+                    onManageApp = { app, anchor ->
+                        onManageApp(app, anchor, LauncherAppContextOrigin.HOME)
+                    },
                     onCreateAndroidWidgetView = onCreateAndroidWidgetView,
                     onManageWidget = onManageWidget,
                     onMoveWidget = onMoveWidget,
@@ -1696,7 +1691,9 @@ private fun HomeSurface(
                     onEndLocalDrag = onEndLocalDrag,
                     onCancelLocalDrag = onCancelLocalDrag,
                     onLaunchApp = onLaunchApp,
-                    onManageApp = onManageApp,
+                    onManageApp = { app, anchor ->
+                        onManageApp(app, anchor, LauncherAppContextOrigin.DOCK)
+                    },
                     onSwipeUp = {
                         executeGestureAction(experiencePreferences.swipeUpAction)
                     },
@@ -1938,6 +1935,9 @@ private fun WidgetPickerBuiltInCard(
 ) {
     val span = WorkspaceWidgetCatalog.defaultSpan(typeId) ?: (1 to 1)
     val glyph = when (typeId) {
+        WorkspaceWidgetCatalog.CALENDAR -> "15"
+        WorkspaceWidgetCatalog.WEATHER -> "72°"
+        WorkspaceWidgetCatalog.GLANCE -> "15 · 72°"
         WorkspaceWidgetCatalog.CLOCK -> "12:34"
         WorkspaceWidgetCatalog.COMPACT_CLOCK -> "12:34"
         WorkspaceWidgetCatalog.ANALOG_CLOCK -> "◷"
@@ -2634,7 +2634,7 @@ private fun LauncherWeatherStatusChip(
 ) {
     val context = LocalContext.current
     var permissionRevision by remember { mutableIntStateOf(0) }
-    var weather by remember { mutableStateOf<LauncherWeatherSnapshot?>(null) }
+    var weather by remember { mutableStateOf(LauncherWeather.cachedSnapshot()) }
     var loading by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
     val hasLocationPermission = remember(permissionRevision, context) {
@@ -2653,15 +2653,20 @@ private fun LauncherWeatherStatusChip(
             loading = false
             failed = false
         } else {
-            loading = true
+            val hadCachedWeather = weather != null
+            loading = !hadCachedWeather
             failed = false
-            weather = LauncherWeather.load(context.applicationContext)
+            val refreshed = LauncherWeather.load(
+                context = context.applicationContext,
+                forceRefresh = permissionRevision > 0,
+            )
+            if (refreshed != null) weather = refreshed
             failed = weather == null
             loading = false
         }
     }
 
-    val snapshot = weather
+    val snapshot = weather.takeIf { hasLocationPermission }
     val primaryLabel = when {
         !hasLocationPermission -> "Weather"
         loading -> "Weather"
@@ -2692,7 +2697,7 @@ private fun LauncherWeatherStatusChip(
 
     Surface(
         modifier = Modifier
-            .widthIn(min = if (compact) 154.dp else 188.dp)
+            .widthIn(min = if (compact) 104.dp else 188.dp)
             .heightIn(min = if (compact) 64.dp else 76.dp)
             .semantics {
                 contentDescription = when {
@@ -3936,6 +3941,15 @@ private fun LauncherBuiltInWidget(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.86f),
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.80f),
+                                ),
+                            ),
+                            RoundedCornerShape(28.dp),
+                        )
                         .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
                     verticalArrangement = Arrangement.SpaceBetween,
                 ) {
@@ -3944,31 +3958,114 @@ private fun LauncherBuiltInWidget(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            now.format(DateTimeFormatter.ofPattern("EEEE, MMM d", Locale.getDefault())),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = foreground.copy(alpha = 0.82f),
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = Color.White.copy(alpha = 0.94f),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    now.dayOfMonth.toString(),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color(0xFF17191D),
+                                    fontWeight = FontWeight.Light,
+                                )
+                                Column {
+                                    Text(
+                                        now.format(DateTimeFormatter.ofPattern("MMM", Locale.getDefault())).uppercase(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF17191D).copy(alpha = 0.64f),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Text(
+                                        now.format(DateTimeFormatter.ofPattern("EEE", Locale.getDefault())),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = Color(0xFF17191D),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                        }
                         LauncherWeatherStatusChip(
-                            foreground = foreground,
+                            foreground = Color.White,
                             compact = true,
                         )
                     }
                     Text(
                         now.format(DateTimeFormatter.ofPattern("h:mm", Locale.getDefault())),
                         style = MaterialTheme.typography.displayLarge,
-                        color = foreground,
+                        color = Color.White,
                         fontWeight = FontWeight.Light,
                         maxLines = 1,
                     )
                     Text(
                         "Time and date stay local. Weather uses foreground location only after you allow it.",
                         style = MaterialTheme.typography.labelSmall,
-                        color = foreground.copy(alpha = 0.66f),
+                        color = Color.White.copy(alpha = 0.72f),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            WorkspaceWidgetCatalog.CALENDAR -> {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = Color.White.copy(alpha = 0.94f),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(15.dp),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            now.format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF17191D).copy(alpha = 0.62f),
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            now.dayOfMonth.toString(),
+                            style = MaterialTheme.typography.displayMedium,
+                            color = Color(0xFF17191D),
+                            fontWeight = FontWeight.Light,
+                        )
+                        Text(
+                            now.format(DateTimeFormatter.ofPattern("EEE", Locale.getDefault())),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color(0xFF17191D),
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+            }
+            WorkspaceWidgetCatalog.WEATHER -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.88f),
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.82f),
+                                ),
+                            ),
+                            RoundedCornerShape(28.dp),
+                        )
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        now.format(DateTimeFormatter.ofPattern("h:mm", Locale.getDefault())),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    LauncherWeatherStatusChip(
+                        foreground = Color.White,
+                        compact = true,
                     )
                 }
             }
@@ -10119,17 +10216,17 @@ private fun rememberLauncherContextShortcuts(
 private fun AppContextPopup(
     app: LauncherActivityInfo,
     anchor: Rect,
+    contextOrigin: LauncherAppContextOrigin,
     workspace: WorkspaceState,
     layoutLocked: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
-    onToggleFavorite: () -> Unit,
+    onHomeAction: () -> Unit,
     onToggleDock: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onRequestUninstall: () -> Unit,
     onAddToFolder: () -> Unit,
     onOpenWidgets: (List<LauncherWidgetProviderDescriptor>) -> Unit,
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
-    onMoreOptions: () -> Unit,
     onClose: () -> Unit,
 ) {
     val key = app.workspaceKey()
@@ -10240,9 +10337,15 @@ private fun AppContextPopup(
                         horizontalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         GlazeLauncherPopupQuickAction(
-                            label = if (isFavorite) "Remove" else "Home",
+                            label = if (
+                                contextOrigin == LauncherAppContextOrigin.HOME || isFavorite
+                            ) {
+                                "Remove"
+                            } else {
+                                "Home"
+                            },
                             symbol = GlazePopupActionSymbol.HOME,
-                            onClick = onToggleFavorite,
+                            onClick = onHomeAction,
                             enabled = !layoutLocked,
                             modifier = Modifier.weight(1f),
                         )
@@ -10297,11 +10400,6 @@ private fun AppContextPopup(
                     enabled = canAddToFolder && !layoutLocked,
                 )
                 GlazeLauncherPopupAction(
-                    label = "More options",
-                    symbol = GlazePopupActionSymbol.MORE,
-                    onClick = onMoreOptions,
-                )
-                GlazeLauncherPopupAction(
                     label = "Uninstall",
                     symbol = GlazePopupActionSymbol.UNINSTALL,
                     onClick = onRequestUninstall,
@@ -10354,7 +10452,7 @@ private fun LauncherAppWidgetChoicesDialog(
     )
 }
 
-private enum class GlazePopupActionSymbol { HOME, DOCK, WIDGET, SHORTCUT, FOLDER, INFO, UNINSTALL, MORE }
+private enum class GlazePopupActionSymbol { HOME, DOCK, WIDGET, SHORTCUT, FOLDER, INFO, UNINSTALL }
 
 /** Decorative vector geometry; labels remain the accessible action description. */
 @Composable
@@ -10418,11 +10516,6 @@ private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) 
             GlazePopupActionSymbol.UNINSTALL -> {
                 segment(.24f, .24f, .76f, .76f)
                 segment(.76f, .24f, .24f, .76f)
-            }
-            GlazePopupActionSymbol.MORE -> {
-                drawCircle(color, radius = w * .78f, center = Offset(u * .27f, u * .5f))
-                drawCircle(color, radius = w * .78f, center = Offset(u * .5f, u * .5f))
-                drawCircle(color, radius = w * .78f, center = Offset(u * .73f, u * .5f))
             }
         }
     }
@@ -10505,137 +10598,4 @@ private fun GlazeLauncherPopupAction(
             )
         }
     }
-}
-
-@Composable
-private fun AppPlacementDialog(
-    app: LauncherActivityInfo,
-    workspace: WorkspaceState,
-    layoutLocked: Boolean,
-    onToggleFavorite: () -> Unit,
-    onToggleDock: () -> Unit,
-    onMoveFavorite: (WorkspaceMoveDirection) -> Unit,
-    targetPages: List<WorkspaceRenderedHomePage>,
-    onMoveFavoriteToPage: (String) -> Unit,
-    onMoveDock: (WorkspaceMoveDirection) -> Unit,
-    homeLabelOverride: String?,
-    onSetHomeLabelOverride: (String?) -> Unit,
-    onOpenAppInfo: () -> Unit,
-    onRequestUninstall: () -> Unit,
-    onClose: () -> Unit,
-) {
-    val key = app.workspaceKey()
-    val favoriteIndex = workspace.favoriteKeys.indexOf(key)
-    val dockIndex = workspace.dockKeys.indexOf(key)
-    val isFavorite = favoriteIndex >= 0
-    val isDocked = dockIndex >= 0
-    val dockFull = !isDocked && workspace.dockKeys.size >= MAX_DOCK_ITEMS
-    val originalLabel = app.label.toString()
-    var labelDraft by remember(key, homeLabelOverride) {
-        mutableStateOf(homeLabelOverride ?: originalLabel)
-    }
-
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(homeLabelOverride ?: originalLabel) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                if (layoutLocked) {
-                    Text("Home layout is locked.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                OutlinedButton(
-                    onClick = onToggleFavorite,
-                    enabled = !layoutLocked,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(if (isFavorite) "Remove from Home" else "Add to Home") }
-                OutlinedButton(
-                    onClick = onToggleDock,
-                    enabled = !layoutLocked && !dockFull,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(if (isDocked) "Remove from Dock" else "Add to Dock") }
-                if (isFavorite && !layoutLocked) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = { onMoveFavorite(WorkspaceMoveDirection.EARLIER) }) { Text("Earlier") }
-                        TextButton(onClick = { onMoveFavorite(WorkspaceMoveDirection.LATER) }) { Text("Later") }
-                    }
-                    if (targetPages.isNotEmpty()) {
-                        Text("Move to another Home page", fontWeight = FontWeight.SemiBold)
-                        targetPages.forEach { target ->
-                            FilledTonalButton(
-                                onClick = {
-                                    onMoveFavoriteToPage(target.pageId)
-                                    onClose()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(
-                                    target.context().moveTargetLabel(
-                                        pageNumber = target.rank + 1,
-                                        primary = target.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
-                if (isDocked && !layoutLocked) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = { onMoveDock(WorkspaceMoveDirection.EARLIER) }) { Text("Dock left") }
-                        TextButton(onClick = { onMoveDock(WorkspaceMoveDirection.LATER) }) { Text("Dock right") }
-                    }
-                }
-
-                if (isFavorite) {
-                    Text("Rename on Home", fontWeight = FontWeight.SemiBold)
-                    OutlinedTextField(
-                        value = labelDraft,
-                        onValueChange = { labelDraft = it.take(LauncherHomeLabelPolicy.MAX_LABEL_LENGTH) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        supportingText = { Text("Rename this label on Home only.") },
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilledTonalButton(
-                            onClick = {
-                                val normalized = LauncherHomeLabelPolicy.normalize(labelDraft)
-                                val original = LauncherHomeLabelPolicy.normalize(originalLabel)
-                                onSetHomeLabelOverride(normalized?.takeUnless { it == original })
-                            },
-                        ) { Text("Save label") }
-                        TextButton(
-                            onClick = {
-                                labelDraft = originalLabel
-                                onSetHomeLabelOverride(null)
-                            },
-                        ) { Text("Reset") }
-                    }
-                }
-
-                HorizontalDivider()
-                OutlinedButton(
-                    onClick = {
-                        onOpenAppInfo()
-                        onClose()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("App info") }
-                OutlinedButton(
-                    onClick = {
-                        onRequestUninstall()
-                        onClose()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("Uninstall app") }
-                Text(
-                    "Android will show its system uninstall confirmation before anything is removed.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        confirmButton = { TextButton(onClick = onClose) { Text("Done") } },
-    )
 }
