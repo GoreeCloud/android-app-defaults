@@ -2,7 +2,7 @@
 
 ## September 30, 2026 — bounded Edit Home app-group controls
 
-The current stacked Development candidate exposes app-group movement from **Edit Home** for unlocked secondary Home pages. A page offers **Move apps** only when at least two available applications have persisted spatial positions. The dialog provides explicit app selection, secondary-page destination choice, and exact top-left anchor-cell selection, then delegates the write to the atomic Room group-movement foundation. Successful writes switch to the authoritative destination page; rejected writes keep the original placement and report that no group move was applied.
+The current stacked Development candidate exposes app-group movement from **Edit Home** for unlocked secondary Home pages. A page offers **Move apps** only when at least two available applications have persisted spatial positions. The dialog provides explicit app selection, secondary-page destination choice, and exact top-left anchor-cell selection. Invalid rendered-state anchors are disabled when they collide with apps/folders/widgets or push the rigid group out of bounds; a valid choice still delegates the write to the atomic Room group-movement foundation for authoritative stale-state revalidation. Successful writes switch to the authoritative destination page; rejected writes keep the original placement and report that no group move was applied.
 
 This visible tranche remains deliberately narrower than the full planned group-edit system: it is app-only, secondary-HOME-only, and exact-cell driven. The backend remains responsible for collision/bounds validation and full HOME snapshot compare-and-swap.
 

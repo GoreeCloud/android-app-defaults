@@ -4,7 +4,7 @@
 
 **Change type:** Workspace editing UX; explicit multi-select; exact-cell group placement; Development candidate.
 
-The stacked Launcher candidate now exposes the atomic secondary-HOME app-group primitive through **Edit Home**. On an unlocked secondary page with at least two available positioned apps, **Move apps** opens an explicit selection surface. The user chooses two or more apps, a secondary destination page, and an exact anchor cell. Selected apps retain their relative geometry; the Room-authoritative backend remains the final collision, bounds, identity, and stale-snapshot authority.
+The stacked Launcher candidate now exposes the atomic secondary-HOME app-group primitive through **Edit Home**. On an unlocked secondary page with at least two available positioned apps, **Move apps** opens an explicit selection surface. The user chooses two or more apps, a secondary destination page, and an exact anchor cell. The editor preflights each anchor against rendered app, folder, and widget occupancy and disables anchors that are already invalid or would push the rigid group outside the configured grid. Selected apps retain their relative geometry; the Room-authoritative backend remains the final collision, bounds, identity, and stale-snapshot authority.
 
 Primary Home is intentionally excluded from this first visible group-edit tranche. A rejected move preserves the existing layout and surfaces a bounded failure message rather than partially applying the selection. The flow adds no permission, network request, telemetry, credential, or external provider.
 
