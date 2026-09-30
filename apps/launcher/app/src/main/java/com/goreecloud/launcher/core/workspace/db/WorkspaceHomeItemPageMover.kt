@@ -307,6 +307,7 @@ class WorkspaceHomeItemPageMover(
                 itemIds = appKeys.map { key ->
                     checkNotNull(candidatesByKey.getValue(key).single().itemId)
                 },
+                sourcePageId = sourcePageId,
                 targetPageId = targetPageId,
                 targetCellX = targetCellX,
                 targetCellY = targetCellY,
