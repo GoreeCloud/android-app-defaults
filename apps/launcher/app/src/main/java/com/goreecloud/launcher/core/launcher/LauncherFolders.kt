@@ -17,6 +17,7 @@ data class LauncherFolder(
     val id: String,
     val name: String,
     val appKeys: List<String>,
+    val profileKind: LauncherDrawerProfileKind = LauncherDrawerProfileKind.USER,
 )
 
 object LauncherFolderPolicy {
