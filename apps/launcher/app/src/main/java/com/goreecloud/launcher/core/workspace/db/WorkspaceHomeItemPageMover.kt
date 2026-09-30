@@ -199,7 +199,6 @@ class WorkspaceHomeItemPageMover(
         grid: WorkspaceGridPlacement.Grid,
         targetCellX: Int,
         targetCellY: Int,
-        expectedSourcePlacements: List<WorkspaceHomeAppGroupPlacementExpectation>? = null,
     ): WorkspacePagedRoomMutationResult {
         if (pageId.isBlank() || appKey.isBlank()) {
             return WorkspacePagedRoomMutationResult.InvalidWorkspace
@@ -253,6 +252,7 @@ class WorkspaceHomeItemPageMover(
         grid: WorkspaceGridPlacement.Grid,
         targetCellX: Int,
         targetCellY: Int,
+        expectedSourcePlacements: List<WorkspaceHomeAppGroupPlacementExpectation>? = null,
     ): WorkspacePagedRoomMutationResult {
         if (
             sourcePageId.isBlank() ||
