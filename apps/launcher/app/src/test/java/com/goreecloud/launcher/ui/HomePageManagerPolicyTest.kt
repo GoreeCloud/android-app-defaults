@@ -601,6 +601,20 @@ class HomePageManagerPolicyTest {
                 availableAppKeys = setOf(firstKey, secondKey),
             ),
         )
+        assertFalse(
+            canMoveHomeAppGroup(
+                page = secondary.copy(
+                    appKeys = listOf(firstKey, firstKey, secondKey),
+                    appPlacements = listOf(
+                        WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                        WorkspaceRenderedHomeApp(firstKey, 0, 1, 1, 1),
+                        WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
+                    ),
+                ),
+                layoutLocked = false,
+                availableAppKeys = setOf(firstKey, secondKey),
+            ),
+        )
     }
 
 
