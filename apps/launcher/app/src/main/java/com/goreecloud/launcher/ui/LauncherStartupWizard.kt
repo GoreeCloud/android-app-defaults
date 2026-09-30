@@ -281,8 +281,8 @@ fun LauncherStartupWizard(
                                 summary = "Glance keeps time and opt-in local weather together, and the widget gallery also includes separate polished Weather and Calendar cards. Recent successful weather stays briefly cached so normal Home returns do not visibly reload it.",
                             )
                             WizardInfoCard(
-                                title = "Manage folders in place",
-                                summary = "Open a folder and use Add apps at the end of its grid or from the folder menu. On Home, long-press a folder to move it to a free cell or release it at a page edge to move it to the adjacent Home page. Larger opened folders swipe across compact pages.",
+                                title = "Organize User and Work Apps",
+                                summary = "Apps can be sorted A–Z, Z–A, by most recent launch, or by most frequent launch. User Apps and Work Apps keep separate folders: create and manage folders from the active profile, and Work folders stay inside Work Apps instead of mixing with personal Home.",
                             )
                             WizardInfoCard(
                                 title = "Connected Search is opt-in",
