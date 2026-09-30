@@ -1,5 +1,18 @@
 # Android App Defaults — Implemented Features
 
+## September 30, 2026 — Since Development APK distribution hardening candidate
+
+The active stacked Since line now includes source-level Development packaging controls for
+`com.goreecloud.since.dev`: monotonically progressing CI `versionCode` values, optional complete
+external persistent-signing configuration, exact-head build/runtime checkout, package/version
+readback, ZIP-alignment validation, modern v2/v3 APK Signing Block verification, and checksum/signer
+provenance.
+
+Ordinary pull-request artifacts intentionally remain hosted-runner debug-signed and are
+installability-only. The protected persistent Development key itself is not present in Git and has
+not been provisioned to an approved trusted distribution path. Representative-device
+update-in-place continuity therefore remains unverified.
+
 ## September 29, 2026 — Since fail-closed import review candidate
 
 The stacked Since portability candidate now exposes **Review import** under Settings → Data & recovery. The user explicitly chooses a document through Android's Storage Access Framework; Since reads at most 4 MiB, requires strict UTF-8, and validates only the versioned `goreecloud-since-export` schema v1 before showing a summary of trackers, archived trackers, periods, and goals.
