@@ -26,6 +26,16 @@ Until a verified Gradle Wrapper is added, CI bootstraps Gradle 8.11.1 explicitly
 gradle :apps:since:testDebugUnitTest :apps:since:lintDebug :apps:since:assembleDebug :apps:since:assembleDebugAndroidTest
 ```
 
+### Since Development package and update continuity
+
+The side-by-side Development package is `com.goreecloud.since.dev`. The Since build now accepts a positive `GOREECLOUD_DEV_VERSION_CODE` and, in ordinary GitHub Actions builds, falls back to `GITHUB_RUN_NUMBER` instead of permanently reusing `versionCode = 1`.
+
+For protected owner-distribution builds, the module accepts a complete external Development signing configuration through `GOREECLOUD_DEV_KEYSTORE_PATH`, `GOREECLOUD_DEV_KEYSTORE_PASSWORD`, `GOREECLOUD_DEV_KEY_ALIAS`, and `GOREECLOUD_DEV_KEY_PASSWORD`. Partial signing configuration fails closed, the configured keystore path must exist, and protected signing cannot silently fall back to an unversioned local build. Signing material is not stored in Git.
+
+The manual **Since Development APK Distribution** workflow is isolated behind the `since-development` GitHub environment. It expects the protected keystore and passwords to be provisioned as environment secrets, builds the APK through the Android Gradle Plugin so modern APK signing schemes are preserved, reads the assembled APK back with Android build tools, verifies package/version identity and the APK signature, records the exact source SHA plus signer/APK digests, and uploads the resulting artifact. Ordinary pull-request CI remains installability/runtime evidence and must not be represented as the persistent owner-distribution signing identity.
+
+The September 30, 2026 owner-device packaging incident demonstrated why post-build manifest rewriting plus JAR/v1-only re-signing is prohibited for Since distribution: that transformation removed the APK Signing Block and Android rejected the package as invalid. Owner-distribution version/signing changes must occur during the governed Android build instead.
+
 ## Repository records
 
 - [Implemented features](IMPLEMENTED-FEATURES.md)
