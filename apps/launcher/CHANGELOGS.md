@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — live held-page widget handoff
+
+**Change type:** Workspace direct manipulation; widget movement; Development candidate.
+
+Unlocked Home widgets now use Android platform drag transport for pointer-held page switching while preserving stationary long-press management. Holding a widget at a valid left or right Home-grid edge briefly changes only the visible page; Room remains untouched during the hover. Release on the rendered destination page maps to an exact measured anchor and reuses the existing span-aware, snapshot-checked widget mutation path. A quick edge release retains deterministic span-aware opposite-edge landing.
+
+The transport carries widget identity, source page, and current span so target edges and exact release cells fail closed when the complete widget would leave the grid. Same-page movement remains page-aware, ordinary Home swipes are disabled while a widget drag is active, stale page geometry is cleared before hover navigation, and existing resize/remove/non-drag page movement remain unchanged. Startup guidance and the replayable Home hint now explain the held-edge widget workflow. No new permission, network path, telemetry, credential, widget-provider authority, or persistence authority is introduced.
+
+**Acceptance boundary:** this branch is Development source/test work. Fresh exact-head build/lint/unit/schema/instrumentation-compilation and Android 16 runtime evidence remain required. Representative-device hosted-widget pointer behavior, TalkBack/Switch Access, large-text/landscape/foldable behavior, performance/power, protected promotion, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
 
 **Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
