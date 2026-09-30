@@ -59,7 +59,7 @@ You can disable hints during startup, dismiss the Home hint with **Got it**, and
 
 ## Launcher Universal Search from Home
 
-**GoreeCloud Launcher owns Universal Search.** Swipe down on the unobstructed Home gesture zone opens the Launcher-owned search surface by default; the assignment can be changed under **Launcher settings → Gestures**. When the Home search bar is enabled, tapping **Search GoreeCloud** always opens Launcher Universal Search.
+**GoreeCloud Launcher owns Universal Search.** Swipe down on the unobstructed Home gesture zone opens the Launcher-owned search surface by default; the assignment can be changed under **Launcher settings → Gestures**. Configured vertical Home gestures now apply on primary and secondary Home pages, so moving between pages does not silently change swipe-up or swipe-down behavior. When the Home search bar is enabled, tapping **Search GoreeCloud** always opens Launcher Universal Search.
 
 Launcher Settings provides two Home-entry modes:
 
@@ -120,7 +120,9 @@ Open **Apps** from Home to browse the launchable application inventory exposed t
 
 Use the **Search apps** field to search the installed-application inventory locally. This Apps view is a specialized Launcher-owned view backed by the same installed-app provider foundation used for Universal Search. It does not require Internet access.
 
-Long-press an app to open the compact Glaze context menu. The same surface provides Home/Remove, Dock/Undock, app-specific Widgets when available, App info, folder assignment, supported app shortcuts, and **Uninstall**. There is no second **More options** placement dialog. **Remove** only removes or suppresses the Home icon; it does not uninstall the application. **Uninstall** delegates to Android's system confirmation, and Launcher never silently removes packages. Placement-changing actions are disabled while the Home layout is locked.
+The Apps header can sort the active profile by **A–Z**, **Z–A**, **Most Recent**, or **Most Frequent**. Recent/frequent ordering uses the same privacy-bounded Launcher-local launch history described above; folders without usage history remain deterministically ordered after tracked applications. When Android exposes a separate work profile, **User Apps** and **Work Apps** remain distinct pages. Folder creation follows the active profile: User folders contain User apps, Work folders contain Work apps, and a folder cannot mix members from different Android profiles. Work folders remain inside Work Apps and are not placeable on personal Home.
+
+Long-press an app to open the compact Glaze context menu. The same surface provides Home/Remove where applicable, Dock/Undock, app-specific Widgets when available, App info, profile-matched folder assignment, supported app shortcuts, and **Uninstall**. There is no second **More options** placement dialog. **Remove** only removes or suppresses the Home icon; it does not uninstall the application. **Uninstall** delegates to Android's system confirmation, and Launcher never silently removes packages. Placement-changing actions are disabled while the Home layout is locked.
 
 ## Launcher settings
 
