@@ -1059,6 +1059,8 @@ class ActivatedHomeLifecycleRuntimeTest {
         val roleManager = context.getSystemService(RoleManager::class.java)
         val alreadyDefaultHome =
             roleManager.isRoleAvailable(RoleManager.ROLE_HOME) && roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+        val preferencesRepository = LauncherPreferencesRepository(context)
+        val previousLayoutLocked = preferencesRepository.preferences.first().layoutLocked
 
         if (!alreadyDefaultHome) {
             runShellCommand(
@@ -1072,6 +1074,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         }
 
         try {
+            preferencesRepository.setLayoutLocked(false)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first { !it.layoutLocked }
+            }
             val apps = withTimeout(10_000) {
                 LauncherAppsRepository(context).apps.first { candidates ->
                     candidates
@@ -1100,7 +1106,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
 
                 val dao = LauncherDatabaseProvider.get(context).workspaceDao()
-                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val preferences = preferencesRepository.preferences.first()
                 establishExactPrimaryHomeFixture(
                     context = context,
                     favoriteKeys = listOf(firstKey, secondKey),
@@ -1228,6 +1234,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                 scenario.close()
             }
         } finally {
+            preferencesRepository.setLayoutLocked(previousLayoutLocked)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first {
+                    it.layoutLocked == previousLayoutLocked
+                }
+            }
             if (!alreadyDefaultHome) {
                 runShellCommand(
                     "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
@@ -1309,6 +1321,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                         checkNotNull(secondKey) to (1 to 0),
                     ),
                 )
+                dao.readPages(listOf(secondaryPageId)).singleOrNull()?.let { existingPage ->
+                    dao.replaceLegacySnapshot(
+                        pages = listOf(existingPage),
+                        items = emptyList(),
+                    )
+                }
 
                 runtime = WorkspaceProductionRuntimeCoordinator(
                     authorityRepository = repository,
