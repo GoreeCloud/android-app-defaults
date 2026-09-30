@@ -3042,7 +3042,7 @@ private fun HomeAppGroupMoveDialog(
                                             "Anchor column " + (cellX + 1) +
                                                 ", row " + (cellY + 1)
                                         stateDescription =
-                                            if (anchorAvailable) {
+                                            if (anchorAvailable && !moveInProgress) {
                                                 "Available destination"
                                             } else {
                                                 "Unavailable destination"
@@ -3079,6 +3079,12 @@ private fun HomeAppGroupMoveDialog(
                     )
                     Text(
                         "Applying group move…",
+                        modifier = Modifier
+                            .testTag("launcher-home-group-move-progress-state")
+                            .semantics {
+                                liveRegion = LiveRegionMode.Polite
+                                stateDescription = "Applying group move"
+                            },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
