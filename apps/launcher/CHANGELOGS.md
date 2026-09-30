@@ -4,7 +4,7 @@
 
 **Change type:** Workspace recovery UX; atomic Room reversal; Development candidate.
 
-After a successful Edit Home application-group move, Launcher now retains one session-local undo token derived from the authoritative pre-move placements returned by the same Room transaction. **Undo move** reuses the existing snapshot-checked atomic group mover to restore the group to its exact prior secondary page and anchor. If the Home layout changed in the meantime, undo fails closed rather than overwriting newer edits, and the one-step token is cleared after the attempt.
+After a successful Edit Home application-group move, Launcher now retains one session-local undo token derived from the authoritative pre-move placements returned by the same Room transaction. **Undo move** reuses the existing snapshot-checked atomic group mover to restore the group to its exact prior secondary page and anchor. The undo token also carries the exact post-move geometry returned by Room; if a selected app is edited again before undo, the reversal fails closed inside the transaction rather than rolling back that newer edit. Conflicting destination changes are rejected by the existing collision/snapshot checks, and the one-step token is cleared after the attempt.
 
 The undo token is in-memory only, contains app identities plus page/anchor geometry, and adds no new permission, network path, telemetry, credential, persistent journal, or second workspace authority. Android runtime coverage moves a two-app group, invokes **Undo move**, verifies both exact original cells are restored, and verifies the one-step action is consumed.
 
