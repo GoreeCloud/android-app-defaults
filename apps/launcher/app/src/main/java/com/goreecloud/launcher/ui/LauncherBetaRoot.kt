@@ -5223,7 +5223,7 @@ private fun AppDrawerSurface(
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
-    onManageFolders: () -> Unit,
+    onManageFolders: (LauncherDrawerProfileKind) -> Unit,
     onOpenSettings: () -> Unit,
     onHome: () -> Unit,
 ) {
@@ -5321,10 +5321,11 @@ private fun AppDrawerSurface(
                 rawQuery = drawerQuery,
             )
         }
-        if (drawerQuery.isBlank() || selectedPage.kind != LauncherDrawerProfileKind.USER) {
-            matchingApps
+        val profileFolders = folders.filter { folder -> folder.profileKind == selectedPage.kind }
+        if (drawerQuery.isBlank()) {
+            matchingApps + profileFolders.size
         } else {
-            matchingApps + folders.count { folder ->
+            matchingApps + profileFolders.count { folder ->
                 LauncherLocalAppSearch.matches(
                     label = folder.name,
                     packageName = "",
@@ -5425,7 +5426,7 @@ private fun AppDrawerSurface(
                             if (selectedPage.kind == LauncherDrawerProfileKind.USER) {
                                 "Apps"
                             } else {
-                                selectedPage.kind.displayName + " apps"
+                                selectedPage.kind.displayName
                             },
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold,
@@ -5502,12 +5503,9 @@ private fun AppDrawerSurface(
                                 }
                             }
                         }
-                        if (
-                            selectedPage.kind == LauncherDrawerProfileKind.USER &&
-                            drawerQuery.isBlank()
-                        ) {
+                        if (drawerQuery.isBlank()) {
                             Surface(
-                                onClick = onManageFolders,
+                                onClick = { onManageFolders(selectedPage.kind) },
                                 modifier = Modifier
                                     .size(if (useDrawerHeaderIcons) 48.dp else 92.dp)
                                     .semantics { contentDescription = "New folder" },
@@ -5578,12 +5576,13 @@ private fun AppDrawerSurface(
                         }
                     }
                     val pageFolders = remember(page.kind, folders, drawerQuery) {
-                        if (page.kind != LauncherDrawerProfileKind.USER) {
-                            emptyList()
-                        } else if (drawerQuery.isBlank()) {
-                            folders
+                        val profileFolders = folders.filter { folder ->
+                            folder.profileKind == page.kind
+                        }
+                        if (drawerQuery.isBlank()) {
+                            profileFolders
                         } else {
-                            folders.filter { folder ->
+                            profileFolders.filter { folder ->
                                 LauncherLocalAppSearch.matches(
                                     label = folder.name,
                                     packageName = "",
