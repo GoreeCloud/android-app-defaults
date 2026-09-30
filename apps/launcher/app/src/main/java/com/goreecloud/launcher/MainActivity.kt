@@ -1202,6 +1202,37 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
+                            onMoveHomeAppGroupToPageCell = {
+                                    sourcePageId, appKeys, targetPageId, cellX, cellY ->
+                                if (!launcherPreferences.layoutLocked) {
+                                    lifecycleScope.launch {
+                                        val result =
+                                            workspaceRuntimeCoordinator.moveHomeAppGroupToPageCell(
+                                                sourcePageId = sourcePageId,
+                                                appKeys = appKeys,
+                                                targetPageId = targetPageId,
+                                                columns = launcherPreferences.homeColumns,
+                                                rows = launcherPreferences.homeRows,
+                                                cellX = cellX,
+                                                cellY = cellY,
+                                            )
+                                        if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
+                                            selectedHomePageId = targetPageId
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Moved " + result.items.size + " apps.",
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                        } else {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Group move was not applied. Choose a free destination that keeps every app inside the Home grid.",
+                                                Toast.LENGTH_LONG,
+                                            ).show()
+                                        }
+                                    }
+                                }
+                            },
                             onSwipeHomePageLeft = {
                                 val target = renderedPages.getOrNull(selectedHomePageIndex + 1)
                                 if (target == null) {

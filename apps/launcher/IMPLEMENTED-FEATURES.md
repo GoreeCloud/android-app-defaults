@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — bounded Edit Home app-group controls
+
+The current stacked Development candidate exposes app-group movement from **Edit Home** for unlocked secondary Home pages. A page offers **Move apps** only when at least two available applications have persisted spatial positions. The dialog provides explicit app selection, secondary-page destination choice, and exact top-left anchor-cell selection. Invalid rendered-state anchors are disabled when they collide with apps/folders/widgets or push the rigid group out of bounds; a valid choice still delegates the write to the atomic Room group-movement foundation for authoritative stale-state revalidation. Successful writes switch to the authoritative destination page; rejected writes keep the original placement and report that no group move was applied.
+
+This visible tranche remains deliberately narrower than the full planned group-edit system: it is app-only, secondary-HOME-only, and exact-cell driven. The backend remains responsible for collision/bounds validation and full HOME snapshot compare-and-swap.
+
+**Acceptance boundary:** Development-only stacked source. Primary-HOME groups, mixed item types, drag-box/lasso selection, durable multi-step undo/redo, process-death-safe edit history, and representative-device accessibility/direct-manipulation acceptance remain open.
+
 ## September 30, 2026 — stacked atomic Home app group-movement foundation
 
 Draft PR #80 implements the first backend tranche of Home group movement on top of the mandatory Android-app consolidation candidate. Two or more applications already placed on the same secondary Home page can be resolved as one group and moved atomically to an exact secondary-page anchor while preserving relative geometry and spans. The Room mutation validates the complete target geometry, rejects collisions/out-of-bounds/stale snapshots without partial writes, and deliberately blocks primary-HOME participation until its rank/compatibility behavior is separately reviewed. The production runtime coordinator now exposes this primitive for a later user-facing multi-select/group-edit experience, and Android runtime coverage exercises both rollback-on-collision and a successful cross-page group move.

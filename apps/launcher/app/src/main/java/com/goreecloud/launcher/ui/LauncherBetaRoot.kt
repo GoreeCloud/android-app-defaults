@@ -54,6 +54,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -88,6 +89,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -154,6 +156,7 @@ import com.goreecloud.launcher.core.launcher.LauncherWeatherVisualKind
 import com.goreecloud.launcher.core.launcher.launcherWeatherVisualKind
 import com.goreecloud.launcher.core.launcher.launcherDrawerProfilePages
 import com.goreecloud.launcher.core.workspace.MAX_DOCK_ITEMS
+import com.goreecloud.launcher.core.workspace.WorkspaceGridPlacement
 import com.goreecloud.launcher.core.workspace.WorkspaceMoveDirection
 import com.goreecloud.launcher.core.workspace.WorkspaceState
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetCatalog
@@ -387,6 +390,7 @@ fun LauncherBetaRoot(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    onMoveHomeAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     isDefaultHome: Boolean,
@@ -800,6 +804,7 @@ fun LauncherBetaRoot(
                 onCreateHomePage = onCreateHomePage,
                 onSelectHomePage = onSelectHomePage,
                 onDeleteHomePage = onDeleteHomePage,
+                onMoveHomeAppGroupToPageCell = onMoveHomeAppGroupToPageCell,
                 onSwipeHomePageLeft = onSwipeHomePageLeft,
                 onSwipeHomePageRight = onSwipeHomePageRight,
                 onManageFolders = {
@@ -1243,6 +1248,7 @@ private fun HomeSurface(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    onMoveHomeAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     onManageFolders: () -> Unit,
@@ -1725,6 +1731,7 @@ private fun HomeSurface(
                     tonalElevation = 0.dp,
                 ) {
                     HomeEditorSurface(
+                        apps = apps,
                         dockApps = dockApps,
                         preferences = preferences,
                         homePages = homePages,
@@ -1732,6 +1739,7 @@ private fun HomeSurface(
                         onSelectPage = onSelectHomePage,
                         onCreatePage = onCreateHomePage,
                         onDeletePage = onDeleteHomePage,
+                        onMoveAppGroupToPageCell = onMoveHomeAppGroupToPageCell,
                         onDone = { showHomeEditor = false },
                         onWallpaper = {
                             showHomeEditor = false
@@ -2225,12 +2233,14 @@ internal fun LauncherWidgetManagementDialog(
 
 @Composable
 private fun HomeEditorSurface(
+    apps: List<LauncherActivityInfo>,
     dockApps: List<LauncherActivityInfo>,
     preferences: LauncherPreferences,
     homePages: List<WorkspaceRenderedHomePage>,
     initialPageId: String? = null,
     onSelectPage: (String) -> Unit,
     onDeletePage: (String) -> Unit,
+    onMoveAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     onDone: () -> Unit,
     onWallpaper: () -> Unit,
     onCreatePage: () -> Unit,
@@ -2279,6 +2289,7 @@ private fun HomeEditorSurface(
 
         HomeEditorPageOverview(
             pages = homePages,
+            apps = apps,
             dockApps = dockApps,
             homeColumns = preferences.homeColumns,
             homeRows = preferences.homeRows,
@@ -2287,6 +2298,7 @@ private fun HomeEditorSurface(
             onSelectPage = onSelectPage,
             onCreatePage = onCreatePage,
             onDeletePage = onDeletePage,
+            onMoveAppGroupToPageCell = onMoveAppGroupToPageCell,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -2320,6 +2332,7 @@ private fun HomeEditorSurface(
 @Composable
 private fun HomeEditorPageOverview(
     pages: List<WorkspaceRenderedHomePage>,
+    apps: List<LauncherActivityInfo>,
     dockApps: List<LauncherActivityInfo>,
     homeColumns: Int,
     homeRows: Int,
@@ -2328,6 +2341,7 @@ private fun HomeEditorPageOverview(
     onSelectPage: (String) -> Unit,
     onCreatePage: () -> Unit,
     onDeletePage: (String) -> Unit,
+    onMoveAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val visiblePages = pages
@@ -2335,6 +2349,10 @@ private fun HomeEditorPageOverview(
 
     var pendingDeletePageId by remember(visiblePages) { mutableStateOf<String?>(null) }
     val pendingDeletePage = visiblePages.firstOrNull { it.pageId == pendingDeletePageId }
+    var groupMoveSourcePageId by remember(visiblePages) { mutableStateOf<String?>(null) }
+    val groupMoveSourcePage =
+        visiblePages.firstOrNull { it.pageId == groupMoveSourcePageId }
+    val availableAppKeys = remember(apps) { apps.mapTo(mutableSetOf()) { it.workspaceKey() } }
     val initialPageIndex = remember(visiblePages, initialPageId) {
         visiblePages.indexOfFirst { it.pageId == initialPageId }
             .takeIf { it >= 0 }
@@ -2454,6 +2472,11 @@ private fun HomeEditorPageOverview(
             val primary = page.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
             val itemCount = homePageVisibleItemCount(page)
             val canDelete = canDeleteHomePage(page, visiblePages, layoutLocked)
+            val canMoveGroup = canMoveHomeAppGroup(
+                page = page,
+                layoutLocked = layoutLocked,
+                availableAppKeys = availableAppKeys,
+            )
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2525,30 +2548,70 @@ private fun HomeEditorPageOverview(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        if (canDelete) {
-                            TextButton(
-                                onClick = { pendingDeletePageId = page.pageId },
-                                modifier = Modifier.heightIn(min = 48.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                            ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (canMoveGroup) {
+                                TextButton(
+                                    onClick = { groupMoveSourcePageId = page.pageId },
+                                    modifier = Modifier
+                                        .heightIn(min = 48.dp)
+                                        .testTag("launcher-home-editor-group-" + page.pageId),
+                                    contentPadding = PaddingValues(horizontal = 8.dp),
+                                ) {
+                                    Text(
+                                        "Move apps",
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                }
+                            }
+                            if (canDelete) {
+                                TextButton(
+                                    onClick = { pendingDeletePageId = page.pageId },
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp),
+                                ) {
+                                    Text(
+                                        "Delete",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
+                            } else if (primary) {
                                 Text(
-                                    "Delete",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.error,
+                                    "Protected",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                        } else if (primary) {
-                            Text(
-                                "Protected",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
                         }
                     }
                 }
             }
         }
 
+    }
+
+    if (groupMoveSourcePage != null) {
+        HomeAppGroupMoveDialog(
+            sourcePage = groupMoveSourcePage,
+            pages = visiblePages,
+            apps = apps,
+            homeColumns = homeColumns,
+            homeRows = homeRows,
+            onMove = { appKeys, targetPageId, cellX, cellY ->
+                groupMoveSourcePageId = null
+                onMoveAppGroupToPageCell(
+                    groupMoveSourcePage.pageId,
+                    appKeys,
+                    targetPageId,
+                    cellX,
+                    cellY,
+                )
+            },
+            onDismiss = { groupMoveSourcePageId = null },
+        )
     }
 
     if (pendingDeletePage != null) {
@@ -2583,6 +2646,379 @@ private fun HomeEditorPageOverview(
             },
         )
     }
+}
+
+
+internal fun canMoveHomeAppGroup(
+    page: WorkspaceRenderedHomePage,
+    layoutLocked: Boolean,
+    availableAppKeys: Set<String>,
+): Boolean =
+    !layoutLocked &&
+        page.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID &&
+        page.appPlacements
+            .asSequence()
+            .filter { app ->
+                app.cellX != null &&
+                    app.cellY != null &&
+                    app.appKey in availableAppKeys
+            }
+            .groupingBy { it.appKey }
+            .eachCount()
+            .count { (_, count) -> count == 1 } >= 2
+
+internal fun homeAppGroupAnchorAvailable(
+    sourcePage: WorkspaceRenderedHomePage,
+    targetPage: WorkspaceRenderedHomePage,
+    selectedAppKeys: List<String>,
+    columns: Int,
+    rows: Int,
+    targetCellX: Int,
+    targetCellY: Int,
+): Boolean {
+    if (
+        sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        targetPage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        targetPage.unsupportedItemCount > 0 ||
+        selectedAppKeys.size < 2 ||
+        selectedAppKeys.distinct().size != selectedAppKeys.size
+    ) {
+        return false
+    }
+    val grid = runCatching {
+        WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
+    }.getOrNull() ?: return false
+
+    val sourceByKey = sourcePage.appPlacements
+        .filter { it.cellX != null && it.cellY != null }
+        .groupBy { it.appKey }
+    val selected = selectedAppKeys.map { key ->
+        sourceByKey[key]?.singleOrNull() ?: return false
+    }
+    val sourceMinX = selected.minOf { checkNotNull(it.cellX) }
+    val sourceMinY = selected.minOf { checkNotNull(it.cellY) }
+    if (
+        targetPage.pageId == sourcePage.pageId &&
+        targetCellX == sourceMinX &&
+        targetCellY == sourceMinY
+    ) {
+        return false
+    }
+    val selectedKeySet = selectedAppKeys.toSet()
+
+    val targetApps = targetPage.appPlacements.filterNot { app ->
+        targetPage.pageId == sourcePage.pageId && app.appKey in selectedKeySet
+    }
+    if (targetApps.any { it.cellX == null || it.cellY == null }) return false
+
+    val occupied = buildList {
+        targetApps.forEach { app ->
+            add(
+                WorkspaceGridPlacement.Placement(
+                    itemId = "app:" + app.appKey,
+                    cellX = checkNotNull(app.cellX),
+                    cellY = checkNotNull(app.cellY),
+                    spanX = app.spanX,
+                    spanY = app.spanY,
+                )
+            )
+        }
+        targetPage.widgetPlacements.forEach { widget ->
+            add(
+                WorkspaceGridPlacement.Placement(
+                    itemId = "widget:" + widget.itemId,
+                    cellX = widget.cellX,
+                    cellY = widget.cellY,
+                    spanX = widget.spanX,
+                    spanY = widget.spanY,
+                )
+            )
+        }
+        targetPage.folderPlacements.forEach { folder ->
+            add(
+                WorkspaceGridPlacement.Placement(
+                    itemId = "folder:" + folder.itemId,
+                    cellX = folder.cellX,
+                    cellY = folder.cellY,
+                    spanX = 1,
+                    spanY = 1,
+                )
+            )
+        }
+    }
+
+    val moved = selected.map { app ->
+        WorkspaceGridPlacement.Placement(
+            itemId = "moving-app:" + app.appKey,
+            cellX = targetCellX + checkNotNull(app.cellX) - sourceMinX,
+            cellY = targetCellY + checkNotNull(app.cellY) - sourceMinY,
+            spanX = app.spanX,
+            spanY = app.spanY,
+        )
+    }
+
+    return WorkspaceGridPlacement.validate(
+        grid = grid,
+        placements = occupied + moved,
+    ) == WorkspaceGridPlacement.Validation.Valid
+}
+
+@Composable
+private fun HomeAppGroupMoveDialog(
+    sourcePage: WorkspaceRenderedHomePage,
+    pages: List<WorkspaceRenderedHomePage>,
+    apps: List<LauncherActivityInfo>,
+    homeColumns: Int,
+    homeRows: Int,
+    onMove: (List<String>, String, Int, Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val columns = homeColumns.coerceIn(4, 6)
+    val rows = homeRows.coerceIn(4, 7)
+    val appsByKey = remember(apps) { apps.associateBy { it.workspaceKey() } }
+    val sourceApps = remember(sourcePage, appsByKey) {
+        sourcePage.appPlacements
+            .filter { it.cellX != null && it.cellY != null }
+            .groupBy { it.appKey }
+            .mapNotNull { (appKey, placements) ->
+                val placement = placements.singleOrNull() ?: return@mapNotNull null
+                appsByKey[appKey]?.let { app -> placement to app }
+            }
+    }
+    val targetPages = remember(pages) {
+        pages.filterNot { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+    }
+    var selectedKeys by remember(sourcePage.pageId) {
+        mutableStateOf<Set<String>>(emptySet())
+    }
+    var targetPageId by remember(sourcePage.pageId, targetPages) {
+        mutableStateOf(
+            sourcePage.pageId.takeIf { sourceId ->
+                targetPages.any { it.pageId == sourceId }
+            } ?: targetPages.firstOrNull()?.pageId.orEmpty()
+        )
+    }
+    val selectableAppKeys = remember(sourceApps) {
+        sourceApps.map { (placement, _) -> placement.appKey }
+    }
+    val selectedAppKeys = remember(selectableAppKeys, selectedKeys) {
+        selectableAppKeys.filter { it in selectedKeys }
+    }
+    val canChooseDestination = selectedAppKeys.size >= 2 && targetPageId.isNotBlank()
+    val anchorHorizontalScrollState = rememberScrollState()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("launcher-home-group-move-dialog"),
+        title = { Text("Move apps together") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Text(
+                    "Select at least two apps from this page. Their relative positions stay together.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        selectedAppKeys.size.toString() + " selected",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row {
+                        TextButton(
+                            onClick = { selectedKeys = selectableAppKeys.toSet() },
+                            enabled = selectedAppKeys.size < selectableAppKeys.size,
+                            modifier = Modifier.testTag("launcher-home-group-select-all"),
+                        ) {
+                            Text("Select all")
+                        }
+                        TextButton(
+                            onClick = { selectedKeys = emptySet() },
+                            enabled = selectedKeys.isNotEmpty(),
+                            modifier = Modifier.testTag("launcher-home-group-clear"),
+                        ) {
+                            Text("Clear")
+                        }
+                    }
+                }
+
+                sourceApps.forEach { (placement, app) ->
+                    val key = placement.appKey
+                    val checked = key in selectedKeys
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("launcher-home-group-app-" + key)
+                            .toggleable(
+                                value = checked,
+                                role = Role.Checkbox,
+                                onValueChange = { selected ->
+                                    selectedKeys = if (selected) {
+                                        selectedKeys + key
+                                    } else {
+                                        selectedKeys - key
+                                    }
+                                },
+                            )
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                    ) {
+                        Checkbox(
+                            checked = checked,
+                            onCheckedChange = null,
+                        )
+                        HomeEditorPreviewIcon(app)
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                app.label.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                "Cell " + (checkNotNull(placement.cellX) + 1) + ", " +
+                                    (checkNotNull(placement.cellY) + 1),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+
+                HorizontalDivider()
+
+                Text(
+                    "Destination page",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                targetPages.forEach { target ->
+                    FilterChip(
+                        selected = target.pageId == targetPageId,
+                        onClick = { targetPageId = target.pageId },
+                        label = {
+                            Text(
+                                if (target.pageId == sourcePage.pageId) {
+                                    "This page"
+                                } else {
+                                    "Page " + (target.rank + 1)
+                                }
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("launcher-home-group-target-" + target.pageId),
+                    )
+                }
+
+                HorizontalDivider()
+
+                Text(
+                    "Destination anchor",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    if (canChooseDestination) {
+                        "Choose the top-left anchor cell. Known collisions and out-of-grid anchors are disabled; Room verifies the workspace again before committing."
+                    } else {
+                        "Select at least two apps before choosing a destination cell."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("launcher-home-group-anchor-section"),
+                ) {
+                    Column(
+                        modifier = Modifier.horizontalScroll(anchorHorizontalScrollState),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        repeat(rows) { cellY ->
+                        Row(
+                            modifier = Modifier.testTag("launcher-home-group-anchor-row-" + cellY),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            repeat(columns) { cellX ->
+                            val targetPage = pages.firstOrNull { it.pageId == targetPageId }
+                            val anchorAvailable =
+                                canChooseDestination &&
+                                    targetPage != null &&
+                                    homeAppGroupAnchorAvailable(
+                                        sourcePage = sourcePage,
+                                        targetPage = targetPage,
+                                        selectedAppKeys = selectedAppKeys,
+                                        columns = columns,
+                                        rows = rows,
+                                        targetCellX = cellX,
+                                        targetCellY = cellY,
+                                    )
+                            Surface(
+                                onClick = {
+                                    onMove(
+                                        selectedAppKeys,
+                                        targetPageId,
+                                        cellX,
+                                        cellY,
+                                    )
+                                },
+                                enabled = anchorAvailable,
+                                modifier = Modifier
+                                    .size(width = 48.dp, height = 48.dp)
+                                    .testTag(
+                                        "launcher-home-group-cell-" + cellX + "-" + cellY
+                                    )
+                                    .semantics {
+                                        contentDescription =
+                                            "Anchor column " + (cellX + 1) +
+                                                ", row " + (cellY + 1)
+                                    },
+                                shape = RoundedCornerShape(GlazeMetrics.radiusSmall),
+                                color = if (anchorAvailable) {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
+                                },
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant,
+                                ),
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        (cellX + 1).toString() + "," + (cellY + 1),
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                }
+                            }
+                        }
+                        }
+                    }
+                }
+            }
+        }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+    )
 }
 
 @Composable
