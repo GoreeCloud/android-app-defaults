@@ -2317,6 +2317,9 @@ private fun HomeEditorSurface(
     onApps: () -> Unit,
     onSettings: () -> Unit,
 ) {
+    var pendingGroupMoveUndo by remember { mutableStateOf<LauncherHomeAppGroupUndo?>(null) }
+    var groupMoveUndoInProgress by remember { mutableStateOf(false) }
+    var groupMoveUndoFailure by remember { mutableStateOf<String?>(null) }
 
     val groupMoveWithUndo: LauncherHomeAppGroupMoveRequest = {
             sourcePageId,
