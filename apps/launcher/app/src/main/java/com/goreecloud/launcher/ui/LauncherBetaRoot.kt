@@ -54,6 +54,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -88,6 +89,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -2715,26 +2717,24 @@ private fun HomeAppGroupMoveDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("launcher-home-group-app-" + key)
-                            .clickable {
-                                selectedKeys = if (checked) {
-                                    selectedKeys - key
-                                } else {
-                                    selectedKeys + key
-                                }
-                            }
+                            .toggleable(
+                                value = checked,
+                                role = Role.Checkbox,
+                                onValueChange = { selected ->
+                                    selectedKeys = if (selected) {
+                                        selectedKeys + key
+                                    } else {
+                                        selectedKeys - key
+                                    }
+                                },
+                            )
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
                         Checkbox(
                             checked = checked,
-                            onCheckedChange = { selected ->
-                                selectedKeys = if (selected) {
-                                    selectedKeys + key
-                                } else {
-                                    selectedKeys - key
-                                }
-                            },
+                            onCheckedChange = null,
                         )
                         HomeEditorPreviewIcon(app)
                         Column(Modifier.weight(1f)) {
@@ -2819,7 +2819,12 @@ private fun HomeAppGroupMoveDialog(
                                     .height(48.dp)
                                     .testTag(
                                         "launcher-home-group-cell-" + cellX + "-" + cellY
-                                    ),
+                                    )
+                                    .semantics {
+                                        contentDescription =
+                                            "Anchor column " + (cellX + 1) +
+                                                ", row " + (cellY + 1)
+                                    },
                                 shape = RoundedCornerShape(GlazeMetrics.radiusSmall),
                                 color = if (canChooseDestination) {
                                     MaterialTheme.colorScheme.surfaceVariant
