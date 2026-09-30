@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — group-edit feedback and onboarding refinement
+
+**Change type:** Workspace-editing UX; fail-closed feedback; onboarding continuity; Development candidate.
+
+The stacked Launcher candidate now explains group-move outcomes according to the authoritative mutation result instead of collapsing every rejection into one generic message. Successful moves report the number of apps moved. Stale workspace snapshots tell the user that Home changed while editing; changed or missing selections require reopening **Move apps**; missing pages require choosing a current page; primary-HOME protection is stated explicitly; collision/out-of-bounds validation asks for another free anchor; storage-unavailable states remain fail closed; and unexpected outcomes confirm that the current Home layout was preserved.
+
+The startup wizard and replayable Home hint now also teach the visible bounded group-edit path: on an unlocked secondary Home page, **Move apps** selects two or more saved apps, keeps their relative arrangement, and moves them to an exact secondary-page anchor while unsafe anchors remain disabled.
+
+No new permission, network path, telemetry, credential, persistence authority, or background service is introduced.
+
+**Acceptance boundary:** this is stacked Development source above the active group-edit candidate. Fresh exact-head build/unit/lint/schema/instrumentation-compilation and Android 16 onboarding/runtime evidence remain required. Primary-HOME groups, mixed item types, drag-box/lasso selection, durable undo/redo, process-death-safe edit history, representative-device accessibility, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — Room 3.0.3 transaction regression correction
 
 **Change type:** Persistence reliability; dependency correction; Android runtime test isolation; Development candidate.
