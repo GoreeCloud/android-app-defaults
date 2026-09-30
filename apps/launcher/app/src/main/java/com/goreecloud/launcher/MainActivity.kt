@@ -1072,8 +1072,6 @@ class MainActivity : ComponentActivity() {
                                                 rows = launcherPreferences.homeRows,
                                                 cellX = cellX,
                                                 cellY = cellY,
-                                                expectedSourcePlacements =
-                                                    expectedSourcePlacements,
                                             )
                                         if (result !is WorkspaceFolderMutationResult.Moved) {
                                             Toast.makeText(
@@ -1226,6 +1224,8 @@ class MainActivity : ComponentActivity() {
                                                 rows = launcherPreferences.homeRows,
                                                 cellX = cellX,
                                                 cellY = cellY,
+                                                expectedSourcePlacements =
+                                                    expectedSourcePlacements,
                                             )
                                         if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
                                             selectedHomePageId = targetPageId
