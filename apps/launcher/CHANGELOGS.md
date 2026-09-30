@@ -16,7 +16,9 @@ The undo token is in-memory only, contains app identities plus page/anchor geome
 
 The Edit Home group-move anchor grid now announces both the exact one-based column/row and whether each anchor is currently available or unavailable. This keeps disabled collision, bounds, stale-geometry, and unchanged-position choices understandable to screen-reader users instead of exposing coordinates without state.
 
-Focused JVM coverage locks the spoken coordinate/state contract. No permission, network path, telemetry, credential, or persistence authority changes.
+The group selector also reports the live selection count as **N of M apps selected** through a polite assistive-technology live region, and the **Destination page** / **Destination anchor** labels are exposed as semantic headings for faster structured navigation. Existing app-selection rows retain checkbox role/state semantics.
+
+Focused JVM coverage locks the spoken anchor coordinate/state contract and selection-summary wording. No permission, network path, telemetry, credential, or persistence authority changes.
 
 **Acceptance boundary:** this is a Development accessibility refinement stacked on the visible group-edit candidate. Exact-head CI and Android runtime evidence remain required, and representative TalkBack/Switch Access, large-text, landscape/foldable, and physical-device acceptance remain separate gates.
 
