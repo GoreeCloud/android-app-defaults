@@ -596,13 +596,14 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
             dockKeys = emptyList(),
         )
         promoteRoomAuthority(authorityRepository)
+        val mutationRepository = WorkspacePagedRoomMutationRepository(
+            authorityRepository = authorityRepository,
+            workspaceDaoProvider = { database.workspaceDao() },
+        )
         val mover = WorkspaceHomeItemPageMover(
             authorityRepository = authorityRepository,
             workspaceDaoProvider = { database.workspaceDao() },
-            mutationRepository = WorkspacePagedRoomMutationRepository(
-                authorityRepository = authorityRepository,
-                workspaceDaoProvider = { database.workspaceDao() },
-            ),
+            mutationRepository = mutationRepository,
         )
         val grid = WorkspaceGridPlacement.Grid(columns = 4, rows = 5)
 
@@ -702,6 +703,17 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
         assertEquals(2, target.getValue(APP_THREE).cellX)
         assertEquals(3, target.getValue(APP_THREE).cellY)
 
+        assertEquals(
+            WorkspacePagedRoomMutationResult.StoredWorkspaceChanged,
+            mutationRepository.moveHomeItems(
+                grid = grid,
+                itemIds = listOf("native:item:two", "native:item:three"),
+                sourcePageId = "home:1",
+                targetPageId = "home:2",
+                targetCellX = 1,
+                targetCellY = 2,
+            ),
+        )
         assertEquals(
             WorkspacePagedRoomMutationResult.PrimaryPageProtected,
             mover.moveAppGroupToPageCell(
