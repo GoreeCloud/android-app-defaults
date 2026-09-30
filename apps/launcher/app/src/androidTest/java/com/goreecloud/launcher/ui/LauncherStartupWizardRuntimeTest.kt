@@ -103,7 +103,7 @@ class LauncherStartupWizardRuntimeTest {
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Long-press an app in Apps, keep holding, and drag it to the exact primary Home cell or Dock position you want. On Home, keep holding a saved app at a left or right page edge briefly to switch pages, then release over the exact target cell. Long-press empty Home space for Edit Home; Launcher Settings is available there and from the gear in Apps.",
+            "Long-press an app in Apps, keep holding, and drag it to the exact primary Home cell or Dock position you want. On Home, keep holding a saved app at a left or right page edge briefly to switch pages, then release over the exact target cell. Long-press empty Home space for Edit Home; on an unlocked secondary page, Move apps can place two or more saved apps together at an exact anchor. Launcher Settings is available from Edit Home and the gear in Apps.",
         )
             .performScrollTo()
             .assertIsDisplayed()
@@ -147,6 +147,9 @@ class LauncherStartupWizardRuntimeTest {
         ).assertIsDisplayed()
         composeRule.onNodeWithText(
             "Folders: long-press a Home folder to move it to a free cell or adjacent page edge; use Add apps at the end of the grid and swipe larger opened folders between pages.",
+        ).assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "Edit Home: on an unlocked secondary page, use Move apps to select two or more saved apps, choose a secondary destination page, and pick an exact anchor. Unsafe anchors are disabled.",
         ).assertIsDisplayed()
     }
 
