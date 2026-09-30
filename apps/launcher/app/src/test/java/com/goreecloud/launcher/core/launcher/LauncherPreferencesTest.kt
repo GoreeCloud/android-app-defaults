@@ -368,7 +368,7 @@ class LauncherPreferencesTest {
     }
 
     @Test
-    fun universalSearchHomeModeStorageDecodingFailsSafeToPermanent() {
+    fun universalSearchHomeModeStorageDecodingFailsSafeToSwipeDownOnly() {
         assertEquals(
             LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
             LauncherUniversalSearchHomeMode.fromStorage("swipe_down_only"),
@@ -379,10 +379,6 @@ class LauncherPreferencesTest {
         )
         assertEquals(
             LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
-            LauncherUniversalSearchHomeMode.fromStorage(null),
-        )
-        assertEquals(
-            LauncherUniversalSearchHomeMode.PERMANENT,
             LauncherUniversalSearchHomeMode.fromStorage(null),
         )
     }
