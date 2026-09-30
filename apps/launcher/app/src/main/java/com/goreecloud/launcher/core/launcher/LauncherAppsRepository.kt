@@ -59,7 +59,7 @@ internal fun launcherInventoryRefreshScope(
     -> LauncherInventoryRefreshScope.FULL
 }
 
-internal enum class LauncherDrawerProfileKind(
+enum class LauncherDrawerProfileKind(
     val displayName: String,
 ) {
     USER("User Apps"),
