@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — group-edit guidance and accessibility semantics
+
+**Change type:** Onboarding maintenance; accessibility; workspace editing guidance; Development candidate.
+
+The first-use wizard and replayable Launcher hint now teach the new secondary-Home **Move apps** workflow: select at least two positioned apps in Edit Home, choose a secondary destination page, then choose the group’s top-left anchor cell. The guidance explicitly preserves the current boundary that primary Home is not yet part of group movement and that invalid or stale destinations fail closed.
+
+The group-move dialog now exposes **Apps**, **Destination page**, and **Destination anchor** as navigable semantic sections. The live selection count uses a polite accessibility live region with an explicit “N of M apps selected” state, and every 48 dp anchor exposes both its row/column description and whether that destination is currently available. Android 16 runtime coverage reads the selection and anchor state descriptions directly while exercising the atomic group move.
+
+No permission, network, telemetry, credential, storage authority, or workspace mutation rule changes in this tranche.
+
+**Acceptance boundary:** this is stacked Development source. Representative-device TalkBack/Switch Access traversal, large/extra-large text, landscape/tablet/foldable behavior, one-handed ergonomics, and Human Visual Excellence remain separate acceptance gates.
+
 ## September 30, 2026 — Room 3.0.3 transaction regression correction
 
 **Change type:** Persistence reliability; dependency correction; Android runtime test isolation; Development candidate.
