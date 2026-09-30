@@ -378,7 +378,8 @@ fun LauncherBetaRoot(
     homePages: List<WorkspaceRenderedHomePage>,
     onMoveFolderToPage: (LauncherFolder, String) -> Unit,
     onMoveFolderToPageCell: (LauncherFolder, String, Int, Int) -> Unit,
-    onCreateFolder: (String, Boolean, LauncherActivityInfo?) -> Unit,
+    onCreateFolder:
+        (String, Boolean, LauncherActivityInfo?, LauncherDrawerProfileKind) -> Unit,
     onRenameFolder: (String, String) -> Unit,
     onDeleteFolder: (LauncherFolder) -> Unit,
     onAddAppToFolder: (String, LauncherActivityInfo) -> Unit,
@@ -490,11 +491,26 @@ fun LauncherBetaRoot(
     var folderAppPickerId by rememberSaveable { mutableStateOf<String?>(null) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
     var folderManagerAddToHome by rememberSaveable { mutableStateOf(false) }
+    var folderManagerProfileName by rememberSaveable {
+        mutableStateOf(LauncherDrawerProfileKind.USER.name)
+    }
+    val folderManagerProfileKind = runCatching {
+        LauncherDrawerProfileKind.valueOf(folderManagerProfileName)
+    }.getOrDefault(LauncherDrawerProfileKind.USER)
     var folderAssignmentAppKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val allAppsByKey = remember(apps) {
+        apps.associateBy { it.workspaceKey() }
+    }
     val rootAppsByKey = remember(apps) {
         val personalUser = Process.myUserHandle()
         apps.asSequence()
             .filter { it.user == personalUser }
+            .associateBy { it.workspaceKey() }
+    }
+    val workAppsByKey = remember(apps) {
+        val personalUser = Process.myUserHandle()
+        apps.asSequence()
+            .filter { it.user != personalUser }
             .associateBy { it.workspaceKey() }
     }
     val homeFolderIds = remember(homePages) {
