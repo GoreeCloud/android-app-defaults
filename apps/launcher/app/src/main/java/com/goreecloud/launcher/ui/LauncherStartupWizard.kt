@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -362,14 +363,18 @@ fun LauncherHomeHintCard(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.widthIn(max = 620.dp),
+        modifier = modifier
+            .widthIn(max = 620.dp)
+            .heightIn(max = 520.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 12.dp,
     ) {
         Column(
-            modifier = Modifier.padding(GlazeMetrics.space3),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(GlazeMetrics.space3),
             verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
         ) {
             Text(
