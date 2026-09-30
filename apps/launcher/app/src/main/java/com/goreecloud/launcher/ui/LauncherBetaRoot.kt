@@ -2656,10 +2656,9 @@ internal fun canMoveHomeAppGroup(
                     app.cellY != null &&
                     app.appKey in availableAppKeys
             }
-            .map { it.appKey }
-            .distinct()
-            .take(2)
-            .count() == 2
+            .groupingBy { it.appKey }
+            .eachCount()
+            .count { (_, count) -> count == 1 } >= 2
 
 internal fun homeAppGroupAnchorAvailable(
     sourcePage: WorkspaceRenderedHomePage,
@@ -2766,8 +2765,10 @@ private fun HomeAppGroupMoveDialog(
     val sourceApps = remember(sourcePage, appsByKey) {
         sourcePage.appPlacements
             .filter { it.cellX != null && it.cellY != null }
-            .mapNotNull { placement ->
-                appsByKey[placement.appKey]?.let { app -> placement to app }
+            .groupBy { it.appKey }
+            .mapNotNull { (appKey, placements) ->
+                val placement = placements.singleOrNull() ?: return@mapNotNull null
+                appsByKey[appKey]?.let { app -> placement to app }
             }
     }
     val targetPages = remember(pages) {
@@ -2783,8 +2784,11 @@ private fun HomeAppGroupMoveDialog(
             } ?: targetPages.firstOrNull()?.pageId.orEmpty()
         )
     }
-    val selectedAppKeys = remember(sourcePage.appKeys, selectedKeys) {
-        sourcePage.appKeys.filter { it in selectedKeys }
+    val selectableAppKeys = remember(sourceApps) {
+        sourceApps.map { (placement, _) -> placement.appKey }
+    }
+    val selectedAppKeys = remember(selectableAppKeys, selectedKeys) {
+        selectableAppKeys.filter { it in selectedKeys }
     }
     val canChooseDestination = selectedAppKeys.size >= 2 && targetPageId.isNotBlank()
 
@@ -2805,6 +2809,33 @@ private fun HomeAppGroupMoveDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        selectedAppKeys.size.toString() + " selected",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row {
+                        TextButton(
+                            onClick = { selectedKeys = selectableAppKeys.toSet() },
+                            enabled = selectedAppKeys.size < selectableAppKeys.size,
+                            modifier = Modifier.testTag("launcher-home-group-select-all"),
+                        ) {
+                            Text("Select all")
+                        }
+                        TextButton(
+                            onClick = { selectedKeys = emptySet() },
+                            enabled = selectedKeys.isNotEmpty(),
+                            modifier = Modifier.testTag("launcher-home-group-clear"),
+                        ) {
+                            Text("Clear")
+                        }
+                    }
+                }
 
                 sourceApps.forEach { (placement, app) ->
                     val key = placement.appKey
