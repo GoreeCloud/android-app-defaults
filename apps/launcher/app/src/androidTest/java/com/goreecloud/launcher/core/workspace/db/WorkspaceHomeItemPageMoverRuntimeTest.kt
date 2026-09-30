@@ -589,6 +589,78 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
 
 
     @Test
+    fun primaryHomeAppGroupRepositionPreservesRanksAndRejectsCrossBoundary() = runBlocking {
+        val authorityRepository = WorkspaceRepository(openDataStore())
+        authorityRepository.ensureDefaults(
+            favoriteKeys = listOf(APP_ONE, APP_TWO, APP_THREE),
+            dockKeys = emptyList(),
+        )
+        promoteRoomAuthority(authorityRepository)
+
+        val runtime = WorkspaceProductionRuntimeCoordinator(
+            authorityRepository = authorityRepository,
+            workspaceDaoProvider = { database.workspaceDao() },
+        )
+        val grid = WorkspaceGridPlacement.Grid(columns = 4, rows = 5)
+
+        assertEquals(
+            WorkspacePagedRoomMutationResult.InvalidWorkspace,
+            runtime.moveHomeAppGroupToPageCell(
+                sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                appKeys = listOf(APP_ONE, APP_TWO),
+                targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                columns = grid.columns,
+                rows = grid.rows,
+                cellX = 1,
+                cellY = 0,
+            ),
+        )
+
+        val moved = runtime.moveHomeAppGroupToPageCell(
+            sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            appKeys = listOf(APP_ONE, APP_TWO),
+            targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            columns = grid.columns,
+            rows = grid.rows,
+            cellX = 0,
+            cellY = 2,
+        )
+        assertTrue(moved is WorkspacePagedRoomMutationResult.UpdatedItems)
+
+        val primary = database.workspaceDao()
+            .readItems(listOf(WorkspaceLegacyImportMapper.HOME_PAGE_ID))
+            .sortedBy { it.rank }
+        assertEquals(listOf(APP_ONE, APP_TWO, APP_THREE), primary.map { it.appKey })
+        val byKey = primary.associateBy { it.appKey }
+        assertEquals(0, byKey.getValue(APP_ONE).cellX)
+        assertEquals(2, byKey.getValue(APP_ONE).cellY)
+        assertEquals(1, byKey.getValue(APP_TWO).cellX)
+        assertEquals(2, byKey.getValue(APP_TWO).cellY)
+        assertEquals(2, byKey.getValue(APP_THREE).cellX)
+        assertEquals(0, byKey.getValue(APP_THREE).cellY)
+
+        assertEquals(
+            WorkspacePagedRoomMutationResult.PrimaryPageProtected,
+            runtime.moveHomeAppGroupToPageCell(
+                sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                appKeys = listOf(APP_ONE, APP_TWO),
+                targetPageId = "home:1",
+                columns = grid.columns,
+                rows = grid.rows,
+                cellX = 0,
+                cellY = 0,
+            ),
+        )
+        assertEquals(
+            WorkspacePostCutoverHealthResult.Healthy,
+            WorkspacePostCutoverHealthEvaluator(
+                repository = authorityRepository,
+                workspaceDaoProvider = { database.workspaceDao() },
+            ).evaluate(),
+        )
+    }
+
+    @Test
     fun appGroupMoveIsAtomicPreservesRelativeGeometryAndRejectsCollision() = runBlocking {
         val authorityRepository = WorkspaceRepository(openDataStore())
         authorityRepository.ensureDefaults(
