@@ -31,6 +31,11 @@ object LauncherFolderPolicy {
             ?.replace(Regex("\\s+"), " ")
             ?.take(MAX_NAME_LENGTH)
             ?.takeIf { it.isNotBlank() }
+
+    fun canContain(
+        folderProfileKind: LauncherDrawerProfileKind,
+        appProfileKind: LauncherDrawerProfileKind,
+    ): Boolean = folderProfileKind == appProfileKind
 }
 
 object LauncherFolderCodec {
@@ -159,13 +164,20 @@ class LauncherFolderRepository(context: Context) {
         return changed
     }
 
-    suspend fun addApp(folderId: String, appKey: String): Boolean {
+    suspend fun addApp(
+        folderId: String,
+        appKey: String,
+        appProfileKind: LauncherDrawerProfileKind,
+    ): Boolean {
         if (appKey.isBlank()) return false
         var changed = false
         dataStore.edit { values ->
             val current = LauncherFolderCodec.decode(values[foldersKey])
             val updated = current.map { folder ->
                 if (folder.id != folderId) return@map folder
+                if (!LauncherFolderPolicy.canContain(folder.profileKind, appProfileKind)) {
+                    return@map folder
+                }
                 if (appKey in folder.appKeys) {
                     changed = true
                     return@map folder
