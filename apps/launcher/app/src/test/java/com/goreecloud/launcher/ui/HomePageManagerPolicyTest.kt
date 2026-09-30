@@ -742,6 +742,17 @@ class HomePageManagerPolicyTest {
             ),
         )
 
+        assertFalse(
+            homeAppGroupAnchorAvailable(
+                sourcePage = page,
+                targetPage = page,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 0,
+                targetCellY = 0,
+            ),
+        )
         assertTrue(
             homeAppGroupAnchorAvailable(
                 sourcePage = page,
