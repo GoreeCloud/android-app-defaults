@@ -159,6 +159,16 @@ jobs:
           disable-animations: true
           script: cd apps/launcher && gradle --no-daemon connectedDebugAndroidTest
 
+      - name: Upload Launcher Android test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-android16-test-reports
+          path: |
+            apps/launcher/app/build/reports/androidTests/connected/**
+            apps/launcher/app/build/outputs/androidTest-results/connected/**
+          if-no-files-found: warn
+
   keyboard:
     name: Keyboard validation, unit tests, and build
     runs-on: ubuntu-24.04
