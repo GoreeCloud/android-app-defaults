@@ -5363,7 +5363,7 @@ private fun AppDrawerSurface(
         }
         val profileFolders = folders.filter { folder -> folder.profileKind == selectedPage.kind }
         if (drawerQuery.isBlank()) {
-            matchingApps + profileFolders.size
+            matchingApps
         } else {
             matchingApps + profileFolders.count { folder ->
                 LauncherLocalAppSearch.matches(
