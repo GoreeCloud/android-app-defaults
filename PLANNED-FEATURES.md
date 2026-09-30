@@ -126,6 +126,10 @@ The current dedicated Since Compose theme is an application-local presentation m
 
 - Accessibility and rendered visual acceptance.
 - Representative-device functional, performance, battery, lifecycle, and recovery evidence.
+- Development distribution: source plumbing now supports a protected external persistent signer,
+  monotonically increasing owner `versionCode` values, and CI package/signature provenance. Still
+  required are approved protected-key provisioning, a trusted key-bearing distribution path, and
+  representative-device update-in-place verification without uninstall/data loss.
 - Dependency/security review, signing, artifact provenance, rollback, complete applicable platform-system assessment, Release Candidate gates, production readiness, and Stable qualification.
 
 ## Other Android App Defaults applications
