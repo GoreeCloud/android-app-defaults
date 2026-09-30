@@ -721,6 +721,39 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
         assertEquals(2, target.getValue(APP_THREE).cellX)
         assertEquals(3, target.getValue(APP_THREE).cellY)
 
+        val expectedCurrentGroup = listOf(
+            WorkspacePagedRoomMutationResult.UpdatedItem(
+                itemId = "native:item:two",
+                pageId = "home:2",
+                cellX = 1,
+                cellY = 2,
+                spanX = 1,
+                spanY = 1,
+            ),
+            WorkspacePagedRoomMutationResult.UpdatedItem(
+                itemId = "native:item:three",
+                pageId = "home:2",
+                cellX = 2,
+                cellY = 3,
+                spanX = 1,
+                spanY = 1,
+            ),
+        )
+        assertEquals(
+            WorkspacePagedRoomMutationResult.StoredWorkspaceChanged,
+            mover.moveAppGroupToPageCell(
+                sourcePageId = "home:2",
+                appKeys = listOf(APP_TWO, APP_THREE),
+                targetPageId = "home:1",
+                grid = grid,
+                targetCellX = 0,
+                targetCellY = 0,
+                expectedSourceItems = expectedCurrentGroup.mapIndexed { index, item ->
+                    if (index == 0) item.copy(cellX = 0) else item
+                },
+            ),
+        )
+
         assertEquals(
             WorkspacePagedRoomMutationResult.StoredWorkspaceChanged,
             mutationRepository.moveHomeItems(
