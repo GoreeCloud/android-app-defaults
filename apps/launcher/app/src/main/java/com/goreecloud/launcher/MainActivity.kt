@@ -1289,7 +1289,6 @@ class MainActivity : ComponentActivity() {
                                                 Toast.LENGTH_SHORT,
                                             ).show()
                                         } else {
-                                            pendingHomeAppGroupUndo = null
                                             Toast.makeText(
                                                 this@MainActivity,
                                                 "Group move was not applied. Choose a free destination that keeps every app inside the Home grid.",
