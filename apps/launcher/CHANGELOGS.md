@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — bounded one-step app-group move undo
+
+**Change type:** Workspace recovery UX; atomic Room reversal; Development candidate.
+
+After a successful Edit Home application-group move, Launcher now retains one session-local undo token derived from the authoritative pre-move placements returned by the same Room transaction. **Undo move** reuses the existing snapshot-checked atomic group mover to restore the group to its exact prior secondary page and anchor. If the Home layout changed in the meantime, undo fails closed rather than overwriting newer edits, and the one-step token is cleared after the attempt.
+
+The undo token is in-memory only, contains app identities plus page/anchor geometry, and adds no new permission, network path, telemetry, credential, persistent journal, or second workspace authority. Android runtime coverage moves a two-app group, invokes **Undo move**, verifies both exact original cells are restored, and verifies the one-step action is consumed.
+
+**Acceptance boundary:** this is a bounded session-level recovery affordance, not durable multi-step undo/redo or process-death-safe edit history. Exact-head CI and Android runtime evidence remain required; primary-HOME group participation, mixed-item groups, durable history, representative-device accessibility/direct-manipulation, protected promotion, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — group-move anchor accessibility refinement
 
 **Change type:** Accessibility; workspace editing; Development candidate.
