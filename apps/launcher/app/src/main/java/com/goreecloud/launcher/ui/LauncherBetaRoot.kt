@@ -5209,6 +5209,7 @@ private fun AppDrawerSurface(
     val drawerSortOrder = runCatching {
         LauncherDrawerSortOrder.valueOf(drawerSortOrderName)
     }.getOrDefault(LauncherDrawerSortOrder.ALPHABETICAL)
+    var drawerSortMenuExpanded by rememberSaveable { mutableStateOf(false) }
     val primaryUser = remember { Process.myUserHandle() }
     val profilePages = remember(apps, primaryUser) {
         launcherDrawerProfilePages(
@@ -5422,46 +5423,56 @@ private fun AppDrawerSurface(
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Surface(
-                            onClick = {
-                                drawerSortOrderName = when (drawerSortOrder) {
-                                    LauncherDrawerSortOrder.ALPHABETICAL ->
-                                        LauncherDrawerSortOrder.REVERSE_ALPHABETICAL.name
-                                    LauncherDrawerSortOrder.REVERSE_ALPHABETICAL ->
-                                        LauncherDrawerSortOrder.ALPHABETICAL.name
-                                }
-                            },
-                            modifier = Modifier
-                                .size(48.dp)
-                                .testTag("launcher-drawer-sort-order")
-                                .semantics {
-                                    contentDescription = if (
-                                        drawerSortOrder == LauncherDrawerSortOrder.ALPHABETICAL
-                                    ) {
-                                        "Sort apps Z to A"
+                        Box {
+                            Surface(
+                                onClick = { drawerSortMenuExpanded = true },
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .testTag("launcher-drawer-sort-order")
+                                    .semantics {
+                                        contentDescription =
+                                            "Sort apps. Current: " + drawerSortOrder.displayName
+                                    },
+                                shape = CircleShape,
+                                color = Color.Transparent,
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    if (useDrawerHeaderIcons) {
+                                        LauncherDrawerSortIcon(
+                                            ascending =
+                                                drawerSortOrder ==
+                                                    LauncherDrawerSortOrder.ALPHABETICAL,
+                                            color = drawerSecondaryColor,
+                                        )
                                     } else {
-                                        "Sort apps A to Z"
+                                        Text(
+                                            drawerSortOrder.displayName,
+                                            color = drawerSecondaryColor,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            maxLines = 1,
+                                        )
                                     }
-                                },
-                            shape = CircleShape,
-                            color = Color.Transparent,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                if (useDrawerHeaderIcons) {
-                                    LauncherDrawerSortIcon(
-                                        ascending =
-                                            drawerSortOrder ==
-                                                LauncherDrawerSortOrder.ALPHABETICAL,
-                                        color = drawerSecondaryColor,
-                                    )
-                                } else {
-                                    Text(
-                                        if (
-                                            drawerSortOrder ==
-                                            LauncherDrawerSortOrder.ALPHABETICAL
-                                        ) "A–Z" else "Z–A",
-                                        color = drawerSecondaryColor,
-                                        style = MaterialTheme.typography.labelLarge,
+                                }
+                            }
+                            DropdownMenu(
+                                expanded = drawerSortMenuExpanded,
+                                onDismissRequest = { drawerSortMenuExpanded = false },
+                            ) {
+                                LauncherDrawerSortOrder.entries.forEach { option ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                if (option == drawerSortOrder) {
+                                                    "✓ " + option.displayName
+                                                } else {
+                                                    option.displayName
+                                                },
+                                            )
+                                        },
+                                        onClick = {
+                                            drawerSortOrderName = option.name
+                                            drawerSortMenuExpanded = false
+                                        },
                                     )
                                 }
                             }
