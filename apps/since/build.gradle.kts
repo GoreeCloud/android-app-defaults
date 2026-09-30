@@ -6,15 +6,77 @@ plugins {
     id("androidx.room3")
 }
 
+val explicitDevelopmentVersionCode =
+    providers.environmentVariable("GOREECLOUD_DEV_VERSION_CODE").orNull
+val githubRunNumber =
+    providers.environmentVariable("GITHUB_RUN_NUMBER").orNull
+
+val developmentVersionCode =
+    when {
+        !explicitDevelopmentVersionCode.isNullOrBlank() ->
+            explicitDevelopmentVersionCode.toIntOrNull()?.takeIf { it > 0 }
+                ?: throw GradleException("GOREECLOUD_DEV_VERSION_CODE must be a positive integer.")
+        !githubRunNumber.isNullOrBlank() ->
+            githubRunNumber.toIntOrNull()?.takeIf { it > 0 }
+                ?: throw GradleException("GITHUB_RUN_NUMBER must be a positive integer when present.")
+        else -> 1
+    }
+
+val developmentKeystorePath =
+    providers.environmentVariable("GOREECLOUD_DEV_KEYSTORE_PATH").orNull
+val developmentKeystorePassword =
+    providers.environmentVariable("GOREECLOUD_DEV_KEYSTORE_PASSWORD").orNull
+val developmentKeyAlias =
+    providers.environmentVariable("GOREECLOUD_DEV_KEY_ALIAS").orNull
+val developmentKeyPassword =
+    providers.environmentVariable("GOREECLOUD_DEV_KEY_PASSWORD").orNull
+val developmentSigningValues =
+    listOf(
+        developmentKeystorePath,
+        developmentKeystorePassword,
+        developmentKeyAlias,
+        developmentKeyPassword,
+    )
+val developmentSigningRequested = developmentSigningValues.any { !it.isNullOrBlank() }
+val developmentSigningConfigured = developmentSigningValues.all { !it.isNullOrBlank() }
+
+if (developmentSigningRequested && !developmentSigningConfigured) {
+    throw GradleException(
+        "Development signing configuration is incomplete. Provide all GOREECLOUD_DEV_KEYSTORE_* " +
+            "environment variables or none of them.",
+    )
+}
+
+if (developmentSigningConfigured && !file(developmentKeystorePath!!).isFile) {
+    throw GradleException("Configured Development keystore path does not point to a file.")
+}
+
+if (developmentSigningConfigured && explicitDevelopmentVersionCode.isNullOrBlank() && githubRunNumber.isNullOrBlank()) {
+    throw GradleException(
+        "A protected Development signing build requires GOREECLOUD_DEV_VERSION_CODE or GITHUB_RUN_NUMBER.",
+    )
+}
+
 android {
     namespace = "com.goreecloud.since"
     compileSdk = 36
+
+    signingConfigs {
+        if (developmentSigningConfigured) {
+            create("development") {
+                storeFile = file(developmentKeystorePath!!)
+                storePassword = developmentKeystorePassword!!
+                keyAlias = developmentKeyAlias!!
+                keyPassword = developmentKeyPassword!!
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.goreecloud.since"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
+        versionCode = developmentVersionCode
         versionName = "0.1.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
