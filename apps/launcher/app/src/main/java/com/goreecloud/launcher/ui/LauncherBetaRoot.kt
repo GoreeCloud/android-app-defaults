@@ -3941,6 +3941,15 @@ private fun LauncherBuiltInWidget(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.86f),
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.80f),
+                                ),
+                            ),
+                            RoundedCornerShape(28.dp),
+                        )
                         .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
                     verticalArrangement = Arrangement.SpaceBetween,
                 ) {
