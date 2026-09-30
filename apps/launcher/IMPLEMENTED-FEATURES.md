@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — stacked atomic Home app group-movement foundation
+
+Draft PR #80 implements the first backend tranche of Home group movement on top of the mandatory Android-app consolidation candidate. Two or more applications already placed on the same secondary Home page can be resolved as one group and moved atomically to an exact secondary-page anchor while preserving relative geometry and spans. The Room mutation validates the complete target geometry, rejects collisions/out-of-bounds/stale snapshots without partial writes, and deliberately blocks primary-HOME participation until its rank/compatibility behavior is separately reviewed. The production runtime coordinator now exposes this primitive for a later user-facing multi-select/group-edit experience, and Android runtime coverage exercises both rollback-on-collision and a successful cross-page group move.
+
+**Acceptance boundary:** this is Development source on Draft PR #80, stacked on PR #75. It does not claim visible group-selection controls, general group editing, primary-HOME group movement, durable undo/redo, process-death-safe edit history, representative-device acceptance, Release Candidate, Production, or Stable status.
+
 ## September 28, 2026 — accessible App Drawer page indicators
 
 Paged App Drawer layouts now keep the existing restrained **6/8 dp** visual dots inside explicit **48 dp** interaction surfaces. Each page target exposes a stable test tag plus a page-position accessibility label and selected state while preserving the compact Glaze visual treatment. Focused policy coverage locks the interaction floor separately from the visual-dot geometry.
