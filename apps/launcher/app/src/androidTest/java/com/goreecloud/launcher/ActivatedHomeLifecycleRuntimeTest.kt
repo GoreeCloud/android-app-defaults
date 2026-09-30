@@ -1496,6 +1496,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                         useUnmergedTree = true,
                     )
                     .assertCountEquals(0)
+                Unit
             } finally {
                 scenario.close()
             }
