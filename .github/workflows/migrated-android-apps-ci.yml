@@ -135,8 +135,6 @@ jobs:
     name: Launcher validation, unit tests, lint, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 35
-    env:
-      GOREECLOUD_DEV_VERSION_CODE: ${{ github.run_number }}
     defaults:
       run:
         working-directory: apps/launcher
@@ -160,6 +158,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.11.1'
+      - name: Set Launcher Development artifact identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_CODE=$((1000000 + GITHUB_RUN_NUMBER))
+          test "$VERSION_CODE" -gt 1439
+          echo "GOREECLOUD_DEV_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "EXPECTED_LAUNCHER_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
       - name: Validate Launcher privacy, identity, UI, motion, and Room boundaries
         shell: bash
         run: |
@@ -182,6 +188,59 @@ jobs:
             git status --short -- app/schemas
             exit 1
           fi
+      - name: Stage Launcher Development APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="$(find app/build/outputs/apk/debug -type f -name '*.apk' -print -quit)"
+          test -n "$APK"
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt -print | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
+          test -x "$AAPT"
+          test -x "$APKSIGNER"
+          BADGING="$("$AAPT" dump badging "$APK" | head -n 1)"
+          APPLICATION_ID="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+          VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionCode='\([^']*\)'.*/\1/p")"
+          VERSION_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p")"
+          test "$APPLICATION_ID" = "com.goreecloud.launcher.dev"
+          test "$VERSION_NAME" = "0.1.0-dev"
+          test "$VERSION_CODE" = "$EXPECTED_LAUNCHER_VERSION_CODE"
+          "$APKSIGNER" verify --print-certs "$APK" > "$RUNNER_TEMP/launcher-apksigner.txt"
+          SIGNER_CERT_SHA256="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/launcher-apksigner.txt" | head -n 1)"
+          test -n "$SIGNER_CERT_SHA256"
+          ARTIFACT_ROOT="artifact-launcher-android"
+          rm -rf "$ARTIFACT_ROOT"
+          mkdir -p "$ARTIFACT_ROOT"
+          cp "$APK" "$ARTIFACT_ROOT/GoreeCloud-Launcher-Dev.apk"
+          cat > "$ARTIFACT_ROOT/BUILD-PROVENANCE.txt" <<EOF
+          repository=GoreeCloud/android-app-defaults
+          component_path=apps/launcher
+          source_sha=$(git rev-parse HEAD)
+          application_id=$APPLICATION_ID
+          version_name=$VERSION_NAME
+          version_code=$VERSION_CODE
+          workflow=$GITHUB_WORKFLOW
+          run_id=$GITHUB_RUN_ID
+          run_number=$GITHUB_RUN_NUMBER
+          run_attempt=$GITHUB_RUN_ATTEMPT
+          signing_role=ci-debug-installability-only
+          signer_certificate_sha256=$SIGNER_CERT_SHA256
+          update_in_place_continuity=not-established
+          stable_release_authority=none
+          EOF
+          (
+            cd "$ARTIFACT_ROOT"
+            sha256sum ./*.apk > SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+      - name: Upload Launcher Development sidecar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-launcher-android-dev-sidecar
+          if-no-files-found: error
+          retention-days: 14
+          path: apps/launcher/artifact-launcher-android/*
 
   keyboard:
     needs: changes
