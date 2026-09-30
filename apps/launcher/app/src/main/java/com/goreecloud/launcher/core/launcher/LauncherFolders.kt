@@ -17,6 +17,7 @@ data class LauncherFolder(
     val id: String,
     val name: String,
     val appKeys: List<String>,
+    val profileKind: LauncherDrawerProfileKind = LauncherDrawerProfileKind.USER,
 )
 
 object LauncherFolderPolicy {
@@ -38,6 +39,7 @@ object LauncherFolderCodec {
             listOf(
                 encodePart(folder.id),
                 encodePart(folder.name),
+                folder.profileKind.name,
                 folder.appKeys
                     .distinct()
                     .take(LauncherFolderPolicy.MAX_APPS_PER_FOLDER)
@@ -51,22 +53,34 @@ object LauncherFolderCodec {
         return raw.lineSequence()
             .mapNotNull { line ->
                 val parts = line.split('\t')
-                if (parts.size != 3) return@mapNotNull null
+                if (parts.size != 3 && parts.size != 4) return@mapNotNull null
                 val id = decodePart(parts[0])?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
                 if (!seenIds.add(id)) return@mapNotNull null
                 val name = LauncherFolderPolicy.normalizeName(decodePart(parts[1]))
                     ?: return@mapNotNull null
-                val appKeys = if (parts[2].isBlank()) {
+                val profileKind = if (parts.size == 4) {
+                    runCatching { LauncherDrawerProfileKind.valueOf(parts[2]) }.getOrNull()
+                        ?: return@mapNotNull null
+                } else {
+                    LauncherDrawerProfileKind.USER
+                }
+                val appField = parts[if (parts.size == 4) 3 else 2]
+                val appKeys = if (appField.isBlank()) {
                     emptyList()
                 } else {
-                    parts[2]
+                    appField
                         .split(',')
                         .mapNotNull(::decodePart)
                         .filter { it.isNotBlank() }
                         .distinct()
                         .take(LauncherFolderPolicy.MAX_APPS_PER_FOLDER)
                 }
-                LauncherFolder(id = id, name = name, appKeys = appKeys)
+                LauncherFolder(
+                    id = id,
+                    name = name,
+                    appKeys = appKeys,
+                    profileKind = profileKind,
+                )
             }
             .take(LauncherFolderPolicy.MAX_FOLDER_COUNT)
             .toList()
@@ -94,7 +108,10 @@ class LauncherFolderRepository(context: Context) {
         .map { values -> LauncherFolderCodec.decode(values[foldersKey]) }
         .distinctUntilChanged()
 
-    suspend fun create(rawName: String): LauncherFolder? {
+    suspend fun create(
+        rawName: String,
+        profileKind: LauncherDrawerProfileKind = LauncherDrawerProfileKind.USER,
+    ): LauncherFolder? {
         val name = LauncherFolderPolicy.normalizeName(rawName) ?: return null
         var created: LauncherFolder? = null
         dataStore.edit { values ->
@@ -104,6 +121,7 @@ class LauncherFolderRepository(context: Context) {
                 id = UUID.randomUUID().toString(),
                 name = name,
                 appKeys = emptyList(),
+                profileKind = profileKind,
             )
             values[foldersKey] = LauncherFolderCodec.encode(current + folder)
             created = folder
