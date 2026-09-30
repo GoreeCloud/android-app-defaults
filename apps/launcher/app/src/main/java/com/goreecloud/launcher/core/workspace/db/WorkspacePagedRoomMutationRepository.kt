@@ -40,6 +40,7 @@ sealed interface WorkspacePagedRoomMutationResult {
     ) : WorkspacePagedRoomMutationResult
     data class UpdatedItems(
         val items: List<UpdatedItem>,
+        val previousItems: List<UpdatedItem> = emptyList(),
     ) : WorkspacePagedRoomMutationResult
     data class Failed(val failureType: String) : WorkspacePagedRoomMutationResult
 }
@@ -513,7 +514,17 @@ class WorkspacePagedRoomMutationRepository(
                         spanX = updated.spanX,
                         spanY = updated.spanY,
                     )
-                }
+                },
+                previousItems = selectedInStableOrder.map { selected ->
+                    WorkspacePagedRoomMutationResult.UpdatedItem(
+                        itemId = selected.itemId,
+                        pageId = selected.pageId,
+                        cellX = checkNotNull(selected.cellX),
+                        cellY = checkNotNull(selected.cellY),
+                        spanX = selected.spanX,
+                        spanY = selected.spanY,
+                    )
+                },
             )
         } catch (exception: CancellationException) {
             throw exception
