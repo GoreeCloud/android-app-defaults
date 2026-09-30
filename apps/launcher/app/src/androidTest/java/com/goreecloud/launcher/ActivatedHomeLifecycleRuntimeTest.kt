@@ -1621,12 +1621,21 @@ class ActivatedHomeLifecycleRuntimeTest {
                     )
                     .performClick()
 
-                composeRule
+                val anchorNode = composeRule
                     .onNodeWithTag(
                         "launcher-home-group-cell-2-2",
                         useUnmergedTree = true,
                     )
-                    .performClick()
+                anchorNode.assertHasClickAction()
+                val anchorBounds = anchorNode.fetchSemanticsNode().boundsInRoot
+                val density = context.resources.displayMetrics.density
+                check(anchorBounds.width >= 48f * density) {
+                    "Group anchor controls must preserve the 48 dp interaction width floor."
+                }
+                check(anchorBounds.height >= 48f * density) {
+                    "Group anchor controls must preserve the 48 dp interaction height floor."
+                }
+                anchorNode.performClick()
 
                 withTimeout(15_000) {
                     while (true) {
