@@ -203,6 +203,43 @@ internal data class LauncherAppDragData(
 internal typealias LauncherHomeAppGroupMoveRequest =
     (String, List<String>, String, Int, Int, (Boolean) -> Unit) -> Unit
 
+internal data class LauncherHomeAppGroupUndo(
+    val originalPageId: String,
+    val movedPageId: String,
+    val appKeys: List<String>,
+    val originalAnchorX: Int,
+    val originalAnchorY: Int,
+)
+
+internal fun homeAppGroupUndoForMove(
+    sourcePage: WorkspaceRenderedHomePage,
+    appKeys: List<String>,
+    movedPageId: String,
+): LauncherHomeAppGroupUndo? {
+    if (
+        sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        movedPageId.isBlank() ||
+        movedPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        appKeys.size < 2 ||
+        appKeys.distinct().size != appKeys.size
+    ) {
+        return null
+    }
+    val byKey = sourcePage.appPlacements
+        .filter { it.cellX != null && it.cellY != null }
+        .groupBy { it.appKey }
+    val selected = appKeys.map { key ->
+        byKey[key]?.singleOrNull() ?: return null
+    }
+    return LauncherHomeAppGroupUndo(
+        originalPageId = sourcePage.pageId,
+        movedPageId = movedPageId,
+        appKeys = appKeys.toList(),
+        originalAnchorX = selected.minOf { checkNotNull(it.cellX) },
+        originalAnchorY = selected.minOf { checkNotNull(it.cellY) },
+    )
+}
+
 internal fun launcherFolderGridColumns(
     availableWidthDp: Float,
     largeText: Boolean,
@@ -2358,6 +2395,9 @@ private fun HomeEditorPageOverview(
     var groupMoveSourcePageId by remember(visiblePages) { mutableStateOf<String?>(null) }
     val groupMoveSourcePage =
         visiblePages.firstOrNull { it.pageId == groupMoveSourcePageId }
+    var pendingGroupMoveUndo by remember { mutableStateOf<LauncherHomeAppGroupUndo?>(null) }
+    var groupMoveUndoInProgress by remember { mutableStateOf(false) }
+    var groupMoveUndoFailure by remember { mutableStateOf<String?>(null) }
     val availableAppKeys = remember(apps) { apps.mapTo(mutableSetOf()) { it.workspaceKey() } }
     val initialPageIndex = remember(visiblePages, initialPageId) {
         visiblePages.indexOfFirst { it.pageId == initialPageId }
@@ -2607,17 +2647,28 @@ private fun HomeEditorPageOverview(
             homeColumns = homeColumns,
             homeRows = homeRows,
             onMove = { appKeys, targetPageId, cellX, cellY, onResult ->
-                onMoveAppGroupToPageCell(
-                    groupMoveSourcePage.pageId,
-                    appKeys,
-                    targetPageId,
-                    cellX,
-                    cellY,
-                ) { applied ->
-                    if (applied) {
-                        groupMoveSourcePageId = null
+                val undo = homeAppGroupUndoForMove(
+                    sourcePage = groupMoveSourcePage,
+                    appKeys = appKeys,
+                    movedPageId = targetPageId,
+                )
+                if (undo == null) {
+                    onResult(false)
+                } else {
+                    onMoveAppGroupToPageCell(
+                        groupMoveSourcePage.pageId,
+                        appKeys,
+                        targetPageId,
+                        cellX,
+                        cellY,
+                    ) { applied ->
+                        if (applied) {
+                            pendingGroupMoveUndo = undo
+                            groupMoveUndoFailure = null
+                            groupMoveSourcePageId = null
+                        }
+                        onResult(applied)
                     }
-                    onResult(applied)
                 }
             },
             onDismiss = { groupMoveSourcePageId = null },
