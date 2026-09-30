@@ -2667,6 +2667,15 @@ internal fun canMoveHomeAppGroup(
             .eachCount()
             .count { (_, count) -> count == 1 } >= 2
 
+internal fun homeAppGroupAnchorContentDescription(
+    cellX: Int,
+    cellY: Int,
+    available: Boolean,
+): String =
+    "Anchor column " + (cellX + 1) +
+        ", row " + (cellY + 1) +
+        if (available) ", available" else ", unavailable"
+
 internal fun homeAppGroupAnchorAvailable(
     sourcePage: WorkspaceRenderedHomePage,
     targetPage: WorkspaceRenderedHomePage,
@@ -2979,8 +2988,11 @@ private fun HomeAppGroupMoveDialog(
                                     )
                                     .semantics {
                                         contentDescription =
-                                            "Anchor column " + (cellX + 1) +
-                                                ", row " + (cellY + 1)
+                                            homeAppGroupAnchorContentDescription(
+                                                cellX = cellX,
+                                                cellY = cellY,
+                                                available = anchorAvailable,
+                                            )
                                     },
                                 shape = RoundedCornerShape(GlazeMetrics.radiusSmall),
                                 color = if (anchorAvailable) {
