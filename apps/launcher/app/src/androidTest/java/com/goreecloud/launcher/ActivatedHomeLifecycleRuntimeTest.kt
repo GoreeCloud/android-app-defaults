@@ -1287,7 +1287,7 @@ class ActivatedHomeLifecycleRuntimeTest {
             val secondKey = secondApp.workspaceKey()
             val repository = WorkspaceRepository(context)
             repository.ensureDefaults(
-                favoriteKeys = listOf(firstAppKey, secondAppKey),
+                favoriteKeys = listOf(firstKey, secondKey),
                 dockKeys = emptyList(),
             )
 
@@ -1304,7 +1304,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                     workspaceDaoProvider = { dao },
                 )
                 val baseline = roomPlacement.replace(
-                    favoriteKeys = listOf(firstAppKey, secondAppKey),
+                    favoriteKeys = listOf(firstKey, secondKey),
                     dockKeys = emptyList(),
                     homeGrid = WorkspaceGridPlacement.Grid(
                         columns = preferences.homeColumns,
