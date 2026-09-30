@@ -1430,6 +1430,7 @@ fun ReadOnlyPagedHomeSurface(
                                 onOpenApps = onOpenWidgetApps,
                                 onOpenHomeEditor = onOpenHomeEditor,
                                 onOpenSettings = onOpenWidgetSettings,
+                                sourcePageId = page.pageId,
                                 onDropWidget = { candidate, dropPoint ->
                                     val edgeTarget = gridBounds?.let { bounds ->
                                         homePageEdgeDropTarget(

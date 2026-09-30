@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — live held-page widget handoff
+
+The current Development candidate extends widget direct manipulation from exact same-page movement and deterministic adjacent-edge release to pointer-held page switching. An unlocked non-edit Home widget starts a platform drag carrying its item identity, source page, and span; the Activity-level Home drag target survives source-page recomposition, changes only the visible page after the bounded edge hold, and routes release through the existing page-aware Room widget mover. Span-aware bounds checks reject destinations that cannot contain the complete widget, and stationary long-press release still opens widget management rather than becoming a move.
+
+**Acceptance boundary:** exact-head CI and managed Android 16 runtime evidence remain required. Representative-device AppWidgetHost/provider interactions, accessibility, performance/power, recovery, protected integration, Release Candidate, Production, and Stable acceptance are not established.
+
 ## September 30, 2026 — stacked atomic Home app group-movement foundation
 
 Draft PR #80 implements the first backend tranche of Home group movement on top of the mandatory Android-app consolidation candidate. Two or more applications already placed on the same secondary Home page can be resolved as one group and moved atomically to an exact secondary-page anchor while preserving relative geometry and spans. The Room mutation validates the complete target geometry, rejects collisions/out-of-bounds/stale snapshots without partial writes, and deliberately blocks primary-HOME participation until its rank/compatibility behavior is separately reviewed. The production runtime coordinator now exposes this primitive for a later user-facing multi-select/group-edit experience, and Android runtime coverage exercises both rollback-on-collision and a successful cross-page group move.

@@ -1847,6 +1847,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         }
     }
 
+
     private suspend fun establishExactPrimaryHomeFixture(
         context: android.content.Context,
         favoriteKeys: List<String>,
