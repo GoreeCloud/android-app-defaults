@@ -10,9 +10,13 @@ import java.util.Locale
  * Canonically equivalent Unicode labels must sort together, like the installed-app inventory.
  * Only presentation order changes: folder membership and persisted Home positions are untouched.
  */
-internal enum class LauncherDrawerSortOrder {
-    ALPHABETICAL,
-    REVERSE_ALPHABETICAL,
+internal enum class LauncherDrawerSortOrder(
+    val displayName: String,
+) {
+    ALPHABETICAL("A–Z"),
+    REVERSE_ALPHABETICAL("Z–A"),
+    MOST_RECENT("Most Recent"),
+    MOST_FREQUENT("Most Frequent"),
 }
 
 internal object LauncherDrawerSortingPolicy {
@@ -21,18 +25,61 @@ internal object LauncherDrawerSortingPolicy {
         label: (T) -> String,
         key: (T) -> String,
         sortOrder: LauncherDrawerSortOrder = LauncherDrawerSortOrder.ALPHABETICAL,
-    ): List<T> = entries.sortedWith { left, right ->
-        val leftLabel = Normalizer.normalize(label(left), Normalizer.Form.NFC).lowercase(Locale.ROOT)
-        val rightLabel = Normalizer.normalize(label(right), Normalizer.Form.NFC).lowercase(Locale.ROOT)
-        val labelOrder = leftLabel.compareTo(rightLabel)
-        val directedLabelOrder = when (sortOrder) {
-            LauncherDrawerSortOrder.ALPHABETICAL -> labelOrder
-            LauncherDrawerSortOrder.REVERSE_ALPHABETICAL -> -labelOrder
+        recentKeys: List<String> = emptyList(),
+        launchCounts: Map<String, Long> = emptyMap(),
+        usageKey: (T) -> String? = { null },
+    ): List<T> {
+        val recentRank = recentKeys
+            .asSequence()
+            .filter { it.isNotBlank() }
+            .distinct()
+            .withIndex()
+            .associate { indexed -> indexed.value to indexed.index }
+
+        fun normalizedLabel(entry: T): String =
+            Normalizer.normalize(label(entry), Normalizer.Form.NFC).lowercase(Locale.ROOT)
+
+        fun labelThenKey(left: T, right: T, reverse: Boolean = false): Int {
+            val labelOrder = normalizedLabel(left).compareTo(normalizedLabel(right))
+            val directed = if (reverse) -labelOrder else labelOrder
+            return if (directed != 0) directed else key(left).compareTo(key(right))
         }
-        if (directedLabelOrder != 0) directedLabelOrder else key(left).compareTo(key(right))
+
+        return entries.sortedWith { left, right ->
+            when (sortOrder) {
+                LauncherDrawerSortOrder.ALPHABETICAL ->
+                    labelThenKey(left, right)
+
+                LauncherDrawerSortOrder.REVERSE_ALPHABETICAL ->
+                    labelThenKey(left, right, reverse = true)
+
+                LauncherDrawerSortOrder.MOST_RECENT -> {
+                    val leftRank = usageKey(left)?.let(recentRank::get)
+                    val rightRank = usageKey(right)?.let(recentRank::get)
+                    when {
+                        leftRank != null && rightRank != null && leftRank != rightRank ->
+                            leftRank.compareTo(rightRank)
+                        leftRank != null && rightRank == null -> -1
+                        leftRank == null && rightRank != null -> 1
+                        else -> labelThenKey(left, right)
+                    }
+                }
+
+                LauncherDrawerSortOrder.MOST_FREQUENT -> {
+                    val leftCount = usageKey(left)?.let(launchCounts::get)?.takeIf { it > 0L }
+                    val rightCount = usageKey(right)?.let(launchCounts::get)?.takeIf { it > 0L }
+                    when {
+                        leftCount != null && rightCount != null && leftCount != rightCount ->
+                            rightCount.compareTo(leftCount)
+                        leftCount != null && rightCount == null -> -1
+                        leftCount == null && rightCount != null -> 1
+                        else -> labelThenKey(left, right)
+                    }
+                }
+            }
+        }
     }
 }
-
 
 /** Fixed cell geometry for a uniform app-drawer grid. */
 internal data class LauncherDrawerGridGeometry(
@@ -70,7 +117,6 @@ internal object LauncherDrawerGridPolicy {
         )
     }
 }
-
 
 /**
  * Drawer page indicators keep a restrained visual dot while preserving the Glaze interaction
