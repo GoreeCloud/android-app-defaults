@@ -38,6 +38,9 @@ sealed interface WorkspacePagedRoomMutationResult {
         val spanX: Int,
         val spanY: Int,
     ) : WorkspacePagedRoomMutationResult
+    data class UpdatedItems(
+        val items: List<UpdatedItem>,
+    ) : WorkspacePagedRoomMutationResult
     data class Failed(val failureType: String) : WorkspacePagedRoomMutationResult
 }
 
@@ -327,6 +330,187 @@ class WorkspacePagedRoomMutationRepository(
                 cellY = finalPlacement.cellY,
                 spanX = finalPlacement.spanX,
                 spanY = finalPlacement.spanY,
+            )
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            WorkspacePagedRoomMutationResult.Failed(exception::class.java.simpleName)
+        }
+    }
+
+
+    /**
+     * Atomically moves a rigid group of existing secondary-HOME items to one exact anchor cell.
+     *
+     * The selected items keep their relative offsets and spans. The complete HOME page/item
+     * snapshot is re-read and compared inside Room before any write is committed, so a concurrent
+     * workspace mutation fails closed instead of partially moving the group. Primary HOME remains
+     * protected in this first group-movement tranche.
+     */
+    suspend fun moveHomeItems(
+        grid: WorkspaceGridPlacement.Grid,
+        itemIds: List<String>,
+        targetPageId: String,
+        targetCellX: Int,
+        targetCellY: Int,
+    ): WorkspacePagedRoomMutationResult {
+        if (!isRoomAuthoritative()) return WorkspacePagedRoomMutationResult.Reserved
+        if (
+            itemIds.size < 2 ||
+            itemIds.any { it.isBlank() } ||
+            itemIds.distinct().size != itemIds.size ||
+            targetPageId.isBlank() ||
+            targetCellX < 0 ||
+            targetCellY < 0
+        ) {
+            return WorkspacePagedRoomMutationResult.InvalidWorkspace
+        }
+        if (targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+            return WorkspacePagedRoomMutationResult.PrimaryPageProtected
+        }
+        val dao = workspaceDaoOrNull() ?: return WorkspacePagedRoomMutationResult.Unavailable
+
+        return try {
+            if (WorkspaceCanonicalRoomPlacementReader.read(dao) == null) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+
+            val storedPages = dao.readPagesByContainer(WorkspaceContainerType.HOME)
+            if (storedPages.none { it.pageId == targetPageId }) {
+                return WorkspacePagedRoomMutationResult.PageNotFound
+            }
+            if (storedPages.firstOrNull()?.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+
+            val pageIds = storedPages.map { it.pageId }
+            val storedItems = dao.readItems(pageIds)
+            val storedById = storedItems.associateBy { it.itemId }
+            if (storedById.size != storedItems.size) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+            val selectedItems = itemIds.map { itemId ->
+                storedById[itemId] ?: return WorkspacePagedRoomMutationResult.ItemNotFound
+            }
+            if (selectedItems.any { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }) {
+                return WorkspacePagedRoomMutationResult.PrimaryPageProtected
+            }
+            val sourcePageId = selectedItems.map { it.pageId }.distinct().singleOrNull()
+                ?: return WorkspacePagedRoomMutationResult.InvalidWorkspace
+
+            val spatialItems = storedItems.filterNot {
+                it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+            }
+            if (spatialItems.any { it.cellX == null || it.cellY == null }) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+
+            val sourceMinX = selectedItems.minOf { checkNotNull(it.cellX) }
+            val sourceMinY = selectedItems.minOf { checkNotNull(it.cellY) }
+            val selectedIds = itemIds.toSet()
+            val targetPlacements = selectedItems.map { item ->
+                WorkspaceGridPlacement.Placement(
+                    itemId = item.itemId,
+                    cellX = targetCellX + checkNotNull(item.cellX) - sourceMinX,
+                    cellY = targetCellY + checkNotNull(item.cellY) - sourceMinY,
+                    spanX = item.spanX,
+                    spanY = item.spanY,
+                )
+            }
+            val targetOccupied = spatialItems
+                .filter { it.pageId == targetPageId && it.itemId !in selectedIds }
+                .map { item ->
+                    WorkspaceGridPlacement.Placement(
+                        itemId = item.itemId,
+                        cellX = checkNotNull(item.cellX),
+                        cellY = checkNotNull(item.cellY),
+                        spanX = item.spanX,
+                        spanY = item.spanY,
+                    )
+                }
+            if (
+                WorkspaceGridPlacement.validate(grid, targetOccupied + targetPlacements) !=
+                    WorkspaceGridPlacement.Validation.Valid
+            ) {
+                return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+
+            val selectedInStableOrder = selectedItems.sortedWith(
+                compareBy<WorkspaceItemEntity> { it.rank }.thenBy { it.itemId }
+            )
+            val targetRankById = if (sourcePageId == targetPageId) {
+                selectedInStableOrder.associate { it.itemId to it.rank }
+            } else {
+                val maxTargetRank = storedItems
+                    .asSequence()
+                    .filter { it.pageId == targetPageId && it.itemId !in selectedIds }
+                    .maxOfOrNull { it.rank }
+                    ?: -1
+                if (maxTargetRank > Int.MAX_VALUE - selectedInStableOrder.size) {
+                    return WorkspacePagedRoomMutationResult.Failed("TargetRankOverflow")
+                }
+                selectedInStableOrder.mapIndexed { index, item ->
+                    item.itemId to (maxTargetRank + index + 1)
+                }.toMap()
+            }
+            val targetPlacementById = targetPlacements.associateBy { it.itemId }
+            val updatedById = selectedItems.associate { item ->
+                val placement = checkNotNull(targetPlacementById[item.itemId])
+                item.itemId to item.copy(
+                    pageId = targetPageId,
+                    rank = checkNotNull(targetRankById[item.itemId]),
+                    cellX = placement.cellX,
+                    cellY = placement.cellY,
+                    spanX = placement.spanX,
+                    spanY = placement.spanY,
+                )
+            }
+            val updatedItems = storedItems.map { item -> updatedById[item.itemId] ?: item }
+
+            for (pageId in setOf(sourcePageId, targetPageId)) {
+                val placements = updatedItems
+                    .filter {
+                        it.pageId == pageId &&
+                            it.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                    }
+                    .map { item ->
+                        WorkspaceGridPlacement.Placement(
+                            itemId = item.itemId,
+                            cellX = checkNotNull(item.cellX),
+                            cellY = checkNotNull(item.cellY),
+                            spanX = item.spanX,
+                            spanY = item.spanY,
+                        )
+                    }
+                if (
+                    WorkspaceGridPlacement.validate(grid, placements) !=
+                        WorkspaceGridPlacement.Validation.Valid
+                ) {
+                    return WorkspacePagedRoomMutationResult.InvalidWorkspace
+                }
+            }
+
+            if (!dao.replaceHomeItemsIfSnapshotMatches(
+                    expectedPages = storedPages,
+                    expectedItems = storedItems,
+                    updatedItems = updatedItems,
+                )
+            ) {
+                return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+            }
+
+            WorkspacePagedRoomMutationResult.UpdatedItems(
+                items = selectedInStableOrder.map { selected ->
+                    val updated = checkNotNull(updatedById[selected.itemId])
+                    WorkspacePagedRoomMutationResult.UpdatedItem(
+                        itemId = updated.itemId,
+                        pageId = updated.pageId,
+                        cellX = checkNotNull(updated.cellX),
+                        cellY = checkNotNull(updated.cellY),
+                        spanX = updated.spanX,
+                        spanY = updated.spanY,
+                    )
+                }
             )
         } catch (exception: CancellationException) {
             throw exception
