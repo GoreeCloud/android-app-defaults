@@ -2677,15 +2677,41 @@ internal fun canMoveHomeAppGroup(
             .eachCount()
             .count { (_, count) -> count == 1 } >= 2
 
-internal fun homeAppGroupAnchorAvailable(
+internal data class HomeAppGroupAnchorPreflight(
+    val grid: WorkspaceGridPlacement.Grid,
+    val occupied: List<WorkspaceGridPlacement.Placement>,
+    val relativeGroup: List<WorkspaceGridPlacement.Placement>,
+    val sourceMinX: Int,
+    val sourceMinY: Int,
+    val samePage: Boolean,
+) {
+    fun isAvailable(
+        targetCellX: Int,
+        targetCellY: Int,
+    ): Boolean {
+        if (samePage && targetCellX == sourceMinX && targetCellY == sourceMinY) {
+            return false
+        }
+        val moved = relativeGroup.map { placement ->
+            placement.copy(
+                cellX = targetCellX + placement.cellX,
+                cellY = targetCellY + placement.cellY,
+            )
+        }
+        return WorkspaceGridPlacement.validate(
+            grid = grid,
+            placements = occupied + moved,
+        ) == WorkspaceGridPlacement.Validation.Valid
+    }
+}
+
+internal fun prepareHomeAppGroupAnchorPreflight(
     sourcePage: WorkspaceRenderedHomePage,
     targetPage: WorkspaceRenderedHomePage,
     selectedAppKeys: List<String>,
     columns: Int,
     rows: Int,
-    targetCellX: Int,
-    targetCellY: Int,
-): Boolean {
+): HomeAppGroupAnchorPreflight? {
     if (
         sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
         targetPage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
@@ -2693,33 +2719,26 @@ internal fun homeAppGroupAnchorAvailable(
         selectedAppKeys.size < 2 ||
         selectedAppKeys.distinct().size != selectedAppKeys.size
     ) {
-        return false
+        return null
     }
     val grid = runCatching {
         WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
-    }.getOrNull() ?: return false
+    }.getOrNull() ?: return null
 
     val sourceByKey = sourcePage.appPlacements
         .filter { it.cellX != null && it.cellY != null }
         .groupBy { it.appKey }
     val selected = selectedAppKeys.map { key ->
-        sourceByKey[key]?.singleOrNull() ?: return false
+        sourceByKey[key]?.singleOrNull() ?: return null
     }
     val sourceMinX = selected.minOf { checkNotNull(it.cellX) }
     val sourceMinY = selected.minOf { checkNotNull(it.cellY) }
-    if (
-        targetPage.pageId == sourcePage.pageId &&
-        targetCellX == sourceMinX &&
-        targetCellY == sourceMinY
-    ) {
-        return false
-    }
     val selectedKeySet = selectedAppKeys.toSet()
 
     val targetApps = targetPage.appPlacements.filterNot { app ->
         targetPage.pageId == sourcePage.pageId && app.appKey in selectedKeySet
     }
-    if (targetApps.any { it.cellX == null || it.cellY == null }) return false
+    if (targetApps.any { it.cellX == null || it.cellY == null }) return null
 
     val occupied = buildList {
         targetApps.forEach { app ->
@@ -2757,21 +2776,42 @@ internal fun homeAppGroupAnchorAvailable(
         }
     }
 
-    val moved = selected.map { app ->
+    val relativeGroup = selected.map { app ->
         WorkspaceGridPlacement.Placement(
             itemId = "moving-app:" + app.appKey,
-            cellX = targetCellX + checkNotNull(app.cellX) - sourceMinX,
-            cellY = targetCellY + checkNotNull(app.cellY) - sourceMinY,
+            cellX = checkNotNull(app.cellX) - sourceMinX,
+            cellY = checkNotNull(app.cellY) - sourceMinY,
             spanX = app.spanX,
             spanY = app.spanY,
         )
     }
 
-    return WorkspaceGridPlacement.validate(
+    return HomeAppGroupAnchorPreflight(
         grid = grid,
-        placements = occupied + moved,
-    ) == WorkspaceGridPlacement.Validation.Valid
+        occupied = occupied,
+        relativeGroup = relativeGroup,
+        sourceMinX = sourceMinX,
+        sourceMinY = sourceMinY,
+        samePage = targetPage.pageId == sourcePage.pageId,
+    )
 }
+
+internal fun homeAppGroupAnchorAvailable(
+    sourcePage: WorkspaceRenderedHomePage,
+    targetPage: WorkspaceRenderedHomePage,
+    selectedAppKeys: List<String>,
+    columns: Int,
+    rows: Int,
+    targetCellX: Int,
+    targetCellY: Int,
+): Boolean =
+    prepareHomeAppGroupAnchorPreflight(
+        sourcePage = sourcePage,
+        targetPage = targetPage,
+        selectedAppKeys = selectedAppKeys,
+        columns = columns,
+        rows = rows,
+    )?.isAvailable(targetCellX, targetCellY) == true
 
 @Composable
 private fun HomeAppGroupMoveDialog(
@@ -2815,6 +2855,26 @@ private fun HomeAppGroupMoveDialog(
         selectableAppKeys.filter { it in selectedKeys }
     }
     val canChooseDestination = selectedAppKeys.size >= 2 && targetPageId.isNotBlank()
+    val targetPage = remember(pages, targetPageId) {
+        pages.firstOrNull { it.pageId == targetPageId }
+    }
+    val anchorPreflight = remember(
+        sourcePage,
+        targetPage,
+        selectedAppKeys,
+        columns,
+        rows,
+    ) {
+        targetPage?.let { page ->
+            prepareHomeAppGroupAnchorPreflight(
+                sourcePage = sourcePage,
+                targetPage = page,
+                selectedAppKeys = selectedAppKeys,
+                columns = columns,
+                rows = rows,
+            )
+        }
+    }
     val anchorHorizontalScrollState = rememberScrollState()
     var moveInProgress by remember(sourcePage.pageId) { mutableStateOf(false) }
     var moveFailureMessage by remember(sourcePage.pageId) { mutableStateOf<String?>(null) }
@@ -3001,19 +3061,9 @@ private fun HomeAppGroupMoveDialog(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             repeat(columns) { cellX ->
-                            val targetPage = pages.firstOrNull { it.pageId == targetPageId }
                             val anchorAvailable =
                                 canChooseDestination &&
-                                    targetPage != null &&
-                                    homeAppGroupAnchorAvailable(
-                                        sourcePage = sourcePage,
-                                        targetPage = targetPage,
-                                        selectedAppKeys = selectedAppKeys,
-                                        columns = columns,
-                                        rows = rows,
-                                        targetCellX = cellX,
-                                        targetCellY = cellY,
-                                    )
+                                    anchorPreflight?.isAvailable(cellX, cellY) == true
                             Surface(
                                 onClick = {
                                     moveInProgress = true

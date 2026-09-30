@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — group-anchor preflight reuse
+
+**Change type:** Workspace-editor performance; allocation/recomposition reduction; Development candidate.
+
+The Edit Home group editor now prepares selected-group geometry and target-page occupancy once per selection, destination page, and grid configuration. Each visible anchor reuses that immutable preflight model instead of rebuilding source grouping, occupied app/folder/widget placement, and relative group offsets independently for every cell. On a supported 4–6 by 4–7 grid this removes repeated preparation work across as many as 42 anchor controls per recomposition.
+
+The existing fail-closed behavior is unchanged: primary Home, ambiguous identities, unresolved target app geometry, unsupported items, collisions, out-of-bounds placement, and unchanged same-page anchors remain rejected. Focused JVM coverage validates multiple anchor decisions against one prepared snapshot.
+
+**Acceptance boundary:** this is a Development performance refinement. Representative-device recomposition/frame-time/power measurements remain open.
+
 ## September 30, 2026 — group-move rejection recovery
 
 **Change type:** Workspace editing resilience; failure recovery; accessible feedback; Development candidate.
