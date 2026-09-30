@@ -2666,7 +2666,7 @@ private fun LauncherWeatherStatusChip(
         }
     }
 
-    val snapshot = weather
+    val snapshot = weather.takeIf { hasLocationPermission }
     val primaryLabel = when {
         !hasLocationPermission -> "Weather"
         loading -> "Weather"
