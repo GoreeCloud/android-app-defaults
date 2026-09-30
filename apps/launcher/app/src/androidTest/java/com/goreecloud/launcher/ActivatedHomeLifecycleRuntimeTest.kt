@@ -237,6 +237,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         var directlyAddedPageId: String? = null
 
         try {
+            preferencesRepository.setLayoutLocked(false)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first { !it.layoutLocked }
+            }
             val apps = withTimeout(10_000) {
                 LauncherAppsRepository(context).apps.first { candidates ->
                     candidates.any { it.componentName.packageName != context.packageName }
@@ -1059,6 +1063,8 @@ class ActivatedHomeLifecycleRuntimeTest {
         val roleManager = context.getSystemService(RoleManager::class.java)
         val alreadyDefaultHome =
             roleManager.isRoleAvailable(RoleManager.ROLE_HOME) && roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+        val preferencesRepository = LauncherPreferencesRepository(context)
+        val previousLayoutLocked = preferencesRepository.preferences.first().layoutLocked
 
         if (!alreadyDefaultHome) {
             runShellCommand(
@@ -1100,20 +1106,15 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
 
                 val dao = LauncherDatabaseProvider.get(context).workspaceDao()
-                val preferences = LauncherPreferencesRepository(context).preferences.first()
-                val roomPlacement = WorkspaceRoomPlacementRepository(
-                    authorityRepository = repository,
-                    workspaceDaoProvider = { dao },
-                )
-                val baseline = roomPlacement.replace(
+                val preferences = preferencesRepository.preferences.first()
+                establishExactPrimaryHomeFixture(
+                    context = context,
                     favoriteKeys = listOf(firstKey, secondKey),
-                    dockKeys = emptyList(),
-                    homeGrid = WorkspaceGridPlacement.Grid(
-                        columns = preferences.homeColumns,
-                        rows = preferences.homeRows,
+                    preferredHomeCells = mapOf(
+                        firstKey to (0 to 0),
+                        secondKey to (1 to 0),
                     ),
                 )
-                check(baseline is WorkspaceRoomWriteResult.Written)
 
                 val runtime = WorkspaceProductionRuntimeCoordinator(
                     authorityRepository = repository,
@@ -1233,6 +1234,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                 scenario.close()
             }
         } finally {
+            preferencesRepository.setLayoutLocked(previousLayoutLocked)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first {
+                    it.layoutLocked == previousLayoutLocked
+                }
+            }
             if (!alreadyDefaultHome) {
                 runShellCommand(
                     "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
@@ -1836,6 +1843,59 @@ class ActivatedHomeLifecycleRuntimeTest {
                 runShellCommand(
                     "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
                 )
+            }
+        }
+    }
+
+
+    private suspend fun establishExactPrimaryHomeFixture(
+        context: android.content.Context,
+        favoriteKeys: List<String>,
+        dockKeys: List<String> = emptyList(),
+        preferredHomeCells: Map<String, Pair<Int, Int>> = emptyMap(),
+    ) {
+        val dao = LauncherDatabaseProvider.get(context).workspaceDao()
+        val mapped = WorkspaceLegacyImportMapper.map(
+            favoriteKeys = favoriteKeys,
+            dockKeys = dockKeys,
+        )
+        val items = mapped.items.map { item ->
+            if (item.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+                item
+            } else {
+                val coordinate = item.appKey?.let(preferredHomeCells::get)
+                if (coordinate == null) {
+                    item
+                } else {
+                    item.copy(
+                        cellX = coordinate.first,
+                        cellY = coordinate.second,
+                    )
+                }
+            }
+        }
+
+        dao.replaceLegacySnapshot(
+            pages = mapped.pages,
+            items = items,
+        )
+
+        val expectedKeys = favoriteKeys.distinct()
+        val primary = dao
+            .readItems(listOf(WorkspaceLegacyImportMapper.HOME_PAGE_ID))
+            .sortedBy { it.rank }
+        check(primary.mapNotNull { it.appKey } == expectedKeys) {
+            "Runtime fixture failed to establish the exact primary Home app set."
+        }
+        check(primary.size == expectedKeys.size) {
+            "Runtime fixture left unexpected primary Home items."
+        }
+        preferredHomeCells.forEach { (appKey, expectedCell) ->
+            val item = checkNotNull(primary.singleOrNull { it.appKey == appKey }) {
+                "Runtime fixture did not place the requested app."
+            }
+            check(item.cellX == expectedCell.first && item.cellY == expectedCell.second) {
+                "Runtime fixture did not establish the requested app cell."
             }
         }
     }
