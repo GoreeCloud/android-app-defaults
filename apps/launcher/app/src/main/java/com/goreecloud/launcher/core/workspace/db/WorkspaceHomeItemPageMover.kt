@@ -292,7 +292,7 @@ class WorkspaceHomeItemPageMover(
             val candidates = spatialItems.filter {
                 it.pageId == sourcePageId &&
                     it.itemType == WorkspaceItemType.APP &&
-                    it.appKey in requestedKeys
+                    it.appKey?.let(requestedKeys::contains) == true
             }
             val candidatesByKey = candidates.groupBy { it.appKey }
             if (appKeys.any { candidatesByKey[it].isNullOrEmpty() }) {
