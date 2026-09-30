@@ -2804,7 +2804,7 @@ private fun HomeAppGroupMoveDialog(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         repeat(columns) { cellX ->
-                            OutlinedButton(
+                            Surface(
                                 onClick = {
                                     onMove(
                                         selectedAppKeys,
@@ -2816,16 +2816,27 @@ private fun HomeAppGroupMoveDialog(
                                 enabled = canChooseDestination,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .heightIn(min = 48.dp)
+                                    .height(48.dp)
                                     .testTag(
                                         "launcher-home-group-cell-" + cellX + "-" + cellY
                                     ),
-                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(GlazeMetrics.radiusSmall),
+                                color = if (canChooseDestination) {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
+                                },
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outlineVariant,
+                                ),
                             ) {
-                                Text(
-                                    (cellX + 1).toString() + "," + (cellY + 1),
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        (cellX + 1).toString() + "," + (cellY + 1),
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                }
                             }
                         }
                     }
