@@ -2692,18 +2692,18 @@ internal fun homeAppGroupAnchorAvailable(
     val sourceMinY = selected.minOf { checkNotNull(it.cellY) }
     val selectedKeySet = selectedAppKeys.toSet()
 
+    val targetApps = targetPage.appPlacements.filterNot { app ->
+        targetPage.pageId == sourcePage.pageId && app.appKey in selectedKeySet
+    }
+    if (targetApps.any { it.cellX == null || it.cellY == null }) return false
+
     val occupied = buildList {
-        targetPage.appPlacements.forEach { app ->
-            val cellX = app.cellX ?: return@forEach
-            val cellY = app.cellY ?: return@forEach
-            if (targetPage.pageId == sourcePage.pageId && app.appKey in selectedKeySet) {
-                return@forEach
-            }
+        targetApps.forEach { app ->
             add(
                 WorkspaceGridPlacement.Placement(
                     itemId = "app:" + app.appKey,
-                    cellX = cellX,
-                    cellY = cellY,
+                    cellX = checkNotNull(app.cellX),
+                    cellY = checkNotNull(app.cellY),
                     spanX = app.spanX,
                     spanY = app.spanY,
                 )
@@ -2917,7 +2917,7 @@ private fun HomeAppGroupMoveDialog(
                 )
                 Text(
                     if (canChooseDestination) {
-                        "Choose the top-left anchor cell. If any selected app would overlap another item or leave the grid, the move is rejected and the current layout is preserved."
+                        "Choose the top-left anchor cell. Known collisions and out-of-grid anchors are disabled; Room verifies the workspace again before committing."
                     } else {
                         "Select at least two apps before choosing a destination cell."
                     },
