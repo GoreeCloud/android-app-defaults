@@ -167,6 +167,45 @@ internal fun Modifier.homePageSwipeNavigation(
     }
 }
 
+internal fun Modifier.homeVerticalGestureNavigation(
+    enabled: Boolean,
+    onSwipeUp: () -> Unit,
+    onSwipeDown: () -> Unit,
+): Modifier {
+    if (!enabled) return this
+
+    return pointerInput(enabled, onSwipeUp, onSwipeDown) {
+        val minimumDistancePx = 44.dp.toPx()
+
+        awaitEachGesture {
+            val down = awaitFirstDown(
+                requireUnconsumed = false,
+                pass = PointerEventPass.Final,
+            )
+            var horizontalDistance = 0f
+            var verticalDistance = 0f
+
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Final)
+                val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                val delta = change.positionChange()
+                horizontalDistance += delta.x
+                verticalDistance += delta.y
+
+                if (!change.pressed) {
+                    if (
+                        abs(verticalDistance) >= minimumDistancePx &&
+                        abs(verticalDistance) > abs(horizontalDistance) * 1.20f
+                    ) {
+                        if (verticalDistance < 0f) onSwipeUp() else onSwipeDown()
+                    }
+                    break
+                }
+            }
+        }
+    }
+}
+
 internal fun Modifier.homeEditLongPress(
     enabled: Boolean,
     canStartAt: (Offset) -> Boolean = { true },
@@ -1058,6 +1097,8 @@ fun ReadOnlyPagedHomeSurface(
     onOpenWidgetEditor: () -> Unit,
     onOpenHomeEditor: () -> Unit,
     onOpenWidgetSettings: () -> Unit,
+    onSwipeUp: () -> Unit = {},
+    onSwipeDown: () -> Unit = {},
     dockApps: List<LauncherActivityInfo> = emptyList(),
     dockStyle: LauncherDockStyle = LauncherDockStyle.GLASS,
     pageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
@@ -1205,6 +1246,11 @@ fun ReadOnlyPagedHomeSurface(
         Modifier
             .fillMaxSize()
             .testTag("launcher-home-page-" + page.pageId)
+            .homeVerticalGestureNavigation(
+                enabled = true,
+                onSwipeUp = onSwipeUp,
+                onSwipeDown = onSwipeDown,
+            )
             .homeEditLongPress(
                 enabled = true,
                 canStartAt = { point ->
