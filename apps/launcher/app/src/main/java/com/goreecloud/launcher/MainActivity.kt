@@ -126,6 +126,7 @@ import com.goreecloud.launcher.ui.LauncherAppDragData
 import com.goreecloud.launcher.ui.LauncherAppDragOrigin
 import com.goreecloud.launcher.ui.LayoutLockHoldControl
 import com.goreecloud.launcher.ui.LauncherBetaRoot
+import com.goreecloud.launcher.ui.launcherGroupMoveFeedback
 import com.goreecloud.launcher.ui.LauncherIconAppearance
 import com.goreecloud.launcher.ui.LauncherHomeHintCard
 import com.goreecloud.launcher.ui.LauncherStartupWizard
@@ -1224,17 +1225,21 @@ class MainActivity : ComponentActivity() {
                                                 cellX = cellX,
                                                 cellY = cellY,
                                             )
-                                        if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
+                                        val applied =
+                                            result is WorkspacePagedRoomMutationResult.UpdatedItems
+                                        if (applied) {
                                             selectedHomePageId = targetPageId
-                                            Toast.makeText(
-                                                this@MainActivity,
-                                                "Moved " + result.items.size + " apps.",
-                                                Toast.LENGTH_SHORT,
-                                            ).show()
-                                            onResult(true)
-                                        } else {
-                                            onResult(false)
                                         }
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            launcherGroupMoveFeedback(result),
+                                            if (applied) {
+                                                Toast.LENGTH_SHORT
+                                            } else {
+                                                Toast.LENGTH_LONG
+                                            },
+                                        ).show()
+                                        onResult(applied)
                                     }
                                 }
                             },

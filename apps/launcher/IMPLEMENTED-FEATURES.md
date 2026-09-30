@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — authoritative group-move recovery messages
+
+The current Development candidate translates Room-authoritative app-group mutation outcomes into specific local recovery guidance while retaining #94's fail-closed in-dialog retry behavior. Successful moves report the moved-app count; rejected moves distinguish stale workspace state, changed selections, missing pages, Primary Home protection, invalid placement, and temporary storage unavailability.
+
+**Acceptance boundary:** this is local feedback only and does not change workspace mutation authority, add durable history, or promote Launcher beyond Development.
+
 ## September 30, 2026 — recoverable group-move submission
 
 The stacked Development candidate no longer dismisses the group editor before the atomic Room write returns. It preserves selected apps and destination choices after a rejected request, blocks duplicate input while the write is in flight, provides inline assertive failure feedback, and closes only after confirmed success. Android 16 runtime coverage verifies locked-layout rejection leaves both selection and persisted geometry unchanged, then verifies the retained group can be retried successfully after unlocking.
