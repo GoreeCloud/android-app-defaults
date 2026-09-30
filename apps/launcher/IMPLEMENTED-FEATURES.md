@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — group-edit onboarding and assistive semantics
+
+The stacked Development candidate updates both first-use guidance and replayable Home hints so users are told how **Edit Home → Move apps** works on secondary pages and where its current primary-Home boundary remains. The group editor exposes semantic section headings, a polite live selection-count state, and explicit available/unavailable state descriptions on its existing 48 dp anchor controls. Android 16 runtime coverage verifies the selected-count and anchor state descriptions while completing the persisted atomic move.
+
+**Acceptance boundary:** source/runtime semantics are implemented, but representative-device TalkBack/Switch Access traversal, large-text/form-factor behavior, and broader accessibility acceptance remain open.
+
 ## September 30, 2026 — bounded Edit Home app-group controls
 
 The current stacked Development candidate exposes app-group movement from **Edit Home** for unlocked secondary Home pages. A page offers **Move apps** only when at least two available applications have persisted spatial positions. The dialog provides explicit app selection, secondary-page destination choice, and exact top-left anchor-cell selection. Invalid rendered-state anchors are disabled when they collide with apps/folders/widgets or push the rigid group out of bounds; a valid choice still delegates the write to the atomic Room group-movement foundation for authoritative stale-state revalidation. Successful writes switch to the authoritative destination page; rejected writes keep the original placement and report that no group move was applied.
