@@ -68,6 +68,8 @@ import com.goreecloud.launcher.core.launcher.LauncherFileSearchPreferencesReposi
 import com.goreecloud.launcher.core.launcher.LauncherFilesSearchProvider
 import com.goreecloud.launcher.core.launcher.LauncherFolder
 import com.goreecloud.launcher.core.launcher.LauncherFolderRepository
+import com.goreecloud.launcher.core.launcher.LauncherGestureAction
+import com.goreecloud.launcher.core.launcher.LauncherGestureActionType
 import com.goreecloud.launcher.core.launcher.LauncherGoogleDriveAuthorizationState
 import com.goreecloud.launcher.core.launcher.LauncherInstalledAppBaselineRepository
 import com.goreecloud.launcher.core.launcher.LauncherHomeAppMode
@@ -517,6 +519,37 @@ class MainActivity : ComponentActivity() {
                 appsRepository.launch(app)
                 if (experiencePreferences.homeAppMode != LauncherHomeAppMode.NONE) {
                     localUsageRepository.recordLaunch(app.workspaceKey())
+                }
+            }
+            val executeSecondaryHomeGesture: (LauncherGestureAction) -> Unit = { action ->
+                when (action.type) {
+                    LauncherGestureActionType.NONE -> Unit
+                    LauncherGestureActionType.APPS -> {
+                        selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                        primarySurfaceModeName = LauncherSurfaceMode.DRAWER.name
+                    }
+                    LauncherGestureActionType.UNIVERSAL_SEARCH -> {
+                        selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                        primarySurfaceModeName = LauncherSurfaceMode.SEARCH.name
+                    }
+                    LauncherGestureActionType.LAUNCHER_SETTINGS,
+                    LauncherGestureActionType.HOME_EDITOR,
+                    -> {
+                        pendingHomeEditorPageId = selectedHomePageId
+                        selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                        primarySurfaceModeName = LauncherSurfaceMode.HOME.name
+                        primaryHomeEditorRequestSequence += 1L
+                    }
+                    LauncherGestureActionType.WALLPAPER -> openWallpaperPicker()
+                    LauncherGestureActionType.THEME_MANAGER -> {
+                        selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                        primarySurfaceModeName = LauncherSurfaceMode.THEME_MANAGER.name
+                    }
+                    LauncherGestureActionType.OPEN_APP -> {
+                        action.appKey
+                            ?.let(appsByWorkspaceKey::get)
+                            ?.let(launchApp)
+                    }
                 }
             }
 
@@ -1158,6 +1191,16 @@ class MainActivity : ComponentActivity() {
                             onOpenWidgetSettings = {
                                 selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
                                 primarySurfaceModeName = LauncherSurfaceMode.SETTINGS.name
+                            },
+                            onSwipeUp = {
+                                executeSecondaryHomeGesture(
+                                    experiencePreferences.swipeUpAction,
+                                )
+                            },
+                            onSwipeDown = {
+                                executeSecondaryHomeGesture(
+                                    experiencePreferences.swipeDownAction,
+                                )
                             },
                             onGridBoundsChanged = { bounds ->
                                 if (selectedHomePageId == secondaryPage.pageId) {
