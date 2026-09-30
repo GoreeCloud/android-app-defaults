@@ -355,6 +355,7 @@ class WorkspacePagedRoomMutationRepository(
         targetPageId: String,
         targetCellX: Int,
         targetCellY: Int,
+        expectedSourceItems: List<WorkspacePagedRoomMutationResult.UpdatedItem>? = null,
     ): WorkspacePagedRoomMutationResult {
         if (!isRoomAuthoritative()) return WorkspacePagedRoomMutationResult.Reserved
         if (
@@ -400,6 +401,24 @@ class WorkspacePagedRoomMutationRepository(
             }
             if (selectedItems.any { it.pageId != sourcePageId }) {
                 return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+            }
+            if (expectedSourceItems != null) {
+                val expectedById = expectedSourceItems.associateBy { it.itemId }
+                if (
+                    expectedById.size != expectedSourceItems.size ||
+                    expectedById.keys != itemIds.toSet() ||
+                    selectedItems.any { item ->
+                        val expected = expectedById[item.itemId]
+                            ?: return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+                        expected.pageId != item.pageId ||
+                            expected.cellX != item.cellX ||
+                            expected.cellY != item.cellY ||
+                            expected.spanX != item.spanX ||
+                            expected.spanY != item.spanY
+                    }
+                ) {
+                    return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+                }
             }
 
             val spatialItems = storedItems.filterNot {
