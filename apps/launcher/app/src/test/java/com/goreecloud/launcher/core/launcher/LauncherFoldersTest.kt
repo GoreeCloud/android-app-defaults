@@ -14,9 +14,10 @@ class LauncherFoldersTest {
                 id = "folder-1",
                 name = "Family 👪 & Work",
                 appKeys = listOf(
-                    "0:com.example.mail/.MainActivity",
-                    "0:com.example.camera/.CameraActivity",
+                    "10:com.example.mail/.MainActivity",
+                    "10:com.example.camera/.CameraActivity",
                 ),
+                profileKind = LauncherDrawerProfileKind.WORK,
             ),
             LauncherFolder(id = "folder-2", name = "中文工具", appKeys = emptyList()),
         )
