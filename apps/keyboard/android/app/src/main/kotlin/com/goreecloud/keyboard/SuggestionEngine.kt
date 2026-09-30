@@ -1,5 +1,6 @@
 package com.goreecloud.keyboard
 
+import java.text.Normalizer
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.ln
@@ -28,13 +29,13 @@ class SuggestionEngine {
         if (prefix.isBlank() || limit <= 0) return emptyList()
 
         val effectiveLimit = limit.coerceAtMost(MAX_VISIBLE_SUGGESTIONS)
-        val normalized = prefix.lowercase()
+        val normalized = normalizeForMatch(prefix)
         val index = indexFor(dictionary)
         val candidates = suggestionCandidates(normalized, index)
         val exact = index.byNormalized[normalized]
         val contextRank = contextualPredictions
-            .distinctBy { it.lowercase() }
-            .mapIndexed { index, value -> value.lowercase() to index }
+            .distinctBy(::normalizeForMatch)
+            .mapIndexed { index, value -> normalizeForMatch(value) to index }
             .toMap()
 
         val scored = candidates.asSequence()
@@ -58,13 +59,13 @@ class SuggestionEngine {
         scored.forEach { scoredCandidate ->
             if (result.size >= effectiveLimit) return@forEach
             val word = scoredCandidate.candidate.word
-            if (result.none { it.equals(word, ignoreCase = true) }) result += word
+            if (result.none { normalizeForMatch(it) == scoredCandidate.candidate.normalized }) result += word
         }
 
         if (
             exact == null &&
             result.size < effectiveLimit &&
-            result.none { it.equals(prefix, ignoreCase = true) }
+            result.none { normalizeForMatch(it) == normalized }
         ) {
             result += prefix
         }
@@ -72,7 +73,7 @@ class SuggestionEngine {
         if (result.isEmpty()) result += prefix
 
         return result
-            .distinctBy { it.lowercase() }
+            .distinctBy(::normalizeForMatch)
             .take(effectiveLimit)
     }
 
@@ -90,7 +91,7 @@ class SuggestionEngine {
         contextualPredictions: Collection<String> = emptyList(),
     ): String? {
         if (word.isBlank()) return null
-        val normalized = word.lowercase()
+        val normalized = normalizeForMatch(word)
         if (codePointCount(normalized) < MIN_CORRECTION_LENGTH) return null
         if (!normalized.codePoints().allMatch { Character.isLetter(it) }) return null
 
@@ -99,8 +100,8 @@ class SuggestionEngine {
         val candidates = correctionCandidates(normalized, index)
 
         val contextRank = contextualPredictions
-            .distinctBy { it.lowercase() }
-            .mapIndexed { index, value -> value.lowercase() to index }
+            .distinctBy(::normalizeForMatch)
+            .mapIndexed { index, value -> normalizeForMatch(value) to index }
             .toMap()
 
         val corrections = candidates.asSequence()
@@ -285,11 +286,11 @@ class SuggestionEngine {
 
         val candidates = dictionary.asSequence()
             .filter { it.isNotBlank() }
-            .distinctBy { it.lowercase() }
+            .distinctBy(::normalizeForMatch)
             .mapIndexed { rank, word ->
                 Candidate(
                     word = word,
-                    normalized = word.lowercase(),
+                    normalized = normalizeForMatch(word),
                     rank = rank,
                 )
             }
@@ -465,6 +466,9 @@ class SuggestionEngine {
         if (isEmpty()) return null
         return codePointAt(0)
     }
+
+    private fun normalizeForMatch(value: String): String =
+        Normalizer.normalize(value, Normalizer.Form.NFC).lowercase()
 
     private fun codePointCount(value: String): Int = value.codePointCount(0, value.length)
 

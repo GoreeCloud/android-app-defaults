@@ -1,5 +1,18 @@
 # GoreeCloud Keyboard — Changelogs
 
+## September 29, 2026 — legacy Unicode-normalization reconciliation candidate
+
+Legacy Keyboard PR #61 contained one substantive behavior not present in the mandatory cutover tree: NFC normalization for canonically equivalent Unicode suggestion matching. This candidate adapts that behavior to the current indexed/ranked `SuggestionEngine` rather than restoring the obsolete earlier engine.
+
+- Canonically equivalent input and dictionary forms now share the same NFC-normalized matching key.
+- Dictionary output preserves the original stored spelling rather than rewriting text to normalized form.
+- Canonical duplicate dictionary entries collapse under the normalized key.
+- Context ranking and exact-result de-duplication use the same normalized boundary.
+- Regression tests cover decomposed/composed `café` matching and duplicate preservation.
+
+This is migration reconciliation, not lifecycle promotion. Exact-head CI and current Keyboard validation remain required before integration.
+
+
 ## September 29, 2026 — setup replay wording correction candidate
 
 The existing voluntary setup replay now identifies itself as **Review GoreeCloud Keyboard setup** instead of reusing the mandatory first-use title. At replay step 1, the exit control is explicitly labeled **Close replay** rather than **Back**, matching its actual behavior. Instrumentation verifies closing replay returns to Settings while preserving completed first-use state.
