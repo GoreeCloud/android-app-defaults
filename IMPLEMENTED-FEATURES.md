@@ -1,5 +1,11 @@
 # Android App Defaults — Implemented Features
 
+## September 30, 2026 — Since protected Development packaging source
+
+The active stacked Since candidate includes protected Development APK packaging plumbing: positive build-time Development version codes, complete external keystore configuration with fail-closed partial-state handling, and a manual environment-gated distribution workflow that verifies assembled package/version/signature identity and records exact-source plus cryptographic provenance. This prevents the earlier invalid post-build rewrite/re-sign path from becoming a distribution mechanism.
+
+This is source capability, not evidence that the protected `since-development` secrets are already provisioned or that owner-device update-in-place acceptance has passed. Ordinary CI debug artifacts remain test/installability evidence only.
+
 ## September 29, 2026 — Since fail-closed import review candidate
 
 The stacked Since portability candidate now exposes **Review import** under Settings → Data & recovery. The user explicitly chooses a document through Android's Storage Access Framework; Since reads at most 4 MiB, requires strict UTF-8, and validates only the versioned `goreecloud-since-export` schema v1 before showing a summary of trackers, archived trackers, periods, and goals.
