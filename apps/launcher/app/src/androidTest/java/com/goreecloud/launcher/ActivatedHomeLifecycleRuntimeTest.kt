@@ -200,6 +200,234 @@ class ActivatedHomeLifecycleRuntimeTest {
     }
 
     @Test
+    fun editHomeMovesSelectedSecondaryAppsAsAtomicGroup() = runBlocking {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val roleManager = context.getSystemService(RoleManager::class.java)
+        val alreadyDefaultHome =
+            roleManager.isRoleAvailable(RoleManager.ROLE_HOME) &&
+                roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+        val preferencesRepository = LauncherPreferencesRepository(context)
+        val previousLayoutLocked = preferencesRepository.preferences.first().layoutLocked
+
+        if (!alreadyDefaultHome) {
+            runShellCommand(
+                "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+            )
+            withTimeout(10_000) {
+                while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                    delay(100)
+                }
+            }
+        }
+
+        val secondaryPageId = "home:test:group-edit"
+        val repository = WorkspaceRepository(context)
+        var runtime: WorkspaceProductionRuntimeCoordinator? = null
+        var firstKey: String? = null
+        var secondKey: String? = null
+        var preferences: com.goreecloud.launcher.core.launcher.LauncherPreferences? = null
+
+        try {
+            preferencesRepository.setLayoutLocked(false).join()
+            val apps = withTimeout(10_000) {
+                LauncherAppsRepository(context).apps.first { candidates ->
+                    candidates
+                        .filter { it.componentName.packageName != context.packageName }
+                        .distinctBy { it.workspaceKey() }
+                        .size >= 2
+                }
+            }
+            val candidates = apps
+                .filter { it.componentName.packageName != context.packageName }
+                .distinctBy { it.workspaceKey() }
+            val firstApp = candidates[0]
+            val secondApp = candidates[1]
+            firstKey = firstApp.workspaceKey()
+            secondKey = secondApp.workspaceKey()
+
+            repository.ensureDefaults(
+                favoriteKeys = listOf(firstKey, secondKey),
+                dockKeys = emptyList(),
+            )
+
+            val scenario = ActivityScenario.launch(MainActivity::class.java)
+            try {
+                withTimeout(15_000) {
+                    repository.state.first { it.authority == WorkspaceAuthority.ROOM }
+                }
+                preferences = preferencesRepository.preferences.first()
+                val grid = WorkspaceGridPlacement.Grid(
+                    columns = preferences.homeColumns,
+                    rows = preferences.homeRows,
+                )
+                val roomPlacement = WorkspaceRoomPlacementRepository(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = {
+                        LauncherDatabaseProvider.get(context).workspaceDao()
+                    },
+                )
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(firstKey, secondKey),
+                        dockKeys = emptyList(),
+                        homeGrid = grid,
+                    ) is WorkspaceRoomWriteResult.Written
+                )
+
+                runtime = WorkspaceProductionRuntimeCoordinator(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = {
+                        LauncherDatabaseProvider.get(context).workspaceDao()
+                    },
+                )
+                runtime?.deleteEmptyHomePage(secondaryPageId)
+                val created = runtime?.createHomePage(secondaryPageId)
+                check(created is WorkspacePagedRoomMutationResult.CreatedPage)
+
+                check(
+                    runtime?.moveHomeAppToPage(
+                        sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                        appKey = firstKey,
+                        targetPageId = secondaryPageId,
+                        primaryColumns = preferences.homeColumns,
+                        primaryRows = preferences.homeRows,
+                        targetCellX = 0,
+                        targetCellY = 0,
+                    ) is WorkspacePagedRoomMutationResult.UpdatedItem
+                )
+                check(
+                    runtime?.moveHomeAppToPage(
+                        sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                        appKey = secondKey,
+                        targetPageId = secondaryPageId,
+                        primaryColumns = preferences.homeColumns,
+                        primaryRows = preferences.homeRows,
+                        targetCellX = 1,
+                        targetCellY = 0,
+                    ) is WorkspacePagedRoomMutationResult.UpdatedItem
+                )
+
+                withTimeout(10_000) {
+                    runtime!!.observeHomePages().first { state ->
+                        val ready = state as? WorkspacePagedHomeState.Ready ?: return@first false
+                        ready.pages.firstOrNull { it.pageId == secondaryPageId }
+                            ?.appKeys
+                            ?.containsAll(listOf(firstKey, secondKey)) == true
+                    }
+                }
+
+                waitForDisplayedTag("launcher-home-empty-space-actions")
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-empty-space-actions",
+                        useUnmergedTree = true,
+                    )
+                    .performTouchInput {
+                        down(center)
+                        advanceEventTime(700)
+                        up()
+                    }
+                waitForDisplayedTag("launcher-home-editor-page-carousel")
+
+                repeat(created.rank) {
+                    composeRule
+                        .onNodeWithTag(
+                            "launcher-home-editor-page-carousel",
+                            useUnmergedTree = true,
+                        )
+                        .performTouchInput {
+                            swipeLeft(
+                                startX = right - 24f,
+                                endX = left + 24f,
+                                durationMillis = 420,
+                            )
+                        }
+                }
+
+                val groupActionTag = "launcher-home-editor-group-" + secondaryPageId
+                waitForDisplayedTag(groupActionTag)
+                composeRule
+                    .onNodeWithTag(groupActionTag, useUnmergedTree = true)
+                    .performClick()
+
+                waitForDisplayedTag("launcher-home-group-move-dialog")
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-group-app-" + firstKey,
+                        useUnmergedTree = true,
+                    )
+                    .performClick()
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-group-app-" + secondKey,
+                        useUnmergedTree = true,
+                    )
+                    .performClick()
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-group-cell-0-1",
+                        useUnmergedTree = true,
+                    )
+                    .performClick()
+
+                val dao = LauncherDatabaseProvider.get(context).workspaceDao()
+                withTimeout(15_000) {
+                    while (true) {
+                        val byKey = dao.readItems(listOf(secondaryPageId)).associateBy { it.appKey }
+                        val first = byKey[firstKey]
+                        val second = byKey[secondKey]
+                        if (
+                            first?.cellX == 0 &&
+                            first.cellY == 1 &&
+                            second?.cellX == 1 &&
+                            second.cellY == 1
+                        ) {
+                            break
+                        }
+                        delay(100)
+                    }
+                }
+            } finally {
+                scenario.close()
+            }
+        } finally {
+            val currentPreferences = preferences
+            val currentRuntime = runtime
+            val currentFirst = firstKey
+            val currentSecond = secondKey
+            if (
+                currentRuntime != null &&
+                currentPreferences != null &&
+                currentFirst != null &&
+                currentSecond != null
+            ) {
+                currentRuntime.moveHomeAppToPage(
+                    sourcePageId = secondaryPageId,
+                    appKey = currentFirst,
+                    targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                    primaryColumns = currentPreferences.homeColumns,
+                    primaryRows = currentPreferences.homeRows,
+                )
+                currentRuntime.moveHomeAppToPage(
+                    sourcePageId = secondaryPageId,
+                    appKey = currentSecond,
+                    targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                    primaryColumns = currentPreferences.homeColumns,
+                    primaryRows = currentPreferences.homeRows,
+                )
+                currentRuntime.deleteEmptyHomePage(secondaryPageId)
+            }
+            preferencesRepository.setLayoutLocked(previousLayoutLocked).join()
+            if (!alreadyDefaultHome) {
+                runShellCommand(
+                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                )
+            }
+        }
+    }
+
+    @Test
     fun horizontalSwipeSwitchesHomePagesAndReturns() = runBlocking {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
