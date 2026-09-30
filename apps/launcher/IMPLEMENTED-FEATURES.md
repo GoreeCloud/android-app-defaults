@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — live held-page folder handoff
+
+The current Development candidate extends Home folder direct manipulation from deterministic edge release to pointer-held page switching. An unlocked folder starts a platform drag with its source page identity; the Activity-level Home drag target can keep receiving pointer movement while the source page leaves composition, switch the visible page after the bounded edge hold without writing Room, and route release to an exact measured destination cell through the existing authoritative folder transaction. Primary/secondary same-page exact moves and quick adjacent-edge release remain available, and layout lock fails closed before the live drag is offered.
+
+**Acceptance boundary:** exact-head CI and managed Android 16 runtime evidence remain required. Representative-device drag continuity, accessibility, performance/power, recovery, protected integration, Release Candidate, Production, and Stable acceptance are not established.
+
 ## September 30, 2026 — stacked atomic Home app group-movement foundation
 
 Draft PR #80 implements the first backend tranche of Home group movement on top of the mandatory Android-app consolidation candidate. Two or more applications already placed on the same secondary Home page can be resolved as one group and moved atomically to an exact secondary-page anchor while preserving relative geometry and spans. The Room mutation validates the complete target geometry, rejects collisions/out-of-bounds/stale snapshots without partial writes, and deliberately blocks primary-HOME participation until its rank/compatibility behavior is separately reviewed. The production runtime coordinator now exposes this primitive for a later user-facing multi-select/group-edit experience, and Android runtime coverage exercises both rollback-on-collision and a successful cross-page group move.
