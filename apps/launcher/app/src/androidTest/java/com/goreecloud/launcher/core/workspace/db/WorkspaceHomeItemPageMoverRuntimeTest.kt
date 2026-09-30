@@ -634,8 +634,42 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
             ),
         )
 
-        val targetAnchorX = 0
-        val targetAnchorY = 2
+        val selectedInitial = listOf(firstInitial, secondInitial)
+        val blockerPlacement = WorkspaceGridPlacement.Placement(
+            itemId = blockerInitial.itemId,
+            cellX = checkNotNull(blockerInitial.cellX),
+            cellY = checkNotNull(blockerInitial.cellY),
+            spanX = blockerInitial.spanX,
+            spanY = blockerInitial.spanY,
+        )
+        val validAnchor = buildList {
+            for (cellY in 0 until grid.rows) {
+                for (cellX in 0 until grid.columns) {
+                    add(cellX to cellY)
+                }
+            }
+        }.firstOrNull { (anchorX, anchorY) ->
+            if (anchorX == sourceMinX && anchorY == sourceMinY) {
+                false
+            } else {
+                val movedPlacements = selectedInitial.map { item ->
+                    WorkspaceGridPlacement.Placement(
+                        itemId = item.itemId,
+                        cellX = anchorX + checkNotNull(item.cellX) - sourceMinX,
+                        cellY = anchorY + checkNotNull(item.cellY) - sourceMinY,
+                        spanX = item.spanX,
+                        spanY = item.spanY,
+                    )
+                }
+                WorkspaceGridPlacement.validate(
+                    grid,
+                    listOf(blockerPlacement) + movedPlacements,
+                ) == WorkspaceGridPlacement.Validation.Valid
+            }
+        }
+        checkNotNull(validAnchor) { "Runtime fixture requires one free group destination." }
+        val targetAnchorX = validAnchor.first
+        val targetAnchorY = validAnchor.second
         val moved = runtime.moveHomeAppGroupToPageCell(
             sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
             appKeys = listOf(APP_ONE, APP_TWO),
