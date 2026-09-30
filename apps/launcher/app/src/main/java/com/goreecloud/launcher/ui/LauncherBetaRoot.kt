@@ -2791,6 +2791,7 @@ private fun HomeAppGroupMoveDialog(
         selectableAppKeys.filter { it in selectedKeys }
     }
     val canChooseDestination = selectedAppKeys.size >= 2 && targetPageId.isNotBlank()
+    val anchorHorizontalScrollState = rememberScrollState()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -2925,12 +2926,15 @@ private fun HomeAppGroupMoveDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                repeat(rows) { cellY ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        repeat(columns) { cellX ->
+                Column(
+                    modifier = Modifier.horizontalScroll(anchorHorizontalScrollState),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    repeat(rows) { cellY ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            repeat(columns) { cellX ->
                             val targetPage = pages.firstOrNull { it.pageId == targetPageId }
                             val anchorAvailable =
                                 canChooseDestination &&
@@ -2955,8 +2959,7 @@ private fun HomeAppGroupMoveDialog(
                                 },
                                 enabled = anchorAvailable,
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp)
+                                    .size(width = 48.dp, height = 48.dp)
                                     .testTag(
                                         "launcher-home-group-cell-" + cellX + "-" + cellY
                                     )
