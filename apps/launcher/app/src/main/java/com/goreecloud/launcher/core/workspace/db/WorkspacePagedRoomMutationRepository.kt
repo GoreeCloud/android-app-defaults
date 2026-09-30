@@ -216,7 +216,10 @@ class WorkspacePagedRoomMutationRepository(
         targetPlacement: WorkspaceGridPlacement.Placement,
     ): WorkspacePagedRoomMutationResult {
         if (!isRoomAuthoritative()) return WorkspacePagedRoomMutationResult.Reserved
-        if (targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+        val primarySource = sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        val primaryTarget = targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        val primarySamePage = primarySource && primaryTarget
+        if (primarySource != primaryTarget) {
             return WorkspacePagedRoomMutationResult.PrimaryPageProtected
         }
         val dao = workspaceDaoOrNull() ?: return WorkspacePagedRoomMutationResult.Unavailable
@@ -394,15 +397,14 @@ class WorkspacePagedRoomMutationRepository(
             val selectedItems = itemIds.map { itemId ->
                 storedById[itemId] ?: return WorkspacePagedRoomMutationResult.ItemNotFound
             }
-            if (selectedItems.any { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }) {
-                return WorkspacePagedRoomMutationResult.PrimaryPageProtected
-            }
             if (selectedItems.any { it.pageId != sourcePageId }) {
                 return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
             }
 
-            val spatialItems = storedItems.filterNot {
-                it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+            val spatialItems = if (primarySamePage) {
+                storedItems.filter { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+            } else {
+                storedItems.filterNot { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
             }
             if (spatialItems.any { it.cellX == null || it.cellY == null }) {
                 return WorkspacePagedRoomMutationResult.InvalidWorkspace
@@ -474,7 +476,8 @@ class WorkspacePagedRoomMutationRepository(
                 val placements = updatedItems
                     .filter {
                         it.pageId == pageId &&
-                            it.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                            (primarySamePage ||
+                                it.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID)
                     }
                     .map { item ->
                         WorkspaceGridPlacement.Placement(
