@@ -156,6 +156,7 @@ import com.goreecloud.launcher.core.launcher.LauncherWeatherVisualKind
 import com.goreecloud.launcher.core.launcher.launcherWeatherVisualKind
 import com.goreecloud.launcher.core.launcher.launcherDrawerProfilePages
 import com.goreecloud.launcher.core.workspace.MAX_DOCK_ITEMS
+import com.goreecloud.launcher.core.workspace.WorkspaceGridPlacement
 import com.goreecloud.launcher.core.workspace.WorkspaceMoveDirection
 import com.goreecloud.launcher.core.workspace.WorkspaceState
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetCatalog
@@ -2648,11 +2649,106 @@ internal fun canMoveHomeAppGroup(
 ): Boolean =
     !layoutLocked &&
         page.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID &&
-        page.appPlacements.count { app ->
-            app.cellX != null &&
-                app.cellY != null &&
-                app.appKey in availableAppKeys
-        } >= 2
+        page.appPlacements
+            .asSequence()
+            .filter { app ->
+                app.cellX != null &&
+                    app.cellY != null &&
+                    app.appKey in availableAppKeys
+            }
+            .map { it.appKey }
+            .distinct()
+            .take(2)
+            .count() == 2
+
+internal fun homeAppGroupAnchorAvailable(
+    sourcePage: WorkspaceRenderedHomePage,
+    targetPage: WorkspaceRenderedHomePage,
+    selectedAppKeys: List<String>,
+    columns: Int,
+    rows: Int,
+    targetCellX: Int,
+    targetCellY: Int,
+): Boolean {
+    if (
+        sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        targetPage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        targetPage.unsupportedItemCount > 0 ||
+        selectedAppKeys.size < 2 ||
+        selectedAppKeys.distinct().size != selectedAppKeys.size
+    ) {
+        return false
+    }
+    val grid = runCatching {
+        WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
+    }.getOrNull() ?: return false
+
+    val sourceByKey = sourcePage.appPlacements
+        .filter { it.cellX != null && it.cellY != null }
+        .groupBy { it.appKey }
+    val selected = selectedAppKeys.map { key ->
+        sourceByKey[key]?.singleOrNull() ?: return false
+    }
+    val sourceMinX = selected.minOf { checkNotNull(it.cellX) }
+    val sourceMinY = selected.minOf { checkNotNull(it.cellY) }
+    val selectedKeySet = selectedAppKeys.toSet()
+
+    val occupied = buildList {
+        targetPage.appPlacements.forEach { app ->
+            val cellX = app.cellX ?: return@forEach
+            val cellY = app.cellY ?: return@forEach
+            if (targetPage.pageId == sourcePage.pageId && app.appKey in selectedKeySet) {
+                return@forEach
+            }
+            add(
+                WorkspaceGridPlacement.Placement(
+                    itemId = "app:" + app.appKey,
+                    cellX = cellX,
+                    cellY = cellY,
+                    spanX = app.spanX,
+                    spanY = app.spanY,
+                )
+            )
+        }
+        targetPage.widgetPlacements.forEach { widget ->
+            add(
+                WorkspaceGridPlacement.Placement(
+                    itemId = "widget:" + widget.itemId,
+                    cellX = widget.cellX,
+                    cellY = widget.cellY,
+                    spanX = widget.spanX,
+                    spanY = widget.spanY,
+                )
+            )
+        }
+        targetPage.folderPlacements.forEach { folder ->
+            add(
+                WorkspaceGridPlacement.Placement(
+                    itemId = "folder:" + folder.itemId,
+                    cellX = folder.cellX,
+                    cellY = folder.cellY,
+                    spanX = 1,
+                    spanY = 1,
+                )
+            )
+        }
+    }
+
+    val moved = selected.map { app ->
+        WorkspaceGridPlacement.Placement(
+            itemId = "moving-app:" + app.appKey,
+            cellX = targetCellX + checkNotNull(app.cellX) - sourceMinX,
+            cellY = targetCellY + checkNotNull(app.cellY) - sourceMinY,
+            spanX = app.spanX,
+            spanY = app.spanY,
+        )
+    }
+
+    return WorkspaceGridPlacement.validate(
+        grid = grid,
+        placements = occupied + moved,
+    ) == WorkspaceGridPlacement.Validation.Valid
+}
 
 @Composable
 private fun HomeAppGroupMoveDialog(
@@ -2804,6 +2900,19 @@ private fun HomeAppGroupMoveDialog(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         repeat(columns) { cellX ->
+                            val targetPage = pages.firstOrNull { it.pageId == targetPageId }
+                            val anchorAvailable =
+                                canChooseDestination &&
+                                    targetPage != null &&
+                                    homeAppGroupAnchorAvailable(
+                                        sourcePage = sourcePage,
+                                        targetPage = targetPage,
+                                        selectedAppKeys = selectedAppKeys,
+                                        columns = columns,
+                                        rows = rows,
+                                        targetCellX = cellX,
+                                        targetCellY = cellY,
+                                    )
                             Surface(
                                 onClick = {
                                     onMove(
@@ -2813,7 +2922,7 @@ private fun HomeAppGroupMoveDialog(
                                         cellY,
                                     )
                                 },
-                                enabled = canChooseDestination,
+                                enabled = anchorAvailable,
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
@@ -2826,7 +2935,7 @@ private fun HomeAppGroupMoveDialog(
                                                 ", row " + (cellY + 1)
                                     },
                                 shape = RoundedCornerShape(GlazeMetrics.radiusSmall),
-                                color = if (canChooseDestination) {
+                                color = if (anchorAvailable) {
                                     MaterialTheme.colorScheme.surfaceVariant
                                 } else {
                                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
