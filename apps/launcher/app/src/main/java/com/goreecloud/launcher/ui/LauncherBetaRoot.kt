@@ -3958,13 +3958,37 @@ private fun LauncherBuiltInWidget(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            now.format(DateTimeFormatter.ofPattern("EEEE, MMM d", Locale.getDefault())),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = Color.White.copy(alpha = 0.86f),
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                        )
+                        Surface(
+                            shape = RoundedCornerShape(18.dp),
+                            color = Color.White.copy(alpha = 0.94f),
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    now.dayOfMonth.toString(),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color(0xFF17191D),
+                                    fontWeight = FontWeight.Light,
+                                )
+                                Column {
+                                    Text(
+                                        now.format(DateTimeFormatter.ofPattern("MMM", Locale.getDefault())).uppercase(),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color(0xFF17191D).copy(alpha = 0.64f),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Text(
+                                        now.format(DateTimeFormatter.ofPattern("EEE", Locale.getDefault())),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = Color(0xFF17191D),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                            }
+                        }
                         LauncherWeatherStatusChip(
                             foreground = Color.White,
                             compact = true,
