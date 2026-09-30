@@ -1449,7 +1449,7 @@ private fun HomeSurface(
             }
         }
     }
-    LaunchedEffect(homeSearchSurface, hasMovableSearch) {
+    LaunchedEffect(homeSearchSurface, hasMovableSearch, primaryHomePage) {
         when {
             homeSearchSurface == LauncherHomeSearchSurface.MOVABLE && !hasMovableSearch ->
                 onSetManagedHomeSearchEnabled(true)
@@ -7193,28 +7193,33 @@ private fun LauncherSettingsRootSurface(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall,
                     )
-                    Text(
-                        "Home bar style",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    ChoiceRow(
-                        choices = listOf("Glass", "Clear", "Solid"),
-                        selected = when (experiencePreferences.homeSearchStyle) {
-                            LauncherHomeSearchStyle.GLASS -> "Glass"
-                            LauncherHomeSearchStyle.CLEAR -> "Clear"
-                            LauncherHomeSearchStyle.SOLID -> "Solid"
-                        },
-                        onChoice = {
-                            onSetHomeSearchStyle(
-                                when (it) {
-                                    "Clear" -> LauncherHomeSearchStyle.CLEAR
-                                    "Solid" -> LauncherHomeSearchStyle.SOLID
-                                    else -> LauncherHomeSearchStyle.GLASS
-                                },
-                            )
-                        },
-                    )
+                    if (
+                        experiencePreferences.homeSearchPlacement !=
+                            LauncherHomeSearchPlacement.MOVABLE
+                    ) {
+                        Text(
+                            "Home bar style",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        ChoiceRow(
+                            choices = listOf("Glass", "Clear", "Solid"),
+                            selected = when (experiencePreferences.homeSearchStyle) {
+                                LauncherHomeSearchStyle.GLASS -> "Glass"
+                                LauncherHomeSearchStyle.CLEAR -> "Clear"
+                                LauncherHomeSearchStyle.SOLID -> "Solid"
+                            },
+                            onChoice = {
+                                onSetHomeSearchStyle(
+                                    when (it) {
+                                        "Clear" -> LauncherHomeSearchStyle.CLEAR
+                                        "Solid" -> LauncherHomeSearchStyle.SOLID
+                                        else -> LauncherHomeSearchStyle.GLASS
+                                    },
+                                )
+                            },
+                        )
+                    }
                 }
                 SettingsReadOnlyRow("Home gestures", "Configured in Gestures")
                 SettingsReadOnlyRow("Core provider", "Installed apps · Launcher")
