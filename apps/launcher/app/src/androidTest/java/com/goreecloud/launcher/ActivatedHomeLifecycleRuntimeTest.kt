@@ -109,6 +109,8 @@ class ActivatedHomeLifecycleRuntimeTest {
         val roleManager = context.getSystemService(RoleManager::class.java)
         val alreadyDefaultHome =
             roleManager.isRoleAvailable(RoleManager.ROLE_HOME) && roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+        val preferencesRepository = LauncherPreferencesRepository(context)
+        val previousLayoutLocked = preferencesRepository.preferences.first().layoutLocked
 
         if (!alreadyDefaultHome) {
             runShellCommand(
@@ -122,6 +124,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         }
 
         try {
+            preferencesRepository.setLayoutLocked(false)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first { !it.layoutLocked }
+            }
             val apps = withTimeout(10_000) {
                 LauncherAppsRepository(context).apps.first { candidates ->
                     candidates.count { it.componentName.packageName != context.packageName } >= 2
@@ -147,7 +153,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 withTimeout(15_000) {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
-                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val preferences = preferencesRepository.preferences.first()
                 val roomPlacement = WorkspaceRoomPlacementRepository(
                     authorityRepository = repository,
                     workspaceDaoProvider = {
@@ -191,6 +197,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                 scenario.close()
             }
         } finally {
+            preferencesRepository.setLayoutLocked(previousLayoutLocked)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first {
+                    it.layoutLocked == previousLayoutLocked
+                }
+            }
             if (!alreadyDefaultHome) {
                 runShellCommand(
                     "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
@@ -708,20 +720,24 @@ class ActivatedHomeLifecycleRuntimeTest {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
 
-                val runtime = WorkspaceProductionRuntimeCoordinator(
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
                     authorityRepository = repository,
                     workspaceDaoProvider = {
                         LauncherDatabaseProvider.get(context).workspaceDao()
                     },
                 )
-                if (candidateKey !in repository.state.first().favoriteKeys) {
-                    val preferences = LauncherPreferencesRepository(context).preferences.first()
-                    val write = runtime.toggleFavorite(
-                        key = candidateKey,
-                        homeColumns = preferences.homeColumns,
-                        homeRows = preferences.homeRows,
-                    )
-                    check(write is WorkspaceAuthoritativeWriteResult.Written)
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidateKey),
+                        dockKeys = emptyList(),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Drawer gesture fixture must establish its visible Home app authoritatively."
                 }
 
                 waitForDisplayedLabel(candidate.label.toString())
@@ -1174,8 +1190,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                         advanceEventTime(
                             ViewConfiguration.getLongPressTimeout().toLong() + 180L,
                         )
-                        moveTo(center + delta)
-                        advanceEventTime(120)
+                        val steps = 8
+                        repeat(steps) { index ->
+                            val fraction = (index + 1).toFloat() / steps.toFloat()
+                            moveTo(center + (delta * fraction))
+                            advanceEventTime(32)
+                        }
                         up()
                     }
 
@@ -1258,6 +1278,25 @@ class ActivatedHomeLifecycleRuntimeTest {
             try {
                 withTimeout(15_000) {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
+                }
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = {
+                        LauncherDatabaseProvider.get(context).workspaceDao()
+                    },
+                )
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidateKey),
+                        dockKeys = emptyList(),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Home-button drawer fixture must establish its visible Home app authoritatively."
                 }
                 waitForDisplayedLabel(candidate.label.toString())
 
