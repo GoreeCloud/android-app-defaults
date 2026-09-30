@@ -282,7 +282,7 @@ fun LauncherStartupWizard(
                             )
                             WizardInfoCard(
                                 title = "Manage folders in place",
-                                summary = "Open a folder and use Add apps at the end of its grid or from the folder menu. On Home, long-press a folder to move it to a free cell or release it at a page edge to move it to the adjacent Home page. Larger opened folders swipe across compact pages.",
+                                summary = "Open a folder and use Add apps at the end of its grid or from the folder menu. On Home, long-press a folder and keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell. A quick edge release still moves to the adjacent page. Larger opened folders swipe across compact pages.",
                             )
                             WizardInfoCard(
                                 title = "Connected Search is opt-in",
@@ -290,7 +290,7 @@ fun LauncherStartupWizard(
                             )
                             WizardSwitchRow(
                                 title = "Show Launcher hints",
-                                summary = "Show short, dismissible hints for Apps, Search, Edit Home, exact app placement, and folder Add apps. You can show them again later from the searchable Launcher Settings home.",
+                                summary = "Show short, dismissible hints for Apps, Search, Edit Home, exact app/folder placement, and folder Add apps. You can show them again later from the searchable Launcher Settings home.",
                                 checked = showHints,
                                 onCheckedChange = { showHints = it },
                             )
@@ -398,7 +398,7 @@ fun LauncherHomeHintCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "Folders: long-press a Home folder to move it to a free cell or adjacent page edge; use Add apps at the end of the grid and swipe larger opened folders between pages.",
+                "Folders: long-press and keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell; a quick edge release still uses adjacent-page landing. Use Add apps at the end of the grid and swipe larger opened folders between pages.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
