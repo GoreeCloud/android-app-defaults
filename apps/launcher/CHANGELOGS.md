@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
+
+**Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
+
+The migrated Android-app monorepo now restores the Launcher Android 16 `connectedDebugAndroidTest` lane on the exact pull-request head and always preserves connected-test reports/results. The faster Launcher validation lane also compiles `debugAndroidTest` Kotlin before emulator startup so instrumentation-source errors fail early instead of consuming an emulator run.
+
+The restored gate exposed shared-state and interaction defects that are corrected in this candidate. The horizontal-swipe fixture now establishes its expected primary Home and persistent Dock through the Room-authoritative placement repository instead of assuming `ensureDefaults` rewrites an initialized workspace. In Edit Home, changing the page count no longer resets the preview pager to its original page, so creating from **+ Add Page** keeps the same carousel position and reveals the newly created page. On unlocked primary Home, a stationary long press still opens app management, while an actual long-press drag no longer opens that management surface at drag start and can complete its local cell move uninterrupted.
+
+No new permission, network path, telemetry, credential, or persistence authority is introduced.
+
+**Acceptance boundary:** fresh exact-head Launcher build/lint/unit/schema/instrumentation-compilation and Android 16 runtime evidence is required. Representative-device gesture, drag/drop, accessibility, performance/power, protected promotion, Release Candidate, Production, and Stable qualification remain separate gates.
+
 ## September 30, 2026 — Edit Home app-group movement
 
 **Change type:** Workspace editing UX; explicit multi-select; exact-cell group placement; Development candidate.
