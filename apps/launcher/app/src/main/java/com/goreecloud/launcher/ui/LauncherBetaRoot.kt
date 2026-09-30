@@ -194,6 +194,19 @@ internal data class LauncherAppDragData(
     val sourcePageId: String? = null,
 )
 
+internal data class LauncherWidgetDragData(
+    val itemId: String,
+    val sourcePageId: String,
+    val spanX: Int,
+    val spanY: Int,
+)
+
+internal fun canStartWidgetLiveDrag(
+    layoutLocked: Boolean,
+    editMode: Boolean,
+    sourcePageId: String?,
+): Boolean = !layoutLocked && !editMode && !sourcePageId.isNullOrBlank()
+
 internal fun launcherFolderGridColumns(
     availableWidthDp: Float,
     largeText: Boolean,
@@ -324,6 +337,15 @@ internal fun LauncherAppDragData.toTransferData(): DragAndDropTransferData =
 
 internal fun DragAndDropEvent.launcherAppDragData(): LauncherAppDragData? =
     toAndroidDragEvent().localState as? LauncherAppDragData
+
+internal fun LauncherWidgetDragData.toTransferData(): DragAndDropTransferData =
+    DragAndDropTransferData(
+        clipData = ClipData.newPlainText("GoreeCloud Launcher widget", itemId),
+        localState = this,
+    )
+
+internal fun DragAndDropEvent.launcherWidgetDragData(): LauncherWidgetDragData? =
+    toAndroidDragEvent().localState as? LauncherWidgetDragData
 
 internal fun DragAndDropEvent.rootDropPoint(): Offset =
     toAndroidDragEvent().let { event -> Offset(event.x, event.y) }
@@ -3241,6 +3263,7 @@ private fun HomeFavoritesGrid(
                     onOpenApps = onOpenWidgetApps,
                     onOpenHomeEditor = onOpenWidgetEditor,
                     onOpenSettings = onOpenWidgetSettings,
+                    sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
                     onDropWidget = { candidate, point ->
                         val edgeTarget = folderGridBounds?.let { bounds ->
                             homePageEdgeDropTarget(
@@ -3625,6 +3648,42 @@ private fun Modifier.observeLongPressWithoutConsuming(
     }
 }
 
+
+private fun Modifier.observeStationaryLongPressReleaseWithoutConsuming(
+    movementThresholdPx: Float,
+    onStationaryRelease: () -> Unit,
+): Modifier = pointerInput(movementThresholdPx, onStationaryRelease) {
+    awaitEachGesture {
+        val down = awaitFirstDown(
+            requireUnconsumed = false,
+            pass = PointerEventPass.Initial,
+        )
+        val origin = down.position
+        val endedBeforeLongPress = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.firstOrNull { it.id == down.id }
+                    ?: return@withTimeoutOrNull true
+                if (!change.pressed) return@withTimeoutOrNull true
+                if ((change.position - origin).getDistance() > movementThresholdPx) {
+                    return@withTimeoutOrNull true
+                }
+            }
+        }
+        if (endedBeforeLongPress != null) return@awaitEachGesture
+
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+            if ((change.position - origin).getDistance() > movementThresholdPx) break
+            if (!change.pressed) {
+                onStationaryRelease()
+                break
+            }
+        }
+    }
+}
+
 @Composable
 internal fun HomeWidgetTile(
     widget: WorkspaceRenderedHomeWidget,
@@ -3637,12 +3696,32 @@ internal fun HomeWidgetTile(
     onOpenHomeEditor: () -> Unit,
     onOpenSettings: () -> Unit,
     onDropWidget: (WorkspaceRenderedHomeWidget, Offset) -> Unit,
+    sourcePageId: String? = null,
     modifier: Modifier = Modifier,
 ) {
     var tileBounds by remember(widget.itemId) { mutableStateOf<Rect?>(null) }
     var startRoot by remember(widget.itemId) { mutableStateOf<Offset?>(null) }
     var dragDelta by remember(widget.itemId) { mutableStateOf(Offset.Zero) }
     val dragThreshold = with(LocalDensity.current) { 12.dp.toPx() }
+    val platformDragData = remember(
+        widget.itemId,
+        sourcePageId,
+        widget.spanX,
+        widget.spanY,
+        editMode,
+        layoutLocked,
+    ) {
+        if (canStartWidgetLiveDrag(layoutLocked, editMode, sourcePageId)) {
+            LauncherWidgetDragData(
+                itemId = widget.itemId,
+                sourcePageId = checkNotNull(sourcePageId),
+                spanX = widget.spanX,
+                spanY = widget.spanY,
+            )
+        } else {
+            null
+        }
+    }
     Box(
         modifier = modifier
             .testTag("launcher-home-widget-" + widget.itemId)
@@ -3655,6 +3734,16 @@ internal fun HomeWidgetTile(
             .padding(2.dp)
             .then(
                 when {
+                    !editMode && platformDragData != null ->
+                        Modifier
+                            .dragAndDropSource { _ ->
+                                platformDragData.toTransferData()
+                            }
+                            .observeStationaryLongPressReleaseWithoutConsuming(
+                                movementThresholdPx = dragThreshold,
+                            ) {
+                                onManageWidget(widget)
+                            }
                     !editMode && !layoutLocked -> Modifier.pointerInput(widget.itemId, dragThreshold) {
                         detectDragGesturesAfterLongPress(
                             onDragStart = { pointer ->
