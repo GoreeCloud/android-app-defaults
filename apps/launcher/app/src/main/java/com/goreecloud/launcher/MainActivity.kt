@@ -124,6 +124,7 @@ import com.goreecloud.launcher.ui.HomePageDots
 import com.goreecloud.launcher.ui.HomePageManagerSheet
 import com.goreecloud.launcher.ui.LauncherAppDragData
 import com.goreecloud.launcher.ui.LauncherAppDragOrigin
+import com.goreecloud.launcher.ui.LauncherWidgetDragData
 import com.goreecloud.launcher.ui.LayoutLockHoldControl
 import com.goreecloud.launcher.ui.LauncherBetaRoot
 import com.goreecloud.launcher.ui.LauncherIconAppearance
@@ -137,6 +138,7 @@ import com.goreecloud.launcher.ui.ReadOnlyPagedHomeSurface
 import com.goreecloud.launcher.ui.homePageCellAtPoint
 import com.goreecloud.launcher.ui.homePageEdgeDropTarget
 import com.goreecloud.launcher.ui.launcherAppDragData
+import com.goreecloud.launcher.ui.launcherWidgetDragData
 import com.goreecloud.launcher.ui.launcherUsesDarkSystemBarIcons
 import com.goreecloud.launcher.ui.rootDropPoint
 import com.goreecloud.launcher.ui.theme.GlazeMetrics
@@ -466,6 +468,8 @@ class MainActivity : ComponentActivity() {
             var currentHomeGridBounds by remember { mutableStateOf<Rect?>(null) }
             var activeHomeAppDrag by remember { mutableStateOf<LauncherAppDragData?>(null) }
             var activeHomeAppDragPoint by remember { mutableStateOf<Offset?>(null) }
+            var activeHomeWidgetDrag by remember { mutableStateOf<LauncherWidgetDragData?>(null) }
+            var activeHomeWidgetDragPoint by remember { mutableStateOf<Offset?>(null) }
             var showHomePageManager by rememberSaveable { mutableStateOf(false) }
             var homeEditorVisible by rememberSaveable { mutableStateOf(false) }
             var pendingHomeEditorPageId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -822,61 +826,158 @@ class MainActivity : ComponentActivity() {
                 }
                 val currentRouteHomeAppDrop by rememberUpdatedState(routeHomeAppDrop)
 
+                val routeHomeWidgetDrop: (LauncherWidgetDragData, Offset) -> Boolean =
+                    route@{ drag, point ->
+                        if (currentLauncherPreferences.layoutLocked) return@route false
+                        val widget = currentRenderedPages
+                            .asSequence()
+                            .flatMap { it.widgetPlacements.asSequence() }
+                            .firstOrNull { it.itemId == drag.itemId }
+                            ?: return@route false
+                        if (
+                            widget.spanX != drag.spanX ||
+                            widget.spanY != drag.spanY
+                        ) {
+                            return@route false
+                        }
+                        val sourcePageId = drag.sourcePageId
+                        val targetPageId = currentSelectedHomePageId.takeIf { candidate ->
+                            currentRenderedPages.any { it.pageId == candidate }
+                        } ?: WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                        val bounds = currentGridBounds ?: return@route false
+                        val columns = currentLauncherPreferences.homeColumns.coerceIn(4, 6)
+                        val rows = currentLauncherPreferences.homeRows.coerceIn(4, 7)
+
+                        val adjacentEdge = if (sourcePageId == targetPageId) {
+                            homePageEdgeDropTarget(
+                                pages = currentRenderedPages,
+                                currentPageId = targetPageId,
+                                dropX = point.x,
+                                dropY = point.y,
+                                surfaceLeftPx = bounds.left,
+                                surfaceTopPx = bounds.top,
+                                surfaceRightPx = bounds.right,
+                                surfaceBottomPx = bounds.bottom,
+                                edgeThresholdPx = crossPageDragEdgeThresholdPx,
+                                columns = columns,
+                                rows = rows,
+                                spanX = drag.spanX,
+                                spanY = drag.spanY,
+                            )
+                        } else {
+                            null
+                        }
+
+                        if (adjacentEdge != null) {
+                            moveWidgetToPage(
+                                widget = widget,
+                                targetPageId = adjacentEdge.pageId,
+                                targetCellX = adjacentEdge.cellX,
+                                targetCellY = adjacentEdge.cellY,
+                            ) { selectedHomePageId = it }
+                            true
+                        } else {
+                            val targetCell =
+                                currentResolveHomeDropCell(point, targetPageId, bounds)
+                                    ?: return@route false
+                            if (
+                                targetCell.first + drag.spanX > columns ||
+                                targetCell.second + drag.spanY > rows
+                            ) {
+                                return@route false
+                            }
+                            if (sourcePageId == targetPageId) {
+                                moveWidget(
+                                    widget = widget,
+                                    cellX = targetCell.first,
+                                    cellY = targetCell.second,
+                                )
+                            } else {
+                                moveWidgetToPage(
+                                    widget = widget,
+                                    targetPageId = targetPageId,
+                                    targetCellX = targetCell.first,
+                                    targetCellY = targetCell.second,
+                                ) { selectedHomePageId = it }
+                            }
+                            true
+                        }
+                    }
+                val currentRouteHomeWidgetDrop by rememberUpdatedState(routeHomeWidgetDrop)
+
                 val homeAppDragTarget = remember {
                     object : DragAndDropTarget {
                         override fun onStarted(event: DragAndDropEvent) {
-                            val drag = event.launcherAppDragData() ?: return
+                            val appDrag = event.launcherAppDragData()
                             if (
-                                drag.origin != LauncherAppDragOrigin.HOME ||
-                                drag.sourcePageId == null
+                                appDrag?.origin == LauncherAppDragOrigin.HOME &&
+                                appDrag.sourcePageId != null
                             ) {
+                                activeHomeWidgetDrag = null
+                                activeHomeWidgetDragPoint = null
+                                activeHomeAppDrag = appDrag
+                                activeHomeAppDragPoint = null
                                 return
                             }
-                            activeHomeAppDrag = drag
+                            val widgetDrag = event.launcherWidgetDragData() ?: return
+                            activeHomeAppDrag = null
                             activeHomeAppDragPoint = null
+                            activeHomeWidgetDrag = widgetDrag
+                            activeHomeWidgetDragPoint = null
                         }
 
                         override fun onMoved(event: DragAndDropEvent) {
-                            val drag = event.launcherAppDragData() ?: return
+                            val appDrag = event.launcherAppDragData()
                             if (
-                                drag.origin == LauncherAppDragOrigin.HOME &&
-                                drag.sourcePageId != null &&
-                                activeHomeAppDrag?.appKey == drag.appKey
+                                appDrag?.origin == LauncherAppDragOrigin.HOME &&
+                                appDrag.sourcePageId != null &&
+                                activeHomeAppDrag?.appKey == appDrag.appKey
                             ) {
                                 activeHomeAppDragPoint = event.rootDropPoint()
+                                return
+                            }
+                            val widgetDrag = event.launcherWidgetDragData() ?: return
+                            if (activeHomeWidgetDrag?.itemId == widgetDrag.itemId) {
+                                activeHomeWidgetDragPoint = event.rootDropPoint()
                             }
                         }
 
                         override fun onDrop(event: DragAndDropEvent): Boolean {
-                            val drag = event.launcherAppDragData() ?: return false
-                            if (
-                                drag.origin != LauncherAppDragOrigin.HOME ||
-                                drag.sourcePageId == null
-                            ) {
-                                return false
-                            }
                             val point = event.rootDropPoint()
-                            activeHomeAppDragPoint = point
-                            return currentRouteHomeAppDrop(drag, point)
+                            val appDrag = event.launcherAppDragData()
+                            if (
+                                appDrag?.origin == LauncherAppDragOrigin.HOME &&
+                                appDrag.sourcePageId != null
+                            ) {
+                                activeHomeAppDragPoint = point
+                                return currentRouteHomeAppDrop(appDrag, point)
+                            }
+                            val widgetDrag = event.launcherWidgetDragData() ?: return false
+                            activeHomeWidgetDragPoint = point
+                            return currentRouteHomeWidgetDrop(widgetDrag, point)
                         }
 
                         override fun onEnded(event: DragAndDropEvent) {
-                            val drag = event.launcherAppDragData()
-                            if (drag?.origin == LauncherAppDragOrigin.HOME) {
+                            val appDrag = event.launcherAppDragData()
+                            if (appDrag?.origin == LauncherAppDragOrigin.HOME) {
                                 activeHomeAppDrag = null
                                 activeHomeAppDragPoint = null
+                            }
+                            if (event.launcherWidgetDragData() != null) {
+                                activeHomeWidgetDrag = null
+                                activeHomeWidgetDragPoint = null
                             }
                         }
                     }
                 }
 
                 val hoverTargetPageId = run {
-                    val drag = activeHomeAppDrag
-                    val point = activeHomeAppDragPoint
+                    val appDrag = activeHomeAppDrag
+                    val widgetDrag = activeHomeWidgetDrag
+                    val point = activeHomeAppDragPoint ?: activeHomeWidgetDragPoint
                     val bounds = currentHomeGridBounds
                     if (
-                        drag == null ||
-                        drag.sourcePageId == null ||
+                        (appDrag?.sourcePageId == null && widgetDrag == null) ||
                         point == null ||
                         bounds == null ||
                         launcherPreferences.layoutLocked ||
@@ -897,6 +998,8 @@ class MainActivity : ComponentActivity() {
                             edgeThresholdPx = crossPageDragEdgeThresholdPx,
                             columns = launcherPreferences.homeColumns.coerceIn(4, 6),
                             rows = launcherPreferences.homeRows.coerceIn(4, 7),
+                            spanX = widgetDrag?.spanX ?: 1,
+                            spanY = widgetDrag?.spanY ?: 1,
                         )?.pageId
                     }
                 }
@@ -904,13 +1007,15 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(
                     activeHomeAppDrag?.appKey,
                     activeHomeAppDrag?.sourcePageId,
+                    activeHomeWidgetDrag?.itemId,
+                    activeHomeWidgetDrag?.sourcePageId,
                     selectedHomePageId,
                     hoverTargetPageId,
                 ) {
                     if (hoverTargetPageId != null) {
                         delay(550)
                         if (
-                            activeHomeAppDrag != null &&
+                            (activeHomeAppDrag != null || activeHomeWidgetDrag != null) &&
                             !launcherPreferences.layoutLocked &&
                             !showHomePageManager &&
                             selectedHomePageId != hoverTargetPageId
@@ -932,7 +1037,7 @@ class MainActivity : ComponentActivity() {
                                 event.launcherAppDragData()?.let { drag ->
                                     drag.origin == LauncherAppDragOrigin.HOME &&
                                         drag.sourcePageId != null
-                                } == true
+                                } == true || event.launcherWidgetDragData() != null
                             },
                             target = homeAppDragTarget,
                         )
@@ -940,7 +1045,8 @@ class MainActivity : ComponentActivity() {
                             enabled = showingHome &&
                                 renderedPages.size > 1 &&
                                 !showHomePageManager &&
-                                activeHomeAppDrag == null,
+                                activeHomeAppDrag == null &&
+                                activeHomeWidgetDrag == null,
                             currentIndex = selectedHomePageIndex,
                             pageCount = renderedPages.size,
                             onPageSelected = { pageIndex ->
