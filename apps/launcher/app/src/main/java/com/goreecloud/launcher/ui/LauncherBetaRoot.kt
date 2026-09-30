@@ -2634,7 +2634,7 @@ private fun LauncherWeatherStatusChip(
 ) {
     val context = LocalContext.current
     var permissionRevision by remember { mutableIntStateOf(0) }
-    var weather by remember { mutableStateOf<LauncherWeatherSnapshot?>(null) }
+    var weather by remember { mutableStateOf(LauncherWeather.cachedSnapshot()) }
     var loading by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
     val hasLocationPermission = remember(permissionRevision, context) {
@@ -2653,9 +2653,14 @@ private fun LauncherWeatherStatusChip(
             loading = false
             failed = false
         } else {
-            loading = true
+            val hadCachedWeather = weather != null
+            loading = !hadCachedWeather
             failed = false
-            weather = LauncherWeather.load(context.applicationContext)
+            val refreshed = LauncherWeather.load(
+                context = context.applicationContext,
+                forceRefresh = permissionRevision > 0,
+            )
+            if (refreshed != null) weather = refreshed
             failed = weather == null
             loading = false
         }
