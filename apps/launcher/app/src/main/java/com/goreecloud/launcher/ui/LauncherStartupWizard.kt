@@ -274,7 +274,7 @@ fun LauncherStartupWizard(
                             )
                             WizardInfoCard(
                                 title = "Move apps together",
-                                summary = "In Edit Home, secondary pages with at least two positioned apps show Move apps. Select the apps, choose a secondary destination page, then choose the top-left anchor cell. Launcher keeps the group’s relative arrangement, disables known invalid destinations, and preserves the current layout if the workspace changes before commit. Primary Home is not part of group movement yet.",
+                                summary = "In Edit Home, any Home page with at least two positioned apps can show Move apps. Primary Home groups can be repositioned together on Primary Home; secondary-page groups can move within or between secondary pages. Select the apps, choose the allowed destination page, then choose the top-left anchor cell. Launcher keeps the group’s relative arrangement, disables known invalid destinations, and preserves the current layout if the workspace changes before commit. Primary↔secondary group transfer remains protected.",
                             )
                             WizardInfoCard(
                                 title = "Move widgets directly",
@@ -397,7 +397,7 @@ fun LauncherHomeHintCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "Edit Home: on a secondary page with at least two positioned apps, use Move apps to select the group, choose a destination page, and choose its top-left anchor cell.",
+                "Edit Home: on a Home page with at least two positioned apps, use Move apps to select the group and choose its top-left anchor cell. Primary Home groups stay on Primary Home; secondary groups may move among secondary pages.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
