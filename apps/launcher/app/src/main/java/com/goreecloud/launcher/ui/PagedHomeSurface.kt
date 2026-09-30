@@ -167,6 +167,30 @@ internal fun Modifier.homePageSwipeNavigation(
     }
 }
 
+internal enum class HomeVerticalGestureTarget {
+    UP,
+    DOWN,
+}
+
+internal fun homeVerticalGestureTarget(
+    horizontalDistancePx: Float,
+    verticalDistancePx: Float,
+    minimumDistancePx: Float,
+): HomeVerticalGestureTarget? {
+    if (
+        minimumDistancePx <= 0f ||
+        abs(verticalDistancePx) < minimumDistancePx ||
+        abs(verticalDistancePx) <= abs(horizontalDistancePx) * 1.20f
+    ) {
+        return null
+    }
+    return if (verticalDistancePx < 0f) {
+        HomeVerticalGestureTarget.UP
+    } else {
+        HomeVerticalGestureTarget.DOWN
+    }
+}
+
 internal fun Modifier.homeVerticalGestureNavigation(
     enabled: Boolean,
     onSwipeUp: () -> Unit,
@@ -193,11 +217,16 @@ internal fun Modifier.homeVerticalGestureNavigation(
                 verticalDistance += delta.y
 
                 if (!change.pressed) {
-                    if (
-                        abs(verticalDistance) >= minimumDistancePx &&
-                        abs(verticalDistance) > abs(horizontalDistance) * 1.20f
+                    when (
+                        homeVerticalGestureTarget(
+                            horizontalDistancePx = horizontalDistance,
+                            verticalDistancePx = verticalDistance,
+                            minimumDistancePx = minimumDistancePx,
+                        )
                     ) {
-                        if (verticalDistance < 0f) onSwipeUp() else onSwipeDown()
+                        HomeVerticalGestureTarget.UP -> onSwipeUp()
+                        HomeVerticalGestureTarget.DOWN -> onSwipeDown()
+                        null -> Unit
                     }
                     break
                 }
