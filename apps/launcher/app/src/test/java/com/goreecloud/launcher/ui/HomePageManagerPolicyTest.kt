@@ -619,6 +619,53 @@ class HomePageManagerPolicyTest {
 
 
     @Test
+    fun preparedGroupAnchorPreflightEvaluatesMultipleCellsFromOneSnapshot() {
+        val firstKey = "10:com.example.one/.Main"
+        val secondKey = "10:com.example.two/.Main"
+        val source = WorkspaceRenderedHomePage(
+            pageId = "home:user:source",
+            rank = 1,
+            appKeys = listOf(firstKey, secondKey),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 1, 1, 1, 1),
+            ),
+        )
+        val target = WorkspaceRenderedHomePage(
+            pageId = "home:user:target",
+            rank = 2,
+            appKeys = emptyList(),
+            unsupportedItemCount = 0,
+            folderPlacements = listOf(
+                WorkspaceRenderedHomeFolder(
+                    itemId = "folder:item",
+                    folderId = "folder:id",
+                    cellX = 0,
+                    cellY = 0,
+                ),
+            ),
+        )
+
+        val preflight = checkNotNull(
+            prepareHomeAppGroupAnchorPreflight(
+                sourcePage = source,
+                targetPage = target,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+            ),
+        )
+
+        assertEquals(0, preflight.sourceMinX)
+        assertEquals(0, preflight.sourceMinY)
+        assertFalse(preflight.samePage)
+        assertFalse(preflight.isAvailable(0, 0))
+        assertTrue(preflight.isAvailable(1, 2))
+        assertFalse(preflight.isAvailable(3, 4))
+    }
+
+    @Test
     fun groupAnchorPreflightPreservesRigidGeometryAndRejectsOccupiedOrOutOfBoundsCells() {
         val firstKey = "10:com.example.one/.Main"
         val secondKey = "10:com.example.two/.Main"
