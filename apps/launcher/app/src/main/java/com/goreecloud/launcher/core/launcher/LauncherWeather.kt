@@ -154,8 +154,14 @@ object LauncherWeather {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
             ) == PackageManager.PERMISSION_GRANTED
 
-    suspend fun load(context: Context): LauncherWeatherSnapshot? = withContext(Dispatchers.IO) {
+    suspend fun load(
+        context: Context,
+        forceRefresh: Boolean = false,
+    ): LauncherWeatherSnapshot? = withContext(Dispatchers.IO) {
         if (!hasLocationPermission(context)) return@withContext null
+        if (!forceRefresh) {
+            cachedSnapshot()?.let { return@withContext it }
+        }
         val location = withTimeoutOrNull(6_000) { currentLocation(context) }
             ?: lastKnownLocation(context)
             ?: return@withContext null
