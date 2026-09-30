@@ -1940,7 +1940,11 @@ class MainActivity : ComponentActivity() {
                 }
                 if (
                     initialProfile == folder.profileKind &&
-                    !folderRepository.addApp(folder.id, initialApp.workspaceKey())
+                    !folderRepository.addApp(
+                        folder.id,
+                        initialApp.workspaceKey(),
+                        initialProfile,
+                    )
                 ) {
                     Toast.makeText(
                         this@MainActivity,
@@ -1983,7 +1987,7 @@ class MainActivity : ComponentActivity() {
                 ).show()
                 return@launch
             }
-            if (!folderRepository.addApp(folderId, app.workspaceKey())) {
+            if (!folderRepository.addApp(folderId, app.workspaceKey(), appProfile)) {
                 Toast.makeText(
                     this@MainActivity,
                     "App could not be added to that folder.",
