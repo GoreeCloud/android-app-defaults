@@ -1459,9 +1459,9 @@ class ActivatedHomeLifecycleRuntimeTest {
 
                 val moved = dao.readItems(listOf(secondaryPageId)).associateBy { it.appKey }
                 assertEquals(2, moved.getValue(checkNotNull(firstKey)).cellX)
-                assertEquals(2, moved.getValue(checkNotNull(firstKey)).cellY)
+                assertEquals(0, moved.getValue(checkNotNull(firstKey)).cellY)
                 assertEquals(3, moved.getValue(checkNotNull(secondKey)).cellX)
-                assertEquals(2, moved.getValue(checkNotNull(secondKey)).cellY)
+                assertEquals(0, moved.getValue(checkNotNull(secondKey)).cellY)
             } finally {
                 scenario.close()
             }
