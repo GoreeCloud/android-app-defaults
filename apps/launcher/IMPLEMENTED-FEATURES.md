@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — reusable group-anchor preflight model
+
+The stacked Development candidate memoizes group-move source geometry and destination occupancy once per selection/page/grid state, then evaluates each anchor against that prepared model. This preserves the exact existing collision/bounds/no-op authority while avoiding repeated page grouping and placement-list construction for every anchor cell. Focused JVM coverage exercises multiple cells from one preflight snapshot.
+
+**Acceptance boundary:** source-level recomposition/allocation reduction is implemented; representative-device performance and power acceptance remain open.
+
 ## September 30, 2026 — recoverable group-move submission
 
 The stacked Development candidate no longer dismisses the group editor before the atomic Room write returns. It preserves selected apps and destination choices after a rejected request, blocks duplicate input while the write is in flight, provides inline assertive failure feedback, and closes only after confirmed success. Android 16 runtime coverage verifies locked-layout rejection leaves both selection and persisted geometry unchanged, then verifies the retained group can be retried successfully after unlocking.
