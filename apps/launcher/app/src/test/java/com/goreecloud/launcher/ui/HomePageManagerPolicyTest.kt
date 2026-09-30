@@ -109,6 +109,34 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun liveFolderDragRequiresUnlockedNamedSourcePage() {
+        assertTrue(
+            canStartFolderLiveDrag(
+                layoutLocked = false,
+                sourcePageId = "home:user:secondary",
+            ),
+        )
+        assertFalse(
+            canStartFolderLiveDrag(
+                layoutLocked = true,
+                sourcePageId = "home:user:secondary",
+            ),
+        )
+        assertFalse(
+            canStartFolderLiveDrag(
+                layoutLocked = false,
+                sourcePageId = null,
+            ),
+        )
+        assertFalse(
+            canStartFolderLiveDrag(
+                layoutLocked = false,
+                sourcePageId = "",
+            ),
+        )
+    }
+
+    @Test
     fun horizontalHomeSwipeMovesBetweenAdjacentPages() {
         assertEquals(
             1,
