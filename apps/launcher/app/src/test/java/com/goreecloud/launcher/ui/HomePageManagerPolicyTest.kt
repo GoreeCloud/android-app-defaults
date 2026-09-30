@@ -164,6 +164,40 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun verticalHomeGestureRecognizesSearchAndAppsWithoutStealingHorizontalPaging() {
+        assertEquals(
+            HomeVerticalGestureTarget.DOWN,
+            homeVerticalGestureTarget(
+                horizontalDistancePx = 8f,
+                verticalDistancePx = 96f,
+                minimumDistancePx = 44f,
+            ),
+        )
+        assertEquals(
+            HomeVerticalGestureTarget.UP,
+            homeVerticalGestureTarget(
+                horizontalDistancePx = -6f,
+                verticalDistancePx = -92f,
+                minimumDistancePx = 44f,
+            ),
+        )
+        assertNull(
+            homeVerticalGestureTarget(
+                horizontalDistancePx = -96f,
+                verticalDistancePx = 50f,
+                minimumDistancePx = 44f,
+            ),
+        )
+        assertNull(
+            homeVerticalGestureTarget(
+                horizontalDistancePx = 4f,
+                verticalDistancePx = 30f,
+                minimumDistancePx = 44f,
+            ),
+        )
+    }
+
+    @Test
     fun secondaryHomeMoveTargetsIncludePrimaryAndExcludeCurrentPage() {
         val secondary = WorkspaceRenderedHomePage(
             pageId = "home:user:secondary",
