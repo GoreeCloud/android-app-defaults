@@ -4014,7 +4014,7 @@ private fun LauncherBuiltInWidget(
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     shape = RoundedCornerShape(28.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                    color = Color.White.copy(alpha = 0.94f),
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize().padding(15.dp),
@@ -4023,17 +4023,19 @@ private fun LauncherBuiltInWidget(
                         Text(
                             now.format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = Color(0xFF17191D).copy(alpha = 0.62f),
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
                             now.dayOfMonth.toString(),
                             style = MaterialTheme.typography.displayMedium,
+                            color = Color(0xFF17191D),
                             fontWeight = FontWeight.Light,
                         )
                         Text(
                             now.format(DateTimeFormatter.ofPattern("EEE", Locale.getDefault())),
                             style = MaterialTheme.typography.titleSmall,
+                            color = Color(0xFF17191D),
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
