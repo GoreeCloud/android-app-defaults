@@ -1418,13 +1418,13 @@ class ActivatedHomeLifecycleRuntimeTest {
 
                 composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-anchor-row-0",
+                        "launcher-home-group-anchor-row-1",
                         useUnmergedTree = true,
                     )
                     .performScrollTo()
                 val anchorNode = composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-cell-2-0",
+                        "launcher-home-group-cell-0-1",
                         useUnmergedTree = true,
                     )
                 anchorNode.assertIsDisplayed()
@@ -1446,10 +1446,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                         val first = byKey[checkNotNull(firstKey)]
                         val second = byKey[checkNotNull(secondKey)]
                         if (
-                            first?.cellX == 2 &&
-                            first.cellY == 0 &&
-                            second?.cellX == 3 &&
-                            second.cellY == 0
+                            first?.cellX == 0 &&
+                            first.cellY == 1 &&
+                            second?.cellX == 1 &&
+                            second.cellY == 1
                         ) {
                             break
                         }
@@ -1458,10 +1458,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
 
                 val moved = dao.readItems(listOf(secondaryPageId)).associateBy { it.appKey }
-                assertEquals(2, moved.getValue(checkNotNull(firstKey)).cellX)
-                assertEquals(0, moved.getValue(checkNotNull(firstKey)).cellY)
-                assertEquals(3, moved.getValue(checkNotNull(secondKey)).cellX)
-                assertEquals(0, moved.getValue(checkNotNull(secondKey)).cellY)
+                assertEquals(0, moved.getValue(checkNotNull(firstKey)).cellX)
+                assertEquals(1, moved.getValue(checkNotNull(firstKey)).cellY)
+                assertEquals(1, moved.getValue(checkNotNull(secondKey)).cellX)
+                assertEquals(1, moved.getValue(checkNotNull(secondKey)).cellY)
             } finally {
                 scenario.close()
             }
