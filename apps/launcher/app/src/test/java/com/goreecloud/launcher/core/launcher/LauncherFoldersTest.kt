@@ -65,6 +65,34 @@ class LauncherFoldersTest {
     }
 
     @Test
+    fun folderMembershipRequiresMatchingProfile() {
+        assertTrue(
+            LauncherFolderPolicy.canContain(
+                LauncherDrawerProfileKind.USER,
+                LauncherDrawerProfileKind.USER,
+            ),
+        )
+        assertTrue(
+            LauncherFolderPolicy.canContain(
+                LauncherDrawerProfileKind.WORK,
+                LauncherDrawerProfileKind.WORK,
+            ),
+        )
+        assertFalse(
+            LauncherFolderPolicy.canContain(
+                LauncherDrawerProfileKind.USER,
+                LauncherDrawerProfileKind.WORK,
+            ),
+        )
+        assertFalse(
+            LauncherFolderPolicy.canContain(
+                LauncherDrawerProfileKind.WORK,
+                LauncherDrawerProfileKind.USER,
+            ),
+        )
+    }
+
+    @Test
     fun emptyAndMissingStorageDecodeToEmptyFolderList() {
         assertEquals(emptyList<LauncherFolder>(), LauncherFolderCodec.decode(null))
         assertEquals(emptyList<LauncherFolder>(), LauncherFolderCodec.decode(""))
