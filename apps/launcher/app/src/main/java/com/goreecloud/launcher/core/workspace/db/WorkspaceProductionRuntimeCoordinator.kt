@@ -588,6 +588,7 @@ class WorkspaceProductionRuntimeCoordinator(
         rows: Int,
         cellX: Int,
         cellY: Int,
+        expectedSourceItems: List<WorkspacePagedRoomMutationResult.UpdatedItem>? = null,
     ): WorkspacePagedRoomMutationResult {
         val grid = runCatching {
             WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
@@ -599,6 +600,7 @@ class WorkspaceProductionRuntimeCoordinator(
             grid = grid,
             targetCellX = cellX,
             targetCellY = cellY,
+            expectedSourceItems = expectedSourceItems,
         )
         if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
             refresh()
