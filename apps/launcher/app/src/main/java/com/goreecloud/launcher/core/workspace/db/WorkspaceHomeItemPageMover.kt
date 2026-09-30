@@ -244,6 +244,7 @@ class WorkspaceHomeItemPageMover(
         grid: WorkspaceGridPlacement.Grid,
         targetCellX: Int,
         targetCellY: Int,
+        expectedSourceItems: List<WorkspacePagedRoomMutationResult.UpdatedItem>? = null,
     ): WorkspacePagedRoomMutationResult {
         if (
             sourcePageId.isBlank() ||
@@ -311,6 +312,7 @@ class WorkspaceHomeItemPageMover(
                 targetPageId = targetPageId,
                 targetCellX = targetCellX,
                 targetCellY = targetCellY,
+                expectedSourceItems = expectedSourceItems,
             )
         } catch (exception: CancellationException) {
             throw exception
