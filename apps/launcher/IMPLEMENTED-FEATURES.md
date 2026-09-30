@@ -8,9 +8,10 @@
 - Merged PR #105 confirms suspicious full-refresh inventory losses before publishing them when the Android profile is still active, reducing transient disappearing apps without delaying explicit package/profile removals.
 - Merged PR #106 adds **Movable** Universal Search beside **Swipe down**, fixed **Top**, and fixed **Bottom**. Movable Search reuses the existing 4 × 1 Room-backed Universal Search widget, supports ordinary Home widget movement and cross-page placement, keeps a fixed-bottom fallback when no 4 × 1 primary-Home area is free, and retries managed placement after primary-Home geometry changes.
 - Merged PR #107 removes the redundant 180–220 ms first-composition page-entry animation while preserving configured transitions for actual page-key changes.
-- The current Development architecture branch adds a content-only mode for secondary Home surfaces so page content can be rendered independently from persistent page indicators and Dock chrome. This is a prerequisite for follow-finger paging; the default/full-surface path remains unchanged.
+- Parent PR #108 adds a content-only mode for secondary Home surfaces so page content can be rendered independently from persistent page indicators and Dock chrome.
+- The current stacked Development branch uses that boundary to page between two or more secondary Home pages with Compose `HorizontalPager`. Secondary page content now follows the finger while the persistent Dock stays outside the pager. The Activity-level threshold recognizer is filtered so it continues to own only the Primary↔secondary boundary rather than racing secondary↔secondary paging.
 
-**Acceptance boundary:** PRs #103–#107 are merged Development evidence. The content-layer split still requires fresh exact-head CI before integration and does not itself implement a follow-finger pager. Representative-device multi-page frame pacing, the larger Primary↔secondary subtree replacement, Search placement, package/profile churn, accessibility, large-text/form-factor, visual quality, and power acceptance remain open.
+**Acceptance boundary:** PRs #103–#107 are merged Development evidence. PR #108 must integrate first, then this stacked follow-finger candidate requires reconciliation against authoritative main and fresh exact-head validation. Primary↔secondary follow-finger unification, representative-device multi-page frame pacing, Search placement, package/profile churn, accessibility, large-text/form-factor, visual quality, and power acceptance remain open.
 
 ## September 30, 2026 — polished Calendar and Weather widgets
 
