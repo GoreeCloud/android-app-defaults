@@ -119,7 +119,7 @@ class LauncherStartupWizardRuntimeTest {
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Open a folder and use Add apps at the end of its grid or from the folder menu. On Home, long-press a folder to move it to a free cell or release it at a page edge to move it to the adjacent Home page. Larger opened folders swipe across compact pages.",
+            "Open a folder and use Add apps at the end of its grid or from the folder menu. On Home, long-press a folder and keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell. A quick edge release still moves to the adjacent page. Larger opened folders swipe across compact pages.",
         )
             .performScrollTo()
             .assertIsDisplayed()
@@ -138,16 +138,16 @@ class LauncherStartupWizardRuntimeTest {
 
         composeRule.onNodeWithText(
             "Long-press an app in Apps, keep holding, and drag it to the exact primary Home cell or Dock position.",
-        ).assertIsDisplayed()
+        ).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(
             "Home apps: keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell.",
-        ).assertIsDisplayed()
+        ).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(
             "Widgets: long-press and drag to a free Home cell or adjacent page edge; a stationary hold opens widget options, including Move to another Home page.",
-        ).assertIsDisplayed()
+        ).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Folders: long-press a Home folder to move it to a free cell or adjacent page edge; use Add apps at the end of the grid and swipe larger opened folders between pages.",
-        ).assertIsDisplayed()
+            "Folders: long-press and keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell; a quick edge release still uses adjacent-page landing. Use Add apps at the end of the grid and swipe larger opened folders between pages.",
+        ).performScrollTo().assertIsDisplayed()
     }
 
     @Test
