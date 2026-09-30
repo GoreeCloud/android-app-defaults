@@ -21,6 +21,24 @@ class HomePageManagerPolicyTest {
     )
 
     @Test
+    fun groupSelectionSummaryAnnouncesProgressWithinSelectableApps() {
+        assertEquals(
+            "0 of 4 apps selected",
+            homeAppGroupSelectionSummary(
+                selectedCount = 0,
+                totalCount = 4,
+            ),
+        )
+        assertEquals(
+            "3 of 4 apps selected",
+            homeAppGroupSelectionSummary(
+                selectedCount = 3,
+                totalCount = 4,
+            ),
+        )
+    }
+
+    @Test
     fun groupAnchorDescriptionAnnouncesCoordinatesAndAvailability() {
         assertEquals(
             "Anchor column 3, row 4, available",
