@@ -229,7 +229,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         var preferences: com.goreecloud.launcher.core.launcher.LauncherPreferences? = null
 
         try {
-            preferencesRepository.setLayoutLocked(false).join()
+            preferencesRepository.setLayoutLocked(false)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first { !it.layoutLocked }
+            }
             val apps = withTimeout(10_000) {
                 LauncherAppsRepository(context).apps.first { candidates ->
                     candidates
@@ -421,7 +424,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
                 currentRuntime.deleteEmptyHomePage(secondaryPageId)
             }
-            preferencesRepository.setLayoutLocked(previousLayoutLocked).join()
+            preferencesRepository.setLayoutLocked(previousLayoutLocked)
+            withTimeout(10_000) {
+                preferencesRepository.preferences.first { it.layoutLocked == previousLayoutLocked }
+            }
             if (!alreadyDefaultHome) {
                 runShellCommand(
                     "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
