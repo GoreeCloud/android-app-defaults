@@ -242,11 +242,28 @@ class ActivatedHomeLifecycleRuntimeTest {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
 
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val dao = LauncherDatabaseProvider.get(context).workspaceDao()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = { dao },
+                )
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidate.workspaceKey()),
+                        dockKeys = listOf(candidate.workspaceKey()),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Horizontal-swipe fixture must establish the persistent Dock it later measures."
+                }
+
                 runtime = WorkspaceProductionRuntimeCoordinator(
                     authorityRepository = repository,
-                    workspaceDaoProvider = {
-                        LauncherDatabaseProvider.get(context).workspaceDao()
-                    },
+                    workspaceDaoProvider = { dao },
                 )
                 // Remove any residue from an interrupted prior emulator attempt, then create one
                 // empty secondary page so the test exercises the exact primary -> secondary path.
