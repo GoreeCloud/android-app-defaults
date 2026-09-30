@@ -1322,8 +1322,17 @@ private fun HomeSurface(
         }
     }
 
-    LaunchedEffect(showHomeEditor) {
-        onHomeEditorVisibilityChanged(showHomeEditor)
+    // HOME re-entry invalidates any editor/picker that was opened under an older reset
+    // generation immediately, instead of waiting an extra composition for the cleanup effect.
+    val homeEditorResetGeneration = remember(showHomeEditor) { homeResetSequence }
+    val widgetPickerResetGeneration = remember(showWidgetPicker) { homeResetSequence }
+    val effectiveShowHomeEditor =
+        showHomeEditor && homeEditorResetGeneration == homeResetSequence
+    val effectiveShowWidgetPicker =
+        showWidgetPicker && widgetPickerResetGeneration == homeResetSequence
+
+    LaunchedEffect(effectiveShowHomeEditor) {
+        onHomeEditorVisibilityChanged(effectiveShowHomeEditor)
     }
 
     LaunchedEffect(homeResetSequence) {
@@ -1708,7 +1717,7 @@ private fun HomeSurface(
             Spacer(Modifier.height(2.dp))
         }
 
-        if (showHomeEditor) {
+        if (effectiveShowHomeEditor) {
             Dialog(
                 onDismissRequest = { showHomeEditor = false },
                 properties = DialogProperties(
@@ -1757,7 +1766,7 @@ private fun HomeSurface(
             }
         }
 
-        if (showWidgetPicker) {
+        if (effectiveShowWidgetPicker) {
             ModalBottomSheet(
                 onDismissRequest = { showWidgetPicker = false },
                 containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
