@@ -3309,6 +3309,7 @@ private fun HomeFavoritesGrid(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeFolderTile(
     folder: LauncherFolder,
