@@ -216,10 +216,7 @@ class WorkspacePagedRoomMutationRepository(
         targetPlacement: WorkspaceGridPlacement.Placement,
     ): WorkspacePagedRoomMutationResult {
         if (!isRoomAuthoritative()) return WorkspacePagedRoomMutationResult.Reserved
-        val primarySource = sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
-        val primaryTarget = targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
-        val primarySamePage = primarySource && primaryTarget
-        if (primarySource != primaryTarget) {
+        if (targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
             return WorkspacePagedRoomMutationResult.PrimaryPageProtected
         }
         val dao = workspaceDaoOrNull() ?: return WorkspacePagedRoomMutationResult.Unavailable
@@ -370,7 +367,10 @@ class WorkspacePagedRoomMutationRepository(
         ) {
             return WorkspacePagedRoomMutationResult.InvalidWorkspace
         }
-        if (targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+        val primarySource = sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        val primaryTarget = targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        val primarySamePage = primarySource && primaryTarget
+        if (primarySource != primaryTarget) {
             return WorkspacePagedRoomMutationResult.PrimaryPageProtected
         }
         val dao = workspaceDaoOrNull() ?: return WorkspacePagedRoomMutationResult.Unavailable
