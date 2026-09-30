@@ -832,6 +832,12 @@ class MainActivity : ComponentActivity() {
                         val folder = folders.firstOrNull { it.id == drag.folderId }
                             ?: return@route false
                         val sourcePageId = drag.sourcePageId
+                        val renderedSourcePageId = currentRenderedPages
+                            .firstOrNull { page ->
+                                page.folderPlacements.any { it.folderId == drag.folderId }
+                            }
+                            ?.pageId
+                        if (renderedSourcePageId != sourcePageId) return@route false
                         val targetPageId = currentSelectedHomePageId.takeIf { candidate ->
                             currentRenderedPages.any { it.pageId == candidate }
                         } ?: WorkspaceLegacyImportMapper.HOME_PAGE_ID
