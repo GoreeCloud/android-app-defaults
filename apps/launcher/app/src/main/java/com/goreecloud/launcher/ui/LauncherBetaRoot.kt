@@ -5493,7 +5493,13 @@ private fun AppDrawerSurface(
                             Surface(
                                 onClick = { drawerSortMenuExpanded = true },
                                 modifier = Modifier
-                                    .size(48.dp)
+                                    .then(
+                                        if (useDrawerHeaderIcons) {
+                                            Modifier.size(48.dp)
+                                        } else {
+                                            Modifier.widthIn(min = 104.dp).height(48.dp)
+                                        },
+                                    )
                                     .testTag("launcher-drawer-sort-order")
                                     .semantics {
                                         contentDescription =
