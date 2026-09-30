@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — live held-page folder handoff
+
+**Change type:** Workspace direct manipulation; folder movement; Development candidate.
+
+Unlocked Home folders now use Android platform drag transport for the same held-edge page handoff already available to saved Home apps. Keeping a folder drag at a valid left or right Home-grid edge briefly changes only the visible page; Room is not mutated during the hover. After the adjacent page renders, release over an exact measured cell to request the existing snapshot-checked folder move. A quick edge release still uses deterministic opposite-edge landing, and occupied, malformed, out-of-bounds, locked-layout, or stale destinations fail closed through the existing Room-authoritative mutation path.
+
+The transport works from primary or secondary Home, disables ordinary page swipes while a folder drag is active, clears stale page geometry before a hover switch, and preserves folder identity, name, membership, and the existing non-drag **Move to another Home page** route. Startup guidance and the replayable Home hint now explain the held-edge folder workflow. No new permission, network path, telemetry, credential, or persistence authority is introduced.
+
+**Acceptance boundary:** this branch is Development source/test work. Fresh exact-head build/lint/unit/schema/instrumentation-compilation and Android 16 runtime evidence remain required, and representative-device pointer continuity, TalkBack/Switch Access, large-text/landscape/foldable behavior, performance/power, protected promotion, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
 
 **Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
