@@ -2586,7 +2586,7 @@ private fun HomeEditorPageOverview(
                                 }
                             } else if (primary) {
                                 Text(
-                                    "Protected",
+                                    "Page protected",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -2665,7 +2665,6 @@ internal fun canMoveHomeAppGroup(
     availableAppKeys: Set<String>,
 ): Boolean =
     !layoutLocked &&
-        page.pageId != WorkspaceLegacyImportMapper.HOME_PAGE_ID &&
         page.appPlacements
             .asSequence()
             .filter { app ->
@@ -2686,9 +2685,10 @@ internal fun homeAppGroupAnchorAvailable(
     targetCellX: Int,
     targetCellY: Int,
 ): Boolean {
+    val primarySource = sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+    val primaryTarget = targetPage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
     if (
-        sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
-        targetPage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        primarySource != primaryTarget ||
         targetPage.unsupportedItemCount > 0 ||
         selectedAppKeys.size < 2 ||
         selectedAppKeys.distinct().size != selectedAppKeys.size
@@ -2795,8 +2795,12 @@ private fun HomeAppGroupMoveDialog(
                 appsByKey[appKey]?.let { app -> placement to app }
             }
     }
-    val targetPages = remember(pages) {
-        pages.filterNot { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+    val targetPages = remember(pages, sourcePage.pageId) {
+        if (sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+            pages.filter { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+        } else {
+            pages.filterNot { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+        }
     }
     var selectedKeys by remember(sourcePage.pageId) {
         mutableStateOf<Set<String>>(emptySet())
@@ -2836,7 +2840,11 @@ private fun HomeAppGroupMoveDialog(
                 verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
             ) {
                 Text(
-                    "Select at least two apps from this page. Their relative positions stay together.",
+                    if (sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+                        "Select at least two apps from Primary Home. Their relative positions stay together on Primary Home."
+                    } else {
+                        "Select at least two apps from this page. Their relative positions stay together."
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
