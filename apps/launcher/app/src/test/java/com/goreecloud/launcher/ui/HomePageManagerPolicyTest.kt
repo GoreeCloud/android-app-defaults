@@ -683,6 +683,49 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun groupAnchorPreflightFailsClosedWhenTargetAppPlacementIsUnresolved() {
+        val firstKey = "10:com.example.one/.Main"
+        val secondKey = "10:com.example.two/.Main"
+        val source = WorkspaceRenderedHomePage(
+            pageId = "home:user:source",
+            rank = 1,
+            appKeys = listOf(firstKey, secondKey),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
+            ),
+        )
+        val target = WorkspaceRenderedHomePage(
+            pageId = "home:user:target",
+            rank = 2,
+            appKeys = listOf("10:com.example.unresolved/.Main"),
+            unsupportedItemCount = 0,
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(
+                    "10:com.example.unresolved/.Main",
+                    null,
+                    null,
+                    1,
+                    1,
+                ),
+            ),
+        )
+
+        assertFalse(
+            homeAppGroupAnchorAvailable(
+                sourcePage = source,
+                targetPage = target,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 1,
+                targetCellY = 2,
+            ),
+        )
+    }
+
+    @Test
     fun samePageGroupAnchorPreflightIgnoresSelectedSourceCellsButKeepsOtherOccupancy() {
         val firstKey = "10:com.example.one/.Main"
         val secondKey = "10:com.example.two/.Main"
