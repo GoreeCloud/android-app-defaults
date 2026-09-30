@@ -708,20 +708,24 @@ class ActivatedHomeLifecycleRuntimeTest {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
 
-                val runtime = WorkspaceProductionRuntimeCoordinator(
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
                     authorityRepository = repository,
                     workspaceDaoProvider = {
                         LauncherDatabaseProvider.get(context).workspaceDao()
                     },
                 )
-                if (candidateKey !in repository.state.first().favoriteKeys) {
-                    val preferences = LauncherPreferencesRepository(context).preferences.first()
-                    val write = runtime.toggleFavorite(
-                        key = candidateKey,
-                        homeColumns = preferences.homeColumns,
-                        homeRows = preferences.homeRows,
-                    )
-                    check(write is WorkspaceAuthoritativeWriteResult.Written)
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidateKey),
+                        dockKeys = emptyList(),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Drawer gesture fixture must establish its visible Home app authoritatively."
                 }
 
                 waitForDisplayedLabel(candidate.label.toString())
@@ -1396,12 +1400,14 @@ class ActivatedHomeLifecycleRuntimeTest {
                     )
                     .performClick()
 
+                composeRule
+                    .onNodeWithText("Destination anchor", useUnmergedTree = true)
+                    .performScrollTo()
                 val anchorNode = composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-cell-2-2",
+                        "launcher-home-group-cell-2-0",
                         useUnmergedTree = true,
                     )
-                anchorNode.performScrollTo()
                 anchorNode.assertIsDisplayed()
                 anchorNode.assertHasClickAction()
                 val anchorBounds = anchorNode.fetchSemanticsNode().boundsInRoot
@@ -1422,9 +1428,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                         val second = byKey[checkNotNull(secondKey)]
                         if (
                             first?.cellX == 2 &&
-                            first.cellY == 2 &&
+                            first.cellY == 0 &&
                             second?.cellX == 3 &&
-                            second.cellY == 2
+                            second.cellY == 0
                         ) {
                             break
                         }
@@ -1516,6 +1522,25 @@ class ActivatedHomeLifecycleRuntimeTest {
             try {
                 withTimeout(15_000) {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
+                }
+                val preferences = LauncherPreferencesRepository(context).preferences.first()
+                val roomPlacement = WorkspaceRoomPlacementRepository(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = {
+                        LauncherDatabaseProvider.get(context).workspaceDao()
+                    },
+                )
+                check(
+                    roomPlacement.replace(
+                        favoriteKeys = listOf(candidateKey),
+                        dockKeys = emptyList(),
+                        homeGrid = WorkspaceGridPlacement.Grid(
+                            columns = preferences.homeColumns,
+                            rows = preferences.homeRows,
+                        ),
+                    ) is WorkspaceRoomWriteResult.Written,
+                ) {
+                    "Home-button drawer fixture must establish its visible Home app authoritatively."
                 }
                 waitForDisplayedLabel(candidate.label.toString())
 

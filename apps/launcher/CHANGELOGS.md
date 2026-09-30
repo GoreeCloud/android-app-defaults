@@ -10,6 +10,16 @@ Focused JVM coverage locks the spoken coordinate/state contract. No permission, 
 
 **Acceptance boundary:** this is a Development accessibility refinement stacked on the visible group-edit candidate. Exact-head CI and Android runtime evidence remain required, and representative TalkBack/Switch Access, large-text, landscape/foldable, and physical-device acceptance remain separate gates.
 
+## September 30, 2026 — Room 3.0.3 transaction regression correction
+
+**Change type:** Persistence reliability; dependency correction; Android runtime test isolation; Development candidate.
+
+The Launcher Room plugin, runtime, and compiler move from 3.0.2 to 3.0.3 after exact Android 16 runtime evidence exposed `IllegalMonitorStateException` from a repeated guarded primary↔secondary HOME transaction. AndroidX Room 3.0.3 specifically fixes the `@Transaction` wrapper-function regression that can throw that exception. The change preserves the existing schema and Room-authoritative workspace design; it does not add a new persistence authority or migration.
+
+Two drawer lifecycle tests now also establish their expected visible primary-Home app through the Room-authoritative placement repository instead of assuming `ensureDefaults` rewrites an already initialized workspace. This removes suite-order dependence exposed by the new group-edit runtime coverage.
+
+**Acceptance boundary:** fresh exact-head build/lint/unit/schema/instrumentation-compilation and Android 16 runtime evidence is required. The dependency correction is Development evidence only and does not establish representative-device, Release Candidate, Production, or Stable acceptance.
+
 ## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
 
 **Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
