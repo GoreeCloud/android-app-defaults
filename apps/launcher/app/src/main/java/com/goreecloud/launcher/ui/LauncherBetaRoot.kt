@@ -1935,6 +1935,9 @@ private fun WidgetPickerBuiltInCard(
 ) {
     val span = WorkspaceWidgetCatalog.defaultSpan(typeId) ?: (1 to 1)
     val glyph = when (typeId) {
+        WorkspaceWidgetCatalog.CALENDAR -> "15"
+        WorkspaceWidgetCatalog.WEATHER -> "72°"
+        WorkspaceWidgetCatalog.GLANCE -> "15 · 72°"
         WorkspaceWidgetCatalog.CLOCK -> "12:34"
         WorkspaceWidgetCatalog.COMPACT_CLOCK -> "12:34"
         WorkspaceWidgetCatalog.ANALOG_CLOCK -> "◷"
