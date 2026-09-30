@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — group-move anchor accessibility refinement
+
+**Change type:** Accessibility; workspace editing; Development candidate.
+
+The Edit Home group-move anchor grid now announces both the exact one-based column/row and whether each anchor is currently available or unavailable. This keeps disabled collision, bounds, stale-geometry, and unchanged-position choices understandable to screen-reader users instead of exposing coordinates without state.
+
+Focused JVM coverage locks the spoken coordinate/state contract. No permission, network path, telemetry, credential, or persistence authority changes.
+
+**Acceptance boundary:** this is a Development accessibility refinement stacked on the visible group-edit candidate. Exact-head CI and Android runtime evidence remain required, and representative TalkBack/Switch Access, large-text, landscape/foldable, and physical-device acceptance remain separate gates.
+
 ## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
 
 **Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
