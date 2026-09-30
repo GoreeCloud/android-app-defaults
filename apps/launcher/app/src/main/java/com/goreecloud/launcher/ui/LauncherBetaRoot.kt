@@ -2588,7 +2588,6 @@ private fun HomeEditorPageOverview(
                 }
             }
         }
-    }
 
         HorizontalPager(
             state = pagerState,
@@ -2775,6 +2774,7 @@ private fun HomeEditorPageOverview(
                 }
             }
         }
+    }
 
     if (groupMoveSourcePage != null) {
         HomeAppGroupMoveDialog(
