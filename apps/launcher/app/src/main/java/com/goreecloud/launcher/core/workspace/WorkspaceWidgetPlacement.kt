@@ -107,7 +107,7 @@ object WorkspaceWidgetCatalog {
     }
 
     fun description(typeId: String): String = when (typeId) {
-        GLANCE -> "Polished Calendar and Weather cards in one movable Home surface."
+        GLANCE -> "Time, date, and weather-provider status in one movable Home card."
         CALENDAR -> "A polished local date card with no Calendar permission required."
         WEATHER -> "Current local weather with time; foreground location only after you allow it."
         CLOCK -> "Time and date with a roomy glance layout."
