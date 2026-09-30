@@ -77,6 +77,68 @@ class LauncherDrawerSortingPolicyTest {
     }
 
     @Test
+    fun mostRecentPrioritizesTrackedAppsAndKeepsUntrackedEntriesAlphabetical() {
+        val entries = listOf(
+            Entry("Camera", "app:camera"),
+            Entry("Banking", "folder:banking"),
+            Entry("Maps", "app:maps"),
+            Entry("Clock", "app:clock"),
+        )
+
+        val sorted = LauncherDrawerSortingPolicy.order(
+            entries = entries,
+            label = { it.label },
+            key = { it.stableKey },
+            sortOrder = LauncherDrawerSortOrder.MOST_RECENT,
+            recentKeys = listOf("maps-key", "camera-key"),
+            usageKey = {
+                when (it.stableKey) {
+                    "app:camera" -> "camera-key"
+                    "app:maps" -> "maps-key"
+                    "app:clock" -> "clock-key"
+                    else -> null
+                }
+            },
+        )
+
+        assertEquals(
+            listOf("app:maps", "app:camera", "folder:banking", "app:clock"),
+            sorted.map { it.stableKey },
+        )
+    }
+
+    @Test
+    fun mostFrequentPrioritizesPositiveCountsAndUsesStableAlphabeticalFallback() {
+        val entries = listOf(
+            Entry("Camera", "app:camera"),
+            Entry("Banking", "folder:banking"),
+            Entry("Maps", "app:maps"),
+            Entry("Clock", "app:clock"),
+        )
+
+        val sorted = LauncherDrawerSortingPolicy.order(
+            entries = entries,
+            label = { it.label },
+            key = { it.stableKey },
+            sortOrder = LauncherDrawerSortOrder.MOST_FREQUENT,
+            launchCounts = mapOf("camera-key" to 3L, "maps-key" to 11L, "clock-key" to 0L),
+            usageKey = {
+                when (it.stableKey) {
+                    "app:camera" -> "camera-key"
+                    "app:maps" -> "maps-key"
+                    "app:clock" -> "clock-key"
+                    else -> null
+                }
+            },
+        )
+
+        assertEquals(
+            listOf("app:maps", "app:camera", "folder:banking", "app:clock"),
+            sorted.map { it.stableKey },
+        )
+    }
+
+    @Test
     fun gridGeometryKeepsIconAndLabelSlotsFixedAcrossSpacingModes() {
         val grid = LauncherDrawerSpacing.entries.map { spacing ->
             LauncherDrawerGridPolicy.geometry(compact = false, spacing = spacing)
