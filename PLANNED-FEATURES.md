@@ -1,5 +1,9 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-30 Since protected signing continuation
+
+Build-time version/signing plumbing and the environment-gated Development distribution workflow are implemented on the stacked packaging-correction candidate. Remaining work is to provision the approved persistent Since Development signing identity into the protected `since-development` GitHub environment, produce a fresh workflow-built owner artifact with a versionCode greater than the previously distributed baseline, copy that exact verified APK to GoreeCloud Drive, and complete representative-device install/update-in-place acceptance without uninstalling user data.
+
 ## 2026-09-29 Since import-review continuation
 
 A stacked Development candidate now implements the review-only half of the M3 import boundary: explicit SAF document selection, bounded strict UTF-8 input, schema-v1 structural/invariant validation, and a non-mutating summary before any future restore. Unsupported or malformed input fails closed. **No imported data can be applied yet.** Replace-style mutation, conflict handling, rollback/recovery, representative document-provider/device acceptance, and release gates remain planned.
