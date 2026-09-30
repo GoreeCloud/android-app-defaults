@@ -904,6 +904,8 @@ fun LauncherBetaRoot(
                 preferences = preferences,
                 drawerLayoutMode = drawerLayoutMode,
                 experiencePreferences = experiencePreferences,
+                recentAppKeys = recentAppKeys,
+                localLaunchCounts = localLaunchCounts,
                 focusSearch = drawerSearchRequested,
                 onLaunchApp = onLaunchApp,
                 onManageApp = { app, anchor ->
@@ -5009,6 +5011,8 @@ private fun orderedDrawerVisualEntries(
     apps: List<LauncherActivityInfo>,
     folders: List<LauncherFolder>,
     sortOrder: LauncherDrawerSortOrder,
+    recentAppKeys: List<String>,
+    localLaunchCounts: Map<String, Long>,
 ): List<LauncherDrawerVisualEntry> = buildList {
     apps.forEach { add(LauncherDrawerVisualEntry.Application(it)) }
     folders.forEach { add(LauncherDrawerVisualEntry.Folder(it)) }
@@ -5018,6 +5022,11 @@ private fun orderedDrawerVisualEntries(
         label = { it.label },
         key = { it.stableKey },
         sortOrder = sortOrder,
+        recentKeys = recentAppKeys,
+        launchCounts = localLaunchCounts,
+        usageKey = { entry ->
+            (entry as? LauncherDrawerVisualEntry.Application)?.app?.workspaceKey()
+        },
     )
 }
 
@@ -5183,6 +5192,8 @@ private fun AppDrawerSurface(
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
+    recentAppKeys: List<String>,
+    localLaunchCounts: Map<String, Long>,
     focusSearch: Boolean,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
@@ -5561,6 +5572,8 @@ private fun AppDrawerSurface(
                             drawerLayoutMode = drawerLayoutMode,
                             experiencePreferences = experiencePreferences,
                             sortOrder = drawerSortOrder,
+                            recentAppKeys = recentAppKeys,
+                            localLaunchCounts = localLaunchCounts,
                             onLaunchApp = onLaunchApp,
                             onManageApp = onManageApp,
                             onOpenFolder = onOpenFolder,
@@ -5705,6 +5718,8 @@ private fun DrawerAppsContent(
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
     sortOrder: LauncherDrawerSortOrder,
+    recentAppKeys: List<String>,
+    localLaunchCounts: Map<String, Long>,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
@@ -5713,8 +5728,14 @@ private fun DrawerAppsContent(
     allowHorizontalPaging: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
-    val entries = remember(apps, folders, sortOrder) {
-        orderedDrawerVisualEntries(apps, folders, sortOrder)
+    val entries = remember(apps, folders, sortOrder, recentAppKeys, localLaunchCounts) {
+        orderedDrawerVisualEntries(
+            apps = apps,
+            folders = folders,
+            sortOrder = sortOrder,
+            recentAppKeys = recentAppKeys,
+            localLaunchCounts = localLaunchCounts,
+        )
     }
     if (entries.isEmpty() && query.isNotBlank()) {
         Box(
@@ -6537,11 +6558,6 @@ private fun LauncherSettingsOverviewRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(
-                ">",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
         }
     }
 }
