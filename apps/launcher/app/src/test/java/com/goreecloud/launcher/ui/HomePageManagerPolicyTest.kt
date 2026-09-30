@@ -588,16 +588,24 @@ class HomePageManagerPolicyTest {
                 availableAppKeys = setOf(firstKey),
             ),
         )
+        val spatialPrimary = primary.copy(
+            appKeys = listOf(firstKey, secondKey),
+            appPlacements = listOf(
+                WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
+                WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
+            ),
+        )
+        assertTrue(
+            canMoveHomeAppGroup(
+                page = spatialPrimary,
+                layoutLocked = false,
+                availableAppKeys = setOf(firstKey, secondKey),
+            ),
+        )
         assertFalse(
             canMoveHomeAppGroup(
-                page = primary.copy(
-                    appKeys = listOf(firstKey, secondKey),
-                    appPlacements = listOf(
-                        WorkspaceRenderedHomeApp(firstKey, 0, 0, 1, 1),
-                        WorkspaceRenderedHomeApp(secondKey, 1, 0, 1, 1),
-                    ),
-                ),
-                layoutLocked = false,
+                page = spatialPrimary,
+                layoutLocked = true,
                 availableAppKeys = setOf(firstKey, secondKey),
             ),
         )
@@ -773,6 +781,33 @@ class HomePageManagerPolicyTest {
                 rows = 5,
                 targetCellX = 1,
                 targetCellY = 0,
+            ),
+        )
+
+        val primaryPage = page.copy(
+            pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
+        )
+        assertTrue(
+            homeAppGroupAnchorAvailable(
+                sourcePage = primaryPage,
+                targetPage = primaryPage,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 0,
+                targetCellY = 1,
+            ),
+        )
+        assertFalse(
+            homeAppGroupAnchorAvailable(
+                sourcePage = primaryPage,
+                targetPage = page,
+                selectedAppKeys = listOf(firstKey, secondKey),
+                columns = 4,
+                rows = 5,
+                targetCellX = 0,
+                targetCellY = 1,
             ),
         )
     }

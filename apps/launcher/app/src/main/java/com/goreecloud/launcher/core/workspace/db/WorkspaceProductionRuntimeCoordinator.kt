@@ -592,6 +592,26 @@ class WorkspaceProductionRuntimeCoordinator(
         val grid = runCatching {
             WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
         }.getOrNull() ?: return WorkspacePagedRoomMutationResult.InvalidWorkspace
+        val primarySamePage =
+            sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID &&
+                targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        if (primarySamePage) {
+            when (val ready = ensurePrimaryHomeSpatialGrid(columns, rows)) {
+                is WorkspacePrimaryHomeSpatialResult.Ready -> Unit
+                WorkspacePrimaryHomeSpatialResult.Reserved ->
+                    return WorkspacePagedRoomMutationResult.Reserved
+                WorkspacePrimaryHomeSpatialResult.Unavailable ->
+                    return WorkspacePagedRoomMutationResult.Unavailable
+                WorkspacePrimaryHomeSpatialResult.InvalidWorkspace ->
+                    return WorkspacePagedRoomMutationResult.InvalidWorkspace
+                WorkspacePrimaryHomeSpatialResult.StoredWorkspaceChanged ->
+                    return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+                is WorkspacePrimaryHomeSpatialResult.Failed ->
+                    return WorkspacePagedRoomMutationResult.Failed(ready.failureType)
+                is WorkspacePrimaryHomeSpatialResult.Moved ->
+                    return WorkspacePagedRoomMutationResult.InvalidWorkspace
+            }
+        }
         val result = homeItemPageMover.moveAppGroupToPageCell(
             sourcePageId = sourcePageId,
             appKeys = appKeys,
