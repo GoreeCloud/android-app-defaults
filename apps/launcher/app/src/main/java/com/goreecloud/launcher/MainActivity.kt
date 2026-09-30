@@ -75,7 +75,9 @@ import com.goreecloud.launcher.core.launcher.LauncherGestureActionType
 import com.goreecloud.launcher.core.launcher.LauncherInstalledAppBaselineRepository
 import com.goreecloud.launcher.core.launcher.LauncherHomeAppMode
 import com.goreecloud.launcher.core.launcher.LauncherHomeSearchPlacement
+import com.goreecloud.launcher.core.launcher.LauncherHomeSearchSurface
 import com.goreecloud.launcher.core.launcher.LauncherHomeSpacing
+import com.goreecloud.launcher.core.launcher.launcherHomeSearchSurface
 import com.goreecloud.launcher.core.launcher.LauncherIconPackDescriptor
 import com.goreecloud.launcher.core.launcher.LauncherIconPackRepository
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
@@ -1659,12 +1661,28 @@ class MainActivity : ComponentActivity() {
                         renderedPages.size > 1 &&
                         showingHome
                     ) {
+                        val homeSearchSurface = launcherHomeSearchSurface(
+                            mode = launcherPreferences.universalSearchHomeMode,
+                            placement = experiencePreferences.homeSearchPlacement,
+                        )
+                        val hasMovableSearch = renderedPages.any { page ->
+                            page.widgetPlacements.any { placement ->
+                                val descriptor =
+                                    placement.descriptor as? WorkspaceWidgetDescriptor.BuiltIn
+                                descriptor?.typeId == WorkspaceWidgetCatalog.SEARCH
+                            }
+                        }
                         val indicatorBottomPadding = when {
                             onPrimaryPage &&
-                                launcherPreferences.universalSearchHomeMode ==
-                                    LauncherUniversalSearchHomeMode.PERMANENT &&
-                                experiencePreferences.homeSearchPlacement ==
-                                    LauncherHomeSearchPlacement.BOTTOM ->
+                                (
+                                    homeSearchSurface ==
+                                        LauncherHomeSearchSurface.FIXED_BOTTOM ||
+                                        (
+                                            homeSearchSurface ==
+                                                LauncherHomeSearchSurface.MOVABLE &&
+                                                !hasMovableSearch
+                                            )
+                                    ) ->
                                 176.dp
                             else -> 112.dp
                         }
