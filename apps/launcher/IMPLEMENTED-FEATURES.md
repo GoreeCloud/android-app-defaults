@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — recoverable group-move submission
+
+The stacked Development candidate no longer dismisses the group editor before the atomic Room write returns. It preserves selected apps and destination choices after a rejected request, blocks duplicate input while the write is in flight, provides inline assertive failure feedback, and closes only after confirmed success. Android 16 runtime coverage verifies locked-layout rejection leaves both selection and persisted geometry unchanged, then verifies the retained group can be retried successfully after unlocking.
+
+**Acceptance boundary:** this is immediate in-session failure recovery for the group-move interaction. Durable multi-step undo/redo and process-death-safe edit history are not yet implemented.
+
 ## September 30, 2026 — group-edit onboarding and assistive semantics
 
 The stacked Development candidate updates both first-use guidance and replayable Home hints so users are told how **Edit Home → Move apps** works on secondary pages and where its current primary-Home boundary remains. The group editor exposes semantic section headings, a polite live selection-count state, and explicit available/unavailable state descriptions on its existing 48 dp anchor controls. Android 16 runtime coverage verifies the selected-count and anchor state descriptions while completing the persisted atomic move.
