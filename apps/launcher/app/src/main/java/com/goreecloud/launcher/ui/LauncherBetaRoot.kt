@@ -2988,11 +2988,16 @@ private fun HomeAppGroupMoveDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                Column(
-                    modifier = Modifier.horizontalScroll(anchorHorizontalScrollState),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("launcher-home-group-anchor-section"),
                 ) {
-                    repeat(rows) { cellY ->
+                    Column(
+                        modifier = Modifier.horizontalScroll(anchorHorizontalScrollState),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        repeat(rows) { cellY ->
                         Row(
                             modifier = Modifier.testTag("launcher-home-group-anchor-row-" + cellY),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -3053,6 +3058,7 @@ private fun HomeAppGroupMoveDialog(
                                 }
                             }
                         }
+                    }
                     }
                 }
             }
