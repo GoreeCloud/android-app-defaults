@@ -2697,7 +2697,7 @@ private fun LauncherWeatherStatusChip(
 
     Surface(
         modifier = Modifier
-            .widthIn(min = if (compact) 154.dp else 188.dp)
+            .widthIn(min = if (compact) 104.dp else 188.dp)
             .heightIn(min = if (compact) 64.dp else 76.dp)
             .semantics {
                 contentDescription = when {
