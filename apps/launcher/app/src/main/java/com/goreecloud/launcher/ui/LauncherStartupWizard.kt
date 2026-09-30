@@ -274,7 +274,7 @@ fun LauncherStartupWizard(
                             )
                             WizardInfoCard(
                                 title = "Move widgets directly",
-                                summary = "Long-press a Home widget and drag it to a free cell, or release it at a valid page edge to move it to the adjacent Home page. A stationary hold opens widget options, including Move to another Home page. Fresh starter layouts use movable Glance.",
+                                summary = "Long-press a Home widget and keep holding at a valid left or right page edge briefly to switch pages, then release over the exact target area. A quick edge release still moves directly to the adjacent page. A stationary hold opens widget options, including Move to another Home page. Fresh starter layouts use movable Glance.",
                             )
                             WizardInfoCard(
                                 title = "Weather in Glance",
@@ -393,7 +393,7 @@ fun LauncherHomeHintCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "Widgets: long-press and drag to a free Home cell or adjacent page edge; a stationary hold opens widget options, including Move to another Home page.",
+                "Widgets: long-press and keep holding at a left or right page edge briefly to switch pages, then release over the exact target area; a quick edge release still uses adjacent-page landing. A stationary hold opens widget options, including Move to another Home page.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
