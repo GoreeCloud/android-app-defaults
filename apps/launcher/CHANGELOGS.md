@@ -8,7 +8,7 @@ The selected secondary page identity is synchronized from the pager's current pa
 
 The single-secondary-page path remains unchanged, and app/folder/widget placement, cross-page move authority, Search behavior, permissions, networking, and telemetry are unchanged.
 
-**Acceptance boundary:** stacked Development candidate on top of PR #108. PR #108 must integrate first; this candidate then requires current-main reconciliation and fresh exact-head validation. Primary↔secondary follow-finger paging and representative-device frame pacing remain open.
+**Acceptance boundary:** Development candidate reconciled onto merged PR #108 / current main `26d26ad03ea6d444d509ec705d9ce834db1b98ba`; fresh exact-head validation is required before integration. Primary↔secondary follow-finger paging and representative-device frame pacing remain open.
 
 
 ## September 30, 2026 — separate secondary Home page content from persistent chrome
