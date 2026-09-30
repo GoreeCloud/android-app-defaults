@@ -602,6 +602,24 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
             workspaceDaoProvider = { database.workspaceDao() },
         )
         val grid = WorkspaceGridPlacement.Grid(columns = 4, rows = 5)
+        assertTrue(
+            runtime.ensurePrimaryHomeSpatialGrid(grid.columns, grid.rows) is
+                WorkspacePrimaryHomeSpatialResult.Ready
+        )
+
+        val initial = database.workspaceDao()
+            .readItems(listOf(WorkspaceLegacyImportMapper.HOME_PAGE_ID))
+            .associateBy { it.appKey }
+        val firstInitial = initial.getValue(APP_ONE)
+        val secondInitial = initial.getValue(APP_TWO)
+        val blockerInitial = initial.getValue(APP_THREE)
+        val sourceMinX = minOf(checkNotNull(firstInitial.cellX), checkNotNull(secondInitial.cellX))
+        val sourceMinY = minOf(checkNotNull(firstInitial.cellY), checkNotNull(secondInitial.cellY))
+        val secondOffsetX = checkNotNull(secondInitial.cellX) - sourceMinX
+        val secondOffsetY = checkNotNull(secondInitial.cellY) - sourceMinY
+        val collisionAnchorX = checkNotNull(blockerInitial.cellX) - secondOffsetX
+        val collisionAnchorY = checkNotNull(blockerInitial.cellY) - secondOffsetY
+        check(collisionAnchorX >= 0 && collisionAnchorY >= 0)
 
         assertEquals(
             WorkspacePagedRoomMutationResult.InvalidWorkspace,
@@ -611,19 +629,21 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
                 targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
                 columns = grid.columns,
                 rows = grid.rows,
-                cellX = 1,
-                cellY = 0,
+                cellX = collisionAnchorX,
+                cellY = collisionAnchorY,
             ),
         )
 
+        val targetAnchorX = 0
+        val targetAnchorY = 2
         val moved = runtime.moveHomeAppGroupToPageCell(
             sourcePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
             appKeys = listOf(APP_ONE, APP_TWO),
             targetPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
             columns = grid.columns,
             rows = grid.rows,
-            cellX = 0,
-            cellY = 2,
+            cellX = targetAnchorX,
+            cellY = targetAnchorY,
         )
         assertTrue(moved is WorkspacePagedRoomMutationResult.UpdatedItems)
 
@@ -632,12 +652,24 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
             .sortedBy { it.rank }
         assertEquals(listOf(APP_ONE, APP_TWO, APP_THREE), primary.map { it.appKey })
         val byKey = primary.associateBy { it.appKey }
-        assertEquals(0, byKey.getValue(APP_ONE).cellX)
-        assertEquals(2, byKey.getValue(APP_ONE).cellY)
-        assertEquals(1, byKey.getValue(APP_TWO).cellX)
-        assertEquals(2, byKey.getValue(APP_TWO).cellY)
-        assertEquals(2, byKey.getValue(APP_THREE).cellX)
-        assertEquals(0, byKey.getValue(APP_THREE).cellY)
+        assertEquals(
+            targetAnchorX + checkNotNull(firstInitial.cellX) - sourceMinX,
+            byKey.getValue(APP_ONE).cellX,
+        )
+        assertEquals(
+            targetAnchorY + checkNotNull(firstInitial.cellY) - sourceMinY,
+            byKey.getValue(APP_ONE).cellY,
+        )
+        assertEquals(
+            targetAnchorX + checkNotNull(secondInitial.cellX) - sourceMinX,
+            byKey.getValue(APP_TWO).cellX,
+        )
+        assertEquals(
+            targetAnchorY + checkNotNull(secondInitial.cellY) - sourceMinY,
+            byKey.getValue(APP_TWO).cellY,
+        )
+        assertEquals(blockerInitial.cellX, byKey.getValue(APP_THREE).cellX)
+        assertEquals(blockerInitial.cellY, byKey.getValue(APP_THREE).cellY)
 
         assertEquals(
             WorkspacePagedRoomMutationResult.PrimaryPageProtected,
