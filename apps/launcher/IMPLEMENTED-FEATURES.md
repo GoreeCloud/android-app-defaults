@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — precise group-move feedback and replayable guidance
+
+The stacked Development candidate maps authoritative group-move results to bounded user-facing recovery guidance. Success reports the moved-app count; stale workspace state, changed selection identity, removed destination pages, primary-HOME protection, invalid anchors, unavailable Room state, and unexpected failures now produce distinct messages while preserving the fail-closed workspace contract.
+
+The three-step startup wizard and replayable Home hint also explain the current app-only secondary-HOME group-edit workflow and its exact-anchor behavior. Guidance remains local presentation only and does not activate providers, request permissions, change workspace authority, or add telemetry.
+
+**Acceptance boundary:** this is unmerged Development source stacked above the group-edit candidate. Fresh exact-head CI/runtime evidence and representative-device onboarding/accessibility acceptance remain open.
+
 ## September 30, 2026 — bounded Edit Home app-group controls
 
 The current stacked Development candidate exposes app-group movement from **Edit Home** for unlocked secondary Home pages. A page offers **Move apps** only when at least two available applications have persisted spatial positions. The dialog provides explicit app selection, secondary-page destination choice, and exact top-left anchor-cell selection. Invalid rendered-state anchors are disabled when they collide with apps/folders/widgets or push the rigid group out of bounds; a valid choice still delegates the write to the atomic Room group-movement foundation for authoritative stale-state revalidation. Successful writes switch to the authoritative destination page; rejected writes keep the original placement and report that no group move was applied.
