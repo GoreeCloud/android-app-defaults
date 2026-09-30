@@ -821,6 +821,7 @@ fun LauncherBetaRoot(
                 onSwipeHomePageLeft = onSwipeHomePageLeft,
                 onSwipeHomePageRight = onSwipeHomePageRight,
                 onManageFolders = {
+                    folderManagerProfileName = LauncherDrawerProfileKind.USER.name
                     folderManagerAddToHome = true
                     showFolderManager = true
                 },
@@ -930,7 +931,8 @@ fun LauncherBetaRoot(
                     selectedAppContextOrigin = LauncherAppContextOrigin.DRAWER
                 },
                 onOpenFolder = { folder -> selectedFolderId = folder.id },
-                onManageFolders = {
+                onManageFolders = { profileKind ->
+                    folderManagerProfileName = profileKind.name
                     folderManagerAddToHome = false
                     showFolderManager = true
                 },
@@ -957,6 +959,7 @@ fun LauncherBetaRoot(
                         isDefaultHome = isDefaultHome,
                         onRequestHomeRole = onRequestHomeRole,
                         onManageFolders = {
+                            folderManagerProfileName = LauncherDrawerProfileKind.USER.name
                             folderManagerAddToHome = false
                             showFolderManager = true
                         },
@@ -1049,8 +1052,14 @@ fun LauncherBetaRoot(
                 onAddToFolder = {
                     selectedApp = null
                     selectedAppAnchor = null
+                    val appProfile = if (app.user == Process.myUserHandle()) {
+                        LauncherDrawerProfileKind.USER
+                    } else {
+                        LauncherDrawerProfileKind.WORK
+                    }
+                    folderManagerProfileName = appProfile.name
                     folderAssignmentAppKey = appKey
-                    if (folders.isEmpty()) {
+                    if (folders.none { folder -> folder.profileKind == appProfile }) {
                         folderManagerAddToHome = false
                         showFolderManager = true
                     }
