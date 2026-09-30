@@ -5,6 +5,7 @@ import android.os.ParcelFileDescriptor
 import android.view.View
 import android.view.ViewConfiguration
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
@@ -1418,7 +1419,7 @@ class ActivatedHomeLifecycleRuntimeTest {
 
                 composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-anchor-row-1",
+                        "launcher-home-group-anchor-section",
                         useUnmergedTree = true,
                     )
                     .performScrollTo()
