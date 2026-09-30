@@ -13,6 +13,8 @@ import java.util.Locale
 internal enum class LauncherDrawerSortOrder {
     ALPHABETICAL,
     REVERSE_ALPHABETICAL,
+    MOST_RECENT,
+    MOST_FREQUENT,
 }
 
 internal object LauncherDrawerSortingPolicy {
@@ -21,15 +23,48 @@ internal object LauncherDrawerSortingPolicy {
         label: (T) -> String,
         key: (T) -> String,
         sortOrder: LauncherDrawerSortOrder = LauncherDrawerSortOrder.ALPHABETICAL,
-    ): List<T> = entries.sortedWith { left, right ->
-        val leftLabel = Normalizer.normalize(label(left), Normalizer.Form.NFC).lowercase(Locale.ROOT)
-        val rightLabel = Normalizer.normalize(label(right), Normalizer.Form.NFC).lowercase(Locale.ROOT)
-        val labelOrder = leftLabel.compareTo(rightLabel)
-        val directedLabelOrder = when (sortOrder) {
-            LauncherDrawerSortOrder.ALPHABETICAL -> labelOrder
-            LauncherDrawerSortOrder.REVERSE_ALPHABETICAL -> -labelOrder
+        recentRank: (T) -> Int? = { null },
+        frequency: (T) -> Long = { 0L },
+    ): List<T> {
+        fun normalizedLabel(entry: T): String =
+            Normalizer.normalize(label(entry), Normalizer.Form.NFC).lowercase(Locale.ROOT)
+
+        fun alphabetical(left: T, right: T, reversed: Boolean = false): Int {
+            val labelOrder = normalizedLabel(left).compareTo(normalizedLabel(right))
+            val directed = if (reversed) -labelOrder else labelOrder
+            return if (directed != 0) directed else key(left).compareTo(key(right))
         }
-        if (directedLabelOrder != 0) directedLabelOrder else key(left).compareTo(key(right))
+
+        return entries.sortedWith { left, right ->
+            when (sortOrder) {
+                LauncherDrawerSortOrder.ALPHABETICAL ->
+                    alphabetical(left, right)
+
+                LauncherDrawerSortOrder.REVERSE_ALPHABETICAL ->
+                    alphabetical(left, right, reversed = true)
+
+                LauncherDrawerSortOrder.MOST_RECENT -> {
+                    val leftRank = recentRank(left)
+                    val rightRank = recentRank(right)
+                    when {
+                        leftRank != null && rightRank != null && leftRank != rightRank ->
+                            leftRank.compareTo(rightRank)
+                        leftRank != null && rightRank == null -> -1
+                        leftRank == null && rightRank != null -> 1
+                        else -> alphabetical(left, right)
+                    }
+                }
+
+                LauncherDrawerSortOrder.MOST_FREQUENT -> {
+                    val leftCount = frequency(left)
+                    val rightCount = frequency(right)
+                    when {
+                        leftCount != rightCount -> rightCount.compareTo(leftCount)
+                        else -> alphabetical(left, right)
+                    }
+                }
+            }
+        }
     }
 }
 
