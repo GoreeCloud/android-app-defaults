@@ -9198,6 +9198,7 @@ internal fun LauncherFolderContentsSheet(
     folder: LauncherFolder,
     appsByKey: Map<String, LauncherActivityInfo>,
     isOnHome: Boolean,
+    homePlacementAllowed: Boolean = true,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onRemoveApp: (LauncherActivityInfo) -> Unit,
     onAddApps: () -> Unit,
@@ -9410,16 +9411,18 @@ internal fun LauncherFolderContentsSheet(
                                         dismissThen(onAddApps)
                                     },
                                 )
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(if (isOnHome) "Remove from Home" else "Add to Home")
-                                    },
-                                    onClick = {
-                                        showActions = false
-                                        if (isOnHome) onRemoveFromHome() else onAddToHome()
-                                    },
-                                )
-                                if (isOnHome && moveTargets.isNotEmpty()) {
+                                if (homePlacementAllowed) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(if (isOnHome) "Remove from Home" else "Add to Home")
+                                        },
+                                        onClick = {
+                                            showActions = false
+                                            if (isOnHome) onRemoveFromHome() else onAddToHome()
+                                        },
+                                    )
+                                }
+                                if (homePlacementAllowed && isOnHome && moveTargets.isNotEmpty()) {
                                     DropdownMenuItem(
                                         text = { Text("Move to another Home page") },
                                         onClick = {
