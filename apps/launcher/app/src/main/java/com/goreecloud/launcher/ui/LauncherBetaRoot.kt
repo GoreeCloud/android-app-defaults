@@ -3977,6 +3977,63 @@ private fun LauncherBuiltInWidget(
                     )
                 }
             }
+            WorkspaceWidgetCatalog.CALENDAR -> {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(15.dp),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            now.format(DateTimeFormatter.ofPattern("MMM yyyy", Locale.getDefault())).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            now.dayOfMonth.toString(),
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Light,
+                        )
+                        Text(
+                            now.format(DateTimeFormatter.ofPattern("EEE", Locale.getDefault())),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+            }
+            WorkspaceWidgetCatalog.WEATHER -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.88f),
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.82f),
+                                ),
+                            ),
+                            RoundedCornerShape(28.dp),
+                        )
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        now.format(DateTimeFormatter.ofPattern("h:mm", Locale.getDefault())),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    LauncherWeatherStatusChip(
+                        foreground = Color.White,
+                        compact = true,
+                    )
+                }
+            }
             WorkspaceWidgetCatalog.CLOCK -> {
                 Column(
                     modifier = Modifier
