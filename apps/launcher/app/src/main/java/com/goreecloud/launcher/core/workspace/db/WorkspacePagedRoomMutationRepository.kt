@@ -354,6 +354,7 @@ class WorkspacePagedRoomMutationRepository(
         targetPageId: String,
         targetCellX: Int,
         targetCellY: Int,
+        expectedSourcePlacements: List<WorkspaceGridPlacement.Placement>? = null,
     ): WorkspacePagedRoomMutationResult {
         if (!isRoomAuthoritative()) return WorkspacePagedRoomMutationResult.Reserved
         if (
@@ -411,6 +412,25 @@ class WorkspacePagedRoomMutationRepository(
             val sourceMinX = selectedItems.minOf { checkNotNull(it.cellX) }
             val sourceMinY = selectedItems.minOf { checkNotNull(it.cellY) }
             val selectedIds = itemIds.toSet()
+            if (expectedSourcePlacements != null) {
+                val expectedById = expectedSourcePlacements.associateBy { it.itemId }
+                if (
+                    expectedById.size != expectedSourcePlacements.size ||
+                    expectedById.keys != selectedIds
+                ) {
+                    return WorkspacePagedRoomMutationResult.InvalidWorkspace
+                }
+                if (selectedItems.any { item ->
+                        val expected = checkNotNull(expectedById[item.itemId])
+                        item.cellX != expected.cellX ||
+                            item.cellY != expected.cellY ||
+                            item.spanX != expected.spanX ||
+                            item.spanY != expected.spanY
+                    }
+                ) {
+                    return WorkspacePagedRoomMutationResult.StoredWorkspaceChanged
+                }
+            }
             val targetPlacements = selectedItems.map { item ->
                 WorkspaceGridPlacement.Placement(
                     itemId = item.itemId,

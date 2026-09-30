@@ -1208,6 +1208,7 @@ class MainActivity : ComponentActivity() {
                                     targetPageId,
                                     cellX,
                                     cellY,
+                                    expectedSourcePlacements,
                                     onResult,
                                 ->
                                 if (launcherPreferences.layoutLocked) {
@@ -1223,6 +1224,8 @@ class MainActivity : ComponentActivity() {
                                                 rows = launcherPreferences.homeRows,
                                                 cellX = cellX,
                                                 cellY = cellY,
+                                                expectedSourcePlacements =
+                                                    expectedSourcePlacements,
                                             )
                                         if (result is WorkspacePagedRoomMutationResult.UpdatedItems) {
                                             selectedHomePageId = targetPageId

@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — immediate group-move Undo
+
+**Change type:** Workspace editing recovery; one-step in-session reversal; Development candidate.
+
+After a successful Edit Home application-group move, Launcher now offers one immediate **Undo** while the editor remains open. The Undo record stores only the moved app identities, original secondary page, and original bounding-box anchor in Compose session state. Undo routes the reverse request through the same Room-authoritative atomic group mover, so collisions, stale workspace state, missing pages, or layout lock fail closed without overwriting newer edits.
+
+A failed Undo keeps the current workspace intact and leaves the Undo affordance available with assertive inline feedback. Dismissing the affordance, leaving Edit Home, or completing another successful group move ends or replaces this one-step recovery opportunity. Android 16 runtime coverage moves the group, invokes the real Undo control, and verifies the original Room cells are restored.
+
+The first-use wizard and replayable Home hint now mention the immediate Undo. No new permission, network path, telemetry, credential, database schema, or persistent edit-history store is introduced.
+
+**Acceptance boundary:** this is a bounded one-step, in-session Undo for successful app-group movement only. Durable multi-step undo/redo, process-death-safe edit history, and destructive page recovery remain separate open obligations.
+
 ## September 30, 2026 — group-move rejection recovery
 
 **Change type:** Workspace editing resilience; failure recovery; accessible feedback; Development candidate.

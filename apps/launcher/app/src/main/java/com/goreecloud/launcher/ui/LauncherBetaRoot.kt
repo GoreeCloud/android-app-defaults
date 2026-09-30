@@ -164,6 +164,7 @@ import com.goreecloud.launcher.core.workspace.WorkspaceMoveDirection
 import com.goreecloud.launcher.core.workspace.WorkspaceState
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetCatalog
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetDescriptor
+import com.goreecloud.launcher.core.workspace.db.WorkspaceHomeAppGroupPlacementExpectation
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeFolder
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
@@ -201,7 +202,68 @@ internal data class LauncherAppDragData(
 )
 
 internal typealias LauncherHomeAppGroupMoveRequest =
-    (String, List<String>, String, Int, Int, (Boolean) -> Unit) -> Unit
+    (
+        String,
+        List<String>,
+        String,
+        Int,
+        Int,
+        List<WorkspaceHomeAppGroupPlacementExpectation>?,
+        (Boolean) -> Unit,
+    ) -> Unit
+
+internal data class LauncherHomeAppGroupUndo(
+    val originalPageId: String,
+    val movedPageId: String,
+    val appKeys: List<String>,
+    val originalAnchorX: Int,
+    val originalAnchorY: Int,
+    val expectedMovedPlacements: List<WorkspaceHomeAppGroupPlacementExpectation>,
+)
+
+internal fun homeAppGroupUndoForMove(
+    sourcePage: WorkspaceRenderedHomePage,
+    appKeys: List<String>,
+    movedPageId: String,
+    movedAnchorX: Int,
+    movedAnchorY: Int,
+): LauncherHomeAppGroupUndo? {
+    if (
+        sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        movedPageId.isBlank() ||
+        movedPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        movedAnchorX < 0 ||
+        movedAnchorY < 0 ||
+        appKeys.size < 2 ||
+        appKeys.distinct().size != appKeys.size
+    ) {
+        return null
+    }
+    val byKey = sourcePage.appPlacements
+        .filter { it.cellX != null && it.cellY != null }
+        .groupBy { it.appKey }
+    val selected = appKeys.map { key ->
+        byKey[key]?.singleOrNull() ?: return null
+    }
+    val originalAnchorX = selected.minOf { checkNotNull(it.cellX) }
+    val originalAnchorY = selected.minOf { checkNotNull(it.cellY) }
+    return LauncherHomeAppGroupUndo(
+        originalPageId = sourcePage.pageId,
+        movedPageId = movedPageId,
+        appKeys = appKeys.toList(),
+        originalAnchorX = originalAnchorX,
+        originalAnchorY = originalAnchorY,
+        expectedMovedPlacements = selected.map { app ->
+            WorkspaceHomeAppGroupPlacementExpectation(
+                appKey = app.appKey,
+                cellX = movedAnchorX + checkNotNull(app.cellX) - originalAnchorX,
+                cellY = movedAnchorY + checkNotNull(app.cellY) - originalAnchorY,
+                spanX = app.spanX,
+                spanY = app.spanY,
+            )
+        },
+    )
+}
 
 internal fun launcherFolderGridColumns(
     availableWidthDp: Float,
@@ -2255,6 +2317,56 @@ private fun HomeEditorSurface(
     onApps: () -> Unit,
     onSettings: () -> Unit,
 ) {
+    var pendingGroupMoveUndo by remember { mutableStateOf<LauncherHomeAppGroupUndo?>(null) }
+    var groupMoveUndoInProgress by remember { mutableStateOf(false) }
+    var groupMoveUndoFailure by remember { mutableStateOf<String?>(null) }
+
+    val groupMoveWithUndo: LauncherHomeAppGroupMoveRequest = {
+            sourcePageId,
+            appKeys,
+            targetPageId,
+            cellX,
+            cellY,
+            expectedSourcePlacements,
+            onResult,
+        ->
+        val undo =
+            if (expectedSourcePlacements == null) {
+                homePages
+                    .firstOrNull { it.pageId == sourcePageId }
+                    ?.let { sourcePage ->
+                        homeAppGroupUndoForMove(
+                            sourcePage = sourcePage,
+                            appKeys = appKeys,
+                            movedPageId = targetPageId,
+                            movedAnchorX = cellX,
+                            movedAnchorY = cellY,
+                        )
+                    }
+            } else {
+                null
+            }
+
+        if (expectedSourcePlacements == null && undo == null) {
+            onResult(false)
+        } else {
+            onMoveAppGroupToPageCell(
+                sourcePageId,
+                appKeys,
+                targetPageId,
+                cellX,
+                cellY,
+                expectedSourcePlacements,
+            ) { applied ->
+                if (applied && undo != null) {
+                    pendingGroupMoveUndo = undo
+                    groupMoveUndoFailure = null
+                }
+                onResult(applied)
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2293,6 +2405,119 @@ private fun HomeEditorSurface(
             }
         }
 
+        pendingGroupMoveUndo?.let { undo ->
+            val originalPageExists = homePages.any { it.pageId == undo.originalPageId }
+            val movedPageExists = homePages.any { it.pageId == undo.movedPageId }
+            val canUndo =
+                !groupMoveUndoInProgress &&
+                    !preferences.layoutLocked &&
+                    originalPageExists &&
+                    movedPageExists
+            val undoStatus = when {
+                groupMoveUndoInProgress -> "Restoring the previous group position…"
+                groupMoveUndoFailure != null -> groupMoveUndoFailure.orEmpty()
+                !originalPageExists -> "The original Home page no longer exists."
+                !movedPageExists -> "The moved apps are no longer on an available Home page."
+                preferences.layoutLocked -> "Unlock Home layout to undo this move."
+                else -> "Undo is available while Edit Home stays open."
+            }
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("launcher-home-group-undo"),
+                shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+                border = BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant,
+                ),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            horizontal = GlazeMetrics.space3,
+                            vertical = GlazeMetrics.space2,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            "Moved " + undo.appKeys.size + " apps",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            undoStatus,
+                            modifier = Modifier
+                                .testTag("launcher-home-group-undo-state")
+                                .semantics {
+                                    liveRegion =
+                                        if (groupMoveUndoFailure != null) {
+                                            LiveRegionMode.Assertive
+                                        } else {
+                                            LiveRegionMode.Polite
+                                        }
+                                    stateDescription = undoStatus
+                                },
+                            style = MaterialTheme.typography.bodySmall,
+                            color =
+                                if (groupMoveUndoFailure != null) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            pendingGroupMoveUndo = null
+                            groupMoveUndoFailure = null
+                        },
+                        enabled = !groupMoveUndoInProgress,
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .testTag("launcher-home-group-undo-dismiss"),
+                    ) {
+                        Text("Dismiss")
+                    }
+                    TextButton(
+                        onClick = {
+                            groupMoveUndoInProgress = true
+                            groupMoveUndoFailure = null
+                            onMoveAppGroupToPageCell(
+                                undo.movedPageId,
+                                undo.appKeys,
+                                undo.originalPageId,
+                                undo.originalAnchorX,
+                                undo.originalAnchorY,
+                                undo.expectedMovedPlacements,
+                            ) { applied ->
+                                groupMoveUndoInProgress = false
+                                if (applied) {
+                                    pendingGroupMoveUndo = null
+                                    groupMoveUndoFailure = null
+                                } else {
+                                    groupMoveUndoFailure =
+                                        "Undo was not applied. The current workspace was preserved."
+                                }
+                            }
+                        },
+                        enabled = canUndo,
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .testTag("launcher-home-group-undo-action"),
+                    ) {
+                        Text("Undo")
+                    }
+                }
+            }
+        }
+
         HomeEditorPageOverview(
             pages = homePages,
             apps = apps,
@@ -2304,7 +2529,7 @@ private fun HomeEditorSurface(
             onSelectPage = onSelectPage,
             onCreatePage = onCreatePage,
             onDeletePage = onDeletePage,
-            onMoveAppGroupToPageCell = onMoveAppGroupToPageCell,
+            onMoveAppGroupToPageCell = groupMoveWithUndo,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -2358,6 +2583,9 @@ private fun HomeEditorPageOverview(
     var groupMoveSourcePageId by remember(visiblePages) { mutableStateOf<String?>(null) }
     val groupMoveSourcePage =
         visiblePages.firstOrNull { it.pageId == groupMoveSourcePageId }
+    var pendingGroupMoveUndo by remember { mutableStateOf<LauncherHomeAppGroupUndo?>(null) }
+    var groupMoveUndoInProgress by remember { mutableStateOf(false) }
+    var groupMoveUndoFailure by remember { mutableStateOf<String?>(null) }
     val availableAppKeys = remember(apps) { apps.mapTo(mutableSetOf()) { it.workspaceKey() } }
     val initialPageIndex = remember(visiblePages, initialPageId) {
         visiblePages.indexOfFirst { it.pageId == initialPageId }
@@ -2596,7 +2824,6 @@ private fun HomeEditorPageOverview(
                 }
             }
         }
-
     }
 
     if (groupMoveSourcePage != null) {
@@ -2613,6 +2840,7 @@ private fun HomeEditorPageOverview(
                     targetPageId,
                     cellX,
                     cellY,
+                    null,
                 ) { applied ->
                     if (applied) {
                         groupMoveSourcePageId = null

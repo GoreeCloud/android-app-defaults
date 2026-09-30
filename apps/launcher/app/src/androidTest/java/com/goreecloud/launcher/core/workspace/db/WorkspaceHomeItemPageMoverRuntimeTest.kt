@@ -704,6 +704,57 @@ class WorkspaceHomeItemPageMoverRuntimeTest {
         assertEquals(3, target.getValue(APP_THREE).cellY)
 
         assertEquals(
+            WorkspacePagedRoomMutationResult.UpdatedItem(
+                itemId = "native:item:two",
+                pageId = "home:2",
+                cellX = 3,
+                cellY = 4,
+                spanX = 1,
+                spanY = 1,
+            ),
+            mover.moveAppToCellWithinPage(
+                pageId = "home:2",
+                appKey = APP_TWO,
+                grid = grid,
+                targetCellX = 3,
+                targetCellY = 4,
+            ),
+        )
+        assertEquals(
+            WorkspacePagedRoomMutationResult.StoredWorkspaceChanged,
+            mover.moveAppGroupToPageCell(
+                sourcePageId = "home:2",
+                appKeys = listOf(APP_TWO, APP_THREE),
+                targetPageId = "home:1",
+                grid = grid,
+                targetCellX = 0,
+                targetCellY = 0,
+                expectedSourcePlacements = listOf(
+                    WorkspaceHomeAppGroupPlacementExpectation(
+                        appKey = APP_TWO,
+                        cellX = 1,
+                        cellY = 2,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                    WorkspaceHomeAppGroupPlacementExpectation(
+                        appKey = APP_THREE,
+                        cellX = 2,
+                        cellY = 3,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                ),
+            ),
+        )
+        val afterRejectedUndo =
+            database.workspaceDao().readItems(listOf("home:2")).associateBy { it.appKey }
+        assertEquals(3, afterRejectedUndo.getValue(APP_TWO).cellX)
+        assertEquals(4, afterRejectedUndo.getValue(APP_TWO).cellY)
+        assertEquals(2, afterRejectedUndo.getValue(APP_THREE).cellX)
+        assertEquals(3, afterRejectedUndo.getValue(APP_THREE).cellY)
+
+        assertEquals(
             WorkspacePagedRoomMutationResult.StoredWorkspaceChanged,
             mutationRepository.moveHomeItems(
                 grid = grid,

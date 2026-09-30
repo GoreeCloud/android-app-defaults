@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — one-step in-session group-move Undo
+
+The stacked Development candidate keeps one immediate Undo after a confirmed app-group move in Edit Home. It records the original secondary page and top-left group anchor only for the current editor session, then reuses the same atomic Room group mover to reverse the move. If the layout becomes locked, a page disappears, another item occupies the old destination, or Room detects stale state, Undo fails closed and preserves the newer workspace. Focused JVM coverage verifies the captured recovery anchor, and Android 16 runtime coverage verifies a successful move/Undo roundtrip restores the persisted cells.
+
+**Acceptance boundary:** this is not durable history. The Undo disappears when Edit Home leaves composition and is replaced by the next successful group move. Multi-step undo/redo and process-death-safe edit recovery remain open.
+
 ## September 30, 2026 — recoverable group-move submission
 
 The stacked Development candidate no longer dismisses the group editor before the atomic Room write returns. It preserves selected apps and destination choices after a rejected request, blocks duplicate input while the write is in flight, provides inline assertive failure feedback, and closes only after confirmed success. Android 16 runtime coverage verifies locked-layout rejection leaves both selection and persisted geometry unchanged, then verifies the retained group can be retried successfully after unlocking.
