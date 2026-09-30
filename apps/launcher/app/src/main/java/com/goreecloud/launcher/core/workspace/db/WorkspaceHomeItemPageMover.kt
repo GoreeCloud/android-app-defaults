@@ -231,11 +231,13 @@ class WorkspaceHomeItemPageMover(
 
 
     /**
-     * Resolves a group of secondary-HOME application identities and moves the group atomically.
+     * Resolves a group of HOME application identities and moves the group atomically.
      *
      * The target cell is the top-left anchor of the selected group's current bounding box.
-     * Relative app geometry is preserved. Primary HOME participation is deliberately blocked until
-     * a separately reviewed group-rank/primary-boundary design exists.
+     * Relative app geometry and ranks are preserved for same-page movement. Secondary-to-secondary
+     * movement remains supported. Primary HOME may participate only as a same-page source/target;
+     * primary↔secondary group transfer remains protected until its rank/recovery contract is
+     * separately reviewed.
      */
     suspend fun moveAppGroupToPageCell(
         sourcePageId: String,
@@ -254,10 +256,10 @@ class WorkspaceHomeItemPageMover(
         ) {
             return WorkspacePagedRoomMutationResult.InvalidWorkspace
         }
-        if (
-            sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
-            targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
-        ) {
+        val primarySource = sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        val primaryTarget = targetPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+        val primarySamePage = primarySource && primaryTarget
+        if (primarySource != primaryTarget) {
             return WorkspacePagedRoomMutationResult.PrimaryPageProtected
         }
 
@@ -281,8 +283,10 @@ class WorkspaceHomeItemPageMover(
             }
 
             val items = dao.readItems(pages.map { it.pageId })
-            val spatialItems = items.filterNot {
-                it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+            val spatialItems = if (primarySamePage) {
+                items.filter { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+            } else {
+                items.filterNot { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
             }
             if (spatialItems.any { it.cellX == null || it.cellY == null }) {
                 return WorkspacePagedRoomMutationResult.InvalidWorkspace
