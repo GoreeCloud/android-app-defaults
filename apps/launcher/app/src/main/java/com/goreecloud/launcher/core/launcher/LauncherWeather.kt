@@ -215,7 +215,12 @@ object LauncherWeather {
                 windSpeed = windSpeed,
                 windGust = windGust,
                 windUnit = displayWindUnit,
-            )
+            ).also { snapshot ->
+                cacheEntry = LauncherWeatherCacheEntry(
+                    snapshot = snapshot,
+                    cachedAtMillis = System.currentTimeMillis(),
+                )
+            }
         } finally {
             connection.disconnect()
         }
