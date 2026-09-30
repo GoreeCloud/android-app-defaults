@@ -2990,6 +2990,7 @@ private fun HomeAppGroupMoveDialog(
                     }
                 }
             }
+        }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
