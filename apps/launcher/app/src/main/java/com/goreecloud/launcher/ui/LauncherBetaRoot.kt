@@ -390,6 +390,8 @@ fun LauncherBetaRoot(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    hasPendingHomeAppGroupUndo: Boolean,
+    onUndoHomeAppGroupMove: () -> Unit,
     onMoveHomeAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
@@ -804,6 +806,8 @@ fun LauncherBetaRoot(
                 onCreateHomePage = onCreateHomePage,
                 onSelectHomePage = onSelectHomePage,
                 onDeleteHomePage = onDeleteHomePage,
+                hasPendingHomeAppGroupUndo = hasPendingHomeAppGroupUndo,
+                onUndoHomeAppGroupMove = onUndoHomeAppGroupMove,
                 onMoveHomeAppGroupToPageCell = onMoveHomeAppGroupToPageCell,
                 onSwipeHomePageLeft = onSwipeHomePageLeft,
                 onSwipeHomePageRight = onSwipeHomePageRight,
@@ -1248,6 +1252,8 @@ private fun HomeSurface(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    hasPendingHomeAppGroupUndo: Boolean,
+    onUndoHomeAppGroupMove: () -> Unit,
     onMoveHomeAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
@@ -1739,6 +1745,8 @@ private fun HomeSurface(
                         onSelectPage = onSelectHomePage,
                         onCreatePage = onCreateHomePage,
                         onDeletePage = onDeleteHomePage,
+                        hasPendingHomeAppGroupUndo = hasPendingHomeAppGroupUndo,
+                        onUndoHomeAppGroupMove = onUndoHomeAppGroupMove,
                         onMoveAppGroupToPageCell = onMoveHomeAppGroupToPageCell,
                         onDone = { showHomeEditor = false },
                         onWallpaper = {
@@ -2240,6 +2248,8 @@ private fun HomeEditorSurface(
     initialPageId: String? = null,
     onSelectPage: (String) -> Unit,
     onDeletePage: (String) -> Unit,
+    hasPendingHomeAppGroupUndo: Boolean,
+    onUndoHomeAppGroupMove: () -> Unit,
     onMoveAppGroupToPageCell: (String, List<String>, String, Int, Int) -> Unit,
     onDone: () -> Unit,
     onWallpaper: () -> Unit,
@@ -2278,6 +2288,17 @@ private fun HomeEditorSurface(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+            if (hasPendingHomeAppGroupUndo) {
+                TextButton(
+                    onClick = onUndoHomeAppGroupMove,
+                    enabled = !preferences.layoutLocked,
+                    modifier = Modifier
+                        .heightIn(min = 48.dp)
+                        .testTag("launcher-home-editor-group-undo"),
+                ) {
+                    Text("Undo move")
+                }
             }
             TextButton(
                 onClick = onDone,
