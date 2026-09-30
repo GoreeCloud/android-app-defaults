@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## September 30, 2026 — primary Home same-page app-group reposition foundation
+
+**Change type:** Workspace editing foundation; atomic primary-Home placement; Development candidate.
+
+The Room-native app-group mover now supports one additional bounded case: two or more spatial applications already on protected Primary Home may be translated together to an exact Primary Home anchor while preserving every selected app's relative geometry, span, page identity, and rank. The production runtime coordinator first establishes the configured primary spatial grid, then the complete HOME snapshot is revalidated before one compare-and-swap write. Collision or out-of-bounds requests leave the complete group unchanged.
+
+Primary↔secondary group transfer remains explicitly protected; this tranche does not solve cross-boundary rank/recovery semantics and does not expose a new Primary Home group-selection UI. Secondary-to-secondary group movement remains unchanged. No new permission, network path, telemetry, credential, or persistence authority is introduced.
+
+**Acceptance boundary:** fresh exact-head build/unit/lint/schema/instrumentation-compilation and Android 16 Room/runtime evidence remain required. Visible Primary Home group editing, primary↔secondary group transfer, durable undo/recovery, representative-device direct manipulation/accessibility, protected integration, Release Candidate, Production, and Stable qualification remain open.
+
 ## September 30, 2026 — restored Android 16 runtime gate and Home interaction stabilization
 
 **Change type:** Runtime validation restoration; Home editing and drag interaction correction; Development candidate.
