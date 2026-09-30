@@ -21,6 +21,26 @@ class HomePageManagerPolicyTest {
     )
 
     @Test
+    fun groupAnchorDescriptionAnnouncesCoordinatesAndAvailability() {
+        assertEquals(
+            "Anchor column 3, row 4, available",
+            homeAppGroupAnchorContentDescription(
+                cellX = 2,
+                cellY = 3,
+                available = true,
+            ),
+        )
+        assertEquals(
+            "Anchor column 1, row 1, unavailable",
+            homeAppGroupAnchorContentDescription(
+                cellX = 0,
+                cellY = 0,
+                available = false,
+            ),
+        )
+    }
+
+    @Test
     fun emptySecondaryPageCanBeDeletedWhenLayoutUnlocked() {
         val secondary = WorkspaceRenderedHomePage(
             pageId = "home:user:secondary",
