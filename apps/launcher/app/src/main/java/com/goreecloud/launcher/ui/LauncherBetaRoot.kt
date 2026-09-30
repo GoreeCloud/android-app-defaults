@@ -2976,6 +2976,7 @@ private fun HomeAppGroupMoveDialog(
                 ) {
                     repeat(rows) { cellY ->
                         Row(
+                            modifier = Modifier.testTag("launcher-home-group-anchor-row-" + cellY),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             repeat(columns) { cellX ->
