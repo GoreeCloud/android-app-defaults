@@ -14,6 +14,14 @@ enum class WorkspaceHomeSpatialDirection {
     DOWN,
 }
 
+data class WorkspaceHomeAppGroupPlacementExpectation(
+    val appKey: String,
+    val cellX: Int,
+    val cellY: Int,
+    val spanX: Int,
+    val spanY: Int,
+)
+
 /**
  * Chooses deterministic placements for existing HOME applications while keeping Room authoritative.
  * Secondary-to-secondary writes delegate to [WorkspacePagedRoomMutationRepository.moveHomeItem].
@@ -191,6 +199,7 @@ class WorkspaceHomeItemPageMover(
         grid: WorkspaceGridPlacement.Grid,
         targetCellX: Int,
         targetCellY: Int,
+        expectedSourcePlacements: List<WorkspaceHomeAppGroupPlacementExpectation>? = null,
     ): WorkspacePagedRoomMutationResult {
         if (pageId.isBlank() || appKey.isBlank()) {
             return WorkspacePagedRoomMutationResult.InvalidWorkspace
@@ -289,6 +298,26 @@ class WorkspaceHomeItemPageMover(
             }
 
             val requestedKeys = appKeys.toSet()
+            val expectedByKey = expectedSourcePlacements?.let { expectations ->
+                if (
+                    expectations.size != appKeys.size ||
+                    expectations.any {
+                        it.appKey.isBlank() ||
+                            it.cellX < 0 ||
+                            it.cellY < 0 ||
+                            it.spanX <= 0 ||
+                            it.spanY <= 0
+                    } ||
+                    expectations.map { it.appKey }.toSet() != requestedKeys
+                ) {
+                    return WorkspacePagedRoomMutationResult.InvalidWorkspace
+                }
+                val byKey = expectations.associateBy { it.appKey }
+                if (byKey.size != expectations.size) {
+                    return WorkspacePagedRoomMutationResult.InvalidWorkspace
+                }
+                byKey
+            }
             val candidates = spatialItems.filter {
                 it.pageId == sourcePageId &&
                     it.itemType == WorkspaceItemType.APP &&
@@ -311,6 +340,19 @@ class WorkspaceHomeItemPageMover(
                 targetPageId = targetPageId,
                 targetCellX = targetCellX,
                 targetCellY = targetCellY,
+                expectedSourcePlacements = expectedByKey?.let { expectations ->
+                    appKeys.map { key ->
+                        val candidate = checkNotNull(candidatesByKey.getValue(key).single())
+                        val expected = checkNotNull(expectations[key])
+                        WorkspaceGridPlacement.Placement(
+                            itemId = candidate.itemId,
+                            cellX = expected.cellX,
+                            cellY = expected.cellY,
+                            spanX = expected.spanX,
+                            spanY = expected.spanY,
+                        )
+                    }
+                },
             )
         } catch (exception: CancellationException) {
             throw exception

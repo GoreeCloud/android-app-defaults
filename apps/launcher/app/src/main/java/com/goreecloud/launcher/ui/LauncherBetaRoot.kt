@@ -164,6 +164,7 @@ import com.goreecloud.launcher.core.workspace.WorkspaceMoveDirection
 import com.goreecloud.launcher.core.workspace.WorkspaceState
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetCatalog
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetDescriptor
+import com.goreecloud.launcher.core.workspace.db.WorkspaceHomeAppGroupPlacementExpectation
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeFolder
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
@@ -201,7 +202,15 @@ internal data class LauncherAppDragData(
 )
 
 internal typealias LauncherHomeAppGroupMoveRequest =
-    (String, List<String>, String, Int, Int, (Boolean) -> Unit) -> Unit
+    (
+        String,
+        List<String>,
+        String,
+        Int,
+        Int,
+        List<WorkspaceHomeAppGroupPlacementExpectation>?,
+        (Boolean) -> Unit,
+    ) -> Unit
 
 internal data class LauncherHomeAppGroupUndo(
     val originalPageId: String,
@@ -209,17 +218,22 @@ internal data class LauncherHomeAppGroupUndo(
     val appKeys: List<String>,
     val originalAnchorX: Int,
     val originalAnchorY: Int,
+    val expectedMovedPlacements: List<WorkspaceHomeAppGroupPlacementExpectation>,
 )
 
 internal fun homeAppGroupUndoForMove(
     sourcePage: WorkspaceRenderedHomePage,
     appKeys: List<String>,
     movedPageId: String,
+    movedAnchorX: Int,
+    movedAnchorY: Int,
 ): LauncherHomeAppGroupUndo? {
     if (
         sourcePage.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
         movedPageId.isBlank() ||
         movedPageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID ||
+        movedAnchorX < 0 ||
+        movedAnchorY < 0 ||
         appKeys.size < 2 ||
         appKeys.distinct().size != appKeys.size
     ) {
@@ -231,12 +245,23 @@ internal fun homeAppGroupUndoForMove(
     val selected = appKeys.map { key ->
         byKey[key]?.singleOrNull() ?: return null
     }
+    val originalAnchorX = selected.minOf { checkNotNull(it.cellX) }
+    val originalAnchorY = selected.minOf { checkNotNull(it.cellY) }
     return LauncherHomeAppGroupUndo(
         originalPageId = sourcePage.pageId,
         movedPageId = movedPageId,
         appKeys = appKeys.toList(),
-        originalAnchorX = selected.minOf { checkNotNull(it.cellX) },
-        originalAnchorY = selected.minOf { checkNotNull(it.cellY) },
+        originalAnchorX = originalAnchorX,
+        originalAnchorY = originalAnchorY,
+        expectedMovedPlacements = selected.map { app ->
+            WorkspaceHomeAppGroupPlacementExpectation(
+                appKey = app.appKey,
+                cellX = movedAnchorX + checkNotNull(app.cellX) - originalAnchorX,
+                cellY = movedAnchorY + checkNotNull(app.cellY) - originalAnchorY,
+                spanX = app.spanX,
+                spanY = app.spanY,
+            )
+        },
     )
 }
 
@@ -2727,6 +2752,7 @@ private fun HomeEditorPageOverview(
                                 undo.originalPageId,
                                 undo.originalAnchorX,
                                 undo.originalAnchorY,
+                                undo.expectedMovedPlacements,
                             ) { applied ->
                                 groupMoveUndoInProgress = false
                                 if (applied) {
@@ -2762,6 +2788,8 @@ private fun HomeEditorPageOverview(
                     sourcePage = groupMoveSourcePage,
                     appKeys = appKeys,
                     movedPageId = targetPageId,
+                    movedAnchorX = cellX,
+                    movedAnchorY = cellY,
                 )
                 if (undo == null) {
                     onResult(false)
@@ -2772,6 +2800,7 @@ private fun HomeEditorPageOverview(
                         targetPageId,
                         cellX,
                         cellY,
+                        null,
                     ) { applied ->
                         if (applied) {
                             pendingGroupMoveUndo = undo

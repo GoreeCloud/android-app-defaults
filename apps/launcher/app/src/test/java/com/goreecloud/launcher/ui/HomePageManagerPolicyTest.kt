@@ -2,6 +2,7 @@ package com.goreecloud.launcher.ui
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.goreecloud.launcher.core.workspace.db.WorkspaceHomeAppGroupPlacementExpectation
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeApp
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomeFolder
@@ -640,11 +641,29 @@ class HomePageManagerPolicyTest {
                 appKeys = listOf(firstKey, secondKey),
                 originalAnchorX = 2,
                 originalAnchorY = 3,
+                expectedMovedPlacements = listOf(
+                    WorkspaceHomeAppGroupPlacementExpectation(
+                        appKey = firstKey,
+                        cellX = 0,
+                        cellY = 1,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                    WorkspaceHomeAppGroupPlacementExpectation(
+                        appKey = secondKey,
+                        cellX = 1,
+                        cellY = 2,
+                        spanX = 1,
+                        spanY = 1,
+                    ),
+                ),
             ),
             homeAppGroupUndoForMove(
                 sourcePage = page,
                 appKeys = listOf(firstKey, secondKey),
                 movedPageId = "home:user:target",
+                movedAnchorX = 0,
+                movedAnchorY = 1,
             ),
         )
         assertNull(
@@ -652,6 +671,8 @@ class HomePageManagerPolicyTest {
                 sourcePage = page,
                 appKeys = listOf(firstKey, firstKey),
                 movedPageId = "home:user:target",
+                movedAnchorX = 0,
+                movedAnchorY = 1,
             ),
         )
     }
