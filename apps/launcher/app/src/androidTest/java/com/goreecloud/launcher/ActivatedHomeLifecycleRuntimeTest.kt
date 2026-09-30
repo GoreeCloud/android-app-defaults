@@ -1418,7 +1418,7 @@ class ActivatedHomeLifecycleRuntimeTest {
 
                 composeRule
                     .onNodeWithTag(
-                        "launcher-home-group-anchor-row-1",
+                        "launcher-home-group-anchor-section",
                         useUnmergedTree = true,
                     )
                     .performScrollTo()
