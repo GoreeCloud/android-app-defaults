@@ -3961,26 +3961,26 @@ private fun LauncherBuiltInWidget(
                         Text(
                             now.format(DateTimeFormatter.ofPattern("EEEE, MMM d", Locale.getDefault())),
                             style = MaterialTheme.typography.labelLarge,
-                            color = foreground.copy(alpha = 0.82f),
+                            color = Color.White.copy(alpha = 0.86f),
                             fontWeight = FontWeight.Medium,
                             maxLines = 1,
                         )
                         LauncherWeatherStatusChip(
-                            foreground = foreground,
+                            foreground = Color.White,
                             compact = true,
                         )
                     }
                     Text(
                         now.format(DateTimeFormatter.ofPattern("h:mm", Locale.getDefault())),
                         style = MaterialTheme.typography.displayLarge,
-                        color = foreground,
+                        color = Color.White,
                         fontWeight = FontWeight.Light,
                         maxLines = 1,
                     )
                     Text(
                         "Time and date stay local. Weather uses foreground location only after you allow it.",
                         style = MaterialTheme.typography.labelSmall,
-                        color = foreground.copy(alpha = 0.66f),
+                        color = Color.White.copy(alpha = 0.72f),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
