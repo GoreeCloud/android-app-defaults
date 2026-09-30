@@ -1437,6 +1437,38 @@ class ActivatedHomeLifecycleRuntimeTest {
                 assertEquals(2, moved.getValue(checkNotNull(firstKey)).cellY)
                 assertEquals(3, moved.getValue(checkNotNull(secondKey)).cellX)
                 assertEquals(2, moved.getValue(checkNotNull(secondKey)).cellY)
+
+                waitForDisplayedTag("launcher-home-editor-group-undo")
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-editor-group-undo",
+                        useUnmergedTree = true,
+                    )
+                    .performClick()
+
+                withTimeout(15_000) {
+                    while (true) {
+                        val byKey = dao.readItems(listOf(secondaryPageId))
+                            .associateBy { it.appKey }
+                        val first = byKey[checkNotNull(firstKey)]
+                        val second = byKey[checkNotNull(secondKey)]
+                        if (
+                            first?.cellX == 0 &&
+                            first.cellY == 0 &&
+                            second?.cellX == 1 &&
+                            second.cellY == 0
+                        ) {
+                            break
+                        }
+                        delay(100)
+                    }
+                }
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-home-editor-group-undo",
+                        useUnmergedTree = true,
+                    )
+                    .assertCountEquals(0)
             } finally {
                 scenario.close()
             }
