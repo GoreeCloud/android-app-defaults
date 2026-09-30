@@ -1,0 +1,23 @@
+
+
+def notice(g):
+    text = f'''GoreeCloud Gallery {VERSION_NAME}\n\ngc.6 is a real-device acceptance correction. Square thumbnail controls are removed from GoreeCloud Gallery: media cropping-to-square is disabled, file thumbnails are always rounded, and folder thumbnails are always rounded. Legacy/imported square preferences cannot override this policy. Folder count/title and file spacing/badge options remain.\n\nThe overflow menu is fixed at the MaterialToolbar action-menu theme path. Light Glaze mode uses a light rounded surface with explicit dark text; dark mode uses a dark rounded surface with explicit light text. The app remains offline-first and adds no Internet permission, analytics, advertising, cloud account, or remote API.\n\nGoreeCloud Gallery remains based on Fossify Gallery 1.13.1 and Fossify Commons 6.1.5. Upstream copyright, source history, GNU GPL licensing, and third-party notices remain applicable.\n'''
+    write(g / "GOREECLOUD-NOTICE.md", text); write(g / "app/src/main/assets/goreecloud_notice.txt", text)
+
+
+def validate(g, c):
+    files = {"config": read(g / "app/src/main/kotlin/org/fossify/gallery/helpers/Config.kt"), "settings": read(g / "app/src/main/kotlin/org/fossify/gallery/activities/SettingsActivity.kt"), "filek": read(g / "app/src/main/kotlin/org/fossify/gallery/dialogs/ChangeFileThumbnailStyleDialog.kt"), "folderk": read(g / "app/src/main/kotlin/org/fossify/gallery/dialogs/ChangeFolderThumbnailStyleDialog.kt"), "settingsx": read(g / "app/src/main/res/layout/activity_settings.xml"), "filex": read(g / "app/src/main/res/layout/dialog_change_file_thumbnail_style.xml"), "folderx": read(g / "app/src/main/res/layout/dialog_change_folder_thumbnail_style.xml"), "day": read(g / "app/src/main/res/values/styles.xml"), "night": read(g / "app/src/main/res/values-night/glaze_styles.xml")}
+    required = [("get() = false", files["config"]), ("get() = FOLDER_STYLE_ROUNDED_CORNERS", files["config"]), ("get() = true", files["config"]), ("config.fileRoundedCorners = true", files["filek"]), ("val style = FOLDER_STYLE_ROUNDED_CORNERS", files["folderk"]), ('name="GoreeCloud.PopupMenuTheme"', files["day"]), ('parent="ThemeOverlay.AppCompat.Light"', files["day"]), ('name="GoreeCloud.PopupMenuTheme"', files["night"]), ('parent="ThemeOverlay.AppCompat.Dark"', files["night"])]
+    for n, h in required:
+        if n not in h: fail(f"validation missing {n}")
+    forbidden = [("setupCropThumbnails()", files["settings"]), ("settings_crop_thumbnails", files["settingsx"]), ("dialogFileStyleRoundedCorners", files["filek"]), ("dialog_file_style_rounded_corners", files["filex"]), ("dialogRadioFolderStyle", files["folderk"]), ("DirectoryItemGridSquareBinding", files["folderk"]), ("dialog_radio_folder_square", files["folderx"]), ("dialog_radio_folder_rounded_corners", files["folderx"])]
+    for n, h in forbidden:
+        if n in h: fail(f"square option remains: {n}")
+    for p in (g / "app/src/main/res/layout/activity_settings.xml", g / "app/src/main/res/layout/dialog_change_file_thumbnail_style.xml", g / "app/src/main/res/layout/dialog_change_folder_thumbnail_style.xml", g / "app/src/main/res/values/styles.xml", g / "app/src/main/res/values-night/glaze_styles.xml", g / "app/src/main/res/values-v27/glaze_styles.xml", g / "app/src/main/res/values-night-v27/glaze_styles.xml", c / "commons/src/main/res/values/styles.xml"): ET.parse(p)
+
+
+def main():
+    if len(sys.argv) != 3: fail("usage: build_goreecloud_gallery_gc6.py <gallery-root> <commons-root>")
+    g, c = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve(); verify(g, GALLERY_COMMIT, "Gallery"); verify(c, COMMONS_COMMIT, "Commons")
+    version(g); thumbnails(g); popup(g, c); notice(g); validate(g, c); print(f"Applied GoreeCloud Gallery {VERSION_NAME} acceptance corrections")
+if __name__ == "__main__": main()

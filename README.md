@@ -2,6 +2,10 @@
 
 A privacy-focused monorepo of lightweight replacements for common Android default and utility apps. Each app remains independently installable and maintainable while sharing architecture, UI components, privacy controls, accessibility features, themes, utilities, and development standards.
 
+## Mandatory app repository consolidation
+
+Camera, Launcher, Keyboard, and Gallery are being consolidated into this monorepo under `apps/camera/`, `apps/launcher/`, `apps/keyboard/`, and `apps/gallery/`. The imported revisions are Development snapshots with exact legacy-repository provenance; migration does not imply release or Stable acceptance. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
+
 ## Current Development state
 
 The repository is in **Development**. Authoritative `main` contains GoreeCloud Since under `apps/since/`. Draft PR #50 carries the first GoreeCloud Clock candidate under `apps/clock/`; Clock is not represented as integrated into `main` until that PR is accepted.
