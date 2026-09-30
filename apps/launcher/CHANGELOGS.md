@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## 2026-09-29 — Development continuation candidate
+
+- Added deterministic secondary-Home app compaction with primary-page, unsupported-item, malformed-geometry, and capacity fail-closed guards.
+- Added a Room-authoritative service that rechecks the complete HOME snapshot through the existing compare-and-swap transaction before applying compacted placements.
+- Added an Edit Home **Compact** action only for eligible unlocked non-compact app-only secondary pages, including confirmation and explicit result feedback.
+- Added focused planner and Home-editor eligibility coverage and registered the new compaction service source in the migrated Launcher source manifest.
+- Representative-device/accessibility and broader runtime acceptance remain open; no release-state claim is made.
+
+
 ## September 29, 2026 — Home horizontal-swipe arbitration correction
 
 The Home page gesture arbiter no longer permanently abandons a clear horizontal page swipe merely because a child Home surface consumed an earlier movement sample for press or long-press bookkeeping. Page selection still requires the existing horizontal-distance and direction-dominance thresholds, is committed only after pointer release so the Home subtree is not replaced mid-gesture, and is disabled whenever an app drag session is active so drag/drop and paging cannot compete for authority.

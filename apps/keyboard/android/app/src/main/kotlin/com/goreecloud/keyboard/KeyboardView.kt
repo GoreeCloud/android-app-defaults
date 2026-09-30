@@ -328,7 +328,6 @@ class KeyboardView @JvmOverloads constructor(
         val rows = currentRows()
         val density = resources.displayMetrics.density
         val horizontalPadding = GlazeKeyboardTokens.Space2Dp * density
-        val gap = GlazeKeyboardTokens.Space1Dp * density
         val topArea = GlazeKeyboardV16PresentationPolicy
             .interactionFloorDp(glazeV16PresentationContext) * density
         val toolbarHeight = if (layer == KeyboardLayer.EMOJI) 0f else topArea
@@ -338,6 +337,11 @@ class KeyboardView @JvmOverloads constructor(
             keyboardTop + rows.size,
             height - bottomNavigationInsetPx.toFloat() - bottomSafeGap,
         )
+        val gap = GlazeKeyboardV16PresentationPolicy.verticalGapDp(
+            availableRowsHeightDp = (contentBottom - keyboardTop) / density,
+            rowCount = rows.size,
+            context = glazeV16PresentationContext,
+        ) * density
         val rowGapCount = (rows.size - 1).coerceAtLeast(0)
         val rowHeight = max(1f, (contentBottom - keyboardTop - gap * rowGapCount) / rows.size)
         val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density

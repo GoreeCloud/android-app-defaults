@@ -1,5 +1,10 @@
 # GoreeCloud Gallery — Planned Features and Open Obligations
 
+## 2026-09-29 — local search continuation
+
+The migrated Gallery now has a unified authorized-snapshot search implementation in the current Development candidate. Remaining work is representative-device IME/search interaction, TalkBack/Switch Access, large-text/adaptive-layout, performance, and Privacy Shield/Wardveil acceptance; broader semantic/content search remains separately governed and must not widen media authority implicitly.
+
+
 ## September 29, 2026 — timeline grouping continuation
 
 The current candidate advances the richer-browsing backlog with local **Day / Month / Year / None** grouping plus a persisted **Newest first / Oldest first** presentation preference over the same authorized media snapshot. Day and Newest first remain migration-safe defaults. Settings portability includes grouping and sort order, and the same continuation restores the previously exported-but-not-imported `viewDensity` value. Broader timeline navigation, additional layout controls, and representative-device/adaptive-layout acceptance remain open. Fresh exact-head validation is required.

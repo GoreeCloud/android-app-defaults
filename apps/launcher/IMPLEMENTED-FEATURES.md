@@ -1,5 +1,12 @@
 # GoreeCloud Launcher — Implemented Features
 
+## 2026-09-29 — transactional secondary-page Compact apps
+
+Development source now implements bounded **Compact apps** for eligible unlocked secondary Home pages. The pure planner preserves authoritative app rank order and packs 1×1 apps deterministically from the top-left in row-major cells. The Room service rechecks the complete HOME page/item snapshot inside the existing compare-and-swap transaction before replacing rows, so concurrent workspace changes fail closed. Primary Home, folders, widgets, unsupported/spanning items, malformed geometry, and capacity overflow are excluded.
+
+Edit Home exposes **Compact** only when the rendered page is eligible and visibly non-compact. A confirmation dialog explains that app positions on that page will change, and runtime results provide explicit success/no-op/fail-closed feedback. Focused policy tests cover planner behavior and Home-editor eligibility. Representative-device/accessibility and managed-runtime acceptance remain separate gates.
+
+
 ## September 28, 2026 — accessible App Drawer page indicators
 
 Paged App Drawer layouts now keep the existing restrained **6/8 dp** visual dots inside explicit **48 dp** interaction surfaces. Each page target exposes a stable test tag plus a page-position accessibility label and selected state while preserving the compact Glaze visual treatment. Focused policy coverage locks the interaction floor separately from the visual-dot geometry.

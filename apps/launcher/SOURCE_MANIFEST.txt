@@ -92,6 +92,8 @@ app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceEntities.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceFolderRepository.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomeItemPageMover.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageContext.kt
+app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionPolicy.kt
+app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionService.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspaceLegacyImportMapper.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspacePagedHomeObserver.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/db/WorkspacePagedRoomMutationRepository.kt
@@ -182,6 +184,7 @@ app/src/test/java/com/goreecloud/launcher/core/workspace/WorkspacePortableSnapsh
 app/src/test/java/com/goreecloud/launcher/core/workspace/WorkspaceWidgetPlacementPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspaceCutoverReadinessGuardTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageContextTest.kt
+app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspaceHomePageCompactionPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspaceLegacyImportMapperTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspacePagedHomeMapperTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/db/WorkspacePortableHomeStateFingerprintTest.kt

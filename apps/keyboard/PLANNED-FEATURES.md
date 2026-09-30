@@ -1,5 +1,10 @@
 # GoreeCloud Keyboard — Planned Features
 
+## 2026-09-29 — touch-assistance stabilization continuation
+
+The current candidate restores adaptive row-gap compression against the migrated V1.6 presentation context. Exact-head Android CI plus representative physical-device typing, Touch Exploration, TalkBack/Switch Access, OEM/editor-host constrained-height, landscape, and large-text ergonomics remain acceptance gates.
+
+
 ## 2026-09-29 setup replay continuation
 
 Draft PR #97 now makes voluntary setup replay semantically explicit: replay uses a distinct review title, its first-step exit control says **Close replay**, and instrumentation verifies that closing replay preserves completed first-use state. This is a local guidance/accessibility correction only; exact-head CI and representative-device/TalkBack/Switch Access review remain separate gates.

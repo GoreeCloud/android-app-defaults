@@ -68,6 +68,26 @@ internal object GlazeKeyboardV16PresentationPolicy {
         )
     }
 
+    /**
+     * Compress inter-row whitespace before ordinary key rows fall below the current interaction
+     * floor when an IME host constrains the requested height. The caller supplies only the vertical
+     * space available to key rows and their gaps, so toolbar/suggestion/system-inset accounting
+     * stays owned by the rendered surface.
+     */
+    fun verticalGapDp(
+        availableRowsHeightDp: Float,
+        rowCount: Int,
+        context: GlazeKeyboardV16PresentationContext,
+    ): Float {
+        if (rowCount <= 1 || availableRowsHeightDp <= 0f) return 0f
+        val interactionFloorDp = interactionFloorDp(context)
+        val remainingForGapsDp = (
+            availableRowsHeightDp - interactionFloorDp * rowCount
+        ).coerceAtLeast(0f)
+        return (remainingForGapsDp / (rowCount - 1))
+            .coerceAtMost(GlazeKeyboardTokens.Space1Dp)
+    }
+
     fun motionMode(context: GlazeKeyboardV16PresentationContext): GlazeKeyboardV16MotionMode =
         if (context.reducedMotion) GlazeKeyboardV16MotionMode.MINIMAL
         else GlazeKeyboardV16MotionMode.STANDARD

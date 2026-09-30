@@ -14,39 +14,47 @@ on:
 permissions:
   contents: read
 
+env:
+  MIGRATION_CUTOVER_SHA: 20ca33c7c0c565f361deda206c9c950154dec327
+
 jobs:
   exact-source-integrity:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Check out exact candidate
+      - name: Check out exact candidate with migration history
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify imported source against pinned legacy revisions
+      - name: Verify immutable cutover snapshot against pinned legacy revisions
         shell: bash
         run: |
           set -euo pipefail
           work="$(mktemp -d)"
           trap 'rm -rf "$work"' EXIT
 
+          git cat-file -e "${MIGRATION_CUTOVER_SHA}^{commit}"
+          git worktree add --quiet --detach "$work/cutover" "$MIGRATION_CUTOVER_SHA"
+
           verify_app() {
             app="$1"
             repo="$2"
             sha="$3"
-            src="$work/$app"
+            src="$work/legacy-$app"
+            cutover="$work/cutover/apps/$app"
 
             git clone --quiet --filter=blob:none --no-checkout "https://github.com/$repo.git" "$src"
             git -C "$src" fetch --quiet --depth=1 origin "$sha"
             git -C "$src" checkout --quiet --detach "$sha"
             rm -rf "$src/.git" "$src/.github" "$src/artifacts"
 
-            cp "apps/$app/MIGRATION-ORIGIN.md" "$work/$app-MIGRATION-ORIGIN.md"
-            rm "apps/$app/MIGRATION-ORIGIN.md"
-            diff -ruN "$src" "apps/$app"
-            mv "$work/$app-MIGRATION-ORIGIN.md" "apps/$app/MIGRATION-ORIGIN.md"
+            test -f "$cutover/MIGRATION-ORIGIN.md"
+            cp -a "$cutover" "$work/cutover-$app"
+            rm "$work/cutover-$app/MIGRATION-ORIGIN.md"
+            diff -ruN "$src" "$work/cutover-$app"
           }
 
           verify_app camera GoreeCloud/camera 209b89ca31cc23899f6c90d7ca12908281f0af0c
@@ -54,7 +62,7 @@ jobs:
           verify_app keyboard GoreeCloud/keyboard 041b5e0457f2b4d68dc96a416d5abc1f020646d7
           verify_app gallery GoreeCloud/gallery 3f7263c6e31a0af0f1a06b99491f608b96cc69ba
 
-      - name: Verify migration provenance
+      - name: Verify current migration provenance records
         shell: bash
         run: |
           set -euo pipefail

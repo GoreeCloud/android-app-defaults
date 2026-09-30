@@ -1,5 +1,11 @@
 # GoreeCloud Keyboard — Changelogs
 
+## 2026-09-29 — Development continuation candidate
+
+- Replaced fixed keyboard row-gap reservation with a bounded adaptive gap policy driven by the actual key-row area.
+- Added tests proving Touch Assistance compresses whitespace before row targets and fails closed for degenerate geometry.
+
+
 ## September 29, 2026 — setup replay wording correction candidate
 
 The existing voluntary setup replay now identifies itself as **Review GoreeCloud Keyboard setup** instead of reusing the mandatory first-use title. At replay step 1, the exit control is explicitly labeled **Close replay** rather than **Back**, matching its actual behavior. Instrumentation verifies closing replay returns to Settings while preserving completed first-use state.

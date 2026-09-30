@@ -70,6 +70,10 @@ class WorkspaceProductionRuntimeCoordinator(
         workspaceDaoProvider = workspaceDaoProvider,
         mutationRepository = pagedMutationRepository,
     )
+    private val homePageCompactionService = WorkspaceHomePageCompactionService(
+        authorityRepository = authorityRepository,
+        workspaceDaoProvider = workspaceDaoProvider,
+    )
     private val primaryHomeSpatialRepository = WorkspacePrimaryHomeSpatialRepository(
         authorityRepository = authorityRepository,
         workspaceDaoProvider = workspaceDaoProvider,
@@ -506,6 +510,21 @@ class WorkspaceProductionRuntimeCoordinator(
     ): WorkspacePagedRoomMutationResult {
         val result = pagedMutationRepository.moveHomePage(pageId, targetRank)
         if (result is WorkspacePagedRoomMutationResult.Updated) {
+            refresh()
+        }
+        return result
+    }
+
+    suspend fun compactHomePage(
+        pageId: String,
+        columns: Int,
+        rows: Int,
+    ): WorkspaceHomePageCompactionResult {
+        val grid = runCatching {
+            WorkspaceGridPlacement.Grid(columns = columns, rows = rows)
+        }.getOrNull() ?: return WorkspaceHomePageCompactionResult.InvalidWorkspace
+        val result = homePageCompactionService.compact(grid = grid, pageId = pageId)
+        if (result is WorkspaceHomePageCompactionResult.Applied) {
             refresh()
         }
         return result

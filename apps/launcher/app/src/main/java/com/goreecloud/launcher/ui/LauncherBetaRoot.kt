@@ -387,6 +387,7 @@ fun LauncherBetaRoot(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    onCompactHomePage: (String) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     isDefaultHome: Boolean,
@@ -800,6 +801,7 @@ fun LauncherBetaRoot(
                 onCreateHomePage = onCreateHomePage,
                 onSelectHomePage = onSelectHomePage,
                 onDeleteHomePage = onDeleteHomePage,
+                onCompactHomePage = onCompactHomePage,
                 onSwipeHomePageLeft = onSwipeHomePageLeft,
                 onSwipeHomePageRight = onSwipeHomePageRight,
                 onManageFolders = {
@@ -1243,6 +1245,7 @@ private fun HomeSurface(
     onCreateHomePage: () -> Unit,
     onSelectHomePage: (String) -> Unit,
     onDeleteHomePage: (String) -> Unit,
+    onCompactHomePage: (String) -> Unit,
     onSwipeHomePageLeft: () -> Boolean,
     onSwipeHomePageRight: () -> Boolean,
     onManageFolders: () -> Unit,
@@ -1732,6 +1735,7 @@ private fun HomeSurface(
                         onSelectPage = onSelectHomePage,
                         onCreatePage = onCreateHomePage,
                         onDeletePage = onDeleteHomePage,
+                        onCompactPage = onCompactHomePage,
                         onDone = { showHomeEditor = false },
                         onWallpaper = {
                             showHomeEditor = false
@@ -2231,6 +2235,7 @@ private fun HomeEditorSurface(
     initialPageId: String? = null,
     onSelectPage: (String) -> Unit,
     onDeletePage: (String) -> Unit,
+    onCompactPage: (String) -> Unit,
     onDone: () -> Unit,
     onWallpaper: () -> Unit,
     onCreatePage: () -> Unit,
@@ -2287,6 +2292,7 @@ private fun HomeEditorSurface(
             onSelectPage = onSelectPage,
             onCreatePage = onCreatePage,
             onDeletePage = onDeletePage,
+            onCompactPage = onCompactPage,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
@@ -2328,6 +2334,7 @@ private fun HomeEditorPageOverview(
     onSelectPage: (String) -> Unit,
     onCreatePage: () -> Unit,
     onDeletePage: (String) -> Unit,
+    onCompactPage: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val visiblePages = pages
@@ -2335,6 +2342,8 @@ private fun HomeEditorPageOverview(
 
     var pendingDeletePageId by remember(visiblePages) { mutableStateOf<String?>(null) }
     val pendingDeletePage = visiblePages.firstOrNull { it.pageId == pendingDeletePageId }
+    var pendingCompactPageId by remember(visiblePages) { mutableStateOf<String?>(null) }
+    val pendingCompactPage = visiblePages.firstOrNull { it.pageId == pendingCompactPageId }
     val initialPageIndex = remember(visiblePages, initialPageId) {
         visiblePages.indexOfFirst { it.pageId == initialPageId }
             .takeIf { it >= 0 }
@@ -2447,6 +2456,12 @@ private fun HomeEditorPageOverview(
             val primary = page.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
             val itemCount = homePageVisibleItemCount(page)
             val canDelete = canDeleteHomePage(page, visiblePages, layoutLocked)
+            val canCompact = canCompactHomePageApps(
+                page = page,
+                homeColumns = homeColumns,
+                homeRows = homeRows,
+                layoutLocked = layoutLocked,
+            )
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2518,24 +2533,45 @@ private fun HomeEditorPageOverview(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        if (canDelete) {
-                            TextButton(
-                                onClick = { pendingDeletePageId = page.pageId },
-                                modifier = Modifier.heightIn(min = 48.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                            ) {
-                                Text(
-                                    "Delete",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        } else if (primary) {
+                        if (primary) {
                             Text(
                                 "Protected",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                        } else {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (canCompact) {
+                                    TextButton(
+                                        onClick = { pendingCompactPageId = page.pageId },
+                                        modifier = Modifier
+                                            .heightIn(min = 48.dp)
+                                            .testTag("launcher-home-editor-compact-" + page.pageId),
+                                        contentPadding = PaddingValues(horizontal = 8.dp),
+                                    ) {
+                                        Text(
+                                            "Compact",
+                                            style = MaterialTheme.typography.labelMedium,
+                                        )
+                                    }
+                                }
+                                if (canDelete) {
+                                    TextButton(
+                                        onClick = { pendingDeletePageId = page.pageId },
+                                        modifier = Modifier.heightIn(min = 48.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp),
+                                    ) {
+                                        Text(
+                                            "Delete",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -2571,6 +2607,37 @@ private fun HomeEditorPageOverview(
             },
             dismissButton = {
                 TextButton(onClick = { pendingDeletePageId = null }) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+
+    if (pendingCompactPage != null) {
+        AlertDialog(
+            onDismissRequest = { pendingCompactPageId = null },
+            shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
+            title = { Text("Compact apps on this page?") },
+            text = {
+                Text(
+                    "Apps will be packed from the top-left in their current order. " +
+                        "This changes positions only on this secondary page.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val pageId = pendingCompactPage.pageId
+                        pendingCompactPageId = null
+                        onCompactPage(pageId)
+                    },
+                ) {
+                    Text("Compact apps")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingCompactPageId = null }) {
                     Text("Cancel")
                 }
             },

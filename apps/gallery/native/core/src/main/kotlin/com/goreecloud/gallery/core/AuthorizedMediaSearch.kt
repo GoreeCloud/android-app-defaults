@@ -1,0 +1,48 @@
+package com.goreecloud.gallery.core
+
+import java.util.Locale
+
+/**
+ * Bounded local search over the already-authorized Gallery snapshot.
+ *
+ * This policy never queries MediaStore, reads media bytes, contacts a network service, or widens
+ * Android media authority. It only matches metadata already present on [MediaItem].
+ */
+object AuthorizedMediaSearch {
+    const val MAX_RESULTS = 100
+
+    fun search(
+        items: List<MediaItem>,
+        query: String,
+        limit: Int = MAX_RESULTS,
+    ): List<MediaItem> {
+        val boundedLimit = limit.coerceIn(0, MAX_RESULTS)
+        if (boundedLimit == 0) return emptyList()
+
+        val tokens = query
+            .trim()
+            .lowercase(Locale.ROOT)
+            .split(Regex("\\s+"))
+            .filter { it.isNotBlank() }
+
+        // A blank query is ordinary browsing, not a search result set. Preserve the complete
+        // already-authorized snapshot so opening/closing Search never truncates the library.
+        if (tokens.isEmpty()) return items
+
+        return items.asSequence()
+            .filter { item ->
+                val haystack = buildString {
+                    append(item.displayName.lowercase(Locale.ROOT))
+                    append(' ')
+                    append(item.albumName?.lowercase(Locale.ROOT).orEmpty())
+                    append(' ')
+                    append(item.mimeType.lowercase(Locale.ROOT))
+                    append(' ')
+                    append(item.kind.name.lowercase(Locale.ROOT))
+                }
+                tokens.all(haystack::contains)
+            }
+            .take(boundedLimit)
+            .toList()
+    }
+}

@@ -1,5 +1,10 @@
 # GoreeCloud Launcher — Planned Features
 
+## 2026-09-29 — compaction acceptance continuation
+
+Secondary-page **Compact apps** is now wired through the current Room-authoritative compare-and-swap mutation path and exposed in Edit Home only for eligible unlocked app-only pages. Remaining work is exact-head CI/runtime acceptance, representative-device and TalkBack/Switch Access review, large-text/form-factor validation, and any separately justified durable edit-history/undo semantics. No Production Acceptance, Stable, Seal, or Anchor claim is implied.
+
+
 ## 2026-09-28 candidate continuation
 
 Draft PR #248 now also carries a presentation-only app-drawer sort control for A–Z/Z–A ordering, with Unicode-stable tie-breaking and unit coverage. Drawer search result counts include matching user-profile folders as well as apps. This remains Development candidate behavior until the exact revision is accepted on authoritative main and representative-device/accessibility gates are satisfied.
