@@ -106,7 +106,7 @@ class SinceStreakHistoryTest {
 
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithText("Longest streak").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("3 d · 0 h · 0 min").assertIsDisplayed()
+        composeRule.onNodeWithText("3 d · 0 h · 0 min · 0 sec").assertIsDisplayed()
         composeRule.onNodeWithText("Reset count").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Last reset").performScrollTo().assertIsDisplayed()
     }
