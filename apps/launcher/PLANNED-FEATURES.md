@@ -12,7 +12,7 @@ Merged PR #121 restores configured horizontal edge actions on the unified pager.
 
 The current Development candidate restores the complete API 36 `connectedDebugAndroidTest` suite plus focused `LauncherTransitionPerformanceRuntimeTest` diagnostics and makes both promotion requirements for Launcher changes. Its first restoration attempt exposed and then repaired a project-directory routing defect before any Launcher performance assertion.
 
-A stacked Development feature candidate adds device-local, profile-qualified App Drawer favorites with long-press **Pin in Apps / Unpin in Apps** actions and a deterministic **Pinned first** sort mode. This partially advances the broader user-controlled drawer organization obligation without claiming categories, tags, collections, or general custom ordering complete.
+A stacked Development feature candidate adds device-local, profile-qualified App Drawer favorites with long-press **Pin in Apps / Unpin in Apps** actions, a deterministic **Pinned first** sort mode, and local persistence of the selected Drawer sort mode across restarts. This partially advances the broader user-controlled drawer organization obligation without claiming categories, tags, collections, or general custom ordering complete.
 
 Still open after the runtime-gate candidate: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
