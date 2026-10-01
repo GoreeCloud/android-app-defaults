@@ -356,6 +356,41 @@ internal fun SettingsScreen(
 
         item {
             SettingsSection(title = stringResourceCompat(R.string.settings_appearance)) {
+                Text(
+                    text = stringResourceCompat(R.string.settings_theme),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                ThemePreference.entries.forEach { preference ->
+                    val label = when (preference) {
+                        ThemePreference.SYSTEM -> stringResourceCompat(R.string.theme_system)
+                        ThemePreference.LIGHT -> stringResourceCompat(R.string.theme_light)
+                        ThemePreference.DARK -> stringResourceCompat(R.string.theme_dark)
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("theme-${preference.name.lowercase()}")
+                            .selectable(
+                                selected = themePreference == preference,
+                                role = Role.RadioButton,
+                                onClick = { onThemePreferenceChange(preference) },
+                            )
+                            .semantics(mergeDescendants = true) {}
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        RadioButton(
+                            modifier = Modifier.clearAndSetSemantics {},
+                            selected = themePreference == preference,
+                            onClick = null,
+                        )
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
                 FormatSelector(
                     title = stringResourceCompat(R.string.settings_default_display_format),
                     supporting = stringResourceCompat(
@@ -400,41 +435,6 @@ internal fun SettingsScreen(
                         checked = showSeconds,
                         onCheckedChange = null,
                     )
-                }
-                Text(
-                    text = stringResourceCompat(R.string.settings_theme),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                ThemePreference.entries.forEach { preference ->
-                    val label = when (preference) {
-                        ThemePreference.SYSTEM -> stringResourceCompat(R.string.theme_system)
-                        ThemePreference.LIGHT -> stringResourceCompat(R.string.theme_light)
-                        ThemePreference.DARK -> stringResourceCompat(R.string.theme_dark)
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("theme-${preference.name.lowercase()}")
-                            .selectable(
-                                selected = themePreference == preference,
-                                role = Role.RadioButton,
-                                onClick = { onThemePreferenceChange(preference) },
-                            )
-                            .semantics(mergeDescendants = true) {}
-                            .padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        RadioButton(
-                            modifier = Modifier.clearAndSetSemantics {},
-                            selected = themePreference == preference,
-                            onClick = null,
-                        )
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
                 }
             }
         }
