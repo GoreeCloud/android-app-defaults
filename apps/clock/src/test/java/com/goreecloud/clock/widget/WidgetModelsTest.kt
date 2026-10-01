@@ -103,6 +103,35 @@ class WidgetModelsTest {
     }
 
     @Test
+    fun widgetDetailPolicyShowsEnabledDetailOnlyInRegularPresentation() {
+        assertEquals(
+            true,
+            WidgetDetailPolicy.showSecondaryDetail(
+                presentation = WidgetPresentation.REGULAR,
+                enabled = true,
+            ),
+        )
+        assertEquals(
+            false,
+            WidgetDetailPolicy.showSecondaryDetail(
+                presentation = WidgetPresentation.COMPACT,
+                enabled = true,
+            ),
+        )
+    }
+
+    @Test
+    fun widgetDetailPolicyHonorsUserDisabledDetailInRegularPresentation() {
+        assertEquals(
+            false,
+            WidgetDetailPolicy.showSecondaryDetail(
+                presentation = WidgetPresentation.REGULAR,
+                enabled = false,
+            ),
+        )
+    }
+
+    @Test
     fun widgetSizePolicyFailsOpenToRegularWhenHostOptionsAreUnavailable() {
         assertEquals(
             WidgetPresentation.REGULAR,

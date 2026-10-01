@@ -96,11 +96,13 @@ The current Development candidate implements:
 - Home-screen running-timer information widget using platform Chronometer countdown behavior.
 - Direct widget navigation into the relevant Clock, Alarms, or Timer surface.
 - Local widget refresh when relevant preferences, alarms, timers, package/time/time-zone lifecycle state changes.
+- Adaptive compact/regular layouts driven by launcher-provided widget size options.
+- Local Settings personalization for Clock date, Next alarm secondary detail, and Timer status, with existing detail visible by default and compact layouts prioritizing primary content.
 
 Still planned:
 
-- Widget configuration and expanded responsive layouts.
-- Representative-launcher rendered/accessibility acceptance.
+- Representative-launcher rendered/accessibility acceptance for resize, touch, theme, preference updates, and launcher restoration.
+- Additional per-widget-instance configuration only where justified by product need.
 - Lock-screen/system surfaces supported by Android.
 - Additional notification actions and platform integration where justified.
 

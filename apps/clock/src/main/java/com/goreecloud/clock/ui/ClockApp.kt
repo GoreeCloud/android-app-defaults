@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -294,6 +295,38 @@ private fun SettingsDialog(
                         preferencesStore.setReducedMotion(it)
                     },
                 )
+
+                Spacer(Modifier.height(6.dp))
+                Text("Widgets", style = MaterialTheme.typography.titleMedium)
+                ToggleRow(
+                    label = "Show date in Clock widget",
+                    checked = preferences.showClockWidgetDate,
+                    testTag = "settings-widget-clock-date",
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setShowClockWidgetDate(it)
+                    },
+                )
+                ToggleRow(
+                    label = "Show detail in Next alarm widget",
+                    checked = preferences.showAlarmWidgetDetail,
+                    testTag = "settings-widget-alarm-detail",
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setShowAlarmWidgetDetail(it)
+                    },
+                )
+                ToggleRow(
+                    label = "Show status in Timer widget",
+                    checked = preferences.showTimerWidgetStatus,
+                    testTag = "settings-widget-timer-status",
+                    onCheckedChange = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        preferencesStore.setShowTimerWidgetStatus(it)
+                    },
+                )
+
+                Spacer(Modifier.height(6.dp))
                 ToggleRow(
                     label = "Contextual hints",
                     checked = preferences.hintsEnabled,
@@ -355,6 +388,7 @@ private fun SelectionRow(
 private fun ToggleRow(
     label: String,
     checked: Boolean,
+    testTag: String? = null,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
@@ -363,7 +397,11 @@ private fun ToggleRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label)
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            modifier = if (testTag == null) Modifier else Modifier.testTag(testTag),
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
     }
 }
 
