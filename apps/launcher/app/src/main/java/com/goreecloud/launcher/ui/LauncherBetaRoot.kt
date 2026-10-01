@@ -608,6 +608,7 @@ fun LauncherBetaRoot(
     localLaunchCounts: Map<String, Long>,
     hiddenHomeSuggestionKeys: Set<String>,
     drawerPinnedAppKeys: Set<String>,
+    drawerSortOrderName: String?,
     searchProviderPreferences: com.goreecloud.launcher.core.launcher.LauncherSearchProviderPreferenceDecodeResult?,
     fileSearchRoots: List<Uri>,
     homePageCount: Int,
@@ -667,6 +668,7 @@ fun LauncherBetaRoot(
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
     onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
     onSetDrawerAppPinned: (String, Boolean) -> Unit,
+    onSetDrawerSortOrderName: (String?) -> Unit,
     onRequestUninstall: (LauncherActivityInfo) -> Unit,
     themeMode: GlazeThemeMode,
     onSetThemeMode: (GlazeThemeMode) -> Unit,
@@ -1366,6 +1368,7 @@ fun LauncherBetaRoot(
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
                 pinnedAppKeys = drawerPinnedAppKeys,
+                sortOrderName = drawerSortOrderName,
                 preferences = preferences,
                 drawerLayoutMode = drawerLayoutMode,
                 experiencePreferences = experiencePreferences,
@@ -1382,6 +1385,7 @@ fun LauncherBetaRoot(
                     folderManagerAddToHome = profileId == primaryFolderProfileId
                     showFolderManager = true
                 },
+                onSetSortOrderName = onSetDrawerSortOrderName,
                 onOpenSettings = {
                     drawerSearchRequested = false
                     surfaceModeName = LauncherSurfaceMode.SETTINGS.name
@@ -5799,6 +5803,7 @@ private fun AppDrawerSurface(
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
     pinnedAppKeys: Set<String>,
+    sortOrderName: String?,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
@@ -5807,15 +5812,13 @@ private fun AppDrawerSurface(
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
     onManageFolders: (Int) -> Unit,
+    onSetSortOrderName: (String?) -> Unit,
     onOpenSettings: () -> Unit,
     onHome: () -> Unit,
 ) {
     var drawerQuery by rememberSaveable { mutableStateOf("") }
-    var drawerSortOrderName by rememberSaveable {
-        mutableStateOf(LauncherDrawerSortOrder.ALPHABETICAL.name)
-    }
     val drawerSortOrder = runCatching {
-        LauncherDrawerSortOrder.valueOf(drawerSortOrderName)
+        LauncherDrawerSortOrder.valueOf(sortOrderName.orEmpty())
     }.getOrDefault(LauncherDrawerSortOrder.ALPHABETICAL)
     var showDrawerSortMenu by remember { mutableStateOf(false) }
     val primaryUser = remember { Process.myUserHandle() }
@@ -6105,7 +6108,7 @@ private fun AppDrawerSurface(
                                             )
                                         },
                                         onClick = {
-                                            drawerSortOrderName = order.name
+                                            onSetSortOrderName(order.name)
                                             showDrawerSortMenu = false
                                         },
                                     )
