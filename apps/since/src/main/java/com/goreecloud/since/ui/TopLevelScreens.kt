@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.goreecloud.since.BuildConfig
@@ -163,11 +164,11 @@ internal fun AchievementsScreen(
             .padding(innerPadding),
         contentPadding = PaddingValues(
             start = 20.dp,
-            top = 24.dp,
+            top = 20.dp,
             end = 20.dp,
-            bottom = 32.dp,
+            bottom = 28.dp,
         ),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -211,6 +212,10 @@ private data class AchievementUi(
 private fun AchievementCard(
     achievement: AchievementUi,
 ) {
+    val achievementState = stringResourceCompat(
+        if (achievement.unlocked) R.string.achievement_unlocked else R.string.achievement_locked,
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
@@ -220,8 +225,12 @@ private fun AchievementCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier
+                .semantics(mergeDescendants = true) {
+                    stateDescription = achievementState
+                }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
@@ -238,7 +247,9 @@ private fun AchievementCard(
                 },
             ) {
                 Text(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier
+                        .clearAndSetSemantics {}
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                     text = if (achievement.unlocked) "✓" else "○",
                     style = MaterialTheme.typography.titleLarge,
                 )
@@ -295,11 +306,11 @@ internal fun SettingsScreen(
             .testTag("settings-list"),
         contentPadding = PaddingValues(
             start = 20.dp,
-            top = 24.dp,
+            top = 20.dp,
             end = 20.dp,
-            bottom = 32.dp,
+            bottom = 28.dp,
         ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -340,7 +351,7 @@ internal fun SettingsScreen(
                                 onClick = { onThemePreferenceChange(preference) },
                             )
                             .semantics(mergeDescendants = true) {}
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
@@ -648,8 +659,8 @@ private fun SettingsSection(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = title,
@@ -758,11 +769,10 @@ private fun SettingsActionRow(
         onClick = onClick,
         enabled = enabled,
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.padding(vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -797,7 +807,7 @@ private fun SettingsInfoRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         Text(
