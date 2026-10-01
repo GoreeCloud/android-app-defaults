@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add local arithmetic and unit-conversion Quick answers
+
+Universal Search now includes a Launcher-owned **Quick answers** source. Arithmetic uses a deliberately bounded parser with precedence, parentheses, unary signs, and the four basic operators rather than arbitrary expression/code evaluation. Unit conversion uses an explicit local allowlist for common length, mass, time, and temperature units.
+
+Quick answers participate through the existing built-in provider contract as local-only, permission-free, no-network, and no-query-retention behavior. Results are ranked as direct local answers and expose an explicit tap-to-copy action. Android 13+ relies on the platform clipboard confirmation; earlier Android versions receive a short Launcher copy confirmation.
+
+Focused JVM coverage includes arithmetic precedence/parentheses, malformed expressions, division-by-zero rejection, common conversions, incompatible dimensions, below-absolute-zero rejection, bounded query length, copy payloads, and built-in provider metadata.
+
+**Acceptance boundary:** Development feature candidate on `feat/launcher-local-quick-answers-20261001`. Exact-head CI/runtime validation, review, merge, and representative-device Search/clipboard/accessibility acceptance remain open.
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
