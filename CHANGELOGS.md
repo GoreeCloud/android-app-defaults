@@ -1,5 +1,16 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since dashboard and guidance refinement candidate
+
+- Expanded local Dashboard sort choices and persisted the selected sort in Since Preferences.
+- Added the specified reset-confirmation preference while keeping reset time, optional reason, and optional note in the reset editor.
+- Moved contextual-hint controls and setup replay into General Settings.
+- Suppressed the tracker-interaction hint on an empty Dashboard and placed it before tracker cards when shown.
+- Updated English/Arabic Settings summary copy and UI coverage.
+
+**Acceptance boundary:** PR #128 exact head `7c42b3cf940c9cf370efa4c42c66be7dc45e336c` passed Android Development Foundation #654. Newer stacked source requires fresh exact-head validation and representative-device acceptance.
+
+
 ## September 30, 2026 — Since display preferences candidate
 
 - Added locally persisted **Default display format** and **Show seconds** settings using the existing Since Preferences DataStore.
