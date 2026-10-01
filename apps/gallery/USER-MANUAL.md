@@ -102,7 +102,7 @@ Long-press a visible Recycle Bin tile to enter selection mode, then tap addition
 ### Restore
 
 1. Put a **disposable copied** photo/video into Trash using normal Gallery Delete with Recycle Bin enabled.
-2. Open **Albums > Recovery > Recycle Bin**.
+2. Open **Trash** from the bottom navigation.
 3. Confirm that the trashed item appears.
 4. Either open the item and choose **Restore**, or long-press/select it and choose **Restore** from the selection action surface.
 5. Android should display its system-owned restore confirmation.
@@ -126,9 +126,9 @@ Confirmed purge removes stale Gallery Favorite URI references for those items.
 
 Canceling Android's Restore or permanent-delete confirmation must not be treated as success. The media should remain in the Recycle Bin unless Android or another application changed it independently. If cancellation occurs from the viewer, the viewer remains available for the current item.
 
-### Recycle Bin acceptance boundary
+### Trash acceptance boundary
 
-The rendered `0.7.1-dev` Recycle Bin remains a Development candidate, but representative-device testing now verifies the integrated Albums entry, Trash-to-bin visibility, populated Recycle Bin browsing, stable in-place selection, Android-owned Restore and permanent-delete confirmation surfaces, denial/cancellation for both recovery mutations, successful permanent purge of 28 selected photos, the post-purge empty-bin state, and mixed photo/video Trash-to-Recycle-Bin plus Restore. In the mixed-media test, Gallery recognized the test video in Videos, Android separately confirmed moving the video and a photo to Trash, both appeared in the Recycle Bin, Android presented a `move 2 items out of trash` confirmation for the mixed selection, Gallery reported `Restored 2 items`, and the video returned to Videos while the photo returned to the ordinary library. In the 28-photo purge test, Android presented its system-owned confirmation, Gallery reported `Deleted 28 items permanently`, refreshed the Recycle Bin to 0 items, and rendered the intended `Recycle Bin is empty` state. Remaining required device testing includes mixed photo/video permanent-purge behavior, partial-media permission behavior, permission revocation, provider failure, restart/process recreation, OEM/profile behavior, and retention/expiry refresh. This evidence does not establish Stable or production acceptance.
+The rendered `0.7.1-dev` Recycle Bin remains a Development candidate, but representative-device testing now verifies the dedicated five-tab Trash destination, Trash-to-bin visibility, populated Recycle Bin browsing, stable in-place selection, Android-owned Restore and permanent-delete confirmation surfaces, denial/cancellation for both recovery mutations, successful permanent purge of 28 selected photos, the post-purge empty-bin state, and mixed photo/video Trash-to-Recycle-Bin plus Restore. In the mixed-media test, Gallery recognized the test video in Videos, Android separately confirmed moving the video and a photo to Trash, both appeared in the Recycle Bin, Android presented a `move 2 items out of trash` confirmation for the mixed selection, Gallery reported `Restored 2 items`, and the video returned to Videos while the photo returned to the ordinary library. In the 28-photo purge test, Android presented its system-owned confirmation, Gallery reported `Deleted 28 items permanently`, refreshed the Recycle Bin to 0 items, and rendered the intended `Recycle Bin is empty` state. Remaining required device testing includes mixed photo/video permanent-purge behavior, partial-media permission behavior, permission revocation, provider failure, restart/process recreation, OEM/profile behavior, and retention/expiry refresh. This evidence does not establish Stable or production acceptance.
 
 ## Settings
 
@@ -170,8 +170,8 @@ Separate release gates include GLAZE UI V1.6 application acceptance, accessibili
 
 **Delete is disabled:** the current Development path requires Android 11 or newer and a currently selected/presented authorized media item.
 
-**The ordinary Gallery no longer shows an item after Trash:** open **Albums > Recovery > Recycle Bin** to check Android MediaStore Trash.
+**The ordinary Gallery no longer shows an item after Trash:** open the **Trash** tab to check Android MediaStore Trash.
 
-**The Recycle Bin says media access is required:** return to ordinary GoreeCloud Gallery and grant the Android media scope you intend Gallery to use.
+**Trash says media access is required:** return to ordinary GoreeCloud Gallery and grant the Android media scope you intend Gallery to use.
 
 **Android confirmation does not open:** Gallery must not claim success. Stop that Restore/Delete test and report the exact feedback.
