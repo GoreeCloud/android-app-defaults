@@ -30,6 +30,7 @@ class SincePreferencesRepository(
     private val themePreferenceKey = stringPreferencesKey("theme_preference")
     private val defaultDisplayFormatKey = stringPreferencesKey("default_display_format")
     private val showSecondsKey = booleanPreferencesKey("show_seconds")
+    private val dashboardSortKey = stringPreferencesKey("dashboard_sort")
     private val onboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
     private val onboardingStepKey = intPreferencesKey("onboarding_step")
     private val contextualHintsEnabledKey = booleanPreferencesKey("contextual_hints_enabled")
@@ -74,6 +75,10 @@ class SincePreferencesRepository(
         .map { values -> values[showSecondsKey] ?: true }
         .distinctUntilChanged()
 
+    val dashboardSortName: Flow<String> = preferences
+        .map { values -> values[dashboardSortKey] ?: "CREATED" }
+        .distinctUntilChanged()
+
     val onboardingComplete: Flow<Boolean> = preferences
         .map { values ->
             values[onboardingCompleteKey] ?: upgradedInstallationWithoutOnboardingState
@@ -111,6 +116,12 @@ class SincePreferencesRepository(
     suspend fun setShowSeconds(enabled: Boolean) {
         context.sincePreferencesDataStore.edit { values ->
             values[showSecondsKey] = enabled
+        }
+    }
+
+    suspend fun setDashboardSortName(name: String) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[dashboardSortKey] = name
         }
     }
 
