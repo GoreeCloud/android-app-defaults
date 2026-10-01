@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — extend inventory-continuity runtime coverage
+
+The current stacked Development candidate strengthens the disappearing User/Work-app regression boundary without changing Launcher production behavior. The API 36 inventory test now keeps one live `LauncherAppsRepository` collection active across repeated explicit full reconciliations and requires every emitted snapshot to continue matching Android-visible launcher activities across all available profiles.
+
+The real default-HOME lifecycle suite also keeps a known app visible while the App Drawer is open, moves `MainActivity` through CREATED and back to RESUMED, then requires the Drawer and known app to remain rendered before verifying the existing HOME return path.
+
+**Acceptance boundary:** automated API 36 continuity evidence only. This does not simulate real package installation/removal, managed-profile availability churn, OEM-specific transient enumeration failures, or representative-device jank/power behavior. Those remain open under issue #77.
+
+
 ## October 1, 2026 — restore monorepo Android 16 Launcher runtime gates
 
 A post-consolidation audit found that the migrated-app workflow still ran Launcher source guards, JVM tests, lint, schema verification, and APK assembly, but no longer executed the source-controlled Launcher Android instrumentation suite or the existing transition-performance instrumentation.
