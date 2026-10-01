@@ -1,5 +1,141 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — restore configured Home pager edge actions
+
+The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
+
+The observer snapshots the starting page for the gesture, so a normal follow-finger transition that settles onto an outer page cannot accidentally trigger an edge action during the same swipe. It is disabled while Home app drag routing owns the pager, and interior/vertical/short gestures remain ordinary pager or vertical input.
+
+Focused JVM coverage verifies first/right and last/left dispatch plus rejection of interior, inward, short, vertical, and single-page cases. Android 16 runtime coverage extends the existing real default-HOME multi-page flow by configuring Swipe right to Universal Search, swiping outward from Primary Home, requiring the real Search surface, and then returning HOME before continuing page/editor acceptance.
+
+**Acceptance boundary:** PR #121 is merged after repaired exact-head Development validation as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Accepted head `18abf1673529c1125e31a12ceb55a433eb505f56` passed migration provenance `36802711649`, Migrated Android apps CI `36802711618` including Android 16/default-HOME runtime coverage, Android Development Foundation `36802711630`, and Protected promotion gate `36802711614`. Representative-device gesture, frame-pacing, accessibility, large-text, and form-factor acceptance remain open.
+
+
+## October 1, 2026 — unify Primary and secondary Home follow-finger paging
+
+The stable Home shell now renders the full Room-ordered Home page list through one Compose `HorizontalPager`. Primary Home and every secondary page participate in the same follow-finger motion path, while the already-shared editable Dock remains stationary below the moving content.
+
+The pager synchronizes with the existing selected Home-page ID instead of becoming a second workspace authority. Stale IDs still fail closed to Primary Home. The former Activity-level threshold handoff is removed, secondary pages render content-only to avoid nesting their older secondary-only pager, and Primary's page-local horizontal recognizer is disabled only while the unified pager owns multi-page motion. Pager scrolling is disabled during an active Home drag so edge/drop routing retains control.
+
+The pager keeps at most one adjacent page warm and Primary page-entry animation is held at its settled key while the outer pager moves, avoiding a second animation layered on top of follow-finger motion.
+
+**Acceptance boundary:** PR #118 is merged after complete exact-head Development validation as `e0c7bc787f8dab5a187127ea0819a5b7d80b5d19`. Representative-device/default-HOME frame pacing, input latency, memory/power, configured edge-action acceptance, accessibility, large text, and form-factor acceptance remain open.
+
+
+## October 1, 2026 — host one editable Dock across Home pages
+
+The stable Home root now owns one full `EditableHomeDock` below page-specific content. Primary Home suppresses only its internal Dock and bottom navigation inset; secondary Home does the same while retaining its existing `HorizontalPager`, page mutations, vertical gestures, and editor/Search handoffs.
+
+The shared Dock preserves the extracted Primary contract: layout lock, edit mode, drag geometry, Dock bounds/item bounds, local drag lifecycle, launch/manage actions, reorder/drop behavior, and configured swipe gestures. Bottom system-bar padding is owned once by the stable Home shell.
+
+Focused JVM policy coverage verifies that external Dock hosting suppresses page-local Dock/inset ownership while the default local path remains unchanged.
+
+**Acceptance boundary:** PR #117 is merged after exact-head Development validation as `89ff54e485220d8f408a237c2ed5e4b4da5c5098`. Representative-device frame pacing/input latency/memory/power acceptance remains open.
+
+
+## October 1, 2026 — extract the full editable Home Dock for future pager hosting
+
+The Primary Home Dock path is now factored through a reusable `EditableHomeDock` composable. It forwards the existing `GlazeDock` configuration unchanged: layout lock, edit mode, active-drag geometry, Dock bounds/item bounds, local drag lifecycle, launch/manage actions, reorder/drop behavior, and configured vertical gestures.
+
+This is a behavior-neutral architecture foundation for the eventual shared Home pager. It deliberately preserves the editable Primary Dock contract instead of promoting the simplified read-only secondary Dock.
+
+**Acceptance boundary:** PR #116 is merged after exact-head Development validation as `4cacb1af78bdd03c6df4a00e824983fc061ca411`. Final Primary↔secondary follow-finger paging and representative-device acceptance remain open.
+
+
+## October 1, 2026 — keep Launcher Home root mounted across Primary and secondary selection
+
+`MainActivity` now supplies the existing secondary Home renderer to `LauncherBetaRoot` as a composable slot. The root resolves the authoritative selected Home-page identity and renders either Primary Home or that secondary slot internally, so crossing the Primary boundary no longer removes and later reconstructs the entire Launcher root.
+
+The secondary renderer itself is unchanged: Room-backed app/folder/widget mutations, cross-page movement, secondary vertical gestures, follow-finger secondary paging, Dock presentation, Search/editor handoffs, and grid-bound reporting remain under their existing authorities. A focused policy test verifies that only a known non-Primary Room page can select the secondary slot.
+
+**Acceptance boundary:** PR #115 is merged after exact-head Development validation as `3b84f0d9023a395abf7612c4d5e6d543ab2462d3`. Primary↔secondary follow-finger motion and representative-device frame pacing remain open.
+
+
+## October 1, 2026 — thread authoritative selected Home page identity into the Primary root
+
+`MainActivity` now supplies the current selected Home-page ID to `LauncherBetaRoot` / `HomeSurface`. A fail-closed resolver accepts the identity only when it exists in the current Room-rendered page list; stale, missing, or null identities resolve to Primary Home.
+
+Current user-visible behavior is unchanged because the Primary root is still mounted only for Primary Home. The state thread is the next prerequisite for moving Primary and secondary content under one pager without creating a second selection or workspace authority.
+
+**Acceptance boundary:** PR #114 is merged after complete exact-head Development validation as `f770f14d7be4a0ea5b23c6a7061478ae7196efde`. Unified Primary↔secondary paging remains open.
+
+
+## October 1, 2026 — keep one adjacent secondary Home page warm
+
+The secondary Home `HorizontalPager` now requests one beyond-viewport page only when two or more secondary pages exist. This keeps an adjacent page composed around the active page to reduce swipe-edge composition work while avoiding broad offscreen page retention.
+
+A focused JVM policy keeps the behavior bounded: zero warm pages for zero/one page and exactly one for larger secondary page sets.
+
+**Acceptance boundary:** Development performance candidate reconciled onto merged PR #112 / current main `54b65654075667d48bc4c757357897c128f3337c`; fresh exact-head validation is required before integration. Representative-device frame pacing, input latency, memory, and power acceptance remain open.
+
+
+## September 30, 2026 — separate Primary Home page content from persistent chrome
+
+`LauncherBetaRoot` now exposes a behavior-neutral Primary Home content-only mode. When that mode is used, the Primary page leaves fixed Top/Bottom Search, page-indicator reserve space, Dock rendering, bottom navigation-bar padding, and horizontal page-gesture ownership to an outer Home shell/pager; the existing full surface remains the default for current callers.
+
+The content-only path also clears stale in-root Dock geometry so future use inside a unified pager cannot accidentally retain an old Dock drop target. Focused JVM policy coverage locks both content-only suppression and the unchanged full-surface behavior.
+
+This creates the Primary-side counterpart to merged PR #108's secondary content boundary and merged PR #109's secondary follow-finger pager without changing Room authority, placement semantics, Search providers, permissions, networking, or telemetry.
+
+**Acceptance boundary:** Development architecture candidate; fresh exact-head CI is required before integration. A unified Primary↔secondary follow-finger pager and representative-device frame pacing remain open.
+
+
+## September 30, 2026 — follow-finger paging between secondary Home pages
+
+Secondary Home pages now use a single Compose `HorizontalPager` when two or more secondary pages exist. The moving layer contains page content only; the persistent Dock is rendered once outside the pager so it does not slide away with page content.
+
+The selected secondary page identity is synchronized from the pager's current page, keeping the existing Room-backed page model authoritative. The outer Home swipe recognizer is restricted to targets at the Primary boundary, preventing it from racing the new secondary↔secondary pager while preserving the existing bounded Primary↔secondary handoff.
+
+The single-secondary-page path remains unchanged, and app/folder/widget placement, cross-page move authority, Search behavior, permissions, networking, and telemetry are unchanged.
+
+**Acceptance boundary:** PR #109 is merged after complete exact-head Development validation. Primary↔secondary follow-finger paging and representative-device frame pacing remain open.
+
+
+## September 30, 2026 — separate secondary Home page content from persistent chrome
+
+Secondary Home rendering now has an explicit content-only mode that suppresses the page-local indicator and persistent Dock while also leaving bottom navigation-bar padding to the future outer chrome owner. The existing full-surface behavior remains the default, so current Launcher behavior is unchanged by this foundation.
+
+Focused policy coverage locks both modes: content-only suppresses Dock/page-indicator chrome, while the ordinary full surface retains the requested page indicator and Dock when applicable.
+
+This creates a clean rendering boundary for the next follow-finger paging tranche without adding another workspace authority, changing Room state, or modifying app/folder/widget placement behavior.
+
+**Acceptance boundary:** PR #108 is merged after complete exact-head Development validation. PR #109 now provides secondary↔secondary follow-finger paging; Primary↔secondary unification remains open.
+
+
+## September 30, 2026 — remove redundant first-composition Home page animation
+
+The multi-page Home path no longer starts a fresh 180–220 ms Slide/Fade/Zoom entrance animation merely because the Activity has switched between the Primary Launcher root and a newly composed secondary Home surface. A newly composed page now starts at its settled visual state.
+
+Configured Home transition styles are preserved for a real page-key change inside an already-composed page surface. Focused JVM policy coverage locks first-composition snap, real key-change animation, and no replay when only the transition preference changes.
+
+This is intentionally a bounded latency mitigation. It does not yet replace the Primary↔secondary whole-subtree swap with a follow-finger pager, and it does not establish representative-device frame-time, jank, input-latency, power, accessibility, or form-factor acceptance.
+
+**Acceptance boundary:** PR #107 is merged after exact-head Development validation. Representative-device follow-finger paging, frame-time/jank/input-latency/power, accessibility, and form-factor acceptance remain open.
+
+
+## September 30, 2026 — movable Universal Search Home surface
+
+Launcher Settings now exposes four explicit Home Search presentations: **Swipe down**, **Movable**, fixed **Top**, and fixed **Bottom**. Swipe down remains the default and fail-safe behavior.
+
+Movable Search reuses the existing first-party `goreecloud.search` 4 × 1 Room-backed widget instead of introducing a second Search or drag authority. The managed Search widget participates in ordinary Home widget placement, long-press drag, cross-page movement, and widget management. If no 4 × 1 primary-Home area is currently free, Launcher keeps the bottom Search bar available and retries managed placement after primary-Home geometry changes. Switching to a fixed or gesture-only mode removes only the Launcher-managed Search instance; manually added Search widgets remain user-managed.
+
+Fixed Top/Bottom Search continues to use the existing Glass/Clear/Solid bar presentation. The settings surface no longer presents those fixed-bar style controls as if they changed the movable widget.
+
+This tranche builds on merged post-consolidation stabilization: PR #103 drawer/Home interactions, PR #104 exact-profile Work folders, and PR #105 bounded confirmation of transient active-profile inventory losses.
+
+**Acceptance boundary:** PR #106 is merged after exact-head Development validation. Representative-device movable/fixed Search placement, Home-space fallback/retry, accessibility, large text, form factors, gesture coexistence, jank, and power acceptance remain open.
+
+
+## September 30, 2026 — App Drawer and Home interaction stabilization
+
+The App Drawer now exposes four explicit presentation sorts — **A–Z**, **Z–A**, **Most recent**, and **Most frequent** — using the existing privacy-bounded local Launcher launch history for the two usage-based orders. User/Work profile pages stay precomposed across the two-tab pager to reduce the transient blank-page behavior reported on representative hardware. The Work page heading is corrected from the redundant “Work Apps apps” wording.
+
+Drawer app tiles and list rows now retain a stationary long-press command path even while drag-to-Home/Dock is armed, so the compact app context menu and direct drag placement can coexist. Launcher Settings category rows no longer show the unwanted far-right ASCII arrow.
+
+Home paging reacts as soon as a clear horizontal gesture crosses the existing distance/direction threshold instead of deferring the page selection until finger-up. Secondary Home pages now honor the same configurable vertical Home gestures as primary Home, including the default **swipe down → Universal Search** behavior. Missing/unknown stored Universal Search Home-mode values now also fall back to **Swipe down only**, matching the actual new-install default. HOME re-entry invalidates an open Edit Home/widget-picker generation immediately before the cleanup effect runs, reducing the extra visible editor-dismiss delay.
+
+**Acceptance boundary:** Development candidate. Exact-head CI and representative-device drawer inventory stability, stationary-long-press versus drag arbitration, Home paging jank, secondary-page Search, and HOME-from-Edit-Home acceptance remain required.
+
 ## September 30, 2026 — polished Calendar and Weather widgets
 
 Launcher now includes separate 2 × 2 **Calendar** and **Weather** built-ins. Calendar uses a cleaner local date hierarchy, while Weather combines local time with the existing opt-in condition presentation. Starter Glance remains compatible and receives a richer gradient treatment.

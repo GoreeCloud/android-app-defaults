@@ -1,21 +1,29 @@
 # GoreeCloud Launcher — Planned Features
 
-## 2026-09-28 candidate continuation
+## September 30, 2026 interaction-stabilization continuation
 
-Draft PR #248 now also carries a presentation-only app-drawer sort control for A–Z/Z–A ordering, with Unicode-stable tie-breaking and unit coverage. Drawer search result counts include matching user-profile folders as well as apps. This remains Development candidate behavior until the exact revision is accepted on authoritative main and representative-device/accessibility gates are satisfied.
+Merged PRs #103–#107 now cover the current mainline drawer/Home/profile/Search/performance stabilization tranche: explicit A–Z/Z–A/Most recent/Most frequent sorting, warm User/Work profile paging, stationary drawer long-press actions, threshold-responsive Home paging, secondary-page vertical gestures, exact-profile Work folders with persistence-level isolation, bounded confirmation before publishing suspicious inventory loss from a still-active Android profile, genuine **Movable** Universal Search backed by the existing Room 4 × 1 Search widget, and removal of the redundant first-composition 180–220 ms page-entry animation.
+
+Merged PR #108 separates secondary Home page content from optional persistent Dock/page-indicator chrome. Merged PR #109 then uses `HorizontalPager` across secondary pages, keeps the Dock outside the moving page layer, synchronizes the selected Room-backed page identity as the pager current page changes, and limits the outer threshold recognizer to the Primary boundary.
+
+Merged PR #112 creates the Primary Home content-only path; #113 keeps one adjacent secondary page warm; #114 threads authoritative selected-page identity into the root; #115 keeps the Launcher root mounted across Primary↔secondary selection; #116 extracts the full editable Primary Dock contract; #117 hosts one editable Dock in the stable Home shell; and #118 unifies Primary plus secondary Home content under one follow-finger `HorizontalPager` while preserving the Room page model and drag-edge authority.
+
+Merged PR #121 restores configured horizontal edge actions on the unified pager. It observes pager gestures without consuming them, snapshots the starting page, dispatches only outward first-page/right or last-page/left actions after the same 56 dp horizontal-dominance threshold used by the prior Primary fallback, and verifies the Primary outward-edge Search action in the Android 16/default-HOME runtime suite.
+
+Still open after source integration: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
 **Record type:** Repository planned/open feature inventory  
-**Repository:** `GoreeCloud/launcher`  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
-**Migration state:** **Authoritative on `main` after PR #201 merged as `009371938ac3cab041cfb0893ede68e66e211a4f` and default-branch readback verified this record. Legacy Drive roadmap retirement was subsequently verified after PR #203.**  
-**Runtime source baseline:** `03d4c3d2d7e355916412565b531e411d1bba71de` (PR #240 merged September 23, 2026). Repository-native feature records were reconciled after that runtime merge through PR #241.  
+**Migration state:** **Mandatory monorepo consolidation is complete. The standalone repository is no longer an active development target; historical entries remain provenance only.**  
+**Current authoritative main:** `23b3bc085ef2ae644a71bcea79667f2c3aade8f4` after merged PR #121. Historical candidate sections below remain dated provenance and do not override the September 30 current-state checkpoint.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Purpose
 
 This file carries forward every material open, planned, partial, deferred, blocked, or acceptance-gated feature obligation from the retired roadmap model. A partially implemented feature remains here until its defined implementation and acceptance scope is complete.
 
-Source/build/unit/schema/managed-emulator evidence does not by itself establish representative physical-device acceptance, Release Candidate, production, or Stable status. GoreeCloud Launcher remains **Development**. Issue #80 remains the active stabilization and release-gate record.
+Source/build/unit/schema/managed-emulator evidence does not by itself establish representative physical-device acceptance, Release Candidate, production, or Stable status. GoreeCloud Launcher remains **Development**. Monorepo issue #77 remains the active Launcher stabilization record.
 
 ## Migration reconciliation
 
@@ -29,7 +37,7 @@ PR #201 merged the replacement feature records and retired `FEATURE-ROADMAP.md` 
 
 The former roadmap synchronization obligation (`GOV-01`) is superseded by the September 22, 2026 repository-native standard. Google Drive is no longer a permitted active, mirrored, backup, convenience, or historical-shadow roadmap authority.
 
-## Current unmerged integration candidate
+## Historical standalone integration candidate (superseded by monorepo consolidation)
 
 Draft PR #248 remains the direct-to-`main` Development integration candidate and remains Draft/unmerged. The candidate preserves the owner-feedback Glance/system-bar, folder, Search, Dock, drawer, page-management, icon-reliability, and onboarding work while continuing active representative-device stabilization. Ordinary Home page dots use a compact presentation with page-context semantics; Home Search, optional quick actions, the persistent/adaptive Dock, refreshed folder surfaces, Launcher-owned built-in widgets, unavailable-widget fallback, and the **Add apps** picker share the GLAZE UI V1.6 presentation-policy direction. Larger folders use bounded compact pages with a grid-integrated Add tile and overflow fallback; the picker remains adaptive under larger text. The first-use wizard and replayable Home hint explain exact App Drawer placement, direct Home-widget movement, movable Glance, folder behavior, connected-Search opt-in, and the two current Settings routes. Current owner feedback also drives a searchable Launcher Settings category home with original line icons, a direct default-HOME status banner, and compact App Drawer sort/new-folder/Settings header actions. The Settings organization uses mature launcher information architecture only as reference while retaining GoreeCloud-owned source and Glaze presentation. Fresh starter workspaces seed movable Glance only when Room placement succeeds; upgraded workspaces are not mutated in the background and an older fixed clock/date card converts only after an explicit long-press while Home is unlocked and has room.
 

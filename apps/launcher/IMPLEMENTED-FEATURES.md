@@ -1,5 +1,19 @@
 # GoreeCloud Launcher — Implemented Features
 
+## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
+
+- Authoritative Launcher development now lives in `GoreeCloud/android-app-defaults/apps/launcher/`; the standalone Launcher repository is migration history only.
+- Merged PR #103 adds explicit App Drawer A–Z/Z–A/Most recent/Most frequent sorting, warm User/Work profile paging, stationary drawer long-press actions, responsive Home page switching, secondary-page vertical gestures, swipe-down Search fallback, and HOME-editor reset stabilization.
+- Merged PR #104 adds exact Android-profile folders for Work Apps while keeping legacy folders primary-profile-only and enforcing membership in the persistence layer.
+- Merged PR #105 confirms suspicious full-refresh inventory losses before publishing them when the Android profile is still active, reducing transient disappearing apps without delaying explicit package/profile removals.
+- Merged PR #106 adds **Movable** Universal Search beside **Swipe down**, fixed **Top**, and fixed **Bottom**. Movable Search reuses the existing 4 × 1 Room-backed Universal Search widget, supports ordinary Home widget movement and cross-page placement, keeps a fixed-bottom fallback when no 4 × 1 primary-Home area is free, and retries managed placement after primary-Home geometry changes.
+- Merged PR #107 removes the redundant 180–220 ms first-composition page-entry animation while preserving configured transitions for actual page-key changes.
+- Merged PR #108 adds a content-only mode for secondary Home surfaces so page content can be rendered independently from persistent page indicators and Dock chrome.
+- Merged PR #109 pages between two or more secondary Home pages with Compose `HorizontalPager`. Secondary page content follows the finger while the persistent Dock stays outside the pager, and the Activity-level threshold recognizer owns only the Primary↔secondary boundary.
+- Merged PR #112 adds a Primary Home content-only mode to `LauncherBetaRoot`/Home. Merged PR #113 keeps one adjacent secondary page warm. Merged PR #114 threads authoritative selected-page identity into the root. Merged PR #115 keeps `LauncherBetaRoot` mounted across Primary↔secondary selection. Merged PR #116 extracts the full editable Primary `GlazeDock` contract; merged PR #117 hosts one editable Dock in the stable root; and merged PR #118 puts Primary plus all secondary Home content under one Compose `HorizontalPager`, keeps one adjacent page warm, disables paging during active Home drag, removes the Activity threshold handoff, and keeps the Room-rendered page list plus selected page ID authoritative. Merged PR #121 restores configured horizontal edge actions by observing only outward first-page/right and last-page/left gestures without consuming pager motion, and adds Android 16/default-HOME runtime coverage for an outward Primary edge mapped to Universal Search.
+
+**Acceptance boundary:** PRs #103–#109 and #112–#118 plus #121 are merged Development evidence; PR #121 is integrated as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4` after accepted head `18abf1673529c1125e31a12ceb55a433eb505f56` passed the required exact-head gates. Representative-device/default-HOME multi-page frame pacing, edge gestures, input latency, memory/power, Search placement, package/profile churn, accessibility, large-text/form-factor, and visual acceptance remain open.
+
 ## September 30, 2026 — polished Calendar and Weather widgets
 
 - Added first-party 2 × 2 **Calendar** and **Weather** widget entries and gallery previews.
@@ -27,10 +41,10 @@ Paged App Drawer layouts now keep the existing restrained **6/8 dp** visual dots
 
 
 **Record type:** Repository implemented-feature inventory  
-**Repository:** `GoreeCloud/launcher`  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
-**Migration state:** **Authoritative on `main` after PR #201 merged as `009371938ac3cab041cfb0893ede68e66e211a4f` and default-branch readback verified this record.**  
-**Runtime source baseline:** `03d4c3d2d7e355916412565b531e411d1bba71de` (PR #240 merged September 23, 2026). Repository-native feature records were reconciled after that runtime merge through PR #241.  
+**Migration state:** **Mandatory monorepo consolidation is complete. New Launcher source work belongs only under `apps/launcher/`; legacy standalone history below is retained as dated provenance.**  
+**Current authoritative main:** `89ff54e485220d8f408a237c2ed5e4b4da5c5098` after merged PR #117. Historical baseline sections below retain their dated provenance and are superseded for current-state interpretation by the September 30 checkpoint above.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Interpretation
