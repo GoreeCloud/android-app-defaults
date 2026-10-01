@@ -1141,7 +1141,7 @@ private fun TrackerDetailsScreen(
                     )
                     SelectionContainer {
                         Text(
-                            text = elapsedSummary(elapsed),
+                            text = elapsedSummary(elapsed, showSeconds),
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.displaySmall,
                         )
@@ -1521,9 +1521,10 @@ private fun StreakHistoryScreen(
                 .filter { it.endEpochMs != null }
                 .sortedByDescending { it.sequence }
     }
-    val tick by rememberMinuteTick(
+    val tick by rememberElapsedTick(
         clock = clock,
         key = "history-" + aggregate.tracker.id,
+        showSeconds = showSeconds,
     )
 
     Scaffold(
