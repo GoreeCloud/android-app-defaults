@@ -1508,6 +1508,8 @@ private fun LauncherGlazeSearchResult(
     onOpenSearchUri: (LauncherOpenUriSearchAction) -> Unit,
 ) {
     val isContact = result.category == LauncherSearchCategory.CONTACT
+    val appAction = result.action as? LaunchApplicationSearchAction
+    val appIcon = if (appAction != null) rememberLauncherAppIcon(appAction.app) else null
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -1531,7 +1533,14 @@ private fun LauncherGlazeSearchResult(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                 ) {
-                    if (isContact) {
+                    if (appIcon != null) {
+                        Image(
+                            bitmap = appIcon,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.size(42.dp).launcherIconMask(),
+                        )
+                    } else if (isContact) {
                         Surface(
                             modifier = Modifier.size(38.dp),
                             shape = RoundedCornerShape(GlazeMetrics.radiusPill),
