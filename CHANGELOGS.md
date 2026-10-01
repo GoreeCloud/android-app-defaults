@@ -1,5 +1,41 @@
 # Android App Defaults — Changelogs
 
+## September 28, 2026 — relative Next alarm presentation
+
+Clock's existing exact-alarm-gated **Next alarm** card now adds a compact relative-time summary such as **In 2 h 15 min**, derived from the same scheduled trigger instant rather than a second scheduling path. The presentation policy uses instant duration so DST/local-clock representation does not distort the countdown, handles sub-minute and multi-day boundaries, and fails closed to **Due now** for a non-future trigger.
+
+Exact candidate head `d47eb48611867b5d96b6239ea5681cbf007edbdf` passed Android Development Foundation run `36488720505`, including Clock build/unit/lint, Clock Android 16 runtime, and the shared Since regression matrix. No scheduler, persistence, permission, telemetry, account, or network authority changed. Representative-device time-zone/DST/clock-change, accessibility, power, and real alarm-delivery acceptance remain open.
+
+
+## September 28, 2026 — Clock next-alarm presentation candidate
+
+Clock now derives the next enabled alarm through the same deterministic local schedule calculation used by alarm delivery and surfaces it on the Alarms screen as **Next alarm** with Today/Tomorrow/date and local-time presentation only while Android exact-alarm scheduling access is available. The screen refreshes that presentation at a bounded 30-second cadence while visible; no new background service, permission, telemetry, account, or network path is introduced.
+
+Focused unit coverage verifies earliest-occurrence selection, repeating-alarm ordering, disabled-alarm exclusion, and deterministic tie behavior through the existing schedule policy. Exact-head Android CI and representative-device time-zone/DST, clock-change, accessibility, power, and alarm-delivery acceptance remain open.
+
+
+## 2026-09-28 — Clock haptic-preference coverage candidate
+
+- Applied the existing haptic preference to previously missed full-screen/bedside controls and exit actions.
+- Added preference-governed feedback to world-clock dismissal, permission/guidance actions, and alarm/timer dialog controls.
+- Kept representative-device haptic acceptance and broader release gates open.
+
+## 2026-09-28 — Clock timer-completion restart action candidate
+
+**Lifecycle:** Development  
+**Tracking:** PR #50
+
+### Added
+
+- Timer-completion notifications now open the Timer surface when tapped.
+- Added a local **Restart** notification action that restarts the exact completed timer from its original duration, reschedules its exact completion alarm, updates persisted timer/widget state through existing stores, and dismisses the stale completion notification.
+- The action is an explicit in-app broadcast and adds no network, account, storage, microphone, or new permission authority.
+
+### Boundary
+
+Fresh exact-head Android validation is required. Representative-device notification, exact-alarm, Doze/OEM, accessibility, and power acceptance remain separate from this source change.
+
+
 ## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
 
 **Lifecycle:** Development  
@@ -455,3 +491,98 @@ PR #30 was squash-merged as `979972f2564b6ebd63ed59aeb658cbf4cd261eb1`. Exact me
 
 This is a presentation-only Development refinement. Tracker semantics, persistence, permissions, networking, time calculations, and lifecycle state are unchanged. Representative physical-device/OEM, assistive-technology, downstream GLAZE UI consumer, Release Candidate, production, and Stable acceptance remain open.
 
+
+
+## Unreleased — GoreeCloud Clock Draft PR #50
+
+### Added
+
+- New independent `:apps:clock` Development application candidate.
+- Local digital/analog clock, world-clock, alarm, timer, and stopwatch surfaces.
+- Local-only preferences and persistence with no network permission.
+- Exact Android alarm/timer scheduling and reboot/time/time-zone restoration.
+- Clock, next-alarm, and running-timer home-screen widgets.
+- Repository-local Clock project specification and Development branding boundary.
+- Clock manifest privacy/export guard and focused JVM tests.
+
+### Changed
+
+- Running timers now use monotonic elapsed-realtime semantics during a boot session instead of depending on wall-clock epoch progression. A wall-clock fallback is retained only for reconstructing remaining time after a reboot resets the monotonic clock.
+- Repository CI includes a dedicated Clock test/lint/assemble/privacy-guard job.
+
+### Status
+
+This changelog entry describes an open Development candidate. It does not claim integration to `main`, representative-device acceptance, release, production, or Stable status.
+
+
+### Fixed — Clock visual acceptance follow-up
+
+- Reduced the normal analog clock face responsively on constrained handheld heights so the date, zone, full-screen action, and bedside action remain visible instead of being clipped below the viewport.
+- Replaced colored emoji bottom-navigation glyphs and wrapped text labels with monochrome GoreeCloud-owned vector-style Compose icons. The active destination remains visible in the top app bar and each navigation icon carries an accessibility content description.
+- Extended Android 16 navigation/visual tests so the analog face must keep both presentation actions reachable before rendered evidence is accepted.
+
+
+### Added — Clock onboarding and contextual guidance
+
+- Added a four-stage local-first first-use flow with stable persisted step identifiers and restart-safe resume behavior.
+- Added truthful readiness messaging for local/offline operation, notification state, and exact-alarm state without front-loading Android permission prompts.
+- Added Settings controls for onboarding replay, contextual-hint enable/disable, and resetting dismissed hints.
+- Added dismissible contextual reliability guidance to Alarms and Timer.
+- Added Android 16 first-use/resume/replay/hint automation and rendered onboarding scenes.
+
+### Boundary
+
+The onboarding tranche is Development until exact-head CI/runtime evidence passes. Representative-device accessibility, localization/RTL, form-factor, recovery, and upgrade acceptance remain open.
+
+
+### Fixed - Clock onboarding state semantics
+
+- Separated voluntary onboarding replay from first-use completion so replay can be interrupted, resumed, or closed without resetting a previously completed setup state.
+- Persisted onboarding progress and hint-control changes synchronously to reduce crash-window state loss.
+- Added a one-time onboarding schema migration that keeps existing Development installs with prior Clock state from being forced through a full first-use wizard solely because onboarding support was added.
+
+
+### Fixed — Clock onboarding viewport continuity
+
+- Reset the onboarding scroll position whenever the user advances or returns to a different onboarding stage so each new stage begins at its heading instead of inheriting the prior stage's scroll offset.
+- Kept Add alarm and Add timer as the first actionable controls on their screens, ahead of contextual guidance and permission-status cards, so primary creation actions remain immediately reachable on compact handheld viewports.
+- Retained the Android 16 display assertions that exposed these defects; the tests were not weakened.
+
+
+### Added — Clock alarm sound, gradual volume, and haptic preference behavior
+
+- Added Android alarm-tone selection with System default and Silent options.
+- Added a foreground alarm playback service that loops the selected alarm tone, requests alarm audio focus, stops on snooze/dismiss, and falls back to the notification/full-screen path if playback cannot start.
+- Added optional gradual alarm volume over 15, 30, or 60 seconds with deterministic unit coverage.
+- Applied the existing Haptic feedback preference to primary in-app time-control/navigation actions and alarm snooze/dismiss controls while leaving each alarm's Vibrate setting independent.
+- Preserved the no-network boundary and limited new manifest capability to Android foreground media-playback support required by active alarm audio.
+
+### Boundary
+
+Run #215 / 36418113358 validates selectable alarm sound and gradual volume on head `3d846f9cf0902a9499ecb68c962a2803ab73530e`. Run #216 / 36419206782 validates the haptic-preference application on head `feae932538b23846b09e0cf3ad6591e2a2acd10b` across all four configured jobs. Representative-device audio, tactile, DND/device-policy, OEM, accessibility, and power acceptance remain open.
+
+
+### Added — Clock previous stopwatch results
+
+- Resetting a non-empty stopwatch session now archives the completed duration, finish time, and lap totals locally.
+- Added a bounded Recent results list with 20-result retention, per-result deletion, and Clear all.
+- Empty stopwatch resets do not create history entries.
+- Added JVM coverage for result creation and Android 16 rendered-evidence capture for the history surface.
+
+### Boundary
+
+The stopwatch-history and subsequent relative Next alarm source are included in exact head `60704e906962e3c5d74708866f2393df7ced6393`, which passed Android Development Foundation run #255 / `36489784031`. That closes the prior automated exact-head validation gap for those source slices; representative-device accessibility and interaction acceptance remain open.
+
+
+### Added — Clock adaptive home-screen widget sizing
+
+- Added a shared deterministic compact/regular widget presentation policy driven only by Android launcher size options.
+- Clock compact mode hides the secondary date and reduces the primary time scale.
+- Next-alarm compact mode hides secondary delivery/day detail while preserving the alarm time and label.
+- Running-timer compact mode hides secondary status detail while preserving the timer label and countdown/empty state.
+- Added bounded smaller resize floors in the three AppWidget provider declarations so compatible launchers can reach the compact presentation.
+- Added JVM coverage for narrow, short, default-size, and unavailable host-option behavior.
+
+### Boundary
+
+Exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8` passed Android Development Foundation run #281 / `36511856286`, including Clock build/unit/lint/privacy checks, Clock Android 16 runtime instrumentation and rendered evidence, plus Since build/schema and Android 16 runtime regressions. Representative-launcher resize, theme, touch, accessibility, and update acceptance remain open. This tranche does not add configuration activities, permissions, networking, account state, release authority, or Stable status.
