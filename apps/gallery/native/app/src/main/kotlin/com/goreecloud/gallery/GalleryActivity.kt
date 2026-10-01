@@ -1033,10 +1033,13 @@ class GalleryActivity : Activity() {
                 videoCountLabel(visibleItems.count { it.mimeType.startsWith("video/") })
             destination == GalleryDestination.ALBUMS -> {
                 val albumCatalog = visibleItems.buildAlbumCatalog()
-                val albumCount = albumCatalog.size
-                val albumsLabel = if (albumCount == 1) "1 album" else "$albumCount albums"
+                val hasFavorites =
+                    favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } }
+                val collectionCount = albumCatalog.size + if (hasFavorites) 1 else 0
+                val albumsLabel =
+                    if (collectionCount == 1) "1 album" else "$collectionCount albums"
                 val hasSmartCollections =
-                    favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } } ||
+                    hasFavorites ||
                         albumCatalog.any { album ->
                             GalleryAlbumQuickAccessPolicy.priority(album.displayName, isFavorites = false) != null
                         }
@@ -1046,11 +1049,8 @@ class GalleryActivity : Activity() {
         }
 
         headerTitle.text = title
-        val presentationOrderLabel = if (
-            destination == GalleryDestination.VIDEOS &&
-            videoFilter != GalleryVideoFilter.ALL
-        ) {
-            videoFilter.label + " · " + sortOrderLabel()
+        val presentationOrderLabel = if (destination == GalleryDestination.VIDEOS) {
+            GalleryVideoPresentationPolicy.filterAndOrderLabel(videoFilter, selectedSort)
         } else {
             sortOrderLabel()
         }
@@ -1682,8 +1682,9 @@ class GalleryActivity : Activity() {
                 .map { it.second }
                 .take(ALBUM_QUICK_ACCESS_LIMIT)
 
-            if (quickAccessTiles.isNotEmpty()) {
-                renderAlbumQuickAccess(quickAccessTiles, generation)
+            val videoCount = searchedItems.count { it.mimeType.startsWith("video/") }
+            if (quickAccessTiles.isNotEmpty() || videoCount > 0) {
+                renderAlbumQuickAccess(quickAccessTiles, videoCount)
             }
 
             library.addView(sectionHeader("Collections"))
@@ -1693,27 +1694,59 @@ class GalleryActivity : Activity() {
         renderNavigation()
     }
 
-    private fun renderAlbumQuickAccess(albums: List<AlbumPresentation>, generation: Int) {
-        library.addView(sectionHeader("Quick access"))
+    private fun renderAlbumQuickAccess(
+        albums: List<AlbumPresentation>,
+        videoCount: Int,
+    ) {
         library.addView(
             HorizontalScrollView(this).apply {
                 isHorizontalScrollBarEnabled = false
                 isFillViewport = false
                 overScrollMode = View.OVER_SCROLL_NEVER
-                setPadding(0, dp(4), 0, dp(8))
+                setPadding(0, dp(4), 0, dp(12))
 
                 addView(
                     LinearLayout(context).apply {
                         orientation = LinearLayout.HORIZONTAL
-                        gravity = Gravity.START
+                        gravity = Gravity.START or Gravity.CENTER_VERTICAL
+
                         albums.forEachIndexed { index, album ->
                             addView(
-                                albumQuickAccessCard(album, generation),
+                                albumQuickAccessChip(
+                                    label = album.name,
+                                    count = album.count,
+                                    iconRes = null,
+                                ) { openAlbumPresentation(album) },
                                 LinearLayout.LayoutParams(
-                                    dp(ALBUM_QUICK_ACCESS_CARD_DP),
                                     ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
                                 ).apply {
-                                    if (index > 0) marginStart = dp(10)
+                                    if (index > 0) marginStart = dp(8)
+                                },
+                            )
+                        }
+
+                        if (videoCount > 0) {
+                            addView(
+                                albumQuickAccessChip(
+                                    label = "Videos",
+                                    count = videoCount,
+                                    iconRes = R.drawable.ic_gallery_nav_videos,
+                                ) {
+                                    clearSelection(render = false)
+                                    destination = GalleryDestination.VIDEOS
+                                    openAlbumId = null
+                                    showingFavorites = false
+                                    searchQuery = ""
+                                    searchField.setText("")
+                                    closeSearch(clearQuery = false)
+                                    renderCurrentDestination()
+                                },
+                                LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                                ).apply {
+                                    if (albums.isNotEmpty()) marginStart = dp(8)
                                 },
                             )
                         }
@@ -1727,53 +1760,32 @@ class GalleryActivity : Activity() {
         )
     }
 
-    private fun albumQuickAccessCard(
-        album: AlbumPresentation,
-        generation: Int,
-    ): LinearLayout {
-        val cornerDp = thumbnailCornerDp(ALBUM_CORNER_DP)
-        val image = ImageView(this).apply {
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            background = roundedSurface(withAlpha(primaryTextColor(), 0.08f), cornerDp)
-            clipToOutline = true
-            tag = thumbnailCacheKey(ALBUM_THUMBNAIL_NAMESPACE, album.cover.contentUri)
-        }
-        loadLocalThumbnail(
-            album.cover,
-            image,
-            generation,
-            ALBUM_THUMBNAIL_DP,
-            ALBUM_THUMBNAIL_NAMESPACE,
+    private fun albumQuickAccessChip(
+        label: String,
+        count: Int,
+        iconRes: Int?,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = label
+        gravity = Gravity.CENTER
+        minWidth = dp(76)
+        setPadding(dp(14), 0, dp(14), 0)
+        setTextColor(primaryTextColor())
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+        setTypeface(typeface, Typeface.BOLD)
+        background = GalleryGlazeSurfaces.drawable(
+            context,
+            GalleryGlazeSurfaces.Role.RAISED,
+            GalleryGlazeContract.SHAPE_CAPSULE_DP,
         )
-
-        return LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            isClickable = true
-            isFocusable = true
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-            contentDescription = "Quick access: " + album.name + ", " + itemCountLabel(album.count)
-            setOnClickListener { openAlbumPresentation(album) }
-
-            addView(
-                image,
-                LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    dp(ALBUM_QUICK_ACCESS_THUMBNAIL_DP),
-                ),
-            )
-            addView(
-                TextView(context).apply {
-                    text = album.name
-                    maxLines = 1
-                    gravity = Gravity.CENTER_HORIZONTAL
-                    setTextColor(primaryTextColor())
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-                    setTypeface(typeface, Typeface.BOLD)
-                    setPadding(dp(2), dp(7), dp(2), 0)
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                },
-            )
+        if (iconRes != null) {
+            setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+            compoundDrawablePadding = dp(6)
         }
+        isClickable = true
+        isFocusable = true
+        contentDescription = "$label, ${itemCountLabel(count)}"
+        setOnClickListener { onClick() }
     }
 
     private fun openAlbumPresentation(album: AlbumPresentation) {
@@ -1843,6 +1855,14 @@ class GalleryActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.RAISED,
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
+            clipToOutline = true
+            elevation = dp(1).toFloat()
+            setPadding(dp(2), dp(2), dp(2), dp(8))
             isClickable = true
             isFocusable = true
             contentDescription = "${album.name}, ${itemCountLabel(album.count)}"
@@ -1851,7 +1871,7 @@ class GalleryActivity : Activity() {
                 image,
                 LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    tileWidth.coerceAtLeast(dp(96)),
+                    ((tileWidth * ALBUM_COVER_ASPECT_HEIGHT).toInt()).coerceAtLeast(dp(92)),
                 ),
             )
             addView(TextView(context).apply {
@@ -1860,14 +1880,14 @@ class GalleryActivity : Activity() {
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f)
                 setTypeface(typeface, Typeface.BOLD)
                 maxLines = 1
-                setPadding(dp(2), dp(8), dp(2), 0)
+                setPadding(dp(10), dp(8), dp(10), 0)
             })
             addView(TextView(context).apply {
                 text = itemCountLabel(album.count)
                 setTextColor(secondaryTextColor())
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                 maxLines = 1
-                setPadding(dp(2), dp(2), dp(2), 0)
+                setPadding(dp(10), dp(2), dp(10), 0)
             })
         }
     }
@@ -4943,9 +4963,8 @@ class GalleryActivity : Activity() {
         const val ALBUM_GAP_DP = 12
         const val ALBUM_CORNER_DP = 16
         const val ALBUM_THUMBNAIL_DP = 320
-        const val ALBUM_QUICK_ACCESS_CARD_DP = 88
-        const val ALBUM_QUICK_ACCESS_THUMBNAIL_DP = 72
         const val ALBUM_QUICK_ACCESS_LIMIT = 4
+        const val ALBUM_COVER_ASPECT_HEIGHT = 0.66f
         const val VIDEO_CARD_GAP_DP = 10
         const val VIEWER_THUMBNAIL_DP = 720
         const val VIEWER_SWIPE_DISTANCE_DP = 56
