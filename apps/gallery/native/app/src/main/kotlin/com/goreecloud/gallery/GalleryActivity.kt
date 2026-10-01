@@ -1366,6 +1366,7 @@ class GalleryActivity : Activity() {
     }
 
     private fun renderVideos(generation: Int, sourceItems: List<MediaItem>) {
+        videoFilterStripView = null
         val allVideos = selectedSort.sort(
             sourceItems.filter { it.mimeType.startsWith("video/") },
         )
