@@ -286,7 +286,7 @@ fun LauncherStartupWizard(
                             )
                             WizardInfoCard(
                                 title = "Calculate without leaving Search",
-                                summary = "Type arithmetic like 2 + 2 or conversions like 10 km to mi. Calculator and conversion results stay local and can be tapped to copy.",
+                                summary = "Type arithmetic like 2 + 2, percentages like 20% of 50, or conversions like 10 km to mi. Results stay local and can be tapped to copy.",
                             )
                             WizardInfoCard(
                                 title = "Connected Search is opt-in",
