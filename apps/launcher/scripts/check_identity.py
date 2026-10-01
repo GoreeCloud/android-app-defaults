@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1]
 
-CANONICAL_REPOSITORY = "GoreeCloud/goreecloud-branding-assets"
+CANONICAL_REPOSITORY = "GoreeCloud/branding-assets"
 CANONICAL_PATH = "products/launcher/app-icon.svg"
 CANONICAL_BLOB = "68ea82c4657253a1396376f715d3582f1417b9ac"
 LOCAL_SOURCE = root / "branding/source/goreecloud-launcher-icon.svg"
@@ -31,7 +31,7 @@ if missing:
 if LOCAL_SOURCE.exists():
     print(
         "Competing Launcher-local canonical artwork source is forbidden; "
-        "use GoreeCloud/goreecloud-branding-assets instead."
+        "use GoreeCloud/branding-assets instead."
     )
     sys.exit(1)
 
@@ -45,7 +45,7 @@ expected_provenance = {
     "canonical_repository": CANONICAL_REPOSITORY,
     "canonical_path": CANONICAL_PATH,
     "canonical_blob_sha": CANONICAL_BLOB,
-    "consumer_repository": "GoreeCloud/goreecloud-launcher",
+    "consumer_repository": "GoreeCloud/android-app-defaults",
     "consumer_role": "platform-specific derivative only",
 }
 for key, expected in expected_provenance.items():
