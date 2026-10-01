@@ -169,6 +169,9 @@
     <string name="reset_streak_title">Reset streak</string>
     <string name="reset_streak_supporting">Close the current period and begin a new one without deleting your history.</string>
     <string name="reset_streak">Reset streak</string>
+    <string name="reset_review">Review reset</string>
+    <string name="reset_confirmation_title">Reset this streak?</string>
+    <string name="reset_confirmation_message">The current period will be preserved in History and a new period will begin at the reset time.</string>
     <string name="resetting">Resetting…</string>
     <string name="reset_failed">Could not reset this streak. Your existing history was left unchanged.</string>
     <string name="reset_history_explanation">The current period will be preserved in History and a new period will begin at the reset time.</string>
