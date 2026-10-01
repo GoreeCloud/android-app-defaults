@@ -1,5 +1,16 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — real-data Albums Quick access
+
+### Added
+- Added a horizontal **Quick access** lane above the full Albums collection grid.
+- Quick access is derived only from currently visible authorized collections: Gallery-local Favorites and existing Camera, Screenshots, Downloads, or Screen recordings albums.
+- Familiar collections are ordered deterministically and capped at four shortcuts; ordinary albums remain in the complete Collections grid.
+- Quick-access cards reuse the existing local thumbnail loader and album navigation path, adding no MediaStore permission, mutation, filesystem, account, or network authority.
+
+### Development boundary
+Representative-device visual/accessibility/form-factor acceptance remains open. Gallery does not fabricate People, Places, Documents, or other smart collections that are not actually implemented.
+
 ## October 1, 2026 — mockup-aligned five-tab Gallery navigation
 
 ### Changed
