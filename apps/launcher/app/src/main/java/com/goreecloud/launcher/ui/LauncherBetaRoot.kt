@@ -304,6 +304,16 @@ internal fun launcherUsesWallpaperGlass(
 ): Boolean = materialRole != GlazeV16MaterialRole.SOLID &&
     materialRole != GlazeV16MaterialRole.RAISED
 
+
+internal fun launcherUsesHorizontalGlanceHero(
+    compact: Boolean,
+    alignment: LauncherHomeGlanceAlignment,
+    densityMayYieldToReflow: Boolean,
+): Boolean =
+    !compact &&
+        alignment == LauncherHomeGlanceAlignment.LEFT &&
+        !densityMayYieldToReflow
+
 internal fun launcherWidgetDragMoved(
     delta: Offset,
     thresholdPx: Float,
@@ -3594,9 +3604,11 @@ private fun HomeAtAGlance(
         shadowElevation = if (usesWallpaperGlass) 2.dp else 1.dp,
     ) {
         if (
-            !compact &&
-            alignment == LauncherHomeGlanceAlignment.LEFT &&
-            !resolvedPresentation.densityMayYieldToReflow
+            launcherUsesHorizontalGlanceHero(
+                compact = compact,
+                alignment = alignment,
+                densityMayYieldToReflow = resolvedPresentation.densityMayYieldToReflow,
+            )
         ) {
             Row(
                 modifier = Modifier
