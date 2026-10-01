@@ -106,6 +106,18 @@ class MainActivity : ComponentActivity() {
                                 preferencesRepository.setThemePreference(preference)
                             }
                         },
+                        defaultDisplayFormat = defaultDisplayFormat,
+                        onDefaultDisplayFormatChange = { format ->
+                            scope.launch {
+                                preferencesRepository.setDefaultDisplayFormat(format)
+                            }
+                        },
+                        showSeconds = showSeconds,
+                        onShowSecondsChange = { enabled ->
+                            scope.launch {
+                                preferencesRepository.setShowSeconds(enabled)
+                            }
+                        },
                         contextualHintsEnabled = contextualHintsEnabled,
                         onContextualHintsEnabledChange = { enabled ->
                             scope.launch {
