@@ -16,10 +16,10 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Local thumbnails with bounded in-memory caching and no cloud dependency.
 - Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.6-dev` Development line.
 - Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
-- Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, and dynamic All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
+- Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and dynamic All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
-- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive cover layout, bounded album-detail browsing, and a real-data-only Quick access lane for Favorites, Camera, Screenshots, Downloads, or Screen recordings when those collections actually exist.
+- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, bounded album-detail browsing, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
 - Device-local Favorites backed only by Gallery app-local state; favorite/unfavorite is available from the viewer and authorized Favorites appear as a dedicated collection.
 - A full-screen bounded media viewer shell with Previous / Next navigation, restrained top chrome, and a bottom action surface. Viewer navigation uses the complete current authorized/presented collection rather than one date group.
 - Android Share handoff for the currently authorized media content URI using read-only URI grant semantics.
