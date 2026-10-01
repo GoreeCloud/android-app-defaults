@@ -7,6 +7,7 @@ import android.content.ClipData
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -1462,7 +1463,11 @@ class GalleryActivity : Activity() {
             setPadding(dp(14), 0, dp(14), 0)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
             setTypeface(typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
-            setTextColor(if (selected) accentColor() else primaryTextColor())
+            val foregroundColor = if (selected) accentColor() else primaryTextColor()
+            setTextColor(foregroundColor)
+            setCompoundDrawablesWithIntrinsicBounds(videoFilterIcon(filter), 0, 0, 0)
+            compoundDrawableTintList = ColorStateList.valueOf(foregroundColor)
+            compoundDrawablePadding = dp(6)
             background = if (selected) {
                 GalleryGlazeSurfaces.drawable(
                     context,
@@ -1850,7 +1855,7 @@ class GalleryActivity : Activity() {
                                 albumQuickAccessChip(
                                     label = album.name,
                                     count = album.count,
-                                    iconRes = null,
+                                    iconRes = albumQuickAccessIcon(album),
                                 ) { openAlbumPresentation(album) },
                                 LinearLayout.LayoutParams(
                                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -1895,6 +1900,23 @@ class GalleryActivity : Activity() {
         )
     }
 
+    private fun videoFilterIcon(filter: GalleryVideoFilter): Int = when (filter) {
+        GalleryVideoFilter.ALL -> R.drawable.ic_gallery_nav_videos
+        GalleryVideoFilter.SCREEN_RECORDINGS -> R.drawable.ic_gallery_screen_recording
+        GalleryVideoFilter.CAMERA -> R.drawable.ic_gallery_camera
+        GalleryVideoFilter.FAVORITES -> R.drawable.ic_gallery_favorite
+    }
+
+    private fun albumQuickAccessIcon(album: AlbumPresentation): Int? =
+        when (GalleryAlbumQuickAccessPolicy.priority(album.name, album.isFavorites)) {
+            0 -> R.drawable.ic_gallery_favorite
+            1 -> R.drawable.ic_gallery_camera
+            2 -> R.drawable.ic_gallery_nav_photos
+            3 -> R.drawable.ic_gallery_download
+            4 -> R.drawable.ic_gallery_screen_recording
+            else -> null
+        }
+
     private fun albumQuickAccessChip(
         label: String,
         count: Int,
@@ -1915,6 +1937,7 @@ class GalleryActivity : Activity() {
         )
         if (iconRes != null) {
             setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+            compoundDrawableTintList = ColorStateList.valueOf(primaryTextColor())
             compoundDrawablePadding = dp(6)
         }
         isClickable = true
