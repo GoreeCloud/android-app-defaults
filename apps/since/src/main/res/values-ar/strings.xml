@@ -27,6 +27,9 @@
     <string name="achievement_thirty_days_description">حافظ على سلسلة حالية واحدة لمدة ثلاثين يومًا على الأقل.</string>
 
     <string name="settings_title">الإعدادات</string>
+    <string name="settings_general">عام</string>
+    <string name="settings_dashboard_sort">ترتيب لوحة المتتبعات</string>
+    <string name="settings_dashboard_sort_supporting">اختر الترتيب المحلي الافتراضي للمتتبعات النشطة. تغيير الترتيب لا يغيّر الطوابع الزمنية للمتتبعات.</string>
     <string name="settings_summary">المظهر والبيانات والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
     <string name="settings_default_display_format">تنسيق العرض الافتراضي</string>
     <string name="settings_default_display_format_supporting">يُستخدم عند إنشاء متتبعات جديدة. تحتفظ المتتبعات الحالية بتنسيقها الحالي.</string>
