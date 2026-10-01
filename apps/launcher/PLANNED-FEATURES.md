@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 1, 2026 local Search-history continuation
+
+A Development candidate on `feat/launcher-local-search-history-20261001` adds user-controlled recent Search history without changing the privacy boundary of connected sources. History is disabled by default, stored only on-device when enabled, recorded only on explicit actions, bounded/deduplicated, and erased when disabled. The idle Search surface can reuse recent queries locally.
+
+Still open for this capability: exact-head integration gates, Android 16 interaction coverage, accessibility/large-text/form-factor acceptance, privacy-copy validation, recovery/update continuity, and any future explicit portable-backup contract.
+
 ## September 30, 2026 interaction-stabilization continuation
 
 Merged PRs #103–#107 now cover the current mainline drawer/Home/profile/Search/performance stabilization tranche: explicit A–Z/Z–A/Most recent/Most frequent sorting, warm User/Work profile paging, stationary drawer long-press actions, threshold-responsive Home paging, secondary-page vertical gestures, exact-profile Work folders with persistence-level isolation, bounded confirmation before publishing suspicious inventory loss from a still-active Android profile, genuine **Movable** Universal Search backed by the existing Room 4 × 1 Search widget, and removal of the redundant first-composition 180–220 ms page-entry animation.
