@@ -240,6 +240,143 @@ jobs:
           retention-days: 14
           path: apps/launcher/artifact-launcher-android/*
 
+  launcher-runtime:
+    needs:
+      - changes
+      - launcher
+    if: needs.changes.outputs.launcher == 'true' && needs.launcher.result == 'success'
+    name: Launcher Android 16 runtime instrumentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/launcher
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.11.1'
+      - name: Detect Android emulator acceleration
+        id: emulator-accel
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 0666 /dev/kvm || true
+          fi
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+            echo "kvm_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "kvm_available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::KVM acceleration is unavailable; Launcher Android 16 instrumentation will use software acceleration."
+          fi
+      - name: Validate Launcher runtime harness
+        shell: bash
+        run: bash -n scripts/run_android16_runtime.sh
+      - name: Run complete Launcher Android 16 instrumentation suite
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 36
+          target: default
+          arch: x86_64
+          disable-animations: true
+          disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
+          script: bash "$GITHUB_WORKSPACE/apps/launcher/scripts/run_android16_runtime.sh"
+      - name: Upload Launcher Android 16 test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-android16-runtime-reports
+          path: |
+            apps/launcher/ci-runtime/**
+            apps/launcher/app/build/reports/androidTests/connected/**
+            apps/launcher/app/build/outputs/androidTest-results/connected/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  launcher-transition-performance:
+    needs:
+      - changes
+      - launcher
+    if: needs.changes.outputs.launcher == 'true' && needs.launcher.result == 'success'
+    name: Launcher Android 16 transition performance diagnostics
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/launcher
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.11.1'
+      - name: Detect Android emulator acceleration
+        id: emulator-accel
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 0666 /dev/kvm || true
+          fi
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+            echo "kvm_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "kvm_available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::KVM acceleration is unavailable; Launcher transition diagnostics will use software acceleration."
+          fi
+      - name: Measure Launcher Home and Apps transition frame timing on Android 16
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 36
+          target: default
+          arch: x86_64
+          disable-animations: false
+          disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
+          script: |
+            adb logcat -c
+            gradle --project-dir "$GITHUB_WORKSPACE/apps/launcher" --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.goreecloud.launcher.ui.LauncherTransitionPerformanceRuntimeTest
+            mkdir -p "$GITHUB_WORKSPACE/apps/launcher/ci-performance"
+            adb logcat -d -s LauncherTransitionPerf:I '*:S' | tee "$GITHUB_WORKSPACE/apps/launcher/ci-performance/transition-performance.log"
+      - name: Upload Launcher transition-performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-android16-transition-performance
+          path: |
+            apps/launcher/ci-performance/**
+            apps/launcher/app/build/reports/androidTests/connected/**
+            apps/launcher/app/build/outputs/androidTest-results/connected/**
+          if-no-files-found: warn
+          retention-days: 14
+
   keyboard:
     needs: changes
     if: needs.changes.outputs.keyboard == 'true'
@@ -321,6 +458,8 @@ jobs:
       - changes
       - camera
       - launcher
+      - launcher-runtime
+      - launcher-transition-performance
       - keyboard
       - gallery
     runs-on: ubuntu-24.04
@@ -337,6 +476,8 @@ jobs:
 
           LAUNCHER_CHANGED: ${{ needs.changes.outputs.launcher }}
           LAUNCHER_RESULT: ${{ needs.launcher.result }}
+          LAUNCHER_RUNTIME_RESULT: ${{ needs.launcher-runtime.result }}
+          LAUNCHER_PERFORMANCE_RESULT: ${{ needs.launcher-transition-performance.result }}
 
           KEYBOARD_CHANGED: ${{ needs.changes.outputs.keyboard }}
           KEYBOARD_RESULT: ${{ needs.keyboard.result }}
@@ -374,5 +515,7 @@ jobs:
 
           require_result "$CAMERA_CHANGED" "$CAMERA_RESULT" "Camera"
           require_result "$LAUNCHER_CHANGED" "$LAUNCHER_RESULT" "Launcher"
+          require_result "$LAUNCHER_CHANGED" "$LAUNCHER_RUNTIME_RESULT" "Launcher Android 16 runtime"
+          require_result "$LAUNCHER_CHANGED" "$LAUNCHER_PERFORMANCE_RESULT" "Launcher transition performance"
           require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RESULT" "Keyboard"
           require_result "$GALLERY_CHANGED" "$GALLERY_RESULT" "Gallery"
