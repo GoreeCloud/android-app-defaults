@@ -684,6 +684,7 @@ class MainActivity : ComponentActivity() {
                     workspace.authority != WorkspaceAuthority.ROOM ||
                     !experiencePreferences.starterLayoutApplied ||
                     !experiencePreferences.startupWizardCompleted ||
+                    workspace.favoriteKeys.isNotEmpty() ||
                     !hasLegacyStarterGlance
                 ) {
                     return@LaunchedEffect
