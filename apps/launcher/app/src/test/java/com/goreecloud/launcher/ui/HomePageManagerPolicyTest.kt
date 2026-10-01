@@ -224,6 +224,51 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun unifiedPagerResolvesKnownPageAndFailsStaleSelectionToPrimary() {
+        val secondary = primary.copy(pageId = "home:secondary", rank = 1)
+        val tertiary = primary.copy(pageId = "home:tertiary", rank = 2)
+        val pages = listOf(primary, secondary, tertiary)
+
+        assertEquals(
+            2,
+            unifiedHomePagerSelectedIndex(
+                selectedHomePageId = tertiary.pageId,
+                pages = pages,
+            ),
+        )
+        assertEquals(
+            0,
+            unifiedHomePagerSelectedIndex(
+                selectedHomePageId = "home:missing",
+                pages = pages,
+            ),
+        )
+        assertEquals(
+            0,
+            unifiedHomePagerSelectedIndex(
+                selectedHomePageId = null,
+                pages = emptyList(),
+            ),
+        )
+    }
+
+    @Test
+    fun externallyHostedPagerOwnsHorizontalPageMotion() {
+        assertFalse(
+            primaryHomeShouldHandleHorizontalPaging(
+                contentOnly = false,
+                pagerHostedExternally = true,
+            ),
+        )
+        assertTrue(
+            primaryHomeShouldHandleHorizontalPaging(
+                contentOnly = false,
+                pagerHostedExternally = false,
+            ),
+        )
+    }
+
+    @Test
     fun primaryContentOnlyModeSuppressesPersistentChrome() {
         assertFalse(primaryHomeShouldRenderFixedSearch(contentOnly = true, requested = true))
         assertFalse(
