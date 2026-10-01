@@ -281,6 +281,8 @@ internal fun SettingsScreen(
     onDefaultDisplayFormatChange: (DisplayFormat) -> Unit,
     showSeconds: Boolean,
     onShowSecondsChange: (Boolean) -> Unit,
+    confirmReset: Boolean,
+    onConfirmResetChange: (Boolean) -> Unit,
     archivedTrackers: List<TrackerAggregate>,
     restoringTrackerId: String?,
     restoreFailedTrackerId: String?,
@@ -330,6 +332,45 @@ internal fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyLarge,
                 )
+            }
+        }
+
+        item {
+            SettingsSection(title = stringResourceCompat(R.string.settings_general)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("settings-confirm-reset")
+                        .toggleable(
+                            value = confirmReset,
+                            role = Role.Switch,
+                            onValueChange = onConfirmResetChange,
+                        )
+                        .semantics(mergeDescendants = true) {}
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Text(
+                            text = stringResourceCompat(R.string.settings_confirm_reset),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = stringResourceCompat(R.string.settings_confirm_reset_supporting),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    Switch(
+                        modifier = Modifier.clearAndSetSemantics {},
+                        checked = confirmReset,
+                        onCheckedChange = null,
+                    )
+                }
             }
         }
 
