@@ -5797,6 +5797,16 @@ private fun AppDrawerSurface(
         LauncherDrawerSortOrder.valueOf(drawerSortOrderName)
     }.getOrDefault(LauncherDrawerSortOrder.ALPHABETICAL)
     var showDrawerSortMenu by remember { mutableStateOf(false) }
+    var drawerFreshnessFilterName by rememberSaveable {
+        mutableStateOf(LauncherDrawerFreshnessFilter.ALL.name)
+    }
+    val drawerFreshnessFilter = runCatching {
+        LauncherDrawerFreshnessFilter.valueOf(drawerFreshnessFilterName)
+    }.getOrDefault(LauncherDrawerFreshnessFilter.ALL)
+    val freshnessNowMillis = remember { System.currentTimeMillis() }
+    var drawerPackageFreshness by remember(apps) {
+        mutableStateOf<Map<String, LauncherDrawerPackageFreshness>>(emptyMap())
+    }
     val primaryUser = remember { Process.myUserHandle() }
     val primaryProfileId = remember(primaryUser) { primaryUser.hashCode() }
     val profilePages = remember(apps, primaryUser) {
@@ -5847,6 +5857,12 @@ private fun AppDrawerSurface(
     val useDrawerHeaderIcons =
         drawerVisualPreferences.drawerHeaderPresentation ==
             LauncherDrawerHeaderPresentation.ICONS
+    LaunchedEffect(apps.map { app -> app.componentName.packageName }.distinct()) {
+        drawerPackageFreshness = loadLauncherDrawerPackageFreshness(
+            packageManager = drawerContext.packageManager,
+            packageNames = apps.map { app -> app.componentName.packageName },
+        )
+    }
     LaunchedEffect(
         selectedPage.kind,
         selectedPage.items.map { it.workspaceKey() },
@@ -5895,30 +5911,42 @@ private fun AppDrawerSurface(
         folders,
         drawerQuery,
         primaryProfileId,
+        drawerFreshnessFilter,
+        drawerPackageFreshness,
+        freshnessNowMillis,
     ) {
         val matchingApps = selectedPage.items.count { app ->
             LauncherLocalAppSearch.matches(
                 label = app.label.toString(),
                 packageName = app.componentName.packageName,
                 rawQuery = drawerQuery,
-            )
+            ) &&
+                LauncherDrawerFreshnessPolicy.matches(
+                    filter = drawerFreshnessFilter,
+                    freshness = drawerPackageFreshness[app.componentName.packageName],
+                    nowMillis = freshnessNowMillis,
+                )
         }
-        val matchingFolders = folders.count { folder ->
-            selectedPageProfileIds.any { profileId ->
-                LauncherFolderProfilePolicy.belongsToProfile(
-                    folder = folder,
-                    profileId = profileId,
-                    primaryProfileId = primaryProfileId,
-                )
-            } &&
-                (
-                    drawerQuery.isBlank() ||
-                        LauncherLocalAppSearch.matches(
-                            label = folder.name,
-                            packageName = "",
-                            rawQuery = drawerQuery,
-                        )
-                )
+        val matchingFolders = if (drawerFreshnessFilter == LauncherDrawerFreshnessFilter.ALL) {
+            folders.count { folder ->
+                selectedPageProfileIds.any { profileId ->
+                    LauncherFolderProfilePolicy.belongsToProfile(
+                        folder = folder,
+                        profileId = profileId,
+                        primaryProfileId = primaryProfileId,
+                    )
+                } &&
+                    (
+                        drawerQuery.isBlank() ||
+                            LauncherLocalAppSearch.matches(
+                                label = folder.name,
+                                packageName = "",
+                                rawQuery = drawerQuery,
+                            )
+                    )
+            }
+        } else {
+            0
         }
         matchingApps + matchingFolders
     }
@@ -6146,6 +6174,12 @@ private fun AppDrawerSurface(
                     )
                 }
                 Spacer(Modifier.height(GlazeMetrics.space2))
+                DrawerFreshnessFilterRow(
+                    selected = drawerFreshnessFilter,
+                    onSelect = { filter -> drawerFreshnessFilterName = filter.name },
+                    secondaryColor = drawerSecondaryColor,
+                )
+                Spacer(Modifier.height(GlazeMetrics.space2))
                 HorizontalPager(
                     state = profilePager,
                     modifier = Modifier.weight(1f).fillMaxWidth()
@@ -6155,17 +6189,25 @@ private fun AppDrawerSurface(
                     key = { index -> profilePages[index].kind.name },
                 ) { index ->
                     val page = profilePages[index]
-                    val pageApps = remember(page.items, drawerQuery) {
-                        if (drawerQuery.isBlank()) {
-                            page.items
-                        } else {
-                            page.items.filter { app ->
+                    val pageApps = remember(
+                        page.items,
+                        drawerQuery,
+                        drawerFreshnessFilter,
+                        drawerPackageFreshness,
+                        freshnessNowMillis,
+                    ) {
+                        page.items.filter { app ->
+                            (drawerQuery.isBlank() ||
                                 LauncherLocalAppSearch.matches(
                                     label = app.label.toString(),
                                     packageName = app.componentName.packageName,
                                     rawQuery = drawerQuery,
+                                )) &&
+                                LauncherDrawerFreshnessPolicy.matches(
+                                    filter = drawerFreshnessFilter,
+                                    freshness = drawerPackageFreshness[app.componentName.packageName],
+                                    nowMillis = freshnessNowMillis,
                                 )
-                            }
                         }
                     }
                     val pageProfileIds = remember(page.kind, page.items, primaryProfileId) {
@@ -6180,30 +6222,47 @@ private fun AppDrawerSurface(
                         folders,
                         drawerQuery,
                         primaryProfileId,
+                        drawerFreshnessFilter,
                     ) {
-                        folders.filter { folder ->
-                            pageProfileIds.any { profileId ->
-                                LauncherFolderProfilePolicy.belongsToProfile(
-                                    folder = folder,
-                                    profileId = profileId,
-                                    primaryProfileId = primaryProfileId,
-                                )
-                            } &&
-                                (
-                                    drawerQuery.isBlank() ||
-                                        LauncherLocalAppSearch.matches(
-                                            label = folder.name,
-                                            packageName = "",
-                                            rawQuery = drawerQuery,
-                                        )
-                                )
+                        if (drawerFreshnessFilter != LauncherDrawerFreshnessFilter.ALL) {
+                            emptyList()
+                        } else {
+                            folders.filter { folder ->
+                                pageProfileIds.any { profileId ->
+                                    LauncherFolderProfilePolicy.belongsToProfile(
+                                        folder = folder,
+                                        profileId = profileId,
+                                        primaryProfileId = primaryProfileId,
+                                    )
+                                } &&
+                                    (
+                                        drawerQuery.isBlank() ||
+                                            LauncherLocalAppSearch.matches(
+                                                label = folder.name,
+                                                packageName = "",
+                                                rawQuery = drawerQuery,
+                                            )
+                                    )
+                            }
                         }
                     }
-                    if (pageApps.isEmpty() && pageFolders.isEmpty() && drawerQuery.isBlank()) {
+                    if (pageApps.isEmpty() && pageFolders.isEmpty()) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(
-                                "No apps are available in " + page.kind.displayName + ".",
+                                when {
+                                    drawerQuery.isNotBlank() ->
+                                        "No apps match “" + drawerQuery.trim() + "” in this filter."
+                                    drawerFreshnessFilter ==
+                                        LauncherDrawerFreshnessFilter.RECENTLY_INSTALLED ->
+                                        "No recently installed apps in " + page.kind.displayName + "."
+                                    drawerFreshnessFilter ==
+                                        LauncherDrawerFreshnessFilter.RECENTLY_UPDATED ->
+                                        "No recently updated apps in " + page.kind.displayName + "."
+                                    else ->
+                                        "No apps are available in " + page.kind.displayName + "."
+                                },
                                 color = drawerSecondaryColor,
+                                textAlign = TextAlign.Center,
                             )
                         }
                     } else {
