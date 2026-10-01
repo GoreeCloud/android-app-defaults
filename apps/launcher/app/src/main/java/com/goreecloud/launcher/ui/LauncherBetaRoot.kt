@@ -9601,8 +9601,9 @@ internal fun GlazeDock(
         border = border,
         // Keep the Dock visually floating without casting a full-width horizontal shadow line.
         shadowElevation = when (resolvedPresentation.materialRole) {
-            GlazeV16MaterialRole.CLEAR_GLASS -> 0.dp
-            GlazeV16MaterialRole.FUNCTIONAL_GLASS -> 2.dp
+            GlazeV16MaterialRole.CLEAR_GLASS,
+            GlazeV16MaterialRole.FUNCTIONAL_GLASS,
+            -> 0.dp
             GlazeV16MaterialRole.SOLID -> 1.dp
             GlazeV16MaterialRole.RAISED -> 2.dp
             else -> 0.dp
