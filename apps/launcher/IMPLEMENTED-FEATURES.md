@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — local Universal Search Quick answers candidate
+
+- Added a Launcher-owned **Quick answers** provider for arithmetic using `+`, `-`, `×`/`*`, `÷`/`/`, unary signs, and parentheses.
+- Added allowlisted offline unit conversion for common length, mass, time, and Celsius/Fahrenheit/Kelvin values, including aliases such as `10 km to mi`, `5 lb in kg`, and `32 f to c`.
+- Quick answers execute in-process through a bounded parser; they do not evaluate arbitrary code, request Android permissions, use the network, or retain typed queries.
+- A selected answer copies the rendered result to the Android clipboard. Android 13+ uses the platform copy confirmation; older Android versions receive a short Launcher confirmation.
+- The source is registered through the existing Universal Search provider-control contract as **Local only · No query retention**, and focused JVM coverage exercises precedence, parentheses, invalid input, division by zero, cross-dimension rejection, temperature absolute-zero rejection, copy payloads, and provider metadata.
+
+**Acceptance boundary:** Development feature candidate on `feat/launcher-local-quick-answers-20261001`. Exact-head build/lint/JVM/runtime gates, review, merge, and representative-device Search/clipboard/accessibility acceptance remain required before broader lifecycle claims.
+
 ## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
 
 - Authoritative Launcher development now lives in `GoreeCloud/android-app-defaults/apps/launcher/`; the standalone Launcher repository is migration history only.
