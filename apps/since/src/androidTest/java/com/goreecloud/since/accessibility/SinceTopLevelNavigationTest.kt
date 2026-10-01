@@ -78,7 +78,7 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
             .assertHasClickAction()
             .performClick()
-        composeRule.onNodeWithText("Backup is not enabled yet.", substring = true)
+        composeRule.onNodeWithText("Backup is not available yet.", substring = true)
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
@@ -87,7 +87,7 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
             .assertHasClickAction()
             .performClick()
-        composeRule.onNodeWithText("Applying a restore is not enabled yet.", substring = true)
+        composeRule.onNodeWithText("Restore is not available yet.", substring = true)
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
