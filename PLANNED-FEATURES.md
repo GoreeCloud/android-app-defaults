@@ -4,7 +4,7 @@
 
 Default display format and seconds visibility are implemented and exact-head validated on PR #128 through Android Development Foundation #654. The active stacked continuation also implements the specified reset-confirmation preference. Remaining Settings work includes reduced-motion/transparency behavior where an approved Glaze mapping permits it, representative-device accessibility/localization acceptance, and fresh exact-head validation of the newer stacked candidate.
 
-The existing Reset Streak surface remains the required path for choosing reset time and optional reason/note and for explaining history preservation. The product specification does not yet define a safe alternate interaction for disabling confirmation without losing those controls, so no alternate reset path is invented in this candidate.
+The Reset Streak surface remains the required path for choosing reset time and optional reason/note and for explaining history preservation. The preference changes only whether a final review confirmation appears after the reset details are validated; it does not bypass the reset editor or history-preservation explanation.
 
 
 ## 2026-09-29 Since import-review continuation
