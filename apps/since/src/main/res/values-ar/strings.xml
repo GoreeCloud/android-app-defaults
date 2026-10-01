@@ -235,4 +235,9 @@
     <string name="delete_archived_tracker_message">سيؤدي هذا إلى إزالة المتتبّع المؤرشف وفترته الحالية وسجل إعادة الضبط والملاحظة والهدف من هذا الجهاز. لا يمكن التراجع عن هذا الإجراء.</string>
     <string name="delete_permanently">حذف نهائي</string>
     <string name="delete_tracker_failed">تعذر حذف هذا المتتبّع. تُركت بياناته المحلية دون تغيير.</string>
+    <string name="settings_confirm_reset">تأكيد إعادة ضبط السلسلة</string>
+    <string name="settings_confirm_reset_supporting">اعرض تأكيدًا نهائيًا بعد مراجعة وقت إعادة الضبط والسبب والملاحظة.</string>
+    <string name="reset_review">مراجعة إعادة الضبط</string>
+    <string name="reset_confirmation_title">إعادة ضبط هذه السلسلة؟</string>
+    <string name="reset_confirmation_message">سيتم الاحتفاظ بالفترة الحالية في السجل وستبدأ فترة جديدة في وقت إعادة الضبط.</string>
 </resources>
