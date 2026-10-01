@@ -1762,7 +1762,14 @@ class ActivatedHomeLifecycleRuntimeTest {
                         useUnmergedTree = true,
                     )
                     .performTouchInput {
-                        down(center)
+                        // This test does not own the persisted workspace. Target a lower-right
+                        // empty grid region so an existing app tile cannot consume the long-press
+                        // that is intended to open Edit Home.
+                        val emptyPoint = center.copy(
+                            x = right - 32f,
+                            y = bottom - 32f,
+                        )
+                        down(emptyPoint)
                         advanceEventTime(700)
                         up()
                     }
