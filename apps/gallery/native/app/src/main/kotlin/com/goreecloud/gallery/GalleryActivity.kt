@@ -4510,8 +4510,12 @@ class GalleryActivity : Activity() {
         item.displayName.substringBeforeLast('.', missingDelimiterValue = item.displayName)
             .ifBlank { item.displayName }
 
-    private fun mediaDateLabel(item: MediaItem): String =
-        DATE_HEADER_FORMAT.format(item.capturedAt ?: item.modifiedAt)
+    private fun mediaDateLabel(item: MediaItem): String {
+        val date = (item.capturedAt ?: item.modifiedAt)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+        return DATE_HEADER_FORMAT.format(date)
+    }
 
     private fun mediaMetadata(item: MediaItem): String {
         val timestamp = item.capturedAt ?: item.modifiedAt
