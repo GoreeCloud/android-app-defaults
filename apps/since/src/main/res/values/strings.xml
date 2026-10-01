@@ -27,6 +27,11 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_summary">Appearance, data, privacy, security, guidance, and app information.</string>
+    <string name="settings_general">General</string>
+    <string name="settings_default_display_format">Default display format</string>
+    <string name="settings_default_display_format_supporting">Used when creating new trackers. Existing trackers keep their current format.</string>
+    <string name="settings_show_seconds">Show seconds</string>
+    <string name="settings_show_seconds_supporting">Refresh visible elapsed time every second while Since is open.</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="theme_system">System default</string>
@@ -116,9 +121,13 @@
 
     <string name="elapsed_label">Elapsed</string>
     <string name="elapsed_days_detail">%1$d d · %2$d h · %3$d min</string>
+    <string name="elapsed_days_detail_seconds">%1$d d · %2$d h · %3$d min · %4$d sec</string>
     <string name="elapsed_weeks_detail">%1$d wk · %2$d d · %3$d h · %4$d min</string>
+    <string name="elapsed_weeks_detail_seconds">%1$d wk · %2$d d · %3$d h · %4$d min · %5$d sec</string>
     <string name="elapsed_months_detail">%1$d mo · %2$d d · %3$d h · %4$d min</string>
+    <string name="elapsed_months_detail_seconds">%1$d mo · %2$d d · %3$d h · %4$d min · %5$d sec</string>
     <string name="elapsed_years_detail">%1$d yr · %2$d mo · %3$d d · %4$d h · %5$d min</string>
+    <string name="elapsed_years_detail_seconds">%1$d yr · %2$d mo · %3$d d · %4$d h · %5$d min · %6$d sec</string>
     <string name="clock_inconsistency">Check device clock</string>
 
     <string name="back">Back</string>
