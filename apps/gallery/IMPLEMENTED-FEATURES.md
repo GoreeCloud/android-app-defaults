@@ -39,7 +39,7 @@ Focused policy coverage locks deterministic Fit ↔ Fill toggling. Representativ
 
 
 **Record type:** Repository implemented-feature inventory  
-**Repository:** `GoreeCloud/gallery`  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/gallery/`)  
 **Lifecycle:** Development / non-Stable  
 **Authority:** Current `main` source and accepted repository evidence  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance v1.0, effective September 22, 2026.
