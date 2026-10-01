@@ -3460,37 +3460,12 @@ class GalleryActivity : Activity() {
                 checked = settings.loopVideos,
             ) { setBooleanSetting(LOOP_VIDEOS_KEY, it) },
         )
-        library.addView(
-            settingToggleRow(
-                title = "Animate GIFs in thumbnails",
-                subtitle = "Preference is saved now; animated thumbnail decoding is not enabled in this Development build.",
-                checked = settings.animateGifThumbnails,
-            ) { setBooleanSetting(ANIMATE_GIF_THUMBNAILS_KEY, it) },
-        )
-
-        library.addView(settingsSectionHeader("Privacy & protection"))
-        library.addView(
-            settingChoiceRow(
-                title = "Password protect photos",
-                subtitle = "Requires the secure Protected Photos implementation and supported GoreeCloud/Android authentication.",
-                value = "Not yet",
-                enabled = true,
-            ) { explainPasswordProtectionBoundary() },
-        )
-
         library.addView(settingsSectionHeader("Deletion & recovery"))
         library.addView(
             settingToggleRow(
-                title = "Delete empty folders after deleting their content",
-                subtitle = "Preference is saved; automatic empty-folder cleanup remains separately gated.",
-                checked = settings.deleteEmptyFolders,
-            ) { setBooleanSetting(DELETE_EMPTY_FOLDERS_KEY, it) },
-        )
-        library.addView(
-            settingToggleRow(
-                title = "Move deleted items to Recycle Bin",
+                title = "Move deleted items to Trash",
                 subtitle = if (AndroidMediaMutationRequests.isSupported()) {
-                    "When on, Delete uses Android's Recycle Bin confirmation. When off, Android confirms permanent deletion."
+                    "When on, Delete uses Android's Trash confirmation. When off, Android confirms permanent deletion."
                 } else {
                     "Saved preference. Android-authorized Trash/Delete requires Android 11 or newer in this Development build."
                 },
@@ -4362,17 +4337,6 @@ class GalleryActivity : Activity() {
                 renderSettingsDestinationOnly()
             }
             .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun explainPasswordProtectionBoundary() {
-        AlertDialog.Builder(this)
-            .setTitle("Password protect photos")
-            .setMessage(
-                "Protected Photos is a required Gallery capability, but this Development build does not yet provide a secure protected-media store. " +
-                    "Gallery will not fake protection with an app-local password toggle. The production implementation must use supported Android/GoreeCloud authentication, protected storage, Privacy Shield consent controls, and Wardveil trust boundaries before this setting becomes active.",
-            )
-            .setPositiveButton("Done", null)
             .show()
     }
 
