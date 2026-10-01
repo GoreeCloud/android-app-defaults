@@ -1,5 +1,13 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — Albums cover-badge mockup alignment
+
+### Changed
+- Added the mockup's circular lower-left cover badge treatment to Albums cards.
+- Favorites, Camera, Screenshots, Downloads, and Screen recordings reuse their existing first-party Gallery icon semantics; other video-dominant collections can use the Videos icon and remaining albums use the generic Albums icon.
+- Refactored the Albums quick-access policy to expose semantic collection kinds instead of coupling UI icon selection to numeric priority values.
+- Cover badges are decorative only and do not add media permission, collection inference, mutation, filesystem, account, network, cloud, or synchronization authority.
+
 ## October 1, 2026 — primary-surface chrome cleanup
 
 ### Changed
