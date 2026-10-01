@@ -81,6 +81,7 @@ class GalleryActivity : Activity() {
     private lateinit var browseControls: LinearLayout
     private lateinit var groupingControl: TextView
     private lateinit var densityControl: TextView
+    private var videoFilterStripView: View? = null
     private lateinit var accessPanel: LinearLayout
     private lateinit var status: TextView
     private lateinit var action: TextView
