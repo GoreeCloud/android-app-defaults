@@ -49,8 +49,8 @@ class SinceLocalizationTest {
             localizedContext.getString(R.string.elapsed_days_detail_seconds, 1, 2, 3, 4),
         )
         assertEquals(
-            "ترتيب الإنشاء",
-            localizedContext.getString(R.string.dashboard_sort_created),
+            "يدوي / حسب الإنشاء",
+            localizedContext.getString(R.string.dashboard_sort_manual),
         )
         assertEquals(
             "أقدم بداية",
