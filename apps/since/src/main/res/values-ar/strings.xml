@@ -28,6 +28,9 @@
 
     <string name="settings_title">الإعدادات</string>
     <string name="settings_summary">المظهر والبيانات والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
+    <string name="settings_general">عام</string>
+    <string name="settings_confirm_reset">تأكيد إعادة ضبط السلسلة</string>
+    <string name="settings_confirm_reset_supporting">اعرض تأكيدًا نهائيًا بعد مراجعة وقت إعادة الضبط والسبب والملاحظة.</string>
     <string name="settings_default_display_format">تنسيق العرض الافتراضي</string>
     <string name="settings_default_display_format_supporting">يُستخدم عند إنشاء متتبعات جديدة. تحتفظ المتتبعات الحالية بتنسيقها الحالي.</string>
     <string name="settings_show_seconds">إظهار الثواني</string>
