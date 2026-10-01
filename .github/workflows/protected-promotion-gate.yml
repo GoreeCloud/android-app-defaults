@@ -57,14 +57,22 @@ jobs:
           }
 
           app_checks = {
-              "camera": "Camera build, unit tests, lint, and source guard",
-              "launcher": "Launcher validation, unit tests, lint, and build",
-              "keyboard": "Keyboard validation, unit tests, and build",
-              "gallery": "Gallery native core, adapter, unit tests, and build",
+              "camera": {"Camera build, unit tests, lint, and source guard"},
+              "launcher": {
+                  "Launcher validation, unit tests, lint, and build",
+                  "Launcher Android 16 runtime instrumentation",
+                  "Launcher Android 16 transition performance diagnostics",
+              },
+              "keyboard": {"Keyboard validation, unit tests, and build"},
+              "gallery": {"Gallery native core, adapter, unit tests, and build"},
           }
-          for app, check in app_checks.items():
+          for app, checks in app_checks.items():
               if any(path.startswith(f"apps/{app}/") for path in changed):
-                  expected.add(check)
+                  expected.update(checks)
+
+          if ".github/workflows/migrated-android-apps-ci.yml" in changed:
+              for checks in app_checks.values():
+                  expected.update(checks)
 
           migration_paths = (
               "apps/camera/",
