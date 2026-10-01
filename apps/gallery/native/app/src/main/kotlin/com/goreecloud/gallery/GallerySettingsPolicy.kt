@@ -28,9 +28,6 @@ enum class GalleryGroupingMode(
     NONE("none", "None"),
     ;
 
-    fun next(): GalleryGroupingMode =
-        entries[(ordinal + 1) % entries.size]
-
     companion object {
         fun fromStored(value: String?): GalleryGroupingMode =
             entries.firstOrNull { it.storedValue == value } ?: DAY
@@ -70,9 +67,6 @@ enum class GalleryViewDensity(
         if (itemCount <= 0 || baseline <= 3) return baseline
         return if (itemCount < baseline) 3 else baseline
     }
-
-    fun next(): GalleryViewDensity =
-        entries[(ordinal + 1) % entries.size]
 
     companion object {
         fun fromStored(value: String?): GalleryViewDensity =
