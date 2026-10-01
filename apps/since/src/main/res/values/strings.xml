@@ -26,7 +26,7 @@
     <string name="achievement_thirty_days_description">Keep one current streak going for at least thirty days.</string>
 
     <string name="settings_title">Settings</string>
-    <string name="settings_summary">Appearance, data, privacy, security, guidance, and app information.</string>
+    <string name="settings_summary">General, appearance, data, privacy, security, and app information.</string>
     <string name="settings_general">General</string>
     <string name="settings_confirm_reset">Confirm streak resets</string>
     <string name="settings_confirm_reset_supporting">Show one final confirmation after reviewing the reset time, reason, and note.</string>
