@@ -224,13 +224,19 @@ class RecycleBinActivity : Activity() {
         )
         content.addView(header)
 
-        content.addView(TextView(this).apply {
-            text = "Recently deleted photos and videos remain under Android MediaStore Trash authority. Restore and permanent deletion always require Android confirmation."
-            setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            setLineSpacing(0f, 1.08f)
-            setPadding(dp(4), dp(10), dp(4), dp(8))
-        })
+        content.addView(
+            messageRow(
+                "Android-managed Trash",
+                "Recently deleted photos and videos remain under Android MediaStore authority. Restore and permanent deletion always require Android confirmation.",
+            ),
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                topMargin = dp(10)
+                bottomMargin = dp(2)
+            },
+        )
 
         body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
