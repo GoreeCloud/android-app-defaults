@@ -110,7 +110,7 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithText("Privacy").assertIsDisplayed()
         composeRule.onNodeWithText("Security").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
 
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
@@ -277,7 +277,7 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
         composeRule.onNodeWithTag("settings-contextual-hints").performClick()
         composeRule.onNodeWithTag("nav-home").performClick()
         assertTrue(composeRule.onAllNodesWithTag("home-contextual-hint").fetchSemanticsNodes().isEmpty())
