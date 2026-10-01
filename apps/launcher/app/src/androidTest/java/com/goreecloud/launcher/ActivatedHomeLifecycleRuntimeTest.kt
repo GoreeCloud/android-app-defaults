@@ -253,6 +253,24 @@ class ActivatedHomeLifecycleRuntimeTest {
                         LauncherDatabaseProvider.get(context).workspaceDao()
                     },
                 )
+
+                // Let the launched Home root finish its own startup reconciliation before this
+                // test performs a direct Room page mutation. Racing startup-owned placement work can
+                // correctly produce a snapshot-conflict result even though page creation itself is
+                // healthy.
+                composeRule.waitUntil(timeoutMillis = 15_000) {
+                    composeRule
+                        .onAllNodesWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeRule.waitForIdle()
+                withTimeout(10_000) {
+                    runtime!!.observeHomePages().first { state ->
+                        state is WorkspacePagedHomeState.Ready
+                    }
+                }
+
                 // Remove any residue from an interrupted prior emulator attempt, then create one
                 // empty secondary page so the test exercises the exact primary -> secondary path.
                 runtime?.deleteEmptyHomePage(secondaryPageId)
@@ -260,14 +278,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 check(
                     created is WorkspacePagedRoomMutationResult.CreatedPage ||
                         created is WorkspacePagedRoomMutationResult.PageAlreadyExists
-                )
-
-                composeRule.waitUntil(timeoutMillis = 15_000) {
-                    composeRule
-                        .onAllNodesWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                        .isNotEmpty()
-                }
+                ) { "Expected a usable secondary Home page; create result was $created." }
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
