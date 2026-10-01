@@ -114,8 +114,8 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithTag("settings-contextual-hints")
+            .performScrollTo()
             .assertIsDisplayed()
             .assertHasClickAction()
             .performClick()
@@ -264,7 +264,7 @@ class SinceTopLevelNavigationTest {
         composeRule.setContent {
             MaterialTheme {
                 SinceApp(
-                    repository = FakeTrackerRepository(emptyList()),
+                    repository = FakeTrackerRepository(listOf(sampleAggregate()), clock = clock),
                     clock = clock,
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
@@ -306,8 +306,9 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
-        composeRule.onNodeWithTag("settings-contextual-hints").performClick()
+        composeRule.onNodeWithTag("settings-contextual-hints")
+            .performScrollTo()
+            .performClick()
         composeRule.onNodeWithTag("nav-home").performClick()
         assertTrue(composeRule.onAllNodesWithTag("home-contextual-hint").fetchSemanticsNodes().isEmpty())
     }
