@@ -1,5 +1,13 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — Albums mockup-alignment refinement
+
+### Changed
+- Refined the Albums surface toward the supplied Gallery mockup with media-first flat collection tiles, square rounded covers, and album labels/counts aligned directly beneath each cover.
+- Tightened the real-data Quick access lane into compact cover shortcuts and aligned the Albums subtitle to the plural **Smart collections** wording when recognized local smart-access collections exist.
+- Preserved the complete Collections grid and existing album navigation while keeping Quick access limited to collections actually present in the current Android-authorized snapshot or Gallery-local Favorites state.
+- Added no new MediaStore permission, mutation, filesystem, account, network, or synchronization authority.
+
 ## October 1, 2026 — real-data Albums Quick access
 
 ### Added

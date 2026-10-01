@@ -1032,10 +1032,15 @@ class GalleryActivity : Activity() {
             destination == GalleryDestination.VIDEOS ->
                 videoCountLabel(visibleItems.count { it.mimeType.startsWith("video/") })
             destination == GalleryDestination.ALBUMS -> {
-                val albumCount = visibleItems.buildAlbumCatalog().size
+                val albumCatalog = visibleItems.buildAlbumCatalog()
+                val albumCount = albumCatalog.size
                 val albumsLabel = if (albumCount == 1) "1 album" else "$albumCount albums"
-                val hasFavorites = favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } }
-                if (hasFavorites) albumsLabel + " · Smart collection" else albumsLabel
+                val hasSmartCollections =
+                    favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } } ||
+                        albumCatalog.any { album ->
+                            GalleryAlbumQuickAccessPolicy.priority(album.displayName, isFavorites = false) != null
+                        }
+                if (hasSmartCollections) albumsLabel + " · Smart collections" else albumsLabel
             }
             else -> ""
         }
@@ -1743,14 +1748,6 @@ class GalleryActivity : Activity() {
 
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = GalleryGlazeSurfaces.drawable(
-                context,
-                GalleryGlazeSurfaces.Role.RAISED,
-                GalleryGlazeContract.SHAPE_CONTAINER_DP,
-            )
-            clipToOutline = true
-            elevation = dp(1).toFloat()
-            setPadding(dp(2), dp(2), dp(2), dp(8))
             isClickable = true
             isFocusable = true
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
@@ -1768,20 +1765,11 @@ class GalleryActivity : Activity() {
                 TextView(context).apply {
                     text = album.name
                     maxLines = 1
+                    gravity = Gravity.CENTER_HORIZONTAL
                     setTextColor(primaryTextColor())
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
                     setTypeface(typeface, Typeface.BOLD)
-                    setPadding(dp(10), dp(8), dp(10), 0)
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                },
-            )
-            addView(
-                TextView(context).apply {
-                    text = itemCountLabel(album.count)
-                    maxLines = 1
-                    setTextColor(secondaryTextColor())
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
-                    setPadding(dp(10), dp(2), dp(10), 0)
+                    setPadding(dp(2), dp(7), dp(2), 0)
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 },
             )
@@ -1855,21 +1843,16 @@ class GalleryActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-            background = GalleryGlazeSurfaces.drawable(
-                context,
-                GalleryGlazeSurfaces.Role.RAISED,
-                GalleryGlazeContract.SHAPE_CONTAINER_DP,
-            )
-            clipToOutline = true
-            elevation = dp(1).toFloat()
-            setPadding(dp(2), dp(2), dp(2), dp(8))
             isClickable = true
             isFocusable = true
             contentDescription = "${album.name}, ${itemCountLabel(album.count)}"
             setOnClickListener { openAlbumPresentation(album) }
             addView(
                 image,
-                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (tileWidth - dp(4)).coerceAtLeast(dp(96))),
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    tileWidth.coerceAtLeast(dp(96)),
+                ),
             )
             addView(TextView(context).apply {
                 text = album.name
@@ -1877,14 +1860,14 @@ class GalleryActivity : Activity() {
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f)
                 setTypeface(typeface, Typeface.BOLD)
                 maxLines = 1
-                setPadding(dp(10), dp(8), dp(10), 0)
+                setPadding(dp(2), dp(8), dp(2), 0)
             })
             addView(TextView(context).apply {
                 text = itemCountLabel(album.count)
                 setTextColor(secondaryTextColor())
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                 maxLines = 1
-                setPadding(dp(10), dp(2), dp(10), 0)
+                setPadding(dp(2), dp(2), dp(2), 0)
             })
         }
     }
@@ -4960,8 +4943,8 @@ class GalleryActivity : Activity() {
         const val ALBUM_GAP_DP = 12
         const val ALBUM_CORNER_DP = 16
         const val ALBUM_THUMBNAIL_DP = 320
-        const val ALBUM_QUICK_ACCESS_CARD_DP = 132
-        const val ALBUM_QUICK_ACCESS_THUMBNAIL_DP = 88
+        const val ALBUM_QUICK_ACCESS_CARD_DP = 88
+        const val ALBUM_QUICK_ACCESS_THUMBNAIL_DP = 72
         const val ALBUM_QUICK_ACCESS_LIMIT = 4
         const val VIDEO_CARD_GAP_DP = 10
         const val VIEWER_THUMBNAIL_DP = 720

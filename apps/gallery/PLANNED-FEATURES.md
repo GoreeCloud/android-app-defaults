@@ -14,7 +14,7 @@ PR #100 now implements a bounded local photo-only slideshow in the authorized vi
 PR #100 now includes a persisted Dense/Comfortable/Spacious media-grid presentation control. The setting is included in Gallery settings import/export and has pure policy tests. It advances the view-density backlog without changing media authorization, selection, mutation, or storage authority; representative-device/adaptive-layout acceptance remains open.
 
 **Record type:** Repository planned/incomplete-feature inventory  
-**Repository:** `GoreeCloud/gallery`  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/gallery/`)  
 **Lifecycle:** Development / non-Stable  
 **Authority:** Current `main` source, accepted repository evidence, and active GoreeCloud Tasks Management obligations  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance v1.0, effective September 22, 2026.

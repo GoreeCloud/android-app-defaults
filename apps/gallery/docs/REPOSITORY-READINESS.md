@@ -4,21 +4,30 @@
 
 This document records the source-controlled readiness model for GoreeCloud Gallery. It distinguishes repository readiness from Stable-release readiness and prevents a green build from being interpreted as production approval.
 
-## Current state
+## Current first-party native state
 
 - Product: GoreeCloud Gallery
-- Current packaged acceptance line: `1.0.0-gc.7`
-- Current maintained reconstruction/test patch line: `gc.8`
+- Active Development line: `0.8.6-dev`
 - Application ID: `com.goreecloud.gallery`
-- Repository: `GoreeCloud/goreecloud-gallery`
-- Development model: GoreeCloud-maintained open-source Android application based on Fossify Gallery
-- License boundary: GNU GPL v3
-- User-facing design language: Glaze UI
+- Active repository: `GoreeCloud/android-app-defaults` under `apps/gallery/`
+- Development model: original GoreeCloud-owned native Android application
+- User-facing design system: Glaze / repository-local 1.6.0 mapping
 - Runtime model: offline-first local Android media application
-- Release state: Acceptance Candidate
+- Release state: Development / non-Stable
 - Stable release: Not approved
 
-The gc.8 layer adds repository/testability and evidence improvements without changing the packaged `1.0.0-gc.7` acceptance identity. Stable classification remains unchanged until all independent release gates are complete.
+The native line is the current product architecture. Repository, CI, rendered-emulator, and source evidence do not replace representative-device, platform-system, signing/provenance, recovery, release, Production Acceptance, Seal, or Anchor gates.
+
+## Transitional reconstruction readiness state
+
+- Preserved packaged acceptance line: `1.0.0-gc.7`
+- Preserved reconstruction/test patch line: `gc.8`
+- Historical repository lineage: `GoreeCloud/gallery`
+- Development model: GoreeCloud-maintained Fossify reconstruction preserved for provenance/regression
+- License boundary: GNU GPL v3 for inherited work
+- Release state: Historical Acceptance Candidate; not Stable
+
+The gc.8 layer remains historical repository/testability evidence without changing the packaged `1.0.0-gc.7` acceptance identity. It must not be interpreted as the current first-party native architecture.
 
 ## Repository readiness gates
 

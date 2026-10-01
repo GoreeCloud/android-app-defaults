@@ -8,7 +8,7 @@ Security and safe operation are release requirements. A successful build does no
 
 ## Supported line
 
-The current supported development and acceptance line is `1.0.0-gc.7`. It is pre-stable software. Stable publication remains blocked until the signing, real-device, permission, destructive-operation, accessibility, upgrade/recovery, privacy, licensing, and release-evidence gates in `docs/STABLE-RELEASE-CHECKLIST.md` are complete.
+The current first-party native Development line is `0.8.6-dev` in `GoreeCloud/android-app-defaults` under `apps/gallery/`. The preserved `1.0.0-gc.7` Fossify-based line is transitional acceptance/provenance evidence rather than the active product architecture. Both remain pre-Stable; Stable publication is blocked until the applicable signing, real-device, permission, destructive-operation, accessibility, upgrade/recovery, privacy, licensing, platform-system, and release-evidence gates are complete.
 
 ## Reporting a vulnerability
 

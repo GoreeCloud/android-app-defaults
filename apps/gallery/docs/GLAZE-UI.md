@@ -86,7 +86,7 @@ The adaptive Android resource qualifiers are platform-native equivalents of Glaz
 
 ## Primary navigation alignment
 
-The October 1, 2026 Gallery mockup-alignment work establishes five persistent primary destinations: **Photos**, **Albums**, **Videos**, **Trash**, and **Settings**. Trash uses the same rounded Glaze navigation capsule and selected-state semantics as the other primary destinations while retaining Android MediaStore as the authoritative Trash state. Recovery is not presented as an Albums collection. Albums Quick access uses only collections already present in the current authorized local snapshot or Gallery-local Favorites state.
+The October 1, 2026 Gallery mockup-alignment work establishes five persistent primary destinations: **Photos**, **Albums**, **Videos**, **Trash**, and **Settings**. Trash uses the same rounded Glaze navigation capsule and selected-state semantics as the other primary destinations while retaining Android MediaStore as the authoritative Trash state. Recovery is not presented as an Albums collection. Albums Quick access uses only collections already present in the current authorized local snapshot or Gallery-local Favorites state. The complete Albums grid uses media-first flat tiles with rounded covers and labels/counts beneath the artwork rather than wrapping every collection in an additional Raised card.
 
 The navigation shell must keep media dominant, preserve 48dp-or-larger actionable targets, expose selected state beyond color alone, remain usable at compact phone widths, and reserve a real viewport lane so media does not render beneath persistent navigation. Moving recovery into the Trash tab must not broaden media permission or mutation authority.
 
