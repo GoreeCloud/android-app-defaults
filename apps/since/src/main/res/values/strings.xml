@@ -208,7 +208,7 @@
 
     <string name="dashboard_search">Search trackers</string>
     <string name="dashboard_sort_recent">Recent</string>
-    <string name="dashboard_sort_created">Created</string>
+    <string name="dashboard_sort_manual">Manual / created</string>
     <string name="dashboard_sort_name">Name</string>
     <string name="dashboard_sort_newest_start">Newest start</string>
     <string name="dashboard_sort_oldest_start">Oldest start</string>
