@@ -789,10 +789,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                         useUnmergedTree = true,
                     )
                     .performTouchInput {
-                        swipeUp(
-                            startX = right - 12f,
-                            startY = bottom - 24f,
-                            endY = top + 24f,
+                        swipe(
+                            start = Offset(right - 12f, bottom - 24f),
+                            end = Offset(right - 12f, top + 24f),
                             durationMillis = 400,
                         )
                     }
