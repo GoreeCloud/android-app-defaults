@@ -3593,63 +3593,104 @@ private fun HomeAtAGlance(
         border = BorderStroke(1.dp, outline),
         shadowElevation = if (usesWallpaperGlass) 2.dp else 1.dp,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = if (compact) GlazeMetrics.space3 else GlazeMetrics.space4,
-                    vertical = if (compact) GlazeMetrics.space2 else GlazeMetrics.space3,
-                ),
-            horizontalAlignment = horizontalAlignment,
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            Text(
-                time,
-                modifier = if (alignment == LauncherHomeGlanceAlignment.CENTER) {
-                    Modifier.fillMaxWidth()
-                } else {
-                    Modifier
-                },
-                style = if (compact) {
-                    MaterialTheme.typography.headlineMedium
-                } else {
-                    MaterialTheme.typography.displayMedium
-                },
-                color = foreground,
-                fontWeight = FontWeight.Light,
-                textAlign = textAlign,
-            )
+        if (!compact && alignment == LauncherHomeGlanceAlignment.START) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = GlazeMetrics.space4,
+                        vertical = GlazeMetrics.space3,
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    date,
+                Column(
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = foreground.copy(alpha = 0.86f),
-                    textAlign = textAlign,
-                    maxLines = 1,
-                )
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        time,
+                        style = MaterialTheme.typography.displayMedium,
+                        color = foreground,
+                        fontWeight = FontWeight.Light,
+                    )
+                    Text(
+                        date,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = foreground.copy(alpha = 0.86f),
+                        maxLines = 1,
+                    )
+                    Text(
+                        "A calmer Home. Your way.",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = foreground.copy(alpha = 0.72f),
+                        maxLines = 1,
+                    )
+                }
                 LauncherWeatherStatusChip(
                     foreground = foreground,
-                    compact = compact,
+                    compact = false,
                 )
             }
-            if (!compact) {
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = if (compact) GlazeMetrics.space3 else GlazeMetrics.space4,
+                        vertical = if (compact) GlazeMetrics.space2 else GlazeMetrics.space3,
+                    ),
+                horizontalAlignment = horizontalAlignment,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
                 Text(
-                    "A calmer Home. Your way.",
+                    time,
                     modifier = if (alignment == LauncherHomeGlanceAlignment.CENTER) {
                         Modifier.fillMaxWidth()
                     } else {
                         Modifier
                     },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = foreground.copy(alpha = 0.72f),
+                    style = if (compact) {
+                        MaterialTheme.typography.headlineMedium
+                    } else {
+                        MaterialTheme.typography.displayMedium
+                    },
+                    color = foreground,
+                    fontWeight = FontWeight.Light,
                     textAlign = textAlign,
-                    maxLines = 1,
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        date,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = foreground.copy(alpha = 0.86f),
+                        textAlign = textAlign,
+                        maxLines = 1,
+                    )
+                    LauncherWeatherStatusChip(
+                        foreground = foreground,
+                        compact = compact,
+                    )
+                }
+                if (!compact) {
+                    Text(
+                        "A calmer Home. Your way.",
+                        modifier = if (alignment == LauncherHomeGlanceAlignment.CENTER) {
+                            Modifier.fillMaxWidth()
+                        } else {
+                            Modifier
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = foreground.copy(alpha = 0.72f),
+                        textAlign = textAlign,
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }
