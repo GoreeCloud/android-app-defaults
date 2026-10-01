@@ -575,7 +575,11 @@ internal fun LauncherProviderControlledSearchSurface(
                                     !complete -> "Searching…"
                                     else -> "No results found"
                                 },
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = if (emphasized) {
+                                MaterialTheme.typography.titleMedium
+                            } else {
+                                MaterialTheme.typography.bodyMedium
+                            },
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.SemiBold,
                             )
@@ -628,6 +632,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 result = topResult,
                                                 providerControls = controls,
                                             ),
+                                        emphasized = true,
                                         onActivate = {
                                             when (val action = topResult.action) {
                                                 is LaunchApplicationSearchAction ->
@@ -1560,6 +1565,7 @@ private fun LauncherGlazeSearchResult(
     sourceLabel: String?,
     onActivate: () -> Unit,
     onOpenSearchUri: (LauncherOpenUriSearchAction) -> Unit,
+    emphasized: Boolean = false,
 ) {
     val isContact = result.category == LauncherSearchCategory.CONTACT
     val appAction = result.action as? LaunchApplicationSearchAction
@@ -1567,13 +1573,17 @@ private fun LauncherGlazeSearchResult(
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.36f),
+        shape = RoundedCornerShape(
+            if (emphasized) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
+        ),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = if (emphasized) 0.54f else 0.36f,
+        ),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(
                 horizontal = GlazeMetrics.space3,
-                vertical = GlazeMetrics.space1,
+                vertical = if (emphasized) GlazeMetrics.space2 else GlazeMetrics.space1,
             ),
         ) {
             Surface(
@@ -1592,11 +1602,13 @@ private fun LauncherGlazeSearchResult(
                             bitmap = appIcon,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(42.dp).launcherIconMask(),
+                            modifier = Modifier
+                                .size(if (emphasized) 48.dp else 42.dp)
+                                .launcherIconMask(),
                         )
                     } else if (isContact) {
                         Surface(
-                            modifier = Modifier.size(38.dp),
+                            modifier = Modifier.size(if (emphasized) 44.dp else 38.dp),
                             shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                             color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
@@ -1609,7 +1621,10 @@ private fun LauncherGlazeSearchResult(
                             }
                         }
                     } else {
-                        LauncherSearchResultCategoryGlyph(result.category)
+                        LauncherSearchResultCategoryGlyph(
+                            category = result.category,
+                            emphasized = emphasized,
+                        )
                     }
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -1679,15 +1694,16 @@ private fun LauncherGlazeSearchResult(
 @Composable
 private fun LauncherSearchResultCategoryGlyph(
     category: LauncherSearchCategory,
+    emphasized: Boolean = false,
 ) {
     val color = MaterialTheme.colorScheme.primary
     Surface(
-        modifier = Modifier.size(38.dp),
+        modifier = Modifier.size(if (emphasized) 44.dp else 38.dp),
         shape = RoundedCornerShape(GlazeMetrics.radiusPill),
         color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Canvas(Modifier.size(20.dp)) {
+            Canvas(Modifier.size(if (emphasized) 22.dp else 20.dp)) {
                 val u = size.minDimension
                 val stroke = 1.65.dp.toPx()
                 val round = androidx.compose.ui.geometry.CornerRadius(u * 0.12f)
