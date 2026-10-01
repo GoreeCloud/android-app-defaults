@@ -1818,6 +1818,7 @@ private fun HomeSurface(
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     var showHomeEditor by rememberSaveable { mutableStateOf(false) }
     var showWidgetPicker by rememberSaveable { mutableStateOf(false) }
+    var pendingWidgetPickerAfterEditorDismissal by rememberSaveable { mutableStateOf(false) }
     var movableGlanceMigrationRequested by rememberSaveable { mutableStateOf(false) }
     val hasMovableGlance = remember(primaryHomePage) {
         primaryHomePage?.widgetPlacements?.any { placement ->
@@ -1849,10 +1850,21 @@ private fun HomeSurface(
         onHomeEditorVisibilityChanged(effectiveShowHomeEditor)
     }
 
+    // A Material3 bottom sheet should not be introduced in the same composition that removes
+    // the full-screen editor Dialog. Defer the picker by one post-composition effect so the
+    // editor window is fully dismissed before the sheet becomes active.
+    LaunchedEffect(effectiveShowHomeEditor, pendingWidgetPickerAfterEditorDismissal) {
+        if (!effectiveShowHomeEditor && pendingWidgetPickerAfterEditorDismissal) {
+            pendingWidgetPickerAfterEditorDismissal = false
+            showWidgetPicker = true
+        }
+    }
+
     LaunchedEffect(homeResetSequence) {
         if (homeResetSequence > 0L) {
             showHomeEditor = false
             showWidgetPicker = false
+            pendingWidgetPickerAfterEditorDismissal = false
         }
     }
     DisposableEffect(Unit) {
@@ -2314,8 +2326,8 @@ private fun HomeSurface(
                             onOpenWallpaperPicker()
                         },
                         onWidgets = {
+                            pendingWidgetPickerAfterEditorDismissal = true
                             showHomeEditor = false
-                            showWidgetPicker = true
                         },
                         onFolders = {
                             showHomeEditor = false
