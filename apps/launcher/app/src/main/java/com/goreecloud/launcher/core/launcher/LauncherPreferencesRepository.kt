@@ -401,6 +401,7 @@ class LauncherPreferencesRepository(
         val homeHintsDismissed = booleanPreferencesKey("home_hints_dismissed_v1")
         val homeLabelOverrides = stringPreferencesKey("home_label_overrides_v1")
         val hiddenHomeSuggestionKeys = stringSetPreferencesKey("hidden_home_suggestion_keys_v1")
+        val drawerPinnedAppKeys = stringSetPreferencesKey("drawer_pinned_app_keys_v1")
         val portableRestoreJournal = stringPreferencesKey("portable_restore_journal_v1")
     }
 
@@ -428,6 +429,20 @@ class LauncherPreferencesRepository(
     val hiddenHomeSuggestionKeys: Flow<Set<String>> = dataStore.data
         .map { values ->
             values[Keys.hiddenHomeSuggestionKeys]
+                .orEmpty()
+                .filterNot(String::isBlank)
+                .toSet()
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Device-local App Drawer pins. Workspace keys already include Android profile identity, so a
+     * pinned Work app never aliases a same-package User app. Pinning is presentation metadata only:
+     * it does not move apps onto Home/Dock and intentionally remains outside portable preference v1.
+     */
+    val drawerPinnedAppKeys: Flow<Set<String>> = dataStore.data
+        .map { values ->
+            values[Keys.drawerPinnedAppKeys]
                 .orEmpty()
                 .filterNot(String::isBlank)
                 .toSet()
@@ -869,6 +884,23 @@ class LauncherPreferencesRepository(
                 values.remove(Keys.hiddenHomeSuggestionKeys)
             } else {
                 values[Keys.hiddenHomeSuggestionKeys] = updated
+            }
+        }
+    }
+
+    fun setDrawerAppPinned(appKey: String, pinned: Boolean): Job = scope.launch {
+        if (appKey.isBlank()) return@launch
+        dataStore.edit { values ->
+            val updated = values[Keys.drawerPinnedAppKeys].orEmpty().toMutableSet()
+            if (pinned) {
+                updated += appKey
+            } else {
+                updated -= appKey
+            }
+            if (updated.isEmpty()) {
+                values.remove(Keys.drawerPinnedAppKeys)
+            } else {
+                values[Keys.drawerPinnedAppKeys] = updated
             }
         }
     }
