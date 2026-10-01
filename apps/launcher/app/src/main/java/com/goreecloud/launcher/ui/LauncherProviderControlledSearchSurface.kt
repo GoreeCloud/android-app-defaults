@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -362,6 +363,7 @@ internal fun LauncherProviderControlledSearchSurface(
                 ) {
                     Text(
                         "Universal Search",
+                        modifier = Modifier.semantics { heading() },
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -598,11 +600,14 @@ internal fun LauncherProviderControlledSearchSurface(
                                 item(key = "top-result-label") {
                                     Text(
                                         "Top result",
-                                        modifier = Modifier.fillMaxWidth().padding(
-                                            start = GlazeMetrics.space2,
-                                            top = GlazeMetrics.space1,
-                                            bottom = GlazeMetrics.space1,
-                                        ),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .semantics { heading() }
+                                            .padding(
+                                                start = GlazeMetrics.space2,
+                                                top = GlazeMetrics.space1,
+                                                bottom = GlazeMetrics.space1,
+                                            ),
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.SemiBold,
@@ -644,11 +649,14 @@ internal fun LauncherProviderControlledSearchSurface(
                                         section.title + " (" +
                                             (fullSectionCounts[section.category] ?: section.items.size) +
                                             ")",
-                                        modifier = Modifier.fillMaxWidth().padding(
-                                            start = GlazeMetrics.space2,
-                                            top = GlazeMetrics.space2,
-                                            bottom = GlazeMetrics.space1,
-                                        ),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .semantics { heading() }
+                                            .padding(
+                                                start = GlazeMetrics.space2,
+                                                top = GlazeMetrics.space2,
+                                                bottom = GlazeMetrics.space1,
+                                            ),
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         fontWeight = FontWeight.SemiBold,
