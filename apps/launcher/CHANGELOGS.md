@@ -4,7 +4,7 @@
 
 A stacked Development feature candidate adds profile-qualified App Drawer favorites without introducing new permissions, network access, or another workspace authority. Long-pressing an application in Apps can now **Pin in Apps** or **Unpin in Apps**. Pins use the existing profile-qualified Launcher workspace key, so a Work-profile package and a same-package User app remain independent.
 
-The App Drawer sort menu gains **Pinned first**. In that mode, pinned applications sort ahead of unpinned applications and folders, while each group retains deterministic normalized-label and stable-key ordering. Folder membership, Home placement, Dock placement, launch history, and existing A–Z / Z–A / Most recent / Most frequent modes are unchanged.
+The App Drawer sort menu gains **Pinned first**. In that mode, pinned applications sort ahead of unpinned applications and folders, while each group retains deterministic normalized-label and stable-key ordering. The selected sort mode is now persisted as device-local Drawer presentation state, so A–Z / Z–A / Most recent / Most frequent / Pinned first survives Drawer re-entry and process restart. Folder membership, Home placement, Dock placement, and launch history are unchanged.
 
 Pinned state is device-local Launcher presentation metadata stored in DataStore and intentionally remains outside the strict portable-preference v1 contract. Focused JVM coverage verifies profile-qualified persistence and pinned-first ordering.
 
