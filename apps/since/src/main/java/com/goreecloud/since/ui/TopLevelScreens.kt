@@ -371,6 +371,56 @@ internal fun SettingsScreen(
                         onCheckedChange = null,
                     )
                 }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("settings-contextual-hints")
+                        .toggleable(
+                            value = contextualHintsEnabled,
+                            role = Role.Switch,
+                            onValueChange = onContextualHintsEnabledChange,
+                        )
+                        .semantics(mergeDescendants = true) {}
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Text(
+                            text = stringResourceCompat(R.string.contextual_hints),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = stringResourceCompat(R.string.contextual_hints_supporting),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    Switch(
+                        modifier = Modifier.clearAndSetSemantics {},
+                        checked = contextualHintsEnabled,
+                        onCheckedChange = null,
+                    )
+                }
+
+                SettingsActionRow(
+                    title = stringResourceCompat(R.string.reset_dismissed_hints),
+                    supporting = stringResourceCompat(R.string.reset_dismissed_hints_supporting),
+                    status = stringResourceCompat(R.string.settings_reset),
+                    testTag = "settings-reset-dismissed-hints",
+                    onClick = onResetDismissedContextualHints,
+                )
+                SettingsActionRow(
+                    title = stringResourceCompat(R.string.replay_setup),
+                    supporting = stringResourceCompat(R.string.replay_setup_supporting),
+                    status = stringResourceCompat(R.string.settings_open),
+                    testTag = "settings-replay-setup",
+                    onClick = onReplaySetup,
+                )
             }
         }
 
@@ -619,58 +669,7 @@ internal fun SettingsScreen(
             }
         }
 
-        item {
-            SettingsSection(title = stringResourceCompat(R.string.settings_guidance)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("settings-contextual-hints")
-                        .toggleable(
-                            value = contextualHintsEnabled,
-                            role = Role.Switch,
-                            onValueChange = onContextualHintsEnabledChange,
-                        )
-                        .semantics(mergeDescendants = true) {}
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(3.dp),
-                    ) {
-                        Text(
-                            text = stringResourceCompat(R.string.contextual_hints),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = stringResourceCompat(R.string.contextual_hints_supporting),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    Switch(
-                        modifier = Modifier.clearAndSetSemantics {},
-                        checked = contextualHintsEnabled,
-                        onCheckedChange = null,
-                    )
-                }
-                SettingsActionRow(
-                    title = stringResourceCompat(R.string.reset_dismissed_hints),
-                    supporting = stringResourceCompat(R.string.reset_dismissed_hints_supporting),
-                    status = stringResourceCompat(R.string.settings_reset),
-                    testTag = "settings-reset-dismissed-hints",
-                    onClick = onResetDismissedContextualHints,
-                )
-                SettingsActionRow(
-                    title = stringResourceCompat(R.string.replay_setup),
-                    supporting = stringResourceCompat(R.string.replay_setup_supporting),
-                    status = stringResourceCompat(R.string.settings_open),
-                    testTag = "settings-replay-setup",
-                    onClick = onReplaySetup,
-                )
-            }
-        }
+
     }
 
     plannedDialog?.let { setting ->
