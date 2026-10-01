@@ -6,7 +6,7 @@
 
 Current user-visible behavior is unchanged because the Primary root is still mounted only for Primary Home. The state thread is the next prerequisite for moving Primary and secondary content under one pager without creating a second selection or workspace authority.
 
-**Acceptance boundary:** stacked Development architecture candidate on parent PR #113. PR #113 must integrate first; this candidate then requires current-main reconciliation and fresh exact-head validation. Unified Primary↔secondary paging remains open.
+**Acceptance boundary:** Development architecture candidate reconciled onto merged PR #113 / current main `48a44a03b88dc04dcb5b7149dc79f936a5874a7c`; fresh exact-head validation is required before integration. Unified Primary↔secondary paging remains open.
 
 
 ## October 1, 2026 — keep one adjacent secondary Home page warm
