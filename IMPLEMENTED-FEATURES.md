@@ -1,5 +1,10 @@
 # Android App Defaults — Implemented Features
 
+## September 30, 2026 — Since dashboard search and sort candidate
+
+The stacked Since candidate adds the five specified local Dashboard order modes, persists the selected order in Preferences DataStore, and normalizes title/note search for case and accents. General Settings exposes the same local choice. Fresh exact-head validation remains required.
+
+
 ## September 30, 2026 — Since display preferences candidate
 
 The current stacked candidate adds two local presentation preferences: a default display format for newly created trackers and optional seconds-level elapsed display. Both use the existing Since Preferences DataStore. Existing trackers keep their own saved display format.
