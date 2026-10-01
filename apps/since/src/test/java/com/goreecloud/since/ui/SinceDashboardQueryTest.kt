@@ -10,16 +10,16 @@ import org.junit.Test
 
 class SinceDashboardQueryTest {
     @Test
-    fun searchMatchesTitleAndNoteCaseInsensitively() {
+    fun searchMatchesTitleAndNoteCaseAndAccentInsensitively() {
         val rows = listOf(
-            aggregate("a", "Coffee", "Morning routine", 100),
-            aggregate("b", "Exercise", "COFFEE break follows", 200),
+            aggregate("a", "Café", "Morning routine", 100),
+            aggregate("b", "Exercise", "CAFÉ break follows", 200),
             aggregate("c", "Reading", null, 300),
         )
 
-        val result = SinceDashboardQuery.apply(rows, "coffee", SinceDashboardSort.RECENT)
+        val result = SinceDashboardQuery.apply(rows, "cafe", SinceDashboardSort.TITLE)
 
-        assertEquals(listOf("b", "a"), result.map { it.tracker.id })
+        assertEquals(listOf("a", "b"), result.map { it.tracker.id })
     }
 
     @Test
@@ -36,6 +36,19 @@ class SinceDashboardQueryTest {
     }
 
     @Test
+    fun createdSortUsesSortOrderThenCreationTime() {
+        val rows = listOf(
+            aggregate("b", "Second", null, 200, sortOrder = 1, createdAt = 300),
+            aggregate("c", "Third", null, 300, sortOrder = 1, createdAt = 400),
+            aggregate("a", "First", null, 100, sortOrder = 0, createdAt = 500),
+        )
+
+        val result = SinceDashboardQuery.apply(rows, "", SinceDashboardSort.CREATED)
+
+        assertEquals(listOf("a", "b", "c"), result.map { it.tracker.id })
+    }
+
+    @Test
     fun titleSortIsCaseInsensitiveAndStable() {
         val rows = listOf(
             aggregate("b", "beta", null, 300),
@@ -48,11 +61,39 @@ class SinceDashboardQueryTest {
         assertEquals(listOf("c", "a", "b"), result.map { it.tracker.id })
     }
 
+    @Test
+    fun startBasedSortsAreDeterministic() {
+        val rows = listOf(
+            aggregate("middle", "Middle", null, 300, startEpochMs = 200),
+            aggregate("newest", "Newest", null, 100, startEpochMs = 300),
+            aggregate("oldest", "Oldest", null, 200, startEpochMs = 100),
+        )
+
+        assertEquals(
+            listOf("newest", "middle", "oldest"),
+            SinceDashboardQuery.apply(rows, "", SinceDashboardSort.NEWEST_START)
+                .map { it.tracker.id },
+        )
+        assertEquals(
+            listOf("oldest", "middle", "newest"),
+            SinceDashboardQuery.apply(rows, "", SinceDashboardSort.OLDEST_START)
+                .map { it.tracker.id },
+        )
+        assertEquals(
+            listOf("oldest", "middle", "newest"),
+            SinceDashboardQuery.apply(rows, "", SinceDashboardSort.LONGEST_CURRENT)
+                .map { it.tracker.id },
+        )
+    }
+
     private fun aggregate(
         id: String,
         title: String,
         note: String?,
         updatedAt: Long,
+        sortOrder: Int = 0,
+        createdAt: Long = 1,
+        startEpochMs: Long = 0,
     ): TrackerAggregate = TrackerAggregate(
         tracker = Tracker(
             id = id,
@@ -62,9 +103,9 @@ class SinceDashboardQueryTest {
             iconKey = null,
             accentKey = null,
             defaultDisplayFormat = DisplayFormat.DAYS,
-            sortOrder = 0,
+            sortOrder = sortOrder,
             isArchived = false,
-            createdAtEpochMs = 1,
+            createdAtEpochMs = createdAt,
             updatedAtEpochMs = updatedAt,
         ),
         periods = listOf(
@@ -72,13 +113,13 @@ class SinceDashboardQueryTest {
                 id = "$id-period",
                 trackerId = id,
                 sequence = 0,
-                startEpochMs = 0,
+                startEpochMs = startEpochMs,
                 startZoneId = "UTC",
                 endEpochMs = null,
                 endZoneId = null,
                 resetReason = null,
                 resetNote = null,
-                createdAtEpochMs = 1,
+                createdAtEpochMs = createdAt,
                 updatedAtEpochMs = updatedAt,
             ),
         ),
