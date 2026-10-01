@@ -63,6 +63,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -870,6 +871,11 @@ private fun TrackerCard(
     onClick: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
+    val compactFloatingActionSafeEnd = if (LocalConfiguration.current.screenWidthDp < 360) {
+        96.dp
+    } else {
+        0.dp
+    }
     val elapsed = remember(aggregate, tick, clock) {
         TimeEngine(clock).elapsedSince(
             startEpochMs = currentPeriod.startEpochMs,
@@ -904,6 +910,7 @@ private fun TrackerCard(
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Surface(
+                    modifier = Modifier.padding(end = compactFloatingActionSafeEnd),
                     shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.secondaryContainer,
                 ) {
