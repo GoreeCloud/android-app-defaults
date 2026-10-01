@@ -12,6 +12,8 @@
     <string name="achievements_title">Achievements</string>
     <string name="achievements_summary">%1$d of %2$d unlocked</string>
     <string name="achievements_privacy_note">Achievements are calculated locally from your tracker data. There is no leaderboard or social ranking.</string>
+    <string name="achievement_unlocked">Unlocked</string>
+    <string name="achievement_locked">Locked</string>
     <string name="achievement_first_tracker">Getting started</string>
     <string name="achievement_first_tracker_description">Create your first tracker.</string>
     <string name="achievement_first_streak">Streak started</string>
@@ -24,7 +26,7 @@
     <string name="achievement_thirty_days_description">Keep one current streak going for at least thirty days.</string>
 
     <string name="settings_title">Settings</string>
-    <string name="settings_summary">Appearance, recovery, privacy, security, and application information.</string>
+    <string name="settings_summary">Appearance, data, privacy, security, guidance, and app information.</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="theme_system">System default</string>
