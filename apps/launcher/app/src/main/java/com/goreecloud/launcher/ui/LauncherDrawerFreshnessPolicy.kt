@@ -1,5 +1,10 @@
 package com.goreecloud.launcher.ui
 
+import android.content.pm.PackageManager
+import android.os.Build
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 internal enum class LauncherDrawerFreshnessFilter(val displayName: String) {
     ALL("All"),
     RECENTLY_INSTALLED("New"),
@@ -36,4 +41,44 @@ internal object LauncherDrawerFreshnessPolicy {
                             INITIAL_INSTALL_UPDATE_TOLERANCE_MILLIS
         }
     }
+}
+
+
+@Suppress("DEPRECATION")
+internal fun launcherDrawerPackageFreshness(
+    packageManager: PackageManager,
+    packageName: String,
+): LauncherDrawerPackageFreshness? = runCatching {
+    val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        packageManager.getPackageInfo(
+            packageName,
+            PackageManager.PackageInfoFlags.of(
+                PackageManager.MATCH_UNINSTALLED_PACKAGES.toLong(),
+            ),
+        )
+    } else {
+        packageManager.getPackageInfo(
+            packageName,
+            PackageManager.MATCH_UNINSTALLED_PACKAGES,
+        )
+    }
+    LauncherDrawerPackageFreshness(
+        firstInstallTimeMillis = packageInfo.firstInstallTime,
+        lastUpdateTimeMillis = packageInfo.lastUpdateTime,
+    )
+}.getOrNull()
+
+internal suspend fun loadLauncherDrawerPackageFreshness(
+    packageManager: PackageManager,
+    packageNames: Collection<String>,
+): Map<String, LauncherDrawerPackageFreshness> = withContext(Dispatchers.IO) {
+    packageNames
+        .asSequence()
+        .filter(String::isNotBlank)
+        .distinct()
+        .mapNotNull { packageName ->
+            launcherDrawerPackageFreshness(packageManager, packageName)
+                ?.let { packageName to it }
+        }
+        .toMap()
 }
