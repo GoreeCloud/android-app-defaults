@@ -1,5 +1,15 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since dashboard search and sort candidate
+
+- Added Created, Name A–Z, Newest start, Oldest start, and Longest current ordering for active trackers.
+- Persisted the Dashboard order locally with Manual/Created as the default and exposed it in General Settings.
+- Made title/note search case- and accent-insensitive while remaining fully local.
+- Added deterministic unit, UI, and persistence coverage; sorting does not mutate tracker timestamps or Room data.
+
+**Acceptance boundary:** stacked Development candidate; fresh exact-head CI and representative-device acceptance remain required.
+
+
 ## September 30, 2026 — Since display preferences candidate
 
 - Added locally persisted **Default display format** and **Show seconds** settings using the existing Since Preferences DataStore.
