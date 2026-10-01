@@ -28,12 +28,11 @@
 
     <string name="settings_title">الإعدادات</string>
     <string name="settings_summary">المظهر والبيانات والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
-    <string name="settings_general">عام</string>
     <string name="settings_default_display_format">تنسيق العرض الافتراضي</string>
     <string name="settings_default_display_format_supporting">يُستخدم عند إنشاء متتبعات جديدة. تحتفظ المتتبعات الحالية بتنسيقها الحالي.</string>
     <string name="settings_show_seconds">إظهار الثواني</string>
     <string name="settings_show_seconds_supporting">يتم تحديث الوقت المنقضي الظاهر كل ثانية أثناء فتح Since.</string>
-    <string name="settings_appearance">المظهر</string>
+    <string name="settings_appearance">المظهر وإمكانية الوصول</string>
     <string name="settings_theme">السمة</string>
     <string name="theme_system">إعداد النظام</string>
     <string name="theme_light">فاتحة</string>
