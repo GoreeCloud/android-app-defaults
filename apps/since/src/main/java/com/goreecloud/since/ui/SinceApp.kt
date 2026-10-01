@@ -805,7 +805,7 @@ private fun DashboardHeroHeader() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (largeText) 108.dp else 132.dp),
+            .height(132.dp),
     ) {
         if (!largeText) {
             DashboardLandscape(
@@ -817,14 +817,18 @@ private fun DashboardHeroHeader() {
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .fillMaxWidth(0.79f),
+                .fillMaxWidth(if (largeText) 1f else 0.79f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
                 modifier = Modifier.semantics { heading() },
                 text = stringResource(R.string.dashboard_title),
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.displayLarge,
+                style = if (largeText) {
+                    MaterialTheme.typography.headlineLarge
+                } else {
+                    MaterialTheme.typography.displayLarge
+                },
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
