@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 1, 2026 capability continuation
+
+A Development candidate on `feat/launcher-hidden-apps-20261001` implements the explicit user-policy side of application visibility: exact profile-qualified hidden-app state, App Drawer and Universal Search suppression, context-menu Hide/Show actions, and a Settings recovery manager. Existing Home/Dock/folder placement is deliberately preserved so hiding is discovery policy rather than destructive workspace mutation.
+
+Still open for this capability: exact-head integration gates, managed-profile/private-profile UI acceptance, package/profile churn, accessibility/large-text/form-factor acceptance, and an explicit versioned backup/restore policy before hidden-app state can enter the portable preference contract.
+
 ## September 30, 2026 interaction-stabilization continuation
 
 Merged PRs #103–#107 now cover the current mainline drawer/Home/profile/Search/performance stabilization tranche: explicit A–Z/Z–A/Most recent/Most frequent sorting, warm User/Work profile paging, stationary drawer long-press actions, threshold-responsive Home paging, secondary-page vertical gestures, exact-profile Work folders with persistence-level isolation, bounded confirmation before publishing suspicious inventory loss from a still-active Android profile, genuine **Movable** Universal Search backed by the existing Room 4 × 1 Search widget, and removal of the redundant first-composition 180–220 ms page-entry animation.
