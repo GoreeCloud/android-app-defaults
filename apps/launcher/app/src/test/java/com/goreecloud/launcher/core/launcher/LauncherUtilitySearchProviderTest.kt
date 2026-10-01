@@ -58,9 +58,11 @@ class LauncherUtilitySearchProviderTest {
 
     @Test
     fun builtInCatalogMarksUtilityAsAutomaticLocalNoRetention() {
-        val registration = LauncherBuiltInSearchProviderRegistry
-            .registrations(emptyList())
-            .single { it.provider.id == LauncherUtilitySearchProvider.PROVIDER_ID }
+        val provider = LauncherUtilitySearchProvider()
+        val registration = LauncherSearchProviderRegistration(
+            provider = provider,
+            metadata = LauncherBuiltInSearchProviderRegistry.metadataFor(provider.id),
+        )
         val option = LauncherSearchProviderUserControlPolicy.optionFor(registration)
 
         assertEquals(LauncherSearchOfflineBehavior.LOCAL_ONLY, registration.metadata.offlineBehavior)
