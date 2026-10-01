@@ -1,5 +1,16 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — opt-in recent searches candidate
+
+- Added a dedicated local Universal Search history repository with an opt-in setting that defaults off.
+- Search text is recorded only after an explicit result or connected-provider action, never while the user is merely typing.
+- History is local-only, newest-first, case-insensitive deduplicated, bounded to 10 queries, and length-limited to 120 normalized characters per entry.
+- Disabling recent searches clears persisted queries; users can also clear history directly while the feature remains enabled.
+- Idle Universal Search can repopulate the field from up to five compact recent-query chips without contacting any provider.
+- Connected-provider execution remains explicit and unchanged; stored history is not supplied to providers automatically.
+
+**Acceptance boundary:** source/JVM Development candidate; fresh exact-head CI/runtime/promotion, representative-device privacy UX, accessibility/large-text/form-factor, and recovery/portable-backup acceptance remain required before integration.
+
 ## October 1, 2026 — local Universal Search Quick answers
 
 - Added a Launcher-owned **Quick answers** provider for arithmetic using `+`, `-`, `×`/`*`, `÷`/`/`, unary signs, and parentheses.
