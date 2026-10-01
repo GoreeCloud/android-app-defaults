@@ -80,6 +80,10 @@ class SincePreferencesRepository(
         .map { values -> values[defaultSortKey] ?: "MANUAL" }
         .distinctUntilChanged()
 
+    val confirmReset: Flow<Boolean> = preferences
+        .map { values -> values[confirmResetKey] ?: true }
+        .distinctUntilChanged()
+
     val onboardingComplete: Flow<Boolean> = preferences
         .map { values ->
             values[onboardingCompleteKey] ?: upgradedInstallationWithoutOnboardingState
