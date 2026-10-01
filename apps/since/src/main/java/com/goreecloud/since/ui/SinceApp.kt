@@ -784,37 +784,25 @@ internal fun DashboardSortControls(
         DashboardSortPreference.LONGEST_CURRENT to R.string.dashboard_sort_longest_current,
     )
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .testTag("dashboard-sort-row"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        options.chunked(2).forEach { rowOptions ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                rowOptions.forEach { (preference, labelRes) ->
-                    FilterChip(
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("dashboard-sort-" + preference.name.lowercase()),
-                        selected = selected == preference,
-                        onClick = { onSelect(preference) },
-                        label = {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(labelRes),
-                                textAlign = TextAlign.Center,
-                            )
-                        },
+        options.forEach { (preference, labelRes) ->
+            FilterChip(
+                modifier = Modifier.testTag("dashboard-sort-" + preference.name.lowercase()),
+                selected = selected == preference,
+                onClick = { onSelect(preference) },
+                label = {
+                    Text(
+                        text = stringResource(labelRes),
+                        textAlign = TextAlign.Center,
                     )
-                }
-                if (rowOptions.size == 1) {
-                    androidx.compose.foundation.layout.Spacer(
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
+                },
+            )
         }
     }
 }
