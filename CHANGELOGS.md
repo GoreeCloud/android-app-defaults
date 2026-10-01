@@ -1,5 +1,18 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since search, sort, and reset-preference candidate
+
+- Expanded device-local Dashboard ordering to the specification set: Manual / created order, Name A–Z, Newest start, Oldest start, and Longest current elapsed, while retaining the existing Recent convenience sort.
+- Made title/note search accent- and case-tolerant without remote suggestions or network access.
+- Persisted the Dashboard sort choice in Preferences DataStore under the specification-aligned `default_sort` key with `MANUAL` as the default.
+- Added the specification-aligned `confirm_reset` preference, defaulting on, with a General Settings toggle.
+- When reset confirmation is on, the required reset editor still collects reset time, optional reason, and note, then presents one final history-preservation confirmation before mutation. Turning the preference off skips only that final confirmation, not the reset editor or validation.
+- Added English/Arabic strings plus JVM and Android coverage for sort behavior, preference persistence, Settings interaction, localization, and both confirmation modes.
+- Added no Room schema migration, network permission, account dependency, background service, or persisted elapsed counter.
+
+**Acceptance boundary:** stacked Development candidate on PR #130. Fresh exact-head Android Development Foundation validation, rendered-evidence review, representative-device acceptance, manual drag/reorder behavior, recovery/signing gates, and broader release qualification remain open.
+
+
 ## September 30, 2026 — Since display preferences candidate
 
 - Added locally persisted **Default display format** and **Show seconds** settings using the existing Since Preferences DataStore.
