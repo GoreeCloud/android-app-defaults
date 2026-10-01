@@ -6347,6 +6347,67 @@ private fun DrawerSearchField(
 }
 
 @Composable
+private fun DrawerFreshnessFilterRow(
+    selected: LauncherDrawerFreshnessFilter,
+    onSelect: (LauncherDrawerFreshnessFilter) -> Unit,
+    secondaryColor: Color,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("launcher-drawer-freshness-filters"),
+        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        LauncherDrawerFreshnessFilter.entries.forEach { filter ->
+            val active = filter == selected
+            Surface(
+                onClick = { onSelect(filter) },
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 44.dp)
+                    .testTag(
+                        "launcher-drawer-freshness-" +
+                            filter.name.lowercase(),
+                    )
+                    .semantics {
+                        contentDescription =
+                            "App filter " + filter.displayName +
+                                if (active) ", selected" else ""
+                    },
+                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                color = if (active) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                } else {
+                    Color.Transparent
+                },
+                border = BorderStroke(
+                    1.dp,
+                    if (active) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.46f)
+                    } else {
+                        secondaryColor.copy(alpha = 0.18f)
+                    },
+                ),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        filter.displayName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (active) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            secondaryColor
+                        },
+                        fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun DrawerProfileTabs(
     pages: List<Pair<LauncherDrawerProfileKind, Int>>,
     selected: LauncherDrawerProfileKind,
