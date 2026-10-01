@@ -4,7 +4,7 @@ component:
   type: application
   id: goreecloud-gallery
   product_name: GoreeCloud Gallery
-  repository: GoreeCloud/gallery
+  repository: GoreeCloud/android-app-defaults
 
 lifecycle: development
 version: "0.8.6-dev"
