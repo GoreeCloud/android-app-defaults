@@ -1782,9 +1782,7 @@ private fun ResetStreakDialog(
             },
             confirmButton = {
                 TextButton(
-                    modifier = Modifier.testTag(
-                    if (confirmReset) "review-reset-streak" else "confirm-reset-streak"
-                ),
+                    modifier = Modifier.testTag("confirm-reset-streak"),
                     onClick = {
                         onConfirm(
                             request.epochMs,
@@ -1903,7 +1901,9 @@ private fun ResetStreakDialog(
         },
         confirmButton = {
             TextButton(
-                modifier = Modifier.testTag("confirm-reset-streak"),
+                modifier = Modifier.testTag(
+                    if (confirmReset) "review-reset-streak" else "confirm-reset-streak"
+                ),
                 onClick = {
                     val errors = mutableListOf<String>()
                     when (
