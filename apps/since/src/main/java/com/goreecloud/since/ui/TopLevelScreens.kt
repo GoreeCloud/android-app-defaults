@@ -277,6 +277,10 @@ internal fun SettingsScreen(
     innerPadding: PaddingValues,
     themePreference: ThemePreference,
     onThemePreferenceChange: (ThemePreference) -> Unit,
+    defaultDisplayFormat: DisplayFormat,
+    onDefaultDisplayFormatChange: (DisplayFormat) -> Unit,
+    showSeconds: Boolean,
+    onShowSecondsChange: (Boolean) -> Unit,
     archivedTrackers: List<TrackerAggregate>,
     restoringTrackerId: String?,
     restoreFailedTrackerId: String?,
@@ -326,6 +330,56 @@ internal fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyLarge,
                 )
+            }
+        }
+
+        item {
+            SettingsSection(title = stringResourceCompat(R.string.settings_general)) {
+                FormatSelector(
+                    title = stringResourceCompat(R.string.settings_default_display_format),
+                    supporting = stringResourceCompat(
+                        R.string.settings_default_display_format_supporting,
+                    ),
+                    selected = defaultDisplayFormat,
+                    enabled = true,
+                    onSelect = onDefaultDisplayFormatChange,
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("settings-show-seconds")
+                        .toggleable(
+                            value = showSeconds,
+                            role = Role.Switch,
+                            onValueChange = onShowSecondsChange,
+                        )
+                        .semantics(mergeDescendants = true) {}
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Text(
+                            text = stringResourceCompat(R.string.settings_show_seconds),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            text = stringResourceCompat(
+                                R.string.settings_show_seconds_supporting,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    Switch(
+                        modifier = Modifier.clearAndSetSemantics {},
+                        checked = showSeconds,
+                        onCheckedChange = null,
+                    )
+                }
             }
         }
 
