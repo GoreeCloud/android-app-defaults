@@ -61,6 +61,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Direct Photos, Albums, Videos, Trash, and Settings navigation.
 - Adaptive Photos timeline grids grouped by Today, Yesterday, and calendar date, with sparse dense-mode groups using a larger presentation lane.
 - Videos browsing uses a featured first card followed by responsive cards with local play/duration affordances, title/date metadata, newest-order **Recently added** wording, and category filters derived only from the current authorized snapshot and Gallery-local Favorites.
+- Mockup-aligned overflow controls on video and album cards with 48dp targets and bounded non-destructive contextual actions.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
 - Album browsing with rounded Raised landscape-cover cards, names, counts, adaptive layout, bounded album-detail browsing, and compact smart-access pills populated only from existing local collections plus the authorized Videos domain.
