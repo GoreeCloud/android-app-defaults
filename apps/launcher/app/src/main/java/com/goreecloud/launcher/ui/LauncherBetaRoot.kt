@@ -685,6 +685,8 @@ fun LauncherBetaRoot(
         (com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction) -> Unit,
     onOpenSearchUri:
         (com.goreecloud.launcher.core.launcher.LauncherOpenUriSearchAction) -> Unit,
+    onCopySearchText:
+        (com.goreecloud.launcher.core.launcher.LauncherCopyTextSearchAction) -> Unit = {},
     onChooseFileSearchRoot: () -> Unit,
     onRemoveFileSearchRoot: (Uri) -> Unit,
     onOpenDocument:
@@ -1325,6 +1327,7 @@ fun LauncherBetaRoot(
                 onLaunchApp = onLaunchApp,
                 onLaunchShortcut = onLaunchSearchShortcut,
                 onOpenSearchUri = onOpenSearchUri,
+                onCopyText = onCopySearchText,
                 onOpenDocument = onOpenDocument,
                 onSearchWithConnectedProvider = onSearchWithConnectedProvider,
                 onNavigate = { destination ->
