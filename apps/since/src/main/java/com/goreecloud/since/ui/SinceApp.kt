@@ -4,10 +4,12 @@ import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -55,6 +57,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -63,6 +66,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -496,7 +502,19 @@ fun SinceApp(
                     shape = MaterialTheme.shapes.large,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                    content = { Text(stringResource(R.string.add_tracker)) },
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "+",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Medium,
+                            )
+                            Text(stringResource(R.string.add_tracker))
+                        }
+                    },
                 )
             }
         },
@@ -654,6 +672,12 @@ private fun Dashboard(
             sort = dashboardSort,
         )
     }
+    val summary = remember(aggregates, dashboardTick, clock) {
+        calculateDashboardSummary(
+            aggregates = aggregates,
+            clock = clock,
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -662,29 +686,14 @@ private fun Dashboard(
             .testTag("dashboard-list"),
         contentPadding = PaddingValues(
             start = 20.dp,
-            top = 24.dp,
+            top = 18.dp,
             end = 20.dp,
-            bottom = if (aggregates.isEmpty()) 32.dp else 112.dp,
+            bottom = if (aggregates.isEmpty()) 32.dp else 116.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    modifier = Modifier.semantics { heading() },
-                    text = stringResource(R.string.dashboard_title),
-                    style = MaterialTheme.typography.displaySmall,
-                )
-                if (aggregates.isNotEmpty()) {
-                    Text(
-                        text = stringResource(R.string.dashboard_empty_message),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-            }
+            DashboardHeroHeader()
         }
 
         if (aggregates.isEmpty()) {
@@ -702,8 +711,10 @@ private fun Dashboard(
                             .testTag("dashboard-search"),
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        label = { Text(stringResource(R.string.dashboard_search)) },
+                        placeholder = { Text(stringResource(R.string.dashboard_search)) },
+                        leadingIcon = { DashboardSearchGlyph() },
                         singleLine = true,
+                        shape = MaterialTheme.shapes.large,
                     )
                     DashboardSortControls(
                         selected = dashboardSort,
@@ -719,6 +730,11 @@ private fun Dashboard(
                     }
                 }
             }
+
+            item {
+                DashboardSummaryRow(summary = summary)
+            }
+
             if (contextualHintsEnabled && !homeContextualHintDismissed) {
                 item {
                     Surface(
@@ -726,7 +742,7 @@ private fun Dashboard(
                             .fillMaxWidth()
                             .testTag("home-contextual-hint"),
                         shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     ) {
                         Row(
@@ -754,6 +770,7 @@ private fun Dashboard(
                     }
                 }
             }
+
             items(
                 items = visibleAggregates,
                 key = { it.tracker.id },
@@ -767,8 +784,150 @@ private fun Dashboard(
                 )
             }
         }
+    }
+}
 
+@Composable
+private fun DashboardHeroHeader() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(132.dp),
+    ) {
+        DashboardLandscape(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(width = 190.dp, height = 112.dp),
+        )
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth(0.79f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                modifier = Modifier.semantics { heading() },
+                text = stringResource(R.string.dashboard_title),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = stringResource(R.string.dashboard_empty_message),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+    }
+}
 
+@Composable
+private fun DashboardLandscape(
+    modifier: Modifier = Modifier,
+) {
+    val backMountain = MaterialTheme.colorScheme.secondaryContainer
+    val frontMountain = MaterialTheme.colorScheme.primaryContainer
+    val lowHill = MaterialTheme.colorScheme.surfaceContainerHigh
+    val sun = MaterialTheme.colorScheme.tertiaryContainer
+    val tree = MaterialTheme.colorScheme.primary
+
+    Canvas(modifier = modifier) {
+        val width = size.width
+        val height = size.height
+
+        drawCircle(
+            color = sun.copy(alpha = 0.56f),
+            radius = width * 0.12f,
+            center = Offset(width * 0.80f, height * 0.19f),
+        )
+
+        val rear = Path().apply {
+            moveTo(width * 0.12f, height * 0.76f)
+            lineTo(width * 0.42f, height * 0.32f)
+            lineTo(width * 0.60f, height * 0.58f)
+            lineTo(width * 0.74f, height * 0.43f)
+            lineTo(width, height * 0.72f)
+            lineTo(width, height)
+            lineTo(width * 0.12f, height)
+            close()
+        }
+        drawPath(rear, backMountain.copy(alpha = 0.82f))
+
+        val front = Path().apply {
+            moveTo(0f, height * 0.82f)
+            lineTo(width * 0.28f, height * 0.56f)
+            lineTo(width * 0.50f, height * 0.75f)
+            lineTo(width * 0.72f, height * 0.61f)
+            lineTo(width, height * 0.82f)
+            lineTo(width, height)
+            lineTo(0f, height)
+            close()
+        }
+        drawPath(front, frontMountain.copy(alpha = 0.92f))
+
+        val foreground = Path().apply {
+            moveTo(0f, height * 0.93f)
+            cubicTo(
+                width * 0.24f,
+                height * 0.78f,
+                width * 0.56f,
+                height * 0.82f,
+                width,
+                height * 0.95f,
+            )
+            lineTo(width, height)
+            lineTo(0f, height)
+            close()
+        }
+        drawPath(foreground, lowHill)
+
+        fun drawPine(centerX: Float, baseY: Float, scale: Float) {
+            val pine = Path().apply {
+                moveTo(centerX, baseY - 38f * scale)
+                lineTo(centerX - 11f * scale, baseY - 13f * scale)
+                lineTo(centerX - 4f * scale, baseY - 13f * scale)
+                lineTo(centerX - 14f * scale, baseY + 7f * scale)
+                lineTo(centerX + 14f * scale, baseY + 7f * scale)
+                lineTo(centerX + 4f * scale, baseY - 13f * scale)
+                lineTo(centerX + 11f * scale, baseY - 13f * scale)
+                close()
+            }
+            drawPath(pine, tree.copy(alpha = 0.84f))
+            drawLine(
+                color = tree,
+                start = Offset(centerX, baseY + 5f * scale),
+                end = Offset(centerX, baseY + 16f * scale),
+                strokeWidth = 2.2f * scale,
+                cap = StrokeCap.Round,
+            )
+        }
+
+        drawPine(width * 0.70f, height * 0.78f, 0.78f)
+        drawPine(width * 0.83f, height * 0.72f, 0.95f)
+        drawPine(width * 0.91f, height * 0.80f, 0.66f)
+    }
+}
+
+@Composable
+private fun DashboardSearchGlyph() {
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
+    Canvas(modifier = Modifier.size(24.dp)) {
+        val strokeWidth = 2.2.dp.toPx()
+        val center = Offset(size.width * 0.42f, size.height * 0.42f)
+        val radius = size.minDimension * 0.27f
+        drawCircle(
+            color = color,
+            radius = radius,
+            center = center,
+            style = Stroke(width = strokeWidth),
+        )
+        drawLine(
+            color = color,
+            start = Offset(center.x + radius * 0.72f, center.y + radius * 0.72f),
+            end = Offset(size.width * 0.82f, size.height * 0.82f),
+            strokeWidth = strokeWidth,
+            cap = StrokeCap.Round,
+        )
     }
 }
 
@@ -794,15 +953,152 @@ internal fun DashboardSortControls(
     ) {
         options.forEach { (preference, labelRes) ->
             FilterChip(
-                modifier = Modifier.testTag("dashboard-sort-" + preference.name.lowercase()),
+                modifier = Modifier
+                    .heightIn(min = 46.dp)
+                    .testTag("dashboard-sort-" + preference.name.lowercase()),
                 selected = selected == preference,
                 onClick = { onSelect(preference) },
+                shape = MaterialTheme.shapes.large,
                 label = {
                     Text(
                         text = stringResource(labelRes),
                         textAlign = TextAlign.Center,
+                        fontWeight = if (selected == preference) {
+                            FontWeight.SemiBold
+                        } else {
+                            FontWeight.Normal
+                        },
                     )
                 },
+            )
+        }
+    }
+}
+
+private data class DashboardSummaryUi(
+    val totalTrackers: Int,
+    val activeStreaks: Int,
+    val longestStreakDays: Long,
+)
+
+private fun calculateDashboardSummary(
+    aggregates: List<TrackerAggregate>,
+    clock: Clock,
+): DashboardSummaryUi {
+    val streaks = aggregates.filter { it.tracker.kind == TrackerKind.STREAK }
+    val engine = TimeEngine(clock)
+    val now = clock.instant()
+    val longestDays = streaks
+        .flatMap { it.periods }
+        .mapNotNull { period ->
+            val end = period.endEpochMs?.let(Instant::ofEpochMilli) ?: now
+            when (
+                val elapsed = engine.elapsedBetween(
+                    start = Instant.ofEpochMilli(period.startEpochMs),
+                    end = end,
+                    zone = ZoneId.of(period.startZoneId),
+                    format = DisplayFormat.DAYS,
+                )
+            ) {
+                ElapsedResult.ClockInconsistency -> null
+                is ElapsedResult.Value -> elapsed.breakdown.days
+            }
+        }
+        .maxOrNull()
+        ?: 0L
+
+    return DashboardSummaryUi(
+        totalTrackers = aggregates.size,
+        activeStreaks = streaks.size,
+        longestStreakDays = longestDays,
+    )
+}
+
+@Composable
+private fun DashboardSummaryRow(
+    summary: DashboardSummaryUi,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("dashboard-summary"),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        DashboardStatCard(
+            modifier = Modifier.weight(1f),
+            glyph = "▦",
+            label = stringResource(R.string.dashboard_total_trackers),
+            value = summary.totalTrackers.toString(),
+        )
+        DashboardStatCard(
+            modifier = Modifier.weight(1f),
+            glyph = "◆",
+            label = stringResource(R.string.dashboard_active_streaks),
+            value = summary.activeStreaks.toString(),
+        )
+        DashboardStatCard(
+            modifier = Modifier.weight(1f),
+            glyph = "★",
+            label = stringResource(R.string.dashboard_longest_streak),
+            value = stringResource(
+                R.string.dashboard_days_value,
+                summary.longestStreakDays,
+            ),
+            emphasized = true,
+        )
+    }
+}
+
+@Composable
+private fun DashboardStatCard(
+    modifier: Modifier,
+    glyph: String,
+    label: String,
+    value: String,
+    emphasized: Boolean = false,
+) {
+    Surface(
+        modifier = modifier.heightIn(min = 92.dp),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Surface(
+                modifier = Modifier.size(34.dp),
+                shape = MaterialTheme.shapes.small,
+                color = if (emphasized) {
+                    MaterialTheme.colorScheme.tertiaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primaryContainer
+                },
+                contentColor = if (emphasized) {
+                    MaterialTheme.colorScheme.onTertiaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                },
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = glyph,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelSmall,
+            )
+            Text(
+                text = value,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
             )
         }
     }
@@ -816,9 +1112,9 @@ private fun DashboardEmptyState(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
@@ -827,8 +1123,8 @@ private fun DashboardEmptyState(
             Surface(
                 modifier = Modifier.size(64.dp),
                 shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
                 Image(
                     painter = painterResource(R.drawable.ic_launcher_foreground),
@@ -840,6 +1136,7 @@ private fun DashboardEmptyState(
                 text = stringResource(R.string.dashboard_empty_status),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
             )
             Text(
                 text = stringResource(R.string.dashboard_empty_message),
@@ -866,11 +1163,6 @@ private fun TrackerCard(
     onClick: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
-    val compactFloatingActionSafeEnd = if (LocalConfiguration.current.screenWidthDp < 360) {
-        96.dp
-    } else {
-        0.dp
-    }
     val elapsed = remember(aggregate, tick, clock) {
         TimeEngine(clock).elapsedSince(
             startEpochMs = currentPeriod.startEpochMs,
@@ -878,6 +1170,25 @@ private fun TrackerCard(
             format = aggregate.tracker.defaultDisplayFormat,
         )
     }
+    val startedText = remember(currentPeriod.startEpochMs, currentPeriod.startZoneId) {
+        DateTimeFormatter
+            .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+            .format(
+                Instant
+                    .ofEpochMilli(currentPeriod.startEpochMs)
+                    .atZone(ZoneId.of(currentPeriod.startZoneId))
+            )
+    }
+    val tip = aggregate.tracker.note
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: stringResource(
+            if (aggregate.tracker.kind == TrackerKind.STREAK) {
+                R.string.dashboard_tip_streak
+            } else {
+                R.string.dashboard_tip_event
+            }
+        )
 
     Card(
         modifier = Modifier
@@ -885,49 +1196,105 @@ private fun TrackerCard(
             .semantics(mergeDescendants = true) {},
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = onClick,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = aggregate.tracker.title,
-                    style = MaterialTheme.typography.titleLarge,
-                )
                 Surface(
-                    modifier = Modifier.padding(end = compactFloatingActionSafeEnd),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier.size(58.dp),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = if (aggregate.tracker.kind == TrackerKind.STREAK) "↟" else "◇",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
                 ) {
                     Text(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        text = trackerKindLabel(aggregate.tracker.kind),
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        style = MaterialTheme.typography.labelMedium,
+                        text = aggregate.tracker.title,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.dashboard_started,
+                            startedText,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Surface(
+                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            text = trackerKindLabel(aggregate.tracker.kind),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    Text(
+                        text = "⋮",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                 }
             }
 
-            Text(
-                text = stringResource(R.string.elapsed_label),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelMedium,
-            )
-            Text(
-                text = elapsedSummary(elapsed, showSeconds),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.headlineSmall,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.elapsed_label),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        text = elapsedSummary(elapsed, showSeconds),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Text(
+                    text = "›",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.displaySmall,
+                )
+            }
 
             aggregate.goal?.let { goal ->
                 val estimate = remember(aggregate, tick, clock) {
@@ -939,12 +1306,13 @@ private fun TrackerCard(
                     )
                 }
                 Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.72f),
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
                     ) {
                         Text(
                             text = stringResource(
@@ -981,9 +1349,33 @@ private fun TrackerCard(
                     }
                 }
             }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "✦",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = tip,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
         }
     }
 }
+
 
 @Composable
 private fun TrackerDetailsScreen(
