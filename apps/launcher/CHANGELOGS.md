@@ -1,5 +1,16 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add local App Drawer favorites candidate
+
+A stacked Development feature candidate adds profile-qualified App Drawer favorites without introducing new permissions, network access, or another workspace authority. Long-pressing an application in Apps can now **Pin in Apps** or **Unpin in Apps**. Pins use the existing profile-qualified Launcher workspace key, so a Work-profile package and a same-package User app remain independent.
+
+The App Drawer sort menu gains **Pinned first**. In that mode, pinned applications sort ahead of unpinned applications and folders, while each group retains deterministic normalized-label and stable-key ordering. Folder membership, Home placement, Dock placement, launch history, and existing A–Z / Z–A / Most recent / Most frequent modes are unchanged.
+
+Pinned state is device-local Launcher presentation metadata stored in DataStore and intentionally remains outside the strict portable-preference v1 contract. Focused JVM coverage verifies profile-qualified persistence and pinned-first ordering.
+
+**Acceptance boundary:** stacked Development candidate based on the active runtime-gate parent. It must be rebased/restacked onto an accepted parent and pass fresh exact-head Launcher build/JVM/lint/schema plus restored API 36 runtime gates before integration. Broader categories, tags, collections, custom ordering, portability policy, accessibility, and representative-device acceptance remain open.
+
+
 ## October 1, 2026 — restore monorepo Android 16 Launcher runtime gates
 
 A post-consolidation audit found that the migrated-app workflow still ran Launcher source guards, JVM tests, lint, schema verification, and APK assembly, but no longer executed the source-controlled Launcher Android instrumentation suite or the existing transition-performance instrumentation.
