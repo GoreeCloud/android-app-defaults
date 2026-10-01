@@ -10,7 +10,7 @@ This document records the source-controlled readiness model for GoreeCloud Galle
 - Current packaged acceptance line: `1.0.0-gc.7`
 - Current maintained reconstruction/test patch line: `gc.8`
 - Application ID: `com.goreecloud.gallery`
-- Repository: `GoreeCloud/goreecloud-gallery`
+- Repository: `GoreeCloud/android-app-defaults` (`apps/gallery/`)
 - Development model: GoreeCloud-maintained open-source Android application based on Fossify Gallery
 - License boundary: GNU GPL v3
 - User-facing design language: Glaze UI
