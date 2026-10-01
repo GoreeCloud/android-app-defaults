@@ -1808,14 +1808,22 @@ class GalleryActivity : Activity() {
     }
 
     private fun albumQuickAccessIcon(album: AlbumPresentation): Int? =
-        when (GalleryAlbumQuickAccessPolicy.priority(album.name, album.isFavorites)) {
-            0 -> R.drawable.ic_gallery_favorite
-            1 -> R.drawable.ic_gallery_camera
-            2 -> R.drawable.ic_gallery_nav_photos
-            3 -> R.drawable.ic_gallery_download
-            4 -> R.drawable.ic_gallery_screen_recording
-            else -> null
+        when (GalleryAlbumQuickAccessPolicy.kind(album.name, album.isFavorites)) {
+            GalleryAlbumQuickAccessKind.FAVORITES -> R.drawable.ic_gallery_favorite
+            GalleryAlbumQuickAccessKind.CAMERA -> R.drawable.ic_gallery_camera
+            GalleryAlbumQuickAccessKind.SCREENSHOTS -> R.drawable.ic_gallery_nav_photos
+            GalleryAlbumQuickAccessKind.DOWNLOADS -> R.drawable.ic_gallery_download
+            GalleryAlbumQuickAccessKind.SCREEN_RECORDINGS -> R.drawable.ic_gallery_screen_recording
+            null -> null
         }
+
+    private fun albumBadgeIcon(album: AlbumPresentation): Int =
+        albumQuickAccessIcon(album)
+            ?: if (album.cover.mimeType.startsWith("video/")) {
+                R.drawable.ic_gallery_nav_videos
+            } else {
+                R.drawable.ic_gallery_nav_albums
+            }
 
     private fun albumQuickAccessChip(
         label: String,
@@ -1926,7 +1934,38 @@ class GalleryActivity : Activity() {
             contentDescription = "${album.name}, ${itemCountLabel(album.count)}"
             setOnClickListener { openAlbumPresentation(album) }
             addView(
-                image,
+                FrameLayout(context).apply {
+                    addView(
+                        image,
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                        ),
+                    )
+                    addView(
+                        ImageView(context).apply {
+                            setImageResource(albumBadgeIcon(album))
+                            imageTintList = ColorStateList.valueOf(primaryTextColor())
+                            scaleType = ImageView.ScaleType.CENTER_INSIDE
+                            setPadding(dp(10), dp(10), dp(10), dp(10))
+                            background = GalleryGlazeSurfaces.drawable(
+                                context,
+                                GalleryGlazeSurfaces.Role.CHROME,
+                                ALBUM_BADGE_DP / 2,
+                            )
+                            elevation = dp(2).toFloat()
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                        FrameLayout.LayoutParams(
+                            dp(ALBUM_BADGE_DP),
+                            dp(ALBUM_BADGE_DP),
+                        ).apply {
+                            gravity = Gravity.BOTTOM or Gravity.START
+                            marginStart = dp(10)
+                            bottomMargin = dp(10)
+                        },
+                    )
+                },
                 LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ((tileWidth * ALBUM_COVER_ASPECT_HEIGHT).toInt()).coerceAtLeast(dp(92)),
@@ -5040,6 +5079,7 @@ class GalleryActivity : Activity() {
         const val ALBUM_THUMBNAIL_DP = 320
         const val ALBUM_QUICK_ACCESS_LIMIT = 4
         const val ALBUM_COVER_ASPECT_HEIGHT = 0.66f
+        const val ALBUM_BADGE_DP = 44
         const val VIDEO_CARD_GAP_DP = 10
         const val VIEWER_THUMBNAIL_DP = 720
         const val VIEWER_SWIPE_DISTANCE_DP = 56
