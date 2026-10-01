@@ -1,5 +1,13 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — primary-surface chrome cleanup
+
+### Changed
+- Removed the persistent Group/View row from Photos and Videos.
+- Kept Search and Sort as the primary header actions to match the supplied mockups more closely.
+- Preserved grouping and view-density in Settings > Appearance.
+- Kept Videos category filters unchanged.
+
 ## October 1, 2026 — mockup-aligned smart-filter iconography
 
 ### Changed
