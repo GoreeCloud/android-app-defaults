@@ -5,6 +5,8 @@ import android.app.AlertDialog
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.app.role.RoleManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.LauncherActivityInfo
@@ -61,6 +63,7 @@ import com.goreecloud.launcher.core.launcher.LauncherAppsRepository
 import com.goreecloud.launcher.core.launcher.LauncherBuiltInWallpaperId
 import com.goreecloud.launcher.core.launcher.LauncherBuiltInWallpapers
 import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
+import com.goreecloud.launcher.core.launcher.LauncherCopyTextSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.LauncherExperiencePreferences
@@ -1378,6 +1381,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onOpenSearchUri = ::openSearchUri,
+                            onCopySearchText = ::copySearchText,
                             onOpenDocument = ::openDocument,
                             onSearchWithConnectedProvider = ::searchWithConnectedProvider,
                             onResetSearchProviderPreferences = {
@@ -2518,6 +2522,18 @@ class MainActivity : ComponentActivity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun copySearchText(action: LauncherCopyTextSearchAction) {
+        val clipboard = getSystemService(ClipboardManager::class.java)
+        clipboard.setPrimaryClip(
+            ClipData.newPlainText("Launcher search result", action.text),
+        )
+        Toast.makeText(
+            this,
+            "Result copied.",
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
     private fun openSearchUri(action: LauncherOpenUriSearchAction) {
