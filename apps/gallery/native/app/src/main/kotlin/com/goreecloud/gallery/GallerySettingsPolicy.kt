@@ -28,6 +28,9 @@ enum class GalleryGroupingMode(
     NONE("none", "None"),
     ;
 
+    fun next(): GalleryGroupingMode =
+        entries[(ordinal + 1) % entries.size]
+
     companion object {
         fun fromStored(value: String?): GalleryGroupingMode =
             entries.firstOrNull { it.storedValue == value } ?: DAY
@@ -61,6 +64,9 @@ enum class GalleryViewDensity(
 
     fun mediaGridColumns(widthDp: Int): Int =
         (GalleryGlazeContract.gridColumns(widthDp) + columnAdjustment).coerceAtLeast(2)
+
+    fun next(): GalleryViewDensity =
+        entries[(ordinal + 1) % entries.size]
 
     companion object {
         fun fromStored(value: String?): GalleryViewDensity =
