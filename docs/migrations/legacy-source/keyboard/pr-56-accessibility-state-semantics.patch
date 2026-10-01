@@ -1,0 +1,138 @@
+# Preserved legacy source patch: GoreeCloud/keyboard PR #56
+# Title: Expose explicit Keyboard accessibility state semantics
+# Source repository: GoreeCloud/keyboard
+# Base revision: e77ee4513c7e1d8d9baa493922e4c457b3251a5a
+# Head revision: da77a9ae4c39ee4dbb4ee1fafac5d9f17adf3410
+# Original PR: https://github.com/GoreeCloud/keyboard/pull/56
+# Disposition: explicit virtual-node state-description semantics are not present verbatim in the cutover; preserve for current-runtime accessibility reconciliation.
+
+diff --git a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
+--- a/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
++++ b/android/app/src/androidTest/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityRuntimeTest.kt
+@@ -127,20 +127,48 @@ class KeyboardAccessibilityRuntimeTest {
+     @Test
+     fun selectedVirtualStateTracksShiftAndEmojiCategoryPresentation() {
+         val view = createRenderedKeyboard()
++        var targets = view.accessibilityTargets()
++        var shift = targets.first { it.label == "Shift" }
++        var provider = view.accessibilityNodeProvider
++        assertNotNull("ExploreByTouchHelper must expose a platform node provider", provider)
++        var shiftNode = provider!!.createAccessibilityNodeInfo(shift.id)
++        assertNotNull("Shift virtual node must be creatable", shiftNode)
++        assertEquals(
++            "Unshifted state must be available without relying on selection visuals",
++            "Off",
++            shiftNode!!.stateDescription?.toString(),
++        )
++
+         view.setShifted(true)
+         render(view)
+ 
+-        var targets = view.accessibilityTargets()
+-        val shift = targets.first { it.label == "Shift" }
++        targets = view.accessibilityTargets()
++        shift = targets.first { it.label == "Shift" }
+         assertTrue("Shift virtual node must expose selected state", shift.selected)
+         assertTrue("Shifted text keys must expose rendered uppercase labels", targets.any { it.label == "Q" })
++        provider = view.accessibilityNodeProvider
++        shiftNode = provider!!.createAccessibilityNodeInfo(shift.id)
++        assertEquals(
++            "Shifted state must be explicitly described",
++            "On",
++            shiftNode!!.stateDescription?.toString(),
++        )
+ 
+         view.setLayer(KeyboardLayer.EMOJI)
+         render(view)
+         targets = view.accessibilityTargets()
+-        assertTrue(
++        val selectedCategories = targets.filter { it.selected && it.label.endsWith(" emoji") }
++        assertEquals(
+             "Exactly one ordinary emoji category should expose selected state initially",
+-            targets.count { it.selected && it.label.endsWith(" emoji") } == 1,
++            1,
++            selectedCategories.size,
++        )
++        val selectedCategoryNode = view.accessibilityNodeProvider!!
++            .createAccessibilityNodeInfo(selectedCategories.single().id)
++        assertEquals(
++            "Selected emoji category must expose a textual state description",
++            "Selected",
++            selectedCategoryNode!!.stateDescription?.toString(),
+         )
+     }
+ 
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardAccessibilityDelegate.kt
+@@ -63,6 +63,7 @@ internal class KeyboardAccessibilityDelegate(
+         node.isFocusable = true
+         node.isClickable = true
+         node.isSelected = target.selected
++        node.stateDescription = stateDescriptionFor(target)
+         node.addAction(AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK)
+ 
+         val alternates = alternatesFor(target)
+@@ -120,6 +121,14 @@ internal class KeyboardAccessibilityDelegate(
+         invalidateRoot()
+     }
+ 
++    private fun stateDescriptionFor(target: KeyboardAccessibilityTarget): CharSequence? = when {
++        target.label == "Shift" -> keyboardView.context.getString(
++            if (target.selected) R.string.accessibility_state_on else R.string.accessibility_state_off,
++        )
++        target.selected -> keyboardView.context.getString(R.string.accessibility_state_selected)
++        else -> null
++    }
++
+     private fun alternatesFor(target: KeyboardAccessibilityTarget): List<String> {
+         if (emojiSearchKeyboardIsActive()) return emptyList()
+         return KeyAlternates.forKey(target.label).take(alternateActionIds.size)
+
+diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -4,6 +4,10 @@
+     <string name="ime_name">GoreeCloud Keyboard</string>
+     <string name="subtype_en_us">English (United States)</string>
+ 
++    <string name="accessibility_state_on">On</string>
++    <string name="accessibility_state_off">Off</string>
++    <string name="accessibility_state_selected">Selected</string>
++
+     <string name="portable_preferences_title">Portable preference</string>
+     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>
+     <string name="portable_preferences_current_category">Current category: %1$s</string>
+
+diff --git a/docs/accessibility-state-semantics.md b/docs/accessibility-state-semantics.md
+--- a/docs/accessibility-state-semantics.md
++++ b/docs/accessibility-state-semantics.md
+@@ -0,0 +1,26 @@
++# Keyboard accessibility state semantics
++
++Status: **Development accessibility-hardening evidence**
++
++## Purpose
++
++GoreeCloud Keyboard renders its key grid and emoji category strip as custom-drawn controls and exposes them through `ExploreByTouchHelper` virtual accessibility nodes. Stateful controls must communicate their current state without relying only on visual selection.
++
++## Implemented boundary
++
++The native virtual-node delegate now exposes localized textual state descriptions for the stateful controls already represented by the rendered keyboard:
++
++- Shift exposes `On` when shifted and `Off` when not shifted.
++- The currently selected emoji category exposes `Selected` while retaining the existing Android selected-state semantic.
++
++The implementation does not inspect editor contents, typed text, clipboard data, suggestion history, network data, or hidden input state. Existing click and alternate-character actions continue to route through the normal Keyboard listener path.
++
++## Validation
++
++Android instrumentation coverage exercises the actual platform accessibility-node provider and verifies Shift `Off`/`On` state descriptions and `Selected` state on the current emoji category.
++
++Exact-head repository CI remains the source/runtime validation authority for this Development candidate.
++
++## Authority and non-claims
++
++This is native accessibility semantic hardening, not human assistive-technology acceptance. It does not establish TalkBack, Switch Access, Voice Access, Touch Assistance, large-text, RTL/localization, phone/tablet/foldable, physical-device, latency/performance, Privacy Shield, Wardveil Security, Release Candidate, or Stable acceptance.
+

@@ -2,6 +2,7 @@ package com.goreecloud.launcher.ui
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import com.goreecloud.launcher.core.launcher.LauncherHomePageTransition
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
 import org.junit.Assert.assertEquals
@@ -109,6 +110,423 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun firstComposedHomePageSnapsWithoutEntryAnimation() {
+        assertFalse(
+            shouldAnimateHomePageEntry(
+                hasRendered = false,
+                previousTransitionKey = "home:0",
+                transitionKey = "home:secondary",
+                transition = LauncherHomePageTransition.SLIDE,
+            ),
+        )
+    }
+
+    @Test
+    fun actualPageKeyChangeStillUsesConfiguredTransition() {
+        assertTrue(
+            shouldAnimateHomePageEntry(
+                hasRendered = true,
+                previousTransitionKey = "home:secondary",
+                transitionKey = "home:tertiary",
+                transition = LauncherHomePageTransition.SLIDE,
+            ),
+        )
+    }
+
+    @Test
+    fun transitionPreferenceChangeDoesNotReplayCurrentPageEntry() {
+        assertFalse(
+            shouldAnimateHomePageEntry(
+                hasRendered = true,
+                previousTransitionKey = "home:secondary",
+                transitionKey = "home:secondary",
+                transition = LauncherHomePageTransition.FADE,
+            ),
+        )
+        assertFalse(
+            shouldAnimateHomePageEntry(
+                hasRendered = true,
+                previousTransitionKey = "home:secondary",
+                transitionKey = "home:tertiary",
+                transition = LauncherHomePageTransition.NONE,
+            ),
+        )
+    }
+
+    @Test
+    fun selectedHomePageIdentityResolvesOnlyKnownRoomPages() {
+        val primary = WorkspaceRenderedHomePage(
+            pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
+            appKeys = emptyList(),
+            appPlacements = emptyList(),
+            folderPlacements = emptyList(),
+            widgetPlacements = emptyList(),
+            unsupportedItemCount = 0,
+        )
+        val secondary = primary.copy(pageId = "home:secondary")
+
+        assertEquals(
+            "home:secondary",
+            resolvedHomePageId(
+                selectedHomePageId = "home:secondary",
+                pages = listOf(primary, secondary),
+            ),
+        )
+        assertEquals(
+            WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            resolvedHomePageId(
+                selectedHomePageId = "home:missing",
+                pages = listOf(primary, secondary),
+            ),
+        )
+        assertEquals(
+            WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            resolvedHomePageId(
+                selectedHomePageId = null,
+                pages = listOf(primary, secondary),
+            ),
+        )
+    }
+
+    @Test
+    fun stableHomeRootSelectsOnlyKnownSecondaryPages() {
+        val primary = WorkspaceRenderedHomePage(
+            pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
+            appKeys = emptyList(),
+            appPlacements = emptyList(),
+            folderPlacements = emptyList(),
+            widgetPlacements = emptyList(),
+            unsupportedItemCount = 0,
+        )
+        val secondary = primary.copy(pageId = "home:secondary", rank = 1)
+
+        assertEquals(
+            secondary,
+            selectedSecondaryHomePage(
+                selectedHomePageId = secondary.pageId,
+                pages = listOf(primary, secondary),
+            ),
+        )
+        assertNull(
+            selectedSecondaryHomePage(
+                selectedHomePageId = primary.pageId,
+                pages = listOf(primary, secondary),
+            ),
+        )
+        assertNull(
+            selectedSecondaryHomePage(
+                selectedHomePageId = "home:missing",
+                pages = listOf(primary, secondary),
+            ),
+        )
+    }
+
+    @Test
+    fun unifiedHomePagerResolvesKnownSelectionAndFailsClosed() {
+        val primary = WorkspaceRenderedHomePage(
+            pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
+            appKeys = emptyList(),
+            appPlacements = emptyList(),
+            folderPlacements = emptyList(),
+            widgetPlacements = emptyList(),
+            unsupportedItemCount = 0,
+        )
+        val secondary = primary.copy(pageId = "home:secondary", rank = 1)
+        val tertiary = primary.copy(pageId = "home:tertiary", rank = 2)
+        val pages = listOf(primary, secondary, tertiary)
+
+        assertEquals(2, launcherHomePagerSelectedIndex("home:tertiary", pages))
+        assertEquals(0, launcherHomePagerSelectedIndex("home:missing", pages))
+        assertEquals(0, launcherHomePagerSelectedIndex(null, pages))
+    }
+
+    @Test
+    fun unifiedHomePagerBoundaryActionsOnlyFireOutwardFromOuterPages() {
+        assertEquals(
+            LauncherHomePagerBoundarySwipe.RIGHT,
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 0,
+                pageCount = 3,
+                horizontalDistancePx = 80f,
+                verticalDistancePx = 4f,
+                minimumDistancePx = 56f,
+            ),
+        )
+        assertEquals(
+            LauncherHomePagerBoundarySwipe.LEFT,
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 2,
+                pageCount = 3,
+                horizontalDistancePx = -80f,
+                verticalDistancePx = 4f,
+                minimumDistancePx = 56f,
+            ),
+        )
+        assertNull(
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 1,
+                pageCount = 3,
+                horizontalDistancePx = 90f,
+                verticalDistancePx = 4f,
+                minimumDistancePx = 56f,
+            ),
+        )
+        assertNull(
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 0,
+                pageCount = 3,
+                horizontalDistancePx = -90f,
+                verticalDistancePx = 4f,
+                minimumDistancePx = 56f,
+            ),
+        )
+    }
+
+    @Test
+    fun unifiedHomePagerBoundaryActionsRejectShortOrVerticalGestures() {
+        assertNull(
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 0,
+                pageCount = 3,
+                horizontalDistancePx = 40f,
+                verticalDistancePx = 2f,
+                minimumDistancePx = 56f,
+            ),
+        )
+        assertNull(
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 2,
+                pageCount = 3,
+                horizontalDistancePx = -80f,
+                verticalDistancePx = 76f,
+                minimumDistancePx = 56f,
+            ),
+        )
+        assertNull(
+            launcherHomePagerBoundarySwipe(
+                startPageIndex = 0,
+                pageCount = 1,
+                horizontalDistancePx = 80f,
+                verticalDistancePx = 0f,
+                minimumDistancePx = 56f,
+            ),
+        )
+    }
+
+    @Test
+    fun unifiedHomePagerKeepsOnlyOneAdjacentPageWarm() {
+        assertEquals(0, launcherHomeBeyondViewportPageCount(0))
+        assertEquals(0, launcherHomeBeyondViewportPageCount(1))
+        assertEquals(1, launcherHomeBeyondViewportPageCount(2))
+        assertEquals(1, launcherHomeBeyondViewportPageCount(8))
+    }
+
+    @Test
+    fun unifiedPagerOwnsPrimaryHorizontalPagingWithoutReplayingEntryTransition() {
+        assertFalse(
+            primaryHomeShouldHandleHorizontalPaging(
+                contentOnly = false,
+                pagingHostedExternally = true,
+            ),
+        )
+        assertTrue(
+            primaryHomeShouldHandleHorizontalPaging(
+                contentOnly = false,
+                pagingHostedExternally = false,
+            ),
+        )
+
+        val primary = WorkspaceRenderedHomePage(
+            pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
+            appKeys = emptyList(),
+            appPlacements = emptyList(),
+            folderPlacements = emptyList(),
+            widgetPlacements = emptyList(),
+            unsupportedItemCount = 0,
+        )
+        val secondary = primary.copy(pageId = "home:secondary", rank = 1)
+        val pages = listOf(primary, secondary)
+
+        assertEquals(
+            WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            primaryHomeTransitionKey(
+                selectedHomePageId = secondary.pageId,
+                pages = pages,
+                pagingHostedExternally = true,
+            ),
+        )
+        assertEquals(
+            secondary.pageId,
+            primaryHomeTransitionKey(
+                selectedHomePageId = secondary.pageId,
+                pages = pages,
+                pagingHostedExternally = false,
+            ),
+        )
+    }
+
+    @Test
+    fun primaryContentOnlyModeSuppressesPersistentChrome() {
+        assertFalse(primaryHomeShouldRenderFixedSearch(contentOnly = true, requested = true))
+        assertFalse(
+            primaryHomeShouldReservePageIndicator(
+                contentOnly = true,
+                pageCount = 3,
+                requested = true,
+            ),
+        )
+        assertFalse(
+            primaryHomeShouldRenderDock(
+                contentOnly = true,
+                dockAppCount = 5,
+                activeDrag = true,
+            ),
+        )
+        assertFalse(primaryHomeShouldHandleHorizontalPaging(contentOnly = true))
+    }
+
+    @Test
+    fun primaryFullSurfaceKeepsRequestedPersistentChrome() {
+        assertTrue(primaryHomeShouldRenderFixedSearch(contentOnly = false, requested = true))
+        assertFalse(primaryHomeShouldRenderFixedSearch(contentOnly = false, requested = false))
+        assertTrue(
+            primaryHomeShouldReservePageIndicator(
+                contentOnly = false,
+                pageCount = 3,
+                requested = true,
+            ),
+        )
+        assertFalse(
+            primaryHomeShouldReservePageIndicator(
+                contentOnly = false,
+                pageCount = 1,
+                requested = true,
+            ),
+        )
+        assertTrue(
+            primaryHomeShouldRenderDock(
+                contentOnly = false,
+                dockAppCount = 0,
+                activeDrag = true,
+            ),
+        )
+        assertFalse(
+            primaryHomeShouldRenderDock(
+                contentOnly = false,
+                dockAppCount = 0,
+                activeDrag = false,
+            ),
+        )
+        assertTrue(primaryHomeShouldHandleHorizontalPaging(contentOnly = false))
+    }
+
+    @Test
+    fun secondaryPagerWarmsAtMostOneAdjacentPage() {
+        assertEquals(0, secondaryHomeBeyondViewportPageCount(0))
+        assertEquals(0, secondaryHomeBeyondViewportPageCount(1))
+        assertEquals(1, secondaryHomeBeyondViewportPageCount(2))
+        assertEquals(1, secondaryHomeBeyondViewportPageCount(6))
+    }
+
+    @Test
+    fun externallyHostedDockSuppressesPageLocalDockAndBottomInset() {
+        assertFalse(
+            primaryHomeShouldRenderDock(
+                contentOnly = false,
+                dockAppCount = 5,
+                activeDrag = true,
+                dockHostedExternally = true,
+            ),
+        )
+        assertFalse(
+            primaryHomeShouldOwnBottomInset(
+                contentOnly = false,
+                dockHostedExternally = true,
+            ),
+        )
+        assertFalse(
+            secondaryHomeShouldRenderDock(
+                contentOnly = false,
+                dockAppCount = 5,
+                dockHostedExternally = true,
+            ),
+        )
+        assertFalse(
+            secondaryHomeShouldOwnBottomInset(
+                contentOnly = false,
+                dockHostedExternally = true,
+            ),
+        )
+    }
+
+    @Test
+    fun pageLocalDockRetainsExistingBottomInsetByDefault() {
+        assertTrue(
+            primaryHomeShouldOwnBottomInset(
+                contentOnly = false,
+                dockHostedExternally = false,
+            ),
+        )
+        assertTrue(
+            secondaryHomeShouldOwnBottomInset(
+                contentOnly = false,
+                dockHostedExternally = false,
+            ),
+        )
+    }
+
+    @Test
+    fun secondaryContentOnlyModeSuppressesPersistentChrome() {
+        assertFalse(
+            secondaryHomeShouldRenderPageIndicator(
+                contentOnly = true,
+                requested = true,
+                pageCount = 3,
+            ),
+        )
+        assertFalse(
+            secondaryHomeShouldRenderDock(
+                contentOnly = true,
+                dockAppCount = 5,
+            ),
+        )
+    }
+
+    @Test
+    fun secondaryFullSurfaceKeepsRequestedPersistentChrome() {
+        assertTrue(
+            secondaryHomeShouldRenderPageIndicator(
+                contentOnly = false,
+                requested = true,
+                pageCount = 3,
+            ),
+        )
+        assertFalse(
+            secondaryHomeShouldRenderPageIndicator(
+                contentOnly = false,
+                requested = true,
+                pageCount = 1,
+            ),
+        )
+        assertTrue(
+            secondaryHomeShouldRenderDock(
+                contentOnly = false,
+                dockAppCount = 5,
+            ),
+        )
+        assertFalse(
+            secondaryHomeShouldRenderDock(
+                contentOnly = false,
+                dockAppCount = 0,
+            ),
+        )
+    }
+
+    @Test
     fun horizontalHomeSwipeMovesBetweenAdjacentPages() {
         assertEquals(
             1,
@@ -159,6 +577,41 @@ class HomePageManagerPolicyTest {
                 horizontalDistancePx = 120f,
                 verticalDistancePx = 0f,
                 minimumDistancePx = 56f,
+            ),
+        )
+    }
+
+    @Test
+    fun outerSwipeRecognizerCanBeLimitedToPrimaryBoundary() {
+        assertEquals(
+            0,
+            homePageSwipeTargetIndex(
+                currentIndex = 1,
+                pageCount = 4,
+                horizontalDistancePx = 160f,
+                verticalDistancePx = 8f,
+                minimumDistancePx = 56f,
+                canSelectTarget = { target -> target == 0 },
+            ),
+        )
+        assertNull(
+            homePageSwipeTargetIndex(
+                currentIndex = 1,
+                pageCount = 4,
+                horizontalDistancePx = -160f,
+                verticalDistancePx = 8f,
+                minimumDistancePx = 56f,
+                canSelectTarget = { target -> target == 0 },
+            ),
+        )
+        assertNull(
+            homePageSwipeTargetIndex(
+                currentIndex = 2,
+                pageCount = 4,
+                horizontalDistancePx = 160f,
+                verticalDistancePx = 8f,
+                minimumDistancePx = 56f,
+                canSelectTarget = { target -> target == 0 },
             ),
         )
     }

@@ -2,21 +2,9 @@ name: Migrated Android apps CI
 
 on:
   pull_request:
-    paths:
-      - 'apps/camera/**'
-      - 'apps/launcher/**'
-      - 'apps/keyboard/**'
-      - 'apps/gallery/**'
-      - '.github/workflows/migrated-android-apps-ci.yml'
   push:
     branches:
       - main
-    paths:
-      - 'apps/camera/**'
-      - 'apps/launcher/**'
-      - 'apps/keyboard/**'
-      - 'apps/gallery/**'
-      - '.github/workflows/migrated-android-apps-ci.yml'
 
 concurrency:
   group: migrated-android-apps-${{ github.workflow }}-${{ github.ref }}
@@ -26,7 +14,72 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect migrated app changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    outputs:
+      camera: ${{ steps.changes.outputs.camera }}
+      launcher: ${{ steps.changes.outputs.launcher }}
+      keyboard: ${{ steps.changes.outputs.keyboard }}
+      gallery: ${{ steps.changes.outputs.gallery }}
+
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - name: Detect affected migrated apps
+        id: changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            changed_files="$(git diff --name-only "$BASE_SHA...HEAD")"
+          else
+            if git rev-parse HEAD^ >/dev/null 2>&1; then
+              changed_files="$(git diff --name-only HEAD^ HEAD)"
+            else
+              changed_files="$(git show --pretty='' --name-only HEAD)"
+            fi
+          fi
+
+          printf '%s\n' "$changed_files"
+
+          run_all=false
+          if printf '%s\n' "$changed_files" |
+             grep -qxF '.github/workflows/migrated-android-apps-ci.yml'; then
+            run_all=true
+          fi
+
+          for app in camera launcher keyboard gallery; do
+            value=false
+
+            if [ "$run_all" = "true" ] ||
+               printf '%s\n' "$changed_files" | grep -q "^apps/${app}/"; then
+              value=true
+            fi
+
+            echo "${app}=${value}" >> "$GITHUB_OUTPUT"
+          done
+
   camera:
+    needs: changes
+    if: needs.changes.outputs.camera == 'true'
     name: Camera build, unit tests, lint, and source guard
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -39,6 +92,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -72,11 +130,11 @@ jobs:
         run: gradle --no-daemon --stacktrace lintDebug testDebugUnitTest assembleDebug
 
   launcher:
+    needs: changes
+    if: needs.changes.outputs.launcher == 'true'
     name: Launcher validation, unit tests, lint, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 35
-    env:
-      GOREECLOUD_DEV_VERSION_CODE: ${{ github.run_number }}
     defaults:
       run:
         working-directory: apps/launcher
@@ -86,6 +144,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -95,6 +158,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.11.1'
+      - name: Set Launcher Development artifact identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_CODE=$((1000000 + GITHUB_RUN_NUMBER))
+          test "$VERSION_CODE" -gt 1439
+          echo "GOREECLOUD_DEV_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "EXPECTED_LAUNCHER_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
       - name: Validate Launcher privacy, identity, UI, motion, and Room boundaries
         shell: bash
         run: |
@@ -117,8 +188,61 @@ jobs:
             git status --short -- app/schemas
             exit 1
           fi
+      - name: Stage Launcher Development APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="$(find app/build/outputs/apk/debug -type f -name '*.apk' -print -quit)"
+          test -n "$APK"
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt -print | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
+          test -x "$AAPT"
+          test -x "$APKSIGNER"
+          BADGING="$("$AAPT" dump badging "$APK" | head -n 1)"
+          APPLICATION_ID="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+          VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionCode='\([^']*\)'.*/\1/p")"
+          VERSION_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p")"
+          echo "Launcher APK identity: package=$APPLICATION_ID versionName=$VERSION_NAME versionCode=$VERSION_CODE"
+          test "$APPLICATION_ID" = "com.goreecloud.launcher.dev"
+          test "$VERSION_NAME" = "0.1.0-dev"
+          test "$VERSION_CODE" = "$EXPECTED_LAUNCHER_VERSION_CODE"
+          "$APKSIGNER" verify --verbose "$APK"
+          ARTIFACT_ROOT="artifact-launcher-android"
+          rm -rf "$ARTIFACT_ROOT"
+          mkdir -p "$ARTIFACT_ROOT"
+          cp "$APK" "$ARTIFACT_ROOT/GoreeCloud-Launcher-Dev.apk"
+          cat > "$ARTIFACT_ROOT/BUILD-PROVENANCE.txt" <<EOF
+          repository=GoreeCloud/android-app-defaults
+          component_path=apps/launcher
+          source_sha=$(git rev-parse HEAD)
+          application_id=$APPLICATION_ID
+          version_name=$VERSION_NAME
+          version_code=$VERSION_CODE
+          workflow=$GITHUB_WORKFLOW
+          run_id=$GITHUB_RUN_ID
+          run_number=$GITHUB_RUN_NUMBER
+          run_attempt=$GITHUB_RUN_ATTEMPT
+          signing_role=ci-debug-installability-only
+          update_in_place_continuity=not-established
+          stable_release_authority=none
+          EOF
+          (
+            cd "$ARTIFACT_ROOT"
+            sha256sum ./*.apk > SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+      - name: Upload Launcher Development sidecar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-launcher-android-dev-sidecar
+          if-no-files-found: error
+          retention-days: 14
+          path: apps/launcher/artifact-launcher-android/*
 
   keyboard:
+    needs: changes
+    if: needs.changes.outputs.keyboard == 'true'
     name: Keyboard validation, unit tests, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -131,6 +255,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -152,6 +281,8 @@ jobs:
         run: gradle --no-daemon :android:app:testDebugUnitTest :android:app:assembleDebug --stacktrace
 
   gallery:
+    needs: changes
+    if: needs.changes.outputs.gallery == 'true'
     name: Gallery native core, adapter, unit tests, and build
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -164,6 +295,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Set up Java 17
         uses: actions/setup-java@v5
         with:
@@ -177,3 +313,66 @@ jobs:
         run: gradle :core:test :android-adapter:testDebugUnitTest :app:testDebugUnitTest --no-daemon
       - name: Build Gallery native debug APK
         run: gradle :app:assembleDebug --no-daemon
+
+  required-gate:
+    name: Migrated Android apps required gate
+    if: always()
+    needs:
+      - changes
+      - camera
+      - launcher
+      - keyboard
+      - gallery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Require affected migrated-app validation
+        shell: bash
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+
+          CAMERA_CHANGED: ${{ needs.changes.outputs.camera }}
+          CAMERA_RESULT: ${{ needs.camera.result }}
+
+          LAUNCHER_CHANGED: ${{ needs.changes.outputs.launcher }}
+          LAUNCHER_RESULT: ${{ needs.launcher.result }}
+
+          KEYBOARD_CHANGED: ${{ needs.changes.outputs.keyboard }}
+          KEYBOARD_RESULT: ${{ needs.keyboard.result }}
+
+          GALLERY_CHANGED: ${{ needs.changes.outputs.gallery }}
+          GALLERY_RESULT: ${{ needs.gallery.result }}
+        run: |
+          set -euo pipefail
+
+          if [ "$CHANGES_RESULT" != "success" ]; then
+            echo "::error::Change detection result is $CHANGES_RESULT"
+            exit 1
+          fi
+
+          require_result() {
+            changed="$1"
+            result="$2"
+            name="$3"
+
+            if [ "$changed" = "true" ]; then
+              if [ "$result" != "success" ]; then
+                echo "::error::$name validation result is $result"
+                exit 1
+              fi
+            else
+              case "$result" in
+                success|skipped) ;;
+                *)
+                  echo "::error::$name unexpected result is $result"
+                  exit 1
+                  ;;
+              esac
+            fi
+          }
+
+          require_result "$CAMERA_CHANGED" "$CAMERA_RESULT" "Camera"
+          require_result "$LAUNCHER_CHANGED" "$LAUNCHER_RESULT" "Launcher"
+          require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RESULT" "Keyboard"
+          require_result "$GALLERY_CHANGED" "$GALLERY_RESULT" "Gallery"

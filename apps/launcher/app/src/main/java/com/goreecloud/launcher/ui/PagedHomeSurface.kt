@@ -14,6 +14,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -97,12 +98,34 @@ import com.goreecloud.launcher.ui.theme.GlazeMetrics
 import kotlin.math.abs
 import kotlinx.coroutines.withTimeoutOrNull
 
+internal fun secondaryHomeShouldRenderPageIndicator(
+    contentOnly: Boolean,
+    requested: Boolean,
+    pageCount: Int,
+): Boolean = !contentOnly && requested && pageCount > 1
+
+internal fun secondaryHomeShouldRenderDock(
+    contentOnly: Boolean,
+    dockAppCount: Int,
+    dockHostedExternally: Boolean = false,
+): Boolean = !contentOnly && !dockHostedExternally && dockAppCount > 0
+
+internal fun secondaryHomeShouldOwnBottomInset(
+    contentOnly: Boolean,
+    dockHostedExternally: Boolean,
+): Boolean = !contentOnly && !dockHostedExternally
+
+internal fun secondaryHomeBeyondViewportPageCount(
+    pageCount: Int,
+): Int = if (pageCount > 1) 1 else 0
+
 internal fun homePageSwipeTargetIndex(
     currentIndex: Int,
     pageCount: Int,
     horizontalDistancePx: Float,
     verticalDistancePx: Float,
     minimumDistancePx: Float,
+    canSelectTarget: (Int) -> Boolean = { true },
 ): Int? {
     if (
         pageCount <= 1 ||
@@ -118,13 +141,14 @@ internal fun homePageSwipeTargetIndex(
     } else {
         currentIndex - 1
     }
-    return target.takeIf { it in 0 until pageCount }
+    return target.takeIf { it in 0 until pageCount && canSelectTarget(it) }
 }
 
 internal fun Modifier.homePageSwipeNavigation(
     enabled: Boolean,
     currentIndex: Int,
     pageCount: Int,
+    canSelectTarget: (Int) -> Boolean = { true },
     onPageSelected: (Int) -> Unit,
 ): Modifier {
     if (!enabled || pageCount <= 1) return this
@@ -139,31 +163,75 @@ internal fun Modifier.homePageSwipeNavigation(
             )
             var horizontalDistance = 0f
             var verticalDistance = 0f
+            var pageSelected = false
 
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Final)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
                 val delta = change.positionChange()
-
-                // Decide from the complete gesture, but do not replace the Home subtree while
-                // the pointer stream is still active. Child surfaces may consume press/long-press
-                // bookkeeping before horizontal intent is known; active drag/drop disables this
-                // modifier at the caller. Selection is applied only after pointer release.
                 horizontalDistance += delta.x
                 verticalDistance += delta.y
 
-                if (!change.pressed) {
+                if (!pageSelected) {
                     homePageSwipeTargetIndex(
                         currentIndex = currentIndex,
                         pageCount = pageCount,
                         horizontalDistancePx = horizontalDistance,
                         verticalDistancePx = verticalDistance,
                         minimumDistancePx = minimumDistancePx,
-                    )?.let(onPageSelected)
-                    break
+                        canSelectTarget = canSelectTarget,
+                    )?.let { target ->
+                        pageSelected = true
+                        onPageSelected(target)
+                    }
                 }
+                if (!change.pressed) break
             }
         }
+    }
+}
+
+internal fun Modifier.homeVerticalGestureNavigation(
+    enabled: Boolean,
+    onSwipeUp: () -> Unit,
+    onSwipeDown: () -> Unit,
+): Modifier {
+    if (!enabled) return this
+    return pointerInput(enabled, onSwipeUp, onSwipeDown) {
+        val threshold = 42.dp.toPx()
+        var distance = 0f
+        var triggered = false
+        detectVerticalDragGestures(
+            onDragStart = {
+                distance = 0f
+                triggered = false
+            },
+            onDragCancel = {
+                distance = 0f
+                triggered = false
+            },
+            onDragEnd = {
+                distance = 0f
+                triggered = false
+            },
+            onVerticalDrag = { change, amount ->
+                if (!triggered) {
+                    distance += amount
+                    when {
+                        distance <= -threshold -> {
+                            triggered = true
+                            change.consume()
+                            onSwipeUp()
+                        }
+                        distance >= threshold -> {
+                            triggered = true
+                            change.consume()
+                            onSwipeDown()
+                        }
+                    }
+                }
+            },
+        )
     }
 }
 
@@ -1065,7 +1133,150 @@ fun ReadOnlyPagedHomeSurface(
     onSelectPage: (String) -> Unit = {},
     layoutLocked: Boolean = false,
     onGridBoundsChanged: (Rect?) -> Unit = {},
+    contentOnly: Boolean = false,
+    dockHostedExternally: Boolean = false,
 ) {
+    if (!contentOnly) {
+        val secondaryPages = remember(pages) {
+            pages.filterNot { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+        }
+        val selectedSecondaryIndex = secondaryPages.indexOfFirst { it.pageId == page.pageId }
+        if (secondaryPages.size > 1 && selectedSecondaryIndex >= 0) {
+            val pagerState = rememberPagerState(
+                initialPage = selectedSecondaryIndex,
+                pageCount = { secondaryPages.size },
+            )
+
+            LaunchedEffect(page.pageId, secondaryPages.map { it.pageId }) {
+                val target = secondaryPages.indexOfFirst { it.pageId == page.pageId }
+                if (target >= 0 && target != pagerState.currentPage) {
+                    pagerState.scrollToPage(target)
+                }
+            }
+            LaunchedEffect(pagerState.currentPage, secondaryPages, page.pageId) {
+                val targetPageId = secondaryPages.getOrNull(pagerState.currentPage)?.pageId
+                if (targetPageId != null && targetPageId != page.pageId) {
+                    onSelectPage(targetPageId)
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (
+                            secondaryHomeShouldOwnBottomInset(
+                                contentOnly = false,
+                                dockHostedExternally = dockHostedExternally,
+                            )
+                        ) {
+                            Modifier.navigationBarsPadding()
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .testTag("launcher-secondary-home-pager"),
+                    userScrollEnabled = true,
+                    beyondViewportPageCount =
+                        secondaryHomeBeyondViewportPageCount(secondaryPages.size),
+                ) { index ->
+                    val candidate = secondaryPages[index]
+                    ReadOnlyPagedHomeSurface(
+                        apps = apps,
+                        folders = folders,
+                        page = candidate,
+                        pages = pages,
+                        homeColumns = homeColumns,
+                        homeRows = homeRows,
+                        showLabels = showLabels,
+                        iconScale = iconScale,
+                        homeLabelOverrides = homeLabelOverrides,
+                        onLaunchApp = onLaunchApp,
+                        onSetHomeLabelOverride = onSetHomeLabelOverride,
+                        onRequestUninstall = onRequestUninstall,
+                        onMoveAppToPage = onMoveAppToPage,
+                        onMoveAppToPageCell = onMoveAppToPageCell,
+                        onMoveAppToCell = onMoveAppToCell,
+                        onMoveAppWithinPage = onMoveAppWithinPage,
+                        onMoveAppOneCell = onMoveAppOneCell,
+                        onRenameFolder = onRenameFolder,
+                        onDeleteFolder = onDeleteFolder,
+                        onAddAppToFolder = onAddAppToFolder,
+                        onRemoveAppFromFolder = onRemoveAppFromFolder,
+                        onRemoveFolderFromHome = onRemoveFolderFromHome,
+                        onMoveFolderToPage = onMoveFolderToPage,
+                        onMoveFolderToPageCell = onMoveFolderToPageCell,
+                        onMoveFolderToCell = onMoveFolderToCell,
+                        onCreateAndroidWidgetView = onCreateAndroidWidgetView,
+                        onRemoveWidget = onRemoveWidget,
+                        onResizeWidget = onResizeWidget,
+                        onMoveWidgetToCell = onMoveWidgetToCell,
+                        onMoveWidgetToPage = onMoveWidgetToPage,
+                        onMoveWidgetToPageCell = onMoveWidgetToPageCell,
+                        onOpenWidgetSearch = onOpenWidgetSearch,
+                        onOpenWidgetApps = onOpenWidgetApps,
+                        onOpenWidgetEditor = onOpenWidgetEditor,
+                        onOpenHomeEditor = onOpenHomeEditor,
+                        onOpenWidgetSettings = onOpenWidgetSettings,
+                        dockApps = emptyList(),
+                        dockStyle = dockStyle,
+                        pageTransition = pageTransition,
+                        showPageIndicator = false,
+                        onSelectPage = onSelectPage,
+                        layoutLocked = layoutLocked,
+                        onGridBoundsChanged = if (candidate.pageId == page.pageId) {
+                            onGridBoundsChanged
+                        } else {
+                            { _ -> }
+                        },
+                        contentOnly = true,
+                        dockHostedExternally = dockHostedExternally,
+                    )
+                }
+
+                if (
+                    secondaryHomeShouldRenderPageIndicator(
+                        contentOnly = false,
+                        requested = showPageIndicator,
+                        pageCount = pages.size,
+                    )
+                ) {
+                    HomePageDots(
+                        pages = pages,
+                        selectedPageId = page.pageId,
+                        onSelectPage = onSelectPage,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .testTag("launcher-secondary-home-page-indicator"),
+                    )
+                }
+
+                if (
+                    secondaryHomeShouldRenderDock(
+                        contentOnly = false,
+                        dockAppCount = dockApps.size,
+                        dockHostedExternally = dockHostedExternally,
+                    )
+                ) {
+                    PersistentHomeDock(
+                        apps = dockApps,
+                        iconScale = iconScale,
+                        style = dockStyle,
+                        onLaunchApp = onLaunchApp,
+                    )
+                    Spacer(Modifier.height(2.dp))
+                }
+            }
+            return
+        }
+    }
+
     val appsByKey = remember(apps) { apps.associateBy { it.workspaceKey() } }
     val pageApps = remember(appsByKey, page.appKeys) {
         page.appKeys.mapNotNull(appsByKey::get)
@@ -1225,7 +1436,18 @@ fun ReadOnlyPagedHomeSurface(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding()
+                .then(
+                    if (
+                        secondaryHomeShouldOwnBottomInset(
+                            contentOnly = contentOnly,
+                            dockHostedExternally = dockHostedExternally,
+                        )
+                    ) {
+                        Modifier.navigationBarsPadding()
+                    } else {
+                        Modifier
+                    },
+                )
                 .padding(horizontal = GlazeMetrics.space4),
         ) {
             Spacer(Modifier.height(72.dp))
@@ -1484,7 +1706,13 @@ fun ReadOnlyPagedHomeSurface(
                     )
                 }
 
-            if (showPageIndicator && pages.size > 1) {
+            if (
+                secondaryHomeShouldRenderPageIndicator(
+                    contentOnly = contentOnly,
+                    requested = showPageIndicator,
+                    pageCount = pages.size,
+                )
+            ) {
                 HomePageDots(
                     pages = pages,
                     selectedPageId = page.pageId,
@@ -1495,7 +1723,13 @@ fun ReadOnlyPagedHomeSurface(
                 )
             }
 
-            if (dockApps.isNotEmpty()) {
+            if (
+                secondaryHomeShouldRenderDock(
+                    contentOnly = contentOnly,
+                    dockAppCount = dockApps.size,
+                    dockHostedExternally = dockHostedExternally,
+                )
+            ) {
                 PersistentHomeDock(
                     apps = dockApps,
                     iconScale = iconScale,

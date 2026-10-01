@@ -1,0 +1,389 @@
+# Preserved legacy source patch: GoreeCloud/keyboard PR #65
+# Title: Add Arabic IME subtype and language-aware layout foundation
+# Source repository: GoreeCloud/keyboard
+# Base revision: faa90104f2b6c56b0e228cd27f5703a1a530d074
+# Head revision: b86992dbcf54340562997630baeaabfd22c42b36
+# Original PR: https://github.com/GoreeCloud/keyboard/pull/65
+# Disposition: planned multilingual/Arabic source preserved for deliberate current-monorepo restack; not accepted runtime authority.
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLanguage.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLanguage.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLanguage.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLanguage.kt
+@@ -0,0 +1,49 @@
++package com.goreecloud.keyboard
++
++import java.util.Locale
++
++enum class KeyboardWritingDirection {
++    LEFT_TO_RIGHT,
++    RIGHT_TO_LEFT,
++}
++
++enum class KeyboardLanguage(
++    val primaryLanguageTag: String,
++    val writingDirection: KeyboardWritingDirection,
++    val supportsCaseShift: Boolean,
++    val supportsLocalBootstrapSuggestions: Boolean,
++    val spacebarLabel: String,
++) {
++    ENGLISH_US(
++        primaryLanguageTag = "en-US",
++        writingDirection = KeyboardWritingDirection.LEFT_TO_RIGHT,
++        supportsCaseShift = true,
++        supportsLocalBootstrapSuggestions = true,
++        spacebarLabel = "English",
++    ),
++    ARABIC(
++        primaryLanguageTag = "ar",
++        writingDirection = KeyboardWritingDirection.RIGHT_TO_LEFT,
++        supportsCaseShift = false,
++        supportsLocalBootstrapSuggestions = false,
++        spacebarLabel = "العربية",
++    );
++
++    companion object {
++        /**
++         * Resolve only from the active Android IME subtype. Device UI locale and editor text are
++         * deliberately not language authority for the keyboard layout.
++         */
++        fun fromSubtypeLocale(localeValue: String?): KeyboardLanguage {
++            val normalized = localeValue
++                ?.trim()
++                ?.replace('_', '-')
++                ?.lowercase(Locale.ROOT)
++                .orEmpty()
++            return when (normalized.substringBefore('-')) {
++                "ar" -> ARABIC
++                else -> ENGLISH_US
++            }
++        }
++    }
++}
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLayout.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLayout.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLayout.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardLayout.kt
+@@ -17,14 +17,29 @@ enum class EmojiCategory(val label: String) {
+ }
+ 
+ object KeyboardLayout {
+-    private val numberRow = keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
+-    private val letterRows = listOf(
++    @Volatile
++    private var activeLanguage = KeyboardLanguage.ENGLISH_US
++
++    private val englishNumberRow = keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
++    private val arabicNumberRow = keys("١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", "٠")
++
++    private val englishLetterRows = listOf(
+         keys("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
+         keys("a", "s", "d", "f", "g", "h", "j", "k", "l"),
+         keys("z", "x", "c", "v", "b", "n", "m"),
+     )
++
++    // Display order intentionally follows the familiar Arabic PC/mobile key positions rather than
++    // blindly mirroring QWERTY. KeyboardWritingDirection remains explicit metadata for platform and
++    // accessibility work; this source tranche does not claim complete BiDi host/editor acceptance.
++    private val arabicLetterRows = listOf(
++        keys("ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"),
++        keys("ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط"),
++        keys("ئ", "ء", "ؤ", "ر", "لا", "ى", "ة", "و", "ز", "ظ"),
++    )
++
+     private val symbolRows = listOf(
+-        numberRow,
++        englishNumberRow,
+         keys("@", "#", "$", "%", "&", "-", "+", "(", ")"),
+         keys("*", "\"", "'", ":", ";", "!", "?"),
+     )
+@@ -66,10 +81,26 @@ object KeyboardLayout {
+         ),
+     )
+ 
+-    fun numberRow(): List<String> = numberRow
++    fun activateLanguage(language: KeyboardLanguage) {
++        activeLanguage = language
++    }
++
++    fun currentLanguage(): KeyboardLanguage = activeLanguage
++
++    fun numberRow(language: KeyboardLanguage = activeLanguage): List<String> =
++        when (language) {
++            KeyboardLanguage.ENGLISH_US -> englishNumberRow
++            KeyboardLanguage.ARABIC -> arabicNumberRow
++        }
+ 
+-    fun characterRows(layer: KeyboardLayer): List<List<String>> = when (layer) {
+-        KeyboardLayer.LETTERS -> letterRows
++    fun characterRows(
++        layer: KeyboardLayer,
++        language: KeyboardLanguage = activeLanguage,
++    ): List<List<String>> = when (layer) {
++        KeyboardLayer.LETTERS -> when (language) {
++            KeyboardLanguage.ENGLISH_US -> englishLetterRows
++            KeyboardLanguage.ARABIC -> arabicLetterRows
++        }
+         KeyboardLayer.SYMBOLS -> symbolRows
+         KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
+         KeyboardLayer.EMOJI -> emojiRows(EmojiCategory.SMILEYS)
+
+diff --git a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+--- a/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
++++ b/android/app/src/main/kotlin/com/goreecloud/keyboard/KeyboardService.kt
+@@ -5,6 +5,8 @@ import android.inputmethodservice.InputMethodService
+ import android.view.KeyEvent
+ import android.view.View
+ import android.view.inputmethod.EditorInfo
++import android.view.inputmethod.InputMethodManager
++import android.view.inputmethod.InputMethodSubtype
+ import kotlin.math.abs
+ 
+ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+@@ -16,6 +18,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+     private var composingCaptureExhausted = false
+     private var keyboardView: KeyboardView? = null
+     private var currentLayer = KeyboardLayer.LETTERS
++    private var activeLanguage = KeyboardLanguage.ENGLISH_US
+     private val suggestionEngine = SuggestionEngine()
+     private val composingWord = StringBuilder()
+     private var presentedSuggestions: List<String> = emptyList()
+@@ -30,12 +33,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+     )
+ 
+     override fun onCreateInputView(): View {
++        applyLanguage(resolveCurrentSubtypeLanguage(), resetTransientInput = false)
+         return KeyboardView(this).also { view ->
+             keyboardView = view
+             view.listener = this
+             currentLayer = KeyboardLayer.LETTERS
+             view.setLayer(currentLayer)
+-            view.setShifted(shifted)
++            view.setShifted(shifted && activeLanguage.supportsCaseShift)
+             view.setNumberRowEnabled(settingsStore.showNumberRow())
+             view.setToolbarConfiguration(settingsStore.toolbarConfiguration())
+             view.setEditorAction(editorAction)
+@@ -74,6 +78,17 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+         updateSuggestions()
+     }
+ 
++    override fun onCurrentInputMethodSubtypeChanged(newSubtype: InputMethodSubtype?) {
++        super.onCurrentInputMethodSubtypeChanged(newSubtype)
++        // Android's selected IME subtype is the layout-language authority. Do not infer language from
++        // the device UI locale, editor text, surrounding text, or application identity.
++        applyLanguage(
++            KeyboardLanguage.fromSubtypeLocale(newSubtype?.locale),
++            resetTransientInput = true,
++        )
++        updateSuggestions()
++    }
++
+     override fun onFinishInput() {
+         super.onFinishInput()
+         // onFinishInput is Android's editor-session boundary. Do not rely only on the input view
+@@ -99,9 +114,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+     override fun onText(value: String) {
+         if (value.isEmpty()) return
+         val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
+-        val output = if (shifted && isLetterText) value.uppercase() else value
++        val output = if (shifted && activeLanguage.supportsCaseShift && isLetterText) {
++            value.uppercase()
++        } else {
++            value
++        }
+         currentInputConnection?.commitText(output, 1)
+-        if (!suggestionsSuppressed) {
++        if (!suggestionsSuppressed && activeLanguage.supportsLocalBootstrapSuggestions) {
+             if (isLetterText) {
+                 val normalized = output.lowercase()
+                 if (!composingCaptureExhausted &&
+@@ -153,7 +172,11 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+         }
+         connection.deleteSurroundingTextInCodePoints(deleteCodePoints, 0)
+ 
+-        if (!suggestionsSuppressed && !composingCaptureExhausted && composingWord.isNotEmpty()) {
++        if (!suggestionsSuppressed &&
++            activeLanguage.supportsLocalBootstrapSuggestions &&
++            !composingCaptureExhausted &&
++            composingWord.isNotEmpty()
++        ) {
+             val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
+             composingWord.delete(lastCodePointStart, composingWord.length)
+         }
+@@ -175,14 +198,23 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+     }
+ 
+     override fun onShift() {
++        if (!activeLanguage.supportsCaseShift) {
++            shifted = false
++            keyboardView?.setShifted(false)
++            return
++        }
+         shifted = !shifted
+         keyboardView?.setShifted(shifted)
+     }
+ 
+     override fun onSuggestion(value: String) {
+         // Keep a second sensitive-input check here so a future policy regression cannot turn
+         // candidate acceptance into surrounding-text access for a protected editor.
+-        if (suggestionsSuppressed || sensitiveInput || composingCaptureExhausted) return
++        if (suggestionsSuppressed ||
++            !activeLanguage.supportsLocalBootstrapSuggestions ||
++            sensitiveInput ||
++            composingCaptureExhausted
++        ) return
+         // The callback value itself is not replacement authority. It must still be one of the exact
+         // candidates presented for this editor session; a stale/forged callback cannot delete text.
+         if (!SuggestionCommitPolicy.isPresentedCandidate(value, presentedSuggestions)) return
+@@ -249,6 +281,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+     }
+ 
+     private fun beginEditorSession(info: EditorInfo?) {
++        applyLanguage(resolveCurrentSubtypeLanguage(), resetTransientInput = false)
+         shifted = false
+         currentLayer = KeyboardLayer.LETTERS
+         composingWord.clear()
+@@ -273,6 +306,34 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+         suggestionsSuppressed = EditorSuggestionPolicy.shouldSuppress(inputType, info.imeOptions)
+     }
+ 
++    private fun applyLanguage(
++        language: KeyboardLanguage,
++        resetTransientInput: Boolean,
++    ) {
++        activeLanguage = language
++        KeyboardLayout.activateLanguage(language)
++        if (!language.supportsCaseShift) {
++            shifted = false
++            keyboardView?.setShifted(false)
++        }
++        if (resetTransientInput) {
++            composingWord.clear()
++            composingCaptureExhausted = false
++            presentedSuggestions = emptyList()
++            keyboardView?.setSuggestions(emptyList())
++        }
++        // KeyboardView reads rows from KeyboardLayout. Re-applying the current layer invalidates its
++        // structure and accessibility nodes without adding a second source of language truth.
++        keyboardView?.setLayer(currentLayer)
++    }
++
++    private fun resolveCurrentSubtypeLanguage(): KeyboardLanguage {
++        val inputMethodManager = getSystemService(InputMethodManager::class.java)
++        return KeyboardLanguage.fromSubtypeLocale(
++            inputMethodManager?.currentInputMethodSubtype?.locale,
++        )
++    }
++
+     private fun resetEditorSession() {
+         shifted = false
+         currentLayer = KeyboardLayer.LETTERS
+@@ -305,7 +366,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
+     }
+ 
+     private fun updateSuggestions() {
+-        if (suggestionsSuppressed || composingCaptureExhausted) {
++        if (suggestionsSuppressed ||
++            composingCaptureExhausted ||
++            !activeLanguage.supportsLocalBootstrapSuggestions
++        ) {
+             presentedSuggestions = emptyList()
+             keyboardView?.setSuggestions(emptyList())
+             return
+
+diff --git a/android/app/src/main/res/values/strings.xml b/android/app/src/main/res/values/strings.xml
+--- a/android/app/src/main/res/values/strings.xml
++++ b/android/app/src/main/res/values/strings.xml
+@@ -3,6 +3,7 @@
+     <string name="app_name">GoreeCloud Keyboard</string>
+     <string name="ime_name">GoreeCloud Keyboard</string>
+     <string name="subtype_en_us">English (United States)</string>
++    <string name="subtype_ar">Arabic</string>
+ 
+     <string name="accessibility_state_on">On</string>
+     <string name="accessibility_state_off">Off</string>
+
+diff --git a/android/app/src/main/res/xml/method.xml b/android/app/src/main/res/xml/method.xml
+--- a/android/app/src/main/res/xml/method.xml
++++ b/android/app/src/main/res/xml/method.xml
+@@ -7,4 +7,9 @@
+         android:imeSubtypeMode="keyboard"
+         android:isAsciiCapable="true"
+         android:label="@string/subtype_en_us" />
++    <subtype
++        android:imeSubtypeLocale="ar"
++        android:imeSubtypeMode="keyboard"
++        android:isAsciiCapable="false"
++        android:label="@string/subtype_ar" />
+ </input-method>
+
+diff --git a/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardLanguageTest.kt b/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardLanguageTest.kt
+--- a/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardLanguageTest.kt
++++ b/android/app/src/test/kotlin/com/goreecloud/keyboard/KeyboardLanguageTest.kt
+@@ -0,0 +1,66 @@
++package com.goreecloud.keyboard
++
++import org.junit.After
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class KeyboardLanguageTest {
++    @After
++    fun restoreEnglishLayout() {
++        KeyboardLayout.activateLanguage(KeyboardLanguage.ENGLISH_US)
++    }
++
++    @Test
++    fun androidSubtypeLocaleIsTheLanguageAuthority() {
++        assertEquals(KeyboardLanguage.ENGLISH_US, KeyboardLanguage.fromSubtypeLocale("en_US"))
++        assertEquals(KeyboardLanguage.ENGLISH_US, KeyboardLanguage.fromSubtypeLocale("en-US"))
++        assertEquals(KeyboardLanguage.ARABIC, KeyboardLanguage.fromSubtypeLocale("ar"))
++        assertEquals(KeyboardLanguage.ARABIC, KeyboardLanguage.fromSubtypeLocale("ar_EG"))
++        assertEquals(KeyboardLanguage.ENGLISH_US, KeyboardLanguage.fromSubtypeLocale(null))
++        assertEquals(KeyboardLanguage.ENGLISH_US, KeyboardLanguage.fromSubtypeLocale("unsupported"))
++    }
++
++    @Test
++    fun arabicProfileIsExplicitlyRtlAndDoesNotReuseEnglishCaseOrSuggestions() {
++        val language = KeyboardLanguage.ARABIC
++
++        assertEquals(KeyboardWritingDirection.RIGHT_TO_LEFT, language.writingDirection)
++        assertFalse(language.supportsCaseShift)
++        assertFalse(language.supportsLocalBootstrapSuggestions)
++        assertEquals("العربية", language.spacebarLabel)
++    }
++
++    @Test
++    fun arabicSubtypeSelectsArabicLettersAndDigits() {
++        KeyboardLayout.activateLanguage(KeyboardLanguage.ARABIC)
++
++        assertEquals(KeyboardLanguage.ARABIC, KeyboardLayout.currentLanguage())
++        assertEquals(
++            listOf("ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"),
++            KeyboardLayout.characterRows(KeyboardLayer.LETTERS).first(),
++        )
++        assertEquals(
++            listOf("١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", "٠"),
++            KeyboardLayout.numberRow(),
++        )
++    }
++
++    @Test
++    fun englishSubtypeKeepsExistingQwertyFoundation() {
++        KeyboardLayout.activateLanguage(KeyboardLanguage.ENGLISH_US)
++
++        assertEquals(KeyboardWritingDirection.LEFT_TO_RIGHT, KeyboardLanguage.ENGLISH_US.writingDirection)
++        assertTrue(KeyboardLanguage.ENGLISH_US.supportsCaseShift)
++        assertTrue(KeyboardLanguage.ENGLISH_US.supportsLocalBootstrapSuggestions)
++        assertEquals(
++            listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
++            KeyboardLayout.characterRows(KeyboardLayer.LETTERS).first(),
++        )
++        assertEquals(
++            listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
++            KeyboardLayout.numberRow(),
++        )
++    }
++}
+

@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,7 @@ enum class LauncherUniversalSearchHomeMode(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): LauncherUniversalSearchHomeMode =
-            entries.firstOrNull { it.storageValue == value } ?: PERMANENT
+            entries.firstOrNull { it.storageValue == value } ?: SWIPE_DOWN_ONLY
     }
 }
 
@@ -118,6 +119,7 @@ enum class LauncherHomeGlanceAlignment(val storageValue: String) {
 }
 
 enum class LauncherHomeSearchPlacement(val storageValue: String) {
+    MOVABLE("movable"),
     TOP("top"),
     BOTTOM("bottom");
 
@@ -125,6 +127,27 @@ enum class LauncherHomeSearchPlacement(val storageValue: String) {
         fun fromStorage(value: String?): LauncherHomeSearchPlacement =
             entries.firstOrNull { it.storageValue == value } ?: BOTTOM
     }
+}
+
+internal enum class LauncherHomeSearchSurface {
+    SWIPE_DOWN_ONLY,
+    MOVABLE,
+    FIXED_TOP,
+    FIXED_BOTTOM,
+}
+
+internal fun launcherHomeSearchSurface(
+    mode: LauncherUniversalSearchHomeMode,
+    placement: LauncherHomeSearchPlacement,
+): LauncherHomeSearchSurface = when {
+    mode != LauncherUniversalSearchHomeMode.PERMANENT ->
+        LauncherHomeSearchSurface.SWIPE_DOWN_ONLY
+    placement == LauncherHomeSearchPlacement.MOVABLE ->
+        LauncherHomeSearchSurface.MOVABLE
+    placement == LauncherHomeSearchPlacement.TOP ->
+        LauncherHomeSearchSurface.FIXED_TOP
+    else ->
+        LauncherHomeSearchSurface.FIXED_BOTTOM
 }
 
 enum class LauncherHomeSearchStyle(val storageValue: String) {
@@ -377,6 +400,7 @@ class LauncherPreferencesRepository(
         val startupWizardCompleted = booleanPreferencesKey("startup_wizard_completed_v1")
         val homeHintsDismissed = booleanPreferencesKey("home_hints_dismissed_v1")
         val homeLabelOverrides = stringPreferencesKey("home_label_overrides_v1")
+        val hiddenHomeSuggestionKeys = stringSetPreferencesKey("hidden_home_suggestion_keys_v1")
         val portableRestoreJournal = stringPreferencesKey("portable_restore_journal_v1")
     }
 
@@ -393,6 +417,21 @@ class LauncherPreferencesRepository(
      */
     val homeLabelOverrides: Flow<Map<String, String>> = dataStore.data
         .map { values -> LauncherHomeLabelOverridesCodec.decode(values[Keys.homeLabelOverrides]) }
+        .distinctUntilChanged()
+
+    /**
+     * Device-local suppression for automatic Home suggestions explicitly removed by the user.
+     *
+     * This does not hide the app from the drawer and does not change manual Home/Dock placement.
+     * The state intentionally remains outside the strict portable-preference v1 contract.
+     */
+    val hiddenHomeSuggestionKeys: Flow<Set<String>> = dataStore.data
+        .map { values ->
+            values[Keys.hiddenHomeSuggestionKeys]
+                .orEmpty()
+                .filterNot(String::isBlank)
+                .toSet()
+        }
         .distinctUntilChanged()
 
     /**
@@ -814,6 +853,23 @@ class LauncherPreferencesRepository(
     fun setHomeHintsDismissed(dismissed: Boolean): Job = scope.launch {
         dataStore.edit { values ->
             values[Keys.homeHintsDismissed] = dismissed
+        }
+    }
+
+    fun setHomeSuggestionHidden(appKey: String, hidden: Boolean): Job = scope.launch {
+        if (appKey.isBlank()) return@launch
+        dataStore.edit { values ->
+            val updated = values[Keys.hiddenHomeSuggestionKeys].orEmpty().toMutableSet()
+            if (hidden) {
+                updated += appKey
+            } else {
+                updated -= appKey
+            }
+            if (updated.isEmpty()) {
+                values.remove(Keys.hiddenHomeSuggestionKeys)
+            } else {
+                values[Keys.hiddenHomeSuggestionKeys] = updated
+            }
         }
     }
 

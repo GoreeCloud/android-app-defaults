@@ -62,6 +62,31 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun hiddenHomeSuggestionsPersistIndependentlyFromManualPlacementPreferences() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("hidden-home-suggestions.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            val first = "0:com.example/.One"
+            val second = "0:com.example/.Two"
+
+            repository.setHomeSuggestionHidden(first, true).join()
+            repository.setHomeSuggestionHidden(second, true).join()
+            assertEquals(setOf(first, second), repository.hiddenHomeSuggestionKeys.first())
+
+            repository.setHomeSuggestionHidden(first, false).join()
+            assertEquals(setOf(second), repository.hiddenHomeSuggestionKeys.first())
+            assertEquals(LauncherHomeAppMode.NONE, repository.experiencePreferences.first().homeAppMode)
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun replayStartupWizardReopensSetupWithoutResettingConfiguration() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
@@ -241,6 +266,10 @@ class LauncherPreferencesTest {
             LauncherHomeGlanceAlignment.fromStorage("unknown"),
         )
         assertEquals(
+            LauncherHomeSearchPlacement.MOVABLE,
+            LauncherHomeSearchPlacement.fromStorage("movable"),
+        )
+        assertEquals(
             LauncherHomeSearchPlacement.TOP,
             LauncherHomeSearchPlacement.fromStorage("top"),
         )
@@ -266,6 +295,38 @@ class LauncherPreferencesTest {
         assertEquals(LauncherHomeSpacing.COMPACT, LauncherHomeSpacing.fromStorage("compact"))
         assertEquals(LauncherHomeSpacing.AIRY, LauncherHomeSpacing.fromStorage("airy"))
         assertEquals(LauncherHomeSpacing.BALANCED, LauncherHomeSpacing.fromStorage("unknown"))
+    }
+
+    @Test
+    fun homeSearchSurfaceResolvesSwipeMovableAndFixedModes() {
+        assertEquals(
+            LauncherHomeSearchSurface.SWIPE_DOWN_ONLY,
+            launcherHomeSearchSurface(
+                LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
+                LauncherHomeSearchPlacement.MOVABLE,
+            ),
+        )
+        assertEquals(
+            LauncherHomeSearchSurface.MOVABLE,
+            launcherHomeSearchSurface(
+                LauncherUniversalSearchHomeMode.PERMANENT,
+                LauncherHomeSearchPlacement.MOVABLE,
+            ),
+        )
+        assertEquals(
+            LauncherHomeSearchSurface.FIXED_TOP,
+            launcherHomeSearchSurface(
+                LauncherUniversalSearchHomeMode.PERMANENT,
+                LauncherHomeSearchPlacement.TOP,
+            ),
+        )
+        assertEquals(
+            LauncherHomeSearchSurface.FIXED_BOTTOM,
+            launcherHomeSearchSurface(
+                LauncherUniversalSearchHomeMode.PERMANENT,
+                LauncherHomeSearchPlacement.BOTTOM,
+            ),
+        )
     }
 
     @Test
@@ -343,17 +404,17 @@ class LauncherPreferencesTest {
     }
 
     @Test
-    fun universalSearchHomeModeStorageDecodingFailsSafeToPermanent() {
+    fun universalSearchHomeModeStorageDecodingFailsSafeToSwipeDownOnly() {
         assertEquals(
             LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
             LauncherUniversalSearchHomeMode.fromStorage("swipe_down_only"),
         )
         assertEquals(
-            LauncherUniversalSearchHomeMode.PERMANENT,
+            LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
             LauncherUniversalSearchHomeMode.fromStorage("unknown"),
         )
         assertEquals(
-            LauncherUniversalSearchHomeMode.PERMANENT,
+            LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
             LauncherUniversalSearchHomeMode.fromStorage(null),
         )
     }

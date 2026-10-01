@@ -28,7 +28,7 @@ The startup wizard and Launcher Settings expose three automatic Home modes:
 - **10 most recent apps** — Launcher shows up to ten apps most recently launched through GoreeCloud Launcher.
 - **10 most used apps** — Launcher shows up to ten apps with the highest local Launcher launch counts.
 
-Recent/most-used suggestions are presentation-only. They fill otherwise-empty Home cells, exclude persisted Home Favorites and Dock duplicates, and do not rewrite saved Room-authoritative placement. Manual Home apps remain available in every mode: press and hold an app in Apps, keep holding and move to drag a copy onto the exact Home cell or Dock position you want, or use the app-management placement actions as optional shortcuts.
+Recent/most-used suggestions are presentation-only. They fill otherwise-empty Home cells, exclude persisted Home Favorites and Dock duplicates, and do not rewrite saved Room-authoritative placement. Long-press an automatic suggestion on Home and choose **Remove** to suppress that suggestion on this device; the app remains installed and remains available in Apps. Manual Home apps remain available in every mode: press and hold an app in Apps, keep holding and move to drag a copy onto the exact Home cell or Dock position you want, or use the compact app context actions.
 
 The ranking store is local and privacy-bounded. It retains only application workspace keys, aggregate Launcher launch counts, and a bounded recency ordering. It does not request Android Usage Access or retain launch timestamps, dwell time, Search queries, or network telemetry for this feature.
 
@@ -37,12 +37,12 @@ The ranking store is local and privacy-bounded. It retains only application work
 The primary Home experience is a launcher-style surface. Android renders the device wallpaper behind the launcher window, and Home presents the persisted application grid and Dock over that surface without requesting wallpaper-storage privileges.
 
 - Tap an app icon to launch it.
-- Long-press and drag a saved Home app to reposition it. On primary Home, dropping onto an empty visible cell places it there and dropping onto an occupied primary cell swaps the two primary positions. While dragging a saved Home app on any Home page, keep holding at a valid left or right page edge briefly to switch to the adjacent page without changing the workspace yet; once that page appears, move to the exact destination cell and release. Invalid, spacing-gap, occupied, or out-of-bounds cross-page destinations fail closed and preserve the original placement. A quick edge release still uses the deterministic adjacent-page edge landing behavior. Long-press without moving opens placement management. When an app is dragged from Apps, the authoritative add is committed directly to the requested primary Home cell or Dock position; Drawer drags do not imply live cross-page placement.
+- Long-press and drag a saved Home app to reposition it. On primary Home, dropping onto an empty visible cell places it there and dropping onto an occupied primary cell swaps the two primary positions. While dragging a saved Home app on any Home page, keep holding at a valid left or right page edge briefly to switch to the adjacent page without changing the workspace yet; once that page appears, move to the exact destination cell and release. Invalid, spacing-gap, occupied, or out-of-bounds cross-page destinations fail closed and preserve the original placement. A quick edge release still uses the deterministic adjacent-page edge landing behavior. Long-press without moving opens the compact app context menu. On Home, its first quick action is **Remove**; this removes the Home placement (or suppresses a presentation-only automatic suggestion) without uninstalling the app. **Uninstall** remains a separate Android-confirmed action. When an app is dragged from Apps, the authoritative add is committed directly to the requested primary Home cell or Dock position; Drawer drags do not imply live cross-page placement.
 - Long-press a Home widget, keep holding, and drag it to a free grid area. On primary or secondary Home, releasing a widget inside a valid left/right page edge moves it to the adjacent Home page at a span-aware opposite-edge position; the landing row is clamped so the complete widget remains in bounds. If that exact destination overlaps another item or cannot fit, the move is rejected and the original placement is preserved. A stationary long-press opens widget management, where resize, remove, exact same-page movement, and **Move to another Home page** remain available even after the widget is on a secondary page. Fresh starter workspaces place the Launcher-owned **Glance** widget in the Home grid when room is available. Upgraded installs may retain the older fixed clock/date card; while Home is unlocked, long-press that fixed card once to request conversion to movable Glance. The conversion is explicit and fails without changing the existing card if the grid has no room. Glance combines local time/date with opt-in local weather. Tap the weather area to grant foreground location access; Launcher then shows current temperature and a condition icon for clear/cloudy weather, fog, wind, rain, snow, or thunderstorms. Coordinates are not persisted, and weather remains unavailable rather than fabricated when permission or the weather request is unavailable.
-- Open **Edit Home → Widgets** to browse Launcher-owned cards and Android widgets. The built-in catalog includes Glance, Universal Search, Quick actions, Battery, Date, **Month**, Digital/Compact/Analog clocks, and Launcher Status. **Month** is a 4 × 2 local calendar overview that highlights today; it does not request Calendar permission or read calendar events.
+- Open **Edit Home → Widgets** to browse Launcher-owned cards and Android widgets. The built-in catalog now leads with separate **Calendar** and **Weather** 2 × 2 cards, followed by Glance, Universal Search, Quick actions, Battery, Date, **Month**, Digital/Compact/Analog clocks, and Launcher Status. Calendar is local-only. Weather includes local time plus current conditions after foreground location is allowed; recent successful conditions are reused briefly in memory so normal Home returns do not visibly reload them. **Month** remains a 4 × 2 local calendar overview that highlights today without reading calendar events.
 - Long-press a Home folder while the layout is unlocked. On primary or secondary Home, release it over a free grid cell to move it within the current page. Releasing the folder inside a valid left/right page edge moves it to the adjacent Home page at the corresponding opposite-edge column and release row. If an exact same-page or cross-page destination is occupied or invalid, the move is rejected and the folder keeps its existing placement. The folder menu's **Move to another Home page** action remains available and uses the first free destination cell instead of an exact drag target.
 - Open **Apps** from the Home affordance to browse installed launchable applications.
-- Long-press empty Home space to enter **Edit Home**, then use its **Settings** action to change supported Home, Apps, icon, label, appearance, layout-lock, and Launcher Universal Search preferences. You can also open the same Launcher Settings surface from the gear at the top of **Apps**.
+- Long-press empty Home space to enter **Edit Home**, then use its **Settings** action to change supported Home, Apps, icon, label, appearance, layout-lock, and Launcher Universal Search preferences. Pressing Android **Home** while Edit Home is open exits the editor and returns to the ordinary primary Home surface. You can also open the same Launcher Settings surface from the gear at the top of **Apps**.
 - Swipe one finger downward through the unobstructed Home gesture zone to open Launcher Universal Search by default. This assignment can be changed under **Launcher settings → Gestures**.
 - The first-run setup can seed the five-item Dock from common app roles when available. Automatic Home apps are controlled separately by the selected No automatic apps / 10 most recent apps / 10 most used apps mode.
 - Five apps remain the first-run Dock default, not a capacity limit. You can add more apps; the Dock tightens item presentation while preserving at least a 48 dp touch slot, then scrolls horizontally when more items are present than fit safely at once.
@@ -59,17 +59,29 @@ You can disable hints during startup, dismiss the Home hint with **Got it**, and
 
 ## Launcher Universal Search from Home
 
-**GoreeCloud Launcher owns Universal Search.** Swipe down on the unobstructed Home gesture zone opens the Launcher-owned search surface by default; the assignment can be changed under **Launcher settings → Gestures**. When the Home search bar is enabled, tapping **Search GoreeCloud** always opens Launcher Universal Search.
+**GoreeCloud Launcher owns Universal Search.** Swipe down on the unobstructed gesture zone of any Home page opens Launcher Universal Search by default; the gesture assignment can be changed under **Launcher Settings → Gestures & inputs**.
 
-Launcher Settings provides two Home-entry modes:
+Under **Launcher Settings → Search**, Home Search now has four Development presentation choices:
 
-### Permanent on Home
+### Swipe down
 
-Home keeps the **Search GoreeCloud** affordance visible. Swipe down opens Launcher Universal Search by default, but the gesture can be reassigned in **Launcher settings → Gestures**.
+This is the default and fail-safe mode. No persistent Search object is required on Home. Swipe down opens Universal Search unless you reassign that gesture.
 
-### Gesture only
+### Movable
 
-The persistent Search GoreeCloud affordance is hidden. Swipe down still opens Launcher Universal Search by default, but any supported Home gesture can be assigned to search under **Launcher settings → Gestures**.
+Launcher uses the existing first-party **Universal Search** 4 × 1 Home widget as the persistent Search surface. It participates in the Room-authoritative Home grid, so you can long-press and drag it like other Home widgets, move it between Home pages, and use normal widget management. Selecting Movable does not create a second Search implementation.
+
+Launcher manages one dedicated movable Search widget for this setting. If an existing Universal Search widget is already present on Home, Launcher reuses the visible Search-widget path rather than adding another one. If the primary Home has no free 4 × 1 area yet, Launcher keeps a fixed bottom Search bar visible and retries managed placement after primary-Home geometry changes. Manually added Search widgets remain ordinary user-managed widgets.
+
+### Top
+
+A persistent **Search GoreeCloud** bar is pinned above the Home grid. It does not consume Home-grid cells. Fixed-bar presentation can use the available Glass, Clear, or Solid styles.
+
+### Bottom
+
+A persistent **Search GoreeCloud** bar is pinned below the Home grid. It does not consume Home-grid cells. Fixed-bar presentation can use the available Glass, Clear, or Solid styles.
+
+Tapping either a fixed Search bar or a movable Universal Search widget opens the same Launcher-owned Universal Search surface.
 
 The current Development search foundation provides installed applications, Android application shortcuts, and user-enabled local Contacts, Call history, Messages, and file-name results. Local file Search is limited to Android Storage Access Framework folders that you explicitly choose; Launcher indexes bounded file-name and MIME metadata only and does not read file contents or request broad storage access.
 
@@ -77,13 +89,13 @@ When Universal Search opens, the idle view is intentionally minimal: one search 
 
 Tap the **settings icon** in the Universal Search field to review enabled sources and their privacy behavior. For **Files**, choose one or more folders to make them searchable. Selected folders are shown in the Sources view. Removing a folder requires confirmation, removes it from Launcher Search, and releases the saved Android read grant when possible. You can choose the folder again later. If one selected document-provider root becomes revoked, malformed, or unavailable, Launcher fails that root softly so other selected roots can continue contributing results.
 
-Enabled connected sources share the same Universal Search result panel. **Google Drive** can now participate inline after authorization; providers that remain handoff-only, including Brave Search and Dropbox in the current candidate, appear under **Search online** as full result rows rather than behind a separate **No local matches** provider strip.
+Enabled connected sources share the same Universal Search result panel. **Google Drive** can participate inline after authorization; providers that remain handoff-only, including Brave Search and Dropbox in the current Development source, appear under **Search online** as full result rows instead of behind a separate provider strip.
 
 **Files** and **Google Drive** are intentionally different sources. **Files** searches folders you explicitly choose through Android's folder picker, including document-provider folders. Enabling **Google Drive** instead starts Google account authorization for the metadata-only `drive.metadata.readonly` scope. After authorization, Launcher sends the typed query to the Google Drive API over HTTPS only while Drive is enabled, returns a bounded set of matching Drive files/folders inline, and opens the selected Drive item through its Google-provided web link. The short-lived access token is kept in process memory only. If authorization is unavailable, expires, or is rejected, Drive stops receiving queries and its source control becomes reconnectable.
 
-The Development source also attempts to reacquire a previously granted Drive access token silently after process restart when the persisted Drive source is enabled. A user-facing account prompt is not opened automatically at startup. Ordinary CI APKs are signed with Android debug identity and now fail closed in the Sources UI instead of opening an account flow that cannot be recognized as the registered Android OAuth client. In those CI builds, use **Files → Choose folder** for permission-scoped Drive folders. Full inline Google Drive remains gated on a protected signed Development build whose Android package/signing fingerprint is registered with Google, followed by representative-device consent, restart, expiry, shared-drive, and result-opening acceptance.
+The Development source also attempts to reacquire a previously granted Drive access token silently after process restart when the persisted Drive source is enabled. A user-facing account prompt is not opened automatically at startup. Ordinary CI APKs use Android debug identity and fail closed for the account flow when that identity is not registered as the authorized Android OAuth client. In those builds, use **Files → Choose folder** for permission-scoped Drive folders. Full inline Google Drive remains gated on a protected signed Development build whose Android package/signing fingerprint is registered with Google, followed by representative-device consent, restart, expiry, shared-drive, and result-opening acceptance.
 
-Brave live suggestions are not yet active. The official Brave Autosuggest API requires a confidential subscription token, so Launcher will not embed that key in the APK or scrape Brave pages. The intended inline mode remains: several official Brave-generated completions appear alongside local results after explicit opt-in, and selecting one opens that Brave query in the configured browser. Until a governed server-side credential path exists, Brave remains a truthful explicit online handoff and Launcher does not fabricate suggestions.
+Brave live suggestions are not yet active. The official Brave Autosuggest API requires a confidential subscription token, so Launcher will not embed that key in the APK or scrape Brave pages. Until a governed credential path exists, Brave remains a truthful explicit online handoff.
 
 Broader provider discovery/registration, portable recovery of provider controls and file-root grants, Google Drive representative-device/OAuth-configuration acceptance, Brave Autosuggest, additional connected adapters, recents/history/context, optional GoreeCloud Search/Index backends, and complete accessibility/profile/performance acceptance remain separately gated.
 
@@ -102,7 +114,7 @@ The following normal actions remain available while Home is locked:
 - invoking Launcher Universal Search; and
 - changing non-placement presentation preferences.
 
-If you long-press an app while locked, the placement dialog can still open so it can explain the locked state, but its current placement-changing controls are disabled.
+If you long-press an app while locked, the compact app context menu can still open, but placement-changing actions are disabled while the layout lock is active.
 
 ### Unlock from Settings
 
@@ -120,7 +132,9 @@ Open **Apps** from Home to browse the launchable application inventory exposed t
 
 Use the **Search apps** field to search the installed-application inventory locally. This Apps view is a specialized Launcher-owned view backed by the same installed-app provider foundation used for Universal Search. It does not require Internet access.
 
-Long-press an app to open its current placement dialog. When the Home layout is unlocked, you can add/remove it from Home or the Dock and use accessible earlier/later ordering controls. For a Home app, the dialog can also save a Launcher-local Home label override or reset it to the application label. **Uninstall app** delegates to Android's system uninstall confirmation; Launcher does not silently remove packages. When the layout is locked, the dialog explains the lock and disables current placement changes.
+Long-press an app to open the compact Glaze context menu. A stationary hold opens that menu; keep holding and move to drag the app directly toward Home or the Dock when the layout is unlocked. The same context surface provides Home/Remove, Dock/Undock, app-specific Widgets when available, App info, folder assignment, supported app shortcuts, and **Uninstall**. There is no second **More options** placement dialog. **Remove** only removes or suppresses the Home icon; it does not uninstall the application. **Uninstall** delegates to Android's system confirmation, and Launcher never silently removes packages. Placement-changing actions are disabled while the Home layout is locked.
+
+The App Drawer sort control provides **A–Z**, **Z–A**, **Most recent**, and **Most frequent**. The two usage-based sorts use only the Launcher's local privacy-bounded launch history described above; they do not request Android Usage Access. User Apps and Work Apps remain separate profile views.
 
 ## Launcher settings
 
@@ -158,7 +172,7 @@ The launcher supports persisted **System**, **Light**, and **Dark** appearance s
 
 ## Multi-page Home navigation
 
-When the guarded workspace has reached terminal Room authority, ordinary Home pages can be swiped horizontally. Page dots communicate position without permanently overlaying page-management controls on the wallpaper.
+When the guarded workspace has reached terminal Room authority, ordinary Home pages can be swiped horizontally. A clear horizontal gesture switches pages as soon as it crosses the Launcher's distance/direction threshold rather than waiting for finger-up. Page dots communicate position without permanently overlaying page-management controls on the wallpaper.
 
 Long-press empty Home space to open **Edit Home**. On phone layouts, its header, adaptive **Home pages** carousel, and five primary actions are composed into one viewport without requiring ordinary vertical scrolling; the action rail contains Wallpaper, Widgets, Apps, Folders, and Settings. The selected page remains prominent while neighboring page edges stay visible for horizontal navigation. Swipe the preview carousel or tap a page preview to select it. Page creation/deletion and the available page-management controls stay within the Edit Home/page-management experience rather than relying on the removed redundant **Manage** button.
 

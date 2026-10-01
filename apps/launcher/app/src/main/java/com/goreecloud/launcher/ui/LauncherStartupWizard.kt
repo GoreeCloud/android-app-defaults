@@ -262,7 +262,7 @@ fun LauncherStartupWizard(
                             )
                             WizardRadioRow(
                                 title = "Show a Search bar on Home",
-                                summary = "Keep a permanent Search affordance on the Home screen.",
+                                summary = "Keep Search visible. Launcher Settings lets you make it movable or pin it to the top or bottom.",
                                 selected = selectedSearchMode == LauncherUniversalSearchHomeMode.PERMANENT,
                                 onClick = {
                                     searchModeName = LauncherUniversalSearchHomeMode.PERMANENT.name
@@ -277,8 +277,8 @@ fun LauncherStartupWizard(
                                 summary = "Long-press a Home widget and drag it to a free cell, or release it at a valid page edge to move it to the adjacent Home page. A stationary hold opens widget options, including Move to another Home page. Fresh starter layouts use movable Glance.",
                             )
                             WizardInfoCard(
-                                title = "Weather in Glance",
-                                summary = "Glance can show current temperature and condition artwork. Weather stays optional: tap Weather on Home and follow Android's permission prompt when you want local conditions.",
+                                title = "Weather and Calendar cards",
+                                summary = "Glance keeps time and opt-in local weather together, and the widget gallery also includes separate polished Weather and Calendar cards. Recent successful weather stays briefly cached so normal Home returns do not visibly reload it.",
                             )
                             WizardInfoCard(
                                 title = "Manage folders in place",
@@ -393,7 +393,7 @@ fun LauncherHomeHintCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "Widgets: long-press and drag to a free Home cell or adjacent page edge; a stationary hold opens widget options, including Move to another Home page.",
+                "Widgets: long-press and drag to a free Home cell or adjacent page edge; movable Universal Search uses the same Home-grid behavior.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
