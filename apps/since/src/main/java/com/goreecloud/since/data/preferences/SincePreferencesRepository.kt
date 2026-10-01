@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.goreecloud.since.domain.model.DisplayFormat
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -27,6 +28,8 @@ class SincePreferencesRepository(
     private val context: Context,
 ) {
     private val themePreferenceKey = stringPreferencesKey("theme_preference")
+    private val defaultDisplayFormatKey = stringPreferencesKey("default_display_format")
+    private val showSecondsKey = booleanPreferencesKey("show_seconds")
     private val onboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
     private val onboardingStepKey = intPreferencesKey("onboarding_step")
     private val contextualHintsEnabledKey = booleanPreferencesKey("contextual_hints_enabled")
@@ -59,6 +62,18 @@ class SincePreferencesRepository(
         }
         .distinctUntilChanged()
 
+    val defaultDisplayFormat: Flow<DisplayFormat> = preferences
+        .map { values ->
+            values[defaultDisplayFormatKey]
+                ?.let { stored -> runCatching { DisplayFormat.valueOf(stored) }.getOrNull() }
+                ?: DisplayFormat.DAYS
+        }
+        .distinctUntilChanged()
+
+    val showSeconds: Flow<Boolean> = preferences
+        .map { values -> values[showSecondsKey] ?: false }
+        .distinctUntilChanged()
+
     val onboardingComplete: Flow<Boolean> = preferences
         .map { values ->
             values[onboardingCompleteKey] ?: upgradedInstallationWithoutOnboardingState
@@ -84,6 +99,18 @@ class SincePreferencesRepository(
     suspend fun setThemePreference(preference: ThemePreference) {
         context.sincePreferencesDataStore.edit { values ->
             values[themePreferenceKey] = preference.name
+        }
+    }
+
+    suspend fun setDefaultDisplayFormat(format: DisplayFormat) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[defaultDisplayFormatKey] = format.name
+        }
+    }
+
+    suspend fun setShowSeconds(enabled: Boolean) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[showSecondsKey] = enabled
         }
     }
 
