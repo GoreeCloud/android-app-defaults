@@ -23,6 +23,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.requestFocus
@@ -257,7 +258,8 @@ class SinceAccessibilityTest {
             .performScrollTo()
             .assertIsDisplayed()
             .assertHasClickAction()
-        composeRule.onNodeWithText("Read daily").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(3)
+        composeRule.onNodeWithText("Read daily").assertIsDisplayed()
     }
 
     @Test
