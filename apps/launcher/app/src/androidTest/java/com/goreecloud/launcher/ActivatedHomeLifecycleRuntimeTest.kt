@@ -442,7 +442,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
 
                 composeRule
-                    .onNodeWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
+                    .onNodeWithTag("launcher-home-unified-pager", useUnmergedTree = true)
                     .performTouchInput {
                         swipeRight(
                             startX = left + 24f,
@@ -1299,17 +1299,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .boundsInRoot
                 val delta = targetBounds.center - sourceBounds.center
 
-                composeRule
-                    .onNodeWithTag(sourceAppTag, useUnmergedTree = true)
-                    .performTouchInput {
-                        down(center)
-                        advanceEventTime(
-                            ViewConfiguration.getLongPressTimeout().toLong() + 180L,
-                        )
-                        moveTo(center + delta)
-                        advanceEventTime(120)
-                        up()
-                    }
+                injectLongPressDrag(
+                    startX = sourceBounds.center.x.toInt(),
+                    startY = sourceBounds.center.y.toInt(),
+                    endX = targetBounds.center.x.toInt(),
+                    endY = targetBounds.center.y.toInt(),
+                )
 
                 withTimeout(15_000) {
                     while (true) {
@@ -2001,6 +1996,73 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .assertIsDisplayed()
             }.isSuccess
         }
+    }
+
+    private fun injectLongPressDrag(
+        startX: Int,
+        startY: Int,
+        endX: Int,
+        endY: Int,
+    ) {
+        val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val downTime = SystemClock.uptimeMillis()
+        val holdMillis = ViewConfiguration.getLongPressTimeout().toLong() + 180L
+        val moveDurationMillis = 360L
+        val moveSteps = 12
+
+        fun inject(
+            action: Int,
+            x: Float,
+            y: Float,
+            eventTime: Long,
+        ) {
+            val event = MotionEvent.obtain(
+                downTime,
+                eventTime,
+                action,
+                x,
+                y,
+                0,
+            ).apply {
+                source = InputDevice.SOURCE_TOUCHSCREEN
+            }
+            try {
+                check(uiAutomation.injectInputEvent(event, true)) {
+                    "Android drag input injection failed for action=$action at ($x, $y)."
+                }
+            } finally {
+                event.recycle()
+            }
+        }
+
+        inject(
+            action = MotionEvent.ACTION_DOWN,
+            x = startX.toFloat(),
+            y = startY.toFloat(),
+            eventTime = downTime,
+        )
+        SystemClock.sleep(holdMillis)
+
+        repeat(moveSteps) { index ->
+            val fraction = (index + 1).toFloat() / moveSteps.toFloat()
+            val targetTime =
+                downTime + holdMillis + (moveDurationMillis * fraction).toLong()
+            val sleepMillis = (targetTime - SystemClock.uptimeMillis()).coerceAtLeast(0L)
+            if (sleepMillis > 0L) SystemClock.sleep(sleepMillis)
+            inject(
+                action = MotionEvent.ACTION_MOVE,
+                x = startX + (endX - startX) * fraction,
+                y = startY + (endY - startY) * fraction,
+                eventTime = SystemClock.uptimeMillis(),
+            )
+        }
+
+        inject(
+            action = MotionEvent.ACTION_UP,
+            x = endX.toFloat(),
+            y = endY.toFloat(),
+            eventTime = SystemClock.uptimeMillis(),
+        )
     }
 
     private fun injectTouchSwipe(
