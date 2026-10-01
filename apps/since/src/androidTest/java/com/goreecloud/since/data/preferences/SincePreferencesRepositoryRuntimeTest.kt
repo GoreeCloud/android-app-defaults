@@ -30,6 +30,7 @@ class SincePreferencesRepositoryRuntimeTest {
             assertEquals(DisplayFormat.MONTHS, reopened.defaultDisplayFormat.first())
             assertFalse(reopened.showSeconds.first())
             assertEquals("OLDEST_START", reopened.defaultSortName.first())
+            assertFalse(reopened.confirmReset.first())
 
             reopened.setDefaultDisplayFormat(DisplayFormat.YEARS)
             reopened.setShowSeconds(true)
