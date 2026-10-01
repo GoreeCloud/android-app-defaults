@@ -296,6 +296,7 @@ class SinceTopLevelNavigationTest {
             }
         }
 
+        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
         composeRule.onNodeWithTag("home-contextual-hint-dismiss")
             .assertHasClickAction()
@@ -326,6 +327,7 @@ class SinceTopLevelNavigationTest {
             }
         }
 
+        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
         composeRule.onNodeWithTag("nav-settings").performClick()
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
