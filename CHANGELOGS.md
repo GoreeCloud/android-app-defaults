@@ -7,8 +7,10 @@
 - Made title/note search case- and accent-insensitive while remaining fully local.
 - Added deterministic unit, UI, and persistence coverage; sorting does not mutate tracker timestamps or Room data.
 - Added compact-width spacing that keeps tracker-kind metadata clear of the populated Dashboard’s floating Add tracker action after rendered-evidence review exposed overlap at 320 dp.
+- Consolidated the locally persisted **Confirm streak resets** preference: enabled by default, it adds a final review confirmation after reset time/reason/note validation; disabling it removes only that final step and preserves the reset editor, validation, History preservation, and atomic reset path.
+- Contextual Home guidance now appears only when a tracker exists and is placed before tracker cards so the primary floating action cannot obscure it.
 
-**Acceptance boundary:** stacked Development candidate; fresh exact-head CI and representative-device acceptance remain required.
+**Acceptance boundary:** consolidated stacked Development candidate; fresh exact-head CI, rendered-evidence review, and representative-device acceptance remain required.
 
 
 ## September 30, 2026 — Since display preferences candidate
@@ -20,7 +22,7 @@
 - Added English/Arabic Settings and elapsed-time resources, Android runtime persistence coverage across repository instances, and UI coverage for preference controls, visible seconds, and new-tracker default-format behavior.
 - Added no Room schema change, network permission, background service, account dependency, or persisted elapsed counter.
 
-**Acceptance boundary:** this is stacked Development candidate source. Exact-head CI, rendered-evidence review, representative-device verification, and the separately specified reset-confirmation preference remain open.
+**Acceptance boundary:** this is stacked Development candidate source. Exact-head CI, rendered-evidence review, representative-device verification, and representative-device verification remain open; the reset-confirmation preference is now implemented on the consolidated dashboard candidate.
 
 
 ## September 30, 2026 — Since owner-device Settings and Achievements refinement candidate
