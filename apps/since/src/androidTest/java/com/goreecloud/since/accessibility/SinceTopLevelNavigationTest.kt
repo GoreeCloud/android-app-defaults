@@ -76,7 +76,8 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-settings").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("Months").performScrollTo().assertHasClickAction().performClick()
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithText("Months").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-show-seconds").performScrollTo().assertHasClickAction().performClick()
         composeRule.runOnIdle {
             assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
