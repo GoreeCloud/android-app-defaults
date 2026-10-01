@@ -14,15 +14,17 @@ Merged PR #127 restores the complete API 36 `connectedDebugAndroidTest` suite pl
 
 Merged PR #144 adds device-local, profile-qualified App Drawer favorites with long-press **Pin in Apps / Unpin in Apps** actions, visible/accessibility pin state, a ★ pinned-only page filter, a deterministic **Pinned first** sort mode, and local persistence of the selected Drawer sort mode across restarts. This partially advances the broader user-controlled drawer organization obligation without claiming categories, tags, collections, or general custom ordering complete.
 
-The current Home/Search polish candidate advances the visual-composition portion of the Glaze acceptance work but does not close representative-device, accessibility, performance, or consumer-conformance gates.
+Merged Home/Search polish PR #147 advances the visual-composition portion of the Glaze acceptance work but does not close representative-device, accessibility, performance, or consumer-conformance gates. Merged Quick answers PR #149 adds bounded local arithmetic/unit-conversion answers without changing the local-first/no-retention Search boundary.
 
-Still open after runtime-gate integration: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
+The current runtime-acceptance candidate adds direct secondary-Home swipe-down Universal Search coverage plus repeated full-inventory reconciliation and Drawer CREATED→RESUMED continuity coverage. These managed-emulator tests narrow the acceptance gap but do not simulate real package/profile churn, OEM-specific enumeration failures, or representative-device jank/power behavior.
+
+Still open after this candidate: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; real User/Work package/profile churn and managed-profile lifecycle acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
 **Record type:** Repository planned/open feature inventory  
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
 **Migration state:** **Mandatory monorepo consolidation is complete. The standalone repository is no longer an active development target; historical entries remain provenance only.**  
-**Current authoritative main:** `d78ef5625ad14ef62c2405fdb697fe37aba81bec` after merged App Drawer favorites PR #144; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override the September 30 current-state checkpoint.  
+**Current authoritative main:** `a521281821f6a73a6e8d540aca6ca1a1364b40d2` after documentation-only reconciliation PR #150; latest source-bearing Launcher runtime remains `1f3758eb9ea5722e6557bae56ecc3be240d3c12e` after merged Quick answers PR #149 on top of Home/Search polish PR #147. Launcher remains Development. Historical candidate sections below remain dated provenance and do not override the September 30 current-state checkpoint.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Purpose
