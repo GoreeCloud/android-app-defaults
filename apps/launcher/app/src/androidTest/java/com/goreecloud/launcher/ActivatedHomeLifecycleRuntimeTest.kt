@@ -441,17 +441,15 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
 
-                val pagerBounds = composeRule
+                composeRule
                     .onNodeWithTag("launcher-home-unified-pager", useUnmergedTree = true)
-                    .fetchSemanticsNode()
-                    .boundsInRoot
-                injectTouchSwipe(
-                    startX = (pagerBounds.left + 24f).toInt(),
-                    startY = pagerBounds.center.y.toInt(),
-                    endX = (pagerBounds.right - 24f).toInt(),
-                    endY = pagerBounds.center.y.toInt(),
-                    durationMillis = 420L,
-                )
+                    .performTouchInput {
+                        swipeRight(
+                            startX = left + 24f,
+                            endX = right - 24f,
+                            durationMillis = 420,
+                        )
+                    }
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
