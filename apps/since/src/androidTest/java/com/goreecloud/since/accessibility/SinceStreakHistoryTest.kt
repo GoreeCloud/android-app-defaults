@@ -151,7 +151,7 @@ class SinceStreakHistoryTest {
                     .isNotEmpty()
         }
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
@@ -181,7 +181,7 @@ class SinceStreakHistoryTest {
 
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
