@@ -75,17 +75,17 @@ Launcher manages one dedicated movable Search widget for this setting. If an exi
 
 ### Top
 
-A persistent **Search GoreeCloud** bar is pinned above the Home grid. It does not consume Home-grid cells. Fixed-bar presentation can use the available Glass, Clear, or Solid styles.
+A persistent **Search with GoreeCloud…** bar is pinned above the Home grid. It does not consume Home-grid cells. Fixed-bar presentation can use the available Glass, Clear, or Solid styles.
 
 ### Bottom
 
-A persistent **Search GoreeCloud** bar is pinned below the Home grid. It does not consume Home-grid cells. Fixed-bar presentation can use the available Glass, Clear, or Solid styles.
+A persistent **Search with GoreeCloud…** bar is pinned below the Home grid. It does not consume Home-grid cells. Fixed-bar presentation can use the available Glass, Clear, or Solid styles.
 
 Tapping either a fixed Search bar or a movable Universal Search widget opens the same Launcher-owned Universal Search surface.
 
 The current Development search foundation provides installed applications, Android application shortcuts, and user-enabled local Contacts, Call history, Messages, and file-name results. Local file Search is limited to Android Storage Access Framework folders that you explicitly choose; Launcher indexes bounded file-name and MIME metadata only and does not read file contents or request broad storage access.
 
-When Universal Search opens, the idle view is intentionally minimal: one search field with a search icon, **Find anything on your device…**, and a settings icon at the far right. Result groups, status information, and other search controls appear only after you begin typing or explicitly open settings.
+When Universal Search opens, the current Development shell shows **Universal Search**, the boundary **Local first · connected sources are opt-in**, a direct **Sources** action, and a **Search this device** field. Local Frequent / Recent / New & updated suggestions remain available before typing. After you type, Launcher presents a ranked **Top result** followed by source-grouped result sections with counts; connected handoff rows remain explicit user actions rather than automatic query transmission.
 
 Tap the **settings icon** in the Universal Search field to review enabled sources and their privacy behavior. For **Files**, choose one or more folders to make them searchable. Selected folders are shown in the Sources view. Removing a folder requires confirmation, removes it from Launcher Search, and releases the saved Android read grant when possible. You can choose the folder again later. If one selected document-provider root becomes revoked, malformed, or unavailable, Launcher fails that root softly so other selected roots can continue contributing results.
 
