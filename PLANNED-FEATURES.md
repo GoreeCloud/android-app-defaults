@@ -1,5 +1,10 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-30 Since dashboard-search continuation
+
+The active stacked candidate now covers the specified local Dashboard ordering set and accent-tolerant title/note search. Remaining S08 work is limited to optional archived-item inclusion if intentionally enabled; representative-device accessibility/localization acceptance remains open.
+
+
 ## 2026-09-30 Since display-settings continuation
 
 Default display format and seconds visibility are implemented on the active stacked Development candidate with the specified defaults of Days and seconds enabled. Remaining Settings work includes the separately specified reset-confirmation preference, reduced-motion/transparency behavior only where an approved Glaze mapping permits it, and representative-device accessibility/localization acceptance.
