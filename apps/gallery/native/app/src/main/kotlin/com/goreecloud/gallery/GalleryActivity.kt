@@ -1040,6 +1040,7 @@ class GalleryActivity : Activity() {
                     if (collectionCount == 1) "1 album" else "$collectionCount albums"
                 val hasSmartCollections =
                     hasFavorites ||
+                        visibleItems.any { it.mimeType.startsWith("video/") } ||
                         albumCatalog.any { album ->
                             GalleryAlbumQuickAccessPolicy.priority(album.displayName, isFavorites = false) != null
                         }
