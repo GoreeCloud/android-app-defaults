@@ -2,7 +2,7 @@
 
 ## September 30, 2026 — Since dashboard search and sort candidate
 
-The stacked Since candidate adds the five specified local Dashboard order modes, persists the selected order in Preferences DataStore, and normalizes title/note search for case and accents. General Settings exposes the same local choice. Fresh exact-head validation remains required.
+The consolidated Since candidate adds the five specified local Dashboard order modes, persists the selected order in Preferences DataStore, and normalizes title/note search for case and accents. General Settings exposes the same local choice and a persisted **Confirm streak resets** preference. Confirmation defaults on and inserts a final review step only after the reset editor validates time, reason, and note; opting out skips that final prompt without bypassing editor validation, History preservation, or the existing atomic reset mutation. Contextual Home guidance is limited to actionable populated dashboards, and compact-width tracker metadata is kept clear of the floating Add tracker action. Fresh exact-head validation and rendered-evidence review remain required.
 
 
 ## September 30, 2026 — Since display preferences candidate
