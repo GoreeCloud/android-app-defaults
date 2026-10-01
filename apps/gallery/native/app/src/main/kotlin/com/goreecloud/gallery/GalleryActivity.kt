@@ -1033,9 +1033,9 @@ class GalleryActivity : Activity() {
                 videoCountLabel(visibleItems.count { it.mimeType.startsWith("video/") })
             destination == GalleryDestination.ALBUMS -> {
                 val albumCount = visibleItems.buildAlbumCatalog().size
-                val favoriteSuffix = if (favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } }) 1 else 0
-                val totalCollections = albumCount + favoriteSuffix
-                if (totalCollections == 1) "1 collection" else "$totalCollections collections"
+                val albumsLabel = if (albumCount == 1) "1 album" else "$albumCount albums"
+                val hasFavorites = favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } }
+                if (hasFavorites) albumsLabel + " · Smart collection" else albumsLabel
             }
             else -> ""
         }
