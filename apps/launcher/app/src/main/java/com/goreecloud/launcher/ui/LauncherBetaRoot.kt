@@ -2151,7 +2151,7 @@ private fun HomeSurface(
 
             if (primaryHomeShouldRenderFixedSearch(contentOnly, showFixedSearchAtTop)) {
                 GlazeSearchCapsule(
-                    value = "Search GoreeCloud",
+                    value = "Search with GoreeCloud…",
                     style = experiencePreferences.homeSearchStyle,
                     onClick = openSearch,
                     modifier = Modifier.fillMaxWidth(),
@@ -2242,7 +2242,7 @@ private fun HomeSurface(
 
             if (primaryHomeShouldRenderFixedSearch(contentOnly, showFixedSearchAtBottom)) {
                 GlazeSearchCapsule(
-                    value = "Search GoreeCloud",
+                    value = "Search with GoreeCloud…",
                     style = experiencePreferences.homeSearchStyle,
                     onClick = openSearch,
                     modifier = Modifier.fillMaxWidth(),
@@ -3447,10 +3447,10 @@ private fun HomeAtAGlance(
     val background = when (resolvedPresentation.materialRole) {
         GlazeV16MaterialRole.SOLID -> MaterialTheme.colorScheme.surface
         GlazeV16MaterialRole.RAISED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
-        else -> GlazeAtmosphere.canvasBlack.copy(alpha = 0.30f)
+        else -> GlazeAtmosphere.canvasBlack.copy(alpha = 0.26f)
     }
     val outline = if (usesWallpaperGlass) {
-        Color.White.copy(alpha = 0.11f)
+        Color.White.copy(alpha = 0.14f)
     } else {
         MaterialTheme.colorScheme.outlineVariant
     }
@@ -3470,10 +3470,10 @@ private fun HomeAtAGlance(
                     "Time, date and weather. Unlock Home layout to make this movable."
                 }
             },
-        shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
+        shape = RoundedCornerShape(GlazeMetrics.opticalHero),
         color = background,
         border = BorderStroke(1.dp, outline),
-        shadowElevation = if (usesWallpaperGlass) 0.dp else 1.dp,
+        shadowElevation = if (usesWallpaperGlass) 2.dp else 1.dp,
     ) {
         Column(
             modifier = Modifier
@@ -3517,6 +3517,20 @@ private fun HomeAtAGlance(
                 LauncherWeatherStatusChip(
                     foreground = foreground,
                     compact = compact,
+                )
+            }
+            if (!compact) {
+                Text(
+                    "A calmer Home. Your way.",
+                    modifier = if (alignment == LauncherHomeGlanceAlignment.CENTER) {
+                        Modifier.fillMaxWidth()
+                    } else {
+                        Modifier
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = foreground.copy(alpha = 0.72f),
+                    textAlign = textAlign,
+                    maxLines = 1,
                 )
             }
         }
