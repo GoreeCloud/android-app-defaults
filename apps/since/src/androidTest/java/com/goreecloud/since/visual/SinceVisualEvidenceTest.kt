@@ -168,7 +168,7 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithTag("review-reset-streak").performClick()
         composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
         capture("reset-confirmation")
-        composeRule.onNodeWithText("Back").performClick()
+        composeRule.onNodeWithTag("back-from-reset-confirmation").performClick()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
