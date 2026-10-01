@@ -767,6 +767,19 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .assertIsDisplayed()
                 Unit
             } finally {
+                // This test intentionally selects a temporary secondary page. Return through the
+                // real HOME path before deleting that page so the persisted selected-page identity
+                // cannot leak into later ActivityScenario tests as a now-stale page selection.
+                resetHomeBeforeScenarioClose()
+                composeRule.waitUntil(timeoutMillis = 10_000) {
+                    composeRule
+                        .onAllNodesWithTag(
+                            "launcher-home-page-" + WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
                 scenario.close()
             }
         } finally {
