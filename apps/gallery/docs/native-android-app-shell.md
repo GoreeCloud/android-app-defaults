@@ -22,13 +22,13 @@ The current shell reads at most 100 recent rows exposed by the authorized MediaS
 
 The shell renders local metadata only and introduces no network permission, cloud dependency, account requirement, analytics, remote font, remote icon, or remote UI resource.
 
-## Glaze UI 2.0 source contract
+## Current Glaze source contract
 
-The shell targets Glaze UI 2.0.0, the current Stable design-system baseline. The first source-level mapping intentionally uses native Android controls and platform theme semantics while preserving Gallery's media-first composition.
+The original shell milestone predates the current Gallery design-system authority. The current native Development line maps to **GLAZE UI V1.6 / 1.6.0**, the Official Anchor shared release. The canonical implementation repository is `GoreeCloud/glaze`; Glaze V1.7 remains Development and is not a consumer baseline for Gallery.
 
 The repository-local contract currently enforces:
 
-- Glaze UI version `2.0.0`;
+- GLAZE UI V1.6 / `1.6.0` as the consumer source baseline;
 - a 48dp general interactive-target floor;
 - adaptive horizontal gutters for phone, tablet, and larger resizable widths;
 - native light/dark theme variants;
@@ -36,19 +36,15 @@ The repository-local contract currently enforces:
 - no animation dependency for task completion; and
 - no network-delivered presentation resources.
 
-This is source integration, not rendered acceptance. Accessibility, large-text reflow, representative phone/tablet/foldable behavior, visual hierarchy, contrast, focus behavior, and physical-device review remain required.
+This remains source integration, not whole-application acceptance. Accessibility, large-text reflow, representative phone/tablet/foldable behavior, visual hierarchy, contrast, focus behavior, motion behavior, and physical-device review remain separately gated.
 
 ## Current UI scope
 
-The application presents:
+The first-party native implementation has advanced substantially beyond the initial shell described by this milestone. Current Development source includes direct **Photos / Albums / Videos / Trash / Settings** navigation, Android-authorized local thumbnail grids, album/favorites browsing, local search and sort, timeline grouping, view-density controls, selection and bulk actions, an authorized media viewer, Android-owned Trash/Restore/Delete flows, Move foundations, and Gallery-local settings.
 
-- a local-library heading and explicit Development/Glaze source target;
-- explicit denied, selected-only, image-only, video-only, image-and-video, or legacy authorized media state as applicable;
-- a native permission/reselection action or local refresh action;
-- authoritative provider-failure messaging; and
-- a bounded newest-first list of authorized image/video metadata including display name, kind, optional album, timestamp, and size.
+The October 1, 2026 UI refresh also adds mockup-aligned primary headers, raised album cards, timeline counts, dedicated Trash navigation, and direct Photos/Videos Group and View controls.
 
-No thumbnail grid, album navigation, viewer, editor, share flow, delete/move flow, hidden-media policy, Photos integration, or cloud library is implemented by this shell.
+For the maintained current feature inventory and remaining work, use the repository feature/specification records rather than treating this historical shell milestone as the complete application surface.
 
 ## Security, privacy, and continuity boundary
 
