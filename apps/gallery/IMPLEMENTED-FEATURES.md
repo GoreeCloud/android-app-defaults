@@ -63,7 +63,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Videos browsing uses a featured first card followed by responsive cards with local play/duration affordances, title/date metadata, and category filters derived only from the current authorized snapshot and Gallery-local Favorites.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
-- Album browsing with covers, names, counts, adaptive layout, and bounded album-detail browsing.
+- Album browsing with covers, names, counts, adaptive layout, bounded album-detail browsing, and a Quick access lane populated only from existing local collections.
 
 ### Favorites, viewer, selection, and sharing
 
