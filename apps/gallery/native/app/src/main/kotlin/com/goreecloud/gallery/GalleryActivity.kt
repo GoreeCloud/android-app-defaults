@@ -1778,8 +1778,9 @@ class GalleryActivity : Activity() {
         generation: Int,
         parent: LinearLayout,
     ) {
-        val columns = currentUserSettings().viewDensity.mediaGridColumns(
+        val columns = currentUserSettings().viewDensity.mediaGridColumnsForGroup(
             resources.configuration.screenWidthDp,
+            groupItems.size,
         )
         val gutterPx = dp(GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp))
         val gaps = dp(GRID_GAP_DP) * (columns - 1)
