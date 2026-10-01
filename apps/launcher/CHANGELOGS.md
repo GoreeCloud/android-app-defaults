@@ -1,5 +1,18 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add opt-in device-local recent searches
+
+Universal Search now has an explicit **Recent searches** capability designed around privacy boundaries rather than keystroke logging. The setting is off by default. When enabled, Launcher records a normalized query only after the user activates a search result or explicit connected-provider handoff; merely typing never persists the query.
+
+History is stored only in Launcher-local DataStore, deduplicated newest-first, bounded to 10 entries, and each normalized query is capped at 120 characters. Disabling the feature immediately clears persisted history. The Search source/settings surface exposes the enable/disable control and **Clear history** action, while the idle Search surface shows up to five local recent queries that repopulate the field without sending anything remotely.
+
+Connected-source privacy remains unchanged: query history is not shared with providers, and connected queries are still sent only after an explicit provider action.
+
+Focused JVM coverage verifies disabled-by-default persistence, clear-on-disable behavior, normalization, deduplication, bounds, codec round-trip, and fail-closed truncated data handling.
+
+**Acceptance boundary:** Development feature candidate only. Exact-head build/JVM/lint/schema and restored API 36 runtime validation are required before integration; accessibility/large-text/form-factor, privacy UX, representative-device behavior, and broader backup/restore policy remain open.
+
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
