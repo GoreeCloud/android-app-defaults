@@ -441,15 +441,17 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
 
-                composeRule
+                val pagerBounds = composeRule
                     .onNodeWithTag("launcher-home-unified-pager", useUnmergedTree = true)
-                    .performTouchInput {
-                        swipeRight(
-                            startX = left + 24f,
-                            endX = right - 24f,
-                            durationMillis = 420,
-                        )
-                    }
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+                injectTouchSwipe(
+                    startX = (pagerBounds.left + 24f).toInt(),
+                    startY = pagerBounds.center.y.toInt(),
+                    endX = (pagerBounds.right - 24f).toInt(),
+                    endY = pagerBounds.center.y.toInt(),
+                    durationMillis = 420L,
+                )
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
@@ -1299,12 +1301,21 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .boundsInRoot
                 val delta = targetBounds.center - sourceBounds.center
 
-                injectLongPressDrag(
-                    startX = sourceBounds.center.x.toInt(),
-                    startY = sourceBounds.center.y.toInt(),
-                    endX = targetBounds.center.x.toInt(),
-                    endY = targetBounds.center.y.toInt(),
-                )
+                composeRule
+                    .onNodeWithTag(sourceAppTag, useUnmergedTree = true)
+                    .performTouchInput {
+                        val dragDelta = targetBounds.center - sourceBounds.center
+                        down(center)
+                        advanceEventTime(
+                            ViewConfiguration.getLongPressTimeout().toLong() + 180L,
+                        )
+                        repeat(12) { index ->
+                            val fraction = (index + 1).toFloat() / 12f
+                            moveTo(center + dragDelta * fraction)
+                            advanceEventTime(30L)
+                        }
+                        up()
+                    }
 
                 withTimeout(15_000) {
                     while (true) {
