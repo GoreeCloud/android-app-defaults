@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -53,6 +54,7 @@ class RecycleBinActivity : Activity() {
     private lateinit var body: LinearLayout
     private lateinit var headerTitle: TextView
     private lateinit var headerSubtitle: TextView
+    private lateinit var navigationCapsule: LinearLayout
     private lateinit var actionBar: LinearLayout
 
     private var generation = 0
@@ -173,7 +175,12 @@ class RecycleBinActivity : Activity() {
 
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(horizontalGutterDp()), dp(14), dp(horizontalGutterDp()), dp(110))
+            setPadding(
+                dp(horizontalGutterDp()),
+                dp(14),
+                dp(horizontalGutterDp()),
+                dp(GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP),
+            )
             setBackgroundColor(canvasColor())
         }
 
@@ -181,20 +188,13 @@ class RecycleBinActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        header.addView(
-            textAction("‹", "Back to GoreeCloud Gallery") { finish() }.apply {
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-            },
-            LinearLayout.LayoutParams(dp(48), dp(48)),
-        )
-
         val titles = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
         headerTitle = TextView(this).apply {
-            text = "Recycle Bin"
+            text = "Trash"
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
             setTypeface(typeface, Typeface.BOLD)
         }
         headerSubtitle = TextView(this).apply {
@@ -208,13 +208,13 @@ class RecycleBinActivity : Activity() {
             marginStart = dp(4)
         })
         header.addView(
-            textAction("Refresh", "Refresh Recycle Bin") { loadRecycleBin() },
+            textAction("Refresh", "Refresh Trash") { loadRecycleBin() },
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48)),
         )
         content.addView(header)
 
         content.addView(TextView(this).apply {
-            text = "Items here remain under Android MediaStore Trash authority. Restore and permanent deletion always require Android confirmation."
+            text = "Recently deleted photos and videos remain under Android MediaStore Trash authority. Restore and permanent deletion always require Android confirmation."
             setTextColor(secondaryTextColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             setLineSpacing(0f, 1.08f)
@@ -232,28 +232,107 @@ class RecycleBinActivity : Activity() {
             clipToPadding = false
             addView(content, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         }
-        root.addView(scroll, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-
-        actionBar = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            visibility = View.GONE
-            setPadding(dp(4), dp(4), dp(4), dp(4))
-            background = roundedSurface(if (isNightMode()) 0xf21d1d1f.toInt() else 0xf2ffffff.toInt(), 26)
-            elevation = dp(4).toFloat()
-        }
         root.addView(
-            actionBar,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(58)).apply {
-                gravity = Gravity.BOTTOM
-                marginStart = dp(22)
-                marginEnd = dp(22)
-                bottomMargin = dp(12)
+            scroll,
+            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
+                bottomMargin = dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
             },
         )
 
+        navigationCapsule = buildNavigationCapsule()
+        root.addView(navigationCapsule, bottomCapsuleLayoutParams())
+
+        actionBar = bottomCapsuleSurface().apply {
+            visibility = View.GONE
+        }
+        root.addView(actionBar, bottomCapsuleLayoutParams())
+
         setContentView(root)
         applySystemChrome()
+    }
+
+    private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
+        val items = listOf(
+            Triple("Photos", R.drawable.ic_gallery_nav_photos, GalleryNavigationContract.PHOTOS),
+            Triple("Albums", R.drawable.ic_gallery_nav_albums, GalleryNavigationContract.ALBUMS),
+            Triple("Videos", R.drawable.ic_gallery_nav_videos, GalleryNavigationContract.VIDEOS),
+            Triple("Trash", R.drawable.ic_gallery_nav_trash, GalleryNavigationContract.TRASH),
+            Triple("Settings", R.drawable.ic_gallery_nav_settings, GalleryNavigationContract.SETTINGS),
+        )
+        items.forEachIndexed { index, (label, icon, target) ->
+            val selected = target == GalleryNavigationContract.TRASH
+            addView(
+                TextView(this@RecycleBinActivity).apply {
+                    text = label
+                    gravity = Gravity.CENTER
+                    minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, GalleryGlazeContract.NAVIGATION_LABEL_SP)
+                    setTypeface(typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
+                    setTextColor(if (selected) accentColor() else primaryTextColor())
+                    setCompoundDrawablesWithIntrinsicBounds(0, icon, 0, 0)
+                    compoundDrawableTintList = ColorStateList.valueOf(
+                        if (selected) accentColor() else primaryTextColor(),
+                    )
+                    compoundDrawablePadding = dp(2)
+                    isSelected = selected
+                    isClickable = true
+                    isFocusable = true
+                    contentDescription = label + if (selected) ", selected" else ""
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        stateDescription = if (selected) "Selected" else null
+                    }
+                    background = if (selected) {
+                        GalleryGlazeSurfaces.drawable(
+                            context,
+                            GalleryGlazeSurfaces.Role.CONTROL,
+                            GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP,
+                        )
+                    } else {
+                        roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP)
+                    }
+                    setOnClickListener {
+                        if (target != GalleryNavigationContract.TRASH) {
+                            openGalleryDestination(target)
+                        }
+                    }
+                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply {
+                    if (index > 0) marginStart = dp(2)
+                },
+            )
+        }
+    }
+
+    private fun openGalleryDestination(target: String) {
+        startActivity(
+            Intent(this, GalleryActivity::class.java)
+                .putExtra(GalleryNavigationContract.EXTRA_DESTINATION, target)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+        )
+        finish()
+    }
+
+    private fun bottomCapsuleLayoutParams(): FrameLayout.LayoutParams =
+        FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            dp(GalleryGlazeContract.NAVIGATION_HEIGHT_DP),
+        ).apply {
+            gravity = Gravity.BOTTOM
+            marginStart = dp(GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
+            marginEnd = dp(GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
+            bottomMargin = dp(GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
+        }
+
+    private fun bottomCapsuleSurface(): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER
+        setPadding(dp(3), dp(3), dp(3), dp(3))
+        background = GalleryGlazeSurfaces.drawable(
+            context,
+            GalleryGlazeSurfaces.Role.CHROME,
+            GalleryGlazeContract.NAVIGATION_RADIUS_DP,
+        )
+        elevation = dp(GalleryGlazeContract.NAVIGATION_ELEVATION_DP).toFloat()
     }
 
     private fun loadRecycleBin() {
@@ -266,20 +345,20 @@ class RecycleBinActivity : Activity() {
 
         if (!AndroidTrashedMediaStoreReader.isSupported()) {
             trashedItems = emptyList()
-            headerTitle.text = "Recycle Bin"
+            headerTitle.text = "Trash"
             headerSubtitle.text = "Requires Android 11 or newer"
             body.addView(emptyState("Recycle Bin unavailable", "Android MediaStore Trash browsing requires Android 11 or newer."))
             return
         }
         if (!hasReadableMediaAccess()) {
             trashedItems = emptyList()
-            headerTitle.text = "Recycle Bin"
+            headerTitle.text = "Trash"
             headerSubtitle.text = "Media access required"
             body.addView(emptyState("Media access required", "Open GoreeCloud Gallery and allow Android media access before browsing the Recycle Bin."))
             return
         }
 
-        headerTitle.text = "Recycle Bin"
+        headerTitle.text = "Trash"
         headerSubtitle.text = "Loading Android MediaStore Trash…"
         body.addView(messageRow("Loading Recycle Bin", "Reading only image/video items Android currently exposes as trashed."))
 
@@ -304,7 +383,7 @@ class RecycleBinActivity : Activity() {
         body.removeAllViews()
         renderedTiles.clear()
         val count = trashedItems.size
-        headerTitle.text = "Recycle Bin"
+        headerTitle.text = "Trash"
         headerSubtitle.text = buildString {
             append(if (count == 1) "1 item" else "$count items")
             if (rejectedRows > 0) append(" · $rejectedRows skipped")
@@ -312,7 +391,7 @@ class RecycleBinActivity : Activity() {
         }
 
         if (trashedItems.isEmpty()) {
-            body.addView(emptyState("Recycle Bin is empty", "Photos and videos moved to Android Trash will appear here when Android exposes them to Gallery."))
+            body.addView(emptyState("Trash is empty", "Photos and videos moved to Android Trash will appear here when Android exposes them to Gallery."))
             return
         }
 
@@ -326,10 +405,10 @@ class RecycleBinActivity : Activity() {
             trashedItems = emptyList()
             selectedUris.clear()
             renderedTiles.clear()
-            headerTitle.text = "Recycle Bin"
-            headerSubtitle.text = "Recycle Bin unavailable"
+            headerTitle.text = "Trash"
+            headerSubtitle.text = "Trash unavailable"
             body.removeAllViews()
-            body.addView(messageRow("Recycle Bin unavailable", message))
+            body.addView(messageRow("Trash unavailable", message))
             renderActionBar()
         }
     }
@@ -475,12 +554,14 @@ class RecycleBinActivity : Activity() {
     }
 
     private fun renderActionBar() {
-        if (!::actionBar.isInitialized) return
+        if (!::actionBar.isInitialized || !::navigationCapsule.isInitialized) return
         actionBar.removeAllViews()
         if (selectedUris.isEmpty() || viewerOverlay != null) {
             actionBar.visibility = View.GONE
+            navigationCapsule.visibility = if (viewerOverlay == null) View.VISIBLE else View.GONE
             return
         }
+        navigationCapsule.visibility = View.GONE
         actionBar.visibility = View.VISIBLE
         val actions = listOf(
             textAction("Select all", "Select all currently loaded trashed media") {
@@ -494,7 +575,7 @@ class RecycleBinActivity : Activity() {
             textAction("Delete permanently", "Permanently delete selected media through Android confirmation") {
                 requestMutation(AndroidMediaMutationMode.DELETE)
             },
-            textAction("Cancel", "Clear Recycle Bin selection") {
+            textAction("Cancel", "Clear Trash selection") {
                 selectedUris.clear()
                 renderSelectionState()
             },
@@ -517,6 +598,7 @@ class RecycleBinActivity : Activity() {
         renderSelectionState()
         viewerOverlay?.let { root.removeView(it) }
         actionBar.visibility = View.GONE
+        navigationCapsule.visibility = View.GONE
 
         val overlay = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
@@ -550,7 +632,7 @@ class RecycleBinActivity : Activity() {
             setPadding(dp(10), dp(8), dp(10), dp(8))
             background = roundedSurface(0xd9141416.toInt(), 22)
         }
-        val viewerBack = viewerAction("‹", "Close Recycle Bin viewer") { closeViewer() }.apply {
+        val viewerBack = viewerAction("‹", "Close Trash viewer") { closeViewer() }.apply {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
         }
         topBar.addView(viewerBack, LinearLayout.LayoutParams(dp(48), dp(48)))
@@ -694,23 +776,23 @@ class RecycleBinActivity : Activity() {
                 mode = mode,
             )
         } catch (_: IllegalArgumentException) {
-            Toast.makeText(this, "Gallery refused an invalid Recycle Bin request.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gallery refused an invalid Trash request.", Toast.LENGTH_SHORT).show()
             return
         } catch (_: IllegalStateException) {
-            Toast.makeText(this, "Recycle Bin mutation is unavailable on this device.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Trash mutation is unavailable on this device.", Toast.LENGTH_SHORT).show()
             return
         } catch (_: SecurityException) {
-            Toast.makeText(this, "Android denied the Recycle Bin request.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Android denied the Trash request.", Toast.LENGTH_SHORT).show()
             return
         } catch (_: RuntimeException) {
-            Toast.makeText(this, "Android could not prepare the Recycle Bin request.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Android could not prepare the Trash request.", Toast.LENGTH_SHORT).show()
             return
         }
 
         pendingMutation = try {
             AndroidMediaMutationPendingStates.capture(request.mode, request.contentUris)
         } catch (_: IllegalArgumentException) {
-            Toast.makeText(this, "Gallery refused invalid pending Recycle Bin state.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gallery refused invalid pending Trash state.", Toast.LENGTH_SHORT).show()
             return
         }
         try {
@@ -763,7 +845,7 @@ class RecycleBinActivity : Activity() {
             .setTitle(item.displayName)
             .setMessage(
                 listOf(
-                    "State: In Android Recycle Bin",
+                    "State: In Android Trash",
                     "Type: ${if (item.mimeType.startsWith("video/")) "Video" else "Photo"}",
                     "Album: ${item.albumName ?: "Not grouped"}",
                     "Date: ${DATE_TIME_FORMAT.format(item.capturedAt ?: item.modifiedAt)}",
