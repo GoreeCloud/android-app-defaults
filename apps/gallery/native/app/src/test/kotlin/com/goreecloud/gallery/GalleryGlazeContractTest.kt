@@ -98,14 +98,14 @@ class GalleryGlazeContractTest {
 
     @Test
     fun `navigation capsule preserves current V1_6 baseline and local icon semantics`() {
-        assertEquals(54, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
+        assertEquals(60, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
         assertEquals(26, GalleryGlazeContract.NAVIGATION_RADIUS_DP)
-        assertEquals(24, GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
+        assertEquals(16, GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
         assertEquals(10, GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
         assertEquals(4, GalleryGlazeContract.NAVIGATION_ELEVATION_DP)
-        assertEquals(76, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+        assertEquals(82, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
         assertEquals(28, GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP)
-        assertEquals(20, GalleryGlazeContract.NAVIGATION_ICON_DP)
+        assertEquals(21, GalleryGlazeContract.NAVIGATION_ICON_DP)
         assertTrue(
             GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP >=
                 GalleryGlazeContract.NAVIGATION_HEIGHT_DP + GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP,
