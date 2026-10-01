@@ -42,7 +42,7 @@ Current source includes:
 - Development presentation of unsupported workspace-item counts instead of silently hiding their presence.
 - Launcher-owned Universal Search Home entry through the **Search GoreeCloud** affordance in Permanent mode and one-finger downward Home invocation in both supported entry modes. Earlier Index activity-handoff revisions remain historical provenance.
 - Scoped `MAIN` + `LAUNCHER` package visibility for app discovery without the legacy Index search-action query, `QUERY_ALL_PACKAGES`, or Launcher Internet permission.
-- Canonical Launcher visual-asset provenance from `GoreeCloud/goreecloud-branding-assets`, with this repository limited to traceable Android derivatives.
+- Canonical Launcher visual-asset provenance from `GoreeCloud/branding-assets`, with this repository limited to traceable Android derivatives.
 - Repository-level Glaze UI Adoption Candidate mapping and validation guard.
 - Privacy/HOME/identity/Room/schema/lint/test/debug-build validation in CI, with Android 16 emulator runtime coverage for the exercised Development paths.
 
@@ -78,9 +78,9 @@ The controlling principle is: **GoreeCloud Launcher owns Universal Search. Goree
 
 ## Official product identity and asset authority
 
-All canonical GoreeCloud Launcher logos, icons, symbols, illustrations, and artwork live in **`GoreeCloud/goreecloud-branding-assets`**. The canonical Launcher asset is `products/launcher/app-icon.svg`.
+All canonical GoreeCloud Launcher logos, icons, symbols, illustrations, and artwork live in **`GoreeCloud/branding-assets`**. The canonical Launcher asset is `products/launcher/app-icon.svg`.
 
-`GoreeCloud/goreecloud-launcher` is a consumer repository. It may retain only traceable synchronized/generated/platform-specific derivatives needed for the Android application. `branding/provenance.json` records the canonical repository, asset path, and source blob used for the current derivatives, and the repository identity guard rejects a competing Launcher-local canonical source.
+`GoreeCloud/android-app-defaults` is the active consumer repository for Launcher under `apps/launcher/`. It may retain only traceable synchronized/generated/platform-specific derivatives needed for the Android application. `branding/provenance.json` records the canonical repository, asset path, and source blob used for the current derivatives, and the repository identity guard rejects a competing Launcher-local canonical source.
 
 The current Development APK contains synchronized adaptive, round, and Android 13+ monochrome derivatives. This establishes derivative provenance and build integration, not production visual-identity acceptance or Stable qualification.
 
@@ -174,7 +174,7 @@ The following capability inventory is the approved Launcher product direction. T
 
 ## Icons and Visual Appearance
 
-- Unique official GoreeCloud Launcher product identity whose canonical source is maintained in `GoreeCloud/goreecloud-branding-assets`.
+- Unique official GoreeCloud Launcher product identity whose canonical source is maintained in `GoreeCloud/branding-assets`.
 - Traceable Android adaptive foreground/background icon resources derived from the canonical branding asset.
 - Traceable monochrome/themed Launcher icon derivative.
 - Native Theme Manager integrated with applicable Glaze Theme Engine behavior.
