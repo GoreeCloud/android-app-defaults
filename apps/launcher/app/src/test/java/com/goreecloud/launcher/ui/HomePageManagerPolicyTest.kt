@@ -157,6 +157,7 @@ class HomePageManagerPolicyTest {
     fun selectedHomePageIdentityResolvesOnlyKnownRoomPages() {
         val primary = WorkspaceRenderedHomePage(
             pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
             appKeys = emptyList(),
             appPlacements = emptyList(),
             folderPlacements = emptyList(),
