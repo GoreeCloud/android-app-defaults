@@ -12,6 +12,8 @@ Merged PR #121 restores configured horizontal edge actions on the unified pager.
 
 The current Development candidate restores the complete API 36 `connectedDebugAndroidTest` suite plus focused `LauncherTransitionPerformanceRuntimeTest` diagnostics and makes both promotion requirements for Launcher changes. Its first restoration attempt exposed and then repaired a project-directory routing defect before any Launcher performance assertion.
 
+A stacked Development feature candidate adds device-local, profile-qualified App Drawer favorites with long-press **Pin in Apps / Unpin in Apps** actions, visible/accessibility pin state, a ★ pinned-only page filter, a deterministic **Pinned first** sort mode, and local persistence of the selected Drawer sort mode across restarts. This partially advances the broader user-controlled drawer organization obligation without claiming categories, tags, collections, or general custom ordering complete.
+
 Still open after the runtime-gate candidate: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
 **Record type:** Repository planned/open feature inventory  
@@ -97,7 +99,7 @@ Issue #80 remains open for representative-device first-use/resume and refreshed-
 - Add folders and smart folders with recovery-safe editing.
 - Add AppWidgetHost widget placement, searchable widget gallery, resize/configuration, widget crash containment, and supported Glaze Cards.
 - Add pinned/dynamic shortcuts, richer package states, and launch animations.
-- Add categories, tags, collections, custom ordering, and transparent user-controlled local recent/frequent views.
+- Continue beyond the App Drawer favorites candidate with categories, tags, collections, richer custom ordering, and transparent user-controlled local recent/frequent views.
 - Add durable multi-step undo/redo and process-death-safe edit recovery for destructive operations.
 
 ### Presentation and accessibility
