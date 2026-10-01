@@ -4,7 +4,7 @@ component:
   type: application
   id: goreecloud-launcher
   product_name: GoreeCloud Launcher
-  repository: GoreeCloud/launcher
+  repository: GoreeCloud/android-app-defaults
 
 lifecycle: development
 version: "0.1.0-dev"
