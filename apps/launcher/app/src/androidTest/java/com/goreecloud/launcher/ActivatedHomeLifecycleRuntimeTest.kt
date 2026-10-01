@@ -2,6 +2,9 @@ package com.goreecloud.launcher
 
 import android.app.role.RoleManager
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.view.InputDevice
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import androidx.compose.ui.test.assertHasClickAction
@@ -799,14 +802,20 @@ class ActivatedHomeLifecycleRuntimeTest {
                 // Inject at the Android input layer so Compose's touch injector is not attached to a
                 // node that disappears mid-gesture. Use empty right-side Home space, away from the
                 // seeded app tile and the bottom system-gesture edge.
-                val displayMetrics = context.resources.displayMetrics
-                val swipeX = displayMetrics.widthPixels * 5 / 6
-                runShellCommand(
-                    "input swipe " +
-                        "$swipeX " +
-                        "${displayMetrics.heightPixels * 3 / 4} " +
-                        "$swipeX " +
-                        "${displayMetrics.heightPixels / 4} 400"
+                val gestureBounds = composeRule
+                    .onNodeWithTag(
+                        "launcher-home-swipe-up-apps",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+                val swipeX = (gestureBounds.right - 32f).toInt()
+                injectTouchSwipe(
+                    startX = swipeX,
+                    startY = (gestureBounds.bottom * 0.72f).toInt(),
+                    endX = swipeX,
+                    endY = (gestureBounds.top + gestureBounds.height * 0.28f).toInt(),
+                    durationMillis = 360L,
                 )
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -837,12 +846,16 @@ class ActivatedHomeLifecycleRuntimeTest {
                 // dismissal threshold is crossed. Inject this gesture at the Android input layer
                 // rather than keeping Compose's touch injector attached to a node that removes
                 // itself mid-gesture.
-                runShellCommand(
-                    "input swipe " +
-                        "$swipeX " +
-                        "${displayMetrics.heightPixels / 4} " +
-                        "$swipeX " +
-                        "${displayMetrics.heightPixels * 5 / 6} 400"
+                val drawerBounds = composeRule
+                    .onNodeWithTag("launcher-app-drawer", useUnmergedTree = true)
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+                injectTouchSwipe(
+                    startX = (drawerBounds.right - 32f).toInt(),
+                    startY = (drawerBounds.top + drawerBounds.height * 0.24f).toInt(),
+                    endX = (drawerBounds.right - 32f).toInt(),
+                    endY = (drawerBounds.bottom * 0.84f).toInt(),
+                    durationMillis = 360L,
                 )
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -1932,6 +1945,74 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .assertIsDisplayed()
             }.isSuccess
         }
+    }
+
+    private fun injectTouchSwipe(
+        startX: Int,
+        startY: Int,
+        endX: Int,
+        endY: Int,
+        durationMillis: Long,
+    ) {
+        val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val downTime = SystemClock.uptimeMillis()
+        val steps = 12
+
+        fun inject(
+            action: Int,
+            x: Float,
+            y: Float,
+            eventTime: Long,
+        ) {
+            val event = MotionEvent.obtain(
+                downTime,
+                eventTime,
+                action,
+                x,
+                y,
+                0,
+            ).apply {
+                source = InputDevice.SOURCE_TOUCHSCREEN
+            }
+            try {
+                check(uiAutomation.injectInputEvent(event, true)) {
+                    "Android input injection failed for action=$action at ($x, $y)."
+                }
+            } finally {
+                event.recycle()
+            }
+        }
+
+        inject(
+            action = MotionEvent.ACTION_DOWN,
+            x = startX.toFloat(),
+            y = startY.toFloat(),
+            eventTime = downTime,
+        )
+        for (step in 1 until steps) {
+            val fraction = step.toFloat() / steps.toFloat()
+            val targetTime = downTime + (durationMillis * fraction).toLong()
+            val sleepMillis = (targetTime - SystemClock.uptimeMillis()).coerceAtLeast(0L)
+            if (sleepMillis > 0L) {
+                SystemClock.sleep(sleepMillis)
+            }
+            inject(
+                action = MotionEvent.ACTION_MOVE,
+                x = startX + (endX - startX) * fraction,
+                y = startY + (endY - startY) * fraction,
+                eventTime = SystemClock.uptimeMillis(),
+            )
+        }
+        val finalSleep = (downTime + durationMillis - SystemClock.uptimeMillis()).coerceAtLeast(0L)
+        if (finalSleep > 0L) {
+            SystemClock.sleep(finalSleep)
+        }
+        inject(
+            action = MotionEvent.ACTION_UP,
+            x = endX.toFloat(),
+            y = endY.toFloat(),
+            eventTime = SystemClock.uptimeMillis(),
+        )
     }
 
     private fun runShellCommand(command: String) {
