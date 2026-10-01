@@ -113,11 +113,7 @@ class GalleryRenderedAcceptanceTest {
     fun mediaOnlyHeaderControlsStayHiddenWithoutReadableMedia() {
         onView(withContentDescription("Search the current Gallery destination"))
             .check(matches(withEffectiveVisibility(GONE)))
-        onView(withContentDescription(containsString("Sort order:")))
-            .check(matches(withEffectiveVisibility(GONE)))
-        onView(withContentDescription("Group media by Day. Double tap to change."))
-            .check(matches(withEffectiveVisibility(GONE)))
-        onView(withContentDescription("View density: Dense. Double tap to change."))
+        onView(withContentDescription("More Gallery options"))
             .check(matches(withEffectiveVisibility(GONE)))
     }
 
