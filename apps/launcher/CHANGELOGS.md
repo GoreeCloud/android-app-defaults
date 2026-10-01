@@ -1,5 +1,18 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — restore monorepo Android 16 Launcher runtime gates
+
+A post-consolidation audit found that the migrated-app workflow still ran Launcher source guards, JVM tests, lint, schema verification, and APK assembly, but no longer executed the source-controlled Launcher Android instrumentation suite or the existing transition-performance instrumentation.
+
+The current Development candidate restores two exact-head API 36 jobs: the complete unfiltered `connectedDebugAndroidTest` suite and the focused `LauncherTransitionPerformanceRuntimeTest` diagnostic. Both use the historically accepted immutable Android Emulator Runner revision, use KVM when available with software-acceleration fallback, upload runtime/test evidence, and are required by both the migrated-app required gate and the protected promotion gate whenever Launcher changes.
+
+The first restoration head exposed a workflow-path defect before any Launcher performance assertion: the emulator action invoked the monorepo root Gradle project and therefore attempted to run Since instrumentation with a Launcher class filter. The repaired candidate binds both emulator commands explicitly to `$GITHUB_WORKSPACE/apps/launcher` via Gradle `--project-dir` and writes transition evidence to an absolute Launcher path. The failed head remains historical evidence and is not accepted.
+
+This correction also tightens the evidence boundary for PR #121: its edge-action source and JVM/build/schema evidence are merged, but the post-consolidation workflow did not execute the Launcher Android suite. The edge-action Android test source becomes current runtime evidence only after the restored lane successfully executes it.
+
+**Acceptance boundary:** Development CI-governance candidate reconciled to authoritative main `b00ca6f2c44e7c7270d7e4e6d6f2097859ec8d8e`. Fresh exact-head build, full API 36 runtime, transition-performance, migrated-app required-gate, and protected-promotion evidence are required. Emulator runtime/frame timing remain diagnostic; representative physical-device/default-HOME interaction, performance, power, accessibility, form-factor, recovery, signing, and lifecycle qualification remain open.
+
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
@@ -8,7 +21,7 @@ The observer snapshots the starting page for the gesture, so a normal follow-fin
 
 Focused JVM coverage verifies first/right and last/left dispatch plus rejection of interior, inward, short, vertical, and single-page cases. Android 16 runtime coverage extends the existing real default-HOME multi-page flow by configuring Swipe right to Universal Search, swiping outward from Primary Home, requiring the real Search surface, and then returning HOME before continuing page/editor acceptance.
 
-**Acceptance boundary:** PR #121 is merged after repaired exact-head Development validation as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Accepted head `18abf1673529c1125e31a12ceb55a433eb505f56` passed migration provenance `36802711649`, Migrated Android apps CI `36802711618` including Android 16/default-HOME runtime coverage, Android Development Foundation `36802711630`, and Protected promotion gate `36802711614`. Representative-device gesture, frame-pacing, accessibility, large-text, and form-factor acceptance remain open.
+**Acceptance boundary:** PR #121 is merged as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Accepted source head `18abf1673529c1125e31a12ceb55a433eb505f56` passed migration provenance `36802711649`, migrated-app build/JVM/lint/schema run `36802711618`, Android Development Foundation `36802711630`, and Protected promotion gate `36802711614`. A post-merge audit established that the monorepo migrated-app workflow was not executing Launcher Android instrumentation at that time, so those runs are not Android-runtime evidence. Representative-device gesture, frame-pacing, accessibility, large-text, and form-factor acceptance remain open.
 
 
 ## October 1, 2026 — unify Primary and secondary Home follow-finger paging
