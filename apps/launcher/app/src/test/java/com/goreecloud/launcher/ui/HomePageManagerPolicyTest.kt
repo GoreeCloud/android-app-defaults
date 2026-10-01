@@ -170,6 +170,7 @@ class HomePageManagerPolicyTest {
                 activeDrag = true,
             ),
         )
+        assertFalse(primaryHomeShouldHandleHorizontalPaging(contentOnly = true))
     }
 
     @Test
@@ -204,6 +205,7 @@ class HomePageManagerPolicyTest {
                 activeDrag = false,
             ),
         )
+        assertTrue(primaryHomeShouldHandleHorizontalPaging(contentOnly = false))
     }
 
     @Test
