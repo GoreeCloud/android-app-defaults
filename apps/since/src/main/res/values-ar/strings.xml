@@ -209,7 +209,7 @@
 
     <string name="dashboard_search">البحث في المتتبعات</string>
     <string name="dashboard_sort_recent">الأحدث</string>
-    <string name="dashboard_sort_created">ترتيب الإنشاء</string>
+    <string name="dashboard_sort_manual">يدوي / حسب الإنشاء</string>
     <string name="dashboard_sort_name">الاسم</string>
     <string name="dashboard_sort_newest_start">أحدث بداية</string>
     <string name="dashboard_sort_oldest_start">أقدم بداية</string>
