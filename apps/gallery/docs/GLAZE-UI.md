@@ -92,6 +92,10 @@ The navigation shell must keep media dominant, preserve 48dp-or-larger actionabl
 
 Photos and Videos also expose two compact Glaze browse controls immediately below the search surface: **Group** cycles Day → Month → Year → None and **View** cycles Dense → Comfortable → Spacious. These controls update the same app-private presentation preferences used by Settings, do not re-query MediaStore, do not mutate media, and disappear during search and selection so the media canvas remains dominant.
 
+The refreshed **Videos** destination uses a mockup-aligned media-card hierarchy rather than the ordinary photo timeline grid: the first visible video receives a wide featured card, following items use responsive two-column phone / three-column wider-layout cards, and each video keeps a centered play affordance plus its bounded duration badge. Optional Screen recordings, Camera, and Favorites chips are rendered only when those categories can be derived from the already-authorized local snapshot or Gallery-local Favorites state; the interface must not imply unavailable People, Places, Documents, or other unimplemented smart collections.
+
+Photos retain the dense media-first grid but sparse dense-mode date groups use a three-column presentation lane so one- and two-item days do not look visually stranded inside a four-column grid.
+
 ## Browsing-surface integration
 
 The folder browser and opened-folder media grid are Gallery's highest-frequency surfaces and receive an explicit Glaze UI treatment in `gc.12`:
