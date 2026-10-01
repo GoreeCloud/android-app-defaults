@@ -5830,6 +5830,7 @@ private fun AppDrawerSurface(
         LauncherDrawerSortOrder.valueOf(drawerSortOrderName)
     }.getOrDefault(LauncherDrawerSortOrder.ALPHABETICAL)
     var showDrawerSortMenu by remember { mutableStateOf(false) }
+    var showHiddenAppsManager by rememberSaveable { mutableStateOf(false) }
     val primaryUser = remember { Process.myUserHandle() }
     val primaryProfileId = remember(primaryUser) { primaryUser.hashCode() }
     val profilePages = remember(apps, primaryUser) {
@@ -5956,6 +5957,16 @@ private fun AppDrawerSurface(
                 )
         }
         matchingApps + matchingFolders
+    }
+    val selectedHiddenApps = remember(selectedPage.items, hiddenDrawerAppKeys) {
+        LauncherDrawerAppOrganizationPolicy.hiddenItems(
+            items = selectedPage.items,
+            hiddenKeys = hiddenDrawerAppKeys,
+            keyOf = { app -> app.workspaceKey() },
+        ).sortedWith(
+            compareBy<LauncherActivityInfo> { it.label.toString().lowercase(Locale.getDefault()) }
+                .thenBy { it.workspaceKey() },
+        )
     }
 
     Box(
@@ -6152,6 +6163,33 @@ private fun AppDrawerSurface(
                                 }
                             }
                         }
+                        if (selectedHiddenApps.isNotEmpty()) {
+                            Surface(
+                                onClick = { showHiddenAppsManager = true },
+                                modifier = Modifier
+                                    .size(if (useDrawerHeaderIcons) 48.dp else 92.dp)
+                                    .testTag("launcher-drawer-hidden-apps")
+                                    .semantics {
+                                        contentDescription =
+                                            "Hidden apps. " + selectedHiddenApps.size + " hidden"
+                                    },
+                                shape = CircleShape,
+                                color = Color.Transparent,
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        if (useDrawerHeaderIcons) "⊘" else "Hidden",
+                                        color = drawerSecondaryColor,
+                                        style = if (useDrawerHeaderIcons) {
+                                            MaterialTheme.typography.titleLarge
+                                        } else {
+                                            MaterialTheme.typography.labelLarge
+                                        },
+                                        maxLines = 1,
+                                    )
+                                }
+                            }
+                        }
                         Surface(
                             onClick = onOpenSettings,
                             modifier = Modifier
@@ -6273,6 +6311,120 @@ private fun AppDrawerSurface(
                     )
                 }
             }
+        }
+    }
+
+    if (showHiddenAppsManager) {
+        LauncherHiddenDrawerAppsSheet(
+            apps = selectedHiddenApps,
+            onUnhide = { app ->
+                onSetDrawerAppHidden(app.workspaceKey(), false)
+            },
+            onDismiss = { showHiddenAppsManager = false },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LauncherHiddenDrawerAppsSheet(
+    apps: List<LauncherActivityInfo>,
+    onUnhide: (LauncherActivityInfo) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("launcher-hidden-apps-sheet"),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    "Hidden apps",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    "Hidden apps stay installed and remain available to Home, folders, and Search.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (apps.isEmpty()) {
+                Text(
+                    "No hidden apps in this profile.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 460.dp),
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+                ) {
+                    lazyItems(
+                        items = apps,
+                        key = { app -> app.workspaceKey() },
+                    ) { app ->
+                        val icon = rememberLauncherAppIcon(app)
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("launcher-hidden-app-" + app.workspaceKey()),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = GlazeMetrics.minimumTarget)
+                                    .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+                            ) {
+                                if (icon != null) {
+                                    Image(
+                                        bitmap = icon,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(40.dp).launcherIconMask(),
+                                    )
+                                }
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        app.label.toString(),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        app.componentName.packageName,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                TextButton(onClick = { onUnhide(app) }) {
+                                    Text("Unhide")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            FilledTonalButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Done")
+            }
+            Spacer(Modifier.height(GlazeMetrics.space2))
         }
     }
 }
@@ -11146,6 +11298,18 @@ private fun AppContextPopup(
                     onClick = onAddToFolder,
                     enabled = canAddToFolder && !layoutLocked,
                 )
+                if (allowDrawerOrganization) {
+                    GlazeLauncherPopupAction(
+                        label = if (drawerPinned) "Unpin from top" else "Pin to top",
+                        symbol = GlazePopupActionSymbol.PIN,
+                        onClick = onToggleDrawerPinned,
+                    )
+                    GlazeLauncherPopupAction(
+                        label = "Hide from Apps",
+                        symbol = GlazePopupActionSymbol.HIDE,
+                        onClick = onHideFromDrawer,
+                    )
+                }
                 GlazeLauncherPopupAction(
                     label = "Uninstall",
                     symbol = GlazePopupActionSymbol.UNINSTALL,
@@ -11199,7 +11363,9 @@ private fun LauncherAppWidgetChoicesDialog(
     )
 }
 
-private enum class GlazePopupActionSymbol { HOME, DOCK, WIDGET, SHORTCUT, FOLDER, INFO, UNINSTALL }
+private enum class GlazePopupActionSymbol {
+    HOME, DOCK, WIDGET, SHORTCUT, FOLDER, PIN, HIDE, INFO, UNINSTALL
+}
 
 /** Decorative vector geometry; labels remain the accessible action description. */
 @Composable
@@ -11254,6 +11420,20 @@ private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) 
                 segment(.89f, .36f, .89f, .80f)
                 segment(.89f, .80f, .10f, .80f)
                 segment(.10f, .80f, .10f, .25f)
+            }
+            GlazePopupActionSymbol.PIN -> {
+                segment(.34f, .16f, .66f, .16f)
+                segment(.40f, .16f, .40f, .42f)
+                segment(.60f, .16f, .60f, .42f)
+                segment(.30f, .42f, .70f, .42f)
+                segment(.50f, .42f, .50f, .86f)
+            }
+            GlazePopupActionSymbol.HIDE -> {
+                segment(.12f, .50f, .28f, .34f)
+                segment(.28f, .34f, .50f, .26f)
+                segment(.50f, .26f, .72f, .34f)
+                segment(.72f, .34f, .88f, .50f)
+                segment(.12f, .18f, .88f, .82f)
             }
             GlazePopupActionSymbol.INFO -> {
                 drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
