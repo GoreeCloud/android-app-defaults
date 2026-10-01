@@ -6,6 +6,7 @@
 - Persisted the Dashboard order locally with Manual/Created as the default and exposed it in General Settings.
 - Made title/note search case- and accent-insensitive while remaining fully local.
 - Added deterministic unit, UI, and persistence coverage; sorting does not mutate tracker timestamps or Room data.
+- Added compact-width spacing that keeps tracker-kind metadata clear of the populated Dashboard’s floating Add tracker action after rendered-evidence review exposed overlap at 320 dp.
 
 **Acceptance boundary:** stacked Development candidate; fresh exact-head CI and representative-device acceptance remain required.
 
