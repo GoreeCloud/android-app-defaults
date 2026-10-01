@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 1, 2026 App Drawer freshness-filter continuation
+
+A Development candidate on `feat/launcher-drawer-freshness-filters-20261001` implements the specification-required Recently installed / recently updated Drawer filters using local Android package timestamps. The filter is transient, profile-aware, app-only when active, and does not add polling, permissions, network access, or a new persistence authority.
+
+Still open for this capability: exact-head integration gates, Android 16 interaction coverage, managed/private-profile and package-churn acceptance, accessibility/large-text/form-factor checks, visual polish, and representative-device verification.
+
 ## September 30, 2026 interaction-stabilization continuation
 
 Merged PRs #103–#107 now cover the current mainline drawer/Home/profile/Search/performance stabilization tranche: explicit A–Z/Z–A/Most recent/Most frequent sorting, warm User/Work profile paging, stationary drawer long-press actions, threshold-responsive Home paging, secondary-page vertical gestures, exact-profile Work folders with persistence-level isolation, bounded confirmation before publishing suspicious inventory loss from a still-active Android profile, genuine **Movable** Universal Search backed by the existing Room 4 × 1 Search widget, and removal of the redundant first-composition 180–220 ms page-entry animation.

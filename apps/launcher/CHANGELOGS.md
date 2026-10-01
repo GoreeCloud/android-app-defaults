@@ -1,5 +1,18 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add App Drawer New / Updated filters
+
+The App Drawer now has an explicit **All / New / Updated** freshness filter row backed only by local Android package metadata. **New** shows apps installed within the last 30 days. **Updated** shows apps updated within the last 30 days after their initial install, with a short tolerance so first-install timestamp noise is not mislabeled as an update.
+
+Filtering remains profile-aware because visible app membership still comes from Android `LauncherActivityInfo`; package timestamps are used only as local freshness metadata. Missing package metadata fails closed for New/Updated. User-created folders remain visible in **All** and step out while a freshness filter is active so the filtered result is genuinely app-only.
+
+Package timestamps are loaded when the visible Launcher app inventory changes rather than polled continuously. No new Android permission, network request, analytics, telemetry, or persistent freshness authority is introduced.
+
+Focused JVM coverage verifies the 30-day install/update window, initial-install suppression for Updated, All-mode fallthrough, and fail-closed missing metadata.
+
+**Acceptance boundary:** Development feature candidate only. Exact-head build/JVM/lint/schema and restored API 36 runtime validation are required before integration; managed-profile/private-profile behavior, package churn, accessibility/large-text/form-factor, and representative-device visual acceptance remain open.
+
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
