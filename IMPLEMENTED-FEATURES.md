@@ -1,5 +1,14 @@
 # Android App Defaults — Implemented Features
 
+## September 30, 2026 — Since search, sort, and reset-preference candidate
+
+The active stacked Development candidate now carries the full specified local Dashboard ordering set: Manual / created order, Name A–Z, Newest start, Oldest start, and Longest current elapsed, plus the earlier Recent convenience ordering. Search normalizes case and common accent differences locally across tracker titles and general notes.
+
+The candidate persists the selected Dashboard order through the existing Preferences DataStore using the specification-aligned `default_sort` key with a Manual default. It also implements the `confirm_reset` preference with a default-on General Settings switch. The Reset Streak editor always remains the place to choose reset time and optional reason/note. With confirmation enabled, a separate final history-preservation confirmation appears after validation; with confirmation disabled, only that final step is skipped.
+
+Automated candidate coverage includes deterministic JVM sorting/search tests, preference persistence across repository instances, Settings interaction, Arabic resources, and reset flows with confirmation enabled and disabled. Exact-head CI and representative-device acceptance remain separate evidence gates.
+
+
 ## September 30, 2026 — Since display preferences candidate
 
 The current stacked candidate adds two local presentation preferences: a default display format for newly created trackers and optional seconds-level elapsed display. Both use the existing Since Preferences DataStore. Existing trackers keep their own saved display format.
