@@ -622,13 +622,30 @@ class ActivatedHomeLifecycleRuntimeTest {
                         LauncherDatabaseProvider.get(context).workspaceDao()
                     },
                 )
+
+                // Keep direct Room test mutations behind the same settled startup boundary used by
+                // the paging acceptance test. Activity launch can still be finishing authoritative
+                // reconciliation after WorkspaceRepository has reported ROOM authority.
+                composeRule.waitUntil(timeoutMillis = 15_000) {
+                    composeRule
+                        .onAllNodesWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeRule.waitForIdle()
+                withTimeout(10_000) {
+                    runtime!!.observeHomePages().first { state ->
+                        state is WorkspacePagedHomeState.Ready
+                    }
+                }
+
                 runtime?.removeWidget(widgetItemId)
                 runtime?.deleteEmptyHomePage(secondaryPageId)
                 val created = runtime?.createHomePage(secondaryPageId)
                 check(
                     created is WorkspacePagedRoomMutationResult.CreatedPage ||
                         created is WorkspacePagedRoomMutationResult.PageAlreadyExists
-                )
+                ) { "Expected a usable secondary Home page; create result was $created." }
 
                 check(
                     runtime?.addBuiltInWidget(
