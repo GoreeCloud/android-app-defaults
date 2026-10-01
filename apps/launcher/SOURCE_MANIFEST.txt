@@ -74,6 +74,7 @@ app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherSearchTabGlyphs.
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherTransactionalPortableRestoreWriter.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequest.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherUniversalSearch.kt
+app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherUtilitySearchProvider.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherWeather.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/StarterWorkspacePolicy.kt
 app/src/main/java/com/goreecloud/launcher/core/workspace/WorkspaceAuthority.kt
@@ -170,6 +171,7 @@ app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderPr
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderUserControlPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequestPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUniversalSearchTest.kt
+app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUtilitySearchProviderTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherWeatherTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/StarterWorkspacePolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/GlazeMotionExperimentalConsumerTest.kt
