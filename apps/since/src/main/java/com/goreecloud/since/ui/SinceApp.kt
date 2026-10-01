@@ -3167,8 +3167,9 @@ private fun EditorActions(
 }
 
 @Composable
-private fun FormatSelector(
+internal fun FormatSelector(
     title: String,
+    supporting: String? = null,
     selected: DisplayFormat,
     enabled: Boolean,
     onSelect: (DisplayFormat) -> Unit,
@@ -3180,6 +3181,13 @@ private fun FormatSelector(
             text = title,
             style = MaterialTheme.typography.titleMedium,
         )
+        if (supporting != null) {
+            Text(
+                text = supporting,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
 
         DisplayFormat.entries.chunked(2).forEach { formats ->
             Row(
@@ -3232,7 +3240,7 @@ private fun FormatSelector(
 }
 
 @Composable
-private fun displayFormatLabel(
+internal fun displayFormatLabel(
     format: DisplayFormat,
 ): String = when (format) {
     DisplayFormat.DAYS -> stringResource(R.string.format_days)
