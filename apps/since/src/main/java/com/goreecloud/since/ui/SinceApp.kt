@@ -532,6 +532,8 @@ fun SinceApp(
                 onDefaultDisplayFormatChange = onDefaultDisplayFormatChange,
                 showSeconds = showSeconds,
                 onShowSecondsChange = onShowSecondsChange,
+                dashboardSort = dashboardSort,
+                onDashboardSortChange = onDashboardSortChange,
                 archivedTrackers = archivedAggregates,
                 restoringTrackerId = restoringTrackerId,
                 restoreFailedTrackerId = restoreFailedTrackerId,
