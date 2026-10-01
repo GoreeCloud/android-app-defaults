@@ -420,6 +420,7 @@ internal fun unifiedHomePagerSelectedIndex(
         ?: 0
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun UnifiedHomePager(
     pages: List<WorkspaceRenderedHomePage>,
