@@ -51,7 +51,7 @@ The `0.6.2-dev` in-place selection renderer is physically verified on the repres
 
 ## Delete and Android Trash
 
-With **Settings > Deletion & recovery > Move deleted items to Recycle Bin** enabled, Delete requests Android MediaStore Trash. Android owns the confirmation surface and final mutation. With that setting disabled, Gallery requests Android-confirmed permanent deletion.
+With **Settings > Deletion & recovery > Move deleted items to Trash** enabled, Delete requests Android MediaStore Trash. Android owns the confirmation surface and final mutation. With that setting disabled, Gallery requests Android-confirmed permanent deletion.
 
 Representative-device testing has verified the current corrected Trash path for a single item and tested 26-item and 10-item multi-select operations. Broader cancellation, permanent-delete, permission-change, OEM/profile, and post-mutation edge-case acceptance remains Development work.
 
