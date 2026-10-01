@@ -110,6 +110,9 @@ class SinceVisualEvidenceTest {
 
         composeRule.onNodeWithText("Back").performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+        composeRule.onNodeWithTag("dashboard-summary-total").assertIsDisplayed()
+        composeRule.onNodeWithTag("dashboard-summary-streaks").assertIsDisplayed()
+        composeRule.onNodeWithTag("dashboard-summary-longest").assertIsDisplayed()
         capture("dashboard-populated-dark")
 
         composeRule.runOnIdle {
