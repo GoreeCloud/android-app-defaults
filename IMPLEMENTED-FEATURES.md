@@ -1,5 +1,14 @@
 # Android App Defaults — Implemented Features
 
+## October 1, 2026 — Since mockup-driven Home UI candidate
+
+A new stacked Since Development candidate now implements the first Home-screen slice of the owner-supplied mockup. The candidate introduces the large Since hero and landscape treatment, rounded search surface, live local summary cards, richer tracker cards, a plus-labelled Add tracker action, and selected-state navigation polish while retaining the validated Dashboard search/sort and contextual-guidance behavior beneath it.
+
+The summary values are derived from the existing local tracker/period state. Longest streak is calculated from persisted streak periods through the existing calendar-aware TimeEngine rather than a new counter or remote statistic. Tracker cards continue to use the persisted period start and current clock for elapsed presentation, preserve goal rendering, and do not mutate tracker data.
+
+This is implemented candidate source, not accepted runtime evidence. Fresh exact-head Android validation, rendered-evidence inspection, and representative-device accessibility/localization/form-factor review remain required.
+
+
 ## September 30, 2026 — Since dashboard search and sort candidate
 
 The consolidated Since candidate adds the five specified local Dashboard order modes, persists the selected order in Preferences DataStore, and normalizes title/note search for case and accents. General Settings exposes the same local choice and a persisted **Confirm streak resets** preference. Confirmation defaults on and inserts a final review step only after the reset editor validates time, reason, and note; opting out skips that final prompt without bypassing editor validation, History preservation, or the existing atomic reset mutation. Contextual Home guidance is limited to actionable populated dashboards, and compact-width tracker metadata is kept clear of the floating Add tracker action. Fresh exact-head validation and rendered-evidence review remain required.
