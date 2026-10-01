@@ -110,6 +110,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import com.goreecloud.launcher.core.launcher.LauncherAppIconCache
+import com.goreecloud.launcher.core.launcher.LauncherAppVisibilityPolicy
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearchHomeMode
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
@@ -748,7 +749,12 @@ fun LauncherBetaRoot(
         apps.associateBy { it.workspaceKey() }
     }
     val discoverableApps = remember(apps, hiddenAppKeys) {
-        apps.filterNot { app -> app.workspaceKey() in hiddenAppKeys }
+        apps.filter { app ->
+            LauncherAppVisibilityPolicy.isDiscoverable(
+                appKey = app.workspaceKey(),
+                hiddenAppKeys = hiddenAppKeys,
+            )
+        }
     }
     val homeFolderIds = remember(homePages) {
         homePages.flatMap { page -> page.folderPlacements.map { it.folderId } }.toSet()
