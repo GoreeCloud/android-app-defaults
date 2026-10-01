@@ -13,6 +13,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isClickable
 import androidx.test.espresso.matcher.ViewMatchers.Visibility.GONE
@@ -115,6 +116,20 @@ class GalleryRenderedAcceptanceTest {
             .check(matches(withEffectiveVisibility(GONE)))
         onView(withContentDescription(containsString("Sort order:")))
             .check(matches(withEffectiveVisibility(GONE)))
+    }
+
+    @Test
+    fun settingsSurfaceShowsOnlyImplementedControls() {
+        activateNavigationControl("Settings")
+
+        onView(withText("Move deleted items to Trash"))
+            .check(matches(withText("Move deleted items to Trash")))
+        onView(withText("Animate GIFs in thumbnails"))
+            .check(doesNotExist())
+        onView(withText("Delete empty folders after deleting their content"))
+            .check(doesNotExist())
+        onView(withText("Password protect photos"))
+            .check(doesNotExist())
     }
 
     @Test
