@@ -9,9 +9,9 @@ Still open in this area: true manual drag/reorder mutation of tracker `sort_orde
 
 ## 2026-09-30 Since display-settings continuation
 
-Default display format and seconds visibility are implemented on the active stacked Development candidate with the specified defaults of Days and seconds enabled. Remaining Settings work includes the separately specified reset-confirmation preference, reduced-motion/transparency behavior only where an approved Glaze mapping permits it, and representative-device accessibility/localization acceptance.
+Default display format, seconds visibility, and the default-on reset-confirmation preference are implemented on the active stacked Development candidates. The reset preference skips only the extra final confirmation when disabled; the Reset Streak editor, corrected reset time, optional reason/note, validation, history-preservation explanation, and atomic reset transaction remain mandatory.
 
-The existing Reset Streak surface remains the required path for choosing reset time and optional reason/note and for explaining history preservation. The product specification does not yet define a safe alternate interaction for disabling confirmation without losing those controls, so no alternate reset path is invented in this candidate.
+Remaining Settings work includes reduced-motion/transparency behavior only where an approved Glaze mapping permits it and representative-device accessibility/localization acceptance. No alternate reset path that bypasses the required reset editor is planned.
 
 
 ## 2026-09-29 Since import-review continuation
