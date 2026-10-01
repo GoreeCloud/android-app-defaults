@@ -33,6 +33,7 @@ import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
@@ -1591,30 +1592,163 @@ class GalleryActivity : Activity() {
                 thumbnailHeight,
             ),
         )
-        addView(
-            TextView(context).apply {
-                text = mediaDisplayTitle(item)
-                maxLines = if (featured) 1 else 2
-                setTextColor(primaryTextColor())
-                setTextSize(
-                    TypedValue.COMPLEX_UNIT_SP,
-                    if (featured) 17f else 14f,
-                )
-                setTypeface(typeface, Typeface.BOLD)
-                setPadding(dp(10), dp(8), dp(10), 0)
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-            },
-        )
-        addView(
-            TextView(context).apply {
-                text = mediaDateLabel(item)
-                maxLines = 1
-                setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, if (featured) 12.5f else 11.5f)
-                setPadding(dp(10), dp(2), dp(10), 0)
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-            },
-        )
+        addView(videoCardFooter(item, featured))
+    }
+
+    private fun videoCardFooter(item: MediaItem, featured: Boolean): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(10), dp(6), dp(2), 0)
+
+            addView(
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    addView(
+                        TextView(context).apply {
+                            text = mediaDisplayTitle(item)
+                            maxLines = if (featured) 1 else 2
+                            setTextColor(primaryTextColor())
+                            setTextSize(
+                                TypedValue.COMPLEX_UNIT_SP,
+                                if (featured) 17f else 14f,
+                            )
+                            setTypeface(typeface, Typeface.BOLD)
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                    )
+                    addView(
+                        TextView(context).apply {
+                            text = mediaDateLabel(item)
+                            maxLines = 1
+                            setTextColor(secondaryTextColor())
+                            setTextSize(
+                                TypedValue.COMPLEX_UNIT_SP,
+                                if (featured) 12.5f else 11.5f,
+                            )
+                            setPadding(0, dp(2), 0, 0)
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                    )
+                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
+            )
+
+            addView(
+                cardOverflowButton("More actions for " + mediaDisplayTitle(item)) { anchor ->
+                    showVideoOverflowMenu(anchor, item)
+                },
+                LinearLayout.LayoutParams(
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ),
+            )
+        }
+
+    private fun albumCardFooter(album: AlbumPresentation): LinearLayout =
+        LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(10), dp(6), dp(2), 0)
+
+            addView(
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    addView(
+                        TextView(context).apply {
+                            text = album.name
+                            setTextColor(primaryTextColor())
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f)
+                            setTypeface(typeface, Typeface.BOLD)
+                            maxLines = 1
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                    )
+                    addView(
+                        TextView(context).apply {
+                            text = itemCountLabel(album.count)
+                            setTextColor(secondaryTextColor())
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+                            maxLines = 1
+                            setPadding(0, dp(2), 0, 0)
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                    )
+                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
+            )
+
+            addView(
+                cardOverflowButton("More actions for " + album.name) { anchor ->
+                    showAlbumOverflowMenu(anchor, album)
+                },
+                LinearLayout.LayoutParams(
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ),
+            )
+        }
+
+    private fun cardOverflowButton(
+        description: String,
+        onClick: (View) -> Unit,
+    ): TextView = TextView(this).apply {
+        text = "⋮"
+        gravity = Gravity.CENTER
+        setTextColor(secondaryTextColor())
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+        background = roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.SHAPE_CONTROL_DP)
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        setOnClickListener { onClick(this) }
+    }
+
+    private fun showVideoOverflowMenu(anchor: View, item: MediaItem) {
+        val actions = GalleryCardOverflowPolicy.videoActions(item.contentUri in favoriteUris)
+        val byId = actions.associateBy { action -> action.ordinal + 1 }
+        PopupMenu(this, anchor).apply {
+            actions.forEach { action ->
+                menu.add(0, action.ordinal + 1, action.ordinal, action.label)
+            }
+            setOnMenuItemClickListener { menuItem ->
+                when (byId[menuItem.itemId]) {
+                    GalleryCardOverflowAction.SHARE -> shareSingleItem(item)
+                    GalleryCardOverflowAction.ADD_FAVORITE,
+                    GalleryCardOverflowAction.REMOVE_FAVORITE -> {
+                        toggleFavorite(item)
+                        renderCurrentDestination()
+                    }
+                    GalleryCardOverflowAction.DETAILS -> showItemDetails(item)
+                    GalleryCardOverflowAction.OPEN,
+                    null -> return@setOnMenuItemClickListener false
+                }
+                true
+            }
+            show()
+        }
+    }
+
+    private fun showAlbumOverflowMenu(anchor: View, album: AlbumPresentation) {
+        val actions = GalleryCardOverflowPolicy.albumActions()
+        val byId = actions.associateBy { action -> action.ordinal + 1 }
+        PopupMenu(this, anchor).apply {
+            actions.forEach { action ->
+                menu.add(0, action.ordinal + 1, action.ordinal, action.label)
+            }
+            setOnMenuItemClickListener { menuItem ->
+                when (byId[menuItem.itemId]) {
+                    GalleryCardOverflowAction.OPEN -> openAlbumPresentation(album)
+                    GalleryCardOverflowAction.DETAILS -> showAlbumDetails(album)
+                    GalleryCardOverflowAction.SHARE,
+                    GalleryCardOverflowAction.ADD_FAVORITE,
+                    GalleryCardOverflowAction.REMOVE_FAVORITE,
+                    null -> return@setOnMenuItemClickListener false
+                }
+                true
+            }
+            show()
+        }
     }
 
     private fun renderAlbums(generation: Int, sourceItems: List<MediaItem>) {
@@ -1875,21 +2009,7 @@ class GalleryActivity : Activity() {
                     ((tileWidth * ALBUM_COVER_ASPECT_HEIGHT).toInt()).coerceAtLeast(dp(92)),
                 ),
             )
-            addView(TextView(context).apply {
-                text = album.name
-                setTextColor(primaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f)
-                setTypeface(typeface, Typeface.BOLD)
-                maxLines = 1
-                setPadding(dp(10), dp(8), dp(10), 0)
-            })
-            addView(TextView(context).apply {
-                text = itemCountLabel(album.count)
-                setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                maxLines = 1
-                setPadding(dp(10), dp(2), dp(10), 0)
-            })
+            addView(albumCardFooter(album))
         }
     }
 
@@ -2252,6 +2372,25 @@ class GalleryActivity : Activity() {
         }
         try {
             startActivity(Intent.createChooser(shareIntent, "Share selected media"))
+        } catch (_: RuntimeException) {
+            Toast.makeText(this, "No compatible share destination is available.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun shareSingleItem(item: MediaItem) {
+        if (authorizedItems.none { authorized -> authorized.contentUri == item.contentUri }) {
+            Toast.makeText(this, "This media item is no longer authorized.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = Uri.parse(item.contentUri)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = item.mimeType
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(intent, "Share media"))
         } catch (_: RuntimeException) {
             Toast.makeText(this, "No compatible share destination is available.", Toast.LENGTH_SHORT).show()
         }
@@ -3288,6 +3427,21 @@ class GalleryActivity : Activity() {
                     "Dimensions: $dimensions",
                     "Duration: $duration",
                     "Size: ${formatBytes(item.sizeBytes)}",
+                ).joinToString("\n"),
+            )
+            .setPositiveButton("Done", null)
+            .show()
+    }
+
+    private fun showAlbumDetails(album: AlbumPresentation) {
+        val collectionType = if (album.isFavorites) "Favorites" else "Local album"
+        AlertDialog.Builder(this)
+            .setTitle(album.name)
+            .setMessage(
+                listOf(
+                    "Type: $collectionType",
+                    "Items: ${album.count}",
+                    "Cover: ${album.cover.displayName}",
                 ).joinToString("\n"),
             )
             .setPositiveButton("Done", null)

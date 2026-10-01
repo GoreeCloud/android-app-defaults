@@ -1,5 +1,16 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — contextual card overflow actions
+
+### Added
+- Added trailing vertical overflow controls to Albums and Videos cards to match the supplied Gallery mockups.
+- Video card menus provide Share, Add/Remove Favorite, and Details over the already-authorized local item.
+- Album card menus provide Open and Details while reusing the existing album navigation path.
+- Overflow controls retain a 48dp target and independent accessibility focus.
+
+### Boundary
+The compact card menus intentionally exclude Delete, Move, permanent deletion, and other destructive mutation. Existing Android-owned confirmation and selection/action surfaces remain authoritative for those operations.
+
 ## October 1, 2026 — Albums card and Videos subtitle mockup alignment
 
 ### Changed

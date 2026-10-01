@@ -94,6 +94,8 @@ Photos and Videos also expose two compact Glaze browse controls immediately belo
 
 The refreshed **Videos** destination uses a mockup-aligned media-card hierarchy rather than the ordinary photo timeline grid: the first visible video receives a wide featured card, following items use responsive two-column phone / three-column wider-layout cards, and each video keeps a centered play affordance plus its bounded duration badge. Optional Screen recordings, Camera, and Favorites chips are rendered only when those categories can be derived from the already-authorized local snapshot or Gallery-local Favorites state; the interface must not imply unavailable People, Places, Documents, or other unimplemented smart collections.
 
+Album and video cards may expose a trailing vertical overflow control matching the supplied mockups. Overflow controls use the general 48dp target floor, remain separately focusable from the card itself, and expose only bounded contextual actions already supported by Gallery. Destructive Android-authorized mutation is not placed in these compact card menus.
+
 Photos retain the dense media-first grid but sparse dense-mode date groups use a three-column presentation lane so one- and two-item days do not look visually stranded inside a four-column grid.
 
 ## Browsing-surface integration
