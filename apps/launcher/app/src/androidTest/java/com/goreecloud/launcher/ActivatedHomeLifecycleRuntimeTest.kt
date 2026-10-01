@@ -780,10 +780,15 @@ class ActivatedHomeLifecycleRuntimeTest {
                 Unit
             } finally {
                 // This test intentionally selects a temporary secondary page. Return through the
-                // real HOME path before deleting that page so the persisted selected-page identity
-                // cannot leak into later ActivityScenario tests as a now-stale page selection.
+                // real HOME path before deleting that page so the selected page cannot leak into
+                // later ActivityScenario tests as a now-stale page selection.
+                //
+                // HOME may either reset the currently observed root or replace the scenario-owned
+                // LAUNCHER Activity with a fresh HOME Activity. In the replacement path the Compose
+                // test rule legitimately loses the old hierarchy, while the fresh Activity starts
+                // from primary Home. Do not require post-HOME page-indicator semantics from the
+                // scenario-owned hierarchy during teardown.
                 resetHomeBeforeScenarioClose()
-                waitForSelectedHomePage(pageNumber = 1)
                 scenario.close()
             }
         } finally {
