@@ -235,6 +235,64 @@ class SinceAccessibilityTest {
 
     @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
     @Test
+    fun largeFontDashboardKeepsSearchAndExtendedSortChoicesReachable() {
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalDensity provides Density(
+                    density = 1f,
+                    fontScale = 2f,
+                )
+            ) {
+                MaterialTheme {
+                    SinceApp(
+                        repository = FakeTrackerRepository(listOf(sampleAggregate())),
+                        clock = clock,
+                        dashboardSortName = "LONGEST_CURRENT",
+                    )
+                }
+            }
+        }
+
+        composeRule.onNodeWithTag("dashboard-search").assertIsDisplayed()
+        composeRule.onNodeWithText("Longest")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(3)
+        composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+    }
+
+    @Test
+    fun forcedRtlSettingsKeepsGeneralAndAppearanceControlsReachable() {
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalLayoutDirection provides LayoutDirection.Rtl,
+            ) {
+                MaterialTheme {
+                    SinceApp(
+                        repository = FakeTrackerRepository(listOf(sampleAggregate())),
+                        clock = clock,
+                    )
+                }
+            }
+        }
+
+        composeRule.onNodeWithTag("nav-settings").performClick()
+        composeRule.onNodeWithTag("settings-confirm-reset")
+            .assertHasClickAction()
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("System default")
+            .performScrollTo()
+            .assertHasClickAction()
+            .assertIsDisplayed()
+        composeRule.onNodeWithTag("settings-show-seconds")
+            .performScrollTo()
+            .assertHasClickAction()
+            .assertIsDisplayed()
+    }
+
+    @OptIn(ExperimentalTestApi::class, ExperimentalComposeUiApi::class)
+    @Test
     fun keyboardTabMovesFromCancelToSaveAndEnterActivatesSave() {
         lateinit var inputModeManager: InputModeManager
 
