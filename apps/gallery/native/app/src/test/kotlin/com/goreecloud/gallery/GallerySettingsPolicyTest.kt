@@ -45,6 +45,50 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
+    fun `video filters expose only categories present in the authorized snapshot`() {
+        val camera = video("camera", "Camera", "VID_001.mp4")
+        val recording = video("screens", "Screen recordings", "screen_recording_001.mp4")
+        val favorite = video("movies", "Movies", "clip.mp4")
+
+        assertEquals(
+            listOf(
+                GalleryVideoFilter.ALL,
+                GalleryVideoFilter.SCREEN_RECORDINGS,
+                GalleryVideoFilter.CAMERA,
+                GalleryVideoFilter.FAVORITES,
+            ),
+            GalleryVideoFilterPolicy.available(
+                listOf(camera, recording, favorite),
+                favoriteContentUris = setOf(favorite.contentUri),
+            ),
+        )
+        assertEquals(
+            listOf(camera),
+            GalleryVideoFilterPolicy.filter(
+                listOf(camera, recording, favorite),
+                GalleryVideoFilter.CAMERA,
+                favoriteContentUris = emptySet(),
+            ),
+        )
+        assertEquals(
+            listOf(recording),
+            GalleryVideoFilterPolicy.filter(
+                listOf(camera, recording, favorite),
+                GalleryVideoFilter.SCREEN_RECORDINGS,
+                favoriteContentUris = emptySet(),
+            ),
+        )
+        assertEquals(
+            listOf(favorite),
+            GalleryVideoFilterPolicy.filter(
+                listOf(camera, recording, favorite),
+                GalleryVideoFilter.FAVORITES,
+                favoriteContentUris = setOf(favorite.contentUri),
+            ),
+        )
+    }
+
+    @Test
     fun `included folders narrow the current authorized snapshot`() {
         val visible = GallerySettingsPolicy.visibleItems(
             items = listOf(item("camera", "Camera"), item("download", "Download"), ungroupedItem()),
@@ -99,6 +143,21 @@ class GallerySettingsPolicyTest {
         durationMillis = null,
         sizeBytes = 100,
         albumId = albumId,
+        albumName = albumName,
+    )
+
+    private fun video(id: String, albumName: String, displayName: String) = MediaItem(
+        id = id,
+        contentUri = "content://gallery/$id",
+        displayName = displayName,
+        mimeType = "video/mp4",
+        capturedAt = Instant.parse("2026-09-29T12:00:00Z"),
+        modifiedAt = Instant.parse("2026-09-29T12:00:00Z"),
+        width = 1920,
+        height = 1080,
+        durationMillis = 120_000,
+        sizeBytes = 1_000,
+        albumId = albumName.lowercase().replace(" ", "-"),
         albumName = albumName,
     )
 
