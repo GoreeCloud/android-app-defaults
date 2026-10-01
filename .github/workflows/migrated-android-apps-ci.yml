@@ -292,7 +292,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
-          script: cd apps/launcher && gradle --no-daemon connectedDebugAndroidTest
+          script: gradle --project-dir "$GITHUB_WORKSPACE/apps/launcher" --no-daemon connectedDebugAndroidTest
       - name: Upload Launcher Android 16 test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -357,11 +357,10 @@ jobs:
           disable-animations: false
           disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
           script: |
-            cd apps/launcher
             adb logcat -c
-            gradle --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.goreecloud.launcher.ui.LauncherTransitionPerformanceRuntimeTest
-            mkdir -p ci-performance
-            adb logcat -d -s LauncherTransitionPerf:I '*:S' | tee ci-performance/transition-performance.log
+            gradle --project-dir "$GITHUB_WORKSPACE/apps/launcher" --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.goreecloud.launcher.ui.LauncherTransitionPerformanceRuntimeTest
+            mkdir -p "$GITHUB_WORKSPACE/apps/launcher/ci-performance"
+            adb logcat -d -s LauncherTransitionPerf:I '*:S' | tee "$GITHUB_WORKSPACE/apps/launcher/ci-performance/transition-performance.log"
       - name: Upload Launcher transition-performance evidence
         if: always()
         uses: actions/upload-artifact@v4
