@@ -113,6 +113,35 @@ class SinceStreakHistoryTest {
     }
 
     @Test
+    fun resetConfirmationCanBeDisabledWithoutSkippingResetEditor() {
+        val repository = FakeTrackerRepository(
+            initial = listOf(sampleAggregate()),
+            clock = clock,
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                    confirmReset = false,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("reset-reason").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertDoesNotExist()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
+
+        composeRule.runOnIdle {
+            assertEquals(2, repository.current.single().periods.size)
+        }
+    }
+
+    @Test
     fun largeFontResetAndHistoryKeepPrimaryActionsReachable() {
         val repository = FakeTrackerRepository(
             initial = listOf(sampleAggregate()),
