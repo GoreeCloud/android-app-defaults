@@ -1,13 +1,16 @@
 # Android App Defaults — Changelogs
 
-## September 30, 2026 — Since Settings copy polish candidate
+## September 30, 2026 — Since owner-device Settings and Achievements refinement candidate
 
 - Replaced internal acceptance terminology in the user-facing Privacy and Security section with plain-language explanations.
-- Simplified Export, Review import, Backup, and Restore supporting text.
-- Updated the matching Arabic strings.
-- No persistence, recovery, permission, or signing behavior changed.
+- Simplified Export, Review import, Backup, and Restore supporting text and updated matching Arabic copy.
+- Corrected the Settings summary so Data and Guidance are represented.
+- Tightened Settings section spacing and flattened nested action-card treatment to reduce the oversized, card-heavy Settings surface while retaining full-row actions.
+- Reduced repetitive vertical density on the Achievements screen without changing its five local-only achievement rules.
+- Added localized locked/unlocked state descriptions to achievement accessibility semantics and hid decorative check/circle glyphs from accessibility output.
+- Kept the existing fail-closed recovery behavior, local-only privacy boundary, permissions, persistence model, and signing behavior unchanged.
 
-**Evidence boundary:** physical-device screenshots of Development version 0.1.0-dev / 585 showed the copy issue. Fresh exact-head CI and broader device acceptance remain required.
+**Evidence boundary:** physical-device screenshots of Development version 0.1.0-dev / 585 verified successful install/launch and exposed the presentation/copy issues addressed here. Fresh exact-head CI, rendered-evidence review, broader representative-device accessibility/localization acceptance, update-in-place continuity, and protected persistent signing remain required.
 
 ## September 30, 2026 — Since Development APK distribution hardening candidate
 
