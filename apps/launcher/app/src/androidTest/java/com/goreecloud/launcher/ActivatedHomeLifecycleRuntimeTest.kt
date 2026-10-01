@@ -1609,7 +1609,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
                 waitForDisplayedLabel(candidate.label.toString())
 
-                scenario.moveToState(Lifecycle.State.CREATED)
+                scenario.moveToState(Lifecycle.State.STARTED)
                 scenario.moveToState(Lifecycle.State.RESUMED)
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
