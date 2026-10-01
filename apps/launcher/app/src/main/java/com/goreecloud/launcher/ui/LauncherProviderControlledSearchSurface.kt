@@ -2037,6 +2037,7 @@ private fun LauncherProviderSearchRow(
                     LauncherSearchCategory.CALL_HISTORY -> "Call"
                     LauncherSearchCategory.MESSAGE -> "Message"
                     LauncherSearchCategory.FILE -> "File"
+                    LauncherSearchCategory.UTILITY -> "Utility"
                     LauncherSearchCategory.CONNECTED_SOURCE -> "Connected"
                     LauncherSearchCategory.SETTING -> "Setting"
                     LauncherSearchCategory.ACTION -> "Action"
