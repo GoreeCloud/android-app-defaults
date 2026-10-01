@@ -6,6 +6,8 @@ A later exact-head feature validation reproduced a lifecycle-suite setup race th
 
 The test now waits for the actual rendered Drawer gesture surface, Compose idle, a ready paged-Home projection, and a ready authoritative placement snapshot before deciding whether it must add the candidate. If a setup write is required, the test verifies the exact write result and then observes authoritative placement until the candidate is present before continuing.
 
+Exact head `3dac0fa9c39b6cd29172a7bd9eea46667beb7000` cleared build/JVM/lint/schema, Android Development Foundation, provenance, and transition-performance, but the complete API 36 run exposed a second teardown-only race in `secondaryHomeRendersMovedBuiltInWidget`. The widget render/move assertions completed; teardown then sent HOME and waited for page-indicator semantics from the scenario-owned Compose hierarchy. HOME can validly replace that LAUNCHER Activity with a fresh HOME Activity, so the old test hierarchy may disappear even though the reset succeeded. Runtime artifact `11157485154` preserves the failed evidence. The repaired test still sends the real HOME reset before deleting its temporary page, but no longer requires post-HOME page-indicator semantics from an ActivityScenario instance that Android may legitimately replace.
+
 No Launcher production Kotlin behavior, permissions, workspace authority, persistence schema, or user-facing interaction is changed.
 
 **Acceptance boundary:** Development test/runtime-stabilization candidate restacked on accepted main `d78ef5625ad14ef62c2405fdb697fe37aba81bec`. Fresh exact-head build and complete API 36 runtime/promotion evidence are required before integration.
