@@ -58,7 +58,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Bounded MediaStore image/video reads through the compiled Android adapter.
 - Validated media-item and MediaStore-row domain models.
 - Local thumbnail loading with bounded in-memory caching and no cloud dependency.
-- Direct Photos, Albums, Videos, and Settings navigation.
+- Direct Photos, Albums, Videos, Trash, and Settings navigation.
 - Adaptive Photos and Videos grids grouped by Today, Yesterday, and calendar date.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
@@ -79,7 +79,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 ### Delete, Trash, and Recycle Bin Development boundary
 
 - Android 11+ Delete/Trash candidate using Android-owned confirmation through `MediaStore.createTrashRequest(...)` or `MediaStore.createDeleteRequest(...)`.
-- First-party Recycle Bin candidate backed by Android MediaStore Trash.
+- First-party Trash destination backed by Android MediaStore Trash, separated from Albums while preserving Android-owned restore and permanent-delete confirmation.
 - Recycle Bin browsing, bounded viewer navigation, Restore, permanent Delete, and multi-select Restore/Purge actions.
 - Maximum 100 unique authorized MediaStore image/video item URIs per Trash/Restore/Delete request.
 - Rejection of non-MediaStore, file, network, blank, collection-only, malformed, stale, or foreign mutation targets.
