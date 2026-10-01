@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "GoreeCloudAndroidAppDefaults"
 
 include(":apps:since")
+include(":apps:clock")
