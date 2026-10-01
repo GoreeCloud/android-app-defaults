@@ -1,5 +1,17 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — mockup-aligned five-tab Gallery navigation
+
+### Changed
+- Began the new Gallery UI implementation with a five-destination bottom navigation model: **Photos / Albums / Videos / Trash / Settings**.
+- Promoted Android MediaStore Trash to a dedicated primary **Trash** destination and removed the Recovery/Recycle Bin entry from Albums.
+- Reworked the Trash surface as a root destination with the same Glaze bottom-navigation capsule, selected-state treatment, and direct return paths to Photos, Albums, Videos, and Settings.
+- Preserved the existing Android-owned restore and permanent-delete confirmation boundary; this navigation change adds no new storage, filesystem, network, account, or mutation authority.
+- Added a dedicated Trash navigation icon, shared destination handoff contract, and rendered acceptance coverage for the five-tab shell.
+
+### Development boundary
+This is the first implementation slice of the supplied Gallery mockup direction. Broader mockup-aligned Photos, Albums, Videos, Trash, and Settings composition/polish, representative-device visual review, accessibility acceptance, and release qualification remain open.
+
 ## September 29, 2026 — bounded authorized local search reconciliation
 
 - Reconciled still-required behavior from legacy Gallery PRs #42 and #43 into the monorepo Development line.
