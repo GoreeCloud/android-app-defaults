@@ -1025,19 +1025,25 @@ private fun DashboardSummaryRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         DashboardStatCard(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .testTag("dashboard-summary-total"),
             glyph = "▦",
             label = stringResource(R.string.dashboard_total_trackers),
             value = summary.totalTrackers.toString(),
         )
         DashboardStatCard(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .testTag("dashboard-summary-streaks"),
             glyph = "◆",
             label = stringResource(R.string.dashboard_active_streaks),
             value = summary.activeStreaks.toString(),
         )
         DashboardStatCard(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .testTag("dashboard-summary-longest"),
             glyph = "★",
             label = stringResource(R.string.dashboard_longest_streak),
             value = stringResource(
@@ -1245,26 +1251,16 @@ private fun TrackerCard(
                     )
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                 ) {
-                    Surface(
-                        shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                            text = trackerKindLabel(aggregate.tracker.kind),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
                     Text(
-                        text = "⋮",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                        text = trackerKindLabel(aggregate.tracker.kind),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }
