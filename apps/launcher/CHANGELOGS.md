@@ -4,7 +4,7 @@
 
 The next bounded Home/Search polish pass moves the supplied Launcher visual direction closer to the live native product without changing data or authority boundaries. On non-compact left-aligned Home Glance, local time/date and the existing product line now form a clearer left hierarchy while the permission-gated Weather status occupies the right side. Compact and centered Glance layouts keep their adaptive fallbacks.
 
-Idle Universal Search now presents **Frequent / Recent / New or updated** inside one restrained Glaze pill surface. The selected tab uses a contained primary-container state instead of a detached underline while retaining the current icon/word/both presentation preference, semantic tab roles, accessibility labels, ranking inputs, and 48 dp interaction targets.
+Idle Universal Search now presents **Frequent / Recent / New or updated** inside one restrained Glaze pill surface. The selected tab uses a contained primary-container state instead of a detached underline while retaining the current icon/word/both presentation preference, semantic tab roles, accessibility labels, ranking inputs, and 48 dp interaction targets. The existing ranked **Top result** also receives a slightly larger Glaze card, leading artwork/glyph, and title hierarchy without changing ranking or action authority.
 
 No Android permission, provider execution, query transmission, workspace persistence, network, analytics, advertising, sponsorship, or release-authority behavior changes.
 
