@@ -292,13 +292,26 @@ jobs:
           arch: x86_64
           disable-animations: true
           disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
-          script: gradle --project-dir "$GITHUB_WORKSPACE/apps/launcher" --no-daemon connectedDebugAndroidTest
+          script: |
+            mkdir -p "$GITHUB_WORKSPACE/apps/launcher/ci-runtime"
+            set +e
+            timeout --signal=TERM --kill-after=30s 20m \
+              gradle --project-dir "$GITHUB_WORKSPACE/apps/launcher" --no-daemon connectedDebugAndroidTest
+            status=$?
+            set -e
+            if [ "$status" -ne 0 ]; then
+              adb logcat -d > "$GITHUB_WORKSPACE/apps/launcher/ci-runtime/logcat.txt" || true
+              adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/apps/launcher/ci-runtime/activity.txt" || true
+              adb shell dumpsys window windows > "$GITHUB_WORKSPACE/apps/launcher/ci-runtime/window.txt" || true
+            fi
+            exit "$status"
       - name: Upload Launcher Android 16 test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: launcher-android16-runtime-reports
           path: |
+            apps/launcher/ci-runtime/**
             apps/launcher/app/build/reports/androidTests/connected/**
             apps/launcher/app/build/outputs/androidTest-results/connected/**
           if-no-files-found: warn
