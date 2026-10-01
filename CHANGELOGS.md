@@ -1,5 +1,16 @@
 # Android App Defaults — Changelogs
 
+## October 1, 2026 — Since mockup-driven Home visual upgrade candidate
+
+- Began implementing the owner-supplied GoreeCloud Since Home mockup on the active stacked Since Development line.
+- Added a large Since hero header with a lightweight in-app Glaze landscape illustration, rounded search treatment, and a three-card summary for total trackers, active streaks, and longest streak.
+- Refreshed tracker cards with a leading identity tile, localized started timestamp, tracker-kind badge, stronger elapsed-time hierarchy, detail chevron, preserved goal information, and a compact note/tip strip.
+- Refined the Home floating action to the mockup's plus + **Add tracker** treatment and polished selected/unselected bottom-navigation presentation.
+- Preserved all five existing local Dashboard sort modes, local-only search, contextual guidance, timestamp-derived elapsed calculations, and current navigation behavior rather than removing validated functionality solely to match the static mockup.
+
+**Authority boundary:** this is a stacked Development UI candidate on top of PR #131. It adds no network, account, storage-permission, Room-schema, background-service, import/restore, signing, or release authority. Fresh exact-head CI, rendered-evidence review, and representative-device accessibility/localization/form-factor acceptance are required before the new presentation is treated as accepted.
+
+
 ## September 30, 2026 — Since dashboard search and sort candidate
 
 - Added Created, Name A–Z, Newest start, Oldest start, and Longest current ordering for active trackers.
