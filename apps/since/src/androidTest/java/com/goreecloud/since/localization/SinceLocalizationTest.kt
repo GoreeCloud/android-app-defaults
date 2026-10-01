@@ -48,5 +48,13 @@ class SinceLocalizationTest {
             "1 يوم · 2 ساعة · 3 دقيقة · 4 ثانية",
             localizedContext.getString(R.string.elapsed_days_detail_seconds, 1, 2, 3, 4),
         )
+        assertEquals(
+            "ترتيب الإنشاء",
+            localizedContext.getString(R.string.dashboard_sort_created),
+        )
+        assertEquals(
+            "أقدم بداية",
+            localizedContext.getString(R.string.dashboard_sort_oldest_start),
+        )
     }
 }
