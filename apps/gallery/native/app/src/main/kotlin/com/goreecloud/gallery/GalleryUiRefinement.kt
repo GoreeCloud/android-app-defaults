@@ -52,6 +52,8 @@ object GalleryUiRefinement {
     )
 
     private val primaryPersistentControlDescriptions = setOf(
+        "Search the current Gallery destination",
+        "Change Gallery sort order",
         "Gallery media access action",
     )
 
