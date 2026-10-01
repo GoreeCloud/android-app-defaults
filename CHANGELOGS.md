@@ -1,5 +1,16 @@
 # Android App Defaults — Changelogs
 
+
+## September 28, 2026 — Clock timer quick-preset candidate
+
+- Added six quick presets to the existing New timer editor: 1, 5, 10, 15, and 30 minutes plus 1 hour.
+- Presets prefill the existing duration fields only; they do not auto-create, auto-start, schedule, or notify.
+- Added a pure preset catalog and deterministic duration-to-editor-field mapping with JVM coverage.
+- Added Android UI acceptance that selects the 30-minute preset, creates the timer, and verifies it remains paused at the expected duration.
+- Added no permission, persistence schema, widget, account, network, or scheduling authority.
+- Exact-head Android Development Foundation validation remains required.
+
+
 ## September 28, 2026 — relative Next alarm presentation
 
 Clock's existing exact-alarm-gated **Next alarm** card now adds a compact relative-time summary such as **In 2 h 15 min**, derived from the same scheduled trigger instant rather than a second scheduling path. The presentation policy uses instant duration so DST/local-clock representation does not distort the countdown, handles sub-minute and multi-day boundaries, and fails closed to **Due now** for a non-future trigger.
