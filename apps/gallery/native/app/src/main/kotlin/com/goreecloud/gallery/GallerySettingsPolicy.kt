@@ -74,6 +74,51 @@ enum class GalleryViewDensity(
     }
 }
 
+enum class GalleryVideoFilter(val label: String) {
+    ALL("All"),
+    SCREEN_RECORDINGS("Screen recordings"),
+    CAMERA("Camera"),
+    FAVORITES("Favorites"),
+}
+
+object GalleryVideoFilterPolicy {
+    fun available(
+        items: List<MediaItem>,
+        favoriteContentUris: Set<String>,
+    ): List<GalleryVideoFilter> = buildList {
+        add(GalleryVideoFilter.ALL)
+        GalleryVideoFilter.entries
+            .filterNot { it == GalleryVideoFilter.ALL }
+            .filter { filter -> items.any { item -> matches(filter, item, favoriteContentUris) } }
+            .forEach(::add)
+    }
+
+    fun filter(
+        items: List<MediaItem>,
+        selected: GalleryVideoFilter,
+        favoriteContentUris: Set<String>,
+    ): List<MediaItem> =
+        if (selected == GalleryVideoFilter.ALL) items
+        else items.filter { item -> matches(selected, item, favoriteContentUris) }
+
+    fun matches(
+        filter: GalleryVideoFilter,
+        item: MediaItem,
+        favoriteContentUris: Set<String>,
+    ): Boolean = when (filter) {
+        GalleryVideoFilter.ALL -> true
+        GalleryVideoFilter.FAVORITES -> item.contentUri in favoriteContentUris
+        GalleryVideoFilter.CAMERA ->
+            item.albumName?.contains("camera", ignoreCase = true) == true
+        GalleryVideoFilter.SCREEN_RECORDINGS -> {
+            val searchable = listOfNotNull(item.albumName, item.displayName)
+                .joinToString(" ")
+                .lowercase()
+            "screen" in searchable && ("record" in searchable || "capture" in searchable)
+        }
+    }
+}
+
 data class GalleryUserSettings(
     val fileLoadingPriority: GalleryFileLoadingPriority = GalleryFileLoadingPriority.FAST,
     val viewDensity: GalleryViewDensity = GalleryViewDensity.DENSE,
