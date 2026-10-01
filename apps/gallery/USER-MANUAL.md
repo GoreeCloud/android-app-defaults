@@ -25,7 +25,7 @@ The current native Development experience provides direct **Photos**, **Albums**
 - Videos uses a featured first card followed by two-column phone cards (three columns on wider layouts), with play affordances, duration badges, title/date metadata, and category chips that appear only when the current Android-authorized snapshot actually contains matching Screen recordings, Camera, or Favorites media.
 - Albums uses Android-authorized album metadata and includes a device-local Favorites collection when Favorites exist. Recovery is no longer embedded in Albums.
 - Trash is a dedicated bottom-navigation destination on Android 11+ and uses Android MediaStore Trash as the authoritative recovery state. Restore and permanent deletion continue to use Android-owned confirmation.
-- Photos and Videos expose direct Group and View controls for presentation-only grouping/density changes; search and Newest/Oldest ordering operate only over the currently authorized local snapshot.
+- Photos and Videos keep the main canvas focused on Search, Sort, media, and destination-specific filters. Grouping and view-density remain available in Settings > Appearance.
 - Long-press a media tile to enter multi-select mode.
 
 ## Viewer
