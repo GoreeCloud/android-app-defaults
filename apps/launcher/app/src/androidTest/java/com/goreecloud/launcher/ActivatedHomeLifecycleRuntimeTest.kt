@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
@@ -451,15 +452,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                         )
                     }
 
-                composeRule.waitUntil(timeoutMillis = 10_000) {
-                    composeRule
-                        .onAllNodesWithTag(
-                            "launcher-home-page-" + secondaryPageId,
-                            useUnmergedTree = true,
-                        )
-                        .fetchSemanticsNodes()
-                        .isEmpty()
-                }
+                waitForSelectedHomePage(pageNumber = 1)
                 waitForDisplayedLabel(candidate.label.toString())
                 waitForDisplayedTag("launcher-home-page-indicator")
 
@@ -771,15 +764,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 // real HOME path before deleting that page so the persisted selected-page identity
                 // cannot leak into later ActivityScenario tests as a now-stale page selection.
                 resetHomeBeforeScenarioClose()
-                composeRule.waitUntil(timeoutMillis = 10_000) {
-                    composeRule
-                        .onAllNodesWithTag(
-                            "launcher-home-page-" + WorkspaceLegacyImportMapper.HOME_PAGE_ID,
-                            useUnmergedTree = true,
-                        )
-                        .fetchSemanticsNodes()
-                        .isNotEmpty()
-                }
+                waitForSelectedHomePage(pageNumber = 1)
                 scenario.close()
             }
         } finally {
@@ -1994,6 +1979,24 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .isEmpty()
         }
         composeRule.waitForIdle()
+    }
+
+    private fun waitForSelectedHomePage(
+        pageNumber: Int,
+        timeoutMillis: Long = 10_000,
+    ) {
+        composeRule.waitUntil(timeoutMillis = timeoutMillis) {
+            runCatching {
+                val descriptions = composeRule
+                    .onNodeWithTag("launcher-home-page-indicator", useUnmergedTree = true)
+                    .fetchSemanticsNode()
+                    .config[SemanticsProperties.ContentDescription]
+                descriptions.any { description ->
+                    description.startsWith("Page $pageNumber,") &&
+                        description.endsWith(", selected")
+                }
+            }.getOrDefault(false)
+        }
     }
 
     private fun waitForDisplayedLabel(label: String) {
