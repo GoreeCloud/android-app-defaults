@@ -469,7 +469,10 @@ internal fun Modifier.launcherHomePagerBoundaryGestureNavigation(
             while (true) {
                 val event = awaitPointerEvent(PointerEventPass.Final)
                 val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                val delta = change.positionChange()
+                // The pager consumes horizontal position changes before the Final pass. Boundary
+                // actions still need the raw pointer travel so outward swipes on the first/last
+                // page remain observable without competing with ordinary pager navigation.
+                val delta = change.position - change.previousPosition
                 horizontalDistance += delta.x
                 verticalDistance += delta.y
 
@@ -1818,7 +1821,6 @@ private fun HomeSurface(
     var now by remember { mutableStateOf(LocalDateTime.now()) }
     var showHomeEditor by rememberSaveable { mutableStateOf(false) }
     var showWidgetPicker by rememberSaveable { mutableStateOf(false) }
-    var pendingWidgetPickerAfterEditorDismissal by rememberSaveable { mutableStateOf(false) }
     var movableGlanceMigrationRequested by rememberSaveable { mutableStateOf(false) }
     val hasMovableGlance = remember(primaryHomePage) {
         primaryHomePage?.widgetPlacements?.any { placement ->
@@ -1850,21 +1852,10 @@ private fun HomeSurface(
         onHomeEditorVisibilityChanged(effectiveShowHomeEditor)
     }
 
-    // A Material3 bottom sheet should not be introduced in the same composition that removes
-    // the full-screen editor Dialog. Defer the picker by one post-composition effect so the
-    // editor window is fully dismissed before the sheet becomes active.
-    LaunchedEffect(effectiveShowHomeEditor, pendingWidgetPickerAfterEditorDismissal) {
-        if (!effectiveShowHomeEditor && pendingWidgetPickerAfterEditorDismissal) {
-            pendingWidgetPickerAfterEditorDismissal = false
-            showWidgetPicker = true
-        }
-    }
-
     LaunchedEffect(homeResetSequence) {
         if (homeResetSequence > 0L) {
             showHomeEditor = false
             showWidgetPicker = false
-            pendingWidgetPickerAfterEditorDismissal = false
         }
     }
     DisposableEffect(Unit) {
@@ -2297,9 +2288,19 @@ private fun HomeSurface(
             }
         }
 
-        if (effectiveShowHomeEditor) {
+        if (effectiveShowHomeEditor || effectiveShowWidgetPicker) {
+            // Keep editor -> widget-gallery navigation in one Compose dialog window. Replacing a
+            // Dialog with a Material bottom-sheet window in the same interaction proved racy on
+            // Android 16 and could leave the picker uncomposed. A single window also makes Back
+            // dismissal and accessibility focus transfer deterministic.
             Dialog(
-                onDismissRequest = { showHomeEditor = false },
+                onDismissRequest = {
+                    if (effectiveShowWidgetPicker) {
+                        showWidgetPicker = false
+                    } else {
+                        showHomeEditor = false
+                    }
+                },
                 properties = DialogProperties(
                     usePlatformDefaultWidth = false,
                     decorFitsSystemWindows = false,
@@ -2308,66 +2309,66 @@ private fun HomeSurface(
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
-                        .testTag("launcher-home-editor-fullscreen"),
+                        .then(
+                            if (effectiveShowHomeEditor) {
+                                Modifier.testTag("launcher-home-editor-fullscreen")
+                            } else {
+                                Modifier.testTag("launcher-widget-picker-fullscreen")
+                            },
+                        ),
                     color = MaterialTheme.colorScheme.background,
                     tonalElevation = 0.dp,
                 ) {
-                    HomeEditorSurface(
-                        dockApps = dockApps,
-                        preferences = preferences,
-                        homePages = homePages,
-                        initialPageId = homeEditorInitialPageId,
-                        onSelectPage = onSelectHomePage,
-                        onCreatePage = onCreateHomePage,
-                        onDeletePage = onDeleteHomePage,
-                        onDone = { showHomeEditor = false },
-                        onWallpaper = {
-                            showHomeEditor = false
-                            onOpenWallpaperPicker()
-                        },
-                        onWidgets = {
-                            pendingWidgetPickerAfterEditorDismissal = true
-                            showHomeEditor = false
-                        },
-                        onFolders = {
-                            showHomeEditor = false
-                            onManageFolders()
-                        },
-                        onApps = {
-                            showHomeEditor = false
-                            onOpenDrawer()
-                        },
-                        onSettings = {
-                            showHomeEditor = false
-                            onOpenSettings()
-                        },
-                    )
+                    if (effectiveShowHomeEditor) {
+                        HomeEditorSurface(
+                            dockApps = dockApps,
+                            preferences = preferences,
+                            homePages = homePages,
+                            initialPageId = homeEditorInitialPageId,
+                            onSelectPage = onSelectHomePage,
+                            onCreatePage = onCreateHomePage,
+                            onDeletePage = onDeleteHomePage,
+                            onDone = { showHomeEditor = false },
+                            onWallpaper = {
+                                showHomeEditor = false
+                                onOpenWallpaperPicker()
+                            },
+                            onWidgets = {
+                                showWidgetPicker = true
+                                showHomeEditor = false
+                            },
+                            onFolders = {
+                                showHomeEditor = false
+                                onManageFolders()
+                            },
+                            onApps = {
+                                showHomeEditor = false
+                                onOpenDrawer()
+                            },
+                            onSettings = {
+                                showHomeEditor = false
+                                onOpenSettings()
+                            },
+                        )
+                    } else {
+                        LauncherWidgetPickerSheet(
+                            apps = apps,
+                            availableAndroidWidgets = availableAndroidWidgets,
+                            onAddBuiltInWidget = { typeId ->
+                                showWidgetPicker = false
+                                onAddBuiltInWidget(typeId)
+                            },
+                            onPickInstalledAndroidWidget = { descriptor ->
+                                showWidgetPicker = false
+                                onPickInstalledAndroidWidget(descriptor)
+                            },
+                            onPickAndroidWidget = {
+                                showWidgetPicker = false
+                                onPickAndroidWidget()
+                            },
+                        )
+                    }
                 }
-            }
-        }
-
-        if (effectiveShowWidgetPicker) {
-            ModalBottomSheet(
-                onDismissRequest = { showWidgetPicker = false },
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-                tonalElevation = 0.dp,
-            ) {
-                LauncherWidgetPickerSheet(
-                    apps = apps,
-                    availableAndroidWidgets = availableAndroidWidgets,
-                    onAddBuiltInWidget = { typeId ->
-                        showWidgetPicker = false
-                        onAddBuiltInWidget(typeId)
-                    },
-                    onPickInstalledAndroidWidget = { descriptor ->
-                        showWidgetPicker = false
-                        onPickInstalledAndroidWidget(descriptor)
-                    },
-                    onPickAndroidWidget = {
-                        showWidgetPicker = false
-                        onPickAndroidWidget()
-                    },
-                )
             }
         }
     }
