@@ -112,6 +112,8 @@ fun SinceApp(
     onDefaultDisplayFormatChange: (DisplayFormat) -> Unit = {},
     showSeconds: Boolean = true,
     onShowSecondsChange: (Boolean) -> Unit = {},
+    dashboardSortName: String = SinceDashboardSort.CREATED.name,
+    onDashboardSortChange: (String) -> Unit = {},
     contextualHintsEnabled: Boolean = true,
     onContextualHintsEnabledChange: (Boolean) -> Unit = {},
     homeContextualHintDismissed: Boolean = false,
@@ -500,6 +502,8 @@ fun SinceApp(
                 aggregates = aggregates,
                 clock = clock,
                 showSeconds = showSeconds,
+                dashboardSortName = dashboardSortName,
+                onDashboardSortChange = onDashboardSortChange,
                 contextualHintsEnabled = contextualHintsEnabled,
                 homeContextualHintDismissed = homeContextualHintDismissed,
                 onDismissHomeContextualHint = {
@@ -620,6 +624,8 @@ private fun Dashboard(
     aggregates: List<TrackerAggregate>,
     clock: Clock,
     showSeconds: Boolean,
+    dashboardSortName: String,
+    onDashboardSortChange: (String) -> Unit,
     contextualHintsEnabled: Boolean,
     homeContextualHintDismissed: Boolean,
     onDismissHomeContextualHint: () -> Unit,
@@ -632,10 +638,9 @@ private fun Dashboard(
         showSeconds = showSeconds,
     )
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var sortName by rememberSaveable { mutableStateOf(SinceDashboardSort.RECENT.name) }
     val dashboardSort = runCatching {
-        SinceDashboardSort.valueOf(sortName)
-    }.getOrDefault(SinceDashboardSort.RECENT)
+        SinceDashboardSort.valueOf(dashboardSortName)
+    }.getOrDefault(SinceDashboardSort.CREATED)
     val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
         SinceDashboardQuery.apply(
             aggregates = aggregates,
@@ -700,42 +705,42 @@ private fun Dashboard(
                         item {
                             FilterChip(
                                 selected = dashboardSort == SinceDashboardSort.RECENT,
-                                onClick = { sortName = SinceDashboardSort.RECENT.name },
+                                onClick = { onDashboardSortChange(SinceDashboardSort.RECENT.name) },
                                 label = { Text(stringResource(R.string.dashboard_sort_recent)) },
                             )
                         }
                         item {
                             FilterChip(
                                 selected = dashboardSort == SinceDashboardSort.CREATED,
-                                onClick = { sortName = SinceDashboardSort.CREATED.name },
+                                onClick = { onDashboardSortChange(SinceDashboardSort.CREATED.name) },
                                 label = { Text(stringResource(R.string.dashboard_sort_created)) },
                             )
                         }
                         item {
                             FilterChip(
                                 selected = dashboardSort == SinceDashboardSort.TITLE,
-                                onClick = { sortName = SinceDashboardSort.TITLE.name },
+                                onClick = { onDashboardSortChange(SinceDashboardSort.TITLE.name) },
                                 label = { Text(stringResource(R.string.dashboard_sort_name)) },
                             )
                         }
                         item {
                             FilterChip(
                                 selected = dashboardSort == SinceDashboardSort.NEWEST_START,
-                                onClick = { sortName = SinceDashboardSort.NEWEST_START.name },
+                                onClick = { onDashboardSortChange(SinceDashboardSort.NEWEST_START.name) },
                                 label = { Text(stringResource(R.string.dashboard_sort_newest_start)) },
                             )
                         }
                         item {
                             FilterChip(
                                 selected = dashboardSort == SinceDashboardSort.OLDEST_START,
-                                onClick = { sortName = SinceDashboardSort.OLDEST_START.name },
+                                onClick = { onDashboardSortChange(SinceDashboardSort.OLDEST_START.name) },
                                 label = { Text(stringResource(R.string.dashboard_sort_oldest_start)) },
                             )
                         }
                         item {
                             FilterChip(
                                 selected = dashboardSort == SinceDashboardSort.LONGEST_CURRENT,
-                                onClick = { sortName = SinceDashboardSort.LONGEST_CURRENT.name },
+                                onClick = { onDashboardSortChange(SinceDashboardSort.LONGEST_CURRENT.name) },
                                 label = { Text(stringResource(R.string.dashboard_sort_longest_current)) },
                             )
                         }
