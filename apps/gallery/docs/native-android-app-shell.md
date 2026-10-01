@@ -42,7 +42,7 @@ This remains source integration, not whole-application acceptance. Accessibility
 
 The first-party native implementation has advanced substantially beyond the initial shell described by this milestone. Current Development source includes direct **Photos / Albums / Videos / Trash / Settings** navigation, Android-authorized local thumbnail grids, album/favorites browsing, local search and sort, timeline grouping, view-density controls, selection and bulk actions, an authorized media viewer, Android-owned Trash/Restore/Delete flows, Move foundations, and Gallery-local settings.
 
-The October 1, 2026 UI refresh also adds mockup-aligned primary headers, raised album cards, timeline counts, dedicated Trash navigation, and direct Photos/Videos Group and View controls.
+The October 1, 2026 UI refresh also adds mockup-aligned primary headers, raised album cards, timeline counts, dedicated Trash navigation, destination-specific Videos filters, and cleaner media-first Photos/Videos chrome while grouping and density remain configurable from Settings.
 
 For the maintained current feature inventory and remaining work, use the repository feature/specification records rather than treating this historical shell milestone as the complete application surface.
 
