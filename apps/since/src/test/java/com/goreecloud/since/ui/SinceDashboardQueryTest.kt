@@ -36,14 +36,14 @@ class SinceDashboardQueryTest {
     }
 
     @Test
-    fun createdSortUsesSortOrderThenCreationTime() {
+    fun manualSortUsesSortOrderThenCreationTime() {
         val rows = listOf(
             aggregate("b", "Second", null, 200, sortOrder = 1, createdAt = 300),
             aggregate("c", "Third", null, 300, sortOrder = 1, createdAt = 400),
             aggregate("a", "First", null, 100, sortOrder = 0, createdAt = 500),
         )
 
-        val result = SinceDashboardQuery.apply(rows, "", SinceDashboardSort.CREATED)
+        val result = SinceDashboardQuery.apply(rows, "", SinceDashboardSort.MANUAL)
 
         assertEquals(listOf("a", "b", "c"), result.map { it.tracker.id })
     }
