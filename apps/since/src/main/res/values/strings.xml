@@ -208,7 +208,11 @@
 
     <string name="dashboard_search">Search trackers</string>
     <string name="dashboard_sort_recent">Recent</string>
+    <string name="dashboard_sort_created">Created</string>
     <string name="dashboard_sort_name">Name</string>
+    <string name="dashboard_sort_newest_start">Newest start</string>
+    <string name="dashboard_sort_oldest_start">Oldest start</string>
+    <string name="dashboard_sort_longest_current">Longest</string>
     <string name="dashboard_no_matches">No trackers match your search.</string>
     <string name="archive_tracker">Archive tracker</string>
     <string name="archive_tracker_supporting">Hide this tracker from Home without deleting its history or goal. You can restore it from Settings.</string>
