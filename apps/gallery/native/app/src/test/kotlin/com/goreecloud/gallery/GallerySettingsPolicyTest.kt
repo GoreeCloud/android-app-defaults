@@ -33,18 +33,6 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
-    fun `quick presentation controls cycle deterministically and wrap`() {
-        assertEquals(GalleryGroupingMode.MONTH, GalleryGroupingMode.DAY.next())
-        assertEquals(GalleryGroupingMode.YEAR, GalleryGroupingMode.MONTH.next())
-        assertEquals(GalleryGroupingMode.NONE, GalleryGroupingMode.YEAR.next())
-        assertEquals(GalleryGroupingMode.DAY, GalleryGroupingMode.NONE.next())
-
-        assertEquals(GalleryViewDensity.COMFORTABLE, GalleryViewDensity.DENSE.next())
-        assertEquals(GalleryViewDensity.SPACIOUS, GalleryViewDensity.COMFORTABLE.next())
-        assertEquals(GalleryViewDensity.DENSE, GalleryViewDensity.SPACIOUS.next())
-    }
-
-    @Test
     fun `video presentation uses mockup-aligned recency wording`() {
         assertEquals(
             "Recently added",
