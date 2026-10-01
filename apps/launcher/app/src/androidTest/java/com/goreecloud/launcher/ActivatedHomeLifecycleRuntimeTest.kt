@@ -493,8 +493,11 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .assertIsDisplayed()
 
                 runShellCommand("input keyevent KEYCODE_HOME")
+                waitForSelectedHomePage(pageNumber = 1)
                 waitForDisplayedLabel(candidate.label.toString())
                 waitForDisplayedTag("launcher-home-page-indicator")
+                waitForDisplayedTag("launcher-home-empty-space-actions")
+                composeRule.waitForIdle()
 
                 composeRule
                     .onNodeWithTag(
@@ -502,7 +505,14 @@ class ActivatedHomeLifecycleRuntimeTest {
                         useUnmergedTree = true,
                     )
                     .performTouchInput {
-                        down(center)
+                        // The primary page intentionally contains an app. Long-press a lower-right
+                        // empty grid region rather than the node center so child app content cannot
+                        // consume the gesture that opens Edit Home.
+                        val emptyPoint = center.copy(
+                            x = right - 32f,
+                            y = bottom - 32f,
+                        )
+                        down(emptyPoint)
                         advanceEventTime(700)
                         up()
                     }
@@ -1754,7 +1764,13 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .fetchSemanticsNodes()
                         .isNotEmpty()
                 }
-                composeRule.onNodeWithText("Widgets").performClick()
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-editor-action-widgets",
+                        useUnmergedTree = true,
+                    )
+                    .assertHasClickAction()
+                    .performClick()
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
