@@ -575,11 +575,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                     !complete -> "Searching…"
                                     else -> "No results found"
                                 },
-                                style = if (emphasized) {
-                                MaterialTheme.typography.titleMedium
-                            } else {
-                                MaterialTheme.typography.bodyMedium
-                            },
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.SemiBold,
                             )
@@ -1629,7 +1625,11 @@ private fun LauncherGlazeSearchResult(
                     Column(Modifier.weight(1f)) {
                         Text(
                             result.title,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = if (emphasized) {
+                                MaterialTheme.typography.titleMedium
+                            } else {
+                                MaterialTheme.typography.bodyMedium
+                            },
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 2,
