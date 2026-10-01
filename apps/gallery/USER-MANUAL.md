@@ -154,7 +154,7 @@ The current shared authority identifies **GLAZE UI V1.6 / 1.6.0** as Official St
 
 ## Local browsing controls
 
-Gallery keeps browsing controls local to the device. **Sort** in the media header switches between **Newest first** and **Oldest first** and now persists across ordinary relaunches. Settings → Appearance exposes the same sort choice together with **Group media by** (Day, Month, Year, or None) and **View density**. These controls change presentation only; they do not modify media files or broaden Android media access.
+Gallery keeps browsing controls local to the device. **More Gallery options** in the media header exposes **Sort** (Newest first / Oldest first) and, on Photos and Videos, **Group** (Day / Month / Year / None) and **View** density choices. Settings → Appearance exposes the same persisted presentation preferences. These choices change presentation only; they do not modify media files or broaden Android media access.
 
 ## Major capability backlog
 
