@@ -19,10 +19,11 @@ On supported Android versions, the app may operate with selected-media access ra
 
 ## Main destinations
 
-The current native Development experience provides direct **Photos**, **Albums**, **Videos**, and **Settings** destinations.
+The current native Development experience provides direct **Photos**, **Albums**, **Videos**, **Trash**, and **Settings** destinations.
 
 - Photos and Videos use dense local thumbnail grids grouped by Today, Yesterday, or calendar date.
-- Albums uses Android-authorized album metadata, includes a device-local Favorites collection when Favorites exist, and on Android 11+ exposes **Recycle Bin** under a dedicated **Recovery** section.
+- Albums uses Android-authorized album metadata and includes a device-local Favorites collection when Favorites exist. Recovery is no longer embedded in Albums.
+- Trash is a dedicated bottom-navigation destination on Android 11+ and uses Android MediaStore Trash as the authoritative recovery state. Restore and permanent deletion continue to use Android-owned confirmation.
 - Search and Newest/Oldest ordering operate only over the currently authorized local snapshot.
 - Long-press a media tile to enter multi-select mode.
 
