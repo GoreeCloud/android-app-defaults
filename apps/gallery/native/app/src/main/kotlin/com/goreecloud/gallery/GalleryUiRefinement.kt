@@ -78,9 +78,6 @@ object GalleryUiRefinement {
         "Permanently delete this media through Android confirmation",
     )
 
-    private val albumTileDescription = Regex("^.+, (?:1 item|[0-9]+ items)$")
-    private val collectionSubtitle = Regex("^[0-9]+ collections?(?: · (?:Newest|Oldest) first)?$")
-
     fun install(activity: Activity) {
         if (
             activity !is GalleryActivity &&
@@ -114,7 +111,6 @@ object GalleryUiRefinement {
         when (activity) {
             is GalleryActivity -> {
                 findNavigationCapsule(root)?.let { refineNavigation(activity, it) }
-                refineAlbumCollectionSubtitle(root)
             }
             is RecycleBinActivity -> {
                 findNavigationCapsule(root)?.let { refineNavigation(activity, it) }
@@ -192,37 +188,6 @@ object GalleryUiRefinement {
             }
             item.setTag(R.id.gallery_ui_refinement_tag, marker)
         }
-    }
-
-    /**
-     * Keep the Albums subtitle synchronized with the collection tiles that are actually visible.
-     * Trash is a primary destination and is intentionally excluded from album collection counts.
-     */
-    private fun refineAlbumCollectionSubtitle(root: FrameLayout) {
-        var collectionCount = 0
-        val subtitleCandidates = mutableListOf<TextView>()
-
-        walk(root) { view ->
-            if (
-                view is LinearLayout &&
-                view.orientation == LinearLayout.VERTICAL &&
-                view.isClickable &&
-                albumTileDescription.matches(view.contentDescription?.toString().orEmpty())
-            ) {
-                collectionCount += 1
-            }
-            if (view is TextView && collectionSubtitle.matches(view.text?.toString().orEmpty())) {
-                subtitleCandidates += view
-            }
-        }
-
-        if (subtitleCandidates.size != 1) return
-        val subtitle = subtitleCandidates.single()
-        val current = subtitle.text?.toString().orEmpty()
-        val sortSuffix = current.substringAfter(" · ", missingDelimiterValue = "")
-        val countLabel = if (collectionCount == 1) "1 collection" else "$collectionCount collections"
-        val corrected = if (sortSuffix.isBlank()) countLabel else "$countLabel · $sortSuffix"
-        if (current != corrected) subtitle.text = corrected
     }
 
     private fun findNavigationCapsule(root: FrameLayout): LinearLayout? {
