@@ -115,6 +115,28 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun drawerSortSelectionPersistsAndCanResetToDefault() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("drawer-sort.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            assertEquals(null, repository.drawerSortOrderName.first())
+
+            repository.setDrawerSortOrderName("PINNED_FIRST").join()
+            assertEquals("PINNED_FIRST", repository.drawerSortOrderName.first())
+
+            repository.setDrawerSortOrderName(null).join()
+            assertEquals(null, repository.drawerSortOrderName.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun replayStartupWizardReopensSetupWithoutResettingConfiguration() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
