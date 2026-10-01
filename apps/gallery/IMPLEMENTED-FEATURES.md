@@ -117,7 +117,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Favorites export/import using versioned local JSON through Android's document provider.
 - Settings export/import for non-secret Gallery preferences.
 - Rounded-square thumbnail preference.
-- Move-deleted-items-to-Recycle-Bin preference controlling Android-confirmed Trash versus permanent delete behavior on Android 11+.
+- Move-deleted-items-to-Trash preference controlling Android-confirmed Trash versus permanent delete behavior on Android 11+.
 - Active persisted autoplay and loop preferences for the native video viewer.
 - Persisted future-facing preferences for GIF thumbnail animation and empty-folder cleanup; these stored preferences do not constitute implementation of those still-gated behaviors.
 
