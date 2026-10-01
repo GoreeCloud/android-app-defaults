@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — Hidden apps Development candidate
+
+- Added device-local hidden-app persistence keyed by exact profile-qualified Launcher workspace identity.
+- App Drawer and Universal Search discovery exclude hidden identities; Home, Dock, folders, widgets, Android package state, and Room placement remain unchanged.
+- App context actions expose **Hide app** and **Show in app drawer**.
+- Launcher Settings → App drawer exposes a reversible **Hidden apps** manager with installed-app recovery actions and explicit scope copy.
+- Same-component apps in different Android profiles remain independently visible/hidden.
+- Hidden-app state remains outside strict portable-preference v1 pending explicit backup/restore versioning.
+
+**Acceptance boundary:** source/JVM candidate on `feat/launcher-hidden-apps-20261001`; exact-head CI, Android 16 runtime, managed-profile/private-profile behavior, accessibility, package churn, and representative-device acceptance remain required before integration.
+
+
 ## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
 
 - Authoritative Launcher development now lives in `GoreeCloud/android-app-defaults/apps/launcher/`; the standalone Launcher repository is migration history only.

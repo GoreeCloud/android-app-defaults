@@ -1,5 +1,18 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add reversible profile-qualified Hidden apps
+
+Launcher now has a device-local **Hidden apps** capability using exact profile-qualified app identities. Hiding an app suppresses it from App Drawer and Universal Search discovery only; it does not uninstall the package, remove existing Home or Dock placement, or delete folder membership.
+
+The app context menu exposes **Hide app** / **Show in app drawer**. Launcher Settings → App drawer includes a **Hidden apps** recovery surface that lists currently installed hidden apps with a direct **Show** action, preventing hidden state from becoming an unexplained disappearing-app condition. Personal and Work identities remain independent even when the Android component name is the same.
+
+Hidden-app state is stored in Launcher DataStore and deliberately remains outside strict portable-preference v1 until the broader backup/restore contract is explicitly versioned. No new Android permission, cloud dependency, telemetry path, or package mutation is introduced.
+
+Focused JVM coverage verifies profile-qualified persistence and discovery isolation.
+
+**Acceptance boundary:** Development feature candidate only. Exact-head build/JVM/lint/schema and restored API 36 runtime validation are required before integration; representative personal/Work/private-profile UI, accessibility, large-text, package/profile churn, backup/restore policy, and physical-device acceptance remain open.
+
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
