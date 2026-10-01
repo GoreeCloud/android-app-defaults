@@ -736,6 +736,19 @@ private fun Dashboard(
                 DashboardSummaryRow(summary = summary)
             }
 
+            items(
+                items = visibleAggregates,
+                key = { it.tracker.id },
+            ) { aggregate ->
+                TrackerCard(
+                    aggregate = aggregate,
+                    clock = clock,
+                    tick = dashboardTick,
+                    showSeconds = showSeconds,
+                    onClick = { onOpenTracker(aggregate.tracker.id) },
+                )
+            }
+
             if (contextualHintsEnabled && !homeContextualHintDismissed) {
                 item {
                     Surface(
@@ -771,35 +784,27 @@ private fun Dashboard(
                     }
                 }
             }
-
-            items(
-                items = visibleAggregates,
-                key = { it.tracker.id },
-            ) { aggregate ->
-                TrackerCard(
-                    aggregate = aggregate,
-                    clock = clock,
-                    tick = dashboardTick,
-                    showSeconds = showSeconds,
-                    onClick = { onOpenTracker(aggregate.tracker.id) },
-                )
-            }
         }
     }
 }
 
 @Composable
 private fun DashboardHeroHeader() {
+    val fontScale = LocalDensity.current.fontScale
+    val largeText = fontScale >= 1.5f
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(132.dp),
+            .height(if (largeText) 108.dp else 132.dp),
     ) {
-        DashboardLandscape(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(width = 190.dp, height = 112.dp),
-        )
+        if (!largeText) {
+            DashboardLandscape(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(width = 190.dp, height = 112.dp),
+            )
+        }
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
