@@ -30,6 +30,6 @@ Android MediaStore and the existing Gallery permission/mutation adapters remain 
 
 ## Validation boundary
 
-Pure unit coverage locks deterministic control cycling and wraparound. Rendered acceptance verifies that media-only Search, Sort, Group, and View controls stay hidden when no readable media is available; interactive sizing and state behavior are covered when those controls are rendered over an authorized library.
+Pure policy coverage retains grouping, density, and sort behavior. Rendered acceptance verifies that media-only Search and overflow actions stay hidden when no readable media is available.
 
 Representative-device visual review, large-text/reflow behavior, TalkBack and switch-access review, compact-width polish, and complete Gallery Glaze application acceptance remain separate gates.
