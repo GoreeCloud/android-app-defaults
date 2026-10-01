@@ -112,7 +112,7 @@ fun SinceApp(
     onDefaultDisplayFormatChange: (DisplayFormat) -> Unit = {},
     showSeconds: Boolean = true,
     onShowSecondsChange: (Boolean) -> Unit = {},
-    dashboardSortName: String = SinceDashboardSort.CREATED.name,
+    dashboardSortName: String = SinceDashboardSort.MANUAL.name,
     onDashboardSortChange: (String) -> Unit = {},
     contextualHintsEnabled: Boolean = true,
     onContextualHintsEnabledChange: (Boolean) -> Unit = {},
@@ -640,7 +640,7 @@ private fun Dashboard(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val dashboardSort = runCatching {
         SinceDashboardSort.valueOf(dashboardSortName)
-    }.getOrDefault(SinceDashboardSort.CREATED)
+    }.getOrDefault(SinceDashboardSort.MANUAL)
     val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
         SinceDashboardQuery.apply(
             aggregates = aggregates,
@@ -711,9 +711,9 @@ private fun Dashboard(
                         }
                         item {
                             FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.CREATED,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.CREATED.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_created)) },
+                                selected = dashboardSort == SinceDashboardSort.MANUAL,
+                                onClick = { onDashboardSortChange(SinceDashboardSort.MANUAL.name) },
+                                label = { Text(stringResource(R.string.dashboard_sort_manual)) },
                             )
                         }
                         item {
