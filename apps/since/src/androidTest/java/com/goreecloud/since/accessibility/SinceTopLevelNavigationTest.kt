@@ -242,7 +242,7 @@ class SinceTopLevelNavigationTest {
             .performClick()
 
         composeRule.onNodeWithTag("nav-settings").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("archived-tracker-tracker-top-level").assertIsDisplayed()
         composeRule.onNodeWithTag("restore-tracker-tracker-top-level")
             .assertHasClickAction()
@@ -275,7 +275,7 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("confirm-archive-tracker").performClick()
 
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("delete-archived-tracker-tracker-top-level")
             .assertHasClickAction()
             .performClick()
