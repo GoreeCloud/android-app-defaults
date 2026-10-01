@@ -65,6 +65,12 @@ enum class GalleryViewDensity(
     fun mediaGridColumns(widthDp: Int): Int =
         (GalleryGlazeContract.gridColumns(widthDp) + columnAdjustment).coerceAtLeast(2)
 
+    fun mediaGridColumnsForGroup(widthDp: Int, itemCount: Int): Int {
+        val baseline = mediaGridColumns(widthDp)
+        if (itemCount <= 0 || baseline <= 3) return baseline
+        return if (itemCount < baseline) 3 else baseline
+    }
+
     fun next(): GalleryViewDensity =
         entries[(ordinal + 1) % entries.size]
 
