@@ -4,16 +4,15 @@
 
 This Development slice continues the October 1, 2026 GoreeCloud Gallery interface refresh without changing Android media authority.
 
-Photos and Videos now expose compact first-party Glaze controls directly below the search surface so common presentation changes do not require a trip to Settings.
+Photos and Videos expose their presentation controls through the header view/sort action so the primary media canvas follows the supplied mockups without a persistent Group/View row.
 
 ## Implemented behavior
 
-- **Group** cycles through Day → Month → Year → None.
-- **View** cycles through Dense → Comfortable → Spacious.
-- Both controls persist through the same app-private preferences already used by Settings.
-- Both controls use 48dp-or-larger touch targets.
-- The controls are hidden while search is open and while multi-select is active so contextual work keeps priority.
-- Changing either control re-renders only the already-authorized in-memory media presentation.
+- The header view/sort action opens a compact presentation menu.
+- Photos and Videos expose **Sort**, **Group**, and **View** from that menu; Albums exposes **Sort**.
+- Group retains Day / Month / Year / None and View retains Dense / Comfortable / Spacious through the existing Glaze dialogs.
+- The header action retains the 48dp-or-larger target floor and disappears with other media-only header actions when the destination has no readable media.
+- Changing a presentation preference re-renders only the already-authorized in-memory media presentation.
 
 ## Authority boundary
 
@@ -30,6 +29,6 @@ Android MediaStore and the existing Gallery permission/mutation adapters remain 
 
 ## Validation boundary
 
-Pure unit coverage locks deterministic control cycling and wraparound. Rendered acceptance verifies that media-only Search, Sort, Group, and View controls stay hidden when no readable media is available; interactive sizing and state behavior are covered when those controls are rendered over an authorized library.
+Rendered acceptance verifies that media-only Search and view/sort header actions stay hidden when no readable media is available. Existing preference-policy tests cover valid Sort, Group, and View values; representative-device interaction with the header menu remains a separate acceptance gate.
 
 Representative-device visual review, large-text/reflow behavior, TalkBack and switch-access review, compact-width polish, and complete Gallery Glaze application acceptance remain separate gates.
