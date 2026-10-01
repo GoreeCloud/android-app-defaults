@@ -115,6 +115,7 @@ import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.LauncherDrawerBackdrop
+import com.goreecloud.launcher.core.launcher.LauncherDrawerAppOrganizationPolicy
 import com.goreecloud.launcher.core.launcher.LauncherDrawerEntryMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerHeaderPresentation
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
@@ -607,6 +608,8 @@ fun LauncherBetaRoot(
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
     hiddenHomeSuggestionKeys: Set<String>,
+    hiddenDrawerAppKeys: Set<String>,
+    pinnedDrawerAppKeys: Set<String>,
     searchProviderPreferences: com.goreecloud.launcher.core.launcher.LauncherSearchProviderPreferenceDecodeResult?,
     fileSearchRoots: List<Uri>,
     homePageCount: Int,
@@ -665,6 +668,8 @@ fun LauncherBetaRoot(
     onMoveDock: (LauncherActivityInfo, WorkspaceMoveDirection) -> Unit,
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
     onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
+    onSetDrawerAppHidden: (String, Boolean) -> Unit,
+    onSetDrawerAppPinned: (String, Boolean) -> Unit,
     onRequestUninstall: (LauncherActivityInfo) -> Unit,
     themeMode: GlazeThemeMode,
     onSetThemeMode: (GlazeThemeMode) -> Unit,
@@ -1366,7 +1371,10 @@ fun LauncherBetaRoot(
                 preferences = preferences,
                 drawerLayoutMode = drawerLayoutMode,
                 experiencePreferences = experiencePreferences,
+                hiddenDrawerAppKeys = hiddenDrawerAppKeys,
+                pinnedDrawerAppKeys = pinnedDrawerAppKeys,
                 focusSearch = drawerSearchRequested,
+                onSetDrawerAppHidden = onSetDrawerAppHidden,
                 onLaunchApp = onLaunchApp,
                 onManageApp = { app, anchor ->
                     selectedApp = app
@@ -1465,6 +1473,8 @@ fun LauncherBetaRoot(
                 workspace = workspace,
                 layoutLocked = preferences.layoutLocked,
                 availableAndroidWidgets = availableAndroidWidgets,
+                drawerPinned = appKey in pinnedDrawerAppKeys,
+                allowDrawerOrganization = selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER,
                 onHomeAction = {
                     if (
                         selectedAppContextOrigin == LauncherAppContextOrigin.HOME &&
@@ -1489,6 +1499,16 @@ fun LauncherBetaRoot(
                 },
                 onRequestUninstall = {
                     onRequestUninstall(app)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onToggleDrawerPinned = {
+                    onSetDrawerAppPinned(appKey, appKey !in pinnedDrawerAppKeys)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onHideFromDrawer = {
+                    onSetDrawerAppHidden(appKey, true)
                     selectedApp = null
                     selectedAppAnchor = null
                 },
@@ -5590,9 +5610,10 @@ private fun orderedDrawerVisualEntries(
     sortOrder: LauncherDrawerSortOrder,
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
+    pinnedAppKeys: Set<String>,
 ): List<LauncherDrawerVisualEntry> {
     val recentRanks = recentAppKeys.withIndex().associate { (index, key) -> key to index }
-    return buildList {
+    val ordered = buildList {
         apps.forEach { add(LauncherDrawerVisualEntry.Application(it)) }
         folders.forEach { add(LauncherDrawerVisualEntry.Folder(it)) }
     }.let { entries ->
@@ -5615,6 +5636,15 @@ private fun orderedDrawerVisualEntries(
             },
         )
     }
+    return LauncherDrawerAppOrganizationPolicy.visiblePinnedFirst(
+        items = ordered,
+        hiddenKeys = emptySet(),
+        pinnedKeys = pinnedAppKeys,
+        keyOf = { entry ->
+            (entry as? LauncherDrawerVisualEntry.Application)?.app?.workspaceKey()
+                ?: entry.stableKey
+        },
+    )
 }
 
 @Composable
@@ -5781,7 +5811,10 @@ private fun AppDrawerSurface(
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
+    hiddenDrawerAppKeys: Set<String>,
+    pinnedDrawerAppKeys: Set<String>,
     focusSearch: Boolean,
+    onSetDrawerAppHidden: (String, Boolean) -> Unit,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
@@ -5895,9 +5928,11 @@ private fun AppDrawerSurface(
         folders,
         drawerQuery,
         primaryProfileId,
+        hiddenDrawerAppKeys,
     ) {
         val matchingApps = selectedPage.items.count { app ->
-            LauncherLocalAppSearch.matches(
+            app.workspaceKey() !in hiddenDrawerAppKeys &&
+                LauncherLocalAppSearch.matches(
                 label = app.label.toString(),
                 packageName = app.componentName.packageName,
                 rawQuery = drawerQuery,
@@ -6155,17 +6190,17 @@ private fun AppDrawerSurface(
                     key = { index -> profilePages[index].kind.name },
                 ) { index ->
                     val page = profilePages[index]
-                    val pageApps = remember(page.items, drawerQuery) {
-                        if (drawerQuery.isBlank()) {
-                            page.items
-                        } else {
-                            page.items.filter { app ->
-                                LauncherLocalAppSearch.matches(
-                                    label = app.label.toString(),
-                                    packageName = app.componentName.packageName,
-                                    rawQuery = drawerQuery,
+                    val pageApps = remember(page.items, drawerQuery, hiddenDrawerAppKeys) {
+                        page.items.filter { app ->
+                            app.workspaceKey() !in hiddenDrawerAppKeys &&
+                                (
+                                    drawerQuery.isBlank() ||
+                                        LauncherLocalAppSearch.matches(
+                                            label = app.label.toString(),
+                                            packageName = app.componentName.packageName,
+                                            rawQuery = drawerQuery,
+                                        )
                                 )
-                            }
                         }
                     }
                     val pageProfileIds = remember(page.kind, page.items, primaryProfileId) {
@@ -6217,6 +6252,7 @@ private fun AppDrawerSurface(
                             drawerLayoutMode = drawerLayoutMode,
                             experiencePreferences = experiencePreferences,
                             sortOrder = drawerSortOrder,
+                            pinnedAppKeys = pinnedDrawerAppKeys,
                             onLaunchApp = onLaunchApp,
                             onManageApp = onManageApp,
                             onOpenFolder = onOpenFolder,
@@ -6363,6 +6399,7 @@ private fun DrawerAppsContent(
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
     sortOrder: LauncherDrawerSortOrder,
+    pinnedAppKeys: Set<String>,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
@@ -6371,13 +6408,21 @@ private fun DrawerAppsContent(
     allowHorizontalPaging: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
-    val entries = remember(apps, folders, recentAppKeys, localLaunchCounts, sortOrder) {
+    val entries = remember(
+        apps,
+        folders,
+        recentAppKeys,
+        localLaunchCounts,
+        sortOrder,
+        pinnedAppKeys,
+    ) {
         orderedDrawerVisualEntries(
             apps = apps,
             folders = folders,
             sortOrder = sortOrder,
             recentAppKeys = recentAppKeys,
             localLaunchCounts = localLaunchCounts,
+            pinnedAppKeys = pinnedAppKeys,
         )
     }
     if (entries.isEmpty() && query.isNotBlank()) {
@@ -10918,10 +10963,14 @@ private fun AppContextPopup(
     workspace: WorkspaceState,
     layoutLocked: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
+    drawerPinned: Boolean,
+    allowDrawerOrganization: Boolean,
     onHomeAction: () -> Unit,
     onToggleDock: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onRequestUninstall: () -> Unit,
+    onToggleDrawerPinned: () -> Unit,
+    onHideFromDrawer: () -> Unit,
     onAddToFolder: () -> Unit,
     onOpenWidgets: (List<LauncherWidgetProviderDescriptor>) -> Unit,
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
