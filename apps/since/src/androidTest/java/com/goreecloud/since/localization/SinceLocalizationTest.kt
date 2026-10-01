@@ -45,6 +45,10 @@ class SinceLocalizationTest {
             localizedContext.getString(R.string.settings_show_seconds),
         )
         assertEquals(
+            "تأكيد إعادة ضبط السلسلة",
+            localizedContext.getString(R.string.settings_confirm_reset),
+        )
+        assertEquals(
             "1 يوم · 2 ساعة · 3 دقيقة · 4 ثانية",
             localizedContext.getString(R.string.elapsed_days_detail_seconds, 1, 2, 3, 4),
         )
