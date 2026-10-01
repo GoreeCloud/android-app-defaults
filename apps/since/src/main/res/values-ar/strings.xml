@@ -27,7 +27,7 @@
     <string name="achievement_thirty_days_description">حافظ على سلسلة حالية واحدة لمدة ثلاثين يومًا على الأقل.</string>
 
     <string name="settings_title">الإعدادات</string>
-    <string name="settings_summary">المظهر والبيانات والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
+    <string name="settings_summary">الإعدادات العامة والمظهر والبيانات والخصوصية والأمان ومعلومات التطبيق.</string>
     <string name="settings_general">عام</string>
     <string name="settings_confirm_reset">تأكيد إعادة ضبط السلسلة</string>
     <string name="settings_confirm_reset_supporting">اعرض تأكيدًا نهائيًا بعد مراجعة وقت إعادة الضبط والسبب والملاحظة.</string>
