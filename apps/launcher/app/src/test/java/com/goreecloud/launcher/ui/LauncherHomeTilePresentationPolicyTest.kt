@@ -2,6 +2,7 @@ package com.goreecloud.launcher.ui
 
 import androidx.compose.ui.geometry.Offset
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
+import com.goreecloud.launcher.core.launcher.LauncherHomeGlanceAlignment
 import com.goreecloud.launcher.core.launcher.LauncherHomeSearchStyle
 import com.goreecloud.launcher.ui.theme.GlazeV16MaterialRole
 import org.junit.Assert.assertEquals
@@ -132,6 +133,42 @@ class LauncherHomeTilePresentationPolicyTest {
         )
     }
 
+
+    @Test
+    fun `Glance hero uses horizontal composition only when roomy and left aligned`() {
+        assertEquals(
+            true,
+            launcherUsesHorizontalGlanceHero(
+                compact = false,
+                alignment = LauncherHomeGlanceAlignment.LEFT,
+                densityMayYieldToReflow = false,
+            ),
+        )
+        assertEquals(
+            false,
+            launcherUsesHorizontalGlanceHero(
+                compact = true,
+                alignment = LauncherHomeGlanceAlignment.LEFT,
+                densityMayYieldToReflow = false,
+            ),
+        )
+        assertEquals(
+            false,
+            launcherUsesHorizontalGlanceHero(
+                compact = false,
+                alignment = LauncherHomeGlanceAlignment.CENTER,
+                densityMayYieldToReflow = false,
+            ),
+        )
+        assertEquals(
+            false,
+            launcherUsesHorizontalGlanceHero(
+                compact = false,
+                alignment = LauncherHomeGlanceAlignment.LEFT,
+                densityMayYieldToReflow = true,
+            ),
+        )
+    }
 
     @Test
     fun `wallpaper glass is disabled for solid fallback roles`() {
