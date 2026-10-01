@@ -4,7 +4,7 @@
 
 This document describes the source, runtime, privacy, UI, user-isolation, build, and release architecture of GoreeCloud Gallery.
 
-The current acceptance line is `1.0.0-gc.7`. The repository is the authoritative GoreeCloud development record, while the installable application is reconstructed from pinned upstream Fossify source plus the preserved GoreeCloud modification chain.
+Current product development is the original GoreeCloud-owned native Android application in `GoreeCloud/android-app-defaults` under `apps/gallery/`, currently `0.8.6-dev`. The preserved `1.0.0-gc.7` Fossify-based reconstruction and gc patch chain remain transitional provenance, regression, and historical acceptance evidence; they are not the current product architecture.
 
 ## Architectural goals
 
