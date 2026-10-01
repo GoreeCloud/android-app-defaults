@@ -6919,8 +6919,8 @@ private enum class LauncherSettingsCategory(
     ),
     DRAWER(
         "App drawer",
-        "Layout, profiles, density, labels and header actions",
-        "apps drawer grid compact list category work profile user profile columns rows spacing sort folder header labels count search placement backdrop",
+        "Layout, profiles, hidden apps, density and labels",
+        "apps drawer grid compact list category work profile user profile columns rows spacing sort folder header labels count search placement backdrop hidden hide visibility privacy",
     ),
     FOLDERS(
         "Folders",
@@ -7243,6 +7243,8 @@ private fun LauncherSettingsRootSurface(
     isDefaultHome: Boolean,
     onRequestHomeRole: () -> Unit,
     onManageFolders: () -> Unit,
+    hiddenAppCount: Int,
+    onManageHiddenApps: () -> Unit,
     onSetHomeGrid: (Int, Int) -> Unit,
     onSetDrawerColumns: (Int) -> Unit,
     onSetDrawerLayoutMode: (LauncherDrawerLayoutMode) -> Unit,
@@ -7933,6 +7935,12 @@ private fun LauncherSettingsRootSurface(
                     "Show app count",
                     experiencePreferences.showDrawerAppCount,
                     onSetShowDrawerAppCount,
+                )
+                GlazeSettingsAction(
+                    title = "Hidden apps",
+                    summary = "Hide apps from the App Drawer and Universal Search. Home, Dock and folders stay unchanged.",
+                    value = if (hiddenAppCount == 0) "None" else hiddenAppCount.toString(),
+                    onClick = onManageHiddenApps,
                 )
             }
 
@@ -10944,10 +10952,12 @@ private fun AppContextPopup(
     workspace: WorkspaceState,
     layoutLocked: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
+    hiddenFromLauncher: Boolean,
     onHomeAction: () -> Unit,
     onToggleDock: () -> Unit,
     onOpenAppInfo: () -> Unit,
     onRequestUninstall: () -> Unit,
+    onToggleHidden: () -> Unit,
     onAddToFolder: () -> Unit,
     onOpenWidgets: (List<LauncherWidgetProviderDescriptor>) -> Unit,
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
@@ -11124,6 +11134,11 @@ private fun AppContextPopup(
                     enabled = canAddToFolder && !layoutLocked,
                 )
                 GlazeLauncherPopupAction(
+                    label = if (hiddenFromLauncher) "Show in app drawer" else "Hide app",
+                    symbol = GlazePopupActionSymbol.VISIBILITY,
+                    onClick = onToggleHidden,
+                )
+                GlazeLauncherPopupAction(
                     label = "Uninstall",
                     symbol = GlazePopupActionSymbol.UNINSTALL,
                     onClick = onRequestUninstall,
@@ -11176,7 +11191,9 @@ private fun LauncherAppWidgetChoicesDialog(
     )
 }
 
-private enum class GlazePopupActionSymbol { HOME, DOCK, WIDGET, SHORTCUT, FOLDER, INFO, UNINSTALL }
+private enum class GlazePopupActionSymbol {
+    HOME, DOCK, WIDGET, SHORTCUT, FOLDER, INFO, VISIBILITY, UNINSTALL
+}
 
 /** Decorative vector geometry; labels remain the accessible action description. */
 @Composable
@@ -11236,6 +11253,20 @@ private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) 
                 drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
                 drawCircle(color, radius = w * .65f, center = Offset(u * .5f, u * .33f))
                 segment(.50f, .47f, .50f, .70f)
+            }
+            GlazePopupActionSymbol.VISIBILITY -> {
+                drawOval(
+                    color = color,
+                    topLeft = Offset(u * .14f, u * .30f),
+                    size = androidx.compose.ui.geometry.Size(u * .72f, u * .40f),
+                    style = Stroke(w),
+                )
+                drawCircle(
+                    color = color,
+                    radius = u * .10f,
+                    center = Offset(u * .50f, u * .50f),
+                    style = Stroke(w),
+                )
             }
             GlazePopupActionSymbol.UNINSTALL -> {
                 segment(.24f, .24f, .76f, .76f)
