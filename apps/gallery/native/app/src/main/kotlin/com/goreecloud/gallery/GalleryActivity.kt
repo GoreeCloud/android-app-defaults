@@ -1048,6 +1048,14 @@ class GalleryActivity : Activity() {
         brandMark.visibility = if (showBack) View.GONE else View.VISIBLE
         backControl.contentDescription = "Back to Albums"
         sortControl.contentDescription = "Sort order: ${sortOrderLabel()}. Double tap to change."
+        searchField.hint = when {
+            destination == GalleryDestination.PHOTOS -> "Search photos"
+            destination == GalleryDestination.VIDEOS -> "Search videos"
+            destination == GalleryDestination.ALBUMS && showingFavorites -> "Search Favorites"
+            destination == GalleryDestination.ALBUMS && openAlbumId != null -> "Search this album"
+            destination == GalleryDestination.ALBUMS -> "Search albums and favorites"
+            else -> "Search Gallery"
+        }
         val showMediaControls =
             destination != GalleryDestination.SETTINGS &&
                 destination != GalleryDestination.TRASH &&
