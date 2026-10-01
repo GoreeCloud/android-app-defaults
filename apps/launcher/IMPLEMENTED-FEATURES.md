@@ -1,5 +1,12 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 Development candidate — local Search utilities
+
+A separate unmerged feature candidate adds a local **Calculator & conversions** Universal Search provider with arithmetic parsing, common length/mass/volume/time/temperature conversion, a dedicated Utility result group, explicit tap-to-copy behavior, local-only/no-retention registration metadata, focused JVM coverage, and startup-wizard discoverability. It introduces no network, account, permission, query-retention, or production workspace mutation authority.
+
+**Acceptance boundary:** candidate source only until exact-head CI and protected integration succeed. It is not yet merged implementation evidence.
+
+
 ## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
 
 - Authoritative Launcher development now lives in `GoreeCloud/android-app-defaults/apps/launcher/`; the standalone Launcher repository is migration history only.
