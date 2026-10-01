@@ -188,6 +188,17 @@ class RecycleBinActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
+        header.addView(
+            ImageView(this).apply {
+                setImageResource(R.mipmap.ic_gallery_launcher)
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+            LinearLayout.LayoutParams(dp(40), dp(40)).apply {
+                marginEnd = dp(8)
+            },
+        )
+
         val titles = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
