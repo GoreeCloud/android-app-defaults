@@ -4,6 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -116,8 +119,22 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-achievements").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("achievements-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("Getting started").assertIsDisplayed()
+        composeRule.onNodeWithText("Getting started")
+            .assertIsDisplayed()
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    "Unlocked",
+                ),
+            )
         composeRule.onNodeWithText("Goal setter").assertIsDisplayed()
+        composeRule.onNodeWithText("Seven days")
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    "Locked",
+                ),
+            )
 
         composeRule.onNodeWithTag("nav-home").assertHasClickAction().performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
