@@ -1030,7 +1030,7 @@ class GalleryActivity : Activity() {
             destination == GalleryDestination.PHOTOS ->
                 itemCountLabel(visibleItems.count { it.mimeType.startsWith("image/") })
             destination == GalleryDestination.VIDEOS ->
-                itemCountLabel(visibleItems.count { it.mimeType.startsWith("video/") })
+                videoCountLabel(visibleItems.count { it.mimeType.startsWith("video/") })
             destination == GalleryDestination.ALBUMS -> {
                 val albumCount = visibleItems.buildAlbumCatalog().size
                 val favoriteSuffix = if (favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } }) 1 else 0
@@ -4547,6 +4547,9 @@ class GalleryActivity : Activity() {
 
     private fun itemCountLabel(count: Int): String =
         if (count == 1) "1 item" else "$count items"
+
+    private fun videoCountLabel(count: Int): String =
+        if (count == 1) "1 video" else "$count videos"
 
     private fun loadLocalThumbnail(
         item: MediaItem,
