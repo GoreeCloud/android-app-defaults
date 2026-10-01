@@ -89,6 +89,17 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
+    fun `sparse dense groups use a three-column presentation lane`() {
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 1))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 2))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 4))
+        assertEquals(
+            GalleryViewDensity.COMFORTABLE.mediaGridColumns(360),
+            GalleryViewDensity.COMFORTABLE.mediaGridColumnsForGroup(360, 1),
+        )
+    }
+
+    @Test
     fun `included folders narrow the current authorized snapshot`() {
         val visible = GallerySettingsPolicy.visibleItems(
             items = listOf(item("camera", "Camera"), item("download", "Download"), ungroupedItem()),
