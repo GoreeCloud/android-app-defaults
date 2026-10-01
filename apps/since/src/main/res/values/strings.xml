@@ -239,4 +239,12 @@
     <string name="reset_review">Review reset</string>
     <string name="reset_confirmation_title">Reset this streak?</string>
     <string name="reset_confirmation_message">The current period will be preserved in History and a new period will begin at the reset time.</string>
+
+    <string name="dashboard_total_trackers">Total trackers</string>
+    <string name="dashboard_active_streaks">Active streaks</string>
+    <string name="dashboard_longest_streak">Longest streak</string>
+    <string name="dashboard_days_value">%1$d days</string>
+    <string name="dashboard_started">Started %1$s</string>
+    <string name="dashboard_tip_streak">Small steps add up.</string>
+    <string name="dashboard_tip_event">A moment worth remembering.</string>
 </resources>
