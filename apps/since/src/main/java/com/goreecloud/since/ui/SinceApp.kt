@@ -71,6 +71,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.since.R
+import com.goreecloud.since.data.preferences.DashboardSortPreference
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.TrackerAggregate
@@ -111,6 +112,8 @@ fun SinceApp(
     onDefaultDisplayFormatChange: (DisplayFormat) -> Unit = {},
     showSeconds: Boolean = true,
     onShowSecondsChange: (Boolean) -> Unit = {},
+    dashboardSort: DashboardSortPreference = DashboardSortPreference.MANUAL,
+    onDashboardSortChange: (DashboardSortPreference) -> Unit = {},
     contextualHintsEnabled: Boolean = true,
     onContextualHintsEnabledChange: (Boolean) -> Unit = {},
     homeContextualHintDismissed: Boolean = false,
@@ -499,6 +502,8 @@ fun SinceApp(
                 aggregates = aggregates,
                 clock = clock,
                 showSeconds = showSeconds,
+                dashboardSort = dashboardSort,
+                onDashboardSortChange = onDashboardSortChange,
                 contextualHintsEnabled = contextualHintsEnabled,
                 homeContextualHintDismissed = homeContextualHintDismissed,
                 onDismissHomeContextualHint = {
