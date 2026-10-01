@@ -30,6 +30,7 @@ import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -111,6 +112,7 @@ class GalleryActivity : Activity() {
     private var openAlbumId: String? = null
     private var showingFavorites = false
     private var searchQuery = ""
+    private var videoFilter = GalleryVideoFilter.ALL
     private var suppressSearchRender = false
     private var viewerOverlay: View? = null
     private var viewerVideoSurface: GalleryVideoPlayerSurface? = null
@@ -1259,28 +1261,10 @@ class GalleryActivity : Activity() {
                     },
                 )
             }
-            GalleryDestination.VIDEOS -> {
-                val items = selectedSort.sort(
-                    AuthorizedMediaSearch.search(
-                        visibleItems.filter { it.mimeType.startsWith("video/") },
-                        searchQuery,
-                    ),
-                )
-                renderChronologicalLibrary(
-                    items = items,
-                    generation = generation,
-                    emptyTitle = if (searchQuery.isBlank()) "No videos yet" else "No video results",
-                    emptyMessage = if (searchQuery.isBlank()) {
-                        if (authorizedItems.any { it.mimeType.startsWith("video/") }) {
-                            "No videos match the current folder or hidden-item visibility settings."
-                        } else {
-                            "No authorized videos are available in this library."
-                        }
-                    } else {
-                        "No visible authorized videos match “$searchQuery”."
-                    },
-                )
-            }
+            GalleryDestination.VIDEOS -> renderVideos(
+                generation = generation,
+                sourceItems = visibleItems,
+            )
             GalleryDestination.ALBUMS -> when {
                 showingFavorites -> {
                     val items = selectedSort.sort(
@@ -1366,6 +1350,250 @@ class GalleryActivity : Activity() {
                 }
             }
         }
+    }
+
+    private fun renderVideos(generation: Int, sourceItems: List<MediaItem>) {
+        val allVideos = selectedSort.sort(
+            sourceItems.filter { it.mimeType.startsWith("video/") },
+        )
+        val availableFilters = GalleryVideoFilterPolicy.available(allVideos, favoriteUris)
+        if (videoFilter !in availableFilters) {
+            videoFilter = GalleryVideoFilter.ALL
+        }
+
+        val filteredVideos = GalleryVideoFilterPolicy.filter(
+            items = allVideos,
+            selected = videoFilter,
+            favoriteContentUris = favoriteUris,
+        )
+        val items = AuthorizedMediaSearch.search(filteredVideos, searchQuery)
+
+        syncSelectionScope(items)
+        updateHeader()
+        renderNavigation()
+
+        if (allVideos.isNotEmpty()) {
+            library.addView(videoFilterStrip(availableFilters))
+        }
+
+        if (items.isEmpty()) {
+            val emptyTitle = if (searchQuery.isBlank()) {
+                if (videoFilter == GalleryVideoFilter.ALL) "No videos yet"
+                else "No " + videoFilter.label.lowercase() + " videos"
+            } else {
+                "No video results"
+            }
+            val emptyMessage = when {
+                searchQuery.isNotBlank() ->
+                    "No visible authorized videos match “$searchQuery” in " + videoFilter.label.lowercase() + "."
+                allVideos.isEmpty() && authorizedItems.any { it.mimeType.startsWith("video/") } ->
+                    "No videos match the current folder or hidden-item visibility settings."
+                allVideos.isEmpty() ->
+                    "No authorized videos are available in this library."
+                else ->
+                    "No currently authorized videos match the " + videoFilter.label.lowercase() + " filter."
+            }
+            library.addView(emptyState(emptyTitle, emptyMessage))
+            return
+        }
+
+        renderVideoCards(items, generation)
+    }
+
+    private fun videoFilterStrip(filters: List<GalleryVideoFilter>): HorizontalScrollView =
+        HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            isFillViewport = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+            setPadding(0, dp(4), 0, dp(8))
+
+            addView(
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.START or Gravity.CENTER_VERTICAL
+
+                    filters.forEachIndexed { index, filter ->
+                        addView(
+                            videoFilterChip(filter),
+                            LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                            ).apply {
+                                if (index > 0) marginStart = dp(8)
+                            },
+                        )
+                    }
+                },
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ),
+            )
+        }
+
+    private fun videoFilterChip(filter: GalleryVideoFilter): TextView {
+        val selected = filter == videoFilter
+        return TextView(this).apply {
+            text = filter.label
+            gravity = Gravity.CENTER
+            minWidth = dp(72)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            setTypeface(typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
+            setTextColor(if (selected) accentColor() else primaryTextColor())
+            background = if (selected) {
+                GalleryGlazeSurfaces.drawable(
+                    context,
+                    GalleryGlazeSurfaces.Role.CONTROL,
+                    GalleryGlazeContract.SHAPE_CAPSULE_DP,
+                )
+            } else {
+                GalleryGlazeSurfaces.drawable(
+                    context,
+                    GalleryGlazeSurfaces.Role.RAISED,
+                    GalleryGlazeContract.SHAPE_CAPSULE_DP,
+                )
+            }
+            isClickable = true
+            isFocusable = true
+            isSelected = selected
+            contentDescription = filter.label + " videos" + if (selected) ", selected" else ""
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                stateDescription = if (selected) "Selected" else null
+            }
+            setOnClickListener {
+                if (videoFilter == filter) return@setOnClickListener
+                clearSelection(render = false)
+                videoFilter = filter
+                renderCurrentDestination()
+                announceForAccessibility(filter.label + " videos")
+            }
+        }
+    }
+
+    private fun renderVideoCards(items: List<MediaItem>, generation: Int) {
+        val gutterPx = dp(
+            GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp),
+        )
+        val availableWidth = (
+            resources.displayMetrics.widthPixels - (gutterPx * 2)
+        ).coerceAtLeast(dp(240))
+
+        val featured = items.first()
+        library.addView(
+            videoCard(
+                item = featured,
+                collectionItems = items,
+                collectionIndex = 0,
+                generation = generation,
+                thumbnailHeight = ((availableWidth * 9f) / 16f).toInt().coerceAtLeast(dp(160)),
+                featured = true,
+            ),
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ),
+        )
+
+        if (items.size == 1) return
+
+        val columns = if (resources.configuration.screenWidthDp >= 600) 3 else 2
+        val gaps = dp(VIDEO_CARD_GAP_DP) * (columns - 1)
+        val cardWidth = ((availableWidth - gaps) / columns).coerceAtLeast(dp(136))
+        val thumbnailHeight = ((cardWidth * 9f) / 16f).toInt().coerceAtLeast(dp(88))
+
+        items.drop(1).chunked(columns).forEachIndexed { rowIndex, rowItems ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.START
+            }
+            rowItems.forEachIndexed { columnIndex, item ->
+                val collectionIndex = items.indexOf(item)
+                row.addView(
+                    videoCard(
+                        item = item,
+                        collectionItems = items,
+                        collectionIndex = collectionIndex,
+                        generation = generation,
+                        thumbnailHeight = thumbnailHeight,
+                        featured = false,
+                    ),
+                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                        if (columnIndex > 0) marginStart = dp(VIDEO_CARD_GAP_DP)
+                    },
+                )
+            }
+            repeat(columns - rowItems.size) { spacerIndex ->
+                row.addView(
+                    Space(this),
+                    LinearLayout.LayoutParams(0, 1, 1f).apply {
+                        if (rowItems.isNotEmpty() || spacerIndex > 0) {
+                            marginStart = dp(VIDEO_CARD_GAP_DP)
+                        }
+                    },
+                )
+            }
+            library.addView(
+                row,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    topMargin = dp(if (rowIndex == 0) 12 else VIDEO_CARD_GAP_DP)
+                },
+            )
+        }
+    }
+
+    private fun videoCard(
+        item: MediaItem,
+        collectionItems: List<MediaItem>,
+        collectionIndex: Int,
+        generation: Int,
+        thumbnailHeight: Int,
+        featured: Boolean,
+    ): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        background = GalleryGlazeSurfaces.drawable(
+            context,
+            GalleryGlazeSurfaces.Role.RAISED,
+            GalleryGlazeContract.SHAPE_CONTAINER_DP,
+        )
+        clipToOutline = true
+        elevation = dp(1).toFloat()
+        setPadding(dp(2), dp(2), dp(2), dp(if (featured) 10 else 8))
+
+        addView(
+            mediaTile(item, collectionItems, collectionIndex, generation),
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                thumbnailHeight,
+            ),
+        )
+        addView(
+            TextView(context).apply {
+                text = mediaDisplayTitle(item)
+                maxLines = if (featured) 1 else 2
+                setTextColor(primaryTextColor())
+                setTextSize(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    if (featured) 17f else 14f,
+                )
+                setTypeface(typeface, Typeface.BOLD)
+                setPadding(dp(10), dp(8), dp(10), 0)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+        )
+        addView(
+            TextView(context).apply {
+                text = mediaDateLabel(item)
+                maxLines = 1
+                setTextColor(secondaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, if (featured) 12.5f else 11.5f)
+                setPadding(dp(10), dp(2), dp(10), 0)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+        )
     }
 
     private fun renderAlbums(generation: Int, sourceItems: List<MediaItem>) {
@@ -1644,6 +1872,21 @@ class GalleryActivity : Activity() {
             if (item.mimeType.startsWith("video/")) {
                 addView(
                     TextView(context).apply {
+                        tag = VIDEO_PLAY_TAG
+                        text = "▶"
+                        gravity = Gravity.CENTER
+                        setTextColor(Color.WHITE)
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                        setPadding(dp(2), 0, 0, 0)
+                        background = roundedSurface(0xb3000000.toInt(), 24)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    },
+                    FrameLayout.LayoutParams(dp(48), dp(48)).apply {
+                        gravity = Gravity.CENTER
+                    },
+                )
+                addView(
+                    TextView(context).apply {
                         text = formatVideoBadge(item)
                         setTextColor(Color.WHITE)
                         setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
@@ -1700,6 +1943,8 @@ class GalleryActivity : Activity() {
             tile.contentDescription = mediaTileContentDescription(item, selected)
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = selectionVisibility
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = selectionVisibility
+            tile.findViewWithTag<View>(VIDEO_PLAY_TAG)?.visibility =
+                if (inSelectionMode) View.GONE else View.VISIBLE
         }
     }
 
@@ -4252,6 +4497,13 @@ class GalleryActivity : Activity() {
         return date.year.toString()
     }
 
+    private fun mediaDisplayTitle(item: MediaItem): String =
+        item.displayName.substringBeforeLast('.', missingDelimiterValue = item.displayName)
+            .ifBlank { item.displayName }
+
+    private fun mediaDateLabel(item: MediaItem): String =
+        DATE_HEADER_FORMAT.format(item.capturedAt ?: item.modifiedAt)
+
     private fun mediaMetadata(item: MediaItem): String {
         val timestamp = item.capturedAt ?: item.modifiedAt
         val kind = if (item.mimeType.startsWith("video/")) "Video" else "Photo"
@@ -4570,6 +4822,7 @@ class GalleryActivity : Activity() {
         const val ALBUM_GAP_DP = 12
         const val ALBUM_CORNER_DP = 16
         const val ALBUM_THUMBNAIL_DP = 320
+        const val VIDEO_CARD_GAP_DP = 10
         const val VIEWER_THUMBNAIL_DP = 720
         const val VIEWER_SWIPE_DISTANCE_DP = 56
         const val DRAG_SELECTION_EDGE_DP = 72
@@ -4580,6 +4833,7 @@ class GalleryActivity : Activity() {
         const val VIEWER_THUMBNAIL_NAMESPACE = "viewer"
         const val SELECTION_OVERLAY_TAG = "goreecloud_gallery_selection_overlay"
         const val SELECTION_CHECK_TAG = "goreecloud_gallery_selection_check"
+        const val VIDEO_PLAY_TAG = "goreecloud_gallery_video_play"
 
         const val FAVORITES_KEY = "favorite_content_uris"
         const val FILE_LOADING_PRIORITY_KEY = "file_loading_priority"
