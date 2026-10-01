@@ -651,7 +651,8 @@ private fun Dashboard(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
+            .padding(innerPadding)
+            .testTag("dashboard-list"),
         contentPadding = PaddingValues(
             start = 20.dp,
             top = 24.dp,
