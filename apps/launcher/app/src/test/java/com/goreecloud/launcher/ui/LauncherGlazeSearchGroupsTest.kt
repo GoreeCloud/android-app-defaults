@@ -27,6 +27,7 @@ class LauncherGlazeSearchGroupsTest {
         val input = listOf(
             result(LauncherSearchCategory.CONTACT, "person-a"),
             result(LauncherSearchCategory.FILE, "file-a"),
+            result(LauncherSearchCategory.UTILITY, "utility-a"),
             result(LauncherSearchCategory.APPLICATION, "app-a"),
             result(LauncherSearchCategory.CONTACT, "person-b"),
             result(LauncherSearchCategory.APPLICATION, "app-b"),
@@ -39,6 +40,7 @@ class LauncherGlazeSearchGroupsTest {
                 LauncherSearchCategory.APPLICATION,
                 LauncherSearchCategory.CONTACT,
                 LauncherSearchCategory.FILE,
+                LauncherSearchCategory.UTILITY,
             ),
             groups.map { it.category },
         )
