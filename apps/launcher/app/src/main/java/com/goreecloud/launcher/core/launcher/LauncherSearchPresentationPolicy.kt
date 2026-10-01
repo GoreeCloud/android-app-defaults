@@ -55,6 +55,7 @@ object LauncherSearchPresentationPolicy {
                 LauncherSearchCategory.CALL_HISTORY,
                 LauncherSearchCategory.MESSAGE,
                 LauncherSearchCategory.FILE,
+                LauncherSearchCategory.UTILITY,
                 LauncherSearchCategory.CONNECTED_SOURCE,
                 LauncherSearchCategory.SETTING,
                 LauncherSearchCategory.ACTION,
