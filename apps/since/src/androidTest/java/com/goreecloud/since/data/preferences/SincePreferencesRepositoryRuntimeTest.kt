@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SincePreferencesRepositoryRuntimeTest {
     @Test
-    fun displayPreferencesPersistAcrossRepositoryInstances() = runBlocking {
+    fun preferencesPersistAcrossRepositoryInstances() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val first = SincePreferencesRepository(context)
 
@@ -45,6 +45,8 @@ class SincePreferencesRepositoryRuntimeTest {
         } finally {
             first.setDefaultDisplayFormat(DisplayFormat.DAYS)
             first.setShowSeconds(true)
+            first.setDefaultSortName("MANUAL")
+            first.setConfirmReset(true)
         }
     }
 }
