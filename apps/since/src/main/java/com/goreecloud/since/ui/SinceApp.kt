@@ -1726,11 +1726,19 @@ private fun StreakHistoryScreen(
     }
 }
 
+private data class PendingResetRequest(
+    val epochMs: Long,
+    val zoneId: String,
+    val reason: String?,
+    val note: String?,
+)
+
 @Composable
 private fun ResetStreakDialog(
     currentPeriod: com.goreecloud.since.domain.model.TrackerPeriod,
     clock: Clock,
     isSaving: Boolean,
+    confirmReset: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (Long, String, String?, String?) -> Unit,
 ) {
@@ -1745,10 +1753,68 @@ private fun ResetStreakDialog(
     var note by rememberSaveable(currentPeriod.id) { mutableStateOf("") }
     var inputErrors by remember { mutableStateOf(emptyList<String>()) }
 
+    var pendingReset by remember(currentPeriod.id) {
+        mutableStateOf<PendingResetRequest?>(null)
+    }
+
     val beforeStartError = stringResource(R.string.reset_before_start_error)
     val futureError = stringResource(R.string.reset_future_error)
     val reasonLengthError = stringResource(R.string.reset_reason_length_error)
     val noteLengthError = stringResource(R.string.reset_note_length_error)
+
+    pendingReset?.let { request ->
+        AlertDialog(
+            onDismissRequest = {
+                if (!isSaving) pendingReset = null
+            },
+            title = {
+                Text(
+                    modifier = Modifier.semantics { heading() },
+                    text = stringResource(R.string.reset_confirmation_title),
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.reset_confirmation_message),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    modifier = Modifier.testTag(
+                    if (confirmReset) "review-reset-streak" else "confirm-reset-streak"
+                ),
+                    onClick = {
+                        onConfirm(
+                            request.epochMs,
+                            request.zoneId,
+                            request.reason,
+                            request.note,
+                        )
+                    },
+                    enabled = !isSaving,
+                ) {
+                    Text(
+                        if (isSaving) {
+                            stringResource(R.string.resetting)
+                        } else {
+                            stringResource(R.string.reset_streak)
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { pendingReset = null },
+                    enabled = !isSaving,
+                ) {
+                    Text(stringResource(R.string.back))
+                }
+            },
+        )
+        return
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -1865,12 +1931,21 @@ private fun ResetStreakDialog(
                             }
 
                             if (errors.isEmpty()) {
-                                onConfirm(
-                                    reset.start.epochMs,
-                                    reset.start.zoneId,
-                                    reason,
-                                    note,
-                                )
+                                if (confirmReset) {
+                                    pendingReset = PendingResetRequest(
+                                        epochMs = reset.start.epochMs,
+                                        zoneId = reset.start.zoneId,
+                                        reason = reason,
+                                        note = note,
+                                    )
+                                } else {
+                                    onConfirm(
+                                        reset.start.epochMs,
+                                        reset.start.zoneId,
+                                        reason,
+                                        note,
+                                    )
+                                }
                             }
                         }
                     }
@@ -1881,6 +1956,8 @@ private fun ResetStreakDialog(
                 Text(
                     if (isSaving) {
                         stringResource(R.string.resetting)
+                    } else if (confirmReset) {
+                        stringResource(R.string.reset_review)
                     } else {
                         stringResource(R.string.reset_streak)
                     }
