@@ -982,6 +982,7 @@ class GalleryActivity : Activity() {
         if (inSelectionMode) {
             brandMark.visibility = View.GONE
             browseControls.visibility = View.GONE
+            videoFilterStripView?.visibility = View.GONE
             headerTitle.text = if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
             headerSubtitle.text = if (dragSelectionSession != null) {
                 "Drag across photos and videos to select quickly"
