@@ -1,5 +1,16 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — local Calculator and unit conversions in Universal Search
+
+The current Development feature candidate adds a Launcher-owned, permissionless Universal Search utility provider. Arithmetic expressions such as `2 + 3 * 4` and parenthesized expressions are evaluated locally through a bounded parser rather than a scripting/eval engine. Common length, mass, volume, time, and temperature conversions such as `10 km to mi`, `1 cup to ml`, and `32 f to c` are also resolved locally.
+
+Utility results render in a dedicated **Calculator & conversions** Search section, participate as an automatic local/no-retention provider, and expose an explicit tap-to-copy action. Clipboard writes occur only after the user taps a result. The provider does not request Android permissions, access the network, retain queries/results, or introduce account state. Search Sources identifies it as a local/no-retention built-in, and the startup wizard now teaches the capability without adding a setup step.
+
+Focused JVM coverage verifies arithmetic precedence, parentheses, Unicode multiplication/division symbols, invalid/divide-by-zero rejection, cross-dimension rejection, common conversion dimensions, provider metadata/default enablement, copy actions, and Glaze Search grouping.
+
+**Acceptance boundary:** unmerged Development feature candidate based on authoritative main `b00ca6f2c44e7c7270d7e4e6d6f2097859ec8d8e`. Fresh exact-head build/JVM/lint/schema/protected validation is required before integration. The separate Launcher runtime-gate restoration line remains authoritative for API 36 runtime execution and must be reconciled before this feature receives current runtime acceptance.
+
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
