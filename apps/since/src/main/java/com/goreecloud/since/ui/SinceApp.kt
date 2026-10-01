@@ -2752,14 +2752,22 @@ private fun TrackerTypeChooser(
     onDismiss: () -> Unit,
     onChoose: (TrackerKind) -> Unit,
 ) {
+    val largeText = LocalDensity.current.fontScale >= 1.5f
+    val optionVerticalPadding = if (largeText) 12.dp else 16.dp
+
     AlertDialog(
+        modifier = Modifier.testTag("tracker-type-dialog"),
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
         containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 text = stringResource(R.string.choose_tracker_type),
-                style = MaterialTheme.typography.headlineSmall,
+                style = if (largeText) {
+                    MaterialTheme.typography.titleLarge
+                } else {
+                    MaterialTheme.typography.headlineSmall
+                },
             )
         },
         text = {
@@ -2767,13 +2775,13 @@ private fun TrackerTypeChooser(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .testTag("tracker-type-list"),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(if (largeText) 8.dp else 12.dp),
             ) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("tracker-type-event")
-                        .semantics(mergeDescendants = true) {},
+                        .semantics(mergeDescendants = true) {}
+                        .testTag("tracker-type-event"),
                     onClick = { onChoose(TrackerKind.EVENT) },
                     shape = MaterialTheme.shapes.large,
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -2783,26 +2791,31 @@ private fun TrackerTypeChooser(
                     ),
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+                        modifier = Modifier.padding(
+                            horizontal = 18.dp,
+                            vertical = optionVerticalPadding,
+                        ),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.tracker_kind_event),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Text(
-                            text = stringResource(R.string.event_description),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        if (!largeText) {
+                            Text(
+                                text = stringResource(R.string.event_description),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
 
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("tracker-type-streak")
-                        .semantics(mergeDescendants = true) {},
+                        .semantics(mergeDescendants = true) {}
+                        .testTag("tracker-type-streak"),
                     onClick = { onChoose(TrackerKind.STREAK) },
                     shape = MaterialTheme.shapes.large,
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -2812,7 +2825,10 @@ private fun TrackerTypeChooser(
                     ),
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+                        modifier = Modifier.padding(
+                            horizontal = 18.dp,
+                            vertical = optionVerticalPadding,
+                        ),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
@@ -2820,11 +2836,13 @@ private fun TrackerTypeChooser(
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Text(
-                            text = stringResource(R.string.streak_description),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        if (!largeText) {
+                            Text(
+                                text = stringResource(R.string.streak_description),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
             }
