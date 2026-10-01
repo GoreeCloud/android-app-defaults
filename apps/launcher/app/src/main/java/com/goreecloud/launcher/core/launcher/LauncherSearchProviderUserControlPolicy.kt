@@ -270,6 +270,7 @@ object LauncherSearchProviderUserControlPolicy {
     fun displayNameFor(providerId: String): String = when (providerId) {
         LauncherInstalledAppsSearchProvider.PROVIDER_ID -> "Apps"
         LauncherCoreActionsSearchProvider.PROVIDER_ID -> "Launcher actions"
+        LauncherUtilitySearchProvider.PROVIDER_ID -> "Calculator & conversions"
         LauncherShortcutsSearchProvider.PROVIDER_ID -> "App shortcuts"
         LauncherContactsSearchProvider.PROVIDER_ID -> "Contacts"
         LauncherCallHistorySearchProvider.PROVIDER_ID -> "Call history"
