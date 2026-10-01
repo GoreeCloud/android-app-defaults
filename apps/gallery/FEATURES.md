@@ -14,7 +14,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Bounded MediaStore image/video reads through the compiled Android adapter.
 - Validated media-item and MediaStore-row domain models.
 - Local thumbnails with bounded in-memory caching and no cloud dependency.
-- Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.7.1-dev` candidate.
+- Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.6-dev` Development line.
 - Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
 - Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, and dynamic All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
 - Newest / Oldest ordering over the current authorized snapshot.
@@ -34,10 +34,10 @@ The target is to recover the established GoreeCloud Gallery information architec
 - **Recycle Bin Restore / Purge:** both single-item viewer actions and bounded multi-select actions use Android-owned confirmation. Restore uses `MediaStore.createTrashRequest(..., false)`; permanent purge uses `MediaStore.createDeleteRequest(...)`. Restore preserves Gallery Favorite URI metadata while confirmed purge removes stale Favorite references.
 - **Mutation bound:** a single Trash/Restore/Delete request is limited to 100 unique `content://media/...` image/video item URIs. Non-MediaStore, file, network, blank, generic-files, collection-only, or malformed URIs are rejected before Android mutation request creation.
 - **Android 10 fail-closed boundary:** this Development slice does not add a legacy direct-delete/recovery workaround. Delete/Trash/Recycle Bin mutation remains unavailable below Android 11 until a separately approved compatibility path exists.
-- **Move remains unavailable in selection:** selection state does not create move/write authority; approved Move/Copy organization remains separate work.
+- **Android-authorized Move Development implementation:** eligible selections can move to an existing authorized folder or use the bounded `Create & move` path after Android-owned write authorization. Copy and broader album-management behavior remain separate work.
 - Framework-independent selection policy provides toggle, select-all, prune, and resolve only against a caller-supplied current authorized/presented media scope; stale or foreign content URIs cannot become bulk-action authority.
 - Framework-independent non-destructive bulk-action policy preserves presentation order and derives the narrowest safe Share MIME type while deterministically planning Favorites Add/Remove.
-- Edit remains intentionally unavailable in the current Development viewer until an approved editing path is implemented and validated.
+- The current Development viewer can launch Gallery's non-exported first-party photo editor for supported authorized photos, with rotate, horizontal flip, bounded crop presets/custom crop, reset, and non-destructive Save copy behavior. Representative-device fidelity/accessibility/release acceptance remains open.
 - Authorized videos use bounded native Android playback in the viewer with Play/Pause, lifecycle-safe host pause/resume, canonical MediaStore item URI validation, and persisted autoplay/loop preferences; poster thumbnails remain the browsing/failure fallback.
 - Permission and load-generation re-checks before viewer rendering.
 - Framework-independent album/trash/recovery/mutation foundations used by later native milestones.
