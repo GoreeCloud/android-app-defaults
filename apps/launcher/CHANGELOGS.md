@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add opt-in device-local recent searches
+
+Universal Search now has an explicit **Recent searches** capability designed around the same local-first privacy boundary as the polished Search surface. It is off by default. When enabled, Launcher records a normalized query only after the user activates a Search result or explicit connected-provider handoff; typing by itself never persists a query.
+
+History is stored only in Launcher-local DataStore, deduplicated newest-first, bounded to 10 entries, and each normalized query is capped at 120 characters. Disabling the feature immediately clears persisted history. **Search sources** exposes the enable/disable control and **Clear history** action, while idle Universal Search shows up to five compact Glaze recent-query chips that repopulate the local field without contacting any provider.
+
+Connected-source behavior is unchanged: saved queries are never supplied to providers automatically, and connected queries are still sent only after an explicit provider action.
+
+Focused JVM coverage verifies disabled-by-default persistence, clear-on-disable behavior, normalization, deduplication, bounds, codec round-trip, malformed/truncated fail-closed handling, and length limits.
+
+**Acceptance boundary:** Development candidate based on current monorepo main. Fresh exact-head build/JVM/lint/schema, complete API 36 runtime, transition-performance, required-gate, provenance, and protected-promotion evidence are required before integration. Representative-device privacy UX, clipboard/provider interactions, accessibility, large text, form-factor, performance/power, recovery, and portable-backup policy remain open.
+
 ## October 1, 2026 — add local arithmetic and unit-conversion Quick answers
 
 Universal Search now includes a Launcher-owned **Quick answers** source. Arithmetic uses a deliberately bounded parser with precedence, parentheses, unary signs, and the four basic operators rather than arbitrary expression/code evaluation. Unit conversion uses an explicit local allowlist for common length, mass, time, and temperature units.
