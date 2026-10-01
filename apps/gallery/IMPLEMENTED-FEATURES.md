@@ -59,7 +59,8 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Validated media-item and MediaStore-row domain models.
 - Local thumbnail loading with bounded in-memory caching and no cloud dependency.
 - Direct Photos, Albums, Videos, Trash, and Settings navigation.
-- Adaptive Photos and Videos grids grouped by Today, Yesterday, and calendar date.
+- Adaptive Photos timeline grids grouped by Today, Yesterday, and calendar date, with sparse dense-mode groups using a larger presentation lane.
+- Videos browsing uses a featured first card followed by responsive cards with local play/duration affordances, title/date metadata, and category filters derived only from the current authorized snapshot and Gallery-local Favorites.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
 - Album browsing with covers, names, counts, adaptive layout, and bounded album-detail browsing.
@@ -68,6 +69,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 
 - Device-local Favorites stored only in Gallery application state.
 - Full-screen bounded media viewer shell with Previous/Next navigation and contextual actions.
+- Bounded native Android playback for canonical authorized MediaStore video item URIs, including Play/Pause, host lifecycle pause/resume, progress/seek state, and persisted autoplay/loop behavior.
 - Read-only Android Share handoff for authorized media content URIs.
 - Viewer details for type, album, date, dimensions, duration, and size when available.
 - Long-press selection and multi-select with selected-count presentation and contextual actions.
@@ -115,7 +117,8 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Settings export/import for non-secret Gallery preferences.
 - Rounded-square thumbnail preference.
 - Move-deleted-items-to-Recycle-Bin preference controlling Android-confirmed Trash versus permanent delete behavior on Android 11+.
-- Persisted future-facing preferences for autoplay, loop, GIF animation, and empty-folder cleanup; these stored preferences do not constitute implementation of the gated behavior they target.
+- Active persisted autoplay and loop preferences for the native video viewer.
+- Persisted future-facing preferences for GIF thumbnail animation and empty-folder cleanup; these stored preferences do not constitute implementation of those still-gated behaviors.
 
 ### Presentation and repository controls
 
