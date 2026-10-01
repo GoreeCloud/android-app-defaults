@@ -5,6 +5,7 @@ import java.text.Normalizer
 import java.util.Locale
 
 enum class SinceDashboardSort {
+    RECENT,
     CREATED,
     TITLE,
     NEWEST_START,
@@ -29,6 +30,12 @@ object SinceDashboardQuery {
         }
 
         return when (sort) {
+            SinceDashboardSort.RECENT -> filtered.sortedWith(
+                compareByDescending<TrackerAggregate> { it.tracker.updatedAtEpochMs }
+                    .thenBy { normalize(it.tracker.title) }
+                    .thenBy { it.tracker.id },
+            )
+
             SinceDashboardSort.CREATED -> filtered.sortedWith(
                 compareBy<TrackerAggregate> { it.tracker.sortOrder }
                     .thenBy { it.tracker.createdAtEpochMs }
