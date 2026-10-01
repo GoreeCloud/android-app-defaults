@@ -29,7 +29,7 @@
     <string name="settings_general">General</string>
     <string name="settings_dashboard_sort">Dashboard order</string>
     <string name="settings_dashboard_sort_supporting">Choose the default local order for active trackers. Changing order never changes tracker timestamps.</string>
-    <string name="settings_summary">Appearance, data, privacy, security, guidance, and app information.</string>
+    <string name="settings_summary">General, appearance, data, privacy, security, guidance, and app information.</string>
     <string name="settings_default_display_format">Default display format</string>
     <string name="settings_default_display_format_supporting">Used when creating new trackers. Existing trackers keep their current format.</string>
     <string name="settings_show_seconds">Show seconds</string>
