@@ -2,7 +2,7 @@
 
 ## October 1, 2026 — local Calculator and unit conversions in Universal Search
 
-The current Development feature candidate adds a Launcher-owned, permissionless Universal Search utility provider. Arithmetic expressions such as `2 + 3 * 4` and parenthesized expressions are evaluated locally through a bounded parser rather than a scripting/eval engine. Common length, mass, volume, time, and temperature conversions such as `10 km to mi`, `1 cup to ml`, and `32 f to c` are also resolved locally.
+The current Development feature candidate adds a Launcher-owned, permissionless Universal Search utility provider. Arithmetic expressions such as `2 + 3 * 4`, parenthesized expressions, and simple percentage queries such as `20% of 50` are evaluated locally through a bounded parser rather than a scripting/eval engine. Common length, mass, volume, time, and temperature conversions such as `10 km to mi`, `2 fl oz to ml`, `1 cup to ml`, and `32 f to c` are also resolved locally.
 
 Utility results render in a dedicated **Calculator & conversions** Search section, participate as an automatic local/no-retention provider, and expose an explicit tap-to-copy action. Clipboard writes occur only after the user taps a result. The provider does not request Android permissions, access the network, retain queries/results, or introduce account state. Search Sources identifies it as a local/no-retention built-in, and the startup wizard now teaches the capability without adding a setup step.
 
