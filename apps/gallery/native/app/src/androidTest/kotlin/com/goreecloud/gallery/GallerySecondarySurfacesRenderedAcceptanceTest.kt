@@ -28,10 +28,9 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
     val activityRule = ActivityScenarioRule(RecycleBinActivity::class.java)
 
     @Test
-    fun recycleBinPersistentControlsUseGlazeAndRemainTouchSized() {
+    fun trashPersistentControlsUseGlazeAndRemainTouchSized() {
         listOf(
-            "Back to GoreeCloud Gallery",
-            "Refresh Recycle Bin",
+            "Refresh Trash",
         ).forEach { description ->
             onView(withContentDescription(description))
                 .check(matches(isDisplayed()))
@@ -42,12 +41,28 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
     }
 
     @Test
+    fun trashSurfaceExposesFivePrimaryDestinations() {
+        listOf(
+            "Photos",
+            "Albums",
+            "Videos",
+            "Trash, selected",
+            "Settings",
+        ).forEach { description ->
+            onView(withContentDescription(description))
+                .check(matches(isDisplayed()))
+                .check(matches(isClickable()))
+                .check(matches(hasMinimumTouchSizeDp(48f)))
+        }
+    }
+
+    @Test
     fun recycleBinContentStaysInsideSystemBarAndGestureSafeAreas() {
         activityRule.scenario.onActivity { activity ->
             val androidContent = activity.findViewById<ViewGroup>(android.R.id.content)
             val root = androidContent.getChildAt(0) as FrameLayout
             val insets = root.rootWindowInsets
-            assertNotNull("Recycle Bin root must receive Android window insets", insets)
+            assertNotNull("Trash root must receive Android window insets", insets)
 
             val safe = currentSafeInsets(insets!!)
             val decorRect = Rect().also { activity.window.decorView.getGlobalVisibleRect(it) }
@@ -58,19 +73,19 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
             val scrollRect = Rect().also { scroll.getGlobalVisibleRect(it) }
 
             assertTrue(
-                "Recycle Bin content must start below the status-bar/cutout safe edge",
+                "Trash content must start below the status-bar/cutout safe edge",
                 scrollRect.top >= decorRect.top + safe.top,
             )
             assertTrue(
-                "Recycle Bin content must stay inside the physical left safe edge",
+                "Trash content must stay inside the physical left safe edge",
                 scrollRect.left >= decorRect.left + safe.left,
             )
             assertTrue(
-                "Recycle Bin content must stay inside the physical right safe edge",
+                "Trash content must stay inside the physical right safe edge",
                 scrollRect.right <= decorRect.right - safe.right,
             )
             assertTrue(
-                "Recycle Bin content must stay above the navigation/gesture safe edge",
+                "Trash content must stay above the navigation/gesture safe edge",
                 scrollRect.bottom <= decorRect.bottom - safe.bottom,
             )
         }
