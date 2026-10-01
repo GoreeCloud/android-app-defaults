@@ -134,7 +134,7 @@ The Trash/Recycle Bin implementation originated in rendered `0.7.1-dev` acceptan
 
 Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, Favorites/settings import/export, cache clearing, and the Recycle Bin versus permanent-delete choice on supported Android versions.
 
-Playback/GIF preferences remain stored future-facing preferences until their corresponding runtime capabilities are implemented. Automatic empty-folder deletion also remains separately gated; its saved toggle does not mean that empty-folder cleanup is currently implemented.
+Video autoplay and looping are active viewer preferences. Compatibility fields for GIF thumbnail animation and automatic empty-folder cleanup remain in the settings import/export model, but the current Settings screen does not show inactive toggles for those unfinished behaviors.
 
 Protected Photos/password protection is not simulated with insecure app-local credentials; it remains unavailable until supported authentication, protected storage, Privacy Shield, GoreeCloud Identity where applicable, and Wardveil requirements are implemented.
 
