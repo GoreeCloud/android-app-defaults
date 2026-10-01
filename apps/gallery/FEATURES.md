@@ -16,7 +16,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Local thumbnails with bounded in-memory caching and no cloud dependency.
 - Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.6-dev` Development line.
 - Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
-- Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and dynamic All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
+- Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and icon-bearing All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
 - Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open and Details. Destructive media actions remain outside these compact card menus.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
