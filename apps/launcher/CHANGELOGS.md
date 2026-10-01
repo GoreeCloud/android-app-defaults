@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — stabilize Drawer runtime setup authority
+
+A later exact-head feature validation reproduced a lifecycle-suite setup race that can occur before any Drawer gesture assertion: the Drawer runtime test observed terminal ROOM authority, then used the compatibility repository snapshot to decide whether its candidate app needed Home placement. The launched Home could still be finishing startup-owned reconciliation at that point, so the guarded test-owned Room write could legitimately return a non-Written result and contaminate subsequent lifecycle cases.
+
+The test now waits for the actual rendered Drawer gesture surface, Compose idle, a ready paged-Home projection, and a ready authoritative placement snapshot before deciding whether it must add the candidate. If a setup write is required, the test verifies the exact write result and then observes authoritative placement until the candidate is present before continuing.
+
+No Launcher production Kotlin behavior, permissions, workspace authority, persistence schema, or user-facing interaction is changed.
+
+**Acceptance boundary:** Development test/runtime-stabilization candidate restacked on accepted main `d78ef5625ad14ef62c2405fdb697fe37aba81bec`. Fresh exact-head build and complete API 36 runtime/promotion evidence are required before integration.
+
 ## October 1, 2026 — add local App Drawer favorites candidate
 
 A Development feature candidate on the accepted runtime-gate main adds profile-qualified App Drawer favorites without introducing new permissions, network access, or another workspace authority. Long-pressing an application in Apps can now **Pin in Apps** or **Unpin in Apps**. Pins use the existing profile-qualified Launcher workspace key, so a Work-profile package and a same-package User app remain independent.
