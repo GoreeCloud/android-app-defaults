@@ -75,8 +75,8 @@ internal object LauncherSearchHistoryCodec {
                 ?: return emptyList()
             if (length < 0) return emptyList()
             val start = separator + 1
+            if (length > raw.length - start) return emptyList()
             val end = start + length
-            if (end > raw.length) return emptyList()
             decoded += raw.substring(start, end)
             cursor = end
         }
