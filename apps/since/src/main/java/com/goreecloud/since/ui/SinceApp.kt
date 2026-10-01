@@ -666,6 +666,7 @@ private fun Dashboard(
         showSeconds = showSeconds,
     )
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    val largeText = LocalDensity.current.fontScale >= 1.5f
     val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
         SinceDashboardQuery.apply(
             aggregates = aggregates,
@@ -736,6 +737,18 @@ private fun Dashboard(
                 DashboardSummaryRow(summary = summary)
             }
 
+            if (
+                !largeText &&
+                contextualHintsEnabled &&
+                !homeContextualHintDismissed
+            ) {
+                item {
+                    DashboardContextualHint(
+                        onDismiss = onDismissHomeContextualHint,
+                    )
+                }
+            }
+
             items(
                 items = visibleAggregates,
                 key = { it.tracker.id },
@@ -749,40 +762,53 @@ private fun Dashboard(
                 )
             }
 
-            if (contextualHintsEnabled && !homeContextualHintDismissed) {
+            if (
+                largeText &&
+                contextualHintsEnabled &&
+                !homeContextualHintDismissed
+            ) {
                 item {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag("home-contextual-hint"),
-                        shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(
-                                start = 16.dp,
-                                top = 10.dp,
-                                end = 12.dp,
-                                bottom = 10.dp,
-                            ),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = stringResource(R.string.home_contextual_hint),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            TextButton(
-                                modifier = Modifier.testTag("home-contextual-hint-dismiss"),
-                                onClick = onDismissHomeContextualHint,
-                            ) {
-                                Text(stringResource(R.string.dismiss_hint))
-                            }
-                        }
-                    }
+                    DashboardContextualHint(
+                        onDismiss = onDismissHomeContextualHint,
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardContextualHint(
+    onDismiss: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("home-contextual-hint"),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.72f),
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                start = 16.dp,
+                top = 10.dp,
+                end = 12.dp,
+                bottom = 10.dp,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(R.string.home_contextual_hint),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            TextButton(
+                modifier = Modifier.testTag("home-contextual-hint-dismiss"),
+                onClick = onDismiss,
+            ) {
+                Text(stringResource(R.string.dismiss_hint))
             }
         }
     }
@@ -3474,6 +3500,7 @@ private fun TimeZonePickerDialog(
         },
         text = {
             Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 OutlinedTextField(
