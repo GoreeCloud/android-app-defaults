@@ -8,7 +8,7 @@ component:
   type: application
   id: goreecloud-camera
   product_name: GoreeCloud Camera
-  repository: GoreeCloud/goreecloud-camera
+  repository: GoreeCloud/android-app-defaults
 
 lifecycle: concept
 version: "0.1.0"
