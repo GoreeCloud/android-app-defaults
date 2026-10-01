@@ -706,6 +706,7 @@ class GalleryActivity : Activity() {
             !inSelectionMode &&
                 ::searchContainer.isInitialized &&
                 searchContainer.visibility != View.VISIBLE &&
+                authorizedItems.isNotEmpty() &&
                 (destination == GalleryDestination.PHOTOS || destination == GalleryDestination.VIDEOS)
 
         browseControls.visibility = if (show) View.VISIBLE else View.GONE
