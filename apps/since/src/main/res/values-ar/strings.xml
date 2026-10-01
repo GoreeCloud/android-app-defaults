@@ -13,6 +13,8 @@
     <string name="achievements_title">الإنجازات</string>
     <string name="achievements_summary">تم فتح %1$d من %2$d</string>
     <string name="achievements_privacy_note">تُحسب الإنجازات محليًا من بيانات المتتبعات لديك. لا توجد لوحة صدارة أو تصنيفات اجتماعية.</string>
+    <string name="achievement_unlocked">مفتوح</string>
+    <string name="achievement_locked">مغلق</string>
     <string name="achievement_first_tracker">بداية موفقة</string>
     <string name="achievement_first_tracker_description">أنشئ أول متتبّع لك.</string>
     <string name="achievement_first_streak">بدأت السلسلة</string>
@@ -25,7 +27,7 @@
     <string name="achievement_thirty_days_description">حافظ على سلسلة حالية واحدة لمدة ثلاثين يومًا على الأقل.</string>
 
     <string name="settings_title">الإعدادات</string>
-    <string name="settings_summary">المظهر والاسترداد والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
+    <string name="settings_summary">المظهر والبيانات والخصوصية والأمان والإرشادات ومعلومات التطبيق.</string>
     <string name="settings_appearance">المظهر</string>
     <string name="settings_theme">السمة</string>
     <string name="theme_system">إعداد النظام</string>
