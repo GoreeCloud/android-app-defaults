@@ -32,6 +32,7 @@ class SincePreferencesRepositoryRuntimeTest {
 
             reopened.setDefaultDisplayFormat(DisplayFormat.YEARS)
             reopened.setShowSeconds(true)
+            reopened.setDashboardSortName("TITLE")
 
             val secondReopen = SincePreferencesRepository(context)
             assertEquals(DisplayFormat.YEARS, secondReopen.defaultDisplayFormat.first())
