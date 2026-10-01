@@ -1,5 +1,12 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-30 Since display-settings continuation
+
+Default display format and seconds visibility are implemented on the active stacked Development candidate with the specified defaults of Days and seconds enabled. Remaining Settings work includes the separately specified reset-confirmation preference, reduced-motion/transparency behavior only where an approved Glaze mapping permits it, and representative-device accessibility/localization acceptance.
+
+The existing Reset Streak surface remains the required path for choosing reset time and optional reason/note and for explaining history preservation. The product specification does not yet define a safe alternate interaction for disabling confirmation without losing those controls, so no alternate reset path is invented in this candidate.
+
+
 ## 2026-09-29 Since import-review continuation
 
 A stacked Development candidate now implements the review-only half of the M3 import boundary: explicit SAF document selection, bounded strict UTF-8 input, schema-v1 structural/invariant validation, and a non-mutating summary before any future restore. Unsupported or malformed input fails closed. **No imported data can be applied yet.** Replace-style mutation, conflict handling, rollback/recovery, representative document-provider/device acceptance, and release gates remain planned.
