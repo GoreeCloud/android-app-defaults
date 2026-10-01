@@ -64,7 +64,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Mockup-aligned overflow controls on video and album cards with 48dp targets and bounded non-destructive contextual actions.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
-- Album browsing with rounded Raised landscape-cover cards, names, counts, adaptive layout, bounded album-detail browsing, and compact smart-access pills populated only from existing local collections plus the authorized Videos domain.
+- Album browsing with rounded Raised landscape-cover cards, mockup-aligned circular cover badges, names, counts, adaptive layout, bounded album-detail browsing, and compact smart-access pills populated only from existing local collections plus the authorized Videos domain.
 
 ### Favorites, viewer, selection, and sharing
 
