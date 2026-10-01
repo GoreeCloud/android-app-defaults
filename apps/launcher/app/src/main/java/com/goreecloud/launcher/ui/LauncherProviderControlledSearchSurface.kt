@@ -105,6 +105,8 @@ import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPolicy
 import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionTab
 import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPresentation
 import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPresentationRepository
+import com.goreecloud.launcher.core.launcher.LauncherSearchHistoryRepository
+import com.goreecloud.launcher.core.launcher.LauncherSearchHistoryState
 import com.goreecloud.launcher.core.launcher.LauncherSearchProviderUserControlPolicy
 import com.goreecloud.launcher.core.launcher.LauncherSearchResult
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearch
@@ -182,6 +184,12 @@ internal fun LauncherProviderControlledSearchSurface(
     val suggestionPresentation by searchAppearancePreferences.presentation.collectAsState(
         initial = LauncherSearchSuggestionPresentation.ICONS,
     )
+    val searchHistoryRepository = remember(context.applicationContext) {
+        LauncherSearchHistoryRepository(context.applicationContext)
+    }
+    val searchHistory by searchHistoryRepository.state.collectAsState(
+        initial = LauncherSearchHistoryState(),
+    )
     var query by rememberSaveable { mutableStateOf("") }
     var showSources by rememberSaveable { mutableStateOf(false) }
     var suggestionTabName by rememberSaveable {
@@ -226,6 +234,13 @@ internal fun LauncherProviderControlledSearchSurface(
             }
             .take(LauncherSearchSuggestionPolicy.DEFAULT_LIMIT)
             .toList()
+    }
+
+    val recordExplicitQuery = {
+        if (query.isNotBlank()) {
+            searchHistoryRepository.recordQuery(query)
+        }
+        Unit
     }
 
     val dismissSearch = {
@@ -348,6 +363,11 @@ internal fun LauncherProviderControlledSearchSurface(
             LauncherSearchSuggestionPresentationControl(
                 selected = suggestionPresentation,
                 onSelect = searchAppearancePreferences::setPresentation,
+            )
+            LauncherSearchHistoryControl(
+                state = searchHistory,
+                onSetEnabled = { enabled -> searchHistoryRepository.setEnabled(enabled) },
+                onClear = searchHistoryRepository::clear,
             )
             LauncherSearchSourceManager(
                 persisted = searchProviderPreferences,
@@ -508,6 +528,12 @@ internal fun LauncherProviderControlledSearchSurface(
                         },
                     )
                     if (idleSearch) {
+                        if (searchHistory.enabled && searchHistory.recentQueries.isNotEmpty()) {
+                            LauncherRecentSearchChips(
+                                queries = searchHistory.recentQueries,
+                                onSelect = { recent -> query = recent },
+                            )
+                        }
                         LauncherUniversalSearchSuggestions(
                             selectedTab = suggestionTab,
                             presentation = suggestionPresentation,
@@ -629,6 +655,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 providerControls = controls,
                                             ),
                                         onActivate = {
+                                            recordExplicitQuery()
                                             when (val action = topResult.action) {
                                                 is LaunchApplicationSearchAction ->
                                                     onLaunchApp(action.app)
@@ -643,7 +670,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 else -> Unit
                                             }
                                         },
-                                        onOpenSearchUri = onOpenSearchUri,
+                                        onOpenSearchUri = { action ->
+                                            recordExplicitQuery()
+                                            onOpenSearchUri(action)
+                                        },
                                     )
                                 }
                             }
@@ -680,7 +710,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                                         LauncherGlazeSearchAppTile(
                                                             result = result,
                                                             action = action,
-                                                            onLaunch = { onLaunchApp(action.app) },
+                                                            onLaunch = {
+                                                                recordExplicitQuery()
+                                                                onLaunchApp(action.app)
+                                                            },
                                                             modifier = Modifier.weight(1f),
                                                         )
                                                     }
@@ -695,7 +728,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                     ) { result ->
                                         LauncherProviderSearchRow(result) {
                                             (result.action as? LaunchApplicationSearchAction)
-                                                ?.let { onLaunchApp(it.app) }
+                                                ?.let {
+                                                    recordExplicitQuery()
+                                                    onLaunchApp(it.app)
+                                                }
                                         }
                                     }
                                 } else if (section.category == LauncherSearchCategory.SHORTCUT) {
@@ -720,7 +756,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                             app = matchingApp,
                                             packageName = entry.key.first,
                                             shortcuts = entry.value.map { it.second },
-                                            onLaunchShortcut = onLaunchShortcut,
+                                            onLaunchShortcut = { action ->
+                                                recordExplicitQuery()
+                                                onLaunchShortcut(action)
+                                            },
                                         )
                                     }
                                     items(
@@ -729,7 +768,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                     ) { result ->
                                         LauncherProviderSearchRow(result) {
                                             (result.action as? LauncherLaunchShortcutSearchAction)
-                                                ?.let(onLaunchShortcut)
+                                                ?.let { action ->
+                                                    recordExplicitQuery()
+                                                    onLaunchShortcut(action)
+                                                }
                                         }
                                     }
                                 } else {
@@ -744,6 +786,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 providerControls = controls,
                                             ),
                                             onActivate = {
+                                                recordExplicitQuery()
                                                 when (val action = result.action) {
                                                     is LauncherCopyTextSearchAction -> copyQuickAnswer(context, action)
                                                     is LauncherLaunchShortcutSearchAction -> onLaunchShortcut(action)
@@ -753,7 +796,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                                     else -> Unit
                                                 }
                                             },
-                                            onOpenSearchUri = onOpenSearchUri,
+                                            onOpenSearchUri = { action ->
+                                                recordExplicitQuery()
+                                                onOpenSearchUri(action)
+                                            },
                                         )
                                     }
                                 }
@@ -778,6 +824,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 query = query,
                                 apps = apps,
                                 onClick = {
+                                    recordExplicitQuery()
                                     onSearchWithConnectedProvider(provider.providerId, query)
                                 },
                             )
@@ -832,6 +879,138 @@ private suspend fun loadLauncherAppFreshness(
     }
 }
 
+
+@Composable
+private fun LauncherSearchHistoryControl(
+    state: LauncherSearchHistoryState,
+    onSetEnabled: (Boolean) -> Unit,
+    onClear: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("launcher-search-history-control"),
+        shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(GlazeMetrics.space2),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Recent searches",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        if (state.enabled) {
+                            "Saved on this device only after you open a result."
+                        } else {
+                            "Off by default · typing alone is never saved."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = state.enabled,
+                    onCheckedChange = onSetEnabled,
+                    modifier = Modifier.testTag("launcher-search-history-toggle"),
+                )
+            }
+            if (state.enabled && state.recentQueries.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = onClear,
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .testTag("launcher-search-history-clear"),
+                    ) {
+                        Text("Clear history")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherRecentSearchChips(
+    queries: List<String>,
+    onSelect: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("launcher-recent-searches"),
+        verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+    ) {
+        Text(
+            "Recent searches",
+            modifier = Modifier.padding(horizontal = GlazeMetrics.space1),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = GlazeMetrics.space1),
+            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+        ) {
+            queries.take(5).forEachIndexed { index, recent ->
+                Surface(
+                    onClick = { onSelect(recent) },
+                    modifier = Modifier
+                        .heightIn(min = 48.dp)
+                        .testTag("launcher-recent-search-" + index)
+                        .semantics {
+                            contentDescription = "Search again for " + recent
+                        },
+                    shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f),
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(
+                            horizontal = GlazeMetrics.space2,
+                            vertical = GlazeMetrics.space1,
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Text(
+                            "↺",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            recent,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun LauncherSearchSuggestionPresentationControl(
