@@ -80,9 +80,6 @@ class GalleryActivity : Activity() {
     private lateinit var sortControl: ImageView
     private lateinit var searchContainer: LinearLayout
     private lateinit var searchField: EditText
-    private lateinit var browseControls: LinearLayout
-    private lateinit var groupingControl: TextView
-    private lateinit var densityControl: TextView
     private var videoFilterStripView: View? = null
     private lateinit var accessPanel: LinearLayout
     private lateinit var status: TextView
@@ -354,7 +351,6 @@ class GalleryActivity : Activity() {
 
         content.addView(buildHeader())
         content.addView(buildSearchSurface())
-        content.addView(buildBrowseControls())
         content.addView(buildAccessPanel())
 
         library = LinearLayout(this).apply {
@@ -537,19 +533,9 @@ class GalleryActivity : Activity() {
 
         sortControl = iconHeaderAction(
             R.drawable.ic_gallery_sort,
-            "Change Gallery sort order",
+            "View and sort options",
         ) {
-            val preference = if (selectedSort == MediaSortOrder.NEWEST) {
-                GallerySortPreference.OLDEST
-            } else {
-                GallerySortPreference.NEWEST
-            }
-            selectedSort = preference.mediaSortOrder
-            galleryPreferences().edit()
-                .putString(SORT_PREFERENCE_KEY, preference.storedValue)
-                .apply()
-            renderCurrentDestination()
-            announceForAccessibility("Sorted " + preference.label.lowercase())
+            showHeaderPresentationMenu(sortControl)
         }
         row.addView(
             sortControl,
@@ -562,6 +548,27 @@ class GalleryActivity : Activity() {
         )
 
         return row
+    }
+
+    private fun showHeaderPresentationMenu(anchor: View) {
+        val settings = currentUserSettings()
+        PopupMenu(this, anchor).apply {
+            menu.add(0, HEADER_OPTION_SORT, 0, "Sort · " + settings.sortPreference.label)
+            if (destination == GalleryDestination.PHOTOS || destination == GalleryDestination.VIDEOS) {
+                menu.add(0, HEADER_OPTION_GROUP, 1, "Group · " + settings.groupingMode.label)
+                menu.add(0, HEADER_OPTION_DENSITY, 2, "View · " + settings.viewDensity.label)
+            }
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    HEADER_OPTION_SORT -> showSortPreferenceDialog()
+                    HEADER_OPTION_GROUP -> showGroupingModeDialog()
+                    HEADER_OPTION_DENSITY -> showViewDensityDialog()
+                    else -> return@setOnMenuItemClickListener false
+                }
+                true
+            }
+            show()
+        }
     }
 
     private fun buildSearchSurface(): View {
@@ -627,100 +634,6 @@ class GalleryActivity : Activity() {
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
             )
         }
-    }
-
-    private fun buildBrowseControls(): View {
-        browseControls = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            visibility = View.GONE
-            setPadding(0, dp(8), 0, 0)
-        }
-
-        groupingControl = quickBrowseControl(
-            initialLabel = "Group · Day",
-            initialDescription = "Group media by Day. Double tap to change.",
-        ) {
-            val next = currentUserSettings().groupingMode.next()
-            galleryPreferences().edit()
-                .putString(GROUPING_MODE_KEY, next.storedValue)
-                .apply()
-            announceForAccessibility("Grouped by " + next.label.lowercase())
-            renderCurrentDestination()
-        }
-        browseControls.addView(
-            groupingControl,
-            LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f),
-        )
-
-        densityControl = quickBrowseControl(
-            initialLabel = "View · Dense",
-            initialDescription = "View density: Dense. Double tap to change.",
-        ) {
-            val next = currentUserSettings().viewDensity.next()
-            galleryPreferences().edit()
-                .putString(VIEW_DENSITY_KEY, next.storedValue)
-                .apply()
-            announceForAccessibility(next.label + " view")
-            renderCurrentDestination()
-        }
-        browseControls.addView(
-            densityControl,
-            LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
-                marginStart = dp(8)
-            },
-        )
-
-        return browseControls
-    }
-
-    private fun quickBrowseControl(
-        initialLabel: String,
-        initialDescription: String,
-        onClick: () -> Unit,
-    ): TextView = TextView(this).apply {
-        text = initialLabel
-        gravity = Gravity.CENTER
-        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-        setPadding(dp(12), 0, dp(12), 0)
-        setTextColor(primaryTextColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = GalleryGlazeSurfaces.drawable(
-            context,
-            GalleryGlazeSurfaces.Role.RAISED,
-            GalleryGlazeContract.SHAPE_CAPSULE_DP,
-        )
-        isClickable = true
-        isFocusable = true
-        contentDescription = initialDescription
-        setOnClickListener { onClick() }
-    }
-
-    private fun updateBrowseControls() {
-        if (
-            !::browseControls.isInitialized ||
-            !::groupingControl.isInitialized ||
-            !::densityControl.isInitialized
-        ) return
-
-        val show =
-            !inSelectionMode &&
-                ::searchContainer.isInitialized &&
-                searchContainer.visibility != View.VISIBLE &&
-                authorizedItems.isNotEmpty() &&
-                (destination == GalleryDestination.PHOTOS || destination == GalleryDestination.VIDEOS)
-
-        browseControls.visibility = if (show) View.VISIBLE else View.GONE
-        if (!show) return
-
-        val settings = currentUserSettings()
-        groupingControl.text = "Group · ${settings.groupingMode.label}"
-        groupingControl.contentDescription =
-            "Group media by ${settings.groupingMode.label}. Double tap to change."
-        densityControl.text = "View · ${settings.viewDensity.label}"
-        densityControl.contentDescription =
-            "View density: ${settings.viewDensity.label}. Double tap to change."
     }
 
     private fun buildAccessPanel(): View {
@@ -984,7 +897,6 @@ class GalleryActivity : Activity() {
 
         if (inSelectionMode) {
             brandMark.visibility = View.GONE
-            browseControls.visibility = View.GONE
             videoFilterStripView?.visibility = View.GONE
             headerTitle.text = if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
             headerSubtitle.text = if (dragSelectionSession != null) {
@@ -1068,7 +980,7 @@ class GalleryActivity : Activity() {
         backControl.visibility = if (showBack) View.VISIBLE else View.GONE
         brandMark.visibility = if (showBack) View.GONE else View.VISIBLE
         backControl.contentDescription = "Back to Albums"
-        sortControl.contentDescription = "Sort order: ${sortOrderLabel()}. Double tap to change."
+        sortControl.contentDescription = "View and sort options. Current order: ${sortOrderLabel()}."
         searchField.hint = when {
             destination == GalleryDestination.PHOTOS -> "Search photos"
             destination == GalleryDestination.VIDEOS -> "Search videos"
@@ -1085,7 +997,6 @@ class GalleryActivity : Activity() {
         searchControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
         videoFilterStripView?.visibility =
             if (destination == GalleryDestination.VIDEOS) View.VISIBLE else View.GONE
-        updateBrowseControls()
     }
 
     private fun renderPermissionState() {
@@ -3978,6 +3889,14 @@ class GalleryActivity : Activity() {
         renderSettings()
     }
 
+    private fun renderAfterPresentationPreferenceChange() {
+        if (destination == GalleryDestination.SETTINGS) {
+            renderSettingsDestinationOnly()
+        } else {
+            renderCurrentDestination()
+        }
+    }
+
     private fun showFileLoadingPriorityDialog() {
         val current = currentUserSettings().fileLoadingPriority
         var dialog: AlertDialog? = null
@@ -4101,7 +4020,7 @@ class GalleryActivity : Activity() {
                     galleryPreferences().edit()
                         .putString(VIEW_DENSITY_KEY, density.storedValue)
                         .apply()
-                    renderSettingsDestinationOnly()
+                    renderAfterPresentationPreferenceChange()
                     dialog?.dismiss()
                 },
                 LinearLayout.LayoutParams(
@@ -4191,7 +4110,7 @@ class GalleryActivity : Activity() {
                         .putString(SORT_PREFERENCE_KEY, preference.storedValue)
                         .apply()
                     selectedSort = preference.mediaSortOrder
-                    renderSettingsDestinationOnly()
+                    renderAfterPresentationPreferenceChange()
                     dialog?.dismiss()
                 },
                 LinearLayout.LayoutParams(
@@ -4282,7 +4201,7 @@ class GalleryActivity : Activity() {
                     galleryPreferences().edit()
                         .putString(GROUPING_MODE_KEY, mode.storedValue)
                         .apply()
-                    renderSettingsDestinationOnly()
+                    renderAfterPresentationPreferenceChange()
                     dialog?.dismiss()
                 },
                 LinearLayout.LayoutParams(
@@ -4710,7 +4629,6 @@ class GalleryActivity : Activity() {
             closeSearch()
         } else {
             searchContainer.visibility = View.VISIBLE
-            updateBrowseControls()
             searchField.requestFocus()
             searchControl.setImageResource(R.drawable.ic_gallery_close)
             searchControl.setColorFilter(primaryTextColor())
@@ -4733,8 +4651,6 @@ class GalleryActivity : Activity() {
         if (clearQuery) {
             clearSearchQueryWithoutRender()
             renderCurrentDestination()
-        } else {
-            updateBrowseControls()
         }
     }
 
@@ -5126,6 +5042,9 @@ class GalleryActivity : Activity() {
         const val MEDIA_PERMISSION_REQUEST = 4101
         const val MEDIA_MUTATION_REQUEST = 4102
         const val MEDIA_MOVE_REQUEST = 4103
+        const val HEADER_OPTION_SORT = 4301
+        const val HEADER_OPTION_GROUP = 4302
+        const val HEADER_OPTION_DENSITY = 4303
         const val EXPORT_FAVORITES_REQUEST = 4201
         const val IMPORT_FAVORITES_REQUEST = 4202
         const val EXPORT_SETTINGS_REQUEST = 4203
