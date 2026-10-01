@@ -13,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.goreecloud.since.data.preferences.DashboardSortPreference
 import com.goreecloud.since.data.preferences.SincePreferencesRepository
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
@@ -38,6 +39,9 @@ class MainActivity : ComponentActivity() {
             val showSeconds by preferencesRepository
                 .showSeconds
                 .collectAsStateWithLifecycle(initialValue = true)
+            val dashboardSort by preferencesRepository
+                .dashboardSort
+                .collectAsStateWithLifecycle(initialValue = DashboardSortPreference.MANUAL)
             val onboardingComplete by preferencesRepository
                 .onboardingComplete
                 .collectAsStateWithLifecycle(initialValue = false)
@@ -116,6 +120,12 @@ class MainActivity : ComponentActivity() {
                         onShowSecondsChange = { enabled ->
                             scope.launch {
                                 preferencesRepository.setShowSeconds(enabled)
+                            }
+                        },
+                        dashboardSort = dashboardSort,
+                        onDashboardSortChange = { preference ->
+                            scope.launch {
+                                preferencesRepository.setDashboardSort(preference)
                             }
                         },
                         contextualHintsEnabled = contextualHintsEnabled,
