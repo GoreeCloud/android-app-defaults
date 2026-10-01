@@ -666,7 +666,6 @@ private fun Dashboard(
         showSeconds = showSeconds,
     )
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    val largeText = LocalDensity.current.fontScale >= 1.5f
     val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
         SinceDashboardQuery.apply(
             aggregates = aggregates,
@@ -737,18 +736,6 @@ private fun Dashboard(
                 DashboardSummaryRow(summary = summary)
             }
 
-            if (
-                !largeText &&
-                contextualHintsEnabled &&
-                !homeContextualHintDismissed
-            ) {
-                item {
-                    DashboardContextualHint(
-                        onDismiss = onDismissHomeContextualHint,
-                    )
-                }
-            }
-
             items(
                 items = visibleAggregates,
                 key = { it.tracker.id },
@@ -762,11 +749,7 @@ private fun Dashboard(
                 )
             }
 
-            if (
-                largeText &&
-                contextualHintsEnabled &&
-                !homeContextualHintDismissed
-            ) {
+            if (contextualHintsEnabled && !homeContextualHintDismissed) {
                 item {
                     DashboardContextualHint(
                         onDismiss = onDismissHomeContextualHint,
