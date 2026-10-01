@@ -463,6 +463,9 @@ class MainActivity : ComponentActivity() {
             val hiddenHomeSuggestionKeys by launcherPreferencesRepository.hiddenHomeSuggestionKeys.collectAsStateWithLifecycle(
                 initialValue = emptySet(),
             )
+            val drawerPinnedAppKeys by launcherPreferencesRepository.drawerPinnedAppKeys.collectAsStateWithLifecycle(
+                initialValue = emptySet(),
+            )
             val folders by folderRepository.folders.collectAsStateWithLifecycle(
                 initialValue = emptyList(),
             )
@@ -1026,6 +1029,7 @@ class MainActivity : ComponentActivity() {
                             recentAppKeys = localRecentAppKeys,
                             localLaunchCounts = localLaunchCounts,
                             hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
+                            drawerPinnedAppKeys = drawerPinnedAppKeys,
                             searchProviderPreferences = searchProviderPreferences,
                             fileSearchRoots = fileSearchRoots,
                             homePageCount = renderedPages.size.coerceAtLeast(1),
@@ -1425,6 +1429,7 @@ class MainActivity : ComponentActivity() {
                                 launcherPreferencesRepository.setHomeLabelOverride(app.workspaceKey(), label)
                             },
                             onSetHomeSuggestionHidden = launcherPreferencesRepository::setHomeSuggestionHidden,
+                            onSetDrawerAppPinned = launcherPreferencesRepository::setDrawerAppPinned,
                             onRequestUninstall = ::requestUninstall,
                             onOpenWallpaperPicker = ::openWallpaperPicker,
                             onSurfaceModeChanged = { mode ->
