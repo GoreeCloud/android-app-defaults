@@ -41,6 +41,9 @@ class MainActivity : ComponentActivity() {
             val dashboardSortName by preferencesRepository
                 .defaultSortName
                 .collectAsStateWithLifecycle(initialValue = "MANUAL")
+            val confirmReset by preferencesRepository
+                .confirmReset
+                .collectAsStateWithLifecycle(initialValue = true)
             val onboardingComplete by preferencesRepository
                 .onboardingComplete
                 .collectAsStateWithLifecycle(initialValue = false)
@@ -125,6 +128,12 @@ class MainActivity : ComponentActivity() {
                         onDashboardSortChange = { name ->
                             scope.launch {
                                 preferencesRepository.setDefaultSortName(name)
+                            }
+                        },
+                        confirmReset = confirmReset,
+                        onConfirmResetChange = { enabled ->
+                            scope.launch {
+                                preferencesRepository.setConfirmReset(enabled)
                             }
                         },
                         contextualHintsEnabled = contextualHintsEnabled,
