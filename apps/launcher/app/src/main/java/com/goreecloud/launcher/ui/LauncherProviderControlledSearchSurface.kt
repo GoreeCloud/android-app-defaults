@@ -628,6 +628,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 result = topResult,
                                                 providerControls = controls,
                                             ),
+                                        emphasized = true,
                                         onActivate = {
                                             when (val action = topResult.action) {
                                                 is LaunchApplicationSearchAction ->
@@ -924,82 +925,88 @@ private fun LauncherUniversalSearchSuggestions(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
     ) {
-        Row(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("launcher-search-suggestion-tabs"),
-            verticalAlignment = Alignment.CenterVertically,
+            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            ),
         ) {
-            LauncherSearchSuggestionTab.entries.forEach { tab ->
-                val selected = tab == selectedTab
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 48.dp)
-                        .selectable(
-                            selected = selected,
-                            onClick = { onSelectTab(tab) },
-                            role = Role.Tab,
-                        )
-                        .testTag(
-                            "launcher-search-suggestion-tab-" +
-                                tab.name.lowercase(),
-                        )
-                        .semantics {
-                            contentDescription =
-                                launcherSearchSuggestionTabAccessibilityLabel(tab)
-                        }
-                        .padding(horizontal = 4.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                LauncherSearchSuggestionTab.entries.forEach { tab ->
+                    val selected = tab == selectedTab
                     val tabColor = if (selected) {
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        if (presentation != LauncherSearchSuggestionPresentation.WORDS) {
-                            LauncherSearchSuggestionTabIcon(
-                                tab = tab,
-                                color = tabColor,
-                            )
-                        }
-                        if (presentation == LauncherSearchSuggestionPresentation.BOTH) {
-                            Spacer(Modifier.size(6.dp))
-                        }
-                        if (presentation != LauncherSearchSuggestionPresentation.ICONS) {
-                            Text(
-                                tab.displayName,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (selected) {
-                                    FontWeight.Bold
-                                } else {
-                                    FontWeight.SemiBold
-                                },
-                                color = tabColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                    Spacer(Modifier.size(4.dp))
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.82f)
-                            .height(3.dp)
+                            .weight(1f)
+                            .heightIn(min = 48.dp)
                             .background(
                                 color = if (selected) {
-                                    MaterialTheme.colorScheme.primary
+                                    MaterialTheme.colorScheme.primaryContainer
                                 } else {
                                     Color.Transparent
                                 },
                                 shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                            ),
-                    )
+                            )
+                            .selectable(
+                                selected = selected,
+                                onClick = { onSelectTab(tab) },
+                                role = Role.Tab,
+                            )
+                            .testTag(
+                                "launcher-search-suggestion-tab-" +
+                                    tab.name.lowercase(),
+                            )
+                            .semantics {
+                                contentDescription =
+                                    launcherSearchSuggestionTabAccessibilityLabel(tab)
+                            }
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            if (presentation != LauncherSearchSuggestionPresentation.WORDS) {
+                                LauncherSearchSuggestionTabIcon(
+                                    tab = tab,
+                                    color = tabColor,
+                                )
+                            }
+                            if (presentation == LauncherSearchSuggestionPresentation.BOTH) {
+                                Spacer(Modifier.size(6.dp))
+                            }
+                            if (presentation != LauncherSearchSuggestionPresentation.ICONS) {
+                                Text(
+                                    tab.displayName,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (selected) {
+                                        FontWeight.Bold
+                                    } else {
+                                        FontWeight.SemiBold
+                                    },
+                                    color = tabColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1554,6 +1561,7 @@ private fun LauncherGlazeSearchResult(
     sourceLabel: String?,
     onActivate: () -> Unit,
     onOpenSearchUri: (LauncherOpenUriSearchAction) -> Unit,
+    emphasized: Boolean = false,
 ) {
     val isContact = result.category == LauncherSearchCategory.CONTACT
     val appAction = result.action as? LaunchApplicationSearchAction
@@ -1561,13 +1569,17 @@ private fun LauncherGlazeSearchResult(
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.36f),
+        shape = RoundedCornerShape(
+            if (emphasized) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
+        ),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = if (emphasized) 0.54f else 0.36f,
+        ),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(
                 horizontal = GlazeMetrics.space3,
-                vertical = GlazeMetrics.space1,
+                vertical = if (emphasized) GlazeMetrics.space2 else GlazeMetrics.space1,
             ),
         ) {
             Surface(
@@ -1586,11 +1598,13 @@ private fun LauncherGlazeSearchResult(
                             bitmap = appIcon,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(42.dp).launcherIconMask(),
+                            modifier = Modifier
+                                .size(if (emphasized) 48.dp else 42.dp)
+                                .launcherIconMask(),
                         )
                     } else if (isContact) {
                         Surface(
-                            modifier = Modifier.size(38.dp),
+                            modifier = Modifier.size(if (emphasized) 44.dp else 38.dp),
                             shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                             color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
@@ -1603,12 +1617,19 @@ private fun LauncherGlazeSearchResult(
                             }
                         }
                     } else {
-                        LauncherSearchResultCategoryGlyph(result.category)
+                        LauncherSearchResultCategoryGlyph(
+                            category = result.category,
+                            emphasized = emphasized,
+                        )
                     }
                     Column(Modifier.weight(1f)) {
                         Text(
                             result.title,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = if (emphasized) {
+                                MaterialTheme.typography.titleMedium
+                            } else {
+                                MaterialTheme.typography.bodyMedium
+                            },
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 2,
@@ -1673,15 +1694,16 @@ private fun LauncherGlazeSearchResult(
 @Composable
 private fun LauncherSearchResultCategoryGlyph(
     category: LauncherSearchCategory,
+    emphasized: Boolean = false,
 ) {
     val color = MaterialTheme.colorScheme.primary
     Surface(
-        modifier = Modifier.size(38.dp),
+        modifier = Modifier.size(if (emphasized) 44.dp else 38.dp),
         shape = RoundedCornerShape(GlazeMetrics.radiusPill),
         color = MaterialTheme.colorScheme.primaryContainer,
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Canvas(Modifier.size(20.dp)) {
+            Canvas(Modifier.size(if (emphasized) 22.dp else 20.dp)) {
                 val u = size.minDimension
                 val stroke = 1.65.dp.toPx()
                 val round = androidx.compose.ui.geometry.CornerRadius(u * 0.12f)

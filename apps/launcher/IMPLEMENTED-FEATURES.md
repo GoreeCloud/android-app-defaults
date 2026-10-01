@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — Glance and Search suggestion chrome candidate
+
+- Refined the non-compact left-aligned Home Glance composition so the authoritative local time/date hierarchy and product line occupy the primary column while Weather remains a distinct permission-gated status on the right.
+- Refined idle Universal Search suggestion tabs into one bounded Glaze pill with a contained selected state.
+- Preserved compact/center layout fallbacks, 48 dp tab targets, semantic tab roles, accessibility labels, suggestion ranking, the icon/word/both preference, reduced-effects fallbacks, and existing privacy/provider boundaries.
+
+**Acceptance boundary:** Development source candidate pending fresh exact-head protected validation and representative-device visual/accessibility/performance acceptance.
+
 ## October 1, 2026 — local Universal Search Quick answers
 
 - Added a Launcher-owned **Quick answers** provider for arithmetic using `+`, `-`, `×`/`*`, `÷`/`/`, unary signs, and parentheses.
