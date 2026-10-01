@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — reconcile owner-interaction and inventory runtime acceptance
+
+This stacked Development acceptance branch consolidates the remaining managed-emulator evidence from the superseded inventory-continuity and owner-interaction lines without changing Launcher production behavior. One live `LauncherAppsRepository` flow is kept active across repeated explicit full reconciliations, and every emitted snapshot must continue matching Android-visible launcher activities across all available profiles.
+
+The real default-HOME lifecycle test now keeps a known app visible while the App Drawer is open, moves `MainActivity` through CREATED → RESUMED, and requires both the Drawer and app to remain rendered before the existing HOME-return assertion. A separate API 36 test creates a secondary Home page and verifies the configured swipe-down Universal Search gesture opens from that page. The long-press Edit Home test now also uses HOME as the asserted exit path and requires the normal Home surface to return before Activity teardown.
+
+**Acceptance boundary:** automated API 36 interaction and continuity evidence only. This does not simulate real package install/remove churn, managed-profile availability transitions, OEM-specific transient LauncherApps omissions, or representative-device jank/power/accessibility behavior. Those remain open under issue #77.
+
+
 ## October 1, 2026 — restore monorepo Android 16 Launcher runtime gates
 
 A post-consolidation audit found that the migrated-app workflow still ran Launcher source guards, JVM tests, lint, schema verification, and APK assembly, but no longer executed the source-controlled Launcher Android instrumentation suite or the existing transition-performance instrumentation.
