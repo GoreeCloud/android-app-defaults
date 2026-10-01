@@ -1,13 +1,13 @@
 # GoreeCloud Gallery Android Layout Redesign Milestone
 
-Status: Active implementation target
+Status: Historical milestone; current mockup alignment continues on the first-party native Development line
 
 This milestone follows the failed 2026-09-07 physical-device visual acceptance pass.
 
 ## Goals
 
 - Correct the top-heavy phone composition seen on the OnePlus Nord N200.
-- Preserve the existing Photos / Albums / Videos / Settings information architecture.
+- Historical goal: preserve the then-current Photos / Albums / Videos / Settings information architecture. Current Gallery uses Photos / Albums / Videos / Trash / Settings, with Trash promoted to a dedicated primary destination.
 - Use the available vertical viewport intentionally for both sparse and dense libraries.
 - Reduce navigation and action chrome so media remains the visual focus.
 
