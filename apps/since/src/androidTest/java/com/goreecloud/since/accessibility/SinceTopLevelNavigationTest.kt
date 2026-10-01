@@ -46,6 +46,8 @@ class SinceTopLevelNavigationTest {
     @Test
     fun homeAchievementsAndSettingsRemainReachable() {
         var selectedTheme = ThemePreference.SYSTEM
+        var defaultDisplayFormat by mutableStateOf(DisplayFormat.DAYS)
+        var showSeconds by mutableStateOf(false)
         var contextualHintsEnabled by mutableStateOf(true)
         var replayRequested = false
 
@@ -56,6 +58,10 @@ class SinceTopLevelNavigationTest {
                     clock = clock,
                     themePreference = selectedTheme,
                     onThemePreferenceChange = { selectedTheme = it },
+                    defaultDisplayFormat = defaultDisplayFormat,
+                    onDefaultDisplayFormatChange = { defaultDisplayFormat = it },
+                    showSeconds = showSeconds,
+                    onShowSecondsChange = { showSeconds = it },
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
                     onReplaySetup = { replayRequested = true },
@@ -65,13 +71,19 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-settings").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
+        composeRule.onNodeWithText("Months").assertHasClickAction().performClick()
+        composeRule.onNodeWithTag("settings-show-seconds").assertHasClickAction().performClick()
+        composeRule.runOnIdle {
+            assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
+            assertTrue(showSeconds)
+        }
         composeRule.onNodeWithTag("theme-dark").assertHasClickAction().performClick()
 
         composeRule.runOnIdle {
             assertEquals(ThemePreference.DARK, selectedTheme)
         }
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
         composeRule.onNodeWithTag("settings-export-data")
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -94,14 +106,14 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
         composeRule.onNodeWithText("Privacy").assertIsDisplayed()
         composeRule.onNodeWithText("Security").assertIsDisplayed()
 
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
         composeRule.onNodeWithTag("settings-contextual-hints")
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -163,7 +175,7 @@ class SinceTopLevelNavigationTest {
             .performClick()
 
         composeRule.onNodeWithTag("nav-settings").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("archived-tracker-tracker-top-level").assertIsDisplayed()
         composeRule.onNodeWithTag("restore-tracker-tracker-top-level")
             .assertHasClickAction()
@@ -196,7 +208,7 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("confirm-archive-tracker").performClick()
 
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("delete-archived-tracker-tracker-top-level")
             .assertHasClickAction()
             .performClick()
