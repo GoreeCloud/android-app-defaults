@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.core.view.WindowCompat
 import androidx.test.platform.app.InstrumentationRegistry
 import com.goreecloud.since.MainActivity
@@ -34,7 +35,7 @@ class SinceMainActivitySystemBarsTest {
         composeRule.onNodeWithText("Since").assertIsDisplayed()
 
         composeRule.onNodeWithText("Settings").performClick()
-        composeRule.onNodeWithText("Light").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Light").performScrollTo().assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Home").performClick()
         composeRule.onNodeWithText("Since").assertIsDisplayed()
         composeRule.waitForIdle()
@@ -50,7 +51,7 @@ class SinceMainActivitySystemBarsTest {
         capture("main-activity-light")
 
         composeRule.onNodeWithText("Settings").performClick()
-        composeRule.onNodeWithText("Dark").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Dark").performScrollTo().assertIsDisplayed().performClick()
         composeRule.onNodeWithText("Home").performClick()
         composeRule.onNodeWithText("Since").assertIsDisplayed()
         composeRule.waitForIdle()
