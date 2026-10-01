@@ -62,6 +62,16 @@ class GalleryRenderedAcceptanceTest {
         onView(withContentDescription("Photos, selected"))
             .check(matches(hasSelectedStateDescription()))
 
+        listOf(
+            "Group media by Day. Double tap to change.",
+            "View density: Dense. Double tap to change.",
+        ).forEach { description ->
+            onView(withContentDescription(description))
+                .check(matches(isDisplayed()))
+                .check(matches(isClickable()))
+                .check(matches(hasMinimumTouchSizeDp(48f)))
+        }
+
         onView(withContentDescription("Gallery media access action"))
             .check(matches(isDisplayed()))
             .check(matches(isClickable()))
