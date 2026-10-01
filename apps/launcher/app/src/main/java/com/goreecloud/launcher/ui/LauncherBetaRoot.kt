@@ -382,7 +382,28 @@ internal fun primaryHomeShouldOwnBottomInset(
 
 internal fun primaryHomeShouldHandleHorizontalPaging(
     contentOnly: Boolean,
-): Boolean = !contentOnly
+    pageMotionHostedExternally: Boolean = false,
+): Boolean = !contentOnly && !pageMotionHostedExternally
+
+internal fun homePagerSelectedPageIndex(
+    selectedHomePageId: String?,
+    pages: List<WorkspaceRenderedHomePage>,
+): Int {
+    if (pages.isEmpty()) return 0
+    val resolvedPageId = resolvedHomePageId(
+        selectedHomePageId = selectedHomePageId,
+        pages = pages,
+    )
+    return pages.indexOfFirst { it.pageId == resolvedPageId }
+        .takeIf { it >= 0 }
+        ?: pages.indexOfFirst { it.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID }
+            .takeIf { it >= 0 }
+        ?: 0
+}
+
+internal fun homePagerBeyondViewportPageCount(
+    pageCount: Int,
+): Int = if (pageCount > 1) 1 else 0
 
 internal fun resolvedHomePageId(
     selectedHomePageId: String?,
@@ -897,117 +918,252 @@ fun LauncherBetaRoot(
                     selectedHomePageId = selectedHomePageId,
                     pages = homePages,
                 )
+                val selectedPagerIndex = homePagerSelectedPageIndex(
+                    selectedHomePageId = selectedHomePageId,
+                    pages = homePages,
+                )
+                val homePagerState = rememberPagerState(
+                    initialPage = selectedPagerIndex,
+                    pageCount = { homePages.size },
+                )
+                val homePageIds = remember(homePages) { homePages.map { it.pageId } }
+
+                LaunchedEffect(selectedHomePageId, homePageIds) {
+                    if (homePages.isEmpty()) return@LaunchedEffect
+                    val targetIndex = homePagerSelectedPageIndex(
+                        selectedHomePageId = selectedHomePageId,
+                        pages = homePages,
+                    )
+                    if (targetIndex != homePagerState.currentPage) {
+                        homePagerState.scrollToPage(targetIndex)
+                    }
+                }
+                LaunchedEffect(homePagerState.currentPage, homePageIds, selectedHomePageId) {
+                    val pageId = homePages.getOrNull(homePagerState.currentPage)?.pageId
+                    if (pageId != null && pageId != selectedHomePageId) {
+                        onSelectHomePage(pageId)
+                    }
+                }
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .navigationBarsPadding(),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
-                    ) {
-                    if (selectedSecondaryPage != null) {
-                        secondaryHomeContent(selectedSecondaryPage)
-                    } else {
-                        HomeSurface(
-                        apps = apps,
-                        workspace = workspace,
-                        preferences = preferences,
-                        experiencePreferences = experiencePreferences,
-                        homePageTransition = homePageTransition,
-                        recentAppKeys = recentAppKeys,
-                        localLaunchCounts = localLaunchCounts,
-                        hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
-                        homePageCount = homePageCount,
-                        selectedHomePageId = selectedHomePageId,
-                        homeResetSequence = homeResetSequence,
-                        homeEditorRequestSequence = homeEditorRequestSequence,
-                        homeEditorInitialPageId = homeEditorInitialPageId,
-                        homeLabelOverrides = homeLabelOverrides,
-                        folders = folders,
-                        primaryHomePage = primaryHomePage,
-                        homePages = homePages,
-                        editMode = homeEditMode,
-                        activeDrag = activeDrag,
-                        dragPoint = dragPoint,
-                        homeCellBounds = homeCellBounds,
-                        dockItemBounds = dockItemBounds,
-                        onHomeGridBoundsChanged = {
+                    if (homePages.isEmpty()) {
+                            HomeSurface(
+                            apps = apps,
+                            workspace = workspace,
+                            preferences = preferences,
+                            experiencePreferences = experiencePreferences,
+                            homePageTransition = homePageTransition,
+                            recentAppKeys = recentAppKeys,
+                            localLaunchCounts = localLaunchCounts,
+                            hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
+                            homePageCount = homePageCount,
+                            selectedHomePageId = selectedHomePageId,
+                            homeResetSequence = homeResetSequence,
+                            homeEditorRequestSequence = homeEditorRequestSequence,
+                            homeEditorInitialPageId = homeEditorInitialPageId,
+                            homeLabelOverrides = homeLabelOverrides,
+                            folders = folders,
+                            primaryHomePage = primaryHomePage,
+                            homePages = homePages,
+                            editMode = homeEditMode,
+                            activeDrag = activeDrag,
+                            dragPoint = dragPoint,
+                            homeCellBounds = homeCellBounds,
+                            dockItemBounds = dockItemBounds,
+                            onHomeGridBoundsChanged = {
                             primaryHomeGridBounds = it
                             onPrimaryHomeGridBoundsChanged(it)
-                        },
-                        onDockBoundsChanged = { dockBounds = it },
-                        onBeginLocalDrag = beginLocalDrag,
-                        onUpdateLocalDrag = updateLocalDrag,
-                        onEndLocalDrag = endLocalDrag,
-                        onCancelLocalDrag = cancelLocalDrag,
-                        onExitEditMode = {
+                            },
+                            onDockBoundsChanged = { dockBounds = it },
+                            onBeginLocalDrag = beginLocalDrag,
+                            onUpdateLocalDrag = updateLocalDrag,
+                            onEndLocalDrag = endLocalDrag,
+                            onCancelLocalDrag = cancelLocalDrag,
+                            onExitEditMode = {
                             homeEditMode = false
                             selectedApp = null
                             selectedAppAnchor = null
                             selectedWidget = null
                             activeDrag = null
                             dragPoint = null
-                        },
-                        onManageHomePages = onManageHomePages,
-                        onCreateHomePage = onCreateHomePage,
-                        onSelectHomePage = onSelectHomePage,
-                        onDeleteHomePage = onDeleteHomePage,
-                        onSwipeHomePageLeft = onSwipeHomePageLeft,
-                        onSwipeHomePageRight = onSwipeHomePageRight,
-                        onManageFolders = {
+                            },
+                            onManageHomePages = onManageHomePages,
+                            onCreateHomePage = onCreateHomePage,
+                            onSelectHomePage = onSelectHomePage,
+                            onDeleteHomePage = onDeleteHomePage,
+                            onSwipeHomePageLeft = onSwipeHomePageLeft,
+                            onSwipeHomePageRight = onSwipeHomePageRight,
+                            onManageFolders = {
                             folderManagerProfileId = primaryFolderProfileId
                             folderManagerAddToHome = true
                             showFolderManager = true
-                        },
-                        onOpenFolder = { folder -> selectedFolderId = folder.id },
-                        onMoveFavoriteToCell = onMoveFavoriteToCell,
-                        onMoveWidget = onMoveWidget,
-                        onMoveWidgetToPageCell = onMoveWidgetToPageCell,
-                        onMoveHomeFolderToCell = onMoveHomeFolderToCell,
-                        onMoveHomeFolderToPageCell = onMoveFolderToPageCell,
-                        onLaunchApp = onLaunchApp,
-                        onAddBuiltInWidget = onAddBuiltInWidget,
-                        onSetManagedHomeSearchEnabled = onSetManagedHomeSearchEnabled,
-                        availableAndroidWidgets = availableAndroidWidgets,
-                        onPickInstalledAndroidWidget = onPickInstalledAndroidWidget,
-                        onPickAndroidWidget = onPickAndroidWidget,
-                        onCreateAndroidWidgetView = onCreateAndroidWidgetView,
-                        onManageWidget = {
+                            },
+                            onOpenFolder = { folder -> selectedFolderId = folder.id },
+                            onMoveFavoriteToCell = onMoveFavoriteToCell,
+                            onMoveWidget = onMoveWidget,
+                            onMoveWidgetToPageCell = onMoveWidgetToPageCell,
+                            onMoveHomeFolderToCell = onMoveHomeFolderToCell,
+                            onMoveHomeFolderToPageCell = onMoveFolderToPageCell,
+                            onLaunchApp = onLaunchApp,
+                            onAddBuiltInWidget = onAddBuiltInWidget,
+                            onSetManagedHomeSearchEnabled = onSetManagedHomeSearchEnabled,
+                            availableAndroidWidgets = availableAndroidWidgets,
+                            onPickInstalledAndroidWidget = onPickInstalledAndroidWidget,
+                            onPickAndroidWidget = onPickAndroidWidget,
+                            onCreateAndroidWidgetView = onCreateAndroidWidgetView,
+                            onManageWidget = {
                             homeEditMode = true
                             selectedApp = null
                             selectedAppAnchor = null
                             selectedWidget = it
-                        },
-                        onOpenLauncherSearch = {
+                            },
+                            onOpenLauncherSearch = {
                             drawerSearchRequested = false
                             surfaceModeName = LauncherSurfaceMode.SEARCH.name
-                        },
-                        onManageApp = { app, anchor, origin ->
+                            },
+                            onManageApp = { app, anchor, origin ->
                             homeEditMode = true
                             selectedWidget = null
                             selectedApp = app
                             selectedAppAnchor = anchor
                             selectedAppContextOrigin = origin
-                        },
-                        onOpenDrawer = {
+                            },
+                            onOpenDrawer = {
                             drawerSearchRequested =
-                                experiencePreferences.drawerSearchPlacement !=
-                                    LauncherDrawerSearchPlacement.OFF &&
-                                    experiencePreferences.drawerEntryMode ==
-                                        LauncherDrawerEntryMode.SEARCH_FIRST
+                            experiencePreferences.drawerSearchPlacement !=
+                            LauncherDrawerSearchPlacement.OFF &&
+                            experiencePreferences.drawerEntryMode ==
+                            LauncherDrawerEntryMode.SEARCH_FIRST
                             surfaceModeName = LauncherSurfaceMode.DRAWER.name
-                        },
-                        onOpenSettings = { surfaceModeName = LauncherSurfaceMode.SETTINGS.name },
-                        onOpenThemeManager = { surfaceModeName = LauncherSurfaceMode.THEME_MANAGER.name },
-                        onOpenWallpaperPicker = onOpenWallpaperPicker,
-                        onSetHomeCardStyle = onSetHomeCardStyle,
-                        onHomeEditorVisibilityChanged = onHomeEditorVisibilityChanged,
-                        contentOnly = homeContentOnly,
-                        dockHostedExternally = true,
-                    )
-                    }
+                            },
+                            onOpenSettings = { surfaceModeName = LauncherSurfaceMode.SETTINGS.name },
+                            onOpenThemeManager = { surfaceModeName = LauncherSurfaceMode.THEME_MANAGER.name },
+                            onOpenWallpaperPicker = onOpenWallpaperPicker,
+                            onSetHomeCardStyle = onSetHomeCardStyle,
+                            onHomeEditorVisibilityChanged = onHomeEditorVisibilityChanged,
+                            contentOnly = homeContentOnly,
+                            dockHostedExternally = true,
+                            pageMotionHostedExternally = true,
+                            )
+                    } else {
+                        HorizontalPager(
+                            state = homePagerState,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .testTag("launcher-all-home-pager"),
+                            userScrollEnabled = homePages.size > 1 && activeDrag == null,
+                            beyondViewportPageCount =
+                                homePagerBeyondViewportPageCount(homePages.size),
+                        ) { pageIndex ->
+                            val page = homePages[pageIndex]
+                            if (page.pageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID) {
+                            HomeSurface(
+                            apps = apps,
+                            workspace = workspace,
+                            preferences = preferences,
+                            experiencePreferences = experiencePreferences,
+                            homePageTransition = homePageTransition,
+                            recentAppKeys = recentAppKeys,
+                            localLaunchCounts = localLaunchCounts,
+                            hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
+                            homePageCount = homePageCount,
+                            selectedHomePageId = selectedHomePageId,
+                            homeResetSequence = homeResetSequence,
+                            homeEditorRequestSequence = homeEditorRequestSequence,
+                            homeEditorInitialPageId = homeEditorInitialPageId,
+                            homeLabelOverrides = homeLabelOverrides,
+                            folders = folders,
+                            primaryHomePage = primaryHomePage,
+                            homePages = homePages,
+                            editMode = homeEditMode,
+                            activeDrag = activeDrag,
+                            dragPoint = dragPoint,
+                            homeCellBounds = homeCellBounds,
+                            dockItemBounds = dockItemBounds,
+                            onHomeGridBoundsChanged = {
+                            primaryHomeGridBounds = it
+                            onPrimaryHomeGridBoundsChanged(it)
+                            },
+                            onDockBoundsChanged = { dockBounds = it },
+                            onBeginLocalDrag = beginLocalDrag,
+                            onUpdateLocalDrag = updateLocalDrag,
+                            onEndLocalDrag = endLocalDrag,
+                            onCancelLocalDrag = cancelLocalDrag,
+                            onExitEditMode = {
+                            homeEditMode = false
+                            selectedApp = null
+                            selectedAppAnchor = null
+                            selectedWidget = null
+                            activeDrag = null
+                            dragPoint = null
+                            },
+                            onManageHomePages = onManageHomePages,
+                            onCreateHomePage = onCreateHomePage,
+                            onSelectHomePage = onSelectHomePage,
+                            onDeleteHomePage = onDeleteHomePage,
+                            onSwipeHomePageLeft = onSwipeHomePageLeft,
+                            onSwipeHomePageRight = onSwipeHomePageRight,
+                            onManageFolders = {
+                            folderManagerProfileId = primaryFolderProfileId
+                            folderManagerAddToHome = true
+                            showFolderManager = true
+                            },
+                            onOpenFolder = { folder -> selectedFolderId = folder.id },
+                            onMoveFavoriteToCell = onMoveFavoriteToCell,
+                            onMoveWidget = onMoveWidget,
+                            onMoveWidgetToPageCell = onMoveWidgetToPageCell,
+                            onMoveHomeFolderToCell = onMoveHomeFolderToCell,
+                            onMoveHomeFolderToPageCell = onMoveFolderToPageCell,
+                            onLaunchApp = onLaunchApp,
+                            onAddBuiltInWidget = onAddBuiltInWidget,
+                            onSetManagedHomeSearchEnabled = onSetManagedHomeSearchEnabled,
+                            availableAndroidWidgets = availableAndroidWidgets,
+                            onPickInstalledAndroidWidget = onPickInstalledAndroidWidget,
+                            onPickAndroidWidget = onPickAndroidWidget,
+                            onCreateAndroidWidgetView = onCreateAndroidWidgetView,
+                            onManageWidget = {
+                            homeEditMode = true
+                            selectedApp = null
+                            selectedAppAnchor = null
+                            selectedWidget = it
+                            },
+                            onOpenLauncherSearch = {
+                            drawerSearchRequested = false
+                            surfaceModeName = LauncherSurfaceMode.SEARCH.name
+                            },
+                            onManageApp = { app, anchor, origin ->
+                            homeEditMode = true
+                            selectedWidget = null
+                            selectedApp = app
+                            selectedAppAnchor = anchor
+                            selectedAppContextOrigin = origin
+                            },
+                            onOpenDrawer = {
+                            drawerSearchRequested =
+                            experiencePreferences.drawerSearchPlacement !=
+                            LauncherDrawerSearchPlacement.OFF &&
+                            experiencePreferences.drawerEntryMode ==
+                            LauncherDrawerEntryMode.SEARCH_FIRST
+                            surfaceModeName = LauncherSurfaceMode.DRAWER.name
+                            },
+                            onOpenSettings = { surfaceModeName = LauncherSurfaceMode.SETTINGS.name },
+                            onOpenThemeManager = { surfaceModeName = LauncherSurfaceMode.THEME_MANAGER.name },
+                            onOpenWallpaperPicker = onOpenWallpaperPicker,
+                            onSetHomeCardStyle = onSetHomeCardStyle,
+                            onHomeEditorVisibilityChanged = onHomeEditorVisibilityChanged,
+                            contentOnly = homeContentOnly,
+                            dockHostedExternally = true,
+                            pageMotionHostedExternally = true,
+                            )
+                            } else {
+                                secondaryHomeContent(page)
+                            }
+                        }
                     }
 
                     if (rootDockApps.isNotEmpty() || activeDrag != null) {
@@ -1544,6 +1700,7 @@ private fun HomeSurface(
     onHomeEditorVisibilityChanged: (Boolean) -> Unit,
     contentOnly: Boolean = false,
     dockHostedExternally: Boolean = false,
+    pageMotionHostedExternally: Boolean = false,
 ) {
     val appsByKey = remember(apps) { apps.associateBy { it.workspaceKey() } }
     val personalApps = remember(apps) {
@@ -1769,7 +1926,12 @@ private fun HomeSurface(
                     )
                 }
                 .then(
-                    if (primaryHomeShouldHandleHorizontalPaging(contentOnly)) {
+                    if (
+                        primaryHomeShouldHandleHorizontalPaging(
+                            contentOnly = contentOnly,
+                            pageMotionHostedExternally = pageMotionHostedExternally,
+                        )
+                    ) {
                         Modifier.pointerInput(swipeThreshold) {
                             var drag = 0f
                             var triggered = false
@@ -1988,7 +2150,11 @@ private fun HomeSurface(
                         executeGestureAction(experiencePreferences.swipeDownAction)
                     },
                     modifier = Modifier.launcherHomePageEntryTransition(
-                        transition = homePageTransition,
+                        transition = if (pageMotionHostedExternally) {
+                            LauncherHomePageTransition.NONE
+                        } else {
+                            homePageTransition
+                        },
                         transitionKey = resolvedHomePageId(
                             selectedHomePageId = selectedHomePageId,
                             pages = homePages,
