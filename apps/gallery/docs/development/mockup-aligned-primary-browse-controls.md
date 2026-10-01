@@ -4,16 +4,13 @@
 
 This Development slice continues the October 1, 2026 GoreeCloud Gallery interface refresh without changing Android media authority.
 
-Photos and Videos now expose compact first-party Glaze controls directly below the search surface so common presentation changes do not require a trip to Settings.
+The initial implementation exposed Group/View controls below the search surface. The later mockup-alignment refinement removed that persistent row; grouping and view-density remain available in Settings > Appearance.
 
 ## Implemented behavior
 
-- **Group** cycles through Day → Month → Year → None.
-- **View** cycles through Dense → Comfortable → Spacious.
-- Both controls persist through the same app-private preferences already used by Settings.
-- Both controls use 48dp-or-larger touch targets.
-- The controls are hidden while search is open and while multi-select is active so contextual work keeps priority.
-- Changing either control re-renders only the already-authorized in-memory media presentation.
+- Grouping remains Day → Month → Year → None in Settings.
+- View density remains Dense → Comfortable → Spacious in Settings.
+- Photos and Videos keep Search and Sort in the primary header without a permanent secondary row.
 
 ## Authority boundary
 
@@ -30,6 +27,6 @@ Android MediaStore and the existing Gallery permission/mutation adapters remain 
 
 ## Validation boundary
 
-Pure unit coverage locks deterministic control cycling and wraparound. Rendered acceptance verifies that media-only Search, Sort, Group, and View controls stay hidden when no readable media is available; interactive sizing and state behavior are covered when those controls are rendered over an authorized library.
+Pure unit coverage continues to lock grouping and density behavior. Rendered acceptance verifies the media-only Search and Sort state.
 
 Representative-device visual review, large-text/reflow behavior, TalkBack and switch-access review, compact-width polish, and complete Gallery Glaze application acceptance remain separate gates.
