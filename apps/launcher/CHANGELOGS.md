@@ -1,5 +1,25 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add local arithmetic and unit-conversion Quick answers
+
+Universal Search now includes a Launcher-owned **Quick answers** source. Arithmetic uses a deliberately bounded parser with precedence, parentheses, unary signs, and the four basic operators rather than arbitrary expression/code evaluation. Unit conversion uses an explicit local allowlist for common length, mass, time, and temperature units.
+
+Quick answers participate through the existing built-in provider contract as local-only, permission-free, no-network, and no-query-retention behavior. Results are ranked as direct local answers and expose an explicit tap-to-copy action. Android 13+ relies on the platform clipboard confirmation; earlier Android versions receive a short Launcher copy confirmation.
+
+Focused JVM coverage includes arithmetic precedence/parentheses, malformed expressions, division-by-zero rejection, common conversions, incompatible dimensions, below-absolute-zero rejection, bounded query length, copy payloads, and built-in provider metadata.
+
+**Acceptance boundary:** merged PR #149 integrated Quick answers to authoritative `main` as `1f3758eb9ea5722e6557bae56ecc3be240d3c12e` from exact head `a52056f558ef028b844f7a4317500a8602d219ae` after Mandatory app migration provenance #390, Android Development Foundation #850, Migrated Android apps CI #403 including Launcher build/JVM/lint/schema, complete API 36 runtime instrumentation, transition-performance diagnostics and the migrated-app required gate, plus Protected promotion #357 all succeeded. Representative-device Search/clipboard/accessibility/large-text/form-factor/performance acceptance remains open; Launcher remains Development.
+
+## October 1, 2026 — polish Home and Universal Search Glaze composition
+
+This Development candidate turns the supplied Home/Universal Search visual direction into a bounded native Launcher polish pass without changing provider authority, permissions, workspace persistence, or network policy. Universal Search now has a clear product heading, an explicit **Local first · connected sources are opt-in** boundary, a direct Sources action, a broader **Search this device** field, presentation-policy-resolved translucent surfaces, a ranked **Top result** treatment, counted result sections, **Contacts** naming, purpose-specific original vector category glyphs, and preserved explicit Call/Message actions. The product title and result-section labels are also exposed as semantic headings so the stronger visual hierarchy remains useful to assistive technology.
+
+Home keeps the current Room-authoritative layout and configurable presentation model while refining the fixed Search capsule copy to **Search with GoreeCloud…** and giving the fixed Glance hero slightly more optical radius, restrained depth, and the non-authoritative product line **A calmer Home. Your way.** The built-in Glance, Calendar, and Weather cards now resolve their inner presentation through the same Glaze material fallback instead of retaining light-only inner surfaces; the Dock and shared Home page indicator use a more restrained floating-glass treatment. Widget-picker previews no longer show fabricated dates, temperatures, clock times, or battery percentages: previews use current local date/time where authoritative and neutral purpose-specific glyphs where live data is unavailable. The wallpaper Home preview follows the same rule by using the current local time/date plus a neutral permission-gated Weather treatment instead of a fixed sample forecast. Reduced-transparency and performance fallbacks continue to resolve through the accepted GLAZE UI V1.6 presentation policy.
+
+The source intentionally remains pinned to Official Stable GLAZE UI **1.6.0** / revision `a7180679ea851389e0f3004515f9a25f420e716d`. The active Glaze 1.7 Development line is not treated as consumer-eligible or as Launcher conformance evidence.
+
+**Acceptance boundary:** merged PR #147 integrated this Development polish to authoritative `main` as `d667a65ca565ff1512f4065a3462e4b16ca76f49` from exact head `29072f1fe007b5839a08afb4ea69f8c4167060be` after Mandatory app migration provenance #386, Android Development Foundation #846, Migrated Android apps CI #399 including complete API 36 runtime/transition lanes, and Protected promotion #353 all succeeded. Representative-device visual/accessibility/large-text/form-factor/performance acceptance remains open; Launcher remains Development.
+
 ## October 1, 2026 — stabilize Drawer runtime setup authority
 
 A later exact-head feature validation reproduced a lifecycle-suite setup race that can occur before any Drawer gesture assertion: the Drawer runtime test observed terminal ROOM authority, then used the compatibility repository snapshot to decide whether its candidate app needed Home placement. The launched Home could still be finishing startup-owned reconciliation at that point, so the guarded test-owned Room write could legitimately return a non-Written result and contaminate subsequent lifecycle cases.

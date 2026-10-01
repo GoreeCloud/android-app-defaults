@@ -1,5 +1,21 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — local Universal Search Quick answers
+
+- Added a Launcher-owned **Quick answers** provider for arithmetic using `+`, `-`, `×`/`*`, `÷`/`/`, unary signs, and parentheses.
+- Added allowlisted offline unit conversion for common length, mass, time, and Celsius/Fahrenheit/Kelvin values, including aliases such as `10 km to mi`, `5 lb in kg`, and `32 f to c`.
+- Quick answers execute in-process through a bounded parser; they do not evaluate arbitrary code, request Android permissions, use the network, or retain typed queries.
+- A selected answer copies the rendered result to the Android clipboard. Android 13+ uses the platform copy confirmation; older Android versions receive a short Launcher confirmation.
+- The source is registered through the existing Universal Search provider-control contract as **Local only · No query retention**, and focused JVM coverage exercises precedence, parentheses, invalid input, division by zero, cross-dimension rejection, temperature absolute-zero rejection, copy payloads, and provider metadata.
+
+**Acceptance boundary:** merged PR #149 integrated the feature to authoritative `main` as `1f3758eb9ea5722e6557bae56ecc3be240d3c12e` from exact head `a52056f558ef028b844f7a4317500a8602d219ae`. Mandatory app migration provenance #390, Android Development Foundation #850, Launcher build/JVM/lint/schema, complete API 36 runtime instrumentation, transition-performance diagnostics, migrated-app required gate, and Protected promotion #357 all succeeded before guarded squash merge/readback. Representative-device Search/clipboard/accessibility/large-text/form-factor/performance acceptance remains open; Launcher remains Development.
+
+## October 1, 2026 — Home and Universal Search Glaze polish
+
+The current Development branch adds a presentation-only polish tranche inspired by the approved Home and Universal Search concepts: a stronger Universal Search hierarchy, explicit local/connected-source boundary copy, direct source access, a device-wide search prompt, a ranked Top result, counted source sections, purpose-specific original vector result glyphs, semantic Search headings, refined translucent Glaze surfaces, adaptive Glance/Calendar/Weather cards, a more restrained floating Dock/page-indicator treatment, and updated Home Glance/Search optical treatment. Widget-picker and wallpaper Home previews use current local date/time or neutral purpose-specific glyphs rather than fabricated weather, date, time, or battery values. Existing provider execution, opt-in behavior, Android permissions, profile identity, Room workspace authority, Search actions, and reduced-transparency/performance fallbacks are preserved.
+
+Merged PR #147 integrated this source to authoritative `main` as `d667a65ca565ff1512f4065a3462e4b16ca76f49` from exact head `29072f1fe007b5839a08afb4ea69f8c4167060be` after the complete protected exact-head matrix succeeded. This is Development integration, not release acceptance. Launcher remains mapped to Official Stable GLAZE UI 1.6.0; Glaze 1.7 remains Development and is not claimed as a consumer baseline.
+
 ## October 1, 2026 — App Drawer favorites
 
 Merged PR #144 adds device-local, profile-qualified App Drawer pinning. Application long-press actions can pin/unpin an app in Apps, pinned state is surfaced in the app context status and directly on pinned app tiles/rows, the drawer sort menu includes **Pinned first**, and a ★ control can show pinned apps only on the active User/Work page. Drawer sort selection is persisted locally across surface/process recreation. Pin filtering/sorting remains presentation-only and never mutates Home/Dock/folder placement or cross-profile identity.
