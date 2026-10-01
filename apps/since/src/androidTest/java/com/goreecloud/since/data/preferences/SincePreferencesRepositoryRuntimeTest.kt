@@ -23,6 +23,7 @@ class SincePreferencesRepositoryRuntimeTest {
             first.setDefaultDisplayFormat(DisplayFormat.MONTHS)
             first.setShowSeconds(false)
             first.setDefaultSortName("OLDEST_START")
+            first.setConfirmReset(false)
 
             val reopened = SincePreferencesRepository(context)
 
