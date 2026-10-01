@@ -1647,8 +1647,6 @@ class GalleryActivity : Activity() {
         }
 
         if (catalog.isNotEmpty() || showFavoritesTile) {
-            library.addView(sectionHeader("Collections"))
-
             val tiles = mutableListOf<AlbumPresentation>()
             if (showFavoritesTile) {
                 tiles += AlbumPresentation(
@@ -1670,10 +1668,139 @@ class GalleryActivity : Activity() {
                 )
             }
 
+            val quickAccessTiles = tiles
+                .mapNotNull { album ->
+                    GalleryAlbumQuickAccessPolicy.priority(album.name, album.isFavorites)
+                        ?.let { priority -> priority to album }
+                }
+                .sortedBy { it.first }
+                .map { it.second }
+                .take(ALBUM_QUICK_ACCESS_LIMIT)
+
+            if (quickAccessTiles.isNotEmpty()) {
+                renderAlbumQuickAccess(quickAccessTiles, generation)
+            }
+
+            library.addView(sectionHeader("Collections"))
             renderAlbumGrid(tiles, generation)
         }
         updateHeader()
         renderNavigation()
+    }
+
+    private fun renderAlbumQuickAccess(albums: List<AlbumPresentation>, generation: Int) {
+        library.addView(sectionHeader("Quick access"))
+        library.addView(
+            HorizontalScrollView(this).apply {
+                isHorizontalScrollBarEnabled = false
+                isFillViewport = false
+                overScrollMode = View.OVER_SCROLL_NEVER
+                setPadding(0, dp(4), 0, dp(8))
+
+                addView(
+                    LinearLayout(context).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        gravity = Gravity.START
+                        albums.forEachIndexed { index, album ->
+                            addView(
+                                albumQuickAccessCard(album, generation),
+                                LinearLayout.LayoutParams(
+                                    dp(ALBUM_QUICK_ACCESS_CARD_DP),
+                                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ).apply {
+                                    if (index > 0) marginStart = dp(10)
+                                },
+                            )
+                        }
+                    },
+                    ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ),
+                )
+            },
+        )
+    }
+
+    private fun albumQuickAccessCard(
+        album: AlbumPresentation,
+        generation: Int,
+    ): LinearLayout {
+        val cornerDp = thumbnailCornerDp(ALBUM_CORNER_DP)
+        val image = ImageView(this).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            background = roundedSurface(withAlpha(primaryTextColor(), 0.08f), cornerDp)
+            clipToOutline = true
+            tag = thumbnailCacheKey(ALBUM_THUMBNAIL_NAMESPACE, album.cover.contentUri)
+        }
+        loadLocalThumbnail(
+            album.cover,
+            image,
+            generation,
+            ALBUM_THUMBNAIL_DP,
+            ALBUM_THUMBNAIL_NAMESPACE,
+        )
+
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.RAISED,
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
+            clipToOutline = true
+            elevation = dp(1).toFloat()
+            setPadding(dp(2), dp(2), dp(2), dp(8))
+            isClickable = true
+            isFocusable = true
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            contentDescription = "Quick access: " + album.name + ", " + itemCountLabel(album.count)
+            setOnClickListener { openAlbumPresentation(album) }
+
+            addView(
+                image,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dp(ALBUM_QUICK_ACCESS_THUMBNAIL_DP),
+                ),
+            )
+            addView(
+                TextView(context).apply {
+                    text = album.name
+                    maxLines = 1
+                    setTextColor(primaryTextColor())
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
+                    setTypeface(typeface, Typeface.BOLD)
+                    setPadding(dp(10), dp(8), dp(10), 0)
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                },
+            )
+            addView(
+                TextView(context).apply {
+                    text = itemCountLabel(album.count)
+                    maxLines = 1
+                    setTextColor(secondaryTextColor())
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
+                    setPadding(dp(10), dp(2), dp(10), 0)
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                },
+            )
+        }
+    }
+
+    private fun openAlbumPresentation(album: AlbumPresentation) {
+        clearSelection(render = false)
+        searchQuery = ""
+        searchField.setText("")
+        closeSearch(clearQuery = false)
+        if (album.isFavorites) {
+            showingFavorites = true
+            openAlbumId = null
+        } else {
+            showingFavorites = false
+            openAlbumId = album.id
+        }
+        renderCurrentDestination()
     }
 
     private fun renderAlbumGrid(albums: List<AlbumPresentation>, generation: Int) {
@@ -1739,20 +1866,7 @@ class GalleryActivity : Activity() {
             isClickable = true
             isFocusable = true
             contentDescription = "${album.name}, ${itemCountLabel(album.count)}"
-            setOnClickListener {
-                clearSelection(render = false)
-                searchQuery = ""
-                searchField.setText("")
-                closeSearch(clearQuery = false)
-                if (album.isFavorites) {
-                    showingFavorites = true
-                    openAlbumId = null
-                } else {
-                    showingFavorites = false
-                    openAlbumId = album.id
-                }
-                renderCurrentDestination()
-            }
+            setOnClickListener { openAlbumPresentation(album) }
             addView(
                 image,
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (tileWidth - dp(4)).coerceAtLeast(dp(96))),
@@ -4846,6 +4960,9 @@ class GalleryActivity : Activity() {
         const val ALBUM_GAP_DP = 12
         const val ALBUM_CORNER_DP = 16
         const val ALBUM_THUMBNAIL_DP = 320
+        const val ALBUM_QUICK_ACCESS_CARD_DP = 132
+        const val ALBUM_QUICK_ACCESS_THUMBNAIL_DP = 88
+        const val ALBUM_QUICK_ACCESS_LIMIT = 4
         const val VIDEO_CARD_GAP_DP = 10
         const val VIEWER_THUMBNAIL_DP = 720
         const val VIEWER_SWIPE_DISTANCE_DP = 56
