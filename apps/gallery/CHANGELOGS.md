@@ -6,6 +6,7 @@
 - Removed the always-visible Group and View controls from Photos and Videos so the primary browsing surfaces match the supplied media-first mockups more closely.
 - Grouping and view-density preferences remain available under Settings → Appearance and keep the same app-private persisted behavior.
 - Added a 48dp-or-larger functional details action to each Videos card, matching the mockup's trailing overflow affordance while reusing the existing local item-details surface.
+- Added local Camera/Favorites icon treatment to the Videos filter chips; filter availability still comes only from the current authorized snapshot.
 - Removed the retired quick-cycle helpers and rendered assertions that existed only for the discarded persistent controls.
 - No MediaStore permission, mutation, filesystem, account, network, cloud, or synchronization authority changed.
 
