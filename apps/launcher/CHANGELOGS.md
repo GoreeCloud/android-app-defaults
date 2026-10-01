@@ -1,5 +1,16 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — unify Primary and secondary Home follow-finger paging
+
+Primary Home and every Room-rendered secondary Home page now share one Compose `HorizontalPager` inside the stable Launcher root. The pager mirrors the existing Activity-owned selected-page ID rather than creating a second workspace or selection authority, keeps at most one adjacent page warm, and disables its own user scroll while a Primary app drag is active.
+
+Primary Home suppresses its older threshold horizontal recognizer and configured page-entry animation only while the shared pager owns horizontal motion. Secondary pages render as content-only pager pages so the former nested secondary pager is not retained. The editable Dock remains hosted once below page motion, while the existing Activity-owned page indicator continues to reflect the same selected Room page.
+
+Focused JVM coverage verifies known/stale pager-index resolution and external horizontal-motion ownership.
+
+**Acceptance boundary:** Development candidate based on authoritative main `89ff54e485220d8f408a237c2ed5e4b4da5c5098` (merged PR #117). Fresh exact-head migration provenance, Android build/lint/unit/runtime CI, and protected-promotion evidence are required before integration. Representative-device/default-HOME frame pacing, input latency, memory/power, accessibility, large-text, form-factor, drag/drop, and widget acceptance remain open under issue #77.
+
+
 ## October 1, 2026 — host one editable Dock across Home pages
 
 The stable Home root now owns one full `EditableHomeDock` below page-specific content. Primary Home suppresses only its internal Dock and bottom navigation inset; secondary Home does the same while retaining its existing `HorizontalPager`, page mutations, vertical gestures, and editor/Search handoffs.
@@ -8,7 +19,7 @@ The shared Dock preserves the extracted Primary contract: layout lock, edit mode
 
 Focused JVM policy coverage verifies that external Dock hosting suppresses page-local Dock/inset ownership while the default local path remains unchanged.
 
-**Acceptance boundary:** Development performance/architecture candidate on authoritative main `4cacb1af78bdd03c6df4a00e824983fc061ca411`; fresh exact-head validation is required before integration. Final Primary↔secondary follow-finger paging and representative-device frame pacing/input latency/memory/power acceptance remain open.
+**Acceptance boundary:** PR #117 is merged after complete exact-head Development validation as `89ff54e485220d8f408a237c2ed5e4b4da5c5098`. The shared follow-finger pager and representative-device frame pacing/input latency/memory/power acceptance remain open.
 
 
 ## October 1, 2026 — extract the full editable Home Dock for future pager hosting
