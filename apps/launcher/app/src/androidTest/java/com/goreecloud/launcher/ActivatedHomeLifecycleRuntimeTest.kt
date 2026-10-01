@@ -1959,26 +1959,31 @@ class ActivatedHomeLifecycleRuntimeTest {
     private fun resetHomeBeforeScenarioClose() {
         runShellCommand("input keyevent KEYCODE_HOME")
         composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule
-                .onAllNodesWithTag(
-                    "launcher-home-editor-fullscreen",
-                    useUnmergedTree = true,
-                )
-                .fetchSemanticsNodes()
-                .isEmpty() &&
+            // HOME may replace the ActivityScenario-launched LAUNCHER activity with a new HOME
+            // intent instance. In that valid teardown path the test rule can briefly have no
+            // Compose hierarchy at all; that already proves the scenario-owned overlays are gone.
+            runCatching {
                 composeRule
                     .onAllNodesWithTag(
-                        "launcher-widget-picker-sheet",
+                        "launcher-home-editor-fullscreen",
                         useUnmergedTree = true,
                     )
                     .fetchSemanticsNodes()
                     .isEmpty() &&
-                composeRule
-                    .onAllNodesWithText("Wallpapers", useUnmergedTree = true)
-                    .fetchSemanticsNodes()
-                    .isEmpty()
+                    composeRule
+                        .onAllNodesWithTag(
+                            "launcher-widget-picker-sheet",
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isEmpty() &&
+                    composeRule
+                        .onAllNodesWithText("Wallpapers", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isEmpty()
+            }.getOrDefault(true)
         }
-        composeRule.waitForIdle()
+        runCatching { composeRule.waitForIdle() }
     }
 
     private fun waitForSelectedHomePage(
