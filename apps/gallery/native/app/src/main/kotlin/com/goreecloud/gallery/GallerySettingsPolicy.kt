@@ -28,6 +28,9 @@ enum class GalleryGroupingMode(
     NONE("none", "None"),
     ;
 
+    fun next(): GalleryGroupingMode =
+        entries[(ordinal + 1) % entries.size]
+
     companion object {
         fun fromStored(value: String?): GalleryGroupingMode =
             entries.firstOrNull { it.storedValue == value } ?: DAY
@@ -62,9 +65,63 @@ enum class GalleryViewDensity(
     fun mediaGridColumns(widthDp: Int): Int =
         (GalleryGlazeContract.gridColumns(widthDp) + columnAdjustment).coerceAtLeast(2)
 
+    fun mediaGridColumnsForGroup(widthDp: Int, itemCount: Int): Int {
+        val baseline = mediaGridColumns(widthDp)
+        if (itemCount <= 0 || baseline <= 3) return baseline
+        return if (itemCount < baseline) 3 else baseline
+    }
+
+    fun next(): GalleryViewDensity =
+        entries[(ordinal + 1) % entries.size]
+
     companion object {
         fun fromStored(value: String?): GalleryViewDensity =
             entries.firstOrNull { it.storedValue == value } ?: DENSE
+    }
+}
+
+enum class GalleryVideoFilter(val label: String) {
+    ALL("All"),
+    SCREEN_RECORDINGS("Screen recordings"),
+    CAMERA("Camera"),
+    FAVORITES("Favorites"),
+}
+
+object GalleryVideoFilterPolicy {
+    fun available(
+        items: List<MediaItem>,
+        favoriteContentUris: Set<String>,
+    ): List<GalleryVideoFilter> = buildList {
+        add(GalleryVideoFilter.ALL)
+        GalleryVideoFilter.entries
+            .filterNot { it == GalleryVideoFilter.ALL }
+            .filter { filter -> items.any { item -> matches(filter, item, favoriteContentUris) } }
+            .forEach { filter -> add(filter) }
+    }
+
+    fun filter(
+        items: List<MediaItem>,
+        selected: GalleryVideoFilter,
+        favoriteContentUris: Set<String>,
+    ): List<MediaItem> =
+        if (selected == GalleryVideoFilter.ALL) items
+        else items.filter { item -> matches(selected, item, favoriteContentUris) }
+
+    fun matches(
+        filter: GalleryVideoFilter,
+        item: MediaItem,
+        favoriteContentUris: Set<String>,
+    ): Boolean = when (filter) {
+        GalleryVideoFilter.ALL -> true
+        GalleryVideoFilter.FAVORITES -> item.contentUri in favoriteContentUris
+        GalleryVideoFilter.CAMERA ->
+            item.albumName?.contains("camera", ignoreCase = true) == true
+        GalleryVideoFilter.SCREEN_RECORDINGS -> {
+            val searchable = listOfNotNull(item.albumName, item.displayName)
+                .joinToString(" ")
+                .lowercase()
+            "screen" in searchable && ("record" in searchable || "capture" in searchable)
+        }
     }
 }
 

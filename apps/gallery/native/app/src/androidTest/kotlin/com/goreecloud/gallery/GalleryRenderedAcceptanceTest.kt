@@ -49,6 +49,7 @@ class GalleryRenderedAcceptanceTest {
             "Photos, selected",
             "Albums",
             "Videos",
+            "Trash",
             "Settings",
         ).forEach { description ->
             onView(withContentDescription(description))
@@ -79,7 +80,7 @@ class GalleryRenderedAcceptanceTest {
                     val labels = (0 until candidate.childCount).mapNotNull { index ->
                         (candidate.getChildAt(index) as? TextView)?.text?.toString()
                     }
-                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Settings")
+                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
                 }
 
             assertTrue("Navigation capsule must clip child material to its rounded outline", capsule.clipToOutline)
@@ -113,6 +114,10 @@ class GalleryRenderedAcceptanceTest {
         onView(withContentDescription("Search the current Gallery destination"))
             .check(matches(withEffectiveVisibility(GONE)))
         onView(withContentDescription(containsString("Sort order:")))
+            .check(matches(withEffectiveVisibility(GONE)))
+        onView(withContentDescription("Group media by Day. Double tap to change."))
+            .check(matches(withEffectiveVisibility(GONE)))
+        onView(withContentDescription("View density: Dense. Double tap to change."))
             .check(matches(withEffectiveVisibility(GONE)))
     }
 
@@ -217,7 +222,7 @@ class GalleryRenderedAcceptanceTest {
                     val labels = (0 until candidate.childCount).mapNotNull { index ->
                         (candidate.getChildAt(index) as? TextView)?.text?.toString()
                     }
-                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Settings")
+                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
                 }
 
             val decor = activity.window.decorView
@@ -280,7 +285,7 @@ class GalleryRenderedAcceptanceTest {
                     val labels = (0 until candidate.childCount).mapNotNull { index ->
                         (candidate.getChildAt(index) as? TextView)?.text?.toString()
                     }
-                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Settings")
+                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
                 }
 
             assertTrue(
@@ -320,7 +325,7 @@ class GalleryRenderedAcceptanceTest {
                         val labels = (0 until candidate.childCount).mapNotNull { index ->
                             (candidate.getChildAt(index) as? TextView)?.text?.toString()
                         }
-                        labels.toSet() == setOf("Photos", "Albums", "Videos", "Settings")
+                        labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
                     }
 
                 if (capsules.size != 1) {

@@ -20,7 +20,7 @@
         <activity
             android:name=".RecycleBinActivity"
             android:exported="false"
-            android:label="Gallery Recycle Bin" />
+            android:label="Gallery Trash" />
         <activity
             android:name=".GalleryActivity"
             android:exported="true">

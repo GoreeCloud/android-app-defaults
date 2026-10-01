@@ -14,8 +14,9 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Bounded MediaStore image/video reads through the compiled Android adapter.
 - Validated media-item and MediaStore-row domain models.
 - Local thumbnails with bounded in-memory caching and no cloud dependency.
-- Direct Photos / Albums / Videos / Settings navigation in the current `0.7.1-dev` candidate.
-- Dense adaptive Photos and Videos grids grouped into Today / Yesterday / calendar-date sections.
+- Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.7.1-dev` candidate.
+- Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
+- Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, and dynamic All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
 - Dedicated Albums browsing with authoritative album covers, names, counts, adaptive cover layout, and bounded album-detail browsing.
@@ -28,7 +29,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - **Bulk Favorite / Unfavorite:** selection mode adds all selected authorized items to Favorites unless every selected item is already a Favorite, in which case it removes them. Favorites remain Gallery app-local state.
 - **Selection Details:** the contextual More action exposes media details when exactly one item is selected.
 - **Android-authorized Delete / Trash candidate:** on Android 11 and newer, Delete is enabled in the viewer and selection mode. Gallery submits only bounded current MediaStore URIs to Android's system confirmation flow. With **Move deleted items to Recycle Bin** enabled, Android receives a `MediaStore.createTrashRequest(...)`; with the setting disabled, Android receives a `MediaStore.createDeleteRequest(...)` for confirmed permanent deletion. Gallery refreshes its authorized snapshot after a successful system result. This is Development behavior pending complete physical-device destructive-operation acceptance, not Stable qualification.
-- **First-party Recycle Bin candidate:** on Android 11+, Albums now exposes a dedicated **Recovery > Recycle Bin** entry backed by Android MediaStore Trash. The ordinary Gallery launcher is the sole launcher entry; the earlier temporary Recycle Bin launcher has been removed.
+- **First-party Trash candidate:** on Android 11+, **Trash** is a dedicated primary bottom-navigation destination backed by Android MediaStore Trash. Albums no longer contains the recovery entry. The ordinary Gallery launcher remains the sole launcher entry.
 - **Recycle Bin browsing and viewer:** Gallery can enumerate bounded MediaStore items whose authoritative Trash state is set, render an in-place-selectable grid, open a dedicated trashed-item viewer with Previous / Next, Restore, Delete permanently, and More, and disclose that Android controls actual Trash retention/expiration.
 - **Recycle Bin Restore / Purge:** both single-item viewer actions and bounded multi-select actions use Android-owned confirmation. Restore uses `MediaStore.createTrashRequest(..., false)`; permanent purge uses `MediaStore.createDeleteRequest(...)`. Restore preserves Gallery Favorite URI metadata while confirmed purge removes stale Favorite references.
 - **Mutation bound:** a single Trash/Restore/Delete request is limited to 100 unique `content://media/...` image/video item URIs. Non-MediaStore, file, network, blank, generic-files, collection-only, or malformed URIs are rejected before Android mutation request creation.
@@ -37,7 +38,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Framework-independent selection policy provides toggle, select-all, prune, and resolve only against a caller-supplied current authorized/presented media scope; stale or foreign content URIs cannot become bulk-action authority.
 - Framework-independent non-destructive bulk-action policy preserves presentation order and derives the narrowest safe Share MIME type while deterministically planning Favorites Add/Remove.
 - Edit remains intentionally unavailable in the current Development viewer until an approved editing path is implemented and validated.
-- Video items currently use authorized poster thumbnails; native playback is not yet implemented.
+- Authorized videos use bounded native Android playback in the viewer with Play/Pause, lifecycle-safe host pause/resume, canonical MediaStore item URI validation, and persisted autoplay/loop preferences; poster thumbnails remain the browsing/failure fallback.
 - Permission and load-generation re-checks before viewer rendering.
 - Framework-independent album/trash/recovery/mutation foundations used by later native milestones.
 - GLAZE UI V1.6 application-source mapping remains subject to full Gallery-specific visual, accessibility, adaptive-layout, and physical-device acceptance.
@@ -55,13 +56,13 @@ The following controls have active behavior in the current Development candidate
 - **Clear cache:** evicts the bounded in-memory thumbnail cache only; it never deletes media files.
 - **Export Favorites / Import Favorites:** writes or reads a versioned local JSON representation of Gallery's app-local favorite content-URI set through Android's document provider. Import merges favorite state and does not grant access to media Android has not authorized.
 - **Export settings / Import settings:** writes or reads a versioned JSON document containing non-secret Gallery preferences, including folder visibility selections. Unknown fields are ignored and imports do not carry passwords, credentials, signing material, or media bytes.
+- **Play videos automatically:** controls whether authorized videos request playback as soon as the native viewer finishes preparing them.
+- **Loop videos:** controls Android-native repeat behavior for the current authorized video while it remains open.
 - **Rounded-square thumbnails:** toggles GoreeCloud rounded-square clipping for current media and album thumbnails.
 - **Move deleted items to Recycle Bin:** on Android 11+, controls whether the ordinary Gallery Delete action requests Android Trash/Recycling or Android-confirmed permanent deletion. It is enabled by default. Android owns the destructive confirmation surface in both modes.
 
-The following requested settings are present and persisted now, but their behavioral effect remains gated by unfinished capability work and must not be represented as implemented playback or cleanup behavior:
+The following requested settings are present and persisted now, but their behavioral effect remains gated by unfinished capability work:
 
-- **Play videos automatically** — stored preference; applies when validated native video playback exists.
-- **Loop videos** — stored preference; applies when validated native video playback exists.
 - **Animate GIFs in thumbnails** — stored preference; animated thumbnail decoding is not yet enabled.
 - **Delete empty folders after deleting their content** — stored preference; automatic empty-folder cleanup is not enabled by the current Android-authorized Delete/Trash slice.
 
@@ -148,12 +149,12 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 
 ## Development work still required
 
-- Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and integrated Recycle Bin candidate.
-- Physically validate the integrated Recycle Bin on representative Android devices with disposable copied media, including Albums entry, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty bin, provider failure, restart/process recreation, and retention/expiry refresh.
+- Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Trash / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and dedicated Trash candidate.
+- Physically validate the dedicated Trash destination on representative Android devices with disposable copied media, including five-tab navigation, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty Trash, provider failure, restart/process recreation, and retention/expiry refresh.
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
 - Refine multi-select from physical-device evidence and add approved contextual actions as their authorities become real; Move remains unavailable until its mutation path is implemented and validated.
 - Add richer grouping modes, view-density/layout controls, album creation/rename/reorder, and approved move/copy organization.
-- Complete useful/full-resolution image viewing and native video playback, then connect the saved autoplay/loop preferences to accepted playback behavior.
+- Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
 - Complete animated GIF thumbnail decoding before treating the saved GIF-animation preference as behaviorally active.
 - Complete approved first-party editing and approved metadata-editing workflows.
 - Implement slideshow and other established local presentation actions where supported by historical Gallery evidence.
