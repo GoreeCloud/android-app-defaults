@@ -18,6 +18,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -63,8 +64,16 @@ internal fun SinceTopLevelNavigationBar(
     selected: TopLevelDestination,
     onSelect: (TopLevelDestination) -> Unit,
 ) {
+    val itemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.primary,
+        selectedTextColor = MaterialTheme.colorScheme.onSurface,
+        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        tonalElevation = 6.dp,
     ) {
         NavigationBarItem(
             selected = selected == TopLevelDestination.HOME,
@@ -77,6 +86,7 @@ internal fun SinceTopLevelNavigationBar(
                 )
             },
             label = { Text(stringResourceCompat(R.string.nav_home)) },
+            colors = itemColors,
             modifier = Modifier.testTag("nav-home"),
         )
         NavigationBarItem(
@@ -90,6 +100,7 @@ internal fun SinceTopLevelNavigationBar(
                 )
             },
             label = { Text(stringResourceCompat(R.string.nav_achievements)) },
+            colors = itemColors,
             modifier = Modifier.testTag("nav-achievements"),
         )
         NavigationBarItem(
@@ -103,6 +114,7 @@ internal fun SinceTopLevelNavigationBar(
                 )
             },
             label = { Text(stringResourceCompat(R.string.nav_settings)) },
+            colors = itemColors,
             modifier = Modifier.testTag("nav-settings"),
         )
     }
