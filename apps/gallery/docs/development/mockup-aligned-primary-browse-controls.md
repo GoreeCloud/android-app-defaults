@@ -1,10 +1,10 @@
-# Mockup-aligned primary browse controls — Development
+# Mockup-aligned primary browse options — Development
 
 ## Purpose
 
 This Development slice continues the October 1, 2026 GoreeCloud Gallery interface refresh without changing Android media authority.
 
-Photos and Videos now expose compact first-party Glaze controls directly below the search surface so common presentation changes do not require a trip to Settings.
+Photos and Videos now use the mockup's compact Search + overflow header so presentation controls no longer occupy a permanent row beneath the title.
 
 ## Implemented behavior
 
