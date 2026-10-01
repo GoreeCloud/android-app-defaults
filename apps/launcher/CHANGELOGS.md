@@ -6,7 +6,7 @@ The secondary Home `HorizontalPager` now requests one beyond-viewport page only 
 
 A focused JVM policy keeps the behavior bounded: zero warm pages for zero/one page and exactly one for larger secondary page sets.
 
-**Acceptance boundary:** stacked Development performance candidate on parent PR #112. PR #112 must integrate first; this candidate then requires current-main reconciliation and fresh exact-head validation. Representative-device frame pacing, input latency, memory, and power acceptance remain open.
+**Acceptance boundary:** Development performance candidate reconciled onto merged PR #112 / current main `54b65654075667d48bc4c757357897c128f3337c`; fresh exact-head validation is required before integration. Representative-device frame pacing, input latency, memory, and power acceptance remain open.
 
 
 ## September 30, 2026 — separate Primary Home page content from persistent chrome
