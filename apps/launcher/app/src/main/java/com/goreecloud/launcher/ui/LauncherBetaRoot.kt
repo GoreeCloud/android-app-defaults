@@ -374,6 +374,10 @@ internal fun primaryHomeShouldRenderDock(
     activeDrag: Boolean,
 ): Boolean = !contentOnly && (dockAppCount > 0 || activeDrag)
 
+internal fun primaryHomeShouldHandleHorizontalPaging(
+    contentOnly: Boolean,
+): Boolean = !contentOnly
+
 @Composable
 fun LauncherBetaRoot(
     apps: List<LauncherActivityInfo>,
@@ -1551,48 +1555,54 @@ private fun HomeSurface(
                         },
                     )
                 }
-                .pointerInput(swipeThreshold) {
-                    var drag = 0f
-                    var triggered = false
-                    detectHorizontalDragGestures(
-                        onDragStart = {
-                            drag = 0f
-                            triggered = false
-                        },
-                        onDragCancel = {
-                            drag = 0f
-                            triggered = false
-                        },
-                        onDragEnd = {
-                            drag = 0f
-                            triggered = false
-                        },
-                        onHorizontalDrag = { change, amount ->
-                            change.consume()
-                            if (!triggered) {
-                                drag += amount
-                                when {
-                                    drag >= swipeThreshold -> {
-                                        triggered = true
-                                        if (!currentSwipeHomePageRight()) {
-                                            currentExecuteGestureAction(
-                                                currentGesturePreferences.swipeRightAction,
-                                            )
+                .then(
+                    if (primaryHomeShouldHandleHorizontalPaging(contentOnly)) {
+                        Modifier.pointerInput(swipeThreshold) {
+                            var drag = 0f
+                            var triggered = false
+                            detectHorizontalDragGestures(
+                                onDragStart = {
+                                    drag = 0f
+                                    triggered = false
+                                },
+                                onDragCancel = {
+                                    drag = 0f
+                                    triggered = false
+                                },
+                                onDragEnd = {
+                                    drag = 0f
+                                    triggered = false
+                                },
+                                onHorizontalDrag = { change, amount ->
+                                    change.consume()
+                                    if (!triggered) {
+                                        drag += amount
+                                        when {
+                                            drag >= swipeThreshold -> {
+                                                triggered = true
+                                                if (!currentSwipeHomePageRight()) {
+                                                    currentExecuteGestureAction(
+                                                        currentGesturePreferences.swipeRightAction,
+                                                    )
+                                                }
+                                            }
+                                            drag <= -swipeThreshold -> {
+                                                triggered = true
+                                                if (!currentSwipeHomePageLeft()) {
+                                                    currentExecuteGestureAction(
+                                                        currentGesturePreferences.swipeLeftAction,
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
-                                    drag <= -swipeThreshold -> {
-                                        triggered = true
-                                        if (!currentSwipeHomePageLeft()) {
-                                            currentExecuteGestureAction(
-                                                currentGesturePreferences.swipeLeftAction,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                    )
-                },
+                                },
+                            )
+                        }
+                    } else {
+                        Modifier
+                    },
+                ),
         )
 
         if (wallpaperShadeAlpha > 0f) {
