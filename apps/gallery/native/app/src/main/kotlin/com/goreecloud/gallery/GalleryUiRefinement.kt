@@ -23,7 +23,7 @@ import java.util.WeakHashMap
  * GalleryActivity and RecycleBinActivity retain all navigation/media authority. This helper only
  * refines already-rendered first-party controls. It never changes Android permissions, media scope,
  * mutation authority, destination semantics, or Activity-owned navigation accessibility identity.
- * Repeated layout work is intentionally bounded to direct bottom/viewer chrome plus the four
+ * Repeated layout work is intentionally bounded to direct bottom/viewer chrome plus the five
  * primary navigation controls; large media grids are not repeatedly traversed.
  */
 object GalleryUiRefinement {
@@ -38,6 +38,7 @@ object GalleryUiRefinement {
         "Photos" to R.drawable.ic_gallery_nav_photos,
         "Albums" to R.drawable.ic_gallery_nav_albums,
         "Videos" to R.drawable.ic_gallery_nav_videos,
+        "Trash" to R.drawable.ic_gallery_nav_trash,
         "Settings" to R.drawable.ic_gallery_nav_settings,
     )
 
@@ -47,11 +48,12 @@ object GalleryUiRefinement {
         "Change Gallery sort order",
         "Close search",
         "Gallery media access action",
-        "Back to GoreeCloud Gallery",
-        "Refresh Recycle Bin",
+        "Refresh Trash",
     )
 
     private val primaryPersistentControlDescriptions = setOf(
+        "Search the current Gallery destination",
+        "Change Gallery sort order",
         "Gallery media access action",
     )
 
@@ -59,11 +61,11 @@ object GalleryUiRefinement {
         "Select all currently loaded trashed media",
         "Restore selected media through Android confirmation",
         "Permanently delete selected media through Android confirmation",
-        "Clear Recycle Bin selection",
+        "Clear Trash selection",
     )
 
     private val recycleBinViewerDescriptions = setOf(
-        "Close Recycle Bin viewer",
+        "Close Trash viewer",
         "Previous trashed media",
         "Next trashed media",
         "Restore this media through Android confirmation",
@@ -75,9 +77,6 @@ object GalleryUiRefinement {
         "Permanently delete selected media through Android confirmation",
         "Permanently delete this media through Android confirmation",
     )
-
-    private val albumTileDescription = Regex("^.+, (?:1 item|[0-9]+ items)$")
-    private val collectionSubtitle = Regex("^[0-9]+ collections?(?: · (?:Newest|Oldest) first)?$")
 
     fun install(activity: Activity) {
         if (
@@ -112,9 +111,11 @@ object GalleryUiRefinement {
         when (activity) {
             is GalleryActivity -> {
                 findNavigationCapsule(root)?.let { refineNavigation(activity, it) }
-                refineAlbumCollectionSubtitle(root)
             }
-            is RecycleBinActivity -> refineRecycleBinChrome(activity, root)
+            is RecycleBinActivity -> {
+                findNavigationCapsule(root)?.let { refineNavigation(activity, it) }
+                refineRecycleBinChrome(activity, root)
+            }
         }
     }
 
@@ -133,7 +134,7 @@ object GalleryUiRefinement {
         }
     }
 
-    private fun refineNavigation(activity: GalleryActivity, capsule: LinearLayout) {
+    private fun refineNavigation(activity: Activity, capsule: LinearLayout) {
         val capsuleMarker = "navigation-capsule-v3"
         if (capsule.getTag(R.id.gallery_navigation_surface_tag) != capsuleMarker) {
             // Keep the outer bar optically quieter than the selected item so state is not conveyed
@@ -187,39 +188,6 @@ object GalleryUiRefinement {
             }
             item.setTag(R.id.gallery_ui_refinement_tag, marker)
         }
-    }
-
-    /**
-     * The Recovery row is intentionally separate from Collections. GalleryActivity historically
-     * counted the Recycle Bin capability in the Albums subtitle even though it renders under the
-     * Recovery heading. Correct the rendered summary to match the collection tiles the user can see
-     * without changing MediaStore authority or album membership.
-     */
-    private fun refineAlbumCollectionSubtitle(root: FrameLayout) {
-        var collectionCount = 0
-        val subtitleCandidates = mutableListOf<TextView>()
-
-        walk(root) { view ->
-            if (
-                view is LinearLayout &&
-                view.orientation == LinearLayout.VERTICAL &&
-                view.isClickable &&
-                albumTileDescription.matches(view.contentDescription?.toString().orEmpty())
-            ) {
-                collectionCount += 1
-            }
-            if (view is TextView && collectionSubtitle.matches(view.text?.toString().orEmpty())) {
-                subtitleCandidates += view
-            }
-        }
-
-        if (subtitleCandidates.size != 1) return
-        val subtitle = subtitleCandidates.single()
-        val current = subtitle.text?.toString().orEmpty()
-        val sortSuffix = current.substringAfter(" · ", missingDelimiterValue = "")
-        val countLabel = if (collectionCount == 1) "1 collection" else "$collectionCount collections"
-        val corrected = if (sortSuffix.isBlank()) countLabel else "$countLabel · $sortSuffix"
-        if (current != corrected) subtitle.text = corrected
     }
 
     private fun findNavigationCapsule(root: FrameLayout): LinearLayout? {
@@ -298,7 +266,7 @@ object GalleryUiRefinement {
     }
 
     private fun refineRecycleBinViewerOverlay(activity: RecycleBinActivity, overlay: FrameLayout) {
-        if (!containsDescription(overlay, "Close Recycle Bin viewer")) return
+        if (!containsDescription(overlay, "Close Trash viewer")) return
 
         for (index in 0 until overlay.childCount) {
             val child = overlay.getChildAt(index)

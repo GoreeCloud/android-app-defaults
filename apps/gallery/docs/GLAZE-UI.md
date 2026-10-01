@@ -9,7 +9,7 @@ GoreeCloud Gallery is a GoreeCloud-maintained Android fork. Every Gallery-contro
 ## Conformance target
 
 - Target design system: **Glaze UI 1.6.0**
-- Canonical repository: `GoreeCloud/glaze-ui`
+- Canonical repository: `GoreeCloud/glaze`
 - Accepted Stable release source: `a7180679ea851389e0f3004515f9a25f420e716d`
 - Source qualification anchor: `c7509c79256b04b0aa67cb9dd0737d7588e0ae4a`
 - Stable runtime entrypoint: `js/glaze-v1.6.0.mjs`
@@ -84,6 +84,18 @@ Settings is a primary GoreeCloud-owned surface and receives an explicit Glaze UI
 
 The adaptive Android resource qualifiers are platform-native equivalents of Glaze UI's Compact/Medium/Expanded/Wide principle; they are not a claim that Android `sw600dp` and `sw840dp` exactly equal the web breakpoints.
 
+## Primary navigation alignment
+
+The October 1, 2026 Gallery mockup-alignment work establishes five persistent primary destinations: **Photos**, **Albums**, **Videos**, **Trash**, and **Settings**. Trash uses the same rounded Glaze navigation capsule and selected-state semantics as the other primary destinations while retaining Android MediaStore as the authoritative Trash state. Recovery is not presented as an Albums collection.
+
+The navigation shell must keep media dominant, preserve 48dp-or-larger actionable targets, expose selected state beyond color alone, remain usable at compact phone widths, and reserve a real viewport lane so media does not render beneath persistent navigation. Moving recovery into the Trash tab must not broaden media permission or mutation authority.
+
+Photos and Videos also expose two compact Glaze browse controls immediately below the search surface: **Group** cycles Day → Month → Year → None and **View** cycles Dense → Comfortable → Spacious. These controls update the same app-private presentation preferences used by Settings, do not re-query MediaStore, do not mutate media, and disappear during search and selection so the media canvas remains dominant.
+
+The refreshed **Videos** destination uses a mockup-aligned media-card hierarchy rather than the ordinary photo timeline grid: the first visible video receives a wide featured card, following items use responsive two-column phone / three-column wider-layout cards, and each video keeps a centered play affordance plus its bounded duration badge. Optional Screen recordings, Camera, and Favorites chips are rendered only when those categories can be derived from the already-authorized local snapshot or Gallery-local Favorites state; the interface must not imply unavailable People, Places, Documents, or other unimplemented smart collections.
+
+Photos retain the dense media-first grid but sparse dense-mode date groups use a three-column presentation lane so one- and two-item days do not look visually stranded inside a four-column grid.
+
 ## Browsing-surface integration
 
 The folder browser and opened-folder media grid are Gallery's highest-frequency surfaces and receive an explicit Glaze UI treatment in `gc.12`:
@@ -157,6 +169,8 @@ The following are release-significant GoreeCloud presentation decisions and must
 - the media viewer retains the gc.14 muted Glaze toolbar/action overlay and comfortable action targets without obscuring primary media or changing destructive-action behavior;
 - transient surfaces retain the gc.15 rounded Glaze dialog/popup treatment, semantic control accents, compact Settings grouping, and unchanged behavioral semantics;
 - sorting, grouping, and media-filter dialogs retain gc.16 content-driven height and scroll only when required by available space.
+- primary navigation retains the five-destination Photos / Albums / Videos / Trash / Settings structure, with Trash excluded from Albums collection counts.
+- Photos and Videos retain direct Group and View controls with deterministic preference cycling and 48dp-or-larger targets.
 
 Where an invariant can be represented as pure behavior, GoreeCloud-owned automated tests should protect it. Where Android framework rendering, accessibility services, device profiles, permissions, or media operations are required, the corresponding real-device gate remains mandatory.
 

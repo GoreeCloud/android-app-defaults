@@ -65,7 +65,7 @@ Filtering, sorting, search, selection, Favorites, and viewer navigation must rem
 ## Browsing and organization requirements
 
 The mature target experience includes:
-- direct Photos, Albums, Videos, and Settings navigation;
+- direct Photos, Albums, Videos, Trash, and Settings navigation;
 - dense media-first browsing;
 - useful date grouping such as Today and calendar dates;
 - bounded search over authorized local metadata;
@@ -74,7 +74,8 @@ The mature target experience includes:
 - user-controlled view density/layout where appropriate;
 - device-local Favorites;
 - hidden/excluded-media policy;
-- Recycle Bin/Trash;
+- a dedicated primary Trash destination backed by Android MediaStore Trash;
+- Recycle Bin/Trash recovery semantics;
 - organization actions that use Android-authorized provider boundaries; and
 - clear distinction between ordinary deletion, Trash, restore, and permanent deletion.
 
@@ -177,7 +178,7 @@ Authoritative `main` currently includes the first-party native Development capab
 - Android-authorized local image/video access;
 - bounded MediaStore reads;
 - local thumbnail browsing;
-- direct Photos/Albums/Videos/Settings navigation;
+- direct Photos/Albums/Videos/Trash/Settings navigation;
 - adaptive date-grouped grids;
 - album browsing;
 - local search;

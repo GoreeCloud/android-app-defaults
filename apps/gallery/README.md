@@ -43,7 +43,7 @@ The current native application-shell development line adds `native/app`, a first
 
 The native shell now pins the current Official Stable Glaze UI 1.6.0 source contract at accepted release source `a7180679ea851389e0f3004515f9a25f420e716d`, maps its presentation-only authority through platform controls, preserves a 48dp target floor and adaptive gutters, and uses no network-delivered UI resources. Downstream rendered/accessibility/device acceptance remains separate.
 
-These foundations do **not** yet constitute a released or Stable Gallery application. Image previews remain bounded, video preview is poster-only, and full-resolution viewing, playback, editing, sharing, destructive-operation acceptance, and broader album UX remain separate milestones. See [docs/native-mediastore-adapter.md](docs/native-mediastore-adapter.md) and [docs/native-android-app-shell.md](docs/native-android-app-shell.md).
+These foundations do **not** yet constitute a released or Stable Gallery application. The current first-party native line now includes bounded image viewing, native authorized video playback, a bounded photo editor, sharing, Android-authorized Trash/Delete/Restore, Move foundations, and the five-destination Photos / Albums / Videos / Trash / Settings shell. Full representative-device, accessibility, Glaze, recovery, signing, production, and Stable acceptance remain separate gates. See [docs/native-mediastore-adapter.md](docs/native-mediastore-adapter.md) and [docs/native-android-app-shell.md](docs/native-android-app-shell.md).
 
 ## Transitional reconstruction line
 

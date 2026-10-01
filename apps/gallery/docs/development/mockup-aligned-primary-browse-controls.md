@@ -1,0 +1,35 @@
+# Mockup-aligned primary browse controls — Development
+
+## Purpose
+
+This Development slice continues the October 1, 2026 GoreeCloud Gallery interface refresh without changing Android media authority.
+
+Photos and Videos now expose compact first-party Glaze controls directly below the search surface so common presentation changes do not require a trip to Settings.
+
+## Implemented behavior
+
+- **Group** cycles through Day → Month → Year → None.
+- **View** cycles through Dense → Comfortable → Spacious.
+- Both controls persist through the same app-private preferences already used by Settings.
+- Both controls use 48dp-or-larger touch targets.
+- The controls are hidden while search is open and while multi-select is active so contextual work keeps priority.
+- Changing either control re-renders only the already-authorized in-memory media presentation.
+
+## Authority boundary
+
+The controls are presentation-only. They do not:
+
+- issue a new MediaStore listing query;
+- broaden Android photo/video permission;
+- mutate photo or video files;
+- create filesystem authority;
+- contact GoreeCloud Photos or another network service; or
+- alter Trash, Restore, Delete, Move, or Share authority.
+
+Android MediaStore and the existing Gallery permission/mutation adapters remain authoritative.
+
+## Validation boundary
+
+Pure unit coverage locks deterministic control cycling and wraparound. Rendered acceptance verifies that the default Photos controls are visible, clickable, and at least 48dp high in the no-readable-media shell.
+
+Representative-device visual review, large-text/reflow behavior, TalkBack and switch-access review, compact-width polish, and complete Gallery Glaze application acceptance remain separate gates.
