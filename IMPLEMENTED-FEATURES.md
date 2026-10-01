@@ -2,7 +2,7 @@
 
 ## October 1, 2026 — Since mockup-driven Home UI candidate
 
-A new stacked Since Development candidate now implements the first Home-screen slice of the owner-supplied mockup. The candidate introduces the large Since hero and landscape treatment, rounded search surface, live local summary cards, richer tracker cards, a plus-labelled Add tracker action, and selected-state navigation polish while retaining the validated Dashboard search/sort and contextual-guidance behavior beneath it.
+A new stacked Since Development candidate now implements the first Home-screen slice of the owner-supplied mockup. The candidate introduces the large Since hero and landscape treatment, rounded search surface, live local summary cards, richer tracker cards with a privacy-safe generic tip strip, a plus-labelled Add tracker action, and selected-state navigation polish while retaining the validated Dashboard search/sort and contextual-guidance behavior beneath it.
 
 The summary values are derived from the existing local tracker/period state. Longest streak is calculated from persisted streak periods through the existing calendar-aware TimeEngine rather than a new counter or remote statistic. Tracker cards continue to use the persisted period start and current clock for elapsed presentation, preserve goal rendering, and do not mutate tracker data.
 
