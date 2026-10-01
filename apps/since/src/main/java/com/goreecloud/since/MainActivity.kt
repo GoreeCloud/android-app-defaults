@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.since.data.preferences.SincePreferencesRepository
 import com.goreecloud.since.data.preferences.ThemePreference
+import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.ui.SinceApp
 import com.goreecloud.since.ui.SinceSetupWizard
 import com.goreecloud.since.ui.theme.SinceTheme
@@ -31,6 +32,12 @@ class MainActivity : ComponentActivity() {
             val themePreference by preferencesRepository
                 .themePreference
                 .collectAsStateWithLifecycle(initialValue = ThemePreference.SYSTEM)
+            val defaultDisplayFormat by preferencesRepository
+                .defaultDisplayFormat
+                .collectAsStateWithLifecycle(initialValue = DisplayFormat.DAYS)
+            val showSeconds by preferencesRepository
+                .showSeconds
+                .collectAsStateWithLifecycle(initialValue = false)
             val onboardingComplete by preferencesRepository
                 .onboardingComplete
                 .collectAsStateWithLifecycle(initialValue = false)
