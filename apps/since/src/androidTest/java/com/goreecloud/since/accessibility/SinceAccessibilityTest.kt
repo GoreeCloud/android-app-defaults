@@ -204,7 +204,7 @@ class SinceAccessibilityTest {
             .assertIsDisplayed()
             .performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag("tracker-type-event").performScrollTo().performClick()
+        composeRule.onNodeWithTag("tracker-type-event", useUnmergedTree = true).performScrollTo().performClick()
 
         composeRule.onNodeWithTag("title-field").assertIsDisplayed()
         composeRule.onNodeWithTag("start-date-picker").performScrollTo().assertIsDisplayed()
