@@ -1,5 +1,10 @@
 # Android App Defaults — Planned Features
 
+## 2026-10-01 Since mockup-driven Home continuation
+
+The first owner-mockup Home implementation is now present on a stacked Development candidate above PR #131. Remaining work is evidence-driven refinement: run exact-head Android and rendered validation, correct any compact-width or RTL issues exposed by that evidence, complete representative-device accessibility/localization/form-factor acceptance, and continue the mockup upgrade across applicable Since surfaces without regressing established local-first behavior. The candidate does not alter the still-open restore/recovery, persistent Development signing, Glaze consumer-acceptance, Seal, or Anchor gates.
+
+
 ## 2026-09-30 Since dashboard-search continuation
 
 The active consolidated stacked candidate now covers the specified local Dashboard ordering set, accent-tolerant title/note search, persisted sort selection, compact populated-Dashboard spacing, and actionable-only contextual guidance. Remaining S08 work is limited to optional archived-item inclusion if intentionally enabled; representative-device accessibility/localization acceptance remains open.
