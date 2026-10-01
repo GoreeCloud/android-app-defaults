@@ -6803,6 +6803,7 @@ private fun DrawerAppsContent(
                                         showLabel = experiencePreferences.showDrawerLabels,
                                         compact = false,
                                         fixedGridGeometry = true,
+                                        pinnedInDrawer = app.workspaceKey() in pinnedAppKeys,
                                         onClick = { onLaunchApp(app) },
                                         onLongClick = { anchor -> onManageApp(app, anchor) },
                                         dragData = if (preferences.layoutLocked) null else {
