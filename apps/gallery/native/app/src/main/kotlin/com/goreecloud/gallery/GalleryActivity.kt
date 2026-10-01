@@ -1715,6 +1715,12 @@ class GalleryActivity : Activity() {
         }
     }
 
+    private fun isQuickAccessAlbum(album: AlbumPresentation): Boolean {
+        if (album.isFavorites) return true
+        val name = album.name.lowercase()
+        return "camera" in name || "screenshot" in name || "download" in name
+    }
+
     private fun albumTile(album: AlbumPresentation, generation: Int, tileWidth: Int): LinearLayout {
         val cornerDp = thumbnailCornerDp(ALBUM_CORNER_DP)
         val image = ImageView(this).apply {
