@@ -2,9 +2,9 @@
 
 ## October 1, 2026 — App Drawer favorites candidate
 
-The current stacked Development candidate adds device-local, profile-qualified App Drawer pinning. Application long-press actions can pin/unpin an app in Apps, pinned state is surfaced in the app context status and directly on pinned app tiles/rows, the drawer sort menu includes **Pinned first**, and a ★ control can show pinned apps only on the active User/Work page. Drawer sort selection is persisted locally across surface/process recreation. Pin filtering/sorting remains presentation-only and never mutates Home/Dock/folder placement or cross-profile identity.
+The current Development candidate, restacked directly on accepted main, adds device-local, profile-qualified App Drawer pinning. Application long-press actions can pin/unpin an app in Apps, pinned state is surfaced in the app context status and directly on pinned app tiles/rows, the drawer sort menu includes **Pinned first**, and a ★ control can show pinned apps only on the active User/Work page. Drawer sort selection is persisted locally across surface/process recreation. Pin filtering/sorting remains presentation-only and never mutates Home/Dock/folder placement or cross-profile identity.
 
-This candidate is not yet integrated into authoritative `main`; its evidence remains branch/PR-scoped until the runtime-gate parent and this exact feature head pass required validation.
+This candidate is not yet integrated into authoritative `main`; its evidence remains branch/PR-scoped until this exact feature head passes the required build, Android 16 runtime, transition-performance, and promotion gates.
 
 
 ## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
