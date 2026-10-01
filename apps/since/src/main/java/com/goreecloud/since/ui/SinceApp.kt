@@ -287,6 +287,7 @@ fun SinceApp(
         StreakHistoryScreen(
             aggregate = historyAggregate,
             clock = clock,
+            showSeconds = showSeconds,
             onBack = { historyTrackerId = null },
         )
         return
@@ -617,15 +618,17 @@ private fun Dashboard(
     innerPadding: PaddingValues,
     aggregates: List<TrackerAggregate>,
     clock: Clock,
+    showSeconds: Boolean,
     contextualHintsEnabled: Boolean,
     homeContextualHintDismissed: Boolean,
     onDismissHomeContextualHint: () -> Unit,
     onAddTracker: () -> Unit,
     onOpenTracker: (String) -> Unit,
 ) {
-    val dashboardTick by rememberMinuteTick(
+    val dashboardTick by rememberElapsedTick(
         clock = clock,
         key = "dashboard",
+        showSeconds = showSeconds,
     )
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var sortName by rememberSaveable { mutableStateOf(SinceDashboardSort.RECENT.name) }
@@ -722,6 +725,7 @@ private fun Dashboard(
                     aggregate = aggregate,
                     clock = clock,
                     tick = dashboardTick,
+                    showSeconds = showSeconds,
                     onClick = { onOpenTracker(aggregate.tracker.id) },
                 )
             }
@@ -819,6 +823,7 @@ private fun TrackerCard(
     aggregate: TrackerAggregate,
     clock: Clock,
     tick: Long,
+    showSeconds: Boolean,
     onClick: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
@@ -874,7 +879,7 @@ private fun TrackerCard(
                 style = MaterialTheme.typography.labelMedium,
             )
             Text(
-                text = elapsedSummary(elapsed),
+                text = elapsedSummary(elapsed, showSeconds),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.headlineSmall,
             )
@@ -939,6 +944,7 @@ private fun TrackerCard(
 private fun TrackerDetailsScreen(
     aggregate: TrackerAggregate,
     clock: Clock,
+    showSeconds: Boolean,
     updateFailed: Boolean,
     goalUpdateFailed: Boolean,
     resetFailed: Boolean,
@@ -956,9 +962,10 @@ private fun TrackerDetailsScreen(
     onRemoveGoal: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
-    val tick by rememberMinuteTick(
+    val tick by rememberElapsedTick(
         clock = clock,
         key = "details-" + aggregate.tracker.id,
+        showSeconds = showSeconds,
     )
     val elapsed = remember(aggregate, tick, clock) {
         TimeEngine(clock).elapsedSince(
@@ -1298,11 +1305,11 @@ private fun TrackerDetailsScreen(
                     )
                     DetailValueRow(
                         label = stringResource(R.string.current_streak_label),
-                        value = elapsedSummary(elapsed),
+                        value = elapsedSummary(elapsed, showSeconds),
                     )
                     DetailValueRow(
                         label = stringResource(R.string.longest_streak_label),
-                        value = longestElapsed?.let { elapsedSummary(it) }
+                        value = longestElapsed?.let { elapsedSummary(it, showSeconds) }
                             ?: stringResource(R.string.no_history_value),
                     )
                     DetailValueRow(
@@ -1504,6 +1511,7 @@ private fun DetailValueRow(
 private fun StreakHistoryScreen(
     aggregate: TrackerAggregate,
     clock: Clock,
+    showSeconds: Boolean,
     onBack: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
@@ -1651,7 +1659,7 @@ private fun StreakHistoryScreen(
                         }
                         DetailValueRow(
                             label = stringResource(R.string.history_duration),
-                            value = elapsedSummary(duration),
+                            value = elapsedSummary(duration, showSeconds),
                         )
                         period.resetReason?.let { reason ->
                             DetailValueRow(
@@ -2087,16 +2095,18 @@ private fun SectionCard(
 }
 
 @Composable
-private fun rememberMinuteTick(
+private fun rememberElapsedTick(
     clock: Clock,
     key: String,
-) = remember(clock, key) {
+    showSeconds: Boolean,
+) = remember(clock, key, showSeconds) {
     flow {
+        val intervalMs = if (showSeconds) 1_000L else 60_000L
         while (true) {
             val now = clock.millis()
             emit(now)
-            val untilNextMinute = 60_000L - (now % 60_000L)
-            delay(untilNextMinute.coerceIn(1_000L, 60_000L))
+            val untilNextTick = intervalMs - (now % intervalMs)
+            delay(untilNextTick.coerceIn(1_000L, intervalMs))
         }
     }
 }.collectAsStateWithLifecycle(initialValue = clock.millis())
@@ -2104,6 +2114,7 @@ private fun rememberMinuteTick(
 @Composable
 private fun elapsedSummary(
     elapsed: ElapsedResult,
+    showSeconds: Boolean,
 ): String = when (elapsed) {
     ElapsedResult.ClockInconsistency ->
         stringResource(R.string.clock_inconsistency)
@@ -2112,40 +2123,84 @@ private fun elapsedSummary(
         val breakdown = elapsed.breakdown
         when (breakdown.format) {
             DisplayFormat.DAYS ->
-                stringResource(
-                    R.string.elapsed_days_detail,
-                    breakdown.days,
-                    breakdown.hours,
-                    breakdown.minutes,
-                )
+                if (showSeconds) {
+                    stringResource(
+                        R.string.elapsed_days_detail_seconds,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                        breakdown.seconds,
+                    )
+                } else {
+                    stringResource(
+                        R.string.elapsed_days_detail,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                    )
+                }
 
             DisplayFormat.WEEKS ->
-                stringResource(
-                    R.string.elapsed_weeks_detail,
-                    breakdown.weeks,
-                    breakdown.days,
-                    breakdown.hours,
-                    breakdown.minutes,
-                )
+                if (showSeconds) {
+                    stringResource(
+                        R.string.elapsed_weeks_detail_seconds,
+                        breakdown.weeks,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                        breakdown.seconds,
+                    )
+                } else {
+                    stringResource(
+                        R.string.elapsed_weeks_detail,
+                        breakdown.weeks,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                    )
+                }
 
             DisplayFormat.MONTHS ->
-                stringResource(
-                    R.string.elapsed_months_detail,
-                    breakdown.months,
-                    breakdown.days,
-                    breakdown.hours,
-                    breakdown.minutes,
-                )
+                if (showSeconds) {
+                    stringResource(
+                        R.string.elapsed_months_detail_seconds,
+                        breakdown.months,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                        breakdown.seconds,
+                    )
+                } else {
+                    stringResource(
+                        R.string.elapsed_months_detail,
+                        breakdown.months,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                    )
+                }
 
             DisplayFormat.YEARS ->
-                stringResource(
-                    R.string.elapsed_years_detail,
-                    breakdown.years,
-                    breakdown.months,
-                    breakdown.days,
-                    breakdown.hours,
-                    breakdown.minutes,
-                )
+                if (showSeconds) {
+                    stringResource(
+                        R.string.elapsed_years_detail_seconds,
+                        breakdown.years,
+                        breakdown.months,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                        breakdown.seconds,
+                    )
+                } else {
+                    stringResource(
+                        R.string.elapsed_years_detail,
+                        breakdown.years,
+                        breakdown.months,
+                        breakdown.days,
+                        breakdown.hours,
+                        breakdown.minutes,
+                    )
+                }
         }
     }
 }
@@ -2249,6 +2304,7 @@ private fun TrackerTypeChooser(
 private fun CreateTrackerScreen(
     kind: TrackerKind,
     clock: Clock,
+    initialDisplayFormat: DisplayFormat,
     validationErrors: List<String>,
     saveFailed: Boolean,
     isSaving: Boolean,
@@ -2264,7 +2320,7 @@ private fun CreateTrackerScreen(
     var startZoneId by rememberSaveable(kind.name) { mutableStateOf(defaultZoneId) }
     var startInputErrors by remember { mutableStateOf(emptyList<String>()) }
     var displayFormatName by rememberSaveable(kind.name) {
-        mutableStateOf(DisplayFormat.DAYS.name)
+        mutableStateOf(initialDisplayFormat.name)
     }
     var goalEnabled by rememberSaveable(kind.name) { mutableStateOf(false) }
     var goalAmount by rememberSaveable(kind.name) { mutableStateOf("") }
