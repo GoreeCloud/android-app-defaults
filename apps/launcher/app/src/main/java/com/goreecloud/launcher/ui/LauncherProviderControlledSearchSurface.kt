@@ -100,6 +100,8 @@ import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPolicy
 import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionTab
 import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPresentation
 import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPresentationRepository
+import com.goreecloud.launcher.core.launcher.LauncherSearchHistoryRepository
+import com.goreecloud.launcher.core.launcher.LauncherSearchHistoryState
 import com.goreecloud.launcher.core.launcher.LauncherSearchProviderUserControlPolicy
 import com.goreecloud.launcher.core.launcher.LauncherSearchResult
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearch
@@ -141,6 +143,12 @@ internal fun LauncherProviderControlledSearchSurface(
     }
     val suggestionPresentation by searchAppearancePreferences.presentation.collectAsState(
         initial = LauncherSearchSuggestionPresentation.ICONS,
+    )
+    val searchHistoryRepository = remember(context.applicationContext) {
+        LauncherSearchHistoryRepository(context.applicationContext)
+    }
+    val searchHistory by searchHistoryRepository.state.collectAsState(
+        initial = LauncherSearchHistoryState(),
     )
     var query by rememberSaveable { mutableStateOf("") }
     var showSources by rememberSaveable { mutableStateOf(false) }
@@ -186,6 +194,11 @@ internal fun LauncherProviderControlledSearchSurface(
             }
             .take(LauncherSearchSuggestionPolicy.DEFAULT_LIMIT)
             .toList()
+    }
+
+    val recordExplicitQuery = {
+        searchHistoryRepository.recordQuery(query)
+        Unit
     }
 
     val dismissSearch = {
@@ -309,6 +322,11 @@ internal fun LauncherProviderControlledSearchSurface(
                 selected = suggestionPresentation,
                 onSelect = searchAppearancePreferences::setPresentation,
             )
+            LauncherSearchHistoryControl(
+                state = searchHistory,
+                onSetEnabled = { enabled -> searchHistoryRepository.setEnabled(enabled) },
+                onClear = searchHistoryRepository::clear,
+            )
             LauncherSearchSourceManager(
                 persisted = searchProviderPreferences,
                 controls = controls,
@@ -395,6 +413,13 @@ internal fun LauncherProviderControlledSearchSurface(
                         },
                     )
                     if (idleSearch) {
+                        if (searchHistory.enabled && searchHistory.recentQueries.isNotEmpty()) {
+                            LauncherRecentSearches(
+                                queries = searchHistory.recentQueries,
+                                onSelect = { recent -> query = recent },
+                                onClear = searchHistoryRepository::clear,
+                            )
+                        }
                         LauncherUniversalSearchSuggestions(
                             selectedTab = suggestionTab,
                             presentation = suggestionPresentation,
@@ -511,7 +536,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                                         LauncherGlazeSearchAppTile(
                                                             result = result,
                                                             action = action,
-                                                            onLaunch = { onLaunchApp(action.app) },
+                                                            onLaunch = {
+                                                                recordExplicitQuery()
+                                                                onLaunchApp(action.app)
+                                                            },
                                                             modifier = Modifier.weight(1f),
                                                         )
                                                     }
@@ -526,7 +554,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                     ) { result ->
                                         LauncherProviderSearchRow(result) {
                                             (result.action as? LaunchApplicationSearchAction)
-                                                ?.let { onLaunchApp(it.app) }
+                                                ?.let {
+                                                    recordExplicitQuery()
+                                                    onLaunchApp(it.app)
+                                                }
                                         }
                                     }
                                 } else if (section.category == LauncherSearchCategory.SHORTCUT) {
@@ -551,7 +582,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                             app = matchingApp,
                                             packageName = entry.key.first,
                                             shortcuts = entry.value.map { it.second },
-                                            onLaunchShortcut = onLaunchShortcut,
+                                            onLaunchShortcut = { action ->
+                                                recordExplicitQuery()
+                                                onLaunchShortcut(action)
+                                            },
                                         )
                                     }
                                     items(
@@ -560,7 +594,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                     ) { result ->
                                         LauncherProviderSearchRow(result) {
                                             (result.action as? LauncherLaunchShortcutSearchAction)
-                                                ?.let(onLaunchShortcut)
+                                                ?.let { action ->
+                                                    recordExplicitQuery()
+                                                    onLaunchShortcut(action)
+                                                }
                                         }
                                     }
                                 } else {
@@ -575,6 +612,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 providerControls = controls,
                                             ),
                                             onActivate = {
+                                                recordExplicitQuery()
                                                 when (val action = result.action) {
                                                     is LauncherLaunchShortcutSearchAction -> onLaunchShortcut(action)
                                                     is LauncherOpenUriSearchAction -> onOpenSearchUri(action)
@@ -583,7 +621,10 @@ internal fun LauncherProviderControlledSearchSurface(
                                                     else -> Unit
                                                 }
                                             },
-                                            onOpenSearchUri = onOpenSearchUri,
+                                            onOpenSearchUri = { action ->
+                                                recordExplicitQuery()
+                                                onOpenSearchUri(action)
+                                            },
                                         )
                                     }
                                 }
@@ -608,6 +649,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 query = query,
                                 apps = apps,
                                 onClick = {
+                                    recordExplicitQuery()
                                     onSearchWithConnectedProvider(provider.providerId, query)
                                 },
                             )
