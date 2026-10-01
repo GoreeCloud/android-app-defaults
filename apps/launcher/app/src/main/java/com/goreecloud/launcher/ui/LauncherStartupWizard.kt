@@ -285,6 +285,10 @@ fun LauncherStartupWizard(
                                 summary = "Open a folder and use Add apps at the end of its grid or from the folder menu. On Home, long-press a folder to move it to a free cell or release it at a page edge to move it to the adjacent Home page. Larger opened folders swipe across compact pages.",
                             )
                             WizardInfoCard(
+                                title = "Calculate without leaving Search",
+                                summary = "Type arithmetic like 2 + 2 or conversions like 10 km to mi. Calculator and conversion results stay local and can be tapped to copy.",
+                            )
+                            WizardInfoCard(
                                 title = "Connected Search is opt-in",
                                 summary = "Local Search stays local by default. Connected providers require explicit authorization; permission-scoped Drive folders can also be added through Files.",
                             )
