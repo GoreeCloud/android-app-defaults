@@ -624,6 +624,8 @@ private fun Dashboard(
     aggregates: List<TrackerAggregate>,
     clock: Clock,
     showSeconds: Boolean,
+    dashboardSort: DashboardSortPreference,
+    onDashboardSortChange: (DashboardSortPreference) -> Unit,
     contextualHintsEnabled: Boolean,
     homeContextualHintDismissed: Boolean,
     onDismissHomeContextualHint: () -> Unit,
@@ -636,10 +638,6 @@ private fun Dashboard(
         showSeconds = showSeconds,
     )
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var sortName by rememberSaveable { mutableStateOf(SinceDashboardSort.RECENT.name) }
-    val dashboardSort = runCatching {
-        SinceDashboardSort.valueOf(sortName)
-    }.getOrDefault(SinceDashboardSort.RECENT)
     val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
         SinceDashboardQuery.apply(
             aggregates = aggregates,
@@ -697,21 +695,10 @@ private fun Dashboard(
                         label = { Text(stringResource(R.string.dashboard_search)) },
                         singleLine = true,
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        FilterChip(
-                            selected = dashboardSort == SinceDashboardSort.RECENT,
-                            onClick = { sortName = SinceDashboardSort.RECENT.name },
-                            label = { Text(stringResource(R.string.dashboard_sort_recent)) },
-                        )
-                        FilterChip(
-                            selected = dashboardSort == SinceDashboardSort.TITLE,
-                            onClick = { sortName = SinceDashboardSort.TITLE.name },
-                            label = { Text(stringResource(R.string.dashboard_sort_name)) },
-                        )
-                    }
+                    DashboardSortControls(
+                        selected = dashboardSort,
+                        onSelect = onDashboardSortChange,
+                    )
                     if (visibleAggregates.isEmpty()) {
                         Text(
                             modifier = Modifier.testTag("dashboard-no-matches"),
@@ -768,6 +755,54 @@ private fun Dashboard(
                             Text(stringResource(R.string.dismiss_hint))
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardSortControls(
+    selected: DashboardSortPreference,
+    onSelect: (DashboardSortPreference) -> Unit,
+) {
+    val options = listOf(
+        DashboardSortPreference.MANUAL to R.string.dashboard_sort_manual,
+        DashboardSortPreference.TITLE to R.string.dashboard_sort_name,
+        DashboardSortPreference.NEWEST_START to R.string.dashboard_sort_newest_start,
+        DashboardSortPreference.OLDEST_START to R.string.dashboard_sort_oldest_start,
+        DashboardSortPreference.LONGEST_CURRENT to R.string.dashboard_sort_longest_current,
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        options.chunked(2).forEach { rowOptions ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                rowOptions.forEach { (preference, labelRes) ->
+                    FilterChip(
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("dashboard-sort-" + preference.name.lowercase()),
+                        selected = selected == preference,
+                        onClick = { onSelect(preference) },
+                        label = {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(labelRes),
+                                textAlign = TextAlign.Center,
+                            )
+                        },
+                    )
+                }
+                if (rowOptions.size == 1) {
+                    androidx.compose.foundation.layout.Spacer(
+                        modifier = Modifier.weight(1f),
+                    )
                 }
             }
         }
