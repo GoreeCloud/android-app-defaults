@@ -45,7 +45,7 @@ object GalleryUiRefinement {
     private val persistentControlDescriptions = setOf(
         "Back to Albums",
         "Search the current Gallery destination",
-        "Change Gallery sort order",
+        "View and sort options",
         "Close search",
         "Gallery media access action",
         "Refresh Trash",
@@ -122,8 +122,11 @@ object GalleryUiRefinement {
     private fun refinePersistentControls(activity: Activity, root: FrameLayout) {
         walk(root) { view ->
             val description = view.contentDescription?.toString() ?: return@walk
-            if (description !in persistentControlDescriptions) return@walk
-            val primary = description in primaryPersistentControlDescriptions
+            val presentationOptions =
+                description == "View and sort options" ||
+                    description.startsWith("View and sort options.")
+            if (description !in persistentControlDescriptions && !presentationOptions) return@walk
+            val primary = description in primaryPersistentControlDescriptions || presentationOptions
             styleControl(
                 activity = activity,
                 view = view,
