@@ -154,7 +154,7 @@ The Home settings area also includes local app-activity clearing, **Launcher hin
 
 ### Universal Search
 
-Choose **Permanent on Home** or **Gesture only**. Permanent mode keeps the Search GoreeCloud affordance visible; Gesture only removes the persistent Home bar. Search can still be assigned to any supported Home gesture under **Launcher settings → Gestures**.
+Choose **Permanent on Home** or **Gesture only**. Permanent mode keeps the Search with GoreeCloud… affordance visible; Gesture only removes the persistent Home bar. Search can still be assigned to any supported Home gesture under **Launcher settings → Gestures**.
 
 ### Apps screen
 
