@@ -62,12 +62,9 @@ The following controls have active behavior in the current Development candidate
 - **Rounded-square thumbnails:** toggles GoreeCloud rounded-square clipping for current media and album thumbnails.
 - **Move deleted items to Recycle Bin:** on Android 11+, controls whether the ordinary Gallery Delete action requests Android Trash/Recycling or Android-confirmed permanent deletion. It is enabled by default. Android owns the destructive confirmation surface in both modes.
 
-The following requested settings are present and persisted now, but their behavioral effect remains gated by unfinished capability work:
+The settings export/import envelope still preserves compatibility fields for unfinished GIF-animation and empty-folder-cleanup preferences, but the current Settings UI does not surface inactive toggles for behavior that is not implemented.
 
-- **Animate GIFs in thumbnails** — stored preference; animated thumbnail decoding is not yet enabled.
-- **Delete empty folders after deleting their content** — stored preference; automatic empty-folder cleanup is not enabled by the current Android-authorized Delete/Trash slice.
-
-**Password protect photos** is deliberately not implemented as a fake app-local password switch. The Settings row explains that Protected Photos requires a real secure-media implementation using supported Android/GoreeCloud authentication and protected storage, Privacy Shield consent/visibility policy, GoreeCloud Identity where applicable, and Wardveil trust/security boundaries. Until that work is implemented and accepted, the setting is shown as not yet available.
+**Protected Photos/password protection** remains intentionally absent from Settings until a real secure-media implementation exists using supported Android/GoreeCloud authentication and protected storage, Privacy Shield consent/visibility policy, GoreeCloud Identity where applicable, and Wardveil trust/security boundaries. Gallery does not present a fake password control as though protection were active.
 
 ## Historical screenshot restoration requirements
 
@@ -153,11 +150,11 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Trash / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and dedicated Trash candidate.
 - Physically validate the dedicated Trash destination on representative Android devices with disposable copied media, including five-tab navigation, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty Trash, provider failure, restart/process recreation, and retention/expiry refresh.
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
-- Refine multi-select from physical-device evidence and add approved contextual actions as their authorities become real; Move remains unavailable until its mutation path is implemented and validated.
-- Add richer grouping modes, view-density/layout controls, album creation/rename/reorder, and approved move/copy organization.
+- Refine multi-select and the implemented Android-authorized Move path from representative-device evidence, including existing-folder and Create & move flows, confirmation approve/cancel/deny behavior, recreation, mixed-media destinations, stale selection, and provider-failure handling.
+- Extend the already-implemented grouping and view-density model only where evidence supports it; continue album creation/rename/reorder and approved copy/organization work.
 - Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
 - Complete animated GIF thumbnail decoding before treating the saved GIF-animation preference as behaviorally active.
-- Complete approved first-party editing and approved metadata-editing workflows.
+- Complete representative-device fidelity/accessibility acceptance for the implemented first-party photo editor, and separately implement approved metadata-editing workflows.
 - Implement slideshow and other established local presentation actions where supported by historical Gallery evidence.
 - Expand contextual/overflow actions and Share/export acceptance beyond the current Android read-only share handoff where needed.
 - Complete secure Private/Protected Photos, hidden/excluded media policy, and password/device-credential protection through supported platform mechanisms.
