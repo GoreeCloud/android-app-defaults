@@ -105,6 +105,9 @@ import com.goreecloud.launcher.core.launcher.LauncherSearchResult
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearch
 import com.goreecloud.launcher.core.workspace.workspaceKey
 import com.goreecloud.launcher.ui.theme.GlazeMetrics
+import com.goreecloud.launcher.ui.theme.GlazeV16MaterialRole
+import com.goreecloud.launcher.ui.theme.GlazeV16PresentationPolicy
+import com.goreecloud.launcher.ui.theme.LocalGlazeV16PresentationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -136,6 +139,38 @@ internal fun LauncherProviderControlledSearchSurface(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val presentationContext = LocalGlazeV16PresentationContext.current
+    val searchPresentation = remember(presentationContext) {
+        GlazeV16PresentationPolicy.resolve(
+            requestedMaterial = GlazeV16MaterialRole.FUNCTIONAL_GLASS,
+            context = presentationContext,
+        )
+    }
+    val searchSurfaceAlpha = when (searchPresentation.materialRole) {
+        GlazeV16MaterialRole.SOLID -> 1.00f
+        GlazeV16MaterialRole.RAISED -> 0.97f
+        GlazeV16MaterialRole.FUNCTIONAL_GLASS -> 0.90f
+        GlazeV16MaterialRole.CLEAR_GLASS -> 0.82f
+        GlazeV16MaterialRole.CANVAS,
+        GlazeV16MaterialRole.OVERLAY -> 0.94f
+    }
+    val searchSurfaceColor = MaterialTheme.colorScheme.surface.copy(alpha = searchSurfaceAlpha)
+    val searchSurfaceOutline = MaterialTheme.colorScheme.onSurface.copy(
+        alpha = if (
+            searchPresentation.materialRole == GlazeV16MaterialRole.FUNCTIONAL_GLASS ||
+                searchPresentation.materialRole == GlazeV16MaterialRole.CLEAR_GLASS
+        ) {
+            0.11f
+        } else {
+            0.08f
+        },
+    )
+    val searchSurfaceElevation = when (searchPresentation.materialRole) {
+        GlazeV16MaterialRole.FUNCTIONAL_GLASS -> 8.dp
+        GlazeV16MaterialRole.CLEAR_GLASS -> 3.dp
+        GlazeV16MaterialRole.RAISED -> 4.dp
+        else -> 1.dp
+    }
     val searchAppearancePreferences = remember(context.applicationContext) {
         LauncherSearchSuggestionPresentationRepository(context.applicationContext)
     }
@@ -321,21 +356,74 @@ internal fun LauncherProviderControlledSearchSurface(
                 modifier = Modifier.weight(1f),
             )
         } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = GlazeMetrics.space1),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(
+                        "Universal Search",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        "Local first · connected sources are opt-in",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Surface(
+                    modifier = Modifier
+                        .heightIn(min = searchPresentation.minimumInteractionTarget),
+                    onClick = { showSources = true },
+                    shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                    ),
+                ) {
+                    Box(
+                        modifier = Modifier.padding(
+                            horizontal = GlazeMetrics.space3,
+                            vertical = GlazeMetrics.space1,
+                        ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "Sources",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+
             val idleSearch = query.isBlank()
             val searchContainerColor by animateColorAsState(
                 targetValue = if (idleSearch) {
-                    MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
+                    searchSurfaceColor
                 } else {
-                    MaterialTheme.colorScheme.surface.copy(alpha = 0.20f)
+                    MaterialTheme.colorScheme.surface.copy(
+                        alpha = (searchSurfaceAlpha - 0.06f).coerceAtLeast(0.76f),
+                    )
                 },
                 animationSpec = tween(durationMillis = 220),
                 label = "launcherSearchContainerColor",
             )
             val searchContainerOutline by animateColorAsState(
                 targetValue = if (idleSearch) {
-                    MaterialTheme.colorScheme.outlineVariant
+                    searchSurfaceOutline
                 } else {
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f)
+                    searchSurfaceOutline.copy(alpha = searchSurfaceOutline.alpha * 0.72f)
                 },
                 animationSpec = tween(durationMillis = 220),
                 label = "launcherSearchContainerOutline",
@@ -350,7 +438,7 @@ internal fun LauncherProviderControlledSearchSurface(
                 label = "launcherSearchContainerRadius",
             )
             val searchContainerElevation by animateDpAsState(
-                targetValue = if (idleSearch) 12.dp else 2.dp,
+                targetValue = if (idleSearch) searchSurfaceElevation else 2.dp,
                 animationSpec = tween(durationMillis = 220),
                 label = "launcherSearchContainerElevation",
             )
@@ -386,7 +474,7 @@ internal fun LauncherProviderControlledSearchSurface(
                         onValueChange = { query = it },
                         modifier = Modifier.fillMaxWidth(),
                         requestFocus = true,
-                        placeholder = "Search apps",
+                        placeholder = "Search this device",
                         inputTestTag = "launcher-universal-search-field",
                         trailingContent = {
                             LauncherUniversalSearchSettingsAction(
@@ -422,9 +510,9 @@ internal fun LauncherProviderControlledSearchSurface(
                 modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                     .testTag("launcher-glaze-search-panel"),
                 shape = RoundedCornerShape(GlazeMetrics.radius2ExtraLarge),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                shadowElevation = 12.dp,
+                color = searchSurfaceColor,
+                border = BorderStroke(1.dp, searchSurfaceOutline),
+                shadowElevation = searchSurfaceElevation,
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(GlazeMetrics.space2),
@@ -477,16 +565,61 @@ internal fun LauncherProviderControlledSearchSurface(
                             )
                         }
                     } else {
-                        val grouped = LauncherGlazeSearchGroups.group(results)
+                        val topResult = results.firstOrNull()
+                        val grouped = LauncherGlazeSearchGroups.group(results.drop(1))
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                                 .testTag("launcher-glaze-search-results"),
                             verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
                         ) {
+                            if (topResult != null) {
+                                item(key = "top-result-label") {
+                                    Text(
+                                        "Top result",
+                                        modifier = Modifier.fillMaxWidth().padding(
+                                            start = GlazeMetrics.space2,
+                                            top = GlazeMetrics.space1,
+                                            bottom = GlazeMetrics.space1,
+                                        ),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
+                                item(
+                                    key = "top-result:" +
+                                        topResult.providerId + ":" + topResult.resultId,
+                                ) {
+                                    LauncherGlazeSearchResult(
+                                        result = topResult,
+                                        sourceLabel =
+                                            LauncherGlazeSearchGroups.connectedSourceLabel(
+                                                result = topResult,
+                                                providerControls = controls,
+                                            ),
+                                        onActivate = {
+                                            when (val action = topResult.action) {
+                                                is LaunchApplicationSearchAction ->
+                                                    onLaunchApp(action.app)
+                                                is LauncherLaunchShortcutSearchAction ->
+                                                    onLaunchShortcut(action)
+                                                is LauncherOpenUriSearchAction ->
+                                                    onOpenSearchUri(action)
+                                                is LauncherOpenDocumentSearchAction ->
+                                                    onOpenDocument(action)
+                                                is LauncherNavigateSearchAction ->
+                                                    onNavigate(action.destination)
+                                                else -> Unit
+                                            }
+                                        },
+                                        onOpenSearchUri = onOpenSearchUri,
+                                    )
+                                }
+                            }
                             grouped.forEach { section ->
                                 item(key = "header:" + section.category.name) {
                                     Text(
-                                        section.title,
+                                        section.title + " (" + section.items.size + ")",
                                         modifier = Modifier.fillMaxWidth().padding(
                                             start = GlazeMetrics.space2,
                                             top = GlazeMetrics.space2,
@@ -1213,7 +1346,7 @@ internal object LauncherGlazeSearchGroups {
     private val order = listOf(
         LauncherSearchCategory.APPLICATION to "Apps",
         LauncherSearchCategory.SHORTCUT to "App shortcuts",
-        LauncherSearchCategory.CONTACT to "People",
+        LauncherSearchCategory.CONTACT to "Contacts",
         LauncherSearchCategory.CALL_HISTORY to "Recent calls",
         LauncherSearchCategory.MESSAGE to "Messages",
         LauncherSearchCategory.FILE to "Files",
