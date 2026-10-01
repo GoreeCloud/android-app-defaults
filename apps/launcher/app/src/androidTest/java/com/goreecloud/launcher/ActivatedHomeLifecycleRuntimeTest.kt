@@ -821,18 +821,19 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isEmpty(),
                 )
 
-                composeRule
-                    .onNodeWithTag(
-                        "launcher-app-drawer-gesture-surface",
-                        useUnmergedTree = true,
-                    )
-                    .performTouchInput {
-                        swipeDown(
-                            startY = top + 1f,
-                            endY = bottom - 1f,
-                            durationMillis = 400,
-                        )
-                    }
+                // The Drawer intentionally leaves composition as soon as its downward
+                // dismissal threshold is crossed. Inject this gesture at the Android input layer
+                // rather than keeping Compose's touch injector attached to a node that removes
+                // itself mid-gesture.
+                val displayMetrics = context.resources.displayMetrics
+                val swipeX = displayMetrics.widthPixels / 2
+                runShellCommand(
+                    "input swipe " +
+                        "$swipeX " +
+                        "${displayMetrics.heightPixels / 4} " +
+                        "$swipeX " +
+                        "${displayMetrics.heightPixels * 5 / 6} 400"
+                )
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
