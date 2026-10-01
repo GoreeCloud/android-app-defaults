@@ -401,6 +401,8 @@ class LauncherPreferencesRepository(
         val homeHintsDismissed = booleanPreferencesKey("home_hints_dismissed_v1")
         val homeLabelOverrides = stringPreferencesKey("home_label_overrides_v1")
         val hiddenHomeSuggestionKeys = stringSetPreferencesKey("hidden_home_suggestion_keys_v1")
+        val hiddenDrawerAppKeys = stringSetPreferencesKey("hidden_drawer_app_keys_v1")
+        val pinnedDrawerAppKeys = stringSetPreferencesKey("pinned_drawer_app_keys_v1")
         val portableRestoreJournal = stringPreferencesKey("portable_restore_journal_v1")
     }
 
@@ -431,6 +433,37 @@ class LauncherPreferencesRepository(
                 .orEmpty()
                 .filterNot(String::isBlank)
                 .toSet()
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Exact profile-qualified apps hidden only from Apps/Drawer presentation.
+     *
+     * This does not remove applications from LauncherApps inventory, Search, Home, Dock, folders,
+     * or Android. It intentionally remains outside strict portable-preference v1.
+     */
+    val hiddenDrawerAppKeys: Flow<Set<String>> = dataStore.data
+        .map { values ->
+            values[Keys.hiddenDrawerAppKeys]
+                .orEmpty()
+                .filterNot(String::isBlank)
+                .toSet()
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Exact profile-qualified apps promoted ahead of ordinary Drawer ordering.
+     *
+     * Hidden state wins defensively if stale persisted state ever contains the same key in both
+     * sets. This state intentionally remains outside strict portable-preference v1.
+     */
+    val pinnedDrawerAppKeys: Flow<Set<String>> = dataStore.data
+        .map { values ->
+            val hidden = values[Keys.hiddenDrawerAppKeys].orEmpty()
+            LauncherDrawerAppOrganizationPolicy.normalizedPinnedKeys(
+                hiddenKeys = hidden,
+                pinnedKeys = values[Keys.pinnedDrawerAppKeys].orEmpty(),
+            )
         }
         .distinctUntilChanged()
 
@@ -557,6 +590,48 @@ class LauncherPreferencesRepository(
         scope.launch {
             dataStore.edit { values ->
                 values[Keys.drawerLayoutMode] = mode.storageValue
+            }
+        }
+    }
+
+    fun setDrawerAppHidden(appKey: String, hidden: Boolean) {
+        val normalizedKey = appKey.trim()
+        if (normalizedKey.isEmpty()) return
+        scope.launch {
+            dataStore.edit { values ->
+                val hiddenKeys = values[Keys.hiddenDrawerAppKeys].orEmpty().toMutableSet()
+                val pinnedKeys = values[Keys.pinnedDrawerAppKeys].orEmpty().toMutableSet()
+                if (hidden) {
+                    hiddenKeys += normalizedKey
+                    pinnedKeys -= normalizedKey
+                } else {
+                    hiddenKeys -= normalizedKey
+                }
+                if (hiddenKeys.isEmpty()) values.remove(Keys.hiddenDrawerAppKeys)
+                else values[Keys.hiddenDrawerAppKeys] = hiddenKeys
+                if (pinnedKeys.isEmpty()) values.remove(Keys.pinnedDrawerAppKeys)
+                else values[Keys.pinnedDrawerAppKeys] = pinnedKeys
+            }
+        }
+    }
+
+    fun setDrawerAppPinned(appKey: String, pinned: Boolean) {
+        val normalizedKey = appKey.trim()
+        if (normalizedKey.isEmpty()) return
+        scope.launch {
+            dataStore.edit { values ->
+                val hiddenKeys = values[Keys.hiddenDrawerAppKeys].orEmpty().toMutableSet()
+                val pinnedKeys = values[Keys.pinnedDrawerAppKeys].orEmpty().toMutableSet()
+                if (pinned) {
+                    hiddenKeys -= normalizedKey
+                    pinnedKeys += normalizedKey
+                } else {
+                    pinnedKeys -= normalizedKey
+                }
+                if (hiddenKeys.isEmpty()) values.remove(Keys.hiddenDrawerAppKeys)
+                else values[Keys.hiddenDrawerAppKeys] = hiddenKeys
+                if (pinnedKeys.isEmpty()) values.remove(Keys.pinnedDrawerAppKeys)
+                else values[Keys.pinnedDrawerAppKeys] = pinnedKeys
             }
         }
     }
