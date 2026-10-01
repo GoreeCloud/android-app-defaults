@@ -4,7 +4,7 @@
 
 - Began implementing the owner-supplied GoreeCloud Since Home mockup on the active stacked Since Development line.
 - Added a large Since hero header with a lightweight in-app Glaze landscape illustration, rounded search treatment, and a three-card summary for total trackers, active streaks, and longest streak.
-- Refreshed tracker cards with a leading identity tile, localized started timestamp, tracker-kind badge, stronger elapsed-time hierarchy, detail chevron, preserved goal information, and a compact note/tip strip.
+- Refreshed tracker cards with a leading identity tile, localized started timestamp, tracker-kind badge, stronger elapsed-time hierarchy, detail chevron, preserved goal information, and a privacy-safe generic tip strip that does not surface tracker note text on Home.
 - Refined the Home floating action to the mockup's plus + **Add tracker** treatment and polished selected/unselected bottom-navigation presentation.
 - Preserved all five existing local Dashboard sort modes, local-only search, contextual guidance, timestamp-derived elapsed calculations, and current navigation behavior rather than removing validated functionality solely to match the static mockup.
 
