@@ -118,7 +118,7 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
         composeRule.onNodeWithText("Privacy").assertIsDisplayed()
         composeRule.onNodeWithText("Security").assertIsDisplayed()
 
