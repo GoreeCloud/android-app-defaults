@@ -72,13 +72,13 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-settings").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
-        composeRule.onNodeWithText("Months").assertHasClickAction().performClick()
-        composeRule.onNodeWithTag("settings-show-seconds").assertHasClickAction().performClick()
+        composeRule.onNodeWithText("Months").performScrollTo().assertHasClickAction().performClick()
+        composeRule.onNodeWithTag("settings-show-seconds").performScrollTo().assertHasClickAction().performClick()
         composeRule.runOnIdle {
             assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
             assertTrue(showSeconds)
         }
-        composeRule.onNodeWithTag("theme-dark").assertHasClickAction().performClick()
+        composeRule.onNodeWithTag("theme-dark").performScrollTo().assertHasClickAction().performClick()
 
         composeRule.runOnIdle {
             assertEquals(ThemePreference.DARK, selectedTheme)
