@@ -64,7 +64,8 @@ class SinceStreakHistoryTest {
         ).assertIsDisplayed()
         composeRule.onNodeWithTag("reset-reason").performTextInput("Restarted plan")
         composeRule.onNodeWithTag("reset-note").performTextInput("Private reflection")
-        composeRule.onNodeWithTag("confirm-reset-streak").performClick()
+        composeRule.onNodeWithTag("review-reset-streak").performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
 
         composeRule.runOnIdle {
