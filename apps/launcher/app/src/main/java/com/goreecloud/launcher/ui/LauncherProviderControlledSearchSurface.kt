@@ -75,6 +75,7 @@ import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherContactsSearchProvider
 import com.goreecloud.launcher.core.launcher.LauncherCallHistorySearchProvider
+import com.goreecloud.launcher.core.launcher.LauncherCopyTextSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherFilesSearchProvider
 import com.goreecloud.launcher.core.launcher.LauncherGoogleDriveAuthorizationState
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
@@ -128,6 +129,7 @@ internal fun LauncherProviderControlledSearchSurface(
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
     onOpenSearchUri: (LauncherOpenUriSearchAction) -> Unit,
+    onCopyText: (LauncherCopyTextSearchAction) -> Unit,
     onOpenDocument: (LauncherOpenDocumentSearchAction) -> Unit,
     onSearchWithConnectedProvider: (String, String) -> Unit,
     onNavigate: (LauncherSearchDestination) -> Unit,
@@ -578,6 +580,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 when (val action = result.action) {
                                                     is LauncherLaunchShortcutSearchAction -> onLaunchShortcut(action)
                                                     is LauncherOpenUriSearchAction -> onOpenSearchUri(action)
+                                                    is LauncherCopyTextSearchAction -> onCopyText(action)
                                                     is LauncherOpenDocumentSearchAction -> onOpenDocument(action)
                                                     is LauncherNavigateSearchAction -> onNavigate(action.destination)
                                                     else -> Unit
@@ -1217,6 +1220,7 @@ internal object LauncherGlazeSearchGroups {
         LauncherSearchCategory.CALL_HISTORY to "Recent calls",
         LauncherSearchCategory.MESSAGE to "Messages",
         LauncherSearchCategory.FILE to "Files",
+        LauncherSearchCategory.UTILITY to "Calculator & conversions",
         LauncherSearchCategory.ACTION to "Actions",
         LauncherSearchCategory.SETTING to "Settings",
         LauncherSearchCategory.CONNECTED_SOURCE to "Connected sources",
