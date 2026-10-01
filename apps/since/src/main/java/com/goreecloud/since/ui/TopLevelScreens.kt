@@ -337,6 +337,24 @@ internal fun SettingsScreen(
         }
 
         item {
+            SettingsSection(title = stringResourceCompat(R.string.settings_general)) {
+                Text(
+                    text = stringResourceCompat(R.string.settings_dashboard_sort),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = stringResourceCompat(R.string.settings_dashboard_sort_supporting),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                DashboardSortControls(
+                    selected = dashboardSort,
+                    onSelect = onDashboardSortChange,
+                )
+            }
+        }
+
+        item {
             SettingsSection(title = stringResourceCompat(R.string.settings_appearance)) {
                 FormatSelector(
                     title = stringResourceCompat(R.string.settings_default_display_format),
