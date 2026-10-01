@@ -1352,6 +1352,13 @@ class GalleryActivity : Activity() {
             )
         }
 
+    private fun videoFilterIcon(filter: GalleryVideoFilter): Int = when (filter) {
+        GalleryVideoFilter.ALL -> R.drawable.ic_gallery_nav_videos
+        GalleryVideoFilter.SCREEN_RECORDINGS -> R.drawable.ic_gallery_nav_videos
+        GalleryVideoFilter.CAMERA -> R.drawable.ic_gallery_filter_camera
+        GalleryVideoFilter.FAVORITES -> R.drawable.ic_gallery_filter_favorite
+    }
+
     private fun videoFilterChip(filter: GalleryVideoFilter): TextView {
         val selected = filter == videoFilter
         return TextView(this).apply {
@@ -1361,7 +1368,11 @@ class GalleryActivity : Activity() {
             setPadding(dp(14), 0, dp(14), 0)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
             setTypeface(typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
-            setTextColor(if (selected) accentColor() else primaryTextColor())
+            val foreground = if (selected) accentColor() else primaryTextColor()
+            setTextColor(foreground)
+            setCompoundDrawablesWithIntrinsicBounds(videoFilterIcon(filter), 0, 0, 0)
+            compoundDrawablePadding = dp(6)
+            compoundDrawables.forEach { drawable -> drawable?.setTint(foreground) }
             background = if (selected) {
                 GalleryGlazeSurfaces.drawable(
                     context,
