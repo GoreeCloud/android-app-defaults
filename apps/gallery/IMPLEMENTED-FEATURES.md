@@ -61,7 +61,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Direct Photos, Albums, Videos, and Settings navigation.
 - Adaptive Photos and Videos grids grouped by Today, Yesterday, and calendar date.
 - Newest/Oldest ordering over the current authorized snapshot.
-- Local search over authorized display names and album names.
+- Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
 - Album browsing with covers, names, counts, adaptive layout, and bounded album-detail browsing.
 
 ### Favorites, viewer, selection, and sharing
