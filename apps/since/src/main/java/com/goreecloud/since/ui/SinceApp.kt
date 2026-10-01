@@ -2751,6 +2751,9 @@ private fun TrackerTypeChooser(
         },
         text = {
             Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .testTag("tracker-type-list"),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Surface(
