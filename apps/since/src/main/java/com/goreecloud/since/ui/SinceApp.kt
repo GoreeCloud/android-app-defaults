@@ -762,7 +762,7 @@ private fun Dashboard(
 }
 
 @Composable
-private fun DashboardSortControls(
+internal fun DashboardSortControls(
     selected: DashboardSortPreference,
     onSelect: (DashboardSortPreference) -> Unit,
 ) {
