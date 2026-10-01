@@ -70,6 +70,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -1189,6 +1190,8 @@ private fun TrackerCard(
     onClick: () -> Unit,
 ) {
     val currentPeriod = aggregate.periods.single { it.endEpochMs == null }
+    val compactWidth = LocalConfiguration.current.screenWidthDp < 360
+    val floatingActionSafeEnd = if (compactWidth) 92.dp else 0.dp
     val elapsed = remember(aggregate, tick, clock) {
         TimeEngine(clock).elapsedSince(
             startEpochMs = currentPeriod.startEpochMs,
@@ -1229,23 +1232,27 @@ private fun TrackerCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = floatingActionSafeEnd),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Surface(
-                    modifier = Modifier.size(58.dp),
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            modifier = Modifier.clearAndSetSemantics {},
-                            text = if (aggregate.tracker.kind == TrackerKind.STREAK) "↟" else "◇",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
+                if (!compactWidth) {
+                    Surface(
+                        modifier = Modifier.size(58.dp),
+                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                modifier = Modifier.clearAndSetSemantics {},
+                                text = if (aggregate.tracker.kind == TrackerKind.STREAK) "↟" else "◇",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
 
@@ -1267,19 +1274,29 @@ private fun TrackerCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (compactWidth) {
+                        Text(
+                            text = trackerKindLabel(aggregate.tracker.kind),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
                 }
 
-                Surface(
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                ) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        text = trackerKindLabel(aggregate.tracker.kind),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                if (!compactWidth) {
+                    Surface(
+                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            text = trackerKindLabel(aggregate.tracker.kind),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
                 }
             }
 
