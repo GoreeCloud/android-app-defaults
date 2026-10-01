@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
+import com.goreecloud.since.data.preferences.DashboardSortPreference
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Goal
@@ -49,6 +50,7 @@ class SinceTopLevelNavigationTest {
         var selectedTheme = ThemePreference.SYSTEM
         var defaultDisplayFormat by mutableStateOf(DisplayFormat.DAYS)
         var showSeconds by mutableStateOf(false)
+        var dashboardSort by mutableStateOf(DashboardSortPreference.MANUAL)
         var contextualHintsEnabled by mutableStateOf(true)
         var replayRequested = false
 
@@ -63,6 +65,8 @@ class SinceTopLevelNavigationTest {
                     onDefaultDisplayFormatChange = { defaultDisplayFormat = it },
                     showSeconds = showSeconds,
                     onShowSecondsChange = { showSeconds = it },
+                    dashboardSort = dashboardSort,
+                    onDashboardSortChange = { dashboardSort = it },
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
                     onReplaySetup = { replayRequested = true },
@@ -78,13 +82,20 @@ class SinceTopLevelNavigationTest {
             assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
             assertTrue(showSeconds)
         }
+        composeRule.onNodeWithTag("dashboard-sort-longest_current")
+            .performScrollTo()
+            .assertHasClickAction()
+            .performClick()
+        composeRule.runOnIdle {
+            assertEquals(DashboardSortPreference.LONGEST_CURRENT, dashboardSort)
+        }
         composeRule.onNodeWithTag("theme-dark").performScrollTo().assertHasClickAction().performClick()
 
         composeRule.runOnIdle {
             assertEquals(ThemePreference.DARK, selectedTheme)
         }
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
         composeRule.onNodeWithTag("settings-export-data")
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -107,14 +118,14 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
         composeRule.onNodeWithText("Privacy").assertIsDisplayed()
         composeRule.onNodeWithText("Security").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(5)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
         composeRule.onNodeWithTag("settings-contextual-hints")
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -204,7 +215,7 @@ class SinceTopLevelNavigationTest {
             .performClick()
 
         composeRule.onNodeWithTag("nav-settings").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("archived-tracker-tracker-top-level").assertIsDisplayed()
         composeRule.onNodeWithTag("restore-tracker-tracker-top-level")
             .assertHasClickAction()
@@ -237,7 +248,7 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("confirm-archive-tracker").performClick()
 
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
         composeRule.onNodeWithTag("delete-archived-tracker-tracker-top-level")
             .assertHasClickAction()
             .performClick()
@@ -306,7 +317,7 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("home-contextual-hint").assertIsDisplayed()
         composeRule.onNodeWithTag("nav-settings").performClick()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
         composeRule.onNodeWithTag("settings-contextual-hints").performClick()
         composeRule.onNodeWithTag("nav-home").performClick()
         assertTrue(composeRule.onAllNodesWithTag("home-contextual-hint").fetchSemanticsNodes().isEmpty())
