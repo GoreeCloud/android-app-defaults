@@ -1,5 +1,14 @@
 # GoreeCloud Gallery Changelogs
 
+## September 29, 2026 — bounded authorized local search reconciliation
+
+- Reconciled still-required behavior from legacy Gallery PRs #42 and #43 into the monorepo Development line.
+- Restored one bounded core search contract over the already-authorized visible media snapshot, with tokenized case-insensitive matching across display name, album name, MIME type, and image/video kind.
+- Routed Photos, Videos, Favorites, opened albums, and album collection search through that shared core contract instead of maintaining a separate activity-local predicate.
+- Search does not issue a new MediaStore listing query, request broader Android media permission, contact a network/cloud service, or create query-history persistence.
+- This reconciliation is Development source work only and does not establish representative-device, accessibility, Glaze UI, platform-system, release, or Stable acceptance.
+
+
 ## September 29, 2026 — persistent local sort order candidate
 - Persisted **Newest first / Oldest first** instead of resetting the local browsing order on process launch.
 - The existing header sort control now writes the app-private preference, and Settings exposes the same choice directly.
