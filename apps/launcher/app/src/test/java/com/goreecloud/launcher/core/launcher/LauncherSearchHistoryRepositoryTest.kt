@@ -71,6 +71,10 @@ class LauncherSearchHistoryRepositoryTest {
 
         assertEquals(queries, LauncherSearchHistoryCodec.decode(encoded))
         assertEquals(emptyList<String>(), LauncherSearchHistoryCodec.decode(encoded.dropLast(1)))
+        assertEquals(
+            emptyList<String>(),
+            LauncherSearchHistoryCodec.decode("2147483647:x"),
+        )
     }
 
     @Test
