@@ -1074,6 +1074,8 @@ class GalleryActivity : Activity() {
                 visibleItems.isNotEmpty()
         sortControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
         searchControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
+        videoFilterStripView?.visibility =
+            if (destination == GalleryDestination.VIDEOS) View.VISIBLE else View.GONE
         updateBrowseControls()
     }
 
