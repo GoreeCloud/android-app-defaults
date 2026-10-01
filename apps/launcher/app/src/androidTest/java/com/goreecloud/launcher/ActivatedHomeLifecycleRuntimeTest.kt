@@ -1427,6 +1427,24 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .fetchSemanticsNodes()
                         .isEmpty(),
                 )
+
+                // Leave the full-screen editor through its supported UI path before closing the
+                // ActivityScenario. Immediate Activity destruction while the Dialog composition is
+                // still settling can race Compose SlotTable disposal and turn test teardown into a
+                // process crash that is unrelated to the behavior under assertion.
+                composeRule
+                    .onNodeWithText("Done", useUnmergedTree = true)
+                    .performClick()
+                composeRule.waitUntil(timeoutMillis = 10_000) {
+                    composeRule
+                        .onAllNodesWithTag(
+                            "launcher-home-editor-fullscreen",
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isEmpty()
+                }
+                composeRule.waitForIdle()
                 Unit
             } finally {
                 scenario.close()
