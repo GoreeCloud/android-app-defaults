@@ -1,5 +1,15 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — mockup-aligned smart-filter iconography
+
+### Changed
+- Added compact semantic icons to Videos filter chips for All, Screen recordings, Camera, and Favorites.
+- Added matching semantic icons to Albums smart-access pills for recognized Favorites, Camera, Screenshots, Downloads, Screen recordings, and Videos shortcuts.
+- Icons inherit the same foreground tint as their labels, preserving light/dark Glaze contrast and keeping selected state communicated through both surface treatment and accessibility state.
+
+### Boundary
+This is presentation-only work. No new album inference, media permission, mutation, filesystem, account, network, cloud, or synchronization authority is introduced.
+
 ## October 1, 2026 — contextual card overflow actions
 
 ### Added
