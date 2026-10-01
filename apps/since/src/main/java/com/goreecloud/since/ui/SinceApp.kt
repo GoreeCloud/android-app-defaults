@@ -1188,16 +1188,13 @@ private fun TrackerCard(
                     .atZone(ZoneId.of(currentPeriod.startZoneId))
             )
     }
-    val tip = aggregate.tracker.note
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
-        ?: stringResource(
-            if (aggregate.tracker.kind == TrackerKind.STREAK) {
-                R.string.dashboard_tip_streak
-            } else {
-                R.string.dashboard_tip_event
-            }
-        )
+    val tip = stringResource(
+        if (aggregate.tracker.kind == TrackerKind.STREAK) {
+            R.string.dashboard_tip_streak
+        } else {
+            R.string.dashboard_tip_event
+        }
+    )
 
     Card(
         modifier = Modifier
