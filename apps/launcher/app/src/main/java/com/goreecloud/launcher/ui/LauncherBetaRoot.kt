@@ -1178,7 +1178,6 @@ fun LauncherBetaRoot(
                     }
                     Spacer(Modifier.height(2.dp))
                 }
-                }
             }
             LauncherSurfaceMode.SEARCH -> LauncherProviderControlledSearchSurface(
                 apps = apps,
