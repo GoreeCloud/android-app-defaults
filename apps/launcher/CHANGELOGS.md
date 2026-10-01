@@ -1,5 +1,16 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — restore monorepo Android 16 Launcher runtime gates
+
+A post-consolidation audit found that the migrated-app workflow still ran Launcher privacy/identity/UI/Room guards, JVM tests, lint, schema verification, and APK assembly, but no longer executed the source-controlled Launcher Android instrumentation suite or the existing transition-performance instrumentation.
+
+The current Development candidate restores two exact-head API 36 jobs in the monorepo: the complete unfiltered `connectedDebugAndroidTest` suite and the focused `LauncherTransitionPerformanceRuntimeTest` diagnostic. Both preserve the historically accepted immutable Android Emulator Runner revision, use KVM when available with software-acceleration fallback, and upload runtime/test evidence. The migrated-app required gate and protected promotion gate now require both jobs whenever Launcher changes.
+
+This correction does not retroactively upgrade earlier post-consolidation build-only workflow runs into Android runtime evidence. PR #121 merged the configured Home pager edge-action source as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`; the new edge-action Android test becomes accepted runtime evidence only when this restored exact-head runtime lane executes it successfully.
+
+**Acceptance boundary:** Development CI-governance candidate on authoritative main `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Emulator runtime and frame timing remain diagnostic; representative physical-device/default-HOME interaction, performance, power, accessibility, form-factor, recovery, signing, and lifecycle qualification remain open.
+
+
 ## October 1, 2026 — restore configured Home pager edge actions
 
 The unified Home `HorizontalPager` now observes outward horizontal gestures at its two outer boundaries without consuming pager input. A gesture that begins on the first page and moves right, or begins on the last page and moves left, dispatches the corresponding configured Launcher gesture action only after the existing 56 dp horizontal-dominance threshold.
@@ -8,7 +19,7 @@ The observer snapshots the starting page for the gesture, so a normal follow-fin
 
 Focused JVM coverage verifies first/right and last/left dispatch plus rejection of interior, inward, short, vertical, and single-page cases. Android 16 runtime coverage extends the existing real default-HOME multi-page flow by configuring Swipe right to Universal Search, swiping outward from Primary Home, requiring the real Search surface, and then returning HOME before continuing page/editor acceptance.
 
-**Acceptance boundary:** Development interaction-parity candidate based on authoritative main `e0c7bc787f8dab5a187127ea0819a5b7d80b5d19` (merged PR #118). Fresh exact-head migration provenance, Android validation/runtime CI, and protected-promotion evidence are required before integration. Representative-device gesture, frame-pacing, accessibility, large-text, and form-factor acceptance remain open.
+**Acceptance boundary:** PR #121 merged the edge-action source as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Its JVM/build evidence is retained, but post-consolidation monorepo CI was not executing Launcher Android instrumentation; PR #125 is the current runtime-gate restoration candidate. Representative-device gesture, frame-pacing, accessibility, large-text, and form-factor acceptance remain open.
 
 
 ## October 1, 2026 — unify Primary and secondary Home follow-finger paging
