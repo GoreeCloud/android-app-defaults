@@ -49,6 +49,7 @@ class SinceTopLevelNavigationTest {
         var selectedTheme = ThemePreference.SYSTEM
         var defaultDisplayFormat by mutableStateOf(DisplayFormat.DAYS)
         var showSeconds by mutableStateOf(false)
+        var confirmReset by mutableStateOf(true)
         var contextualHintsEnabled by mutableStateOf(true)
         var replayRequested = false
 
@@ -63,6 +64,8 @@ class SinceTopLevelNavigationTest {
                     onDefaultDisplayFormatChange = { defaultDisplayFormat = it },
                     showSeconds = showSeconds,
                     onShowSecondsChange = { showSeconds = it },
+                    confirmReset = confirmReset,
+                    onConfirmResetChange = { confirmReset = it },
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
                     onReplaySetup = { replayRequested = true },
@@ -72,11 +75,13 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-settings").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
+        composeRule.onNodeWithTag("settings-confirm-reset").assertHasClickAction().performClick()
         composeRule.onNodeWithText("Months").performScrollTo().assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-show-seconds").performScrollTo().assertHasClickAction().performClick()
         composeRule.runOnIdle {
             assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
             assertTrue(showSeconds)
+            assertFalse(confirmReset)
         }
         composeRule.onNodeWithTag("theme-dark").performScrollTo().assertHasClickAction().performClick()
 
@@ -84,7 +89,7 @@ class SinceTopLevelNavigationTest {
             assertEquals(ThemePreference.DARK, selectedTheme)
         }
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
         composeRule.onNodeWithTag("settings-export-data")
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -107,7 +112,7 @@ class SinceTopLevelNavigationTest {
             .assertIsDisplayed()
         composeRule.onNodeWithText("Done").performClick()
 
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(7)
         composeRule.onNodeWithText("Privacy").assertIsDisplayed()
         composeRule.onNodeWithText("Security").assertIsDisplayed()
 
