@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.goreecloud.since.BuildConfig
 import com.goreecloud.since.R
+import com.goreecloud.since.data.preferences.DashboardSortPreference
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
@@ -281,6 +282,8 @@ internal fun SettingsScreen(
     onDefaultDisplayFormatChange: (DisplayFormat) -> Unit,
     showSeconds: Boolean,
     onShowSecondsChange: (Boolean) -> Unit,
+    dashboardSort: DashboardSortPreference,
+    onDashboardSortChange: (DashboardSortPreference) -> Unit,
     archivedTrackers: List<TrackerAggregate>,
     restoringTrackerId: String?,
     restoreFailedTrackerId: String?,
