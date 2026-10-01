@@ -1,5 +1,18 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — App Drawer freshness filters Development candidate
+
+- Added transient **All / New / Updated** App Drawer filters.
+- New uses Android first-install time within a 30-day local window.
+- Updated uses last-update time within the same window and excludes near-equal initial-install timestamps.
+- Profile membership remains sourced from Android LauncherApps; freshness metadata never substitutes for User/Work/private-profile identity.
+- Missing metadata fails closed for New/Updated.
+- Folders remain in All and are omitted from app-only freshness-filtered views.
+- Metadata loads on app-inventory changes with no background polling or new permission.
+
+**Acceptance boundary:** source/JVM candidate on `feat/launcher-drawer-freshness-filters-20261001`; exact-head CI, restored Android 16 runtime, profile/package churn, accessibility, and representative-device acceptance remain required before integration.
+
+
 ## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
 
 - Authoritative Launcher development now lives in `GoreeCloud/android-app-defaults/apps/launcher/`; the standalone Launcher repository is migration history only.
