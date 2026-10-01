@@ -334,7 +334,7 @@ internal fun SettingsScreen(
         }
 
         item {
-            SettingsSection(title = stringResourceCompat(R.string.settings_general)) {
+            SettingsSection(title = stringResourceCompat(R.string.settings_appearance)) {
                 FormatSelector(
                     title = stringResourceCompat(R.string.settings_default_display_format),
                     supporting = stringResourceCompat(
@@ -380,11 +380,6 @@ internal fun SettingsScreen(
                         onCheckedChange = null,
                     )
                 }
-            }
-        }
-
-        item {
-            SettingsSection(title = stringResourceCompat(R.string.settings_appearance)) {
                 Text(
                     text = stringResourceCompat(R.string.settings_theme),
                     style = MaterialTheme.typography.titleMedium,
