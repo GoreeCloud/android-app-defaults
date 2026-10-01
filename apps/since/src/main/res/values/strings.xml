@@ -27,6 +27,9 @@
 
     <string name="settings_title">Settings</string>
     <string name="settings_summary">Appearance, data, privacy, security, guidance, and app information.</string>
+    <string name="settings_general">General</string>
+    <string name="settings_confirm_reset">Confirm streak resets</string>
+    <string name="settings_confirm_reset_supporting">Show one final confirmation after reviewing the reset time, reason, and note.</string>
     <string name="settings_default_display_format">Default display format</string>
     <string name="settings_default_display_format_supporting">Used when creating new trackers. Existing trackers keep their current format.</string>
     <string name="settings_show_seconds">Show seconds</string>
