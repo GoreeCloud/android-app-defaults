@@ -6,7 +6,7 @@ The active stacked Development candidate now carries the full specified local Da
 
 The candidate persists the selected Dashboard order through the existing Preferences DataStore using the specification-aligned `default_sort` key with a Manual default. It also implements the `confirm_reset` preference with a default-on General Settings switch. The Reset Streak editor always remains the place to choose reset time and optional reason/note. With confirmation enabled, a separate final history-preservation confirmation appears after validation; with confirmation disabled, only that final step is skipped.
 
-Automated candidate coverage includes deterministic JVM sorting/search tests, preference persistence across repository instances, Settings interaction, Arabic resources, and reset flows with confirmation enabled and disabled. Exact-head CI and representative-device acceptance remain separate evidence gates.
+Automated candidate coverage includes deterministic JVM sorting/search tests, preference persistence across repository instances, Settings interaction, Arabic resources, reset flows with confirmation enabled and disabled, Dashboard sort-state propagation, large-font sort reachability, RTL Settings reachability, and system-bar theme regression coverage. The Home contextual hint is now shown only when a real tracker exists and is placed before tracker cards so it does not compete with the Add tracker primary action. Exact-head CI and representative-device acceptance remain separate evidence gates.
 
 
 ## September 30, 2026 — Since display preferences candidate
