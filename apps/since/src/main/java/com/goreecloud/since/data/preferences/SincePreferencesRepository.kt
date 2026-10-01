@@ -20,6 +20,14 @@ enum class ThemePreference {
     DARK,
 }
 
+enum class DashboardSortPreference {
+    MANUAL,
+    TITLE,
+    NEWEST_START,
+    OLDEST_START,
+    LONGEST_CURRENT,
+}
+
 private val Context.sincePreferencesDataStore by preferencesDataStore(
     name = "since_preferences",
 )
@@ -30,6 +38,7 @@ class SincePreferencesRepository(
     private val themePreferenceKey = stringPreferencesKey("theme_preference")
     private val defaultDisplayFormatKey = stringPreferencesKey("default_display_format")
     private val showSecondsKey = booleanPreferencesKey("show_seconds")
+    private val dashboardSortKey = stringPreferencesKey("dashboard_sort")
     private val onboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
     private val onboardingStepKey = intPreferencesKey("onboarding_step")
     private val contextualHintsEnabledKey = booleanPreferencesKey("contextual_hints_enabled")
@@ -74,6 +83,16 @@ class SincePreferencesRepository(
         .map { values -> values[showSecondsKey] ?: true }
         .distinctUntilChanged()
 
+    val dashboardSort: Flow<DashboardSortPreference> = preferences
+        .map { values ->
+            values[dashboardSortKey]
+                ?.let { stored ->
+                    runCatching { DashboardSortPreference.valueOf(stored) }.getOrNull()
+                }
+                ?: DashboardSortPreference.MANUAL
+        }
+        .distinctUntilChanged()
+
     val onboardingComplete: Flow<Boolean> = preferences
         .map { values ->
             values[onboardingCompleteKey] ?: upgradedInstallationWithoutOnboardingState
@@ -111,6 +130,12 @@ class SincePreferencesRepository(
     suspend fun setShowSeconds(enabled: Boolean) {
         context.sincePreferencesDataStore.edit { values ->
             values[showSecondsKey] = enabled
+        }
+    }
+
+    suspend fun setDashboardSort(preference: DashboardSortPreference) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[dashboardSortKey] = preference.name
         }
     }
 
