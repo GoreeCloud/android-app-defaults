@@ -14,7 +14,7 @@ Still open after the shared editable-Dock candidate: place Primary plus secondar
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
 **Migration state:** **Mandatory monorepo consolidation is complete. The standalone repository is no longer an active development target; historical entries remain provenance only.**  
-**Current authoritative main:** `4cacb1af78bdd03c6df4a00e824983fc061ca411` after merged PR #116. Historical candidate sections below remain dated provenance and do not override the September 30 current-state checkpoint.  
+**Current authoritative main:** `89ff54e485220d8f408a237c2ed5e4b4da5c5098` after merged PR #117. Historical candidate sections below remain dated provenance and do not override the September 30 current-state checkpoint.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Purpose
