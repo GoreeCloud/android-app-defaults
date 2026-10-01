@@ -284,6 +284,9 @@ jobs:
             echo "kvm_available=false" >> "$GITHUB_OUTPUT"
             echo "::warning::KVM acceleration is unavailable; Launcher Android 16 instrumentation will use software acceleration."
           fi
+      - name: Validate Launcher runtime harness
+        shell: bash
+        run: bash -n scripts/run_android16_runtime.sh
       - name: Run complete Launcher Android 16 instrumentation suite
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         with:
@@ -292,18 +295,7 @@ jobs:
           arch: x86_64
           disable-animations: true
           disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
-          script: >-
-            bash -lc 'mkdir -p "$GITHUB_WORKSPACE/apps/launcher/ci-runtime";
-            set +e;
-            timeout --signal=TERM --kill-after=30s 20m gradle --project-dir "$GITHUB_WORKSPACE/apps/launcher" --no-daemon connectedDebugAndroidTest;
-            status=$?;
-            set -e;
-            if [ "$status" -ne 0 ]; then
-              adb logcat -d > "$GITHUB_WORKSPACE/apps/launcher/ci-runtime/logcat.txt" || true;
-              adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/apps/launcher/ci-runtime/activity.txt" || true;
-              adb shell dumpsys window windows > "$GITHUB_WORKSPACE/apps/launcher/ci-runtime/window.txt" || true;
-            fi;
-            exit "$status"'
+          script: bash "$GITHUB_WORKSPACE/apps/launcher/scripts/run_android16_runtime.sh"
       - name: Upload Launcher Android 16 test reports
         if: always()
         uses: actions/upload-artifact@v4
