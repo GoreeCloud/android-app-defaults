@@ -71,6 +71,7 @@ class GalleryActivity : Activity() {
     private lateinit var content: LinearLayout
     private lateinit var headerTitle: TextView
     private lateinit var headerSubtitle: TextView
+    private lateinit var brandMark: ImageView
     private lateinit var backControl: ImageView
     private lateinit var searchControl: ImageView
     private lateinit var sortControl: ImageView
@@ -455,6 +456,18 @@ class GalleryActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
             setPadding(0, dp(3), 0, 0)
         }
+
+        brandMark = ImageView(this).apply {
+            setImageResource(R.mipmap.ic_gallery_launcher)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        }
+        row.addView(
+            brandMark,
+            LinearLayout.LayoutParams(dp(40), dp(40)).apply {
+                marginEnd = dp(8)
+            },
+        )
 
         backControl = iconHeaderAction(R.drawable.ic_gallery_back, "Back to Albums") {
             if (inSelectionMode) {
@@ -867,6 +880,7 @@ class GalleryActivity : Activity() {
         if (!::headerTitle.isInitialized) return
 
         if (inSelectionMode) {
+            brandMark.visibility = View.GONE
             headerTitle.text = if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
             headerSubtitle.text = if (dragSelectionSession != null) {
                 "Drag across photos and videos to select quickly"
@@ -930,9 +944,10 @@ class GalleryActivity : Activity() {
             visibleItems.isEmpty() -> baseSubtitle
             else -> "$baseSubtitle · ${sortOrderLabel()}"
         }
-        backControl.visibility =
-            if (destination == GalleryDestination.ALBUMS && (openAlbumId != null || showingFavorites)) View.VISIBLE
-            else View.GONE
+        val showBack =
+            destination == GalleryDestination.ALBUMS && (openAlbumId != null || showingFavorites)
+        backControl.visibility = if (showBack) View.VISIBLE else View.GONE
+        brandMark.visibility = if (showBack) View.GONE else View.VISIBLE
         backControl.contentDescription = "Back to Albums"
         sortControl.contentDescription = "Sort order: ${sortOrderLabel()}. Double tap to change."
         val showMediaControls =
@@ -1239,7 +1254,7 @@ class GalleryActivity : Activity() {
                 }
 
                 groups.forEach { (label, groupItems) ->
-                    library.addView(sectionHeader(label))
+                    library.addView(timelineSectionHeader(label, groupItems.size))
                     renderMediaGrid(groupItems, items, generation, library)
                 }
             }
@@ -1363,6 +1378,14 @@ class GalleryActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.RAISED,
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
+            clipToOutline = true
+            elevation = dp(1).toFloat()
+            setPadding(dp(2), dp(2), dp(2), dp(8))
             isClickable = true
             isFocusable = true
             contentDescription = "${album.name}, ${itemCountLabel(album.count)}"
@@ -1382,7 +1405,7 @@ class GalleryActivity : Activity() {
             }
             addView(
                 image,
-                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, tileWidth),
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (tileWidth - dp(4)).coerceAtLeast(dp(96))),
             )
             addView(TextView(context).apply {
                 text = album.name
@@ -1390,14 +1413,14 @@ class GalleryActivity : Activity() {
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f)
                 setTypeface(typeface, Typeface.BOLD)
                 maxLines = 1
-                setPadding(dp(2), dp(7), dp(2), 0)
+                setPadding(dp(10), dp(8), dp(10), 0)
             })
             addView(TextView(context).apply {
                 text = itemCountLabel(album.count)
                 setTextColor(secondaryTextColor())
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
                 maxLines = 1
-                setPadding(dp(2), dp(1), dp(2), 0)
+                setPadding(dp(10), dp(2), dp(10), 0)
             })
         }
     }
@@ -4062,6 +4085,33 @@ class GalleryActivity : Activity() {
 
     private fun sortOrderLabel(): String =
         if (selectedSort == MediaSortOrder.NEWEST) "Newest first" else "Oldest first"
+
+    private fun timelineSectionHeader(label: String, count: Int): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        setPadding(dp(2), dp(16), dp(2), dp(7))
+
+        addView(
+            TextView(context).apply {
+                text = label
+                setTextColor(primaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                setTypeface(typeface, Typeface.BOLD)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            },
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
+        )
+        addView(
+            TextView(context).apply {
+                text = itemCountLabel(count)
+                setTextColor(secondaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+                gravity = Gravity.END
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            },
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT),
+        )
+    }
 
     private fun sectionHeader(label: String): TextView = TextView(this).apply {
         text = label
