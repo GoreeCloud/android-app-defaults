@@ -51,6 +51,7 @@ class SinceTopLevelNavigationTest {
         var defaultDisplayFormat by mutableStateOf(DisplayFormat.DAYS)
         var showSeconds by mutableStateOf(false)
         var dashboardSort by mutableStateOf(DashboardSortPreference.MANUAL)
+        var confirmReset by mutableStateOf(true)
         var contextualHintsEnabled by mutableStateOf(true)
         var replayRequested = false
 
@@ -67,6 +68,8 @@ class SinceTopLevelNavigationTest {
                     onShowSecondsChange = { showSeconds = it },
                     dashboardSort = dashboardSort,
                     onDashboardSortChange = { dashboardSort = it },
+                    confirmReset = confirmReset,
+                    onConfirmResetChange = { confirmReset = it },
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
                     onReplaySetup = { replayRequested = true },
@@ -81,8 +84,13 @@ class SinceTopLevelNavigationTest {
             .performScrollTo()
             .assertHasClickAction()
             .performClick()
+        composeRule.onNodeWithTag("settings-confirm-reset")
+            .performScrollTo()
+            .assertHasClickAction()
+            .performClick()
         composeRule.runOnIdle {
             assertEquals(DashboardSortPreference.LONGEST_CURRENT, dashboardSort)
+            assertFalse(confirmReset)
         }
 
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
@@ -278,7 +286,7 @@ class SinceTopLevelNavigationTest {
         composeRule.setContent {
             MaterialTheme {
                 SinceApp(
-                    repository = FakeTrackerRepository(emptyList()),
+                    repository = FakeTrackerRepository(listOf(sampleAggregate())),
                     clock = clock,
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
@@ -310,7 +318,7 @@ class SinceTopLevelNavigationTest {
         composeRule.setContent {
             MaterialTheme {
                 SinceApp(
-                    repository = FakeTrackerRepository(emptyList()),
+                    repository = FakeTrackerRepository(listOf(sampleAggregate())),
                     clock = clock,
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
