@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.goreecloud.since.R
 import com.goreecloud.since.data.preferences.ThemePreference
+import com.goreecloud.since.domain.model.DashboardSort
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.TrackerAggregate
 import com.goreecloud.since.domain.model.TrackerKind
@@ -631,10 +633,10 @@ private fun Dashboard(
         showSeconds = showSeconds,
     )
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var sortName by rememberSaveable { mutableStateOf(SinceDashboardSort.RECENT.name) }
+    var sortName by rememberSaveable { mutableStateOf(DashboardSort.CREATED.name) }
     val dashboardSort = runCatching {
-        SinceDashboardSort.valueOf(sortName)
-    }.getOrDefault(SinceDashboardSort.RECENT)
+        DashboardSort.valueOf(sortName)
+    }.getOrDefault(DashboardSort.CREATED)
     val visibleAggregates = remember(aggregates, searchQuery, dashboardSort) {
         SinceDashboardQuery.apply(
             aggregates = aggregates,
@@ -692,20 +694,20 @@ private fun Dashboard(
                         label = { Text(stringResource(R.string.dashboard_search)) },
                         singleLine = true,
                     )
-                    Row(
+                    LazyRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        FilterChip(
-                            selected = dashboardSort == SinceDashboardSort.RECENT,
-                            onClick = { sortName = SinceDashboardSort.RECENT.name },
-                            label = { Text(stringResource(R.string.dashboard_sort_recent)) },
-                        )
-                        FilterChip(
-                            selected = dashboardSort == SinceDashboardSort.TITLE,
-                            onClick = { sortName = SinceDashboardSort.TITLE.name },
-                            label = { Text(stringResource(R.string.dashboard_sort_name)) },
-                        )
+                        items(
+                            items = DashboardSort.entries,
+                            key = { it.name },
+                        ) { sort ->
+                            FilterChip(
+                                selected = dashboardSort == sort,
+                                onClick = { sortName = sort.name },
+                                label = { Text(dashboardSortLabel(sort)) },
+                            )
+                        }
                     }
                     if (visibleAggregates.isEmpty()) {
                         Text(
@@ -2204,6 +2206,17 @@ private fun elapsedSummary(
                 }
         }
     }
+}
+
+@Composable
+private fun dashboardSortLabel(
+    sort: DashboardSort,
+): String = when (sort) {
+    DashboardSort.CREATED -> stringResource(R.string.dashboard_sort_created)
+    DashboardSort.TITLE -> stringResource(R.string.dashboard_sort_name)
+    DashboardSort.NEWEST_START -> stringResource(R.string.dashboard_sort_newest_start)
+    DashboardSort.OLDEST_START -> stringResource(R.string.dashboard_sort_oldest_start)
+    DashboardSort.LONGEST_CURRENT -> stringResource(R.string.dashboard_sort_longest_current)
 }
 
 @Composable
