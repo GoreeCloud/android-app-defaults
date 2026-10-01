@@ -16,6 +16,12 @@ class LauncherUtilitySearchProviderTest {
     }
 
     @Test
+    fun evaluatesSimplePercentageOfQueries() {
+        assertEquals("10", provider.singleResult("20% of 50").title)
+        assertEquals("18.75", provider.singleResult("12.5% of 150").title)
+    }
+
+    @Test
     fun invalidOrNonArithmeticQueriesFailClosed() {
         assertTrue(provider.search("calculator").isEmpty())
         assertTrue(provider.search("42").isEmpty())
@@ -28,6 +34,8 @@ class LauncherUtilitySearchProviderTest {
         assertEquals("10 km = 6.2137119224 mi", provider.singleResult("10 km to mi").title)
         assertEquals("2 lb = 0.90718474 kg", provider.singleResult("2 lb in kg").title)
         assertEquals("1 cup = 236.5882365 mL", provider.singleResult("1 cup to ml").title)
+        assertEquals("2 fl oz = 59.147059125 mL", provider.singleResult("2 fl oz to ml").title)
+        assertEquals("2 fl oz = 59.147059125 mL", provider.singleResult("2 fluid ounces to ml").title)
         assertEquals("90 min = 1.5 h", provider.singleResult("90 min to h").title)
         assertEquals("32 °F = 0 °C", provider.singleResult("32 f to c").title)
         assertEquals("273.15 K = 0 °C", provider.singleResult("273.15 k to c").title)
