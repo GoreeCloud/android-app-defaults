@@ -240,4 +240,12 @@
     <string name="reset_review">مراجعة إعادة الضبط</string>
     <string name="reset_confirmation_title">إعادة ضبط هذه السلسلة؟</string>
     <string name="reset_confirmation_message">سيتم الاحتفاظ بالفترة الحالية في السجل وستبدأ فترة جديدة في وقت إعادة الضبط.</string>
+
+    <string name="dashboard_total_trackers">إجمالي المتتبعات</string>
+    <string name="dashboard_active_streaks">السلاسل النشطة</string>
+    <string name="dashboard_longest_streak">أطول سلسلة</string>
+    <string name="dashboard_days_value">%1$d يومًا</string>
+    <string name="dashboard_started">بدأ في %1$s</string>
+    <string name="dashboard_tip_streak">الخطوات الصغيرة تتراكم.</string>
+    <string name="dashboard_tip_event">لحظة تستحق التذكّر.</string>
 </resources>
