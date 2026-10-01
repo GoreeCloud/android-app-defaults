@@ -4,16 +4,15 @@
 
 This Development slice continues the October 1, 2026 GoreeCloud Gallery interface refresh without changing Android media authority.
 
-Photos and Videos now expose compact first-party Glaze controls directly below the search surface so common presentation changes do not require a trip to Settings.
+The supplied Photos and Videos mockups keep persistent browsing chrome intentionally minimal. Grouping and view-density choices now remain under Settings → Appearance instead of appearing as always-visible primary controls.
 
 ## Implemented behavior
 
-- **Group** cycles through Day → Month → Year → None.
-- **View** cycles through Dense → Comfortable → Spacious.
-- Both controls persist through the same app-private preferences already used by Settings.
-- Both controls use 48dp-or-larger touch targets.
-- The controls are hidden while search is open and while multi-select is active so contextual work keeps priority.
-- Changing either control re-renders only the already-authorized in-memory media presentation.
+- Search and Sort remain in the primary header when readable media exists.
+- Videos retains destination-specific filter chips.
+- **Group media by** remains available in Settings with Day → Month → Year → None choices.
+- **View density** remains available in Settings with Dense → Comfortable → Spacious choices.
+- Grouping and density keep the same app-private persisted preferences and affect only the already-authorized in-memory media presentation.
 
 ## Authority boundary
 
@@ -30,6 +29,6 @@ Android MediaStore and the existing Gallery permission/mutation adapters remain 
 
 ## Validation boundary
 
-Pure unit coverage locks deterministic control cycling and wraparound. Rendered acceptance verifies that media-only Search, Sort, Group, and View controls stay hidden when no readable media is available; interactive sizing and state behavior are covered when those controls are rendered over an authorized library.
+Unit coverage continues to lock grouping, density, sort, and filter policy. Rendered acceptance covers primary header/navigation visibility and target sizing where those controls are rendered.
 
 Representative-device visual review, large-text/reflow behavior, TalkBack and switch-access review, compact-width polish, and complete Gallery Glaze application acceptance remain separate gates.
