@@ -20,7 +20,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open and Details. Destructive media actions remain outside these compact card menus.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
-- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, bounded album-detail browsing, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
+- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, mockup-aligned circular cover badges, bounded album-detail browsing, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
 - Device-local Favorites backed only by Gallery app-local state; favorite/unfavorite is available from the viewer and authorized Favorites appear as a dedicated collection.
 - A full-screen bounded media viewer shell with Previous / Next navigation, restrained top chrome, and a bottom action surface. Viewer navigation uses the complete current authorized/presented collection rather than one date group.
 - Android Share handoff for the currently authorized media content URI using read-only URI grant semantics.
