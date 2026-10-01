@@ -90,6 +90,8 @@ The October 1, 2026 Gallery mockup-alignment work establishes five persistent pr
 
 The navigation shell must keep media dominant, preserve 48dp-or-larger actionable targets, expose selected state beyond color alone, remain usable at compact phone widths, and reserve a real viewport lane so media does not render beneath persistent navigation. Moving recovery into the Trash tab must not broaden media permission or mutation authority.
 
+Photos and Videos also expose two compact Glaze browse controls immediately below the search surface: **Group** cycles Day → Month → Year → None and **View** cycles Dense → Comfortable → Spacious. These controls update the same app-private presentation preferences used by Settings, do not re-query MediaStore, do not mutate media, and disappear during search and selection so the media canvas remains dominant.
+
 ## Browsing-surface integration
 
 The folder browser and opened-folder media grid are Gallery's highest-frequency surfaces and receive an explicit Glaze UI treatment in `gc.12`:
@@ -164,6 +166,7 @@ The following are release-significant GoreeCloud presentation decisions and must
 - transient surfaces retain the gc.15 rounded Glaze dialog/popup treatment, semantic control accents, compact Settings grouping, and unchanged behavioral semantics;
 - sorting, grouping, and media-filter dialogs retain gc.16 content-driven height and scroll only when required by available space.
 - primary navigation retains the five-destination Photos / Albums / Videos / Trash / Settings structure, with Trash excluded from Albums collection counts.
+- Photos and Videos retain direct Group and View controls with deterministic preference cycling and 48dp-or-larger targets.
 
 Where an invariant can be represented as pure behavior, GoreeCloud-owned automated tests should protect it. Where Android framework rendering, accessibility services, device profiles, permissions, or media operations are required, the corresponding real-device gate remains mandatory.
 
