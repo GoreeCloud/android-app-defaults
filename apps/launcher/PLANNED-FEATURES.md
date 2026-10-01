@@ -10,6 +10,8 @@ Merged PR #112 creates the Primary Home content-only path; #113 keeps one adjace
 
 Merged PR #121 restores configured horizontal edge actions on the unified pager. It observes pager gestures without consuming them, snapshots the starting page, dispatches only outward first-page/right or last-page/left actions after the same 56 dp horizontal-dominance threshold used by the prior Primary fallback, and verifies the Primary outward-edge Search action in the Android 16/default-HOME runtime suite.
 
+A parallel unmerged Development feature candidate adds permissionless local Calculator and unit-conversion results to Universal Search. The capability is implemented as an automatic local/no-retention provider with a dedicated Utility result group, explicit tap-to-copy, focused JVM coverage, and startup-wizard discoverability. It remains pending exact-head CI, protected integration, and reconciliation with the separate runtime-gate restoration line.
+
 Still open after source integration: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
 **Record type:** Repository planned/open feature inventory  
