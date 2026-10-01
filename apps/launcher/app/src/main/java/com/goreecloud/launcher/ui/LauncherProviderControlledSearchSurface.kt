@@ -924,82 +924,88 @@ private fun LauncherUniversalSearchSuggestions(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
     ) {
-        Row(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("launcher-search-suggestion-tabs"),
-            verticalAlignment = Alignment.CenterVertically,
+            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            ),
         ) {
-            LauncherSearchSuggestionTab.entries.forEach { tab ->
-                val selected = tab == selectedTab
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 48.dp)
-                        .selectable(
-                            selected = selected,
-                            onClick = { onSelectTab(tab) },
-                            role = Role.Tab,
-                        )
-                        .testTag(
-                            "launcher-search-suggestion-tab-" +
-                                tab.name.lowercase(),
-                        )
-                        .semantics {
-                            contentDescription =
-                                launcherSearchSuggestionTabAccessibilityLabel(tab)
-                        }
-                        .padding(horizontal = 4.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                LauncherSearchSuggestionTab.entries.forEach { tab ->
+                    val selected = tab == selectedTab
                     val tabColor = if (selected) {
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        if (presentation != LauncherSearchSuggestionPresentation.WORDS) {
-                            LauncherSearchSuggestionTabIcon(
-                                tab = tab,
-                                color = tabColor,
-                            )
-                        }
-                        if (presentation == LauncherSearchSuggestionPresentation.BOTH) {
-                            Spacer(Modifier.size(6.dp))
-                        }
-                        if (presentation != LauncherSearchSuggestionPresentation.ICONS) {
-                            Text(
-                                tab.displayName,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (selected) {
-                                    FontWeight.Bold
-                                } else {
-                                    FontWeight.SemiBold
-                                },
-                                color = tabColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                    Spacer(Modifier.size(4.dp))
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.82f)
-                            .height(3.dp)
+                            .weight(1f)
+                            .heightIn(min = 48.dp)
                             .background(
                                 color = if (selected) {
-                                    MaterialTheme.colorScheme.primary
+                                    MaterialTheme.colorScheme.primaryContainer
                                 } else {
                                     Color.Transparent
                                 },
                                 shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                            ),
-                    )
+                            )
+                            .selectable(
+                                selected = selected,
+                                onClick = { onSelectTab(tab) },
+                                role = Role.Tab,
+                            )
+                            .testTag(
+                                "launcher-search-suggestion-tab-" +
+                                    tab.name.lowercase(),
+                            )
+                            .semantics {
+                                contentDescription =
+                                    launcherSearchSuggestionTabAccessibilityLabel(tab)
+                            }
+                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            if (presentation != LauncherSearchSuggestionPresentation.WORDS) {
+                                LauncherSearchSuggestionTabIcon(
+                                    tab = tab,
+                                    color = tabColor,
+                                )
+                            }
+                            if (presentation == LauncherSearchSuggestionPresentation.BOTH) {
+                                Spacer(Modifier.size(6.dp))
+                            }
+                            if (presentation != LauncherSearchSuggestionPresentation.ICONS) {
+                                Text(
+                                    tab.displayName,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (selected) {
+                                        FontWeight.Bold
+                                    } else {
+                                        FontWeight.SemiBold
+                                    },
+                                    color = tabColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
