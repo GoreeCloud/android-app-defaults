@@ -546,6 +546,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 waitForDisplayedTag("launcher-home-editor-actions")
                 Unit
             } finally {
+                resetHomeBeforeScenarioClose()
                 scenario.close()
             }
         } finally {
@@ -1579,6 +1580,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
                 Unit
             } finally {
+                resetHomeBeforeScenarioClose()
                 scenario.close()
             }
         } finally {
@@ -1734,6 +1736,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
                 Unit
             } finally {
+                resetHomeBeforeScenarioClose()
                 scenario.close()
             }
         } finally {
@@ -1836,6 +1839,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
                 Unit
             } finally {
+                resetHomeBeforeScenarioClose()
                 scenario.close()
             }
         } finally {
@@ -1849,6 +1853,31 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
             }
         }
+    }
+
+    private fun resetHomeBeforeScenarioClose() {
+        runShellCommand("input keyevent KEYCODE_HOME")
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule
+                .onAllNodesWithTag(
+                    "launcher-home-editor-fullscreen",
+                    useUnmergedTree = true,
+                )
+                .fetchSemanticsNodes()
+                .isEmpty() &&
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-widget-picker-sheet",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isEmpty() &&
+                composeRule
+                    .onAllNodesWithText("Wallpapers", useUnmergedTree = true)
+                    .fetchSemanticsNodes()
+                    .isEmpty()
+        }
+        composeRule.waitForIdle()
     }
 
     private fun waitForDisplayedLabel(label: String) {
