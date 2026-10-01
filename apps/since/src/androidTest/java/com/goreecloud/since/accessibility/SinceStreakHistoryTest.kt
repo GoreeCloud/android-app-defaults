@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Goal
@@ -164,9 +165,9 @@ class SinceStreakHistoryTest {
             }
         }
 
+        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(3)
         composeRule
             .onNodeWithText("Read daily")
-            .performScrollTo()
             .assertIsDisplayed()
             .performClick()
         composeRule.waitUntil(timeoutMillis = 5_000) {
