@@ -234,4 +234,9 @@
     <string name="delete_archived_tracker_message">This removes the archived tracker, its current period, reset history, note, and goal from this device. This action cannot be undone.</string>
     <string name="delete_permanently">Delete permanently</string>
     <string name="delete_tracker_failed">Could not delete this tracker. Its local data was left unchanged.</string>
+    <string name="settings_confirm_reset">Confirm streak resets</string>
+    <string name="settings_confirm_reset_supporting">Show one final confirmation after reviewing the reset time, reason, and note.</string>
+    <string name="reset_review">Review reset</string>
+    <string name="reset_confirmation_title">Reset this streak?</string>
+    <string name="reset_confirmation_message">The current period will be preserved in History and a new period will begin at the reset time.</string>
 </resources>
