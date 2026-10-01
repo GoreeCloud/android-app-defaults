@@ -6,7 +6,7 @@ The Primary Home Dock path is now factored through a reusable `EditableHomeDock`
 
 This is a behavior-neutral architecture foundation for the eventual shared Home pager. It deliberately preserves the editable Primary Dock contract instead of promoting the simplified read-only secondary Dock.
 
-**Acceptance boundary:** stacked Development refactor on parent PR #115. PR #115 must integrate first; this candidate then requires current-main reconciliation and fresh exact-head validation. Final Primary↔secondary follow-finger paging and representative-device acceptance remain open.
+**Acceptance boundary:** Development refactor reconciled onto merged PR #115 / current main `3b84f0d9023a395abf7612c4d5e6d543ab2462d3`; fresh exact-head validation is required before integration. Final Primary↔secondary follow-finger paging and representative-device acceptance remain open.
 
 
 ## October 1, 2026 — keep Launcher Home root mounted across Primary and secondary selection
