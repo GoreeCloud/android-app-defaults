@@ -1,5 +1,17 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — mockup-aligned header overflow
+
+### Changed
+- Replaced the persistent Photos/Videos Group and View row with the supplied mockup's compact Search + overflow header pattern.
+- Added a first-party **More Gallery options** menu with persisted Sort, Group, and View presentation choices.
+- Preserved Newest/Oldest, Day/Month/Year/None, and Dense/Comfortable/Spacious behavior while returning vertical space to the media canvas.
+- Kept header actions hidden when no readable media exists and while selection mode owns the header.
+- Added no new MediaStore permission, mutation, filesystem, account, network, cloud, or synchronization authority.
+
+### Development boundary
+Representative-device overflow theming, large-text/reflow, TalkBack/switch access, compact-width behavior, and complete Glaze application acceptance remain open.
+
 ## October 1, 2026 — mockup-aligned smart-filter iconography
 
 ### Changed
