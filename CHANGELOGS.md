@@ -1,5 +1,14 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since Settings copy polish candidate
+
+- Replaced internal acceptance terminology in the user-facing Privacy and Security section with plain-language explanations.
+- Simplified Export, Review import, Backup, and Restore supporting text.
+- Updated the matching Arabic strings.
+- No persistence, recovery, permission, or signing behavior changed.
+
+**Evidence boundary:** physical-device screenshots of Development version 0.1.0-dev / 585 showed the copy issue. Fresh exact-head CI and broader device acceptance remain required.
+
 ## September 30, 2026 — Since Development APK distribution hardening candidate
 
 - Replaced the fixed Development `versionCode = 1` assumption with a positive explicit
