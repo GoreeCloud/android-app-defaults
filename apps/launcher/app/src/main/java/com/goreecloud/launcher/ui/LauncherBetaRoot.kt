@@ -3197,7 +3197,7 @@ private fun HomeEditorAction(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier,
+        modifier = modifier.testTag("launcher-home-editor-action-" + label.lowercase()),
         onClick = onClick,
         shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.56f),
