@@ -71,7 +71,7 @@ class SincePreferencesRepository(
         .distinctUntilChanged()
 
     val showSeconds: Flow<Boolean> = preferences
-        .map { values -> values[showSecondsKey] ?: false }
+        .map { values -> values[showSecondsKey] ?: true }
         .distinctUntilChanged()
 
     val onboardingComplete: Flow<Boolean> = preferences
