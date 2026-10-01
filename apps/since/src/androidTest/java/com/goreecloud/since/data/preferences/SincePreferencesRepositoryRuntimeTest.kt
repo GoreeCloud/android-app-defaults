@@ -22,21 +22,26 @@ class SincePreferencesRepositoryRuntimeTest {
         try {
             first.setDefaultDisplayFormat(DisplayFormat.MONTHS)
             first.setShowSeconds(false)
+            first.setConfirmReset(false)
 
             val reopened = SincePreferencesRepository(context)
 
             assertEquals(DisplayFormat.MONTHS, reopened.defaultDisplayFormat.first())
             assertFalse(reopened.showSeconds.first())
+            assertFalse(reopened.confirmReset.first())
 
             reopened.setDefaultDisplayFormat(DisplayFormat.YEARS)
             reopened.setShowSeconds(true)
+            reopened.setConfirmReset(true)
 
             val secondReopen = SincePreferencesRepository(context)
             assertEquals(DisplayFormat.YEARS, secondReopen.defaultDisplayFormat.first())
             assertTrue(secondReopen.showSeconds.first())
+            assertTrue(secondReopen.confirmReset.first())
         } finally {
             first.setDefaultDisplayFormat(DisplayFormat.DAYS)
             first.setShowSeconds(true)
+            first.setConfirmReset(true)
         }
     }
 }
