@@ -257,6 +257,25 @@ class SinceTopLevelNavigationTest {
     }
 
     @Test
+    fun homeContextualHintDoesNotAppearWithoutTrackers() {
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = FakeTrackerRepository(emptyList()),
+                    clock = clock,
+                )
+            }
+        }
+
+        assertTrue(
+            composeRule.onAllNodesWithTag("home-contextual-hint")
+                .fetchSemanticsNodes()
+                .isEmpty(),
+        )
+        composeRule.onNodeWithText("Add tracker").assertIsDisplayed()
+    }
+
+    @Test
     fun homeContextualHintCanBeDismissedWithoutDisablingGlobalPreference() {
         var contextualHintsEnabled by mutableStateOf(true)
         var homeHintDismissed by mutableStateOf(false)
