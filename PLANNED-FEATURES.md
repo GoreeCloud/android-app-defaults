@@ -2,7 +2,7 @@
 
 ## 2026-09-30 Since display-settings continuation
 
-Default display format and seconds visibility are implemented on the active stacked Development candidate with the specified defaults of Days and seconds enabled. Remaining Settings work includes the separately specified reset-confirmation preference, reduced-motion/transparency behavior only where an approved Glaze mapping permits it, and representative-device accessibility/localization acceptance.
+Default display format and seconds visibility are implemented and exact-head validated on PR #128 through Android Development Foundation #654. The active stacked continuation also implements the specified reset-confirmation preference. Remaining Settings work includes reduced-motion/transparency behavior where an approved Glaze mapping permits it, representative-device accessibility/localization acceptance, and fresh exact-head validation of the newer stacked candidate.
 
 The existing Reset Streak surface remains the required path for choosing reset time and optional reason/note and for explaining history preservation. The product specification does not yet define a safe alternate interaction for disabling confirmation without losing those controls, so no alternate reset path is invented in this candidate.
 
