@@ -240,14 +240,22 @@ jobs:
           retention-days: 14
           path: apps/launcher/artifact-launcher-android/*
 
-  launcher-runtime:
+  launcher-runtime-shards:
     needs:
       - changes
       - launcher
     if: needs.changes.outputs.launcher == 'true' && needs.launcher.result == 'success'
-    name: Launcher Android 16 runtime instrumentation
+    name: Launcher Android 16 runtime shard ${{ matrix.shard_number }} of 2
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard_index: 0
+            shard_number: 1
+          - shard_index: 1
+            shard_number: 2
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: apps/launcher
@@ -282,12 +290,12 @@ jobs:
             echo "kvm_available=true" >> "$GITHUB_OUTPUT"
           else
             echo "kvm_available=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::KVM acceleration is unavailable; Launcher Android 16 instrumentation will use software acceleration."
+            echo "::warning::KVM acceleration is unavailable; Launcher Android 16 instrumentation shard will use software acceleration."
           fi
       - name: Validate Launcher runtime harness
         shell: bash
         run: bash -n scripts/run_android16_runtime.sh
-      - name: Run complete Launcher Android 16 instrumentation suite
+      - name: Run Launcher Android 16 instrumentation shard
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         with:
           api-level: 36
@@ -295,18 +303,39 @@ jobs:
           arch: x86_64
           disable-animations: true
           disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
-          script: bash "$GITHUB_WORKSPACE/apps/launcher/scripts/run_android16_runtime.sh"
-      - name: Upload Launcher Android 16 test reports
+          script: LAUNCHER_RUNTIME_SHARD_INDEX=${{ matrix.shard_index }} LAUNCHER_RUNTIME_SHARD_COUNT=2 bash "$GITHUB_WORKSPACE/apps/launcher/scripts/run_android16_runtime.sh"
+      - name: Upload Launcher Android 16 shard reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: launcher-android16-runtime-reports
+          name: launcher-android16-runtime-shard-${{ matrix.shard_number }}
           path: |
-            apps/launcher/ci-runtime/**
+            apps/launcher/ci-runtime/shard-${{ matrix.shard_index }}/**
             apps/launcher/app/build/reports/androidTests/connected/**
             apps/launcher/app/build/outputs/androidTest-results/connected/**
           if-no-files-found: warn
           retention-days: 14
+
+  launcher-runtime:
+    needs:
+      - changes
+      - launcher-runtime-shards
+    if: always() && needs.changes.outputs.launcher == 'true'
+    name: Launcher Android 16 runtime instrumentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require complete Launcher runtime shards
+        shell: bash
+        env:
+          SHARDS_RESULT: ${{ needs.launcher-runtime-shards.result }}
+        run: |
+          set -euo pipefail
+          if [ "$SHARDS_RESULT" != "success" ]; then
+            echo "::error::Launcher Android 16 runtime shard result is $SHARDS_RESULT"
+            exit 1
+          fi
+          echo "All Launcher Android 16 runtime shards passed."
 
   launcher-transition-performance:
     needs:
