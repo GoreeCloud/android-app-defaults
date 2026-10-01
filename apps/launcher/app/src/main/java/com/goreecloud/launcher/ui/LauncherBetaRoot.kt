@@ -607,6 +607,7 @@ fun LauncherBetaRoot(
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
     hiddenHomeSuggestionKeys: Set<String>,
+    hiddenAppKeys: Set<String>,
     searchProviderPreferences: com.goreecloud.launcher.core.launcher.LauncherSearchProviderPreferenceDecodeResult?,
     fileSearchRoots: List<Uri>,
     homePageCount: Int,
@@ -665,6 +666,7 @@ fun LauncherBetaRoot(
     onMoveDock: (LauncherActivityInfo, WorkspaceMoveDirection) -> Unit,
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
     onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
+    onSetAppHidden: (String, Boolean) -> Unit,
     onRequestUninstall: (LauncherActivityInfo) -> Unit,
     themeMode: GlazeThemeMode,
     onSetThemeMode: (GlazeThemeMode) -> Unit,
@@ -735,6 +737,7 @@ fun LauncherBetaRoot(
     var selectedFolderId by rememberSaveable { mutableStateOf<String?>(null) }
     var folderAppPickerId by rememberSaveable { mutableStateOf<String?>(null) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
+    var showHiddenAppsManager by rememberSaveable { mutableStateOf(false) }
     var folderManagerAddToHome by rememberSaveable { mutableStateOf(false) }
     val primaryFolderProfileId = remember { Process.myUserHandle().hashCode() }
     var folderManagerProfileId by rememberSaveable {
@@ -743,6 +746,9 @@ fun LauncherBetaRoot(
     var folderAssignmentAppKey by rememberSaveable { mutableStateOf<String?>(null) }
     val rootAppsByKey = remember(apps) {
         apps.associateBy { it.workspaceKey() }
+    }
+    val discoverableApps = remember(apps, hiddenAppKeys) {
+        apps.filterNot { app -> app.workspaceKey() in hiddenAppKeys }
     }
     val homeFolderIds = remember(homePages) {
         homePages.flatMap { page -> page.folderPlacements.map { it.folderId } }.toSet()
@@ -1312,7 +1318,7 @@ fun LauncherBetaRoot(
                 }
             }
             LauncherSurfaceMode.SEARCH -> LauncherProviderControlledSearchSurface(
-                apps = apps,
+                apps = discoverableApps,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
                 searchProviderPreferences = searchProviderPreferences,
@@ -1359,7 +1365,7 @@ fun LauncherBetaRoot(
                 },
             )
             LauncherSurfaceMode.DRAWER -> AppDrawerSurface(
-                apps = apps,
+                apps = discoverableApps,
                 folders = folders,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
@@ -1406,6 +1412,8 @@ fun LauncherBetaRoot(
                             folderManagerAddToHome = false
                             showFolderManager = true
                         },
+                        hiddenAppCount = hiddenAppKeys.count(rootAppsByKey::containsKey),
+                        onManageHiddenApps = { showHiddenAppsManager = true },
                         onSetHomeGrid = onSetHomeGrid,
                         onSetDrawerColumns = onSetDrawerColumns,
                         onSetDrawerLayoutMode = onSetDrawerLayoutMode,
@@ -1465,6 +1473,7 @@ fun LauncherBetaRoot(
                 workspace = workspace,
                 layoutLocked = preferences.layoutLocked,
                 availableAndroidWidgets = availableAndroidWidgets,
+                hiddenFromLauncher = appKey in hiddenAppKeys,
                 onHomeAction = {
                     if (
                         selectedAppContextOrigin == LauncherAppContextOrigin.HOME &&
@@ -1489,6 +1498,11 @@ fun LauncherBetaRoot(
                 },
                 onRequestUninstall = {
                     onRequestUninstall(app)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onToggleHidden = {
+                    onSetAppHidden(appKey, appKey !in hiddenAppKeys)
                     selectedApp = null
                     selectedAppAnchor = null
                 },
@@ -1630,6 +1644,18 @@ fun LauncherBetaRoot(
                 },
             )
         }
+
+    if (showHiddenAppsManager) {
+        LauncherHiddenAppsManagerSheet(
+            hiddenApps = hiddenAppKeys
+                .asSequence()
+                .mapNotNull(rootAppsByKey::get)
+                .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) }
+                .toList(),
+            onRestore = { app -> onSetAppHidden(app.workspaceKey(), false) },
+            onDismiss = { showHiddenAppsManager = false },
+        )
+    }
 
     if (showFolderManager) {
         val managedFolders = folders.filter { folder ->
