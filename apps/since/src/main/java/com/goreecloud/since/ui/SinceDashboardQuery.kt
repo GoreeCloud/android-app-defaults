@@ -6,7 +6,7 @@ import java.util.Locale
 
 enum class SinceDashboardSort {
     RECENT,
-    CREATED,
+    MANUAL,
     TITLE,
     NEWEST_START,
     OLDEST_START,
@@ -36,7 +36,7 @@ object SinceDashboardQuery {
                     .thenBy { it.tracker.id },
             )
 
-            SinceDashboardSort.CREATED -> filtered.sortedWith(
+            SinceDashboardSort.MANUAL -> filtered.sortedWith(
                 compareBy<TrackerAggregate> { it.tracker.sortOrder }
                     .thenBy { it.tracker.createdAtEpochMs }
                     .thenBy { normalize(it.tracker.title) }
