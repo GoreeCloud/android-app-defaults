@@ -96,7 +96,7 @@ object GalleryVideoFilterPolicy {
         GalleryVideoFilter.entries
             .filterNot { it == GalleryVideoFilter.ALL }
             .filter { filter -> items.any { item -> matches(filter, item, favoriteContentUris) } }
-            .forEach(::add)
+            .forEach { filter -> add(filter) }
     }
 
     fun filter(
