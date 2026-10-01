@@ -130,6 +130,12 @@ class SincePreferencesRepository(
         }
     }
 
+    suspend fun setConfirmReset(enabled: Boolean) {
+        context.sincePreferencesDataStore.edit { values ->
+            values[confirmResetKey] = enabled
+        }
+    }
+
     suspend fun setOnboardingStep(step: Int) {
         context.sincePreferencesDataStore.edit { values ->
             values[onboardingStepKey] = step.coerceIn(0, ONBOARDING_STEP_COUNT - 1)
