@@ -1,5 +1,17 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — functional-only Settings cleanup
+
+### Changed
+- Removed inactive Settings rows for GIF thumbnail animation, automatic empty-folder cleanup, and password-protected photos rather than presenting unfinished behavior as active controls.
+- Retained compatible settings import/export fields for the unfinished GIF and empty-folder preferences so existing Development settings files continue to parse safely.
+- Renamed the visible deletion preference to **Move deleted items to Trash** to match the dedicated Trash destination and Android MediaStore terminology.
+- Removed the obsolete password-protection explanation helper after the inactive row was removed.
+- Added no new media, storage, authentication, filesystem, account, network, cloud, or synchronization authority.
+
+### Development boundary
+Protected Photos, GIF thumbnail animation, and automatic empty-folder cleanup remain unfinished capabilities. They must return to Settings only when real behavior and their required security/acceptance boundaries exist.
+
 ## October 1, 2026 — Albums cover-badge mockup alignment
 
 ### Changed
