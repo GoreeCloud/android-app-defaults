@@ -463,6 +463,12 @@ class MainActivity : ComponentActivity() {
             val hiddenHomeSuggestionKeys by launcherPreferencesRepository.hiddenHomeSuggestionKeys.collectAsStateWithLifecycle(
                 initialValue = emptySet(),
             )
+            val hiddenDrawerAppKeys by launcherPreferencesRepository.hiddenDrawerAppKeys.collectAsStateWithLifecycle(
+                initialValue = emptySet(),
+            )
+            val pinnedDrawerAppKeys by launcherPreferencesRepository.pinnedDrawerAppKeys.collectAsStateWithLifecycle(
+                initialValue = emptySet(),
+            )
             val folders by folderRepository.folders.collectAsStateWithLifecycle(
                 initialValue = emptyList(),
             )
@@ -1026,6 +1032,8 @@ class MainActivity : ComponentActivity() {
                             recentAppKeys = localRecentAppKeys,
                             localLaunchCounts = localLaunchCounts,
                             hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
+                            hiddenDrawerAppKeys = hiddenDrawerAppKeys,
+                            pinnedDrawerAppKeys = pinnedDrawerAppKeys,
                             searchProviderPreferences = searchProviderPreferences,
                             fileSearchRoots = fileSearchRoots,
                             homePageCount = renderedPages.size.coerceAtLeast(1),
@@ -1425,6 +1433,8 @@ class MainActivity : ComponentActivity() {
                                 launcherPreferencesRepository.setHomeLabelOverride(app.workspaceKey(), label)
                             },
                             onSetHomeSuggestionHidden = launcherPreferencesRepository::setHomeSuggestionHidden,
+                            onSetDrawerAppHidden = launcherPreferencesRepository::setDrawerAppHidden,
+                            onSetDrawerAppPinned = launcherPreferencesRepository::setDrawerAppPinned,
                             onRequestUninstall = ::requestUninstall,
                             onOpenWallpaperPicker = ::openWallpaperPicker,
                             onSurfaceModeChanged = { mode ->
