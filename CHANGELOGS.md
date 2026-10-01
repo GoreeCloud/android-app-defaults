@@ -8,6 +8,8 @@
 - Added the specification-aligned `confirm_reset` preference, defaulting on, with a General Settings toggle.
 - When reset confirmation is on, the required reset editor still collects reset time, optional reason, and note, then presents one final history-preservation confirmation before mutation. Turning the preference off skips only that final confirmation, not the reset editor or validation.
 - Added English/Arabic strings plus JVM and Android coverage for sort behavior, preference persistence, Settings interaction, localization, and both confirmation modes.
+- Moved the Home contextual hint ahead of tracker cards and suppressed it on an empty Dashboard so guidance is actionable and no longer competes with the Add tracker floating action.
+- Realigned rendered-evidence capture with the current General/Appearance/Data/Privacy/About Settings order and the two-step reset review/confirmation flow; added large-font, RTL, sort-state, and system-bar regression coverage for the expanded controls.
 - Added no Room schema migration, network permission, account dependency, background service, or persisted elapsed counter.
 
 **Acceptance boundary:** stacked Development candidate on PR #130. Fresh exact-head Android Development Foundation validation, rendered-evidence review, representative-device acceptance, manual drag/reorder behavior, recovery/signing gates, and broader release qualification remain open.
