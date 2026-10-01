@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — extend secondary-Search and inventory-continuity runtime acceptance
+
+This Development acceptance candidate carries forward the unique runtime coverage that had been stranded behind stale historical branches. It adds direct API 36 acceptance that a configured swipe-down Universal Search action opens from a secondary Home page, not only Primary Home.
+
+The inventory continuity boundary is also strengthened in two independent paths. A live `LauncherAppsRepository` collection is exercised through repeated explicit full reconciliations and every emitted snapshot must continue matching Android-visible launcher activities across available profiles. Separately, the real default-HOME lifecycle suite keeps a known app visible while the App Drawer is open, moves `MainActivity` through CREATED and back to RESUMED, then requires the Drawer and known app to remain rendered before the existing HOME-return assertion.
+
+No Launcher production Kotlin behavior, permission, provider authority, workspace authority, persistence schema, Search execution policy, or network behavior changes.
+
+**Acceptance boundary:** source/runtime-test candidate based directly on authoritative repository main `a521281821f6a73a6e8d540aca6ca1a1364b40d2`. Fresh exact-head build/JVM/lint/schema, complete API 36 runtime, transition-performance, required-gate, provenance, and protected-promotion evidence are required before integration. Real package/profile churn, OEM enumeration behavior, managed-profile lifecycle, representative-device jank/power, accessibility, and broader lifecycle acceptance remain open.
+
 ## October 1, 2026 — add local arithmetic and unit-conversion Quick answers
 
 Universal Search now includes a Launcher-owned **Quick answers** source. Arithmetic uses a deliberately bounded parser with precedence, parentheses, unary signs, and the four basic operators rather than arbitrary expression/code evaluation. Unit conversion uses an explicit local allowlist for common length, mass, time, and temperature units.
