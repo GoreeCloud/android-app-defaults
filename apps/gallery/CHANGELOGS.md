@@ -1,5 +1,14 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — Albums card and Videos subtitle mockup alignment
+
+### Changed
+- Corrected the Albums collection grid to the supplied mockup's rounded Raised-card treatment with landscape media covers and compact title/count footers.
+- Replaced thumbnail-style Albums Quick access mini-cards with compact real-data smart-access pills; authorized Videos can appear as a direct pill without fabricating People, Places, Documents, or other unsupported smart collections.
+- Counts Gallery-local Favorites as a displayed Albums collection when present, so the Albums subtitle better reflects the visible collection surface.
+- Uses **Recently added** for the newest Videos presentation order while retaining **Oldest first** when the user reverses sort order.
+- Preserved Android MediaStore authority and added no new media permission, mutation, filesystem, account, network, cloud, or synchronization authority.
+
 ## October 1, 2026 — Albums mockup-alignment refinement
 
 ### Changed

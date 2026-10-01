@@ -87,6 +87,21 @@ enum class GalleryVideoFilter(val label: String) {
     FAVORITES("Favorites"),
 }
 
+object GalleryVideoPresentationPolicy {
+    fun orderLabel(sortOrder: MediaSortOrder): String = when (sortOrder) {
+        MediaSortOrder.NEWEST -> "Recently added"
+        MediaSortOrder.OLDEST -> "Oldest first"
+    }
+
+    fun filterAndOrderLabel(
+        filter: GalleryVideoFilter,
+        sortOrder: MediaSortOrder,
+    ): String {
+        val order = orderLabel(sortOrder)
+        return if (filter == GalleryVideoFilter.ALL) order else "${filter.label} · $order"
+    }
+}
+
 object GalleryVideoFilterPolicy {
     fun available(
         items: List<MediaItem>,
