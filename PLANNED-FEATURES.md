@@ -1,5 +1,12 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-30 Since search/sort and reset-preference continuation
+
+The active stacked Development candidate now implements the specification's local Search / Sort ordering choices and persists the selected order with a Manual default. It also implements the default-on reset-confirmation preference without removing the required reset-time/reason/note editor.
+
+Still open in this area: true manual drag/reorder mutation of tracker `sort_order`, the specification's Dashboard top-app-bar/overflow treatment, optional archived-item filtering where explicitly enabled, representative-device interaction/accessibility acceptance, and any Glaze motion/transparency options that require an approved mapping.
+
+
 ## 2026-09-30 Since display-settings continuation
 
 Default display format and seconds visibility are implemented on the active stacked Development candidate with the specified defaults of Days and seconds enabled. Remaining Settings work includes the separately specified reset-confirmation preference, reduced-motion/transparency behavior only where an approved Glaze mapping permits it, and representative-device accessibility/localization acceptance.
