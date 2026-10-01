@@ -23,11 +23,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import com.goreecloud.since.data.preferences.DashboardSortPreference
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Goal
 import com.goreecloud.since.domain.model.Tracker
@@ -247,7 +249,7 @@ class SinceAccessibilityTest {
                     SinceApp(
                         repository = FakeTrackerRepository(listOf(sampleAggregate())),
                         clock = clock,
-                        dashboardSortName = "LONGEST_CURRENT",
+                        dashboardSort = DashboardSortPreference.LONGEST_CURRENT,
                     )
                 }
             }
