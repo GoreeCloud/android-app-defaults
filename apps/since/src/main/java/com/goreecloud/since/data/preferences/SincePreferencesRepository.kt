@@ -31,6 +31,7 @@ class SincePreferencesRepository(
     private val defaultDisplayFormatKey = stringPreferencesKey("default_display_format")
     private val showSecondsKey = booleanPreferencesKey("show_seconds")
     private val defaultSortKey = stringPreferencesKey("default_sort")
+    private val confirmResetKey = booleanPreferencesKey("confirm_reset")
     private val onboardingCompleteKey = booleanPreferencesKey("onboarding_complete")
     private val onboardingStepKey = intPreferencesKey("onboarding_step")
     private val contextualHintsEnabledKey = booleanPreferencesKey("contextual_hints_enabled")
