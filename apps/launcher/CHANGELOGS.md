@@ -8,7 +8,9 @@ The current Development candidate restores two exact-head API 36 jobs in the mon
 
 This correction does not retroactively upgrade earlier post-consolidation build-only workflow runs into Android runtime evidence. PR #121 merged the configured Home pager edge-action source as `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`; the new edge-action Android test becomes accepted runtime evidence only when this restored exact-head runtime lane executes it successfully.
 
-**Acceptance boundary:** Development CI-governance candidate on authoritative main `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Emulator runtime and frame timing remain diagnostic; representative physical-device/default-HOME interaction, performance, power, accessibility, form-factor, recovery, signing, and lifecycle qualification remain open.
+The first restored transition-performance run exposed a monorepo-path defect in the new job itself: the emulator action invoked the root Gradle project and therefore attempted to run the Since instrumentation task with a Launcher class filter. The repaired candidate binds both emulator commands explicitly to `$GITHUB_WORKSPACE/apps/launcher` via Gradle `--project-dir`, and writes performance evidence to an absolute Launcher path. The failed head remains historical evidence and is not accepted.
+
+**Acceptance boundary:** Development CI-governance candidate on authoritative main `23b3bc085ef2ae644a71bcea79667f2c3aade8f4`. Fresh exact-head runtime/performance evidence after the project-directory repair is required. Emulator runtime and frame timing remain diagnostic; representative physical-device/default-HOME interaction, performance, power, accessibility, form-factor, recovery, signing, and lifecycle qualification remain open.
 
 
 ## October 1, 2026 — restore configured Home pager edge actions
