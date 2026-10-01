@@ -2,7 +2,7 @@
 
 ## September 30, 2026 — separate Primary Home page content from persistent chrome
 
-`LauncherBetaRoot` now exposes a behavior-neutral Primary Home content-only mode. When that mode is used, the Primary page leaves fixed Top/Bottom Search, page-indicator reserve space, Dock rendering, and bottom navigation-bar padding to an outer Home shell; the existing full surface remains the default for current callers.
+`LauncherBetaRoot` now exposes a behavior-neutral Primary Home content-only mode. When that mode is used, the Primary page leaves fixed Top/Bottom Search, page-indicator reserve space, Dock rendering, bottom navigation-bar padding, and horizontal page-gesture ownership to an outer Home shell/pager; the existing full surface remains the default for current callers.
 
 The content-only path also clears stale in-root Dock geometry so future use inside a unified pager cannot accidentally retain an old Dock drop target. Focused JVM policy coverage locks both content-only suppression and the unchanged full-surface behavior.
 
