@@ -43,7 +43,6 @@ import com.goreecloud.gallery.android.AndroidMediaMutationPendingState
 import com.goreecloud.gallery.android.AndroidMediaMutationPendingStates
 import com.goreecloud.gallery.android.AndroidMediaMutationRequests
 import com.goreecloud.gallery.android.AndroidMediaStoreReader
-import com.goreecloud.gallery.android.AndroidTrashedMediaStoreReader
 import com.goreecloud.gallery.core.GalleryBulkActionPolicy
 import com.goreecloud.gallery.core.AuthorizedMediaSearch
 import com.goreecloud.gallery.core.GalleryDragSelectionPolicy
@@ -131,6 +130,7 @@ class GalleryActivity : Activity() {
             pendingMediaMutation = null
             pendingMediaMove = null
         }
+        requestedDestination(intent)?.let { destination = it }
         selectedSort = currentUserSettings().sortPreference.mediaSortOrder
         reconfigureThumbnailExecutor(currentUserSettings().fileLoadingPriority)
         buildSurface()
@@ -143,6 +143,41 @@ class GalleryActivity : Activity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent == null) return
+        setIntent(intent)
+        val requested = requestedDestination(intent) ?: return
+
+        clearSelection(render = false)
+        destination = requested
+        openAlbumId = null
+        showingFavorites = false
+        searchQuery = ""
+        if (::searchField.isInitialized) {
+            suppressSearchRender = true
+            searchField.setText("")
+            suppressSearchRender = false
+            closeSearch(clearQuery = false)
+        }
+
+        if (destination == GalleryDestination.SETTINGS) {
+            renderCurrentDestination()
+        } else {
+            renderPermissionState()
+        }
+    }
+
+    private fun requestedDestination(intent: Intent?): GalleryDestination? = when (
+        intent?.getStringExtra(GalleryNavigationContract.EXTRA_DESTINATION)
+    ) {
+        GalleryNavigationContract.PHOTOS -> GalleryDestination.PHOTOS
+        GalleryNavigationContract.ALBUMS -> GalleryDestination.ALBUMS
+        GalleryNavigationContract.VIDEOS -> GalleryDestination.VIDEOS
+        GalleryNavigationContract.SETTINGS -> GalleryDestination.SETTINGS
+        else -> null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -635,6 +670,16 @@ class GalleryActivity : Activity() {
                 isClickable = true
                 isFocusable = true
                 setOnClickListener {
+                    if (item == GalleryDestination.TRASH) {
+                        clearSelection(render = false)
+                        openAlbumId = null
+                        showingFavorites = false
+                        searchQuery = ""
+                        if (::searchField.isInitialized) searchField.setText("")
+                        closeSearch(clearQuery = false)
+                        startActivity(Intent(this@GalleryActivity, RecycleBinActivity::class.java))
+                        return@setOnClickListener
+                    }
                     if (destination == item && openAlbumId == null && !showingFavorites) return@setOnClickListener
                     clearSelection(render = false)
                     destination = item
@@ -660,6 +705,7 @@ class GalleryActivity : Activity() {
         GalleryDestination.PHOTOS -> "Photos"
         GalleryDestination.ALBUMS -> "Albums"
         GalleryDestination.VIDEOS -> "Videos"
+        GalleryDestination.TRASH -> "Trash"
         GalleryDestination.SETTINGS -> "Settings"
     }
 
@@ -667,6 +713,7 @@ class GalleryActivity : Activity() {
         GalleryDestination.PHOTOS -> R.drawable.ic_gallery_nav_photos
         GalleryDestination.ALBUMS -> R.drawable.ic_gallery_nav_albums
         GalleryDestination.VIDEOS -> R.drawable.ic_gallery_nav_videos
+        GalleryDestination.TRASH -> R.drawable.ic_gallery_nav_trash
         GalleryDestination.SETTINGS -> R.drawable.ic_gallery_nav_settings
     }
 
@@ -853,12 +900,14 @@ class GalleryActivity : Activity() {
             destination == GalleryDestination.PHOTOS -> "Photos"
             destination == GalleryDestination.ALBUMS -> "Albums"
             destination == GalleryDestination.VIDEOS -> "Videos"
+            destination == GalleryDestination.TRASH -> "Trash"
             destination == GalleryDestination.SETTINGS -> "Settings"
             else -> "Gallery"
         }
 
         val baseSubtitle = when {
             destination == GalleryDestination.SETTINGS -> "Local Gallery preferences"
+            destination == GalleryDestination.TRASH -> "Recently deleted media"
             destination == GalleryDestination.ALBUMS && (showingFavorites || openAlbumId != null) ->
                 itemCountLabel(collectionItems.size)
             destination == GalleryDestination.PHOTOS ->
@@ -868,8 +917,7 @@ class GalleryActivity : Activity() {
             destination == GalleryDestination.ALBUMS -> {
                 val albumCount = visibleItems.buildAlbumCatalog().size
                 val favoriteSuffix = if (favoriteUris.any { uri -> visibleItems.any { it.contentUri == uri } }) 1 else 0
-                val recycleBinSuffix = if (AndroidTrashedMediaStoreReader.isSupported()) 1 else 0
-                val totalCollections = albumCount + favoriteSuffix + recycleBinSuffix
+                val totalCollections = albumCount + favoriteSuffix
                 if (totalCollections == 1) "1 collection" else "$totalCollections collections"
             }
             else -> ""
@@ -887,7 +935,10 @@ class GalleryActivity : Activity() {
             else View.GONE
         backControl.contentDescription = "Back to Albums"
         sortControl.contentDescription = "Sort order: ${sortOrderLabel()}. Double tap to change."
-        val showMediaControls = destination != GalleryDestination.SETTINGS && visibleItems.isNotEmpty()
+        val showMediaControls =
+            destination != GalleryDestination.SETTINGS &&
+                destination != GalleryDestination.TRASH &&
+                visibleItems.isNotEmpty()
         sortControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
         searchControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
     }
@@ -1042,6 +1093,7 @@ class GalleryActivity : Activity() {
                 "Open a video for local playback, or long-press to begin multi-select."
             GalleryDestination.ALBUMS -> GallerySetupPreferences.HINT_ALBUMS to
                 "Albums are built only from the media Android currently authorizes Gallery to read."
+            GalleryDestination.TRASH,
             GalleryDestination.SETTINGS -> null
         }
         if (
@@ -1147,6 +1199,7 @@ class GalleryActivity : Activity() {
                 }
                 else -> renderAlbums(generation, visibleItems)
             }
+            GalleryDestination.TRASH,
             GalleryDestination.SETTINGS -> Unit
         }
     }
@@ -1211,10 +1264,8 @@ class GalleryActivity : Activity() {
         }
 
         val showFavoritesTile = favoriteItems.isNotEmpty()
-        val showRecycleBinTile = AndroidTrashedMediaStoreReader.isSupported() &&
-            (query.isBlank() || "recycle bin".contains(query) || "trash".contains(query))
 
-        if (catalog.isEmpty() && !showFavoritesTile && !showRecycleBinTile) {
+        if (catalog.isEmpty() && !showFavoritesTile) {
             library.addView(
                 emptyState(
                     if (searchQuery.isBlank()) "No albums yet" else "No album results",
@@ -1228,11 +1279,6 @@ class GalleryActivity : Activity() {
             updateHeader()
             renderNavigation()
             return
-        }
-
-        if (showRecycleBinTile) {
-            library.addView(sectionHeader("Recovery"))
-            library.addView(recycleBinCollectionRow())
         }
 
         if (catalog.isNotEmpty() || showFavoritesTile) {
@@ -1263,75 +1309,6 @@ class GalleryActivity : Activity() {
         }
         updateHeader()
         renderNavigation()
-    }
-
-    private fun recycleBinCollectionRow(): LinearLayout = LinearLayout(this).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL
-        minimumHeight = dp(76)
-        setPadding(dp(14), dp(10), dp(12), dp(10))
-        background = GalleryGlazeSurfaces.drawable(
-            context,
-            GalleryGlazeSurfaces.Role.RAISED,
-            GalleryGlazeContract.SHAPE_CONTAINER_DP,
-        )
-        isClickable = true
-        isFocusable = true
-        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-        contentDescription = "Recycle Bin. Browse recently deleted photos and videos. Android controls retention and confirmation."
-        setOnClickListener {
-            clearSelection(render = false)
-            searchQuery = ""
-            if (::searchField.isInitialized) searchField.setText("")
-            closeSearch(clearQuery = false)
-            try {
-                startActivity(Intent(this@GalleryActivity, RecycleBinActivity::class.java))
-            } catch (_: RuntimeException) {
-                Toast.makeText(this@GalleryActivity, "Recycle Bin is unavailable right now.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        addView(
-            TextView(context).apply {
-                text = "↻"
-                gravity = Gravity.CENTER
-                setTextColor(accentColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
-                setTypeface(typeface, Typeface.BOLD)
-                background = roundedSurface(withAlpha(accentColor(), 0.12f), 18)
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-            },
-            LinearLayout.LayoutParams(dp(52), dp(52)),
-        )
-
-        addView(
-            LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp(12), 0, dp(8), 0)
-                addView(TextView(context).apply {
-                    text = "Recycle Bin"
-                    setTextColor(primaryTextColor())
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-                    setTypeface(typeface, Typeface.BOLD)
-                })
-                addView(TextView(context).apply {
-                    text = "Restore or permanently delete Android-trashed media"
-                    setTextColor(secondaryTextColor())
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-                    setPadding(0, dp(2), 0, 0)
-                })
-            },
-            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
-        )
-
-        addView(TextView(context).apply {
-            text = "›"
-            gravity = Gravity.CENTER
-            setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
-            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-        }, LinearLayout.LayoutParams(dp(36), dp(48)))
     }
 
     private fun renderAlbumGrid(albums: List<AlbumPresentation>, generation: Int) {
@@ -4410,6 +4387,7 @@ class GalleryActivity : Activity() {
         PHOTOS,
         ALBUMS,
         VIDEOS,
+        TRASH,
         SETTINGS,
     }
 
