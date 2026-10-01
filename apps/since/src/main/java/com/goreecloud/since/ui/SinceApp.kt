@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -657,7 +657,8 @@ private fun Dashboard(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
+            .padding(innerPadding)
+            .testTag("dashboard-list"),
         contentPadding = PaddingValues(
             start = 20.dp,
             top = 24.dp,
@@ -703,52 +704,43 @@ private fun Dashboard(
                         label = { Text(stringResource(R.string.dashboard_search)) },
                         singleLine = true,
                     )
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .testTag("dashboard-sort-row"),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        item {
-                            FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.RECENT,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.RECENT.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_recent)) },
-                            )
-                        }
-                        item {
-                            FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.MANUAL,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.MANUAL.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_manual)) },
-                            )
-                        }
-                        item {
-                            FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.TITLE,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.TITLE.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_name)) },
-                            )
-                        }
-                        item {
-                            FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.NEWEST_START,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.NEWEST_START.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_newest_start)) },
-                            )
-                        }
-                        item {
-                            FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.OLDEST_START,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.OLDEST_START.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_oldest_start)) },
-                            )
-                        }
-                        item {
-                            FilterChip(
-                                selected = dashboardSort == SinceDashboardSort.LONGEST_CURRENT,
-                                onClick = { onDashboardSortChange(SinceDashboardSort.LONGEST_CURRENT.name) },
-                                label = { Text(stringResource(R.string.dashboard_sort_longest_current)) },
-                            )
-                        }
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.RECENT,
+                            onClick = { onDashboardSortChange(SinceDashboardSort.RECENT.name) },
+                            label = { Text(stringResource(R.string.dashboard_sort_recent)) },
+                        )
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.MANUAL,
+                            onClick = { onDashboardSortChange(SinceDashboardSort.MANUAL.name) },
+                            label = { Text(stringResource(R.string.dashboard_sort_manual)) },
+                        )
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.TITLE,
+                            onClick = { onDashboardSortChange(SinceDashboardSort.TITLE.name) },
+                            label = { Text(stringResource(R.string.dashboard_sort_name)) },
+                        )
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.NEWEST_START,
+                            onClick = { onDashboardSortChange(SinceDashboardSort.NEWEST_START.name) },
+                            label = { Text(stringResource(R.string.dashboard_sort_newest_start)) },
+                        )
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.OLDEST_START,
+                            onClick = { onDashboardSortChange(SinceDashboardSort.OLDEST_START.name) },
+                            label = { Text(stringResource(R.string.dashboard_sort_oldest_start)) },
+                        )
+                        FilterChip(
+                            selected = dashboardSort == SinceDashboardSort.LONGEST_CURRENT,
+                            onClick = { onDashboardSortChange(SinceDashboardSort.LONGEST_CURRENT.name) },
+                            label = { Text(stringResource(R.string.dashboard_sort_longest_current)) },
+                        )
                     }
                     if (visibleAggregates.isEmpty()) {
                         Text(
@@ -1804,6 +1796,7 @@ private fun ResetStreakDialog(
             },
             dismissButton = {
                 TextButton(
+                    modifier = Modifier.testTag("back-from-reset-confirmation"),
                     onClick = { pendingReset = null },
                     enabled = !isSaving,
                 ) {
