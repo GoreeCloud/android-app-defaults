@@ -1135,6 +1135,7 @@ fun ReadOnlyPagedHomeSurface(
     onGridBoundsChanged: (Rect?) -> Unit = {},
     contentOnly: Boolean = false,
     dockHostedExternally: Boolean = false,
+    pageMotionHostedExternally: Boolean = false,
 ) {
     if (!contentOnly) {
         val secondaryPages = remember(pages) {
@@ -1482,7 +1483,11 @@ fun ReadOnlyPagedHomeSurface(
                     .weight(1f)
                     .fillMaxWidth()
                     .launcherHomePageEntryTransition(
-                        transition = pageTransition,
+                        transition = if (pageMotionHostedExternally) {
+                            LauncherHomePageTransition.NONE
+                        } else {
+                            pageTransition
+                        },
                         transitionKey = page.pageId,
                     )
                     .then(
