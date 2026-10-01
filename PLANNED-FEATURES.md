@@ -2,14 +2,12 @@
 
 ## 2026-09-30 Since dashboard-search continuation
 
-The active stacked candidate now covers the specified local Dashboard ordering set and accent-tolerant title/note search. Remaining S08 work is limited to optional archived-item inclusion if intentionally enabled; representative-device accessibility/localization acceptance remains open.
+The active consolidated stacked candidate now covers the specified local Dashboard ordering set, accent-tolerant title/note search, persisted sort selection, compact populated-Dashboard spacing, and actionable-only contextual guidance. Remaining S08 work is limited to optional archived-item inclusion if intentionally enabled; representative-device accessibility/localization acceptance remains open.
 
 
 ## 2026-09-30 Since display-settings continuation
 
-Default display format and seconds visibility are implemented on the active stacked Development candidate with the specified defaults of Days and seconds enabled. Remaining Settings work includes the separately specified reset-confirmation preference, reduced-motion/transparency behavior only where an approved Glaze mapping permits it, and representative-device accessibility/localization acceptance.
-
-The existing Reset Streak surface remains the required path for choosing reset time and optional reason/note and for explaining history preservation. The product specification does not yet define a safe alternate interaction for disabling confirmation without losing those controls, so no alternate reset path is invented in this candidate.
+Default display format, seconds visibility, and the reset-confirmation preference are implemented on the active consolidated Development candidate. Reset confirmation defaults on. When disabled, the existing Reset Streak editor still requires reset time and optional reason/note review, performs the same validation, preserves History, and uses the same atomic reset mutation; only the final extra confirmation is omitted. Remaining Settings work includes reduced-motion/transparency behavior only where an approved Glaze mapping permits it and representative-device accessibility/localization acceptance.
 
 
 ## 2026-09-29 Since import-review continuation
