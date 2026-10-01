@@ -706,6 +706,128 @@ private suspend fun loadLauncherAppFreshness(
 
 
 @Composable
+private fun LauncherSearchHistoryControl(
+    state: LauncherSearchHistoryState,
+    onSetEnabled: (Boolean) -> Unit,
+    onClear: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("launcher-search-history-control"),
+        shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(GlazeMetrics.space2),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Recent searches",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        if (state.enabled) {
+                            "Stored only on this device after you open a search result."
+                        } else {
+                            "Off by default. No search text is saved."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = state.enabled,
+                    onCheckedChange = onSetEnabled,
+                    modifier = Modifier.testTag("launcher-search-history-toggle"),
+                )
+            }
+            if (state.enabled && state.recentQueries.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(
+                        onClick = onClear,
+                        modifier = Modifier.testTag("launcher-search-history-clear"),
+                    ) {
+                        Text("Clear history")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherRecentSearches(
+    queries: List<String>,
+    onSelect: (String) -> Unit,
+    onClear: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("launcher-recent-searches"),
+        verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = GlazeMetrics.space1),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                "Recent searches",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+            )
+            TextButton(onClick = onClear) { Text("Clear") }
+        }
+        queries.take(5).forEachIndexed { index, recent ->
+            Surface(
+                onClick = { onSelect(recent) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .testTag("launcher-recent-search-" + index),
+                shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = GlazeMetrics.space2, vertical = GlazeMetrics.space1),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                ) {
+                    Text(
+                        "↺",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        recent,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun LauncherSearchSuggestionPresentationControl(
     selected: LauncherSearchSuggestionPresentation,
     onSelect: (LauncherSearchSuggestionPresentation) -> Unit,
