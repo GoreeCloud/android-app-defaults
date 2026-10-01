@@ -224,6 +224,62 @@ class HomePageManagerPolicyTest {
     }
 
     @Test
+    fun allHomePagerResolvesKnownAndStaleSelections() {
+        val primary = WorkspaceRenderedHomePage(
+            pageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+            rank = 0,
+            appKeys = emptyList(),
+            appPlacements = emptyList(),
+            folderPlacements = emptyList(),
+            widgetPlacements = emptyList(),
+            unsupportedItemCount = 0,
+        )
+        val second = primary.copy(pageId = "home:secondary", rank = 1)
+        val third = primary.copy(pageId = "home:third", rank = 2)
+        val pages = listOf(primary, second, third)
+
+        assertEquals(
+            2,
+            homePagerSelectedPageIndex(
+                selectedHomePageId = third.pageId,
+                pages = pages,
+            ),
+        )
+        assertEquals(
+            0,
+            homePagerSelectedPageIndex(
+                selectedHomePageId = "home:missing",
+                pages = pages,
+            ),
+        )
+        assertEquals(0, homePagerSelectedPageIndex(null, emptyList()))
+    }
+
+    @Test
+    fun allHomePagerKeepsAtMostOneAdjacentPageWarm() {
+        assertEquals(0, homePagerBeyondViewportPageCount(0))
+        assertEquals(0, homePagerBeyondViewportPageCount(1))
+        assertEquals(1, homePagerBeyondViewportPageCount(2))
+        assertEquals(1, homePagerBeyondViewportPageCount(8))
+    }
+
+    @Test
+    fun externallyHostedPageMotionSuppressesPrimaryThresholdRecognizer() {
+        assertTrue(
+            primaryHomeShouldHandleHorizontalPaging(
+                contentOnly = false,
+                pageMotionHostedExternally = false,
+            ),
+        )
+        assertFalse(
+            primaryHomeShouldHandleHorizontalPaging(
+                contentOnly = false,
+                pageMotionHostedExternally = true,
+            ),
+        )
+    }
+
+    @Test
     fun primaryContentOnlyModeSuppressesPersistentChrome() {
         assertFalse(primaryHomeShouldRenderFixedSearch(contentOnly = true, requested = true))
         assertFalse(
