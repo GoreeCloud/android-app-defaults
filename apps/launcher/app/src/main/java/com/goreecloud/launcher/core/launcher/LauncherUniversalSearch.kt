@@ -90,6 +90,7 @@ enum class LauncherSearchCategory {
     CALL_HISTORY,
     MESSAGE,
     FILE,
+    UTILITY,
     CONNECTED_SOURCE,
     SETTING,
     ACTION,
@@ -406,6 +407,7 @@ object LauncherBuiltInSearchProviderRegistry {
     fun registrations(apps: List<LauncherActivityInfo>): List<LauncherSearchProviderRegistration> =
         listOf(
             builtInRegistration(LauncherCoreActionsSearchProvider()),
+            builtInRegistration(LauncherUtilitySearchProvider()),
             builtInRegistration(LauncherInstalledAppsSearchProvider(apps)),
         )
 
