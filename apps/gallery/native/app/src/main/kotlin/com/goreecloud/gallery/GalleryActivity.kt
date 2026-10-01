@@ -4385,17 +4385,6 @@ class GalleryActivity : Activity() {
             .show()
     }
 
-    private fun explainPasswordProtectionBoundary() {
-        AlertDialog.Builder(this)
-            .setTitle("Password protect photos")
-            .setMessage(
-                "Protected Photos is a required Gallery capability, but this Development build does not yet provide a secure protected-media store. " +
-                    "Gallery will not fake protection with an app-local password toggle. The production implementation must use supported Android/GoreeCloud authentication, protected storage, Privacy Shield consent controls, and Wardveil trust boundaries before this setting becomes active.",
-            )
-            .setPositiveButton("Done", null)
-            .show()
-    }
-
     private fun setBooleanSetting(key: String, value: Boolean) {
         galleryPreferences().edit().putBoolean(key, value).apply()
     }
