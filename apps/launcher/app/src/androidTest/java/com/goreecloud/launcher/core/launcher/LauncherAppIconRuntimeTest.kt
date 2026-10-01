@@ -5,6 +5,10 @@ import android.content.pm.LauncherApps
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
@@ -30,6 +34,34 @@ class LauncherAppIconRuntimeTest {
             expected,
             actual,
         )
+    }
+
+    @Test
+    fun repeatedFullRefreshesPreserveVisibleInventoryAcrossProfiles() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val launcherApps = context.getSystemService(LauncherApps::class.java)
+        val expected = visibleLauncherActivities(launcherApps)
+            .map(::inventoryKey)
+            .sorted()
+        assertTrue(expected.isNotEmpty())
+
+        val repository = LauncherAppsRepository(context)
+        val snapshots = withTimeout(20_000) {
+            repository.apps
+                .onEach { repository.refreshInventory() }
+                .take(4)
+                .map { apps -> apps.map(::inventoryKey).sorted() }
+                .toList()
+        }
+
+        assertEquals(4, snapshots.size)
+        snapshots.forEachIndexed { index, actual ->
+            assertEquals(
+                "Full inventory reconciliation #${index + 1} must not drop Android-visible User/Work apps.",
+                expected,
+                actual,
+            )
+        }
     }
 
     @Test
