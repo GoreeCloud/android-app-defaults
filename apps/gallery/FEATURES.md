@@ -19,6 +19,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and icon-bearing All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
 - Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open and Details. Destructive media actions remain outside these compact card menus.
 - Newest / Oldest ordering over the current authorized snapshot.
+- Header view/sort action keeps Sort, Group, and View-density configuration available without a persistent controls row beneath the Photos/Videos header; Albums exposes Sort through the same compact header action.
 - Local search over authorized display names and album names without an additional provider query.
 - Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, bounded album-detail browsing, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
 - Device-local Favorites backed only by Gallery app-local state; favorite/unfavorite is available from the viewer and authorized Favorites appear as a dedicated collection.
@@ -153,8 +154,8 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Trash / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and dedicated Trash candidate.
 - Physically validate the dedicated Trash destination on representative Android devices with disposable copied media, including five-tab navigation, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty Trash, provider failure, restart/process recreation, and retention/expiry refresh.
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
-- Refine multi-select from physical-device evidence and add approved contextual actions as their authorities become real; Move remains unavailable until its mutation path is implemented and validated.
-- Add richer grouping modes, view-density/layout controls, album creation/rename/reorder, and approved move/copy organization.
+- Refine multi-select from physical-device evidence and continue representative-device acceptance for the implemented Android-authorized Move path and its existing/new-folder cases.
+- Continue richer timeline/layout refinement, album creation/rename/reorder, and approved Copy organization; Group and View-density controls are already implemented.
 - Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
 - Complete animated GIF thumbnail decoding before treating the saved GIF-animation preference as behaviorally active.
 - Complete approved first-party editing and approved metadata-editing workflows.
