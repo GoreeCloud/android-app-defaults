@@ -53,6 +53,13 @@ enum class WidgetPresentation {
     REGULAR,
 }
 
+object WidgetDetailPolicy {
+    fun showSecondaryDetail(
+        presentation: WidgetPresentation,
+        enabled: Boolean,
+    ): Boolean = enabled && presentation == WidgetPresentation.REGULAR
+}
+
 object WidgetSizePolicy {
     private const val COMPACT_WIDTH_DP = 160
     private const val COMPACT_HEIGHT_DP = 90
