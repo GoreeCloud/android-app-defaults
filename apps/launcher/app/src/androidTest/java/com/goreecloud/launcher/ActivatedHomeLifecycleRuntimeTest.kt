@@ -779,12 +779,20 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
 
+                // Exercise the dedicated Home swipe-up surface from empty grid space rather
+                // than injecting through the app tile itself. The tile also owns long-press/drag
+                // recognition; competing recognizers can leave Compose test input waiting for idle
+                // even though the Launcher gesture path is healthy.
                 composeRule
-                    .onNodeWithText(candidate.label.toString(), useUnmergedTree = true)
+                    .onNodeWithTag(
+                        "launcher-home-swipe-up-apps",
+                        useUnmergedTree = true,
+                    )
                     .performTouchInput {
                         swipeUp(
-                            startY = bottom - 1f,
-                            endY = top - 320f,
+                            startX = right - 12f,
+                            startY = bottom - 24f,
+                            endY = top + 24f,
                             durationMillis = 400,
                         )
                     }
