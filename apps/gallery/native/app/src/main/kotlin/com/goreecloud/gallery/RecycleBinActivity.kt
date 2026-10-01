@@ -135,12 +135,12 @@ class RecycleBinActivity : Activity() {
                 this,
                 when (mutation.mode) {
                     AndroidMediaMutationMode.RESTORE ->
-                        if (mutation.contentUris.size == 1) "Restored from Recycle Bin"
+                        if (mutation.contentUris.size == 1) "Restored from Trash"
                         else "Restored ${mutation.contentUris.size} items"
                     AndroidMediaMutationMode.DELETE ->
                         if (mutation.contentUris.size == 1) "Deleted permanently"
                         else "Deleted ${mutation.contentUris.size} items permanently"
-                    AndroidMediaMutationMode.TRASH -> "Recycle Bin updated"
+                    AndroidMediaMutationMode.TRASH -> "Trash updated"
                 },
                 Toast.LENGTH_SHORT,
             ).show()
@@ -358,20 +358,20 @@ class RecycleBinActivity : Activity() {
             trashedItems = emptyList()
             headerTitle.text = "Trash"
             headerSubtitle.text = "Requires Android 11 or newer"
-            body.addView(emptyState("Recycle Bin unavailable", "Android MediaStore Trash browsing requires Android 11 or newer."))
+            body.addView(emptyState("Trash unavailable", "Android MediaStore Trash browsing requires Android 11 or newer."))
             return
         }
         if (!hasReadableMediaAccess()) {
             trashedItems = emptyList()
             headerTitle.text = "Trash"
             headerSubtitle.text = "Media access required"
-            body.addView(emptyState("Media access required", "Open GoreeCloud Gallery and allow Android media access before browsing the Recycle Bin."))
+            body.addView(emptyState("Media access required", "Open GoreeCloud Gallery and allow Android media access before browsing Trash."))
             return
         }
 
         headerTitle.text = "Trash"
         headerSubtitle.text = "Loading Android MediaStore Trash…"
-        body.addView(messageRow("Loading Recycle Bin", "Reading only image/video items Android currently exposes as trashed."))
+        body.addView(messageRow("Loading Trash", "Reading only image/video items Android currently exposes as trashed."))
 
         thread(name = "goreecloud-gallery-recycle-bin") {
             try {
@@ -555,7 +555,7 @@ class RecycleBinActivity : Activity() {
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
         }
-        headerTitle.text = if (selectedUris.isEmpty()) "Recycle Bin" else if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
+        headerTitle.text = if (selectedUris.isEmpty()) "Trash" else if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
         if (selectedUris.isEmpty()) {
             headerSubtitle.text = if (trashedItems.size == 1) "1 item · Android controls retention" else "${trashedItems.size} items · Android controls retention"
         } else {
@@ -731,7 +731,7 @@ class RecycleBinActivity : Activity() {
             val cacheKey = viewerCacheKey(item.contentUri)
             preview.setImageDrawable(null)
             preview.tag = cacheKey
-            preview.contentDescription = "Recycle Bin viewer for ${item.displayName}"
+            preview.contentDescription = "Trash viewer for ${item.displayName}"
             viewerTitle.text = item.displayName
             viewerSubtitle.text = "${currentIndex + 1} of ${items.size} · ${mediaMetadata(item)}"
             previous.isEnabled = currentIndex > 0
@@ -892,7 +892,7 @@ class RecycleBinActivity : Activity() {
         if (selectedUris.isNotEmpty()) {
             "${item.displayName}. ${if (selected) "Selected" else "Not selected"}. Double tap to toggle selection."
         } else {
-            "${item.displayName}. In Recycle Bin. Double tap to open viewer. Long press to select."
+            "${item.displayName}. In Trash. Double tap to open viewer. Long press to select."
         }
 
     private fun mediaMetadata(item: MediaItem): String {
