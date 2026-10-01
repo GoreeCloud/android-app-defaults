@@ -614,27 +614,16 @@ class MainActivity : ComponentActivity() {
                                 packageName = app.componentName.packageName,
                             )
                         },
-                    maxFavorites = 10,
+                    maxFavorites = 0,
                     maxDock = visualPreferences.starterDockSize.coerceIn(4, 6),
                 )
 
                 if (!workspace.initialized) {
                     workspaceRepository.ensureDefaults(
-                        favoriteKeys = starterSelection.favoriteKeys,
+                        favoriteKeys = emptyList(),
                         dockKeys = starterSelection.dockKeys,
                     )
                 } else if (workspace.favoriteKeys.isEmpty() && workspace.dockKeys.isEmpty()) {
-                    for (key in starterSelection.favoriteKeys) {
-                        if (
-                            workspaceRuntimeCoordinator.toggleFavorite(
-                                key = key,
-                                homeColumns = launcherPreferences.homeColumns,
-                                homeRows = launcherPreferences.homeRows,
-                            ) !is WorkspaceAuthoritativeWriteResult.Written
-                        ) {
-                            return@LaunchedEffect
-                        }
-                    }
                     for (key in starterSelection.dockKeys) {
                         if (
                             workspaceRuntimeCoordinator.toggleDock(key) !is
@@ -695,40 +684,15 @@ class MainActivity : ComponentActivity() {
                     workspace.authority != WorkspaceAuthority.ROOM ||
                     !experiencePreferences.starterLayoutApplied ||
                     !experiencePreferences.startupWizardCompleted ||
-                    workspace.favoriteKeys.isNotEmpty() ||
                     !hasLegacyStarterGlance
                 ) {
                     return@LaunchedEffect
                 }
 
-                val migrationSelection = StarterWorkspacePolicy.select(
-                    apps
-                        .filter { app ->
-                            app.componentName.packageName != packageName &&
-                                app.workspaceKey() !in workspace.dockKeys
-                        }
-                        .map { app ->
-                            StarterWorkspaceCandidate(
-                                key = app.workspaceKey(),
-                                label = app.label.toString(),
-                                packageName = app.componentName.packageName,
-                            )
-                        },
-                    maxFavorites = 10,
-                    maxDock = 0,
-                )
-
                 workspaceRuntimeCoordinator.removeWidget(STARTER_GLANCE_WIDGET_ID)
                 launcherPreferencesRepository.setHomeCardStyle(
                     com.goreecloud.launcher.core.launcher.LauncherHomeCardStyle.CLOCK,
                 )
-                for (key in migrationSelection.favoriteKeys) {
-                    workspaceRuntimeCoordinator.toggleFavorite(
-                        key = key,
-                        homeColumns = launcherPreferences.homeColumns,
-                        homeRows = launcherPreferences.homeRows,
-                    )
-                }
                 workspaceRuntimeCoordinator.addBuiltInWidget(
                     itemId = STARTER_CALENDAR_WIDGET_ID,
                     typeId = WorkspaceWidgetCatalog.CALENDAR,
