@@ -1,5 +1,16 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — compact header presentation options
+
+### Changed
+- Removed the persistent Photos/Videos Group and View control row beneath the primary header so date timelines and video filters sit directly beneath the mockup-aligned title area.
+- The existing header view/sort action now opens a compact menu that routes Photos/Videos to Sort, Group, and View-density dialogs and Albums to Sort.
+- Presentation preferences retain their existing app-private storage and operate only on the already-authorized local media snapshot.
+- Updated rendered acceptance so media-only Search and view/sort controls remain hidden when no readable media is available.
+
+### Boundary
+This is presentation and navigation consolidation only. It adds no MediaStore query, permission, mutation, filesystem, account, network, cloud, or synchronization authority.
+
 ## October 1, 2026 — mockup-aligned smart-filter iconography
 
 ### Changed
