@@ -12,7 +12,9 @@ Merged PR #121 restores configured horizontal edge actions on the unified pager.
 
 The current Development candidate restores the complete API 36 `connectedDebugAndroidTest` suite plus focused `LauncherTransitionPerformanceRuntimeTest` diagnostics and makes both promotion requirements for Launcher changes. Its first restoration attempt exposed and then repaired a project-directory routing defect before any Launcher performance assertion.
 
-Still open after the runtime-gate candidate: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
+A stacked Development acceptance candidate adds API 36 regression coverage for repeated full inventory reconciliation and App Drawer stop/resume continuity. It verifies that Android-visible inventory is not dropped by repeated reconciliation and that a known drawer app remains rendered through a CREATED→RESUMED lifecycle transition. Real package/profile churn, OEM enumeration behavior, and representative-device jank/power acceptance remain open.
+
+Still open after the runtime-gate candidate: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work package/profile churn acceptance beyond the new managed-emulator continuity checks; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
 **Record type:** Repository planned/open feature inventory  
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
