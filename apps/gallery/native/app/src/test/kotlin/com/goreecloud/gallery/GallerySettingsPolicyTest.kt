@@ -45,6 +45,31 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
+    fun `video presentation uses mockup-aligned recency wording`() {
+        assertEquals(
+            "Recently added",
+            GalleryVideoPresentationPolicy.filterAndOrderLabel(
+                GalleryVideoFilter.ALL,
+                com.goreecloud.gallery.core.MediaSortOrder.NEWEST,
+            ),
+        )
+        assertEquals(
+            "Screen recordings · Recently added",
+            GalleryVideoPresentationPolicy.filterAndOrderLabel(
+                GalleryVideoFilter.SCREEN_RECORDINGS,
+                com.goreecloud.gallery.core.MediaSortOrder.NEWEST,
+            ),
+        )
+        assertEquals(
+            "Oldest first",
+            GalleryVideoPresentationPolicy.filterAndOrderLabel(
+                GalleryVideoFilter.ALL,
+                com.goreecloud.gallery.core.MediaSortOrder.OLDEST,
+            ),
+        )
+    }
+
+    @Test
     fun `video filters expose only categories present in the authorized snapshot`() {
         val camera = video("camera", "Camera", "VID_001.mp4")
         val recording = video("screens", "Screen recordings", "screen_recording_001.mp4")
