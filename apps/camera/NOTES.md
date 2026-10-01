@@ -9,7 +9,7 @@
 - The local-settings continuation now also includes a persisted Off / 3 s / 10 s photo self-timer that reuses the existing still-capture path and cancels when the activity leaves the foreground, a Camera modal opens, or the capture session leaves preview.
 - The stacked local-settings continuation adds a default-off, persisted composition-grid preference and non-interactive rule-of-thirds preview overlay. It is presentation-only candidate work pending exact-head validation and does not close broader Camera settings or device-qualification gates.
 - The current stacked candidate includes mandatory first-use setup with persisted resume, replay, and globally disableable contextual hints. It remains Concept/Development presentation behavior only and does not create capture, permission, network, release, or Stable authority.
-- Canonical repository: `GoreeCloud/goreecloud-camera`.
+- Canonical repository: `GoreeCloud/android-app-defaults` (`apps/camera/`).
 - Product version baseline: `0.1.0`.
 - Lifecycle remains Concept; source/build progress does not establish promotion.
 - Primary platform: native Android/Kotlin.

@@ -101,7 +101,7 @@ capture_evidence() {
   fi
 
   cat > "$EVIDENCE_ROOT/RUNTIME-PROVENANCE.txt" <<PROVENANCE
-repository=GoreeCloud/goreecloud-camera
+repository=GoreeCloud/android-app-defaults
 source_sha=${SOURCE_SHA:?SOURCE_SHA is required}
 product_version=0.1.0
 lifecycle=Concept
