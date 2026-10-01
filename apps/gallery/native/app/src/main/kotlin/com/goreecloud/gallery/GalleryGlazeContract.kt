@@ -68,12 +68,12 @@ object GalleryGlazeContract {
     const val MIN_ALBUM_TILE_DP = 132
 
     // Current V1.6 Gallery navigation baseline plus local icon/label adapter details.
-    const val NAVIGATION_HEIGHT_DP = 54
+    const val NAVIGATION_HEIGHT_DP = 60
     const val NAVIGATION_RADIUS_DP = 26
     const val NAVIGATION_SIDE_MARGIN_DP = 24
     const val NAVIGATION_BOTTOM_MARGIN_DP = 10
     const val NAVIGATION_ELEVATION_DP = 4
-    const val NAVIGATION_RESERVED_SPACE_DP = 76
+    const val NAVIGATION_RESERVED_SPACE_DP = 82
     const val CONTENT_BOTTOM_INSET_DP = 28
     const val NAVIGATION_ICON_DP = 20
     const val NAVIGATION_LABEL_SP = 10.5f
