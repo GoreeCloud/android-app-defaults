@@ -16,7 +16,7 @@ data class LauncherCopyTextSearchAction(
 /**
  * Permissionless, offline utility provider for quick arithmetic and common unit conversions.
  *
- * Supported arithmetic: +, -, *, /, %, parentheses, unary +/- and the ×/÷ symbols.
+ * Supported arithmetic: +, -, *, /, %, parentheses, unary +/-, ×/÷, and simple "% of" queries.
  * Supported conversion dimensions: length, mass, volume, time, and temperature.
  */
 class LauncherUtilitySearchProvider : LauncherSearchProvider {
@@ -28,6 +28,7 @@ class LauncherUtilitySearchProvider : LauncherSearchProvider {
 
         val evaluation =
             LauncherUtilityQueryParser.convert(query)
+                ?: LauncherUtilityQueryParser.evaluatePercentage(query)
                 ?: LauncherUtilityQueryParser.evaluateExpression(query)
                 ?: return emptyList()
 
@@ -58,7 +59,11 @@ internal data class LauncherUtilityEvaluation(
 
 internal object LauncherUtilityQueryParser {
     private val conversionPattern = Regex(
-        pattern = """^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*([a-zA-Z°]+)\s+(?:to|in)\s+([a-zA-Z°]+)$""",
+        pattern = """^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*([a-zA-Z°]+(?:\s+[a-zA-Z°]+)?)\s+(?:to|in)\s+([a-zA-Z°]+(?:\s+[a-zA-Z°]+)?)$""",
+        options = setOf(RegexOption.IGNORE_CASE),
+    )
+    private val percentagePattern = Regex(
+        pattern = """^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*%\s+of\s+([+-]?(?:\d+(?:\.\d*)?|\.\d+))$""",
         options = setOf(RegexOption.IGNORE_CASE),
     )
     private val allowedExpressionCharacters = Regex("""^[0-9+\-*/%().×÷\s]+$""")
@@ -87,6 +92,21 @@ internal object LauncherUtilityQueryParser {
             kind = "calculator",
             resultText = formatted,
             subtitle = "$trimmed · Local calculator · Tap to copy",
+        )
+    }
+
+    fun evaluatePercentage(rawQuery: String): LauncherUtilityEvaluation? {
+        val match = percentagePattern.matchEntire(rawQuery.trim()) ?: return null
+        val percent = match.groupValues[1].toDoubleOrNull() ?: return null
+        val value = match.groupValues[2].toDoubleOrNull() ?: return null
+        if (!percent.isFinite() || !value.isFinite()) return null
+
+        val result = value * percent / 100.0
+        if (!result.isFinite()) return null
+        return LauncherUtilityEvaluation(
+            kind = "percentage",
+            resultText = formatNumber(result),
+            subtitle = "${formatNumber(percent)}% of ${formatNumber(value)} · Local calculator · Tap to copy",
         )
     }
 
@@ -185,7 +205,12 @@ internal object LauncherUtilityQueryParser {
         UnitDefinition(Dimension.VOLUME, "L", setOf("l", "liter", "liters", "litre", "litres"), 1.0),
         UnitDefinition(Dimension.VOLUME, "tsp", setOf("tsp", "teaspoon", "teaspoons"), 0.00492892159375),
         UnitDefinition(Dimension.VOLUME, "tbsp", setOf("tbsp", "tablespoon", "tablespoons"), 0.01478676478125),
-        UnitDefinition(Dimension.VOLUME, "fl oz", setOf("floz", "fluidounce", "fluidounces"), 0.0295735295625),
+        UnitDefinition(
+            Dimension.VOLUME,
+            "fl oz",
+            setOf("floz", "fl oz", "fluidounce", "fluidounces", "fluid ounce", "fluid ounces"),
+            0.0295735295625,
+        ),
         UnitDefinition(Dimension.VOLUME, "cup", setOf("cup", "cups"), 0.2365882365),
         UnitDefinition(Dimension.VOLUME, "gal", setOf("gal", "gallon", "gallons"), 3.785411784),
 
