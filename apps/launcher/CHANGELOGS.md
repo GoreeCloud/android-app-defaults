@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — add direct owner-interaction runtime acceptance
+
+A stacked Development test candidate now exercises two owner-reported paths that were implemented but lacked direct Android runtime assertions. The unified multi-page Home test boundary now includes a configured swipe-down Universal Search gesture from a real secondary Home page and requires the Search field to render. The existing default-HOME long-press test now presses HOME while the full-screen Edit Home surface is open and requires the editor to disappear and the normal Home gesture surface to be displayed again.
+
+No Launcher production behavior changes in this candidate.
+
+**Acceptance boundary:** test-source candidate only until its parent runtime-gate line is accepted and this exact head passes the restored API 36 suite. Representative-device transition smoothness and input-latency acceptance remain open.
+
+
 ## October 1, 2026 — restore monorepo Android 16 Launcher runtime gates
 
 A post-consolidation audit found that the migrated-app workflow still ran Launcher source guards, JVM tests, lint, schema verification, and APK assembly, but no longer executed the source-controlled Launcher Android instrumentation suite or the existing transition-performance instrumentation.
