@@ -170,6 +170,9 @@
     <string name="reset_streak_title">إعادة ضبط السلسلة</string>
     <string name="reset_streak_supporting">أغلق الفترة الحالية وابدأ فترة جديدة دون حذف السجل.</string>
     <string name="reset_streak">إعادة ضبط السلسلة</string>
+    <string name="reset_review">مراجعة إعادة الضبط</string>
+    <string name="reset_confirmation_title">إعادة ضبط هذه السلسلة؟</string>
+    <string name="reset_confirmation_message">سيتم الاحتفاظ بالفترة الحالية في السجل وستبدأ فترة جديدة في وقت إعادة الضبط.</string>
     <string name="resetting">جارٍ إعادة الضبط…</string>
     <string name="reset_failed">تعذر إعادة ضبط هذه السلسلة. تم ترك السجل الحالي دون تغيير.</string>
     <string name="reset_history_explanation">سيتم الاحتفاظ بالفترة الحالية في السجل وستبدأ فترة جديدة في وقت إعادة الضبط.</string>
