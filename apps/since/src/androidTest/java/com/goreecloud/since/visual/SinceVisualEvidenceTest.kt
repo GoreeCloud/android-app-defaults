@@ -92,9 +92,12 @@ class SinceVisualEvidenceTest {
         capture("tracker-details-dark")
 
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithTag("reset-reason").performTextInput("Restarted plan")
         capture("reset-streak-dark")
+        composeRule.onNodeWithTag("review-reset-streak").performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        capture("reset-confirmation-dark")
         composeRule.onNodeWithTag("confirm-reset-streak").performClick()
         composeRule.waitForIdle()
 
@@ -123,9 +126,10 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithTag("nav-settings").performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
         capture("settings")
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithText("Export data").assertIsDisplayed()
         capture("settings-recovery")
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
         capture("settings-about")
 
@@ -136,9 +140,10 @@ class SinceVisualEvidenceTest {
         composeRule.onNodeWithTag("settings-list").performScrollToIndex(0)
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
         capture("settings-dark")
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(3)
+        composeRule.onNodeWithText("Export data").assertIsDisplayed()
         capture("settings-recovery-dark")
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(4)
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(6)
         composeRule.onNodeWithText("App version").assertIsDisplayed()
         capture("settings-about-dark")
 
@@ -158,8 +163,12 @@ class SinceVisualEvidenceTest {
         capture("tracker-details")
 
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertIsDisplayed()
         capture("reset-streak")
+        composeRule.onNodeWithTag("review-reset-streak").performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        capture("reset-confirmation")
+        composeRule.onNodeWithTag("back-from-reset-confirmation").performClick()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
