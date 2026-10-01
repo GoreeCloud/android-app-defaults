@@ -262,6 +262,26 @@ class SinceTopLevelNavigationTest {
     }
 
     @Test
+    fun homeContextualHintWaitsUntilThereIsARealTrackerToExplain() {
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = FakeTrackerRepository(emptyList()),
+                    clock = clock,
+                    contextualHintsEnabled = true,
+                )
+            }
+        }
+
+        assertTrue(
+            composeRule.onAllNodesWithTag("home-contextual-hint")
+                .fetchSemanticsNodes()
+                .isEmpty(),
+        )
+        composeRule.onNodeWithText("Add tracker").assertIsDisplayed()
+    }
+
+    @Test
     fun homeContextualHintCanBeDismissedWithoutDisablingGlobalPreference() {
         var contextualHintsEnabled by mutableStateOf(true)
         var homeHintDismissed by mutableStateOf(false)
@@ -269,7 +289,7 @@ class SinceTopLevelNavigationTest {
         composeRule.setContent {
             MaterialTheme {
                 SinceApp(
-                    repository = FakeTrackerRepository(emptyList()),
+                    repository = FakeTrackerRepository(listOf(sampleAggregate())),
                     clock = clock,
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
@@ -301,7 +321,7 @@ class SinceTopLevelNavigationTest {
         composeRule.setContent {
             MaterialTheme {
                 SinceApp(
-                    repository = FakeTrackerRepository(emptyList()),
+                    repository = FakeTrackerRepository(listOf(sampleAggregate())),
                     clock = clock,
                     contextualHintsEnabled = contextualHintsEnabled,
                     onContextualHintsEnabledChange = { contextualHintsEnabled = it },
