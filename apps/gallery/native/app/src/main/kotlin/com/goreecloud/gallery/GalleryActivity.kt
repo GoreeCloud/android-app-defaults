@@ -1414,6 +1414,7 @@ class GalleryActivity : Activity() {
 
     private fun videoFilterStrip(filters: List<GalleryVideoFilter>): HorizontalScrollView =
         HorizontalScrollView(this).apply {
+            videoFilterStripView = this
             isHorizontalScrollBarEnabled = false
             isFillViewport = false
             overScrollMode = View.OVER_SCROLL_NEVER
