@@ -23,6 +23,7 @@ import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -840,6 +841,141 @@ class ActivatedHomeLifecycleRuntimeTest {
     }
 
     @Test
+    fun configuredSwipeDownFromSecondaryHomeOpensUniversalSearch() = runBlocking {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val roleManager = context.getSystemService(RoleManager::class.java)
+        val alreadyDefaultHome =
+            roleManager.isRoleAvailable(RoleManager.ROLE_HOME) &&
+                roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+        val preferencesRepository = LauncherPreferencesRepository(context)
+        val previousSwipeDown =
+            preferencesRepository.experiencePreferences.first().swipeDownAction
+        val searchAction =
+            LauncherGestureAction.builtIn(LauncherGestureActionType.UNIVERSAL_SEARCH)
+        val secondaryPageId = "home:test:secondary-search"
+        val repository = WorkspaceRepository(context)
+        var runtime: WorkspaceProductionRuntimeCoordinator? = null
+
+        if (!alreadyDefaultHome) {
+            runShellCommand(
+                "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+            )
+            withTimeout(10_000) {
+                while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                    delay(100)
+                }
+            }
+        }
+
+        try {
+            preferencesRepository.setGestureAction(
+                LauncherHomeGesture.SWIPE_DOWN,
+                searchAction,
+            ).join()
+            withTimeout(5_000) {
+                preferencesRepository.experiencePreferences.first {
+                    it.swipeDownAction == searchAction
+                }
+            }
+
+            val apps = withTimeout(10_000) {
+                LauncherAppsRepository(context).apps.first { candidates ->
+                    candidates.any { it.componentName.packageName != context.packageName }
+                }
+            }
+            val candidate = apps.first { it.componentName.packageName != context.packageName }
+            repository.ensureDefaults(
+                favoriteKeys = listOf(candidate.workspaceKey()),
+                dockKeys = emptyList(),
+            )
+
+            val scenario = ActivityScenario.launch(MainActivity::class.java)
+            try {
+                withTimeout(15_000) {
+                    repository.state.first { it.authority == WorkspaceAuthority.ROOM }
+                }
+
+                runtime = WorkspaceProductionRuntimeCoordinator(
+                    authorityRepository = repository,
+                    workspaceDaoProvider = {
+                        LauncherDatabaseProvider.get(context).workspaceDao()
+                    },
+                )
+                runtime?.deleteEmptyHomePage(secondaryPageId)
+                val created = runtime?.createHomePage(secondaryPageId)
+                check(
+                    created is WorkspacePagedRoomMutationResult.CreatedPage ||
+                        created is WorkspacePagedRoomMutationResult.PageAlreadyExists
+                )
+
+                composeRule.waitUntil(timeoutMillis = 15_000) {
+                    composeRule
+                        .onAllNodesWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeRule
+                    .onNodeWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
+                    .performTouchInput {
+                        swipeLeft(
+                            startX = right - 24f,
+                            endX = left + 24f,
+                            durationMillis = 420,
+                        )
+                    }
+
+                val secondaryTag = "launcher-home-page-" + secondaryPageId
+                composeRule.waitUntil(timeoutMillis = 10_000) {
+                    composeRule
+                        .onAllNodesWithTag(secondaryTag, useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeRule
+                    .onNodeWithTag(secondaryTag, useUnmergedTree = true)
+                    .performTouchInput {
+                        swipeDown(
+                            startY = top + 1f,
+                            endY = bottom - 1f,
+                            durationMillis = 400,
+                        )
+                    }
+
+                composeRule.waitUntil(timeoutMillis = 10_000) {
+                    composeRule
+                        .onAllNodesWithTag(
+                            "launcher-universal-search-field",
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-universal-search-field",
+                        useUnmergedTree = true,
+                    )
+                    .assertIsDisplayed()
+                Unit
+            } finally {
+                scenario.close()
+            }
+        } finally {
+            preferencesRepository.setGestureAction(
+                LauncherHomeGesture.SWIPE_DOWN,
+                previousSwipeDown,
+            ).join()
+            runtime?.deleteEmptyHomePage(secondaryPageId)
+            if (!alreadyDefaultHome) {
+                runShellCommand(
+                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                )
+            }
+        }
+    }
+
+    @Test
     fun configuredSwipeDownStartingOnWorkspaceAppContentOpensUniversalSearch() = runBlocking {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
@@ -1309,6 +1445,17 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .fetchSemanticsNodes()
                         .isNotEmpty()
                 }
+                waitForDisplayedLabel(candidate.label.toString())
+
+                scenario.moveToState(Lifecycle.State.CREATED)
+                scenario.moveToState(Lifecycle.State.RESUMED)
+
+                composeRule.waitUntil(timeoutMillis = 10_000) {
+                    composeRule.onAllNodesWithTag("launcher-app-drawer", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                waitForDisplayedLabel(candidate.label.toString())
 
                 runShellCommand("input keyevent KEYCODE_HOME")
 
@@ -1429,13 +1576,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isEmpty(),
                 )
 
-                // Leave the full-screen editor through its supported UI path before closing the
-                // ActivityScenario. Immediate Activity destruction while the Dialog composition is
-                // still settling can race Compose SlotTable disposal and turn test teardown into a
-                // process crash that is unrelated to the behavior under assertion.
-                composeRule
-                    .onNodeWithText("Done", useUnmergedTree = true)
-                    .performClick()
+                runShellCommand("input keyevent KEYCODE_HOME")
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
                         .onAllNodesWithTag(
@@ -1445,6 +1586,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .fetchSemanticsNodes()
                         .isEmpty()
                 }
+                composeRule
+                    .onNodeWithTag(
+                        "launcher-home-empty-space-actions",
+                        useUnmergedTree = true,
+                    )
+                    .assertIsDisplayed()
                 composeRule.waitForIdle()
                 Unit
             } finally {
