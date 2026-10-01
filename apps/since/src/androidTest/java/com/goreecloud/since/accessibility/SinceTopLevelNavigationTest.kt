@@ -26,6 +26,7 @@ import com.goreecloud.since.domain.model.TrackerKind
 import com.goreecloud.since.domain.model.TrackerPeriod
 import com.goreecloud.since.testutil.FakeTrackerRepository
 import com.goreecloud.since.ui.SinceApp
+import com.goreecloud.since.ui.SinceDashboardSort
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -157,6 +158,38 @@ class SinceTopLevelNavigationTest {
         composeRule.onNodeWithTag("nav-home").assertHasClickAction().performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
         composeRule.onNodeWithText("sec", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun dashboardSortSelectionPropagatesToPersistedAppState() {
+        var dashboardSortName by mutableStateOf(SinceDashboardSort.MANUAL.name)
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = FakeTrackerRepository(listOf(sampleAggregate())),
+                    clock = clock,
+                    dashboardSortName = dashboardSortName,
+                    onDashboardSortChange = { dashboardSortName = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Name")
+            .performScrollTo()
+            .assertHasClickAction()
+            .performClick()
+        composeRule.runOnIdle {
+            assertEquals(SinceDashboardSort.TITLE.name, dashboardSortName)
+        }
+
+        composeRule.onNodeWithText("Oldest start")
+            .performScrollTo()
+            .assertHasClickAction()
+            .performClick()
+        composeRule.runOnIdle {
+            assertEquals(SinceDashboardSort.OLDEST_START.name, dashboardSortName)
+        }
     }
 
     @Test
