@@ -40,6 +40,7 @@ import com.goreecloud.launcher.core.workspace.WorkspaceGridPlacement
 import com.goreecloud.launcher.core.workspace.WorkspaceRepository
 import com.goreecloud.launcher.core.workspace.WorkspaceWidgetCatalog
 import com.goreecloud.launcher.core.workspace.db.LauncherDatabaseProvider
+import com.goreecloud.launcher.core.workspace.db.WorkspaceAuthoritativePlacementState
 import com.goreecloud.launcher.core.workspace.db.WorkspaceAuthoritativeWriteResult
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspacePagedHomeState
@@ -272,6 +273,29 @@ class ActivatedHomeLifecycleRuntimeTest {
                         state is WorkspacePagedHomeState.Ready
                     }
                 }
+
+                // ensureDefaults() only seeds an uninitialized workspace. This test may run after
+                // another lifecycle case has already initialized Room, so explicitly ensure the
+                // candidate exists in the authoritative Dock before asserting persistent-Dock
+                // geometry on the secondary page.
+                val placement = withTimeout(10_000) {
+                    runtime!!.observePlacement().first { state ->
+                        state is WorkspaceAuthoritativePlacementState.Ready
+                    }
+                } as WorkspaceAuthoritativePlacementState.Ready
+                if (candidate.workspaceKey() !in placement.snapshot.dockKeys) {
+                    val dockWrite = runtime!!.toggleDock(candidate.workspaceKey())
+                    check(dockWrite is WorkspaceAuthoritativeWriteResult.Written) {
+                        "Expected authoritative Dock placement; result was $dockWrite."
+                    }
+                    withTimeout(10_000) {
+                        runtime!!.observePlacement().first { state ->
+                            state is WorkspaceAuthoritativePlacementState.Ready &&
+                                candidate.workspaceKey() in state.snapshot.dockKeys
+                        }
+                    }
+                }
+                waitForDisplayedTag("launcher-home-dock")
 
                 // Remove any residue from an interrupted prior emulator attempt, then create one
                 // empty secondary page so the test exercises the exact primary -> secondary path.
