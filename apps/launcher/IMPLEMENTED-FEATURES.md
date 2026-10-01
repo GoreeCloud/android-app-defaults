@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 1, 2026 — Recent searches Development candidate
+
+- Added a dedicated local Search-history repository with an opt-in setting that defaults off.
+- Query text is recorded only after an explicit result/provider action, never on each keystroke.
+- History is local-only, newest-first, case-insensitive deduplicated, bounded to 10 queries, and length-limited.
+- Disabling history clears stored queries; users can also clear history directly while it remains enabled.
+- Idle Universal Search can repopulate the field from recent local queries without contacting a provider.
+- Connected-provider handoff behavior remains explicit and unchanged; stored history is never supplied to providers automatically.
+
+**Acceptance boundary:** source/JVM candidate on `feat/launcher-local-search-history-20261001`; exact-head CI, Android 16 runtime, accessibility/privacy UX, and representative-device acceptance remain required before integration.
+
+
 ## September 30, 2026 — post-consolidation stabilization and Home paging architecture continuation
 
 - Authoritative Launcher development now lives in `GoreeCloud/android-app-defaults/apps/launcher/`; the standalone Launcher repository is migration history only.
