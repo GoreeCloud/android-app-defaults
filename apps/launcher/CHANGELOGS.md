@@ -6,7 +6,7 @@ The unified Home `HorizontalPager` now observes outward horizontal gestures at i
 
 The observer snapshots the starting page for the gesture, so a normal follow-finger transition that settles onto an outer page cannot accidentally trigger an edge action during the same swipe. It is disabled while Home app drag routing owns the pager, and interior/vertical/short gestures remain ordinary pager or vertical input.
 
-Focused JVM coverage verifies first/right and last/left dispatch plus rejection of interior, inward, short, vertical, and single-page cases.
+Focused JVM coverage verifies first/right and last/left dispatch plus rejection of interior, inward, short, vertical, and single-page cases. Android 16 runtime coverage extends the existing real default-HOME multi-page flow by configuring Swipe right to Universal Search, swiping outward from Primary Home, requiring the real Search surface, and then returning HOME before continuing page/editor acceptance.
 
 **Acceptance boundary:** Development interaction-parity candidate based on authoritative main `e0c7bc787f8dab5a187127ea0819a5b7d80b5d19` (merged PR #118). Fresh exact-head migration provenance, Android validation/runtime CI, and protected-promotion evidence are required before integration. Representative-device gesture, frame-pacing, accessibility, large-text, and form-factor acceptance remain open.
 
