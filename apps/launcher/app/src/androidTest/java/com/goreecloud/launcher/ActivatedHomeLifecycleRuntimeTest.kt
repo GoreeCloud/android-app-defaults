@@ -604,14 +604,23 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .first { it.pageId !in pageIdsBeforeDirectAdd }
                     .pageId
 
-                composeRule.waitUntil(timeoutMillis = 10_000) {
+                // Adding a page changes the pager's page count, which intentionally returns the
+                // editor carousel to its selected initial page. Navigate to the appended page
+                // before asserting its preview instead of assuming an offscreen HorizontalPager
+                // page remains composed.
+                repeat((readyAfterDirectAdd.pages.size - 1).coerceAtLeast(0)) {
                     composeRule
-                        .onAllNodesWithTag(
-                            "launcher-home-editor-page-" + directlyAddedPageId,
+                        .onNodeWithTag(
+                            "launcher-home-editor-page-carousel",
                             useUnmergedTree = true,
                         )
-                        .fetchSemanticsNodes()
-                        .isNotEmpty()
+                        .performTouchInput {
+                            swipeLeft(
+                                startX = right - 24f,
+                                endX = left + 24f,
+                                durationMillis = 420,
+                            )
+                        }
                 }
                 waitForDisplayedTag("launcher-home-editor-page-" + directlyAddedPageId)
                 waitForDisplayedTag("launcher-home-editor-fullscreen")
@@ -1758,12 +1767,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                         up()
                     }
 
-                composeRule.waitUntil(timeoutMillis = 15_000) {
-                    composeRule
-                        .onAllNodesWithText("Edit Home", useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                        .isNotEmpty()
-                }
+                waitForDisplayedTag("launcher-home-editor-fullscreen")
+                waitForDisplayedTag("launcher-home-editor-actions")
+                waitForDisplayedTag("launcher-home-editor-action-widgets")
                 composeRule
                     .onNodeWithTag(
                         "launcher-home-editor-action-widgets",
