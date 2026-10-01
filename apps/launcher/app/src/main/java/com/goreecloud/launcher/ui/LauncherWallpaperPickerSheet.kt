@@ -397,7 +397,7 @@ private fun WallpaperHomePreview(wallpaper: LauncherBuiltInWallpaper) {
                                 .background(Color.White.copy(alpha = 0.74f), CircleShape),
                         )
                         Text(
-                            "Search GoreeCloud",
+                            "Search with GoreeCloud…",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.86f),
                         )
