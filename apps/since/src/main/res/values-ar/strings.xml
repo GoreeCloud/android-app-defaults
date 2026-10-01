@@ -209,7 +209,11 @@
 
     <string name="dashboard_search">البحث في المتتبعات</string>
     <string name="dashboard_sort_recent">الأحدث</string>
+    <string name="dashboard_sort_created">ترتيب الإنشاء</string>
     <string name="dashboard_sort_name">الاسم</string>
+    <string name="dashboard_sort_newest_start">أحدث بداية</string>
+    <string name="dashboard_sort_oldest_start">أقدم بداية</string>
+    <string name="dashboard_sort_longest_current">الأطول</string>
     <string name="dashboard_no_matches">لا توجد متتبعات تطابق بحثك.</string>
     <string name="archive_tracker">أرشفة المتتبّع</string>
     <string name="archive_tracker_supporting">أخفِ هذا المتتبّع من الرئيسية دون حذف سجله أو هدفه. يمكنك استعادته من الإعدادات.</string>
