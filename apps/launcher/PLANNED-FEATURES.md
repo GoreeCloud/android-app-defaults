@@ -12,6 +12,8 @@ Merged PR #121 restores configured horizontal edge actions on the unified pager.
 
 The current Development candidate restores the complete API 36 `connectedDebugAndroidTest` suite plus focused `LauncherTransitionPerformanceRuntimeTest` diagnostics and makes both promotion requirements for Launcher changes. Its first restoration attempt exposed and then repaired a project-directory routing defect before any Launcher performance assertion.
 
+A second stacked test-only candidate adds direct API 36 assertions for two owner-feedback paths that were source-implemented but not directly exercised: configured swipe-down Universal Search from a secondary Home page, and HOME exiting the full-screen Edit Home surface back to normal Home. These assertions remain pending until the restored parent runtime gate is accepted and the candidate passes fresh exact-head CI.
+
 Still open after the runtime-gate candidate: representative/default-HOME multi-page frame pacing, input latency, memory/power, drag/drop/widget and gesture acceptance; User/Work inventory churn acceptance; movable/fixed Search accessibility and large-text/form-factor acceptance; Weather/Calendar/Glance visual acceptance; connected-source acceptance; recovery/update continuity; and release qualification.
 
 **Record type:** Repository planned/open feature inventory  
