@@ -256,7 +256,7 @@ class SinceAccessibilityTest {
         }
 
         composeRule.onNodeWithTag("dashboard-search").assertIsDisplayed()
-        composeRule.onNodeWithText("Longest")
+        composeRule.onNodeWithTag("dashboard-sort-longest_current")
             .performScrollTo()
             .assertIsDisplayed()
             .assertHasClickAction()
