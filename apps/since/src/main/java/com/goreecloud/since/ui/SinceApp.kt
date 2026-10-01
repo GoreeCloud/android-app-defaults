@@ -509,6 +509,7 @@ fun SinceApp(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(
+                                modifier = Modifier.clearAndSetSemantics {},
                                 text = "+",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Medium,
@@ -1090,6 +1091,7 @@ private fun DashboardStatCard(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
+                        modifier = Modifier.clearAndSetSemantics {},
                         text = glyph,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
@@ -1225,6 +1227,7 @@ private fun TrackerCard(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
+                            modifier = Modifier.clearAndSetSemantics {},
                             text = if (aggregate.tracker.kind == TrackerKind.STREAK) "↟" else "◇",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
@@ -1287,6 +1290,7 @@ private fun TrackerCard(
                     )
                 }
                 Text(
+                    modifier = Modifier.clearAndSetSemantics {},
                     text = "›",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.displaySmall,
@@ -1358,6 +1362,7 @@ private fun TrackerCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
+                        modifier = Modifier.clearAndSetSemantics {},
                         text = "✦",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.titleMedium,
