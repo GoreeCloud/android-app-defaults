@@ -8,12 +8,12 @@ Photos and Videos now use the mockup's compact Search + overflow header so prese
 
 ## Implemented behavior
 
-- **Group** cycles through Day → Month → Year → None.
-- **View** cycles through Dense → Comfortable → Spacious.
-- Both controls persist through the same app-private preferences already used by Settings.
-- Both controls use 48dp-or-larger touch targets.
-- The controls are hidden while search is open and while multi-select is active so contextual work keeps priority.
-- Changing either control re-renders only the already-authorized in-memory media presentation.
+- **More Gallery options** opens a local overflow menu.
+- **Sort** offers Newest first and Oldest first.
+- On Photos and Videos, **Group** offers Day, Month, Year, and None.
+- On Photos and Videos, **View** offers Dense, Comfortable, and Spacious.
+- These options persist through the same app-private preferences already used by Settings.
+- The header actions use 48dp-or-larger touch targets and stay hidden when unreadable media or selection state makes them irrelevant.
 
 ## Authority boundary
 
