@@ -3593,7 +3593,11 @@ private fun HomeAtAGlance(
         border = BorderStroke(1.dp, outline),
         shadowElevation = if (usesWallpaperGlass) 2.dp else 1.dp,
     ) {
-        if (!compact && alignment == LauncherHomeGlanceAlignment.LEFT) {
+        if (
+            !compact &&
+            alignment == LauncherHomeGlanceAlignment.LEFT &&
+            !resolvedPresentation.densityMayYieldToReflow
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
