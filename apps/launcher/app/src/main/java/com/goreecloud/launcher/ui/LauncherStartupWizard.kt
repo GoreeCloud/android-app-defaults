@@ -383,7 +383,7 @@ fun LauncherHomeHintCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                "Long-press an app in Apps, keep holding, and drag it to the exact primary Home cell or Dock position.",
+                "Long-press an app in Apps to drag it to Home/Dock or use its menu to Pin in Apps; choose Pinned first in sorting to keep favorites on top.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
