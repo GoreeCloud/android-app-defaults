@@ -1471,6 +1471,23 @@ class ActivatedHomeLifecycleRuntimeTest {
                         LauncherDatabaseProvider.get(context).workspaceDao()
                     },
                 )
+
+                // Room authority can become visible before the launched Home finishes startup-owned
+                // reconciliation. Wait for the real Home gesture surface and ready paged projection
+                // before performing the test-owned secondary-page mutation.
+                composeRule.waitUntil(timeoutMillis = 15_000) {
+                    composeRule
+                        .onAllNodesWithTag("launcher-home-swipe-surface", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeRule.waitForIdle()
+                withTimeout(10_000) {
+                    runtime!!.observeHomePages().first { state ->
+                        state is WorkspacePagedHomeState.Ready
+                    }
+                }
+
                 runtime?.deleteEmptyHomePage(secondaryPageId)
                 val created = runtime?.createHomePage(secondaryPageId)
                 check(
