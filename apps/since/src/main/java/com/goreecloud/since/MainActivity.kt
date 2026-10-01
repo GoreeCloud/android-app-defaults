@@ -39,8 +39,8 @@ class MainActivity : ComponentActivity() {
                 .showSeconds
                 .collectAsStateWithLifecycle(initialValue = true)
             val dashboardSortName by preferencesRepository
-                .dashboardSortName
-                .collectAsStateWithLifecycle(initialValue = "CREATED")
+                .defaultSortName
+                .collectAsStateWithLifecycle(initialValue = "MANUAL")
             val onboardingComplete by preferencesRepository
                 .onboardingComplete
                 .collectAsStateWithLifecycle(initialValue = false)
@@ -124,7 +124,7 @@ class MainActivity : ComponentActivity() {
                         dashboardSortName = dashboardSortName,
                         onDashboardSortChange = { name ->
                             scope.launch {
-                                preferencesRepository.setDashboardSortName(name)
+                                preferencesRepository.setDefaultSortName(name)
                             }
                         },
                         contextualHintsEnabled = contextualHintsEnabled,
