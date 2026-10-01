@@ -76,19 +76,21 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-settings").assertHasClickAction().performClick()
         composeRule.onNodeWithTag("settings-screen").assertIsDisplayed()
-        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
-        composeRule.onNodeWithText("Months").assertHasClickAction().performClick()
-        composeRule.onNodeWithTag("settings-show-seconds").performScrollTo().assertHasClickAction().performClick()
-        composeRule.runOnIdle {
-            assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
-            assertTrue(showSeconds)
-        }
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(1)
         composeRule.onNodeWithTag("dashboard-sort-longest_current")
             .performScrollTo()
             .assertHasClickAction()
             .performClick()
         composeRule.runOnIdle {
             assertEquals(DashboardSortPreference.LONGEST_CURRENT, dashboardSort)
+        }
+
+        composeRule.onNodeWithTag("settings-list").performScrollToIndex(2)
+        composeRule.onNodeWithText("Months").assertHasClickAction().performClick()
+        composeRule.onNodeWithTag("settings-show-seconds").performScrollTo().assertHasClickAction().performClick()
+        composeRule.runOnIdle {
+            assertEquals(DisplayFormat.MONTHS, defaultDisplayFormat)
+            assertTrue(showSeconds)
         }
         composeRule.onNodeWithTag("theme-dark").performScrollTo().assertHasClickAction().performClick()
 
