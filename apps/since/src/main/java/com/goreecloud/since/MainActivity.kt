@@ -38,6 +38,9 @@ class MainActivity : ComponentActivity() {
             val showSeconds by preferencesRepository
                 .showSeconds
                 .collectAsStateWithLifecycle(initialValue = true)
+            val dashboardSortName by preferencesRepository
+                .dashboardSortName
+                .collectAsStateWithLifecycle(initialValue = "CREATED")
             val onboardingComplete by preferencesRepository
                 .onboardingComplete
                 .collectAsStateWithLifecycle(initialValue = false)
@@ -116,6 +119,12 @@ class MainActivity : ComponentActivity() {
                         onShowSecondsChange = { enabled ->
                             scope.launch {
                                 preferencesRepository.setShowSeconds(enabled)
+                            }
+                        },
+                        dashboardSortName = dashboardSortName,
+                        onDashboardSortChange = { name ->
+                            scope.launch {
+                                preferencesRepository.setDashboardSortName(name)
                             }
                         },
                         contextualHintsEnabled = contextualHintsEnabled,
