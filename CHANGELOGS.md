@@ -1,5 +1,15 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since General Settings guidance consolidation candidate
+
+- Moved contextual-hint controls, dismissed-hint reset, and setup replay into the existing General Settings section.
+- Removed the separate Guidance card so the Settings surface is shorter and follows the specification's General / Appearance & Accessibility / Data & Recovery / Privacy & Security / About structure more closely.
+- Updated English and Arabic Settings summary copy.
+- Preserved all existing onboarding, hint, privacy, recovery, and persistence behavior.
+
+**Acceptance boundary:** stacked Development candidate on PR #132 replacement line; fresh exact-head CI and rendered-evidence review are required.
+
+
 ## September 30, 2026 — Since search, sort, and reset-preference candidate
 
 - Expanded device-local Dashboard ordering to the specification set: Manual / created order, Name A–Z, Newest start, Oldest start, and Longest current elapsed, while retaining the existing Recent convenience sort.
