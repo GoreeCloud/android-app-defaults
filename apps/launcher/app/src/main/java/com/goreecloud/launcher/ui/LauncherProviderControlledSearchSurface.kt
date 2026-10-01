@@ -932,7 +932,9 @@ private fun LauncherSearchHistoryControl(
                 ) {
                     TextButton(
                         onClick = onClear,
-                        modifier = Modifier.testTag("launcher-search-history-clear"),
+                        modifier = Modifier
+                            .heightIn(min = 48.dp)
+                            .testTag("launcher-search-history-clear"),
                     ) {
                         Text("Clear history")
                     }
@@ -971,7 +973,7 @@ private fun LauncherRecentSearchChips(
                 Surface(
                     onClick = { onSelect(recent) },
                     modifier = Modifier
-                        .heightIn(min = 40.dp)
+                        .heightIn(min = 48.dp)
                         .testTag("launcher-recent-search-" + index)
                         .semantics {
                             contentDescription = "Search again for " + recent
