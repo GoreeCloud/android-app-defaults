@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — all-page follow-finger Home pager candidate
+
+The stable Home root now owns one Compose `HorizontalPager` across all Room-rendered Home pages. Primary Home uses its existing full content/search/editor surface with its old threshold-based horizontal recognizer and page-entry animation disabled while the outer pager owns motion. Secondary pages render content-only, avoiding the previous nested secondary pager and duplicate motion animation.
+
+The pager synchronizes its current page back through the existing authoritative `onSelectHomePage` path, keeps at most one adjacent page warm, leaves the full editable Dock stationary outside the moving page layer, and disables finger paging during active app drags so the existing cross-page drag-edge handoff remains authoritative. The Activity-level threshold page recognizer is removed; secondary vertical gestures and all Room-backed app/folder/widget mutation callbacks remain unchanged.
+
+**Acceptance boundary:** Development candidate on authoritative main `89ff54e485220d8f408a237c2ed5e4b4da5c5098`; fresh exact-head CI is required before integration. Custom horizontal edge-swipe action parity plus representative-device frame pacing, input latency, memory/power, accessibility, large text, and form-factor acceptance remain open.
+
+
 ## October 1, 2026 — host one editable Dock across Home pages
 
 The stable Home root now owns one full `EditableHomeDock` below page-specific content. Primary Home suppresses only its internal Dock and bottom navigation inset; secondary Home does the same while retaining its existing `HorizontalPager`, page mutations, vertical gestures, and editor/Search handoffs.
