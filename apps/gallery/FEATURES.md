@@ -14,7 +14,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Bounded MediaStore image/video reads through the compiled Android adapter.
 - Validated media-item and MediaStore-row domain models.
 - Local thumbnails with bounded in-memory caching and no cloud dependency.
-- Direct Photos / Albums / Videos / Settings navigation in the current `0.7.1-dev` candidate.
+- Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.7.1-dev` candidate.
 - Dense adaptive Photos and Videos grids grouped into Today / Yesterday / calendar-date sections.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
@@ -28,7 +28,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - **Bulk Favorite / Unfavorite:** selection mode adds all selected authorized items to Favorites unless every selected item is already a Favorite, in which case it removes them. Favorites remain Gallery app-local state.
 - **Selection Details:** the contextual More action exposes media details when exactly one item is selected.
 - **Android-authorized Delete / Trash candidate:** on Android 11 and newer, Delete is enabled in the viewer and selection mode. Gallery submits only bounded current MediaStore URIs to Android's system confirmation flow. With **Move deleted items to Recycle Bin** enabled, Android receives a `MediaStore.createTrashRequest(...)`; with the setting disabled, Android receives a `MediaStore.createDeleteRequest(...)` for confirmed permanent deletion. Gallery refreshes its authorized snapshot after a successful system result. This is Development behavior pending complete physical-device destructive-operation acceptance, not Stable qualification.
-- **First-party Recycle Bin candidate:** on Android 11+, Albums now exposes a dedicated **Recovery > Recycle Bin** entry backed by Android MediaStore Trash. The ordinary Gallery launcher is the sole launcher entry; the earlier temporary Recycle Bin launcher has been removed.
+- **First-party Trash candidate:** on Android 11+, **Trash** is a dedicated primary bottom-navigation destination backed by Android MediaStore Trash. Albums no longer contains the recovery entry. The ordinary Gallery launcher remains the sole launcher entry.
 - **Recycle Bin browsing and viewer:** Gallery can enumerate bounded MediaStore items whose authoritative Trash state is set, render an in-place-selectable grid, open a dedicated trashed-item viewer with Previous / Next, Restore, Delete permanently, and More, and disclose that Android controls actual Trash retention/expiration.
 - **Recycle Bin Restore / Purge:** both single-item viewer actions and bounded multi-select actions use Android-owned confirmation. Restore uses `MediaStore.createTrashRequest(..., false)`; permanent purge uses `MediaStore.createDeleteRequest(...)`. Restore preserves Gallery Favorite URI metadata while confirmed purge removes stale Favorite references.
 - **Mutation bound:** a single Trash/Restore/Delete request is limited to 100 unique `content://media/...` image/video item URIs. Non-MediaStore, file, network, blank, generic-files, collection-only, or malformed URIs are rejected before Android mutation request creation.
@@ -148,8 +148,8 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 
 ## Development work still required
 
-- Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and integrated Recycle Bin candidate.
-- Physically validate the integrated Recycle Bin on representative Android devices with disposable copied media, including Albums entry, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty bin, provider failure, restart/process recreation, and retention/expiry refresh.
+- Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Trash / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and dedicated Trash candidate.
+- Physically validate the dedicated Trash destination on representative Android devices with disposable copied media, including five-tab navigation, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty Trash, provider failure, restart/process recreation, and retention/expiry refresh.
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
 - Refine multi-select from physical-device evidence and add approved contextual actions as their authorities become real; Move remains unavailable until its mutation path is implemented and validated.
 - Add richer grouping modes, view-density/layout controls, album creation/rename/reorder, and approved move/copy organization.
