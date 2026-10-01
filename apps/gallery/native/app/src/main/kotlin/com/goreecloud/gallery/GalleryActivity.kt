@@ -1038,11 +1038,19 @@ class GalleryActivity : Activity() {
         }
 
         headerTitle.text = title
+        val presentationOrderLabel = if (
+            destination == GalleryDestination.VIDEOS &&
+            videoFilter != GalleryVideoFilter.ALL
+        ) {
+            videoFilter.label + " · " + sortOrderLabel()
+        } else {
+            sortOrderLabel()
+        }
         headerSubtitle.text = when {
             destination == GalleryDestination.SETTINGS -> baseSubtitle
             !hasMediaAccess -> "Media access required"
             visibleItems.isEmpty() -> baseSubtitle
-            else -> "$baseSubtitle · ${sortOrderLabel()}"
+            else -> baseSubtitle + " · " + presentationOrderLabel
         }
         val showBack =
             destination == GalleryDestination.ALBUMS && (openAlbumId != null || showingFavorites)
@@ -1873,6 +1881,7 @@ class GalleryActivity : Activity() {
                 addView(
                     TextView(context).apply {
                         tag = VIDEO_PLAY_TAG
+                        visibility = if (inSelectionMode) View.GONE else View.VISIBLE
                         text = "▶"
                         gravity = Gravity.CENTER
                         setTextColor(Color.WHITE)
@@ -3396,7 +3405,7 @@ class GalleryActivity : Activity() {
             0 -> {
                 title = "Your local media library"
                 body =
-                    "Gallery organizes photos, videos, albums, favorites, editing, and recovery surfaces around media Android authorizes this app to read."
+                    "Use Photos, Albums, Videos, Trash, and Settings from the bottom navigation. Trash is a separate Android-managed recovery destination, while browsing stays limited to media Android authorizes Gallery to read."
             }
             1 -> {
                 title = "You control media access"
