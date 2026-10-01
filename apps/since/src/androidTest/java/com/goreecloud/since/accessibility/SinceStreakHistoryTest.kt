@@ -65,7 +65,8 @@ class SinceStreakHistoryTest {
         ).assertIsDisplayed()
         composeRule.onNodeWithTag("reset-reason").performTextInput("Restarted plan")
         composeRule.onNodeWithTag("reset-note").performTextInput("Private reflection")
-        composeRule.onNodeWithTag("confirm-reset-streak").performClick()
+        composeRule.onNodeWithTag("review-reset-streak").performClick()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed().performClick()
         composeRule.waitForIdle()
 
         composeRule.runOnIdle {
@@ -107,9 +108,38 @@ class SinceStreakHistoryTest {
 
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithText("Longest streak").performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithText("3 d · 0 h · 0 min · 0 sec").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("3 d · 0 h · 0 min · 0 sec").assertIsDisplayed()
         composeRule.onNodeWithText("Reset count").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Last reset").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun resetConfirmationCanBeDisabledWithoutSkippingResetEditor() {
+        val repository = FakeTrackerRepository(
+            initial = listOf(sampleAggregate()),
+            clock = clock,
+        )
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                    confirmReset = false,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Read daily").performClick()
+        composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
+        composeRule.onNodeWithTag("reset-reason").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertDoesNotExist()
+        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed().performClick()
+        composeRule.waitForIdle()
+
+        composeRule.runOnIdle {
+            assertEquals(2, repository.current.single().periods.size)
+        }
     }
 
     @Test
@@ -135,7 +165,7 @@ class SinceStreakHistoryTest {
             }
         }
 
-        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(2)
+        composeRule.onNodeWithTag("dashboard-list").performScrollToIndex(3)
         composeRule
             .onNodeWithText("Read daily")
             .assertIsDisplayed()
@@ -151,7 +181,7 @@ class SinceStreakHistoryTest {
                     .isNotEmpty()
         }
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
@@ -181,7 +211,7 @@ class SinceStreakHistoryTest {
 
         composeRule.onNodeWithText("Read daily").performClick()
         composeRule.onNodeWithTag("reset-streak").assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag("confirm-reset-streak").assertIsDisplayed()
+        composeRule.onNodeWithTag("review-reset-streak").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithTag("open-history").assertIsDisplayed().performClick()
