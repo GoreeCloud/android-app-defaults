@@ -109,7 +109,7 @@ fun SinceApp(
     onThemePreferenceChange: (ThemePreference) -> Unit = {},
     defaultDisplayFormat: DisplayFormat = DisplayFormat.DAYS,
     onDefaultDisplayFormatChange: (DisplayFormat) -> Unit = {},
-    showSeconds: Boolean = false,
+    showSeconds: Boolean = true,
     onShowSecondsChange: (Boolean) -> Unit = {},
     contextualHintsEnabled: Boolean = true,
     onContextualHintsEnabledChange: (Boolean) -> Unit = {},
