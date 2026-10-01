@@ -1,5 +1,17 @@
 # Android App Defaults — Changelogs
 
+## September 30, 2026 — Since display preferences candidate
+
+- Added locally persisted **Default display format** and **Show seconds** settings using the existing Since Preferences DataStore.
+- Default display format applies only to newly created trackers; existing trackers retain their own persisted format.
+- Matched the project specification by defaulting new installations to **Days** and **Show seconds = on**.
+- When seconds are enabled, Dashboard, Tracker Details, statistics, and History use a shared lifecycle-aware one-second screen tick; when disabled they retain the lower-frequency minute-aligned tick.
+- Added English/Arabic Settings and elapsed-time resources plus Android UI coverage for preference controls, visible seconds, and new-tracker default-format behavior.
+- Added no Room schema change, network permission, background service, account dependency, or persisted elapsed counter.
+
+**Acceptance boundary:** this is stacked Development candidate source. Exact-head CI, rendered-evidence review, representative-device verification, and the separately specified reset-confirmation preference remain open.
+
+
 ## September 30, 2026 — Since owner-device Settings and Achievements refinement candidate
 
 - Replaced internal acceptance terminology in the user-facing Privacy and Security section with plain-language explanations.
