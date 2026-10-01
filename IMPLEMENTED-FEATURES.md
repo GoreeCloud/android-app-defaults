@@ -6,7 +6,7 @@ The current stacked candidate adds two local presentation preferences: a default
 
 Visible elapsed refresh stays screen-scoped and lifecycle-aware. Seconds mode uses one shared one-second tick for the active screen; seconds-off mode uses the existing minute-aligned cadence. Elapsed values continue to be derived from timestamps rather than persisted counters.
 
-The specified defaults are Days for new trackers and seconds enabled. English and Arabic resources plus Android UI coverage accompany the candidate. No database-schema, permission, network, account, or background-service authority is added.
+The specified defaults are Days for new trackers and seconds enabled. English and Arabic resources, Android runtime persistence coverage across repository instances, and UI coverage accompany the candidate. No database-schema, permission, network, account, or background-service authority is added.
 
 Fresh exact-head Android validation and representative-device acceptance remain required for this stacked Development candidate.
 
