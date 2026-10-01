@@ -1,5 +1,16 @@
 # Android App Defaults — Implemented Features
 
+## September 30, 2026 — Since display preferences candidate
+
+The current stacked candidate adds two local presentation preferences: a default display format for newly created trackers and optional seconds-level elapsed display. Both use the existing Since Preferences DataStore. Existing trackers keep their own saved display format.
+
+Visible elapsed refresh stays screen-scoped and lifecycle-aware. Seconds mode uses one shared one-second tick for the active screen; seconds-off mode uses the existing minute-aligned cadence. Elapsed values continue to be derived from timestamps rather than persisted counters.
+
+The specified defaults are Days for new trackers and seconds enabled. English and Arabic resources plus Android UI coverage accompany the candidate. No database-schema, permission, network, account, or background-service authority is added.
+
+Fresh exact-head Android validation and representative-device acceptance remain required for this stacked Development candidate.
+
+
 ## September 30, 2026 — Since Development APK distribution hardening candidate
 
 The active stacked Since line now includes source-level Development packaging controls for
