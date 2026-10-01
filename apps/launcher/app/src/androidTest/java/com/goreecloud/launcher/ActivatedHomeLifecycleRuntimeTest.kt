@@ -306,6 +306,17 @@ class ActivatedHomeLifecycleRuntimeTest {
                         created is WorkspacePagedRoomMutationResult.PageAlreadyExists
                 ) { "Expected a usable secondary Home page; create result was $created." }
 
+                val placementAfterPageCreate = withTimeout(10_000) {
+                    runtime!!.observePlacement().first { state ->
+                        state is WorkspaceAuthoritativePlacementState.Ready
+                    }
+                } as WorkspaceAuthoritativePlacementState.Ready
+                check(candidate.workspaceKey() in placementAfterPageCreate.snapshot.dockKeys) {
+                    "Creating a secondary Home page must not remove the authoritative Dock item; " +
+                        "dockKeys=${placementAfterPageCreate.snapshot.dockKeys}"
+                }
+                waitForDisplayedTag("launcher-home-dock")
+
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
                         .onAllNodesWithTag(
@@ -372,6 +383,27 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .onNodeWithTag("launcher-home-page-indicator", useUnmergedTree = true)
                     .fetchSemanticsNode()
                     .boundsInRoot
+                val placementOnSecondary = withTimeout(10_000) {
+                    runtime!!.observePlacement().first { state ->
+                        state is WorkspaceAuthoritativePlacementState.Ready
+                    }
+                } as WorkspaceAuthoritativePlacementState.Ready
+                check(candidate.workspaceKey() in placementOnSecondary.snapshot.dockKeys) {
+                    "Secondary Home selection must not remove authoritative Dock placement; " +
+                        "dockKeys=${placementOnSecondary.snapshot.dockKeys}"
+                }
+                withTimeout(10_000) {
+                    LauncherAppsRepository(context).apps.first { inventory ->
+                        inventory.any { it.workspaceKey() == candidate.workspaceKey() }
+                    }
+                }
+                val secondaryDockNodes = composeRule
+                    .onAllNodesWithTag("launcher-home-dock", useUnmergedTree = true)
+                    .fetchSemanticsNodes()
+                check(secondaryDockNodes.isNotEmpty()) {
+                    "Persistent Dock semantics disappeared on secondary Home while placement and " +
+                        "LauncherApps inventory still contain ${candidate.workspaceKey()}."
+                }
                 waitForDisplayedTag("launcher-home-dock")
                 val secondaryDockBounds = composeRule
                     .onNodeWithTag("launcher-home-dock", useUnmergedTree = true)
