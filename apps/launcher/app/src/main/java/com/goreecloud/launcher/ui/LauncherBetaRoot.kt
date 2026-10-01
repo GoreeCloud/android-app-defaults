@@ -565,7 +565,7 @@ fun LauncherBetaRoot(
     onHomeEditorVisibilityChanged: (Boolean) -> Unit = {},
     onPrimaryHomeGridBoundsChanged: (Rect?) -> Unit = {},
     homeContentOnly: Boolean = false,
-    secondaryHomeContent: @Composable (WorkspaceRenderedHomePage) -> Unit = {},
+    secondaryHomeContent: @Composable (WorkspaceRenderedHomePage, Boolean) -> Unit = { _, _ -> },
 ) {
     var surfaceModeName by rememberSaveable { mutableStateOf(requestedSurfaceMode.name) }
     val surfaceMode = runCatching { LauncherSurfaceMode.valueOf(surfaceModeName) }
@@ -856,7 +856,7 @@ fun LauncherBetaRoot(
                     pages = homePages,
                 )
                 if (selectedSecondaryPage != null) {
-                    secondaryHomeContent(selectedSecondaryPage)
+                    secondaryHomeContent(selectedSecondaryPage, false)
                 } else {
                     HomeSurface(
                     apps = apps,
