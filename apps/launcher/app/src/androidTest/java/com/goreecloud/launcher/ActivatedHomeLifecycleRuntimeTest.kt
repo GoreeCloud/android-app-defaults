@@ -4,7 +4,6 @@ import android.app.role.RoleManager
 import android.os.ParcelFileDescriptor
 import android.view.View
 import android.view.ViewConfiguration
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
@@ -19,7 +18,6 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
@@ -780,22 +778,19 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
 
-                // Exercise the dedicated Home swipe-up surface from empty grid space rather
-                // than injecting through the app tile itself. The tile also owns long-press/drag
-                // recognition; competing recognizers can leave Compose test input waiting for idle
-                // even though the Launcher gesture path is healthy.
-                composeRule
-                    .onNodeWithTag(
-                        "launcher-home-swipe-up-apps",
-                        useUnmergedTree = true,
-                    )
-                    .performTouchInput {
-                        swipe(
-                            start = Offset(right - 12f, bottom - 24f),
-                            end = Offset(right - 12f, top + 24f),
-                            durationMillis = 400,
-                        )
-                    }
+                // The Home gesture surface intentionally leaves composition when Apps opens.
+                // Inject at the Android input layer so Compose's touch injector is not attached to a
+                // node that disappears mid-gesture. Use empty right-side Home space, away from the
+                // seeded app tile and the bottom system-gesture edge.
+                val displayMetrics = context.resources.displayMetrics
+                val swipeX = displayMetrics.widthPixels * 5 / 6
+                runShellCommand(
+                    "input swipe " +
+                        "$swipeX " +
+                        "${displayMetrics.heightPixels * 3 / 4} " +
+                        "$swipeX " +
+                        "${displayMetrics.heightPixels / 4} 400"
+                )
 
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule.onAllNodesWithTag("launcher-app-drawer", useUnmergedTree = true)
@@ -825,8 +820,6 @@ class ActivatedHomeLifecycleRuntimeTest {
                 // dismissal threshold is crossed. Inject this gesture at the Android input layer
                 // rather than keeping Compose's touch injector attached to a node that removes
                 // itself mid-gesture.
-                val displayMetrics = context.resources.displayMetrics
-                val swipeX = displayMetrics.widthPixels / 2
                 runShellCommand(
                     "input swipe " +
                         "$swipeX " +
