@@ -87,6 +87,38 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun drawerHiddenAndPinnedAppsStayConsistentAndProfileExact() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("drawer-organization.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            val personal = "0:com.example/.Main"
+            val work = "10:com.example/.Main"
+
+            repository.setDrawerAppPinned(personal, true).join()
+            repository.setDrawerAppPinned(work, true).join()
+            assertEquals(setOf(personal, work), repository.pinnedDrawerAppKeys.first())
+
+            repository.setDrawerAppHidden(work, true).join()
+            assertEquals(setOf(work), repository.hiddenDrawerAppKeys.first())
+            assertEquals(setOf(personal), repository.pinnedDrawerAppKeys.first())
+
+            repository.setDrawerAppHidden(work, false).join()
+            assertEquals(emptySet<String>(), repository.hiddenDrawerAppKeys.first())
+            assertEquals(setOf(personal), repository.pinnedDrawerAppKeys.first())
+
+            repository.setDrawerAppPinned(personal, false).join()
+            assertEquals(emptySet<String>(), repository.pinnedDrawerAppKeys.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun replayStartupWizardReopensSetupWithoutResettingConfiguration() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
