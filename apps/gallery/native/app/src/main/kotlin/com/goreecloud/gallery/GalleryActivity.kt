@@ -1492,17 +1492,47 @@ class GalleryActivity : Activity() {
             ),
         )
         addView(
-            TextView(context).apply {
-                text = mediaDisplayTitle(item)
-                maxLines = if (featured) 1 else 2
-                setTextColor(primaryTextColor())
-                setTextSize(
-                    TypedValue.COMPLEX_UNIT_SP,
-                    if (featured) 17f else 14f,
+            LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(dp(10), dp(4), dp(2), 0)
+
+                addView(
+                    TextView(context).apply {
+                        text = mediaDisplayTitle(item)
+                        maxLines = if (featured) 1 else 2
+                        setTextColor(primaryTextColor())
+                        setTextSize(
+                            TypedValue.COMPLEX_UNIT_SP,
+                            if (featured) 17f else 14f,
+                        )
+                        setTypeface(typeface, Typeface.BOLD)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    },
+                    LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        1f,
+                    ),
                 )
-                setTypeface(typeface, Typeface.BOLD)
-                setPadding(dp(10), dp(8), dp(10), 0)
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                addView(
+                    TextView(context).apply {
+                        text = "⋮"
+                        gravity = Gravity.CENTER
+                        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+                        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+                        setTextColor(secondaryTextColor())
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+                        isClickable = true
+                        isFocusable = true
+                        contentDescription = "Show details for " + item.displayName
+                        setOnClickListener { showItemDetails(item) }
+                    },
+                    LinearLayout.LayoutParams(
+                        dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                        dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    ),
+                )
             },
         )
         addView(
