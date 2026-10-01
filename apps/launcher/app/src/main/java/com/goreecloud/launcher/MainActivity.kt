@@ -1015,8 +1015,7 @@ class MainActivity : ComponentActivity() {
                                 } == true
                             },
                             target = homeAppDragTarget,
-                        )
-,
+                        ),
                 ) {
                         LauncherBetaRoot(
                             apps = apps,
