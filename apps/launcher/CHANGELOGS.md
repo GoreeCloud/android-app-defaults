@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 1, 2026 — thread authoritative selected Home page identity into the Primary root
+
+`MainActivity` now supplies the current selected Home-page ID to `LauncherBetaRoot` / `HomeSurface`. A fail-closed resolver accepts the identity only when it exists in the current Room-rendered page list; stale, missing, or null identities resolve to Primary Home.
+
+Current user-visible behavior is unchanged because the Primary root is still mounted only for Primary Home. The state thread is the next prerequisite for moving Primary and secondary content under one pager without creating a second selection or workspace authority.
+
+**Acceptance boundary:** stacked Development architecture candidate on parent PR #113. PR #113 must integrate first; this candidate then requires current-main reconciliation and fresh exact-head validation. Unified Primary↔secondary paging remains open.
+
+
 ## October 1, 2026 — keep one adjacent secondary Home page warm
 
 The secondary Home `HorizontalPager` now requests one beyond-viewport page only when two or more secondary pages exist. This keeps an adjacent page composed around the active page to reduce swipe-edge composition work while avoiding broad offscreen page retention.
