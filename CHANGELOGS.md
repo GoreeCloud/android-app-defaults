@@ -7,6 +7,8 @@
 - Refreshed tracker cards with a leading identity tile, localized started timestamp, tracker-kind badge, stronger elapsed-time hierarchy, detail chevron, preserved goal information, and a privacy-safe generic tip strip that does not surface tracker note text on Home.
 - Refined the Home floating action to the mockup's plus + **Add tracker** treatment and polished selected/unselected bottom-navigation presentation.
 - Preserved all five existing local Dashboard sort modes, local-only search, contextual guidance, timestamp-derived elapsed calculations, and current navigation behavior rather than removing validated functionality solely to match the static mockup.
+- Kept the first tracker reachable on compact phones by placing contextual guidance after tracker cards in the redesigned Home list, with bottom content padding retaining separation from the floating action.
+- Made the tracker-type chooser vertically scrollable and tightened the large-text hero presentation so 2× font-scale flows remain reachable without reintroducing the compact Home overlap.
 
 **Authority boundary:** this is a stacked Development UI candidate on top of PR #131. It adds no network, account, storage-permission, Room-schema, background-service, import/restore, signing, or release authority. Fresh exact-head CI, rendered-evidence review, and representative-device accessibility/localization/form-factor acceptance are required before the new presentation is treated as accepted.
 
