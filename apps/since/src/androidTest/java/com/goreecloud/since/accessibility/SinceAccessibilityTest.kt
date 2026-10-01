@@ -200,7 +200,7 @@ class SinceAccessibilityTest {
         }
 
         composeRule.onNodeWithText("Add tracker").performClick()
-        composeRule.onNodeWithText("Permanent Event").performClick()
+        composeRule.onNodeWithTag("tracker-type-event").performScrollTo().performClick()
 
         composeRule.onNodeWithTag("title-field").assertIsDisplayed()
         composeRule.onNodeWithTag("start-date-picker").performScrollTo().assertIsDisplayed()
