@@ -16,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextInput
 import com.goreecloud.since.data.preferences.ThemePreference
 import com.goreecloud.since.domain.model.DisplayFormat
 import com.goreecloud.since.domain.model.Goal
@@ -150,6 +151,34 @@ class SinceTopLevelNavigationTest {
 
         composeRule.onNodeWithTag("nav-home").assertHasClickAction().performClick()
         composeRule.onNodeWithText("Read daily").assertIsDisplayed()
+        composeRule.onNodeWithText("sec", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun defaultDisplayFormatAppliesToNewTrackers() {
+        val repository = FakeTrackerRepository(emptyList(), clock = clock)
+
+        composeRule.setContent {
+            MaterialTheme {
+                SinceApp(
+                    repository = repository,
+                    clock = clock,
+                    defaultDisplayFormat = DisplayFormat.MONTHS,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Add tracker").performClick()
+        composeRule.onNodeWithText("Permanent Event").performClick()
+        composeRule.onNodeWithTag("title-field").performTextInput("Project launch")
+        composeRule.onNodeWithText("Save").performScrollTo().performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(
+                DisplayFormat.MONTHS,
+                repository.current.single().tracker.defaultDisplayFormat,
+            )
+        }
     }
 
     @Test
