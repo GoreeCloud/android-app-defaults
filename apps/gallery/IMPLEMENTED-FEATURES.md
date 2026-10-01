@@ -6,7 +6,7 @@ The current Gallery candidate exposes three persisted media-grid densities: **De
 
 ## September 29, 2026 — persistent local sort-order candidate
 
-The active Gallery browsing candidate now persists **Newest first / Oldest first** as an app-private presentation preference instead of resetting sort order on every launch. The existing header sort action writes the preference, Settings exposes the same choice explicitly, and Gallery settings export/import carries the portable `sortPreference` value. The preference maps only to the existing core `MediaSortOrder` and composes with Day / Month / Year / None grouping over the same Android-authorized media snapshot.
+The active Gallery browsing candidate now persists **Newest first / Oldest first** as an app-private presentation preference instead of resetting sort order on every launch. The header overflow menu writes the preference, Settings exposes the same choice explicitly, and Gallery settings export/import carries the portable `sortPreference` value. The preference maps only to the existing core `MediaSortOrder` and composes with Day / Month / Year / None grouping over the same Android-authorized media snapshot.
 
 Newest remains the migration-safe default. This adds no MediaStore mutation, permission, account, network, synchronization, or storage authority. Pure policy coverage locks defaulting, stored-value round trips, and mapping to the existing core sort contract. Representative-device/adaptive/accessibility acceptance remains open.
 
