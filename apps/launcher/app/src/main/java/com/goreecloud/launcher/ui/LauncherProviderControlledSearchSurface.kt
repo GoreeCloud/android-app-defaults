@@ -1586,6 +1586,8 @@ private fun LauncherGlazeSearchResult(
                                 )
                             }
                         }
+                    } else {
+                        LauncherSearchResultCategoryGlyph(result.category)
                     }
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -1642,6 +1644,235 @@ private fun LauncherGlazeSearchResult(
                         },
                         modifier = Modifier.heightIn(min = 48.dp),
                     ) { Text("Message") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchResultCategoryGlyph(
+    category: LauncherSearchCategory,
+) {
+    val color = MaterialTheme.colorScheme.primary
+    Surface(
+        modifier = Modifier.size(38.dp),
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.primaryContainer,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(20.dp)) {
+                val u = size.minDimension
+                val stroke = 1.65.dp.toPx()
+                val round = androidx.compose.ui.geometry.CornerRadius(u * 0.12f)
+                when (category) {
+                    LauncherSearchCategory.APPLICATION -> {
+                        drawRoundRect(
+                            color = color,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.14f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.72f),
+                            cornerRadius = round,
+                            style = Stroke(width = stroke),
+                        )
+                        listOf(
+                            0.34f to 0.34f,
+                            0.66f to 0.34f,
+                            0.34f to 0.66f,
+                            0.66f to 0.66f,
+                        ).forEach { (x, y) ->
+                            drawCircle(
+                                color = color,
+                                radius = u * 0.055f,
+                                center = androidx.compose.ui.geometry.Offset(u * x, u * y),
+                            )
+                        }
+                    }
+
+                    LauncherSearchCategory.SHORTCUT -> {
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.76f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.24f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.48f, u * 0.24f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.24f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.24f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.52f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                    }
+
+                    LauncherSearchCategory.CONTACT -> {
+                        drawCircle(
+                            color = color,
+                            radius = u * 0.17f,
+                            center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.36f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawArc(
+                            color = color,
+                            startAngle = 205f,
+                            sweepAngle = 130f,
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.48f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.56f, u * 0.40f),
+                            style = Stroke(width = stroke),
+                        )
+                    }
+
+                    LauncherSearchCategory.CALL_HISTORY -> {
+                        drawArc(
+                            color = color,
+                            startAngle = 30f,
+                            sweepAngle = 250f,
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.18f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.64f, u * 0.64f),
+                            style = Stroke(
+                                width = stroke,
+                                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                            ),
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.50f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.29f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.50f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.67f, u * 0.58f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                    }
+
+                    LauncherSearchCategory.MESSAGE -> {
+                        drawRoundRect(
+                            color = color,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.13f, u * 0.20f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.74f, u * 0.54f),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.14f),
+                            style = Stroke(width = stroke),
+                        )
+                        listOf(0.36f, 0.50f, 0.64f).forEach { x ->
+                            drawCircle(
+                                color = color,
+                                radius = u * 0.04f,
+                                center = androidx.compose.ui.geometry.Offset(u * x, u * 0.47f),
+                            )
+                        }
+                    }
+
+                    LauncherSearchCategory.FILE -> {
+                        drawRoundRect(
+                            color = color,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.12f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.52f, u * 0.76f),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.07f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.52f, u * 0.12f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.35f),
+                            strokeWidth = stroke,
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.52f, u * 0.12f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.52f, u * 0.35f),
+                            strokeWidth = stroke,
+                        )
+                    }
+
+                    LauncherSearchCategory.SETTING -> {
+                        val center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.50f)
+                        drawCircle(
+                            color = color,
+                            radius = u * 0.20f,
+                            center = center,
+                            style = Stroke(width = stroke),
+                        )
+                        drawCircle(
+                            color = color,
+                            radius = u * 0.065f,
+                            center = center,
+                            style = Stroke(width = stroke),
+                        )
+                        listOf(
+                            0.50f to 0.14f,
+                            0.86f to 0.50f,
+                            0.50f to 0.86f,
+                            0.14f to 0.50f,
+                        ).forEach { (x, y) ->
+                            val dx = x - 0.50f
+                            val dy = y - 0.50f
+                            drawLine(
+                                color = color,
+                                start = androidx.compose.ui.geometry.Offset(
+                                    u * (0.50f + dx * 0.72f),
+                                    u * (0.50f + dy * 0.72f),
+                                ),
+                                end = androidx.compose.ui.geometry.Offset(u * x, u * y),
+                                strokeWidth = stroke,
+                                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                            )
+                        }
+                    }
+
+                    LauncherSearchCategory.ACTION -> {
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.20f, u * 0.50f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.78f, u * 0.50f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.60f, u * 0.32f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.78f, u * 0.50f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.78f, u * 0.50f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.60f, u * 0.68f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                    }
+
+                    LauncherSearchCategory.CONNECTED_SOURCE -> {
+                        val center = androidx.compose.ui.geometry.Offset(u * 0.43f, u * 0.42f)
+                        drawCircle(
+                            color = color,
+                            radius = u * 0.22f,
+                            center = center,
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            color = color,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.58f, u * 0.58f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.82f),
+                            strokeWidth = stroke,
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                    }
                 }
             }
         }
