@@ -760,6 +760,46 @@ private fun Dashboard(
                     }
                 }
             }
+            if (
+                contextualHintsEnabled &&
+                !homeContextualHintDismissed &&
+                visibleAggregates.isNotEmpty()
+            ) {
+                item {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("home-contextual-hint"),
+                        shape = MaterialTheme.shapes.large,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(
+                                start = 16.dp,
+                                top = 10.dp,
+                                end = 8.dp,
+                                bottom = 10.dp,
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = stringResource(R.string.home_contextual_hint),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            TextButton(
+                                modifier = Modifier.testTag("home-contextual-hint-dismiss"),
+                                onClick = onDismissHomeContextualHint,
+                            ) {
+                                Text(stringResource(R.string.dismiss_hint))
+                            }
+                        }
+                    }
+                }
+            }
+
             items(
                 items = visibleAggregates,
                 key = { it.tracker.id },
@@ -774,41 +814,6 @@ private fun Dashboard(
             }
         }
 
-        if (contextualHintsEnabled && !homeContextualHintDismissed) {
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("home-contextual-hint"),
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                ) {
-                    Row(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            top = 10.dp,
-                            end = 8.dp,
-                            bottom = 10.dp,
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(R.string.home_contextual_hint),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        TextButton(
-                            modifier = Modifier.testTag("home-contextual-hint-dismiss"),
-                            onClick = onDismissHomeContextualHint,
-                        ) {
-                            Text(stringResource(R.string.dismiss_hint))
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
