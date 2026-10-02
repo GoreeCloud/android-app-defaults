@@ -549,11 +549,25 @@ class GalleryActivity : Activity() {
                 GallerySortPreference.NEWEST
             }
             selectedSort = preference.mediaSortOrder
+            val resetManualAlbumOrder =
+                destination == GalleryDestination.ALBUMS &&
+                    openAlbumId == null &&
+                    !showingFavorites &&
+                    currentUserSettings().albumOrderIds.isNotEmpty()
             galleryPreferences().edit()
                 .putString(SORT_PREFERENCE_KEY, preference.storedValue)
+                .apply {
+                    if (resetManualAlbumOrder) remove(ALBUM_ORDER_IDS_KEY)
+                }
                 .apply()
             renderCurrentDestination()
-            announceForAccessibility("Sorted " + preference.label.lowercase())
+            announceForAccessibility(
+                if (resetManualAlbumOrder) {
+                    "Custom album order reset. Sorted " + preference.label.lowercase()
+                } else {
+                    "Sorted " + preference.label.lowercase()
+                },
+            )
         }
         row.addView(
             sortControl,
@@ -1004,10 +1018,16 @@ class GalleryActivity : Activity() {
         }
 
         headerTitle.text = title
-        val presentationOrderLabel = if (destination == GalleryDestination.VIDEOS) {
-            GalleryVideoPresentationPolicy.filterAndOrderLabel(videoFilter, selectedSort)
-        } else {
-            sortOrderLabel()
+        val hasManualAlbumOrder =
+            destination == GalleryDestination.ALBUMS &&
+                openAlbumId == null &&
+                !showingFavorites &&
+                currentUserSettings().albumOrderIds.isNotEmpty()
+        val presentationOrderLabel = when {
+            hasManualAlbumOrder -> "Custom order"
+            destination == GalleryDestination.VIDEOS ->
+                GalleryVideoPresentationPolicy.filterAndOrderLabel(videoFilter, selectedSort)
+            else -> sortOrderLabel()
         }
         headerSubtitle.text = when {
             destination == GalleryDestination.SETTINGS -> baseSubtitle
@@ -1020,7 +1040,11 @@ class GalleryActivity : Activity() {
         backControl.visibility = if (showBack) View.VISIBLE else View.GONE
         brandMark.visibility = if (showBack) View.GONE else View.VISIBLE
         backControl.contentDescription = "Back to Albums"
-        sortControl.contentDescription = "Sort order: ${sortOrderLabel()}. Double tap to change."
+        sortControl.contentDescription = if (hasManualAlbumOrder) {
+            "Album order: Custom. Double tap to change sort and reset custom order."
+        } else {
+            "Sort order: ${sortOrderLabel()}. Double tap to change."
+        }
         searchField.hint = when {
             destination == GalleryDestination.PHOTOS -> "Search photos"
             destination == GalleryDestination.VIDEOS -> "Search videos"
