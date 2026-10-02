@@ -1,5 +1,17 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — manual app-local Album ordering
+
+### Added
+- Added **Move earlier / Move later** to ordinary Album card overflow menus when movement is available.
+- Persisted an ordered album-identifier list as Gallery-local presentation state and added it to settings export/import.
+- Kept Pin/Unpin as the top-level grouping rule: manual moves never cross the pinned/unpinned boundary.
+- Added **Reset album order** under Appearance after a manual order exists; reset preserves Pin/Unpin choices.
+- Added pure policy and overflow coverage for deterministic ordering, stale-ID handling, new-album fallback, group boundaries, and movement availability.
+
+### Boundary
+Manual Album ordering changes only Gallery's Collections presentation. It does not reorder provider-owned MediaStore folders, mutate media, create album authority, or add storage/filesystem/network/account permissions.
+
 ## October 1, 2026 — opt-in animated GIF thumbnails
 
 ### Added
