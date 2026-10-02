@@ -3552,7 +3552,11 @@ class GalleryActivity : Activity() {
         var viewerZoomScale = GalleryViewerZoomPolicy.MIN_SCALE
         var viewerPanX = 0f
         var viewerPanY = 0f
-        val slideshowInterval = currentUserSettings().slideshowInterval
+        val slideshowSettings = currentUserSettings()
+        val slideshowInterval = slideshowSettings.slideshowInterval
+        val slideshowLoop = slideshowSettings.loopSlideshows
+        val slideshowModeDescription =
+            slideshowInterval.label.lowercase() + if (slideshowLoop) ", loops at end" else ""
         var slideshowRunning = false
         var slideshowPaused = false
         var slideshowAdvance: Runnable? = null
@@ -3565,8 +3569,8 @@ class GalleryActivity : Activity() {
             }
             slideshow.contentDescription = when {
                 slideshowRunning -> "Pause photo slideshow"
-                slideshowPaused -> "Resume photo slideshow, ${slideshowInterval.label.lowercase()}"
-                else -> "Start photo slideshow, ${slideshowInterval.label.lowercase()}"
+                slideshowPaused -> "Resume photo slideshow, $slideshowModeDescription"
+                else -> "Start photo slideshow, $slideshowModeDescription"
             }
         }
 
@@ -3732,6 +3736,7 @@ class GalleryActivity : Activity() {
             val nextPhotoIndex = GallerySlideshowPolicy.nextPhotoIndex(
                 currentIndex = currentIndex,
                 photoEligibility = items.map { it.mimeType.startsWith("image/") },
+                loop = slideshowLoop,
             )
             if (nextPhotoIndex == null) {
                 stopSlideshow(announce = true)
@@ -3752,13 +3757,22 @@ class GalleryActivity : Activity() {
                 pauseSlideshow()
                 return@setOnClickListener
             }
-            val hasLaterPhoto = GallerySlideshowPolicy.nextPhotoIndex(
+            val hasNextPhoto = GallerySlideshowPolicy.nextPhotoIndex(
                 currentIndex = currentIndex,
                 photoEligibility = items.map { it.mimeType.startsWith("image/") },
+                loop = slideshowLoop,
             ) != null
-            if (!hasLaterPhoto) {
+            if (!hasNextPhoto) {
                 stopSlideshow()
-                Toast.makeText(this, "No later photos are available for slideshow.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    if (slideshowLoop) {
+                        "No other photos are available for slideshow."
+                    } else {
+                        "No later photos are available for slideshow."
+                    },
+                    Toast.LENGTH_SHORT,
+                ).show()
                 return@setOnClickListener
             }
             startOrResumeSlideshow()
@@ -4150,6 +4164,13 @@ class GalleryActivity : Activity() {
                 subtitle = "When on, videos repeat continuously while they remain open in the viewer.",
                 checked = settings.loopVideos,
             ) { setBooleanSetting(LOOP_VIDEOS_KEY, it) },
+        )
+        library.addView(
+            settingToggleRow(
+                title = "Loop photo slideshows",
+                subtitle = "When on, a slideshow wraps to the first other authorized photo after reaching the end.",
+                checked = settings.loopSlideshows,
+            ) { setBooleanSetting(LOOP_SLIDESHOWS_KEY, it) },
         )
         val gifAnimationSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
         library.addView(
@@ -5188,6 +5209,7 @@ class GalleryActivity : Activity() {
             showHiddenItems = preferences.getBoolean(SHOW_HIDDEN_ITEMS_KEY, false),
             playVideosAutomatically = preferences.getBoolean(PLAY_VIDEOS_AUTOMATICALLY_KEY, false),
             loopVideos = preferences.getBoolean(LOOP_VIDEOS_KEY, false),
+            loopSlideshows = preferences.getBoolean(LOOP_SLIDESHOWS_KEY, false),
             slideshowInterval = GallerySlideshowInterval.fromStored(
                 preferences.getString(SLIDESHOW_INTERVAL_KEY, GallerySlideshowInterval.NORMAL.storedValue),
             ),
@@ -5304,6 +5326,7 @@ class GalleryActivity : Activity() {
             .put("showHiddenItems", settings.showHiddenItems)
             .put("playVideosAutomatically", settings.playVideosAutomatically)
             .put("loopVideos", settings.loopVideos)
+            .put("loopSlideshows", settings.loopSlideshows)
             .put("slideshowInterval", settings.slideshowInterval.storedValue)
             .put("animateGifThumbnails", settings.animateGifThumbnails)
             .put("deleteEmptyFolders", settings.deleteEmptyFolders)
@@ -5367,6 +5390,10 @@ class GalleryActivity : Activity() {
                 json.optBoolean("playVideosAutomatically", current.playVideosAutomatically),
             )
             .putBoolean(LOOP_VIDEOS_KEY, json.optBoolean("loopVideos", current.loopVideos))
+            .putBoolean(
+                LOOP_SLIDESHOWS_KEY,
+                json.optBoolean("loopSlideshows", current.loopSlideshows),
+            )
             .putString(SLIDESHOW_INTERVAL_KEY, importedSlideshowInterval.storedValue)
             .putBoolean(
                 ANIMATE_GIF_THUMBNAILS_KEY,
@@ -6006,6 +6033,7 @@ class GalleryActivity : Activity() {
         const val SHOW_HIDDEN_ITEMS_KEY = "show_hidden_items"
         const val PLAY_VIDEOS_AUTOMATICALLY_KEY = "play_videos_automatically"
         const val LOOP_VIDEOS_KEY = "loop_videos"
+        const val LOOP_SLIDESHOWS_KEY = "loop_slideshows"
         const val SLIDESHOW_INTERVAL_KEY = "slideshow_interval"
         const val ANIMATE_GIF_THUMBNAILS_KEY = "animate_gif_thumbnails"
         const val DELETE_EMPTY_FOLDERS_KEY = "delete_empty_folders"
