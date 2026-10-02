@@ -63,7 +63,10 @@ jobs:
                   "Launcher Android 16 runtime instrumentation",
                   "Launcher Android 16 transition performance diagnostics",
               },
-              "keyboard": {"Keyboard validation, unit tests, and build"},
+              "keyboard": {
+                  "Keyboard validation, unit tests, and build",
+                  "Keyboard Android 15 runtime instrumentation",
+              },
               "gallery": {"Gallery native core, adapter, unit tests, and build"},
           }
           for app, checks in app_checks.items():
