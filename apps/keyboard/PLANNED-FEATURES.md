@@ -1,5 +1,9 @@
 # GoreeCloud Keyboard — Planned Features
 
+## October 2, 2026 — Arabic punctuation and alternates candidate
+
+The current capability-expansion candidate deepens the already-integrated Arabic layout with Arabic comma presentation on the primary letter row plus deterministic device-local long-press variants for common alef/hamza forms, taa marbuta, alif maqsura, Arabic semicolon/question-mark access, and Arabic diacritics. Alternate lookup is explicitly language-aware; English alternate behavior remains unchanged, and English-only prediction/correction/swipe-learning remains disabled while Arabic is active. The change performs no editor-context inference, learning, persistence, network lookup, Contacts access, or telemetry. Focused JVM coverage verifies Arabic alternates and language-aware punctuation. Broader Arabic dictionaries/prediction, BiDi editor acceptance, physical-device ergonomics, accessibility, and native-language validation remain open.
+
 ## October 2, 2026 — English/Arabic foundation integration and switching candidate
 
 Protected PR #185 integrated the bounded first-party English (US) / Arabic subtype foundation to authoritative monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Android's explicitly selected IME subtype remains the sole language authority. Arabic renders Arabic letter rows, Arabic-Indic digits, RTL metadata, an Arabic spacebar label, and no case-shift key; English-only correction, prediction, swipe-dictionary decoding, and learning capture fail closed while Arabic is active.
