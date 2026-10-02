@@ -35,7 +35,8 @@ The target is to recover the established GoreeCloud Gallery information architec
 - **Recycle Bin Restore / Purge:** both single-item viewer actions and bounded multi-select actions use Android-owned confirmation. Restore uses `MediaStore.createTrashRequest(..., false)`; permanent purge uses `MediaStore.createDeleteRequest(...)`. Restore preserves Gallery Favorite URI metadata while confirmed purge removes stale Favorite references.
 - **Mutation bound:** a single Trash/Restore/Delete request is limited to 100 unique `content://media/...` image/video item URIs. Non-MediaStore, file, network, blank, generic-files, collection-only, or malformed URIs are rejected before Android mutation request creation.
 - **Android 10 fail-closed boundary:** this Development slice does not add a legacy direct-delete/recovery workaround. Delete/Trash/Recycle Bin mutation remains unavailable below Android 11 until a separately approved compatibility path exists.
-- **Android-authorized Move Development implementation:** eligible selections can move to an existing authorized folder or use the bounded `Create & move` path after Android-owned write authorization. Copy and broader album-management behavior remain separate work.
+- **Android-authorized Move Development implementation:** eligible selections can move to an existing authorized folder or use the bounded `Create & move` path after Android-owned write authorization.
+- **Preserve-original Copy Development implementation:** eligible selections can copy to another authorized local folder or use a bounded **Create & copy** path. Copy creates new `IS_PENDING` MediaStore rows, streams only the selected authorized source bytes, publishes outputs only after successful writes, cleans failed partial outputs best-effort, and never changes the source item's `RELATIVE_PATH` or requests Move write authority.
 - Framework-independent selection policy provides toggle, select-all, prune, and resolve only against a caller-supplied current authorized/presented media scope; stale or foreign content URIs cannot become bulk-action authority.
 - Framework-independent non-destructive bulk-action policy preserves presentation order and derives the narrowest safe Share MIME type while deterministically planning Favorites Add/Remove.
 - The current Development viewer can launch Gallery's non-exported first-party photo editor for supported authorized photos, with rotate, horizontal flip, bounded crop presets/custom crop, reset, and non-destructive Save copy behavior. Representative-device fidelity/accessibility/release acceptance remains open.
@@ -138,7 +139,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Share/export and approved Android handoff workflows.
 - Edit entry points and approved first-party editing workflows.
 - Delete/trash/recovery flows with explicit destructive-action authorization.
-- Move/copy/organize actions through Android-supported media boundaries.
+- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move and preserve-original Copy; broader rename/manual reorder/album-management acceptance remains separate.
 - Details/metadata presentation and approved metadata-editing workflows.
 - Slideshow and other established local presentation actions where supported by the historical Gallery product.
 - Hidden/excluded album or media controls and sensitive-media policy governed by Privacy Shield.
@@ -151,7 +152,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Continue the mature Samsung Gallery-inspired restoration beyond the current Photos / Albums / Videos / Trash / Settings experience, bounded viewers, selection, Android-authorized Delete/Trash, and dedicated Trash candidate.
 - Physically validate the dedicated Trash destination on representative Android devices with disposable copied media, including five-tab navigation, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty Trash, provider failure, restart/process recreation, and retention/expiry refresh.
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
-- Refine multi-select and the implemented Android-authorized Move path from representative-device evidence, including existing-folder and Create & move flows, confirmation approve/cancel/deny behavior, recreation, mixed-media destinations, stale selection, and provider-failure handling.
+- Refine multi-select plus the implemented Move and preserve-original Copy paths from representative-device evidence, including existing-folder and Create & move/Create & copy flows, Move confirmation approve/cancel/deny behavior, mixed-media destinations, stale selection, provider/source/output failures, filename collision behavior, and post-operation refresh.
 - Extend the already-implemented grouping and view-density model only where evidence supports it; continue album creation/rename/reorder and approved copy/organization work.
 - Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
 - Complete animated GIF thumbnail decoding before treating the saved GIF-animation preference as behaviorally active.
