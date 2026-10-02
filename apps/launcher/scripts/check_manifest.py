@@ -104,14 +104,36 @@ if "android.permission.QUERY_ALL_PACKAGES" in text:
     print("Broad QUERY_ALL_PACKAGES visibility is not permitted.")
     sys.exit(1)
 
-ui = Path(__file__).resolve().parents[1] / "app/src/main/java/com/goreecloud/launcher/ui/LauncherBetaRoot.kt"
-ui_text = ui.read_text(encoding="utf-8")
+ui_root = Path(__file__).resolve().parents[1] / "app/src/main/java/com/goreecloud/launcher/ui"
+beta_text = (ui_root / "LauncherBetaRoot.kt").read_text(encoding="utf-8")
 for forbidden_label in (
     "Open GoreeCloud Search",
     "Open GoreeCloud Index",
 ):
-    if forbidden_label in ui_text:
+    if forbidden_label in beta_text:
         print("Legacy external-search authority label is not permitted:", forbidden_label)
         sys.exit(1)
 
-print("Manifest and Launcher search-authority guards passed.")
+# User-facing Launcher controls use Launcher-owned vector geometry rather than font/Unicode
+# stand-ins. This keeps optical weight and alignment stable across OEM fonts.
+glyph_guard_files = (
+    ui_root / "LauncherBetaRoot.kt",
+    ui_root / "LauncherProviderControlledSearchSurface.kt",
+    ui_root / "LauncherStartupWizard.kt",
+)
+forbidden_pseudo_glyphs = (
+    "★", "✓", "⚙", "▦", "▤", "◫", "⌕", "⚡", "▰",
+    "›", "⌃", "▣", "≡", "↗", "☎", "✉", "→", "◷", "↑", "↓",
+)
+for source in glyph_guard_files:
+    source_text = source.read_text(encoding="utf-8")
+    present = [glyph for glyph in forbidden_pseudo_glyphs if glyph in source_text]
+    if present:
+        print(
+            "Launcher-owned controls must not use font pseudo-glyphs:",
+            source.name,
+            present,
+        )
+        sys.exit(1)
+
+print("Manifest, Launcher search-authority, and vector-glyph guards passed.")
