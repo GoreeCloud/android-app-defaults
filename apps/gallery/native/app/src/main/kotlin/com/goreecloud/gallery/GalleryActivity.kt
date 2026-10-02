@@ -1626,6 +1626,8 @@ class GalleryActivity : Activity() {
                     }
                     GalleryCardOverflowAction.DETAILS -> showItemDetails(item)
                     GalleryCardOverflowAction.OPEN,
+                    GalleryCardOverflowAction.PIN_TO_TOP,
+                    GalleryCardOverflowAction.UNPIN_FROM_TOP,
                     null -> return@setOnMenuItemClickListener false
                 }
                 true
