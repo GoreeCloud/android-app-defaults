@@ -52,13 +52,13 @@ The `0.6.2-dev` in-place selection renderer is physically verified on the repres
 
 ## Copy media
 
-Select one or more authorized photos/videos and choose **Copy**.
+On Android 11 or newer, select one or more authorized photos/videos and choose **Copy**.
 
 - Choose an existing eligible local folder, or choose **New folder** to use **Create & copy**.
 - Existing source folders are not offered as Copy destinations in this Development path.
 - Image-only new folders use Pictures, video-only folders use Movies, and mixed selections use DCIM.
-- Gallery creates new MediaStore items and leaves the originals unchanged.
-- New filenames use `(copy)`, `(copy 2)`, and later bounded suffixes when needed to avoid names already visible in the destination.
+- Gallery creates new MediaStore items on each source item's concrete provider-owned MediaStore volume and leaves the originals unchanged. The Development path uses Android 11's related-copy insertion contract rather than enabling a separate Android 10 fallback.
+- New filenames use `(copy)`, `(copy 2)`, and later bounded suffixes when needed to avoid names already visible in the destination; long source names are shortened as needed to remain within the supported MediaStore display-name bound.
 - A single operation is bounded to 100 items. Partial failures are reported; failed incomplete destination rows are cleaned up best-effort.
 
 Use disposable copied media for representative-device testing while Copy remains Development and acceptance-gated.
