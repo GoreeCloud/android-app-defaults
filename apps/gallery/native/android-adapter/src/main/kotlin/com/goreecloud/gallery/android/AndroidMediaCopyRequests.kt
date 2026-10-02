@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.MediaStore
 import java.io.IOException
 import java.net.URI
@@ -33,11 +34,16 @@ data class AndroidMediaCopyResult(
  * Copies exact Android-authorized MediaStore image/video items into new MediaStore rows.
  *
  * Copy never requests write authority over the source item and never updates its RELATIVE_PATH.
+ * The source row is queried for its provider-owned concrete VOLUME_NAME so Gallery never attempts
+ * insertion into MediaStore's synthetic external/internal aggregate volumes. Android 11+ copy
+ * insertion also carries QUERY_ARG_RELATED_URI, which is Android's documented relationship hint
+ * for copies that target an otherwise restricted MediaStore relative path.
+ *
  * A destination row remains IS_PENDING until all source bytes have been written successfully.
  * Failed partial output rows are deleted best-effort before the operation continues.
  */
 object AndroidMediaCopyRequests {
-    const val MIN_SUPPORTED_API = Build.VERSION_CODES.Q
+    const val MIN_SUPPORTED_API = Build.VERSION_CODES.R
     const val MAX_COPY_ITEMS = 100
     const val MAX_DISPLAY_NAME_CHARACTERS = 255
 
@@ -50,7 +56,7 @@ object AndroidMediaCopyRequests {
         destinationRelativePath: String,
     ): AndroidMediaCopyResult {
         check(isSupported()) {
-            "MediaStore copy requires Android 10 or newer"
+            "MediaStore copy requires Android 11 or newer"
         }
 
         val normalizedSources = normalizeSources(sources)
@@ -61,10 +67,12 @@ object AndroidMediaCopyRequests {
         normalizedSources.forEach { source ->
             var outputUri: Uri? = null
             try {
+                val sourceUri = Uri.parse(source.contentUri)
                 val identity = sourceIdentity(source.contentUri)
+                val volumeName = resolveConcreteVolumeName(contentResolver, sourceUri)
                 val collection = when (identity.kind) {
-                    MediaKind.IMAGE -> MediaStore.Images.Media.getContentUri(identity.volumeName)
-                    MediaKind.VIDEO -> MediaStore.Video.Media.getContentUri(identity.volumeName)
+                    MediaKind.IMAGE -> MediaStore.Images.Media.getContentUri(volumeName)
+                    MediaKind.VIDEO -> MediaStore.Video.Media.getContentUri(volumeName)
                 }
                 val values = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, source.outputDisplayName)
@@ -72,14 +80,17 @@ object AndroidMediaCopyRequests {
                     put(MediaStore.MediaColumns.RELATIVE_PATH, destination)
                     put(MediaStore.MediaColumns.IS_PENDING, 1)
                     source.capturedAtMillis?.takeIf { it > 0L }?.let {
-                        put(MediaStore.Images.ImageColumns.DATE_TAKEN, it)
+                        put(MediaStore.MediaColumns.DATE_TAKEN, it)
                     }
                 }
+                val extras = Bundle().apply {
+                    putParcelable(MediaStore.QUERY_ARG_RELATED_URI, sourceUri)
+                }
 
-                outputUri = contentResolver.insert(collection, values)
+                outputUri = contentResolver.insert(collection, values, extras)
                     ?: throw IOException("MediaStore refused to create the copy output row")
 
-                val input = contentResolver.openInputStream(Uri.parse(source.contentUri))
+                val input = contentResolver.openInputStream(sourceUri)
                     ?: throw IOException("MediaStore source stream is unavailable")
                 val output = contentResolver.openOutputStream(outputUri, "w")
                     ?: throw IOException("MediaStore output stream is unavailable")
@@ -113,7 +124,7 @@ object AndroidMediaCopyRequests {
                     try {
                         contentResolver.delete(uri, null, null)
                     } catch (_: RuntimeException) {
-                        // Best effort only: the row is still IS_PENDING and not intentionally published.
+                        // Best effort only: the row remains pending and was never intentionally published.
                     }
                 }
             }
@@ -122,7 +133,7 @@ object AndroidMediaCopyRequests {
         return AndroidMediaCopyResult(
             copiedCount = copiedUris.size,
             failedCount = failedCount,
-            copiedContentUris = Collections.unmodifiableList(copiedUris),
+            copiedContentUris = Collections.unmodifiableList(ArrayList(copiedUris)),
         )
     }
 
@@ -174,6 +185,34 @@ object AndroidMediaCopyRequests {
         return value
     }
 
+    private fun resolveConcreteVolumeName(
+        contentResolver: ContentResolver,
+        sourceUri: Uri,
+    ): String {
+        val volumeName = contentResolver.query(
+            sourceUri,
+            arrayOf(MediaStore.MediaColumns.VOLUME_NAME),
+            null,
+            null,
+            null,
+        )?.use { cursor ->
+            if (!cursor.moveToFirst()) return@use null
+            cursor.getColumnIndex(MediaStore.MediaColumns.VOLUME_NAME)
+                .takeIf { it >= 0 && !cursor.isNull(it) }
+                ?.let(cursor::getString)
+                ?.trim()
+                ?.takeIf(String::isNotEmpty)
+        } ?: throw IOException("MediaStore source volume is unavailable")
+
+        require(volumeName != MediaStore.VOLUME_EXTERNAL) {
+            "Copy requires a concrete MediaStore external volume"
+        }
+        require(volumeName != MediaStore.VOLUME_INTERNAL) {
+            "Copy cannot insert into MediaStore's synthetic internal volume"
+        }
+        return volumeName
+    }
+
     private fun sourceIdentity(contentUri: String): MediaIdentity {
         val path = URI(contentUri).path.split('/').filter(String::isNotEmpty)
         require(path.size == 4 && path[2] == "media") {
@@ -184,11 +223,10 @@ object AndroidMediaCopyRequests {
             "video" -> MediaKind.VIDEO
             else -> throw IllegalArgumentException("unsupported MediaStore collection")
         }
-        return MediaIdentity(volumeName = path[0], kind = kind)
+        return MediaIdentity(kind = kind)
     }
 
     private data class MediaIdentity(
-        val volumeName: String,
         val kind: MediaKind,
     )
 
