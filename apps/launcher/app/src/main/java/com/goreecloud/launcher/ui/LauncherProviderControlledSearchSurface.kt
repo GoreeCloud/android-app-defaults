@@ -320,70 +320,46 @@ internal fun LauncherProviderControlledSearchSurface(
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
     ) {
         if (showSources) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(GlazeMetrics.radius2ExtraLarge),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.84f),
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.09f),
-                ),
-                shadowElevation = 5.dp,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .padding(horizontal = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
+                Surface(
+                    onClick = { showSources = false },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(GlazeMetrics.space2),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                        .size(44.dp)
+                        .semantics {
+                            contentDescription = "Back to Universal Search"
+                        },
+                    shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                    ),
                 ) {
-                    Surface(
-                        onClick = { showSources = false },
-                        modifier = Modifier
-                            .size(52.dp)
-                            .semantics {
-                                contentDescription = "Back to Universal Search"
-                            },
-                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-                        ),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                "‹",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(1.dp),
-                    ) {
-                        Text(
-                            "Search sources",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            "Choose where Universal Search looks",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Box(contentAlignment = Alignment.Center) {
+                        LauncherBackGlyph(
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 }
+                Text(
+                    "Search Sources",
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
-            LauncherSearchSuggestionPresentationControl(
-                selected = suggestionPresentation,
-                onSelect = searchAppearancePreferences::setPresentation,
-            )
             LauncherSearchSourceManager(
                 apps = apps,
+                suggestionPresentation = suggestionPresentation,
+                onSelectSuggestionPresentation = searchAppearancePreferences::setPresentation,
                 persisted = searchProviderPreferences,
                 controls = controls,
                 onSet = onSetSearchProviderPreferences,
