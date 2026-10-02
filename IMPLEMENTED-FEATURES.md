@@ -1,5 +1,11 @@
 # Android App Defaults — Implemented Features
 
+## September 29, 2026 — Clock stopwatch-history deletion safeguard candidate
+
+The stacked Clock candidate now protects the destructive **Clear all** stopwatch-history action with an explicit confirmation dialog. The dialog explains that all saved stopwatch results on this device will be permanently removed while the current stopwatch/laps remain unchanged. **Cancel** preserves history; only **Clear history** invokes the existing app-private deletion path. Android runtime coverage verifies both the cancel-preserves and explicit-confirm-clears paths.
+
+This change adds no alarm, timer, notification, network, account, backup, or platform authority. It is candidate Development source stacked on the Clock foundation and remains subject to fresh exact-head Android validation, representative-device/accessibility review, independent review/protection, and release gates.
+
 ## September 29, 2026 — Clock adaptive widget sizing candidate
 
 Draft PR #50 now makes the Clock, next-alarm, and running-timer home-screen widgets react to Android launcher resize options. A shared deterministic policy selects regular presentation at the existing default sizes and a compact presentation when the launcher grants a narrow or short surface. Compact mode hides secondary date/status detail and reduces primary type scale while preserving the existing tap destination and local-only data boundary.

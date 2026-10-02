@@ -1,5 +1,15 @@
 # Android App Defaults — Changelogs
 
+## September 29, 2026 — Clock stopwatch-history clear confirmation candidate
+
+- Added an explicit destructive confirmation before clearing all saved stopwatch results.
+- **Cancel** leaves history intact; **Clear history** invokes the existing local deletion path.
+- Confirmation copy distinguishes saved history from the current stopwatch/laps.
+- Added Android runtime acceptance for cancel-preserves and confirm-clears behavior.
+- No alarm, timer, notification, network, account, backup, or synchronization authority changes.
+
+**Acceptance boundary:** stacked Development candidate on the Clock foundation. Fresh exact-head validation, representative-device/accessibility review, review/protection, release, Stable, Seal, and Anchor gates remain open.
+
 ## September 28, 2026 — relative Next alarm presentation
 
 Clock's existing exact-alarm-gated **Next alarm** card now adds a compact relative-time summary such as **In 2 h 15 min**, derived from the same scheduled trigger instant rather than a second scheduling path. The presentation policy uses instant duration so DST/local-clock representation does not distort the countdown, handles sub-minute and multi-day boundaries, and fails closed to **Due now** for a non-future trigger.

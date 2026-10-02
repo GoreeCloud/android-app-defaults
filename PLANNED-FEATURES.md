@@ -1,5 +1,9 @@
 # Android App Defaults — Planned Features
 
+## 2026-09-29 Clock stopwatch-history safeguard continuation
+
+A stacked Clock Development candidate now adds explicit review-before-delete behavior for **Clear all** stopwatch history. The user can cancel without mutation; only the explicit **Clear history** confirmation removes saved results. This closes only the accidental bulk-history deletion UX gap. Representative-device/accessibility acceptance, broader recovery/portability, platform-system integration, review/protection, release, Stable, Seal, and Anchor gates remain open.
+
 ## September 29, 2026 — Clock widget continuation
 
 Adaptive compact/regular sizing for the three Clock home-screen widgets is implemented on Draft PR #50 and passed Android Development Foundation run #281 / `36511856286` on exact source head `96fd33703c6451977b879f9ce1ad9eb852946cb8`. Remaining widget work is configuration/personalization plus representative-launcher resize, touch, accessibility, theme, and update acceptance; those gates stay planned until verified.

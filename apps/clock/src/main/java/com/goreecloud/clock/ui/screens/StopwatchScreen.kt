@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,6 +49,7 @@ fun StopwatchScreen(
     val state by store.state.collectAsStateWithLifecycle()
     val history by store.history.collectAsStateWithLifecycle()
     var tick by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    var confirmClearHistory by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.running, reducedMotion) {
         tick = SystemClock.elapsedRealtime()
@@ -132,7 +135,7 @@ fun StopwatchScreen(
                         TextButton(
                             onClick = {
                                 onHaptic(ClockHapticEvent.ACTION)
-                                store.clearHistory()
+                                confirmClearHistory = true
                             },
                         ) { Text("Clear all") }
                     }
@@ -150,6 +153,35 @@ fun StopwatchScreen(
                 }
             }
         }
+    }
+
+    if (confirmClearHistory) {
+        AlertDialog(
+            onDismissRequest = { confirmClearHistory = false },
+            title = { Text("Clear stopwatch history?") },
+            text = {
+                Text(
+                    "This permanently removes all saved stopwatch results from this device. " +
+                        "The current stopwatch and laps are not changed.",
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onHaptic(ClockHapticEvent.ACTION)
+                        store.clearHistory()
+                        confirmClearHistory = false
+                    },
+                ) {
+                    Text("Clear history")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmClearHistory = false }) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 }
 
