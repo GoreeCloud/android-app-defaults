@@ -143,21 +143,21 @@ fun LauncherStartupWizard(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = 720.dp),
+                    .widthIn(max = 680.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(
                     GlazeMetrics.radius2ExtraLarge,
                 ),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 tonalElevation = 0.dp,
-                shadowElevation = 18.dp,
+                shadowElevation = 12.dp,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .verticalScroll(scrollState)
-                        .padding(GlazeMetrics.space4),
-                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+                        .padding(GlazeMetrics.space3),
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                 ) {
                     WizardProgress(step = step)
 
@@ -167,7 +167,7 @@ fun LauncherStartupWizard(
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
                         Surface(
-                            modifier = Modifier.size(48.dp),
+                            modifier = Modifier.size(44.dp),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(
                                 GlazeMetrics.radiusLarge,
                             ),
@@ -187,12 +187,12 @@ fun LauncherStartupWizard(
                             Text(
                                 text = stepTitle,
                                 modifier = Modifier.semantics { heading() },
-                                style = MaterialTheme.typography.headlineMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
                                 stepSummary,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -472,27 +472,49 @@ private enum class WizardVisualSymbol {
 
 @Composable
 private fun WizardProgress(step: Int) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-        repeat(3) { index ->
-            val active = index <= step
-            Surface(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(5.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                    GlazeMetrics.radiusPill,
-                ),
-                color = if (active) {
-                    MaterialTheme.colorScheme.primary.copy(
-                        alpha = if (index == step) 1f else 0.48f,
-                    )
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-            ) {}
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Setup",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                "Step ${step + 1} of 3",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            repeat(3) { index ->
+                val active = index <= step
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(4.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                        GlazeMetrics.radiusPill,
+                    ),
+                    color = if (active) {
+                        MaterialTheme.colorScheme.primary.copy(
+                            alpha = if (index == step) 1f else 0.44f,
+                        )
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                ) {}
+            }
         }
     }
 }
@@ -511,12 +533,12 @@ private fun WizardFeatureCard(
         border = BorderStroke(1.dp, accent.copy(alpha = 0.16f)),
     ) {
         Row(
-            modifier = Modifier.padding(GlazeMetrics.space3),
+            modifier = Modifier.padding(GlazeMetrics.space2),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Surface(
-                modifier = Modifier.size(42.dp),
+                modifier = Modifier.size(38.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(
                     GlazeMetrics.radiusMedium,
                 ),
@@ -554,14 +576,14 @@ private fun WizardMiniFeatureCard(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.heightIn(min = 92.dp),
+        modifier = modifier.heightIn(min = 82.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = accent.copy(alpha = 0.07f),
         border = BorderStroke(1.dp, accent.copy(alpha = 0.14f)),
     ) {
         Column(
             modifier = Modifier.padding(GlazeMetrics.space2),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             WizardVisualGlyph(symbol = symbol, tint = accent)
             Text(
@@ -590,7 +612,7 @@ private fun WizardSearchModeCard(
     val accent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 150.dp),
+        modifier = modifier.heightIn(min = 132.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = if (selected) {
             accent.copy(alpha = 0.14f)
@@ -604,7 +626,7 @@ private fun WizardSearchModeCard(
     ) {
         Column(
             modifier = Modifier.padding(GlazeMetrics.space2),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             WizardSearchPreview(
                 showSearchBar = showSearchBar,
@@ -644,7 +666,7 @@ private fun WizardSearchPreview(
     Canvas(
         modifier = modifier
             .fillMaxWidth()
-            .height(70.dp),
+            .height(58.dp),
     ) {
         val w = size.width
         val h = size.height
@@ -716,7 +738,7 @@ private fun WizardGestureStrip() {
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             listOf(
@@ -733,7 +755,7 @@ private fun WizardGestureStrip() {
                 ) {
                     Text(
                         label,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -919,7 +941,7 @@ private fun WizardInfoCard(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f),
     ) {
         Column(
-            modifier = Modifier.padding(GlazeMetrics.space3),
+            modifier = Modifier.padding(GlazeMetrics.space2),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
@@ -954,7 +976,7 @@ private fun WizardRadioRow(
         ),
     ) {
         Row(
-            modifier = Modifier.padding(GlazeMetrics.space3),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
         ) {
@@ -963,7 +985,7 @@ private fun WizardRadioRow(
                 Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                 Text(
                     summary,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -989,7 +1011,7 @@ private fun WizardSwitchRow(
             Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
             Text(
                 summary,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
