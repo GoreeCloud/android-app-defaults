@@ -14,6 +14,8 @@ internal enum class GalleryAlbumMoveDirection {
  * Pinned albums remain a separate leading section; manual movement never crosses that boundary.
  */
 internal object GalleryAlbumOrderPolicy {
+    const val MAX_STORED_ORDER_IDS = 500
+
     fun orderedIds(
         availableAlbumIds: List<String>,
         pinnedAlbumIds: Set<String>,
@@ -99,5 +101,6 @@ internal object GalleryAlbumOrderPolicy {
             .map { it.trim() }
             .filter(String::isNotEmpty)
             .distinct()
+            .take(MAX_STORED_ORDER_IDS)
             .toList()
 }
