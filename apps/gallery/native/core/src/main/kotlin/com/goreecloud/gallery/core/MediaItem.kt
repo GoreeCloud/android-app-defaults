@@ -16,6 +16,13 @@ data class MediaItem(
     val albumId: String? = null,
     val albumName: String? = null,
     /**
+     * Concrete Android MediaStore VOLUME_NAME when the provider exposes one.
+     *
+     * This remains provider-owned identity metadata. Gallery uses it to keep organization actions
+     * on the same concrete shared-storage volume and never treats it as a filesystem mount path.
+     */
+    val volumeName: String? = null,
+    /**
      * Android MediaStore RELATIVE_PATH when the provider exposes one.
      *
      * This value is provider-owned metadata, not filesystem authority. Gallery uses it only as an
@@ -36,6 +43,7 @@ data class MediaItem(
         require(albumId == null || albumId.isNotBlank())
         require(albumName == null || albumName.isNotBlank())
         require((albumId == null) == (albumName == null))
+        require(volumeName == null || volumeName.isNotBlank())
         require(relativePath == null || relativePath.isNotBlank())
     }
 
