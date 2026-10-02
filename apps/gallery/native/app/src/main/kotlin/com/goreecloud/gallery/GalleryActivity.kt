@@ -13,7 +13,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.Typeface
-import android.graphics.drawable.AnimatedImageDrawable
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
@@ -5365,19 +5364,19 @@ class GalleryActivity : Activity() {
 
                 runOnUiThread {
                     if (generation != loadGeneration || target.tag != cacheKey) return@runOnUiThread
-                    (target.drawable as? AnimatedImageDrawable)?.stop()
+                    GalleryGifThumbnailLoader.stopIfAnimated(target.drawable)
                     target.setImageDrawable(drawable)
                     val listener = object : View.OnAttachStateChangeListener {
                         override fun onViewAttachedToWindow(view: View) {
-                            if (target.drawable === drawable) drawable.start()
+                            if (target.drawable === drawable) GalleryGifThumbnailLoader.startIfAnimated(drawable)
                         }
 
                         override fun onViewDetachedFromWindow(view: View) {
-                            drawable.stop()
+                            GalleryGifThumbnailLoader.stopIfAnimated(drawable)
                         }
                     }
                     target.addOnAttachStateChangeListener(listener)
-                    if (target.isAttachedToWindow) drawable.start()
+                    if (target.isAttachedToWindow) GalleryGifThumbnailLoader.startIfAnimated(drawable)
                 }
             }
         } catch (_: RuntimeException) {
@@ -5394,7 +5393,7 @@ class GalleryActivity : Activity() {
     ) {
         thumbnailCache.get(cacheKey)?.let { cached ->
             if (generation == loadGeneration && target.tag == cacheKey) {
-                (target.drawable as? AnimatedImageDrawable)?.stop()
+                GalleryGifThumbnailLoader.stopIfAnimated(target.drawable)
                 target.setImageBitmap(cached)
             }
             return
@@ -5412,7 +5411,7 @@ class GalleryActivity : Activity() {
                 thumbnailCache.put(cacheKey, bitmap)
                 runOnUiThread {
                     if (generation == loadGeneration && target.tag == cacheKey) {
-                        (target.drawable as? AnimatedImageDrawable)?.stop()
+                        GalleryGifThumbnailLoader.stopIfAnimated(target.drawable)
                         target.setImageBitmap(bitmap)
                     }
                 }
