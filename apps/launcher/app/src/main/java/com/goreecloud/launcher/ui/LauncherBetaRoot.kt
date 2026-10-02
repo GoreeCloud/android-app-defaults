@@ -5346,7 +5346,6 @@ private fun LauncherBuiltInWidget(
                     ) {
                         LauncherSearchMagnifier(
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(26.dp),
                         )
                         Column(Modifier.weight(1f)) {
                             Text(
