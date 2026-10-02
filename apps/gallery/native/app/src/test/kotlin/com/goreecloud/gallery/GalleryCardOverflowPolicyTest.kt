@@ -39,6 +39,7 @@ class GalleryCardOverflowPolicyTest {
                 GalleryCardOverflowAction.PIN_TO_TOP,
                 GalleryCardOverflowAction.MOVE_EARLIER,
                 GalleryCardOverflowAction.MOVE_LATER,
+                GalleryCardOverflowAction.RESET_ALBUM_ORDER,
                 GalleryCardOverflowAction.DETAILS,
             ),
             GalleryCardOverflowPolicy.albumActions(
@@ -46,6 +47,7 @@ class GalleryCardOverflowPolicyTest {
                 canPin = true,
                 canMoveEarlier = true,
                 canMoveLater = true,
+                canResetOrder = true,
             ),
         )
         assertEquals(
