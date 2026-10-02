@@ -1275,7 +1275,11 @@ class KeyboardView @JvmOverloads constructor(
         Action.SHIFT -> "Shift"
         Action.BACKSPACE -> "Backspace"
         Action.SPACE ->
-            if (layer == KeyboardLayer.LETTERS) "Space, English (US)" else "Space"
+            if (layer == KeyboardLayer.LETTERS) {
+                "Space, ${KeyboardLayout.currentLanguage().spacebarLabel}"
+            } else {
+                "Space"
+            }
         Action.ENTER -> "Enter"
         Action.LETTERS -> "Letters"
         Action.SYMBOLS -> "Symbols"
