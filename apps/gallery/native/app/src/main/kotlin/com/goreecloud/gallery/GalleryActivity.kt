@@ -5193,7 +5193,7 @@ class GalleryActivity : Activity() {
 
     private fun stringListJson(values: List<String>): JSONArray = JSONArray().apply {
         values.asSequence()
-            .map(String::trim)
+            .map { it.trim() }
             .filter(String::isNotEmpty)
             .distinct()
             .forEach { put(it) }
