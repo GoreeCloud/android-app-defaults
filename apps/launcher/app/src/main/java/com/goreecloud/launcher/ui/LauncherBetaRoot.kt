@@ -2564,21 +2564,19 @@ private fun LauncherWidgetPickerSheet(
                 }
             }
             Text(
-                "GoreeCloud widgets and installed Android widgets in one Launcher gallery.",
+                "Add GoreeCloud or installed Android widgets.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
-        OutlinedTextField(
+        GlazeAppSearchField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("launcher-widget-search-field"),
-            singleLine = true,
-            label = { Text("Search widgets") },
-            placeholder = { Text("GoreeCloud widget, app, or package") },
+            modifier = Modifier.fillMaxWidth(),
+            requestFocus = false,
+            placeholder = "Search widgets",
+            inputTestTag = "launcher-widget-search-field",
         )
 
         Text(
