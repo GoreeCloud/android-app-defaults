@@ -1,6 +1,7 @@
 package com.goreecloud.gallery
 
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 data class GalleryViewerTranslation(
     val x: Float,
@@ -43,8 +44,11 @@ object GalleryViewerZoomPolicy {
 
     fun displayPercent(scale: Float): Int {
         val safeScale = scale.takeIf { it.isFinite() }?.coerceIn(MIN_SCALE, MAX_SCALE) ?: MIN_SCALE
-        return (safeScale * 100f).toInt()
+        return (safeScale * 100f).roundToInt()
     }
+
+    fun allowsNavigationSwipe(scale: Float, hadMultiplePointers: Boolean): Boolean =
+        !hadMultiplePointers && !isZoomed(scale)
 
     fun isPreset(scale: Float): Boolean =
         scale.isFinite() && abs(scale - ACCESSIBLE_PRESET_SCALE) <= ZOOM_EPSILON
