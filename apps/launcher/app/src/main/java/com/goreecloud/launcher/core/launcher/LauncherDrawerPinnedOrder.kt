@@ -6,7 +6,7 @@ package com.goreecloud.launcher.core.launcher
  * Membership remains the existing profile-qualified pinned-key set. This sidecar only remembers
  * user ordering and is intentionally outside portable preference v1.
  */
-internal data class LauncherDrawerPinnedState(
+data class LauncherDrawerPinnedState(
     val keys: Set<String>,
     val order: List<String>,
 )
