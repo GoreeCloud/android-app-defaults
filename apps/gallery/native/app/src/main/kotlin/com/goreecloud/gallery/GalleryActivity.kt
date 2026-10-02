@@ -847,6 +847,8 @@ class GalleryActivity : Activity() {
         }
         val copyDescription = when {
             !copySupported -> "Copy requires Android 11 or newer in this Development build"
+            selectedItems.size > AndroidMediaCopyRequests.MAX_COPY_ITEMS ->
+                "Copy is limited to ${AndroidMediaCopyRequests.MAX_COPY_ITEMS} items at a time"
             copyDestinations.isNotEmpty() && newCopyFolderParent != null ->
                 "Copy selected media while preserving the originals, or create a new folder inside $newCopyFolderParent"
             copyDestinations.isNotEmpty() -> "Copy selected media to another authorized local folder"
@@ -875,6 +877,7 @@ class GalleryActivity : Activity() {
             selectionAction(
                 "Copy",
                 selectedItems.isNotEmpty() &&
+                    selectedItems.size <= AndroidMediaCopyRequests.MAX_COPY_ITEMS &&
                     copySupported &&
                     (copyDestinations.isNotEmpty() || newCopyFolderParent != null) &&
                     !mediaCopyExecutionInProgress &&
@@ -2719,6 +2722,14 @@ class GalleryActivity : Activity() {
         if (pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
 
         val selectedItems = currentSelectedItems()
+        if (selectedItems.size > AndroidMediaCopyRequests.MAX_COPY_ITEMS) {
+            Toast.makeText(
+                this,
+                "Copy is limited to ${AndroidMediaCopyRequests.MAX_COPY_ITEMS} items at a time.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
         val currentScope = visibleAuthorizedItems()
         val destinations = GalleryCopyDestinationPolicy.existingDestinations(
             currentScope = currentScope,
@@ -2951,6 +2962,14 @@ class GalleryActivity : Activity() {
 
     private fun requestMediaCopy(items: List<MediaItem>, destinationRelativePath: String) {
         if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
+        if (items.size > AndroidMediaCopyRequests.MAX_COPY_ITEMS) {
+            Toast.makeText(
+                this,
+                "Copy is limited to ${AndroidMediaCopyRequests.MAX_COPY_ITEMS} items at a time.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
         if (!AndroidMediaCopyRequests.isSupported()) {
             Toast.makeText(this, "Copy requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
             return
