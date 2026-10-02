@@ -383,6 +383,7 @@ internal fun LauncherProviderControlledSearchSurface(
                 onSelect = searchAppearancePreferences::setPresentation,
             )
             LauncherSearchSourceManager(
+                apps = apps,
                 persisted = searchProviderPreferences,
                 controls = controls,
                 onSet = onSetSearchProviderPreferences,
@@ -2002,6 +2003,7 @@ private fun LauncherSearchSourceBadge(
     option: LauncherSearchProviderControlOption,
     section: LauncherSearchSourceSection,
     accent: Color,
+    apps: List<LauncherActivityInfo>,
 ) {
     Surface(
         modifier = Modifier.size(44.dp),
@@ -2010,10 +2012,30 @@ private fun LauncherSearchSourceBadge(
     ) {
         Box(contentAlignment = Alignment.Center) {
             if (section == LauncherSearchSourceSection.CONNECTED) {
-                LauncherConnectedProviderFallbackGlyph(
-                    providerId = option.providerId,
-                    modifier = Modifier.size(24.dp),
-                )
+                val packageName = remember(option.providerId) {
+                    LauncherConnectedSearchProviderRegistry.iconPackageNameFor(option.providerId)
+                }
+                val sourceApp = remember(apps, packageName) {
+                    packageName?.let { targetPackage ->
+                        apps.firstOrNull { app ->
+                            app.componentName.packageName == targetPackage
+                        }
+                    }
+                }
+                val icon = sourceApp?.let { rememberLauncherAppIcon(it) }
+                if (icon != null) {
+                    Image(
+                        bitmap = icon,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(28.dp).launcherIconMask(),
+                    )
+                } else {
+                    LauncherConnectedProviderFallbackGlyph(
+                        providerId = option.providerId,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             } else {
                 LauncherLocalSearchSourceGlyph(
                     providerId = option.providerId,
@@ -2209,6 +2231,7 @@ private fun LauncherLocalSearchSourceGlyph(
 
 @Composable
 private fun LauncherSearchSourceManager(
+    apps: List<LauncherActivityInfo>,
     persisted: LauncherSearchProviderPreferenceDecodeResult?,
     controls: LauncherSearchProviderControlState,
     fileSearchRoots: List<Uri>,
@@ -2486,6 +2509,7 @@ private fun LauncherSearchSourceManager(
                                                 option = option,
                                                 section = section,
                                                 accent = accent,
+                                                apps = apps,
                                             )
 
                                             Column(Modifier.weight(1f)) {
