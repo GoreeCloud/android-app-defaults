@@ -30,10 +30,9 @@ object GalleryCopyDestinationPolicy {
             ?: return emptyList()
         if (selected.any { normalizeVolumeName(it.volumeName) != selectedVolume }) return emptyList()
 
-        val sourcePaths = selected.mapNotNull { canonicalProviderPath(it.relativePath) }.toSet()
-        if (sourcePaths.size != selected.map { canonicalProviderPath(it.relativePath) }.filterNotNull().size) {
-            return emptyList()
-        }
+        val selectedPaths = selected.map { canonicalProviderPath(it.relativePath) }
+        if (selectedPaths.any { it == null }) return emptyList()
+        val sourcePaths = selectedPaths.filterNotNull().toSet()
 
         return currentScope
             .asSequence()
