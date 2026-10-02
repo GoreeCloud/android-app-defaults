@@ -9968,7 +9968,7 @@ private fun LauncherAppTile(
                 },
                 color = if (labelOnWallpaper) Color.White else Color.Unspecified,
                 textAlign = TextAlign.Center,
-                maxLines = if (compact) 1 else 2,
+                maxLines = if (compact || fixedGridGeometry) 1 else 2,
                 overflow = TextOverflow.Ellipsis,
             )
         }
