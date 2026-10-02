@@ -127,7 +127,7 @@ class GalleryRenderedAcceptanceTest {
         onView(withText("Slideshow speed"))
             .check(matches(isDisplayed()))
         onView(withText("Animate GIFs in thumbnails"))
-            .check(doesNotExist())
+            .check(matches(isDisplayed()))
         onView(withText("Delete empty folders after deleting their content"))
             .check(doesNotExist())
         onView(withText("Password protect photos"))
