@@ -6,6 +6,12 @@ import kotlin.test.assertFailsWith
 
 class AndroidMediaCopyRequestsTest {
     @Test
+    fun `copy support begins on Android 11`() {
+        assertEquals(false, AndroidMediaCopyRequests.isSupported(android.os.Build.VERSION_CODES.Q))
+        assertEquals(true, AndroidMediaCopyRequests.isSupported(android.os.Build.VERSION_CODES.R))
+    }
+
+    @Test
     fun `copy normalizes exact canonical image and video sources`() {
         val normalized = AndroidMediaCopyRequests.normalizeSources(
             listOf(
