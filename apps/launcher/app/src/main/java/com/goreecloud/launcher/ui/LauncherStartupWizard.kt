@@ -459,6 +459,11 @@ private enum class WizardVisualSymbol {
     FOLDER,
     SEARCH,
     GESTURE,
+    SWIPE_UP,
+    SWIPE_DOWN,
+    HOLD,
+    PAGE,
+    PIN,
 }
 
 @Composable
@@ -723,6 +728,11 @@ private fun WizardSearchPreview(
 
 @Composable
 private fun WizardGestureStrip() {
+    val cues = listOf(
+        WizardVisualSymbol.SWIPE_UP to "Apps",
+        WizardVisualSymbol.SWIPE_DOWN to "Search",
+        WizardVisualSymbol.HOLD to "Edit",
+    )
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
@@ -732,11 +742,7 @@ private fun WizardGestureStrip() {
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+            cues.forEach { (symbol, label) ->
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
@@ -744,14 +750,24 @@ private fun WizardGestureStrip() {
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
+                    Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        WizardVisualGlyph(
+                            symbol = symbol,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(15.dp),
+                        )
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
         }
@@ -844,10 +860,57 @@ private fun WizardVisualGlyph(
                 )
                 line(0.60f, 0.60f, 0.84f, 0.84f)
             }
-            WizardVisualSymbol.GESTURE -> {
+            WizardVisualSymbol.GESTURE,
+            WizardVisualSymbol.SWIPE_UP,
+            -> {
                 line(0.50f, 0.82f, 0.50f, 0.20f)
                 line(0.50f, 0.20f, 0.32f, 0.38f)
                 line(0.50f, 0.20f, 0.68f, 0.38f)
+            }
+            WizardVisualSymbol.SWIPE_DOWN -> {
+                line(0.50f, 0.18f, 0.50f, 0.80f)
+                line(0.50f, 0.80f, 0.32f, 0.62f)
+                line(0.50f, 0.80f, 0.68f, 0.62f)
+            }
+            WizardVisualSymbol.HOLD -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.18f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(stroke),
+                )
+                drawCircle(
+                    color = tint.copy(alpha = 0.42f),
+                    radius = u * 0.34f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(stroke * 0.72f),
+                )
+            }
+            WizardVisualSymbol.PAGE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * 0.14f, u * 0.22f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.50f, u * 0.58f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.07f),
+                    style = Stroke(stroke),
+                )
+                drawRoundRect(
+                    color = tint.copy(alpha = 0.62f),
+                    topLeft = Offset(u * 0.36f, u * 0.18f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.50f, u * 0.58f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.07f),
+                    style = Stroke(stroke),
+                )
+            }
+            WizardVisualSymbol.PIN -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.15f,
+                    center = Offset(u * 0.50f, u * 0.30f),
+                    style = Stroke(stroke),
+                )
+                line(0.50f, 0.45f, 0.50f, 0.82f)
+                line(0.34f, 0.48f, 0.66f, 0.48f)
             }
         }
     }
@@ -878,14 +941,17 @@ fun LauncherHomeHintCard(
             WizardHintRow(
                 title = "Place precisely",
                 summary = "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
+                symbol = WizardVisualSymbol.HOLD,
             )
             WizardHintRow(
                 title = "Move across pages",
                 summary = "Keep holding at a page edge to switch pages, then release on the target.",
+                symbol = WizardVisualSymbol.PAGE,
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or the Pinned filter when you want them together.",
+                symbol = WizardVisualSymbol.PIN,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -903,6 +969,7 @@ fun LauncherHomeHintCard(
 private fun WizardHintRow(
     title: String,
     summary: String,
+    symbol: WizardVisualSymbol,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -921,7 +988,7 @@ private fun WizardHintRow(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     WizardVisualGlyph(
-                        symbol = WizardVisualSymbol.GESTURE,
+                        symbol = symbol,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
