@@ -22,6 +22,9 @@ abstract class TrackerDao {
     )
     abstract fun observeActiveTrackedEvents(): Flow<List<TrackedEventEntity>>
 
+    @Query("SELECT COUNT(*) FROM tracked_events WHERE is_archived = 0")
+    abstract suspend fun activeTrackerCount(): Int
+
     @Query(
         "SELECT * FROM tracked_events " +
             "WHERE is_archived = 1 " +
