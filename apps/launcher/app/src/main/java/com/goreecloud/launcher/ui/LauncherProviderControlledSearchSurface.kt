@@ -3302,6 +3302,11 @@ private fun LauncherSearchSourceMoveButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val tint = if (enabled) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+    }
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -3315,11 +3320,6 @@ private fun LauncherSearchSourceMoveButton(
             val u = size.minDimension
             val stroke = u * 0.12f
             val cap = androidx.compose.ui.graphics.StrokeCap.Round
-            val tint = if (enabled) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-            }
             if (earlier) {
                 drawLine(
                     tint,
