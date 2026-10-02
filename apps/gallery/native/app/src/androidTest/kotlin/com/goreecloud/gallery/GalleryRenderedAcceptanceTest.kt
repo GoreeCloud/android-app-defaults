@@ -13,6 +13,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isClickable
@@ -125,6 +126,7 @@ class GalleryRenderedAcceptanceTest {
         onView(withText("Move deleted items to Trash"))
             .check(matches(withText("Move deleted items to Trash")))
         onView(withText("Slideshow speed"))
+            .perform(scrollTo())
             .check(matches(isDisplayed()))
         onView(withText("Animate GIFs in thumbnails"))
             .check(matches(isDisplayed()))
