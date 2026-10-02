@@ -3900,6 +3900,19 @@ class GalleryActivity : Activity() {
                 checked = settings.loopVideos,
             ) { setBooleanSetting(LOOP_VIDEOS_KEY, it) },
         )
+        val gifAnimationSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        library.addView(
+            settingToggleRow(
+                title = "Animate GIFs in thumbnails",
+                subtitle = if (gifAnimationSupported) {
+                    "When on, GIF cards animate while visible. The setting changes presentation only."
+                } else {
+                    "Requires Android 9 or newer; static GIF thumbnails remain active on this device."
+                },
+                checked = gifAnimationSupported && settings.animateGifThumbnails,
+                enabled = gifAnimationSupported,
+            ) { setBooleanSetting(ANIMATE_GIF_THUMBNAILS_KEY, it) },
+        )
         library.addView(
             settingChoiceRow(
                 title = "Slideshow speed",
@@ -4251,12 +4264,16 @@ class GalleryActivity : Activity() {
         title: String,
         subtitle: String,
         checked: Boolean,
+        enabled: Boolean = true,
         onToggle: (Boolean) -> Unit,
     ): LinearLayout = settingBaseRow(
         title = title,
         subtitle = subtitle,
-        enabled = true,
-        trailing = settingsPill(if (checked) "On" else "Off", emphasized = checked),
+        enabled = enabled,
+        trailing = settingsPill(
+            if (!enabled) "Unavailable" else if (checked) "On" else "Off",
+            emphasized = enabled && checked,
+        ),
     ) {
         onToggle(!checked)
         renderSettingsDestinationOnly()
@@ -5314,8 +5331,81 @@ class GalleryActivity : Activity() {
             loadAuthorizedViewerBitmap(item, target, generation, cacheKey, sizeDp)
             return
         }
+        if (
+            currentUserSettings().animateGifThumbnails &&
+            GalleryAnimatedThumbnailPolicy.isAnimatedGif(item.mimeType)
+        ) {
+            loadAnimatedGifThumbnail(item, target, generation, cacheKey, sizeDp)
+            return
+        }
+        loadStaticLocalThumbnail(item, target, generation, cacheKey, sizeDp)
+    }
+
+    private fun loadAnimatedGifThumbnail(
+        item: MediaItem,
+        target: ImageView,
+        generation: Int,
+        cacheKey: String,
+        sizeDp: Int,
+    ) {
+        try {
+            thumbnailExecutor.execute {
+                val drawable = try {
+                    GalleryGifThumbnailLoader.loadAnimated(
+                        contentResolver = contentResolver,
+                        contentUri = Uri.parse(item.contentUri),
+                        requestedEdgePx = dp(sizeDp),
+                    )
+                } catch (_: SecurityException) {
+                    null
+                } catch (_: IOException) {
+                    null
+                } catch (_: RuntimeException) {
+                    null
+                }
+                if (drawable == null) {
+                    runOnUiThread {
+                        if (generation == loadGeneration && target.tag == cacheKey) {
+                            loadStaticLocalThumbnail(item, target, generation, cacheKey, sizeDp)
+                        }
+                    }
+                    return@execute
+                }
+
+                runOnUiThread {
+                    if (generation != loadGeneration || target.tag != cacheKey) return@runOnUiThread
+                    GalleryGifThumbnailLoader.stopIfAnimated(target.drawable)
+                    target.setImageDrawable(drawable)
+                    val listener = object : View.OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(view: View) {
+                            if (target.drawable === drawable) GalleryGifThumbnailLoader.startIfAnimated(drawable)
+                        }
+
+                        override fun onViewDetachedFromWindow(view: View) {
+                            GalleryGifThumbnailLoader.stopIfAnimated(drawable)
+                        }
+                    }
+                    target.addOnAttachStateChangeListener(listener)
+                    if (target.isAttachedToWindow) GalleryGifThumbnailLoader.startIfAnimated(drawable)
+                }
+            }
+        } catch (_: RuntimeException) {
+            // Executor replacement can cancel queued GIF work; the next render can retry safely.
+        }
+    }
+
+    private fun loadStaticLocalThumbnail(
+        item: MediaItem,
+        target: ImageView,
+        generation: Int,
+        cacheKey: String,
+        sizeDp: Int,
+    ) {
         thumbnailCache.get(cacheKey)?.let { cached ->
-            if (generation == loadGeneration && target.tag == cacheKey) target.setImageBitmap(cached)
+            if (generation == loadGeneration && target.tag == cacheKey) {
+                GalleryGifThumbnailLoader.stopIfAnimated(target.drawable)
+                target.setImageBitmap(cached)
+            }
             return
         }
         try {
@@ -5330,7 +5420,10 @@ class GalleryActivity : Activity() {
                 if (bitmap == null) return@execute
                 thumbnailCache.put(cacheKey, bitmap)
                 runOnUiThread {
-                    if (generation == loadGeneration && target.tag == cacheKey) target.setImageBitmap(bitmap)
+                    if (generation == loadGeneration && target.tag == cacheKey) {
+                        GalleryGifThumbnailLoader.stopIfAnimated(target.drawable)
+                        target.setImageBitmap(bitmap)
+                    }
                 }
             }
         } catch (_: RuntimeException) {

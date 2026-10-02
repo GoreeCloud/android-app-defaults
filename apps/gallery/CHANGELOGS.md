@@ -1,5 +1,18 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — opt-in animated GIF thumbnails
+
+### Added
+- Activated **Animate GIFs in thumbnails** under Settings > Playback.
+- Added bounded Android animated decoding for authorized `image/gif` grid and album-cover thumbnails on Android 9/API 28+.
+- Preserved source aspect ratio, disabled upscaling, and capped animated thumbnail decode requests at a 512 px long edge.
+- Added static MediaStore thumbnail fallback when animated decode is unavailable or fails.
+- Start/stop animated drawables with ImageView attachment so off-screen cards do not intentionally continue animating.
+- Added pure policy coverage and rendered Settings acceptance for the active control.
+
+### Boundary
+The capability is presentation-only, remains off by default, and adds no media permission, mutation, filesystem, account, network, cloud, or synchronization authority. Representative-device/OEM/profile, accessibility, complex-GIF resource use, performance/power, and release acceptance remain open.
+
 ## October 2, 2026 — preserve-original MediaStore Copy
 
 ### Added

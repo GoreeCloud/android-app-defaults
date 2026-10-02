@@ -98,7 +98,7 @@ Required direction includes:
 - bounded resource use; and
 - representative-device/OEM/profile validation.
 
-Video playback, animation, full-resolution behavior, and other rich-media functionality remain acceptance-gated until verified.
+Rich-media behavior must remain bounded to the current authorized presentation. Opt-in animated GIF thumbnails may use Android framework decoding only for authorized GIF items, must preserve aspect ratio, bound decode size/resource use, stop when their presentation leaves the active hierarchy, and fall back to static thumbnails on failure. Video playback, animated-thumbnail device/OEM/accessibility/performance behavior, full-resolution viewing, and other rich-media functionality remain acceptance-gated until verified.
 
 ## Editing requirements
 
