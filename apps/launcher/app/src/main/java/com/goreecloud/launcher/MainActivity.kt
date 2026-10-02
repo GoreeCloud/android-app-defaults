@@ -464,12 +464,14 @@ class MainActivity : ComponentActivity() {
             val hiddenHomeSuggestionKeys by launcherPreferencesRepository.hiddenHomeSuggestionKeys.collectAsStateWithLifecycle(
                 initialValue = emptySet(),
             )
-            val drawerPinnedAppKeys by launcherPreferencesRepository.drawerPinnedAppKeys.collectAsStateWithLifecycle(
-                initialValue = emptySet(),
+            val drawerPinnedState by launcherPreferencesRepository.drawerPinnedState.collectAsStateWithLifecycle(
+                initialValue = com.goreecloud.launcher.core.launcher.LauncherDrawerPinnedState(
+                    keys = emptySet(),
+                    order = emptyList(),
+                ),
             )
-            val drawerPinnedAppOrder by launcherPreferencesRepository.drawerPinnedAppOrder.collectAsStateWithLifecycle(
-                initialValue = emptyList(),
-            )
+            val drawerPinnedAppKeys = drawerPinnedState.keys
+            val drawerPinnedAppOrder = drawerPinnedState.order
             val drawerSortOrderName by launcherPreferencesRepository.drawerSortOrderName.collectAsStateWithLifecycle(
                 initialValue = null,
             )
