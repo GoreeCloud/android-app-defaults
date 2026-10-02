@@ -23,7 +23,7 @@ The current native Development experience provides direct **Photos**, **Albums**
 
 - Photos uses an adaptive local timeline grid. Dense day groups retain the compact multi-column layout, while sparse one- and two-item groups use a larger three-column presentation lane closer to the current Gallery mockup.
 - Videos uses a featured first card followed by two-column phone cards (three columns on wider layouts), with play affordances, duration badges, title/date metadata, and category chips that appear only when the current Android-authorized snapshot actually contains matching Screen recordings, Camera, or Favorites media.
-- Albums uses Android-authorized album metadata and includes a device-local Favorites collection when Favorites exist. Recovery is no longer embedded in Albums.
+- Albums uses Android-authorized album metadata and includes a device-local Favorites collection when Favorites exist. Use an ordinary album card's More menu to **Pin to top** or **Unpin from top**; this changes only Gallery's local Collections order and does not move or rename media. Recovery is no longer embedded in Albums.
 - Trash is a dedicated bottom-navigation destination on Android 11+ and uses Android MediaStore Trash as the authoritative recovery state. Restore and permanent deletion continue to use Android-owned confirmation.
 - Photos and Videos keep the main canvas focused on Search, Sort, media, and destination-specific filters. Grouping and view-density remain available in Settings > Appearance.
 - Long-press a media tile to enter multi-select mode.
@@ -38,6 +38,7 @@ Tap a visible photo or video to open the bounded full-screen viewer.
 - More displays available media details.
 - Delete on Android 11+ routes through Android's system-owned Trash or permanent-delete confirmation according to the current setting.
 - Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled.
+- Slide/Stop runs the photo-only slideshow using the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.
 
 Image viewing is still a Development viewer path rather than unrestricted full-resolution zoom/pan. Authorized videos use the native bounded playback surface with Play/Pause, lifecycle-safe pause/resume, and the persisted autoplay/loop preferences; representative-device playback acceptance remains separate.
 
@@ -132,7 +133,7 @@ The Trash/Recycle Bin implementation originated in rendered `0.7.1-dev` acceptan
 
 ## Settings
 
-Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, Favorites/settings import/export, cache clearing, and the Recycle Bin versus permanent-delete choice on supported Android versions.
+Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, slideshow speed, Favorites/settings import/export (including app-local album pins and slideshow pace), cache clearing, and the Trash versus permanent-delete choice on supported Android versions.
 
 Video autoplay and looping are active viewer preferences. Compatibility fields for GIF thumbnail animation and automatic empty-folder cleanup remain in the settings import/export model, but the current Settings screen does not show inactive toggles for those unfinished behaviors.
 
