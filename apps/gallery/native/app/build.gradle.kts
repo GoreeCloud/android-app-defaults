@@ -3,6 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+val goreeCloudGalleryDevelopmentVersionCode =
+    System.getenv("GOREECLOUD_GALLERY_DEV_VERSION_CODE")?.toIntOrNull() ?: 19
+
 android {
     namespace = "com.goreecloud.gallery"
     compileSdk = 36
@@ -11,8 +14,8 @@ android {
         applicationId = "com.goreecloud.gallery"
         minSdk = 29
         targetSdk = 36
-        versionCode = 18
-        versionName = "0.8.6-dev"
+        versionCode = goreeCloudGalleryDevelopmentVersionCode
+        versionName = "0.8.7-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
