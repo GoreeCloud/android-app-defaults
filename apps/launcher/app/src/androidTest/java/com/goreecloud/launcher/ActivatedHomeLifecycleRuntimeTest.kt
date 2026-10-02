@@ -117,6 +117,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 it.startupWizardCompleted && it.starterLayoutApplied
             }
         }
+        Unit
     }
 
     @Test
