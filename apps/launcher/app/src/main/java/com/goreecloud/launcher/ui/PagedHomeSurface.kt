@@ -89,6 +89,8 @@ import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.LauncherHomePageTransition
 import com.goreecloud.launcher.core.launcher.LauncherFolder
 import com.goreecloud.launcher.core.workspace.WorkspaceMoveDirection
+import com.goreecloud.launcher.core.workspace.WorkspaceWidgetCatalog
+import com.goreecloud.launcher.core.workspace.WorkspaceWidgetDescriptor
 import com.goreecloud.launcher.core.workspace.db.WorkspaceHomeSpatialDirection
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRenderedHomePage
@@ -807,7 +809,9 @@ internal fun HomePageMiniPreview(
     val columns = homeColumns.coerceIn(4, 6)
     val rows = homeRows.coerceIn(4, 7)
     val appColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.76f)
-    val widgetColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+    val widgetColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.84f)
+    val widgetAccent = MaterialTheme.colorScheme.primary.copy(alpha = 0.72f)
+    val widgetInk = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.58f)
     val folderColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.62f)
     val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
 
