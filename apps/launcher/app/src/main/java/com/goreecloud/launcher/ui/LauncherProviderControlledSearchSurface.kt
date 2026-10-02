@@ -530,9 +530,6 @@ internal fun LauncherProviderControlledSearchSurface(
                         }
                     } else {
                         val topResult = results.firstOrNull()
-                        val fullSectionCounts = results
-                            .groupBy { result -> result.category }
-                            .mapValues { (_, items) -> items.size }
                         val grouped = LauncherGlazeSearchGroups.group(results.drop(1))
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
@@ -1149,21 +1146,18 @@ private fun LauncherSearchHandoffRow(
                 contentDescription = "Search " + provider.displayName + " for " + query
             },
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-        ),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f),
+        border = null,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 7.dp),
+                .padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Surface(
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(32.dp),
                 shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.70f),
             ) {
@@ -1173,7 +1167,7 @@ private fun LauncherSearchHandoffRow(
                             bitmap = icon,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(24.dp).launcherIconMask(),
+                            modifier = Modifier.size(22.dp).launcherIconMask(),
                         )
                     } else {
                         LauncherConnectedProviderFallbackGlyph(provider.providerId)
@@ -1189,7 +1183,7 @@ private fun LauncherSearchHandoffRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    "Search online for “" + query + "”",
+                    "Tap to search for “" + query + "”",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -1407,11 +1401,8 @@ private fun LauncherGlazeSearchAppTile(
     Surface(
         modifier = modifier.heightIn(min = 50.dp),
         onClick = onLaunch,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.46f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-        ),
+        color = Color.Transparent,
+        border = null,
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
     ) {
         Row(
@@ -1474,11 +1465,8 @@ private fun LauncherGlazeShortcutPanel(
             .heightIn(min = 56.dp)
             .testTag("launcher-glaze-shortcut-panel"),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
-        ),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.28f),
+        border = null,
     ) {
         Row(
             modifier = Modifier
@@ -1729,11 +1717,19 @@ private fun LauncherGlazeSearchResult(
         shape = RoundedCornerShape(
             if (prominent) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
         ),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = if (prominent) 0.68f else 0.50f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = if (prominent) 0.07f else 0.05f),
-        ),
+        color = if (prominent) {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.68f)
+        } else {
+            Color.Transparent
+        },
+        border = if (prominent) {
+            BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+            )
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier
@@ -3167,11 +3163,8 @@ private fun LauncherProviderSearchRow(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
-        ),
+        color = Color.Transparent,
+        border = null,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
