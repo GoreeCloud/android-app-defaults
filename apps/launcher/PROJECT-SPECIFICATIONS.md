@@ -432,6 +432,14 @@ The launcher may also provide first-party Glaze Cards. Glaze Cards are launcher-
 
 First-run setup must communicate the minimum decisions needed to begin using Launcher without presenting a documentation-style wall of text. The three-step flow should use a visible progress treatment near the top, an explicit current-step count, visual or diagrammatic examples for spatial/Search choices, concise feature cards with distinct semantic accents, and optional **Learn more** expansion for longer interaction/privacy detail. The post-setup Home hint should continue the same compact visual language rather than reintroducing long instructional paragraphs. Essential controls and explanations must remain accessible without relying on color alone.
 
+## Launcher-owned iconography
+
+User-facing Launcher controls, navigation affordances, state marks, Search categories, widget symbols, and other UI iconography must use deterministic Launcher-owned vector geometry, installed application/provider artwork, or governed image assets. Font/Unicode characters must not serve as the primary visual icon for an interactive control or persistent state indicator merely because a roughly similar character exists. Ordinary textual notation such as multiplication signs, punctuation inside prose, and user-visible text remains text.
+
+Icon changes must preserve accessible names/state descriptions, touch-target requirements, profile/provider truth, and Glaze visual hierarchy. Compact presentation may reduce padding or replace text labels with recognizable icon affordances only when the action remains accessible through semantics and does not become ambiguous.
+
+Widget-picker previews for Launcher-owned widgets must use representative miniature visual structures or vector artwork rather than placeholder punctuation or unrelated font glyphs.
+
 ## Drive Section 10 — Search
 
 GoreeCloud Launcher owns Universal Search. Core Universal Search must be a native, first-party Launcher capability rather than a mandatory dependency on GoreeCloud Index or GoreeCloud Search.
