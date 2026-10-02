@@ -402,6 +402,7 @@ class LauncherPreferencesRepository(
         val homeLabelOverrides = stringPreferencesKey("home_label_overrides_v1")
         val hiddenHomeSuggestionKeys = stringSetPreferencesKey("hidden_home_suggestion_keys_v1")
         val drawerPinnedAppKeys = stringSetPreferencesKey("drawer_pinned_app_keys_v1")
+        val drawerPinnedAppOrder = stringPreferencesKey("drawer_pinned_app_order_v1")
         val drawerSortOrderName = stringPreferencesKey("drawer_sort_order_name_v1")
         val portableRestoreJournal = stringPreferencesKey("portable_restore_journal_v1")
     }
@@ -447,6 +448,19 @@ class LauncherPreferencesRepository(
                 .orEmpty()
                 .filterNot(String::isBlank)
                 .toSet()
+        }
+        .distinctUntilChanged()
+
+    /**
+     * Device-local order for App Drawer pins. Membership remains the pinned-key set; malformed or
+     * stale ordering metadata fails closed to a deterministic reconciliation of current pins.
+     */
+    val drawerPinnedAppOrder: Flow<List<String>> = dataStore.data
+        .map { values ->
+            LauncherDrawerPinnedOrder.reconcile(
+                order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
+                pinnedKeys = values[Keys.drawerPinnedAppKeys].orEmpty().filterNot(String::isBlank).toSet(),
+            )
         }
         .distinctUntilChanged()
 
@@ -919,9 +933,33 @@ class LauncherPreferencesRepository(
             }
             if (updated.isEmpty()) {
                 values.remove(Keys.drawerPinnedAppKeys)
+                values.remove(Keys.drawerPinnedAppOrder)
             } else {
                 values[Keys.drawerPinnedAppKeys] = updated
+                val reconciled = LauncherDrawerPinnedOrder.reconcile(
+                    order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
+                    pinnedKeys = updated,
+                )
+                values[Keys.drawerPinnedAppOrder] = LauncherDrawerPinnedOrder.encode(reconciled)
             }
+        }
+    }
+
+    fun moveDrawerPinnedApp(appKey: String, delta: Int): Job = scope.launch {
+        if (appKey.isBlank() || delta == 0) return@launch
+        dataStore.edit { values ->
+            val pinnedKeys = values[Keys.drawerPinnedAppKeys]
+                .orEmpty()
+                .filterNot(String::isBlank)
+                .toSet()
+            if (appKey !in pinnedKeys) return@edit
+            val moved = LauncherDrawerPinnedOrder.move(
+                order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
+                pinnedKeys = pinnedKeys,
+                appKey = appKey,
+                delta = delta,
+            )
+            values[Keys.drawerPinnedAppOrder] = LauncherDrawerPinnedOrder.encode(moved)
         }
     }
 
