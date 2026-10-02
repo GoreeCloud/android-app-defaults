@@ -4,7 +4,7 @@
 
 The current Gallery Development line now exposes **Copy** from bounded multi-select. Existing destinations come only from authoritative album/path metadata already present in the current Android-authorized snapshot; every selected source folder is excluded from the existing-destination list to avoid accidental same-folder duplication. **Create & copy** can create a bounded Pictures, Movies, or DCIM destination based on the selected media types and can combine sources from multiple current folders because Copy does not mutate those sources.
 
-Copy reads only exact canonical selected MediaStore image/video item URIs, creates new destination rows with `IS_PENDING=1`, streams source bytes into those rows, and publishes each row only after the write succeeds. Failed partial outputs are deleted best-effort before the operation continues. Originals are never moved or overwritten. Known destination filenames are collision-avoided with deterministic `(copy)`, `(copy 2)`, and later bounded suffixes. A single Copy operation is bounded to 100 unique source items.
+On Android 11+, Copy reads only exact canonical selected MediaStore image/video item URIs, resolves each source row's provider-owned concrete `VOLUME_NAME`, rejects synthetic aggregate-volume insertion, and supplies `QUERY_ARG_RELATED_URI` when inserting the new destination row. Each output starts with `IS_PENDING=1`, receives the selected source bytes, and is published only after the write succeeds. Failed partial outputs are deleted best-effort before the operation continues. Originals are never moved or overwritten. Known destination filenames are collision-avoided with deterministic bounded `(copy)`, `(copy 2)`, and later suffixes that stay within the supported display-name limit. A single Copy operation is bounded to 100 unique source items.
 
 This is Development implementation evidence. Representative-device/OEM/profile Copy behavior, large files, provider failures, storage exhaustion, cancellation/lifecycle behavior, metadata fidelity beyond capture time/MIME/display-name handling, accessibility, performance/power, and release acceptance remain open.
 
@@ -123,7 +123,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Exact canonical MediaStore source URIs and image/video MIME alignment are revalidated before byte transfer.
 - Output names avoid currently known destination collisions with bounded deterministic copy suffixes.
 - New rows remain MediaStore `IS_PENDING` until bytes are successfully written; failures are cleaned up best-effort and originals remain untouched.
-- Copy is bounded to 100 unique items per operation and performs no network, cloud, arbitrary filesystem, cross-profile, or source-mutation work.
+- Copy is bounded to 100 unique items per operation, requires Android 11+ in this Development slice, inserts only on the source row's concrete MediaStore volume using Android's related-copy hint, and performs no network, cloud, arbitrary filesystem, cross-profile, or source-mutation work.
 
 ### First-party photo editing Development implementation
 
