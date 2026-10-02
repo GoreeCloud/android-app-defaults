@@ -625,7 +625,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                 bottom = GlazeMetrics.space1,
                                             ),
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f),
                                         fontWeight = FontWeight.SemiBold,
                                     )
                                 }
@@ -723,7 +723,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 top = GlazeMetrics.space1,
                             ),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
                         )
                         explicitHandoffs.forEach { provider ->
@@ -740,7 +740,7 @@ internal fun LauncherProviderControlledSearchSurface(
                             "Connected queries are sent only after you tap a result.",
                             modifier = Modifier.padding(horizontal = GlazeMetrics.space2),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f),
                         )
                     }
                 }
