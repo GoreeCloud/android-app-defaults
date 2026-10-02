@@ -22,7 +22,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Local search over authorized display names and album names without an additional provider query.
 - Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, mockup-aligned circular cover badges, bounded album-detail browsing, app-local persistent Pin/Unpin-to-top grouping plus manual Move earlier / Move later ordering for ordinary Albums collections, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
 - Device-local Favorites backed only by Gallery app-local state; favorite/unfavorite is available from the viewer and authorized Favorites appear as a dedicated collection.
-- A full-screen bounded media viewer shell with Previous / Next navigation, restrained top chrome, and a bottom action surface. Viewer navigation uses the complete current authorized/presented collection rather than one date group.
+- A full-screen bounded media viewer shell with Previous / Next navigation, restrained top chrome, and a bottom action surface. Authorized photos support Fit/Fill plus bounded 1×–4× session-local zoom over the existing viewer bitmap, pinch-to-zoom, drag-to-pan while zoomed, and a compact view-options menu with an accessible 2× preset/reset. Navigation swipes are suppressed while zoomed so panning cannot accidentally change items. Viewer navigation otherwise uses the complete current authorized/presented collection rather than one date group.
 - Android Share handoff for the currently authorized media content URI using read-only URI grant semantics.
 - Viewer details for type, album, date, dimensions, duration, and size when available.
 - **Rendered long-press selection and multi-select:** long-pressing a visible media tile enters selection mode; subsequent taps toggle items. Selected thumbnails receive an accent wash and check marker, the header shows the selected count, Back exits selection, and ordinary bottom navigation is replaced by a contextual action capsule.
@@ -139,7 +139,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Share/export and approved Android handoff workflows.
 - Edit entry points and approved first-party editing workflows.
 - Delete/trash/recovery flows with explicit destructive-action authorization.
-- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move and preserve-original Copy; broader rename/manual reorder/album-management acceptance remains separate.
+- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move, preserve-original Copy, and app-local manual Album ordering; provider-backed album creation/rename and richer album-management acceptance remain separate.
 - Details/metadata presentation and approved metadata-editing workflows.
 - Slideshow and other established local presentation actions where supported by the historical Gallery product.
 - Hidden/excluded album or media controls and sensitive-media policy governed by Privacy Shield.
@@ -154,7 +154,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
 - Refine multi-select plus the implemented Move and preserve-original Copy paths from representative-device evidence, including existing-folder and Create & move/Create & copy flows, Move confirmation approve/cancel/deny behavior, mixed-media destinations, stale selection, provider/source/output failures, filename collision behavior, and post-operation refresh.
 - Extend the already-implemented grouping and view-density model only where evidence supports it; continue Copy acceptance plus album creation, rename, provider-backed organization where justified, and richer album actions.
-- Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
+- Complete representative-device/accessibility/form-factor acceptance for the implemented bounded viewer zoom/pan interaction, and expand decoding beyond the existing viewport/2048px ceiling only where product need separately justifies true full-resolution zoom. Complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
 - Complete representative-device/OEM/profile, accessibility, performance/power, and large/complex-GIF acceptance for the implemented opt-in animated GIF thumbnail path.
 - Complete representative-device fidelity/accessibility acceptance for the implemented first-party photo editor, and separately implement approved metadata-editing workflows.
 - Implement slideshow and other established local presentation actions where supported by historical Gallery evidence.
