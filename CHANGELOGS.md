@@ -48,7 +48,7 @@ Focused unit coverage verifies earliest-occurrence selection, repeating-alarm or
 Fresh exact-head Android validation is required. Representative-device notification, exact-alarm, Doze/OEM, accessibility, and power acceptance remain separate from this source change.
 
 
-## 2026-09-24 — Since dark-mode system-bar contrast correction candidate
+## 2026-09-24 — Since dark-mode system-bar contrast correction integration
 
 **Lifecycle:** Development  
 **Tracking:** GitHub issue #1, PR #43
@@ -64,9 +64,13 @@ Fresh exact-head Android validation is required. Representative-device notificat
 
 User-provided runtime screenshots of the Development build showed black status-bar time and status icons against the near-black Since Dark background. Source review confirmed the production theme did not update system-bar icon appearance when the app-selected theme differed from the device theme, while the visual-evidence test applied its own correct override and therefore masked the defect.
 
-### Verification boundary
+### Verification and integration
 
-PR #43 is an unmerged Development correction candidate. Exact-head Android Development Foundation validation and review/integration gates remain required. This correction does not change tracker data, Room schema, network/privacy permissions, recovery behavior, Release Candidate, production, or Stable status.
+Exact candidate `13480c0c64c4611edb0f2d84ef91263bd22b3831` passed Android Development Foundation run `36077943497` / #159. PR #43 then merged to `main` as `60031a0632ae169c22c8a2a52eed6b5678646f0d`. Exact merged-main Android Development Foundation run `36079029190` / #160 passed and produced the recorded runtime and rendered-evidence artifacts. Human readback of the merged-main dark Dashboard evidence confirmed light, readable status-bar time/status icons against the dark Since surface.
+
+### Boundary
+
+This correction does not change tracker data, Room schema, network/privacy permissions, recovery behavior, Release Candidate, production, or Stable status. Representative physical-device/OEM system-bar behavior, navigation-mode acceptance, assistive-technology acceptance, downstream Glaze consumer acceptance, release, and Stable qualification remain separate gates.
 
 ## 2026-09-24 — Since Home, Achievements, and Settings navigation integration
 
