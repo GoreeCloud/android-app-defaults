@@ -2615,7 +2615,7 @@ private fun LauncherSearchSourceManager(
                         1.dp,
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                     ),
-                    shadowElevation = 1.dp,
+                    shadowElevation = 0.dp,
                 ) {
                     Column {
                         Row(
@@ -2657,19 +2657,10 @@ private fun LauncherSearchSourceManager(
                         }
 
                         Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = GlazeMetrics.space2,
-                                    end = GlazeMetrics.space2,
-                                    bottom = GlazeMetrics.space2,
-                                ),
-                            shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.52f),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.045f),
-                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                            color = Color.Transparent,
+                            border = null,
                         ) {
                             Column {
                                 options.forEachIndexed { sectionIndex, option ->
