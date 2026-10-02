@@ -49,6 +49,21 @@ class KeyboardLanguageTest {
     }
 
     @Test
+    fun arabicSubtypeUsesArabicDigitsAndPunctuationOnSymbolSurfaces() {
+        KeyboardLayout.activateLanguage(KeyboardLanguage.ARABIC)
+
+        assertEquals(
+            listOf("١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", "٠"),
+            KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS).first(),
+        )
+        assertEquals(
+            listOf("*", "\"", "'", ":", "؛", "!", "؟"),
+            KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)[2],
+        )
+        assertEquals("،" to ".", KeyboardLayout.directLetterPunctuation())
+    }
+
+    @Test
     fun englishSubtypeKeepsExistingQwertyFoundation() {
         KeyboardLayout.activateLanguage(KeyboardLanguage.ENGLISH_US)
 
