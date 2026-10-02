@@ -237,6 +237,7 @@ fun LauncherStartupWizard(
                                 symbol = WizardVisualSymbol.WIDGETS,
                                 accent = MaterialTheme.colorScheme.primary,
                             )
+                            WizardHomeCompositionPreview()
 
                             WizardSectionTitle("Home apps")
                             Row(
@@ -507,6 +508,140 @@ private fun WizardProgress(step: Int) {
                 ) {}
             }
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            listOf("Essentials", "Home", "Search").forEachIndexed { index, label ->
+                Text(
+                    label,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (index == step) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                    },
+                    fontWeight = if (index == step) FontWeight.SemiBold else FontWeight.Normal,
+                    textAlign = when (index) {
+                        0 -> TextAlign.Start
+                        1 -> TextAlign.Center
+                        else -> TextAlign.End
+                    },
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardHomeCompositionPreview(
+    modifier: Modifier = Modifier,
+) {
+    val accent = MaterialTheme.colorScheme.primary
+    val foreground = MaterialTheme.colorScheme.onSurfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+        ),
+    ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(112.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+        ) {
+            val w = size.width
+            val h = size.height
+            val phoneLeft = w * 0.18f
+            val phoneTop = h * 0.04f
+            val phoneWidth = w * 0.64f
+            val phoneHeight = h * 0.92f
+            val radius = h * 0.09f
+
+            drawRoundRect(
+                color = surface,
+                topLeft = Offset(phoneLeft, phoneTop),
+                size = androidx.compose.ui.geometry.Size(phoneWidth, phoneHeight),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius),
+            )
+
+            // Two intentionally sparse app positions communicate a clean starter Home.
+            listOf(
+                0.33f to 0.34f,
+                0.50f to 0.34f,
+                0.67f to 0.34f,
+            ).forEachIndexed { index, (x, y) ->
+                drawRoundRect(
+                    color = if (index == 1) {
+                        accent.copy(alpha = 0.24f)
+                    } else {
+                        foreground.copy(alpha = 0.16f)
+                    },
+                    topLeft = Offset(
+                        phoneLeft + phoneWidth * x - h * 0.045f,
+                        phoneTop + phoneHeight * y - h * 0.045f,
+                    ),
+                    size = androidx.compose.ui.geometry.Size(h * 0.09f, h * 0.09f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(h * 0.025f),
+                )
+            }
+
+            // A subtle dotted widget placeholder indicates optional content, not a prefilled card.
+            val widgetLeft = phoneLeft + phoneWidth * 0.16f
+            val widgetTop = phoneTop + phoneHeight * 0.50f
+            val widgetRight = phoneLeft + phoneWidth * 0.84f
+            val widgetBottom = phoneTop + phoneHeight * 0.68f
+            val dash = w * 0.025f
+            var x = widgetLeft
+            while (x < widgetRight) {
+                drawLine(
+                    color = foreground.copy(alpha = 0.22f),
+                    start = Offset(x, widgetTop),
+                    end = Offset((x + dash).coerceAtMost(widgetRight), widgetTop),
+                    strokeWidth = 1.dp.toPx(),
+                    cap = StrokeCap.Round,
+                )
+                drawLine(
+                    color = foreground.copy(alpha = 0.22f),
+                    start = Offset(x, widgetBottom),
+                    end = Offset((x + dash).coerceAtMost(widgetRight), widgetBottom),
+                    strokeWidth = 1.dp.toPx(),
+                    cap = StrokeCap.Round,
+                )
+                x += dash * 1.8f
+            }
+
+            // Dock.
+            drawRoundRect(
+                color = foreground.copy(alpha = 0.08f),
+                topLeft = Offset(
+                    phoneLeft + phoneWidth * 0.15f,
+                    phoneTop + phoneHeight * 0.79f,
+                ),
+                size = androidx.compose.ui.geometry.Size(
+                    phoneWidth * 0.70f,
+                    phoneHeight * 0.12f,
+                ),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(phoneHeight * 0.06f),
+            )
+            repeat(4) { index ->
+                drawCircle(
+                    color = foreground.copy(alpha = 0.28f),
+                    radius = h * 0.027f,
+                    center = Offset(
+                        phoneLeft + phoneWidth * (0.28f + index * 0.15f),
+                        phoneTop + phoneHeight * 0.85f,
+                    ),
+                )
+            }
+        }
     }
 }
 
@@ -603,7 +738,7 @@ private fun WizardSearchModeCard(
     val accent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 132.dp),
+        modifier = modifier.heightIn(min = 120.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = if (selected) {
             accent.copy(alpha = 0.14f)
