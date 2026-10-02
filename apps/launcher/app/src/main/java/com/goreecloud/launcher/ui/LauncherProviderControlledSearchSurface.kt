@@ -3058,6 +3058,9 @@ private fun LauncherSourceMoveControl(
     } else {
         "Move $sourceName later"
     }
+    val glyphTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+        alpha = if (enabled) 0.88f else 0.34f,
+    )
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -3080,9 +3083,7 @@ private fun LauncherSourceMoveControl(
                 val u = size.minDimension
                 val stroke = u * 0.10f
                 val cap = androidx.compose.ui.graphics.StrokeCap.Round
-                val tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = if (enabled) 0.88f else 0.34f,
-                )
+                val tint = glyphTint
                 val tipY = if (direction < 0) u * 0.24f else u * 0.76f
                 val stemEndY = if (direction < 0) u * 0.76f else u * 0.24f
                 val armY = if (direction < 0) u * 0.42f else u * 0.58f
