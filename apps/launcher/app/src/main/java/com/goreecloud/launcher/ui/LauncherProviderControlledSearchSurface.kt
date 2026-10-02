@@ -1927,6 +1927,50 @@ private fun LauncherPrivacyShieldGlyph(
 }
 
 @Composable
+private fun LauncherSourceDisclosureGlyph(
+    expanded: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        if (expanded) {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.62f),
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.36f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.36f),
+                androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.62f),
+                stroke,
+                cap = cap,
+            )
+        } else {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.38f, u * 0.24f),
+                androidx.compose.ui.geometry.Offset(u * 0.64f, u * 0.50f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.64f, u * 0.50f),
+                androidx.compose.ui.geometry.Offset(u * 0.38f, u * 0.76f),
+                stroke,
+                cap = cap,
+            )
+        }
+    }
+}
+
+@Composable
 private fun LauncherSearchSectionGlyph(
     section: LauncherSearchSourceSection,
     tint: Color,
@@ -2326,7 +2370,7 @@ private fun LauncherSearchSourceManager(
                         enabled = ready && controls.orderedOptions.size > 1,
                         modifier = Modifier.heightIn(min = 44.dp),
                     ) {
-                        Text(if (reorderMode) "✓  Done" else "≡  Order")
+                        Text(if (reorderMode) "Done" else "Order")
                     }
                 }
             }
@@ -2574,12 +2618,10 @@ private fun LauncherSearchSourceManager(
                                                         option.providerId,
                                                 ),
                                             )
-                                            Text(
-                                                if (expanded) "⌃" else "›",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            LauncherSourceDisclosureGlyph(
+                                                expanded = expanded,
+                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                                                     .copy(alpha = 0.72f),
-                                                fontWeight = FontWeight.SemiBold,
                                             )
                                         }
 
@@ -2597,7 +2639,19 @@ private fun LauncherSearchSourceManager(
                                                     enabled = ready,
                                                     modifier = Modifier.heightIn(min = 44.dp),
                                                 ) {
-                                                    Text("▣  Choose folder")
+                                                    Row(
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(6.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                    ) {
+                                                        LauncherLocalSearchSourceGlyph(
+                                                            providerId =
+                                                                LauncherFilesSearchProvider.PROVIDER_ID,
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.size(18.dp),
+                                                        )
+                                                        Text("Choose folder")
+                                                    }
                                                 }
                                             }
                                         }
