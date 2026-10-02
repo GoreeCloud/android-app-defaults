@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 2, 2026 — full app-local manual Album ordering
+
+The Gallery Development line now extends ordinary Album **Pin to top / Unpin from top** with persistent **Move earlier**, **Move later**, and **Reset album order** actions. The stored order contains only album identifiers as app-local presentation metadata. Rendering resolves those identifiers only against the current Android-authorized album snapshot, ignores unavailable/stale identifiers, appends newly visible albums from the current Newest/Oldest base order, and keeps pinned and unpinned albums in separate sections so manual movement cannot silently cross the pin boundary.
+
+Manual order participates in the existing additive non-secret settings export/import envelope. Temporarily unavailable stored identifiers are preserved when another active album is moved so a permission or visibility change does not silently erase the user's local order preference. Reset removes only the manual-order override; it does not unpin albums, rename folders, move/copy media, create collections, or mutate MediaStore.
+
+This is Development implementation evidence. Representative-device overflow discoverability, accessibility/TalkBack/Switch Access, large-text behavior, long album lists, permission/profile churn, persistence/import-export acceptance, and broader album creation/rename workflows remain open.
+
 ## October 2, 2026 — preserve-original local media Copy
 
 The current Gallery Development line now exposes **Copy** from bounded multi-select. Existing destinations come only from authoritative album/path metadata already present in the current Android-authorized snapshot; every selected source folder is excluded from the existing-destination list to avoid accidental same-folder duplication. **Create & copy** can create a bounded Pictures, Movies, or DCIM destination based on the selected media types and can combine sources from multiple current folders when every selected item belongs to the same concrete MediaStore volume.
