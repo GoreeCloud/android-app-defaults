@@ -3554,20 +3554,47 @@ class GalleryActivity : Activity() {
         var viewerPanY = 0f
         val slideshowInterval = currentUserSettings().slideshowInterval
         var slideshowRunning = false
+        var slideshowPaused = false
         var slideshowAdvance: Runnable? = null
 
         fun updateSlideshowControl() {
-            slideshow.text = if (slideshowRunning) "Stop" else "Slide"
-            slideshow.contentDescription =
-                if (slideshowRunning) "Stop photo slideshow"
-                else "Start photo slideshow, ${slideshowInterval.label.lowercase()}"
+            slideshow.text = when {
+                slideshowRunning -> "Pause"
+                slideshowPaused -> "Resume"
+                else -> "Slide"
+            }
+            slideshow.contentDescription = when {
+                slideshowRunning -> "Pause photo slideshow"
+                slideshowPaused -> "Resume photo slideshow, ${slideshowInterval.label.lowercase()}"
+                else -> "Start photo slideshow, ${slideshowInterval.label.lowercase()}"
+            }
         }
 
         fun stopSlideshow(announce: Boolean = false) {
             slideshowRunning = false
+            slideshowPaused = false
             slideshowAdvance?.let(overlay::removeCallbacks)
             updateSlideshowControl()
             if (announce) announceForAccessibility("Slideshow stopped")
+        }
+
+        fun pauseSlideshow() {
+            slideshowRunning = false
+            slideshowPaused = true
+            slideshowAdvance?.let(overlay::removeCallbacks)
+            updateSlideshowControl()
+            announceForAccessibility("Photo slideshow paused")
+        }
+
+        fun startOrResumeSlideshow() {
+            slideshowRunning = true
+            slideshowPaused = false
+            updateSlideshowControl()
+            announceForAccessibility("Photo slideshow playing")
+            overlay.postDelayed(
+                checkNotNull(slideshowAdvance),
+                slideshowInterval.intervalMs,
+            )
         }
 
         fun currentItemSupportsZoom(): Boolean =
@@ -3722,7 +3749,7 @@ class GalleryActivity : Activity() {
 
         slideshow.setOnClickListener {
             if (slideshowRunning) {
-                stopSlideshow(announce = true)
+                pauseSlideshow()
                 return@setOnClickListener
             }
             val hasLaterPhoto = GallerySlideshowPolicy.nextPhotoIndex(
@@ -3730,16 +3757,11 @@ class GalleryActivity : Activity() {
                 photoEligibility = items.map { it.mimeType.startsWith("image/") },
             ) != null
             if (!hasLaterPhoto) {
+                stopSlideshow()
                 Toast.makeText(this, "No later photos are available for slideshow.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            slideshowRunning = true
-            updateSlideshowControl()
-            announceForAccessibility("Photo slideshow started")
-            overlay.postDelayed(
-                checkNotNull(slideshowAdvance),
-                slideshowInterval.intervalMs,
-            )
+            startOrResumeSlideshow()
         }
 
         scaleMode.setOnClickListener {
