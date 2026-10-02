@@ -25,6 +25,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
@@ -3548,6 +3549,9 @@ class GalleryActivity : Activity() {
         var currentIndex = initialIndex
         var activePlaybackPlan: GalleryViewerPlaybackPlan? = null
         var viewerScaleMode = GalleryViewerScaleMode.FIT
+        var viewerZoomScale = GalleryViewerZoomPolicy.MIN_SCALE
+        var viewerPanX = 0f
+        var viewerPanY = 0f
         val slideshowInterval = currentUserSettings().slideshowInterval
         var slideshowRunning = false
         var slideshowAdvance: Runnable? = null
@@ -3566,19 +3570,57 @@ class GalleryActivity : Activity() {
             if (announce) announceForAccessibility("Slideshow stopped")
         }
 
+        fun currentItemSupportsZoom(): Boolean =
+            items.getOrNull(currentIndex)?.mimeType?.startsWith("image/") == true
+
+        fun applyViewerTransform() {
+            val bounded = GalleryViewerZoomPolicy.boundedTranslation(
+                viewportWidth = preview.width,
+                viewportHeight = preview.height,
+                scale = viewerZoomScale,
+                proposedX = viewerPanX,
+                proposedY = viewerPanY,
+            )
+            viewerPanX = bounded.x
+            viewerPanY = bounded.y
+            preview.scaleX = viewerZoomScale
+            preview.scaleY = viewerZoomScale
+            preview.translationX = viewerPanX
+            preview.translationY = viewerPanY
+
+            val zoomed = GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)
+            scaleMode.text = if (zoomed) {
+                "${GalleryViewerZoomPolicy.displayPercent(viewerZoomScale)}%"
+            } else {
+                when (viewerScaleMode) {
+                    GalleryViewerScaleMode.FIT -> "Fit"
+                    GalleryViewerScaleMode.FILL -> "Fill"
+                }
+            }
+            scaleMode.contentDescription = when {
+                !currentItemSupportsZoom() -> "View options are available for photos only"
+                zoomed ->
+                    "Viewer zoom ${GalleryViewerZoomPolicy.displayPercent(viewerZoomScale)} percent. " +
+                        "Tap for view options. Drag to pan or pinch to change zoom."
+                viewerScaleMode == GalleryViewerScaleMode.FIT ->
+                    "Viewer view: Fit. Tap for Fit, Fill, and zoom options."
+                else ->
+                    "Viewer view: Fill. Tap for Fit, Fill, and zoom options."
+            }
+        }
+
+        fun resetViewerZoom() {
+            viewerZoomScale = GalleryViewerZoomPolicy.MIN_SCALE
+            viewerPanX = 0f
+            viewerPanY = 0f
+        }
+
         fun applyViewerScaleMode() {
             preview.scaleType = when (viewerScaleMode) {
                 GalleryViewerScaleMode.FIT -> ImageView.ScaleType.FIT_CENTER
                 GalleryViewerScaleMode.FILL -> ImageView.ScaleType.CENTER_CROP
             }
-            scaleMode.text = when (viewerScaleMode) {
-                GalleryViewerScaleMode.FIT -> "Fit"
-                GalleryViewerScaleMode.FILL -> "Fill"
-            }
-            scaleMode.contentDescription = when (viewerScaleMode) {
-                GalleryViewerScaleMode.FIT -> "Viewer scale: Fit. Tap to fill the viewer."
-                GalleryViewerScaleMode.FILL -> "Viewer scale: Fill. Tap to fit the full media."
-            }
+            applyViewerTransform()
         }
 
         fun renderCurrentItem() {
@@ -3593,6 +3635,7 @@ class GalleryActivity : Activity() {
             val item = items[currentIndex]
             val playbackPlan = GalleryViewerPlaybackPolicy.plan(item, currentUserSettings())
             activePlaybackPlan = playbackPlan
+            resetViewerZoom()
             videoSurface.stop()
             videoSurface.visibility = View.GONE
             playbackToggle.visibility = View.GONE
@@ -3601,7 +3644,13 @@ class GalleryActivity : Activity() {
             val viewerCacheKey = thumbnailCacheKey(VIEWER_THUMBNAIL_NAMESPACE, item.contentUri)
             preview.setImageDrawable(null)
             preview.tag = viewerCacheKey
-            preview.contentDescription = "Viewer for ${item.displayName}. Swipe left or right to navigate the current collection."
+            preview.contentDescription = if (item.mimeType.startsWith("image/")) {
+                "Viewer for ${item.displayName}. Swipe left or right to navigate. " +
+                    "Pinch to zoom up to 400 percent and drag to pan while zoomed. " +
+                    "Use the view-options control for Fit, Fill, and 2 times zoom."
+            } else {
+                "Viewer for ${item.displayName}. Swipe left or right to navigate the current collection."
+            }
             viewerTitle.text = item.displayName
             viewerSubtitle.text = mediaMetadata(item)
             previous.isEnabled = currentIndex > 0
@@ -3621,6 +3670,10 @@ class GalleryActivity : Activity() {
             } else {
                 "Photo editing is unavailable for this media type"
             }
+            scaleMode.isEnabled = photoEditable
+            scaleMode.isClickable = photoEditable
+            scaleMode.isFocusable = photoEditable
+            scaleMode.alpha = if (photoEditable) 1f else 0.35f
             applyViewerScaleMode()
             loadLocalThumbnail(item, preview, generation, VIEWER_THUMBNAIL_DP, VIEWER_THUMBNAIL_NAMESPACE)
 
@@ -3690,15 +3743,47 @@ class GalleryActivity : Activity() {
         }
 
         scaleMode.setOnClickListener {
-            viewerScaleMode = viewerScaleMode.next()
-            applyViewerScaleMode()
-            announceForAccessibility(
-                if (viewerScaleMode == GalleryViewerScaleMode.FIT) {
-                    "Viewer set to fit"
-                } else {
-                    "Viewer set to fill"
-                },
-            )
+            if (!currentItemSupportsZoom()) return@setOnClickListener
+            PopupMenu(this, scaleMode).apply {
+                menu.add(0, 1, 0, "Fit entire photo")
+                menu.add(0, 2, 1, "Fill viewer")
+                menu.add(0, 3, 2, "Zoom 2×")
+                if (GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)) {
+                    menu.add(0, 4, 3, "Reset zoom")
+                }
+                setOnMenuItemClickListener { item ->
+                    stopSlideshow()
+                    when (item.itemId) {
+                        1 -> {
+                            viewerScaleMode = GalleryViewerScaleMode.FIT
+                            resetViewerZoom()
+                            applyViewerScaleMode()
+                            announceForAccessibility("Viewer set to fit")
+                        }
+                        2 -> {
+                            viewerScaleMode = GalleryViewerScaleMode.FILL
+                            resetViewerZoom()
+                            applyViewerScaleMode()
+                            announceForAccessibility("Viewer set to fill")
+                        }
+                        3 -> {
+                            viewerZoomScale = GalleryViewerZoomPolicy.ACCESSIBLE_PRESET_SCALE
+                            viewerPanX = 0f
+                            viewerPanY = 0f
+                            applyViewerTransform()
+                            announceForAccessibility("Viewer zoom 200 percent")
+                        }
+                        4 -> {
+                            resetViewerZoom()
+                            applyViewerTransform()
+                            announceForAccessibility("Viewer zoom reset")
+                        }
+                        else -> return@setOnMenuItemClickListener false
+                    }
+                    true
+                }
+                show()
+            }
         }
 
         playbackToggle.setOnClickListener {
@@ -3731,42 +3816,121 @@ class GalleryActivity : Activity() {
             }
         }
 
+        val scaleGestureDetector = ScaleGestureDetector(
+            this,
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+                    if (!currentItemSupportsZoom()) return false
+                    stopSlideshow()
+                    return true
+                }
+
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    val nextScale = GalleryViewerZoomPolicy.scaleAfterGesture(
+                        currentScale = viewerZoomScale,
+                        scaleFactor = detector.scaleFactor,
+                    )
+                    if (nextScale == viewerZoomScale) return true
+                    viewerZoomScale = nextScale
+                    if (!GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)) {
+                        viewerPanX = 0f
+                        viewerPanY = 0f
+                    }
+                    applyViewerTransform()
+                    return true
+                }
+            },
+        )
+
         var swipeStartX = 0f
         var swipeStartY = 0f
+        var panLastX = 0f
+        var panLastY = 0f
+        var gestureHadMultiplePointers = false
         preview.setOnTouchListener { _, event ->
+            if (currentItemSupportsZoom()) {
+                scaleGestureDetector.onTouchEvent(event)
+            }
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     swipeStartX = event.x
                     swipeStartY = event.y
+                    panLastX = event.x
+                    panLastY = event.y
+                    gestureHadMultiplePointers = false
                     true
                 }
-                MotionEvent.ACTION_UP -> {
-                    when (
-                        GalleryViewerSwipePolicy.resolve(
-                            deltaX = event.x - swipeStartX,
-                            deltaY = event.y - swipeStartY,
-                            minimumDistancePx = dp(VIEWER_SWIPE_DISTANCE_DP).toFloat(),
-                            canGoPrevious = currentIndex > 0,
-                            canGoNext = currentIndex < items.lastIndex,
-                        )
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    gestureHadMultiplePointers = true
+                    stopSlideshow()
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (
+                        currentItemSupportsZoom() &&
+                        GalleryViewerZoomPolicy.isZoomed(viewerZoomScale) &&
+                        event.pointerCount == 1 &&
+                        !scaleGestureDetector.isInProgress
                     ) {
-                        GalleryViewerSwipeAction.PREVIOUS -> {
-                            stopSlideshow()
-                            currentIndex -= 1
-                            renderCurrentItem()
-                            announceForAccessibility("Previous media")
-                        }
-                        GalleryViewerSwipeAction.NEXT -> {
-                            stopSlideshow()
-                            currentIndex += 1
-                            renderCurrentItem()
-                            announceForAccessibility("Next media")
-                        }
-                        GalleryViewerSwipeAction.NONE -> Unit
+                        stopSlideshow()
+                        val bounded = GalleryViewerZoomPolicy.boundedTranslation(
+                            viewportWidth = preview.width,
+                            viewportHeight = preview.height,
+                            scale = viewerZoomScale,
+                            proposedX = viewerPanX + (event.x - panLastX),
+                            proposedY = viewerPanY + (event.y - panLastY),
+                        )
+                        viewerPanX = bounded.x
+                        viewerPanY = bounded.y
+                        panLastX = event.x
+                        panLastY = event.y
+                        applyViewerTransform()
                     }
                     true
                 }
-                MotionEvent.ACTION_CANCEL -> false
+                MotionEvent.ACTION_POINTER_UP -> {
+                    gestureHadMultiplePointers = true
+                    panLastX = event.x
+                    panLastY = event.y
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (
+                        gestureHadMultiplePointers ||
+                        GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)
+                    ) {
+                        true
+                    } else {
+                        when (
+                            GalleryViewerSwipePolicy.resolve(
+                                deltaX = event.x - swipeStartX,
+                                deltaY = event.y - swipeStartY,
+                                minimumDistancePx = dp(VIEWER_SWIPE_DISTANCE_DP).toFloat(),
+                                canGoPrevious = currentIndex > 0,
+                                canGoNext = currentIndex < items.lastIndex,
+                            )
+                        ) {
+                            GalleryViewerSwipeAction.PREVIOUS -> {
+                                stopSlideshow()
+                                currentIndex -= 1
+                                renderCurrentItem()
+                                announceForAccessibility("Previous media")
+                            }
+                            GalleryViewerSwipeAction.NEXT -> {
+                                stopSlideshow()
+                                currentIndex += 1
+                                renderCurrentItem()
+                                announceForAccessibility("Next media")
+                            }
+                            GalleryViewerSwipeAction.NONE -> Unit
+                        }
+                        true
+                    }
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    gestureHadMultiplePointers = false
+                    false
+                }
                 else -> true
             }
         }
