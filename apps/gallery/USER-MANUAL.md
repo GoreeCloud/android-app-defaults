@@ -56,6 +56,7 @@ On Android 11 or newer, select one or more authorized photos/videos and choose *
 
 - Choose an existing eligible local folder, or choose **New folder** to use **Create & copy**.
 - Existing source folders are not offered as Copy destinations in this Development path.
+- One Copy operation must stay on one concrete Android media volume. Mixed source folders are allowed only when they belong to that same volume; selections spanning internal/removable media volumes fail closed.
 - Image-only new folders use Pictures, video-only folders use Movies, and mixed selections use DCIM.
 - Gallery creates new MediaStore items on each source item's concrete provider-owned MediaStore volume and leaves the originals unchanged. The Development path uses Android 11's related-copy insertion contract rather than enabling a separate Android 10 fallback.
 - New filenames use `(copy)`, `(copy 2)`, and later bounded suffixes when needed to avoid names already visible in the destination; long source names are shortened as needed to remain within the supported MediaStore display-name bound.
