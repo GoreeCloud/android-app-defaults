@@ -2472,8 +2472,13 @@ private fun LauncherSearchSourceManager(
                                             "Choose a folder to enable"
                                         driveSource && !driveConnectionAvailable ->
                                             "Signed Development build required"
+                                        !connectedHandoffAvailable &&
+                                            option.providerId ==
+                                                LauncherConnectedSearchProviderRegistry
+                                                    .DROPBOX_PROVIDER_ID ->
+                                            "Dropbox app required for handoff"
                                         !connectedHandoffAvailable ->
-                                            "Provider app required"
+                                            "Provider app required for handoff"
                                         else -> null
                                     }
 
