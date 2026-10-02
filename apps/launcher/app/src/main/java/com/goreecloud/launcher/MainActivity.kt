@@ -468,10 +468,12 @@ class MainActivity : ComponentActivity() {
                 initialValue = com.goreecloud.launcher.core.launcher.LauncherDrawerPinnedState(
                     keys = emptySet(),
                     order = emptyList(),
+                    hiddenKeys = emptySet(),
                 ),
             )
             val drawerPinnedAppKeys = drawerPinnedState.keys
             val drawerPinnedAppOrder = drawerPinnedState.order
+            val hiddenAppKeys = drawerPinnedState.hiddenKeys
             val drawerSortOrderName by launcherPreferencesRepository.drawerSortOrderName.collectAsStateWithLifecycle(
                 initialValue = null,
             )
@@ -1147,6 +1149,7 @@ class MainActivity : ComponentActivity() {
                             recentAppKeys = localRecentAppKeys,
                             localLaunchCounts = localLaunchCounts,
                             hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
+                            hiddenAppKeys = hiddenAppKeys,
                             drawerPinnedAppKeys = drawerPinnedAppKeys,
                             drawerPinnedAppOrder = drawerPinnedAppOrder,
                             drawerSortOrderName = drawerSortOrderName,
@@ -1549,6 +1552,7 @@ class MainActivity : ComponentActivity() {
                                 launcherPreferencesRepository.setHomeLabelOverride(app.workspaceKey(), label)
                             },
                             onSetHomeSuggestionHidden = launcherPreferencesRepository::setHomeSuggestionHidden,
+                            onSetAppHidden = launcherPreferencesRepository::setAppHidden,
                             onSetDrawerAppPinned = launcherPreferencesRepository::setDrawerAppPinned,
                             onMoveDrawerPinnedApp = launcherPreferencesRepository::moveDrawerPinnedApp,
                             onSetDrawerPinnedAppOrder = launcherPreferencesRepository::setDrawerPinnedAppOrder,
