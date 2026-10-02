@@ -288,7 +288,7 @@ data class LauncherGestureAction(
 }
 
 data class LauncherExperiencePreferences(
-    val homeCardStyle: LauncherHomeCardStyle = LauncherHomeCardStyle.CLOCK,
+    val homeCardStyle: LauncherHomeCardStyle = LauncherHomeCardStyle.OFF,
     val showHomeQuickActions: Boolean = false,
     val showHomePageIndicator: Boolean = true,
     val showHomeLabels: Boolean = true,
