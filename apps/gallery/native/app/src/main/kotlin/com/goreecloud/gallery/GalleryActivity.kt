@@ -900,23 +900,18 @@ class GalleryActivity : Activity() {
         actions.lastOrNull()?.let { moreAction ->
             moreAction.setOnClickListener {
                 PopupMenu(this, moreAction).apply {
-                    val allVisibleSelected =
-                        currentScope.isNotEmpty() &&
-                            selectedUris.size == currentScope.size &&
-                            currentScope.all { it.contentUri in selectedUris }
-                    menu.add(
-                        0,
-                        1,
-                        0,
-                        if (allVisibleSelected) "Clear selection" else "Select all visible",
+                    val menuState = GallerySelectionMenuPolicy.state(
+                        visibleContentUris = currentScope.map { it.contentUri },
+                        selectedContentUris = selectedUris,
                     )
-                    if (selectedItems.size == 1) {
+                    menu.add(0, 1, 0, menuState.primaryActionLabel)
+                    if (menuState.showDetails) {
                         menu.add(0, 2, 1, "Details")
                     }
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
                             1 -> {
-                                if (allVisibleSelected) {
+                                if (menuState.primaryActionLabel == "Clear selection") {
                                     clearSelection()
                                 } else {
                                     selectedUris.clear()
