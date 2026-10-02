@@ -1526,6 +1526,8 @@ fun LauncherBetaRoot(
                             folderManagerAddToHome = false
                             showFolderManager = true
                         },
+                        hiddenAppCount = hiddenAppKeys.count(rootAppsByKey::containsKey),
+                        onManageHiddenApps = { showHiddenAppsManager = true },
                         onSetHomeGrid = onSetHomeGrid,
                         onSetDrawerColumns = onSetDrawerColumns,
                         onSetDrawerLayoutMode = onSetDrawerLayoutMode,
@@ -1595,6 +1597,7 @@ fun LauncherBetaRoot(
                 canResetDrawerPinnedOrder =
                     selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
                         drawerPinnedAppKeys.size > 1,
+                hiddenFromLauncher = appKey in hiddenAppKeys,
                 availableAndroidWidgets = availableAndroidWidgets,
                 onHomeAction = {
                     if (
@@ -1655,6 +1658,11 @@ fun LauncherBetaRoot(
                         )
                         .map { it.first }
                     onSetDrawerPinnedAppOrder(alphabeticalOrder)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onToggleHidden = {
+                    onSetAppHidden(appKey, appKey !in hiddenAppKeys)
                     selectedApp = null
                     selectedAppAnchor = null
                 },
@@ -1796,6 +1804,18 @@ fun LauncherBetaRoot(
                 },
             )
         }
+
+    if (showHiddenAppsManager) {
+        LauncherHiddenAppsManagerSheet(
+            hiddenApps = hiddenAppKeys
+                .asSequence()
+                .mapNotNull(rootAppsByKey::get)
+                .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) }
+                .toList(),
+            onRestore = { app -> onSetAppHidden(app.workspaceKey(), false) },
+            onDismiss = { showHiddenAppsManager = false },
+        )
+    }
 
     if (showFolderManager) {
         val managedFolders = folders.filter { folder ->
