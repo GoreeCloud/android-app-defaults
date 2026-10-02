@@ -32,7 +32,8 @@ The current native Development experience provides direct **Photos**, **Albums**
 
 Tap a visible photo or video to open the bounded full-screen viewer.
 
-- Use Previous and Next within the current authorized/presented collection.
+- Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale.
+- For photos, use the viewer's view-options control for **Fit entire photo**, **Fill viewer**, or **Zoom 2×**. You can also pinch from 1× up to 4×; while zoomed, drag the photo to pan. Item-navigation swipes are disabled while zoomed so a pan does not change photos. Choose **Reset zoom** or navigate to another item to return to baseline zoom.
 - Share hands the current content URI to Android with a read-only URI grant.
 - Favorite/Unfavorite changes Gallery's device-local Favorites state.
 - More displays available media details.
@@ -40,7 +41,7 @@ Tap a visible photo or video to open the bounded full-screen viewer.
 - Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled.
 - Slide/Stop runs the photo-only slideshow using the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.
 
-Image viewing is still a Development viewer path rather than unrestricted full-resolution zoom/pan. Authorized videos use the native bounded playback surface with Play/Pause, lifecycle-safe pause/resume, and the persisted autoplay/loop preferences; representative-device playback acceptance remains separate.
+Image viewing now includes bounded session-local zoom/pan over the existing orientation-aware viewer bitmap, but it is still a Development viewer path rather than unrestricted original-resolution zoom: the underlying decode remains bounded to the current viewport with a 2048px long-edge ceiling. Authorized videos use the native bounded playback surface with Play/Pause, lifecycle-safe pause/resume, and the persisted autoplay/loop preferences; representative-device playback and zoom/pan acceptance remain separate.
 
 ## Selection and bulk actions
 
