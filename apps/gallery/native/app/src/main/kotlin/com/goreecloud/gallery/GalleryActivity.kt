@@ -1695,24 +1695,25 @@ class GalleryActivity : Activity() {
         val settings = currentUserSettings()
         val isPinned = albumId != null && albumId in settings.pinnedAlbumIds
         val baseAlbumIds = currentBaseAlbumIds()
+        val canManageOrder = albumId != null && searchQuery.isBlank()
         val actions = GalleryCardOverflowPolicy.albumActions(
             isPinned = isPinned,
             canPin = albumId != null,
-            canMoveEarlier = albumId != null && GalleryAlbumOrderPolicy.canMove(
+            canMoveEarlier = canManageOrder && GalleryAlbumOrderPolicy.canMove(
                 availableAlbumIds = baseAlbumIds,
                 pinnedAlbumIds = settings.pinnedAlbumIds,
                 manualOrderIds = settings.albumOrderIds,
                 albumId = albumId,
                 direction = GalleryAlbumMoveDirection.EARLIER,
             ),
-            canMoveLater = albumId != null && GalleryAlbumOrderPolicy.canMove(
+            canMoveLater = canManageOrder && GalleryAlbumOrderPolicy.canMove(
                 availableAlbumIds = baseAlbumIds,
                 pinnedAlbumIds = settings.pinnedAlbumIds,
                 manualOrderIds = settings.albumOrderIds,
                 albumId = albumId,
                 direction = GalleryAlbumMoveDirection.LATER,
             ),
-            canResetOrder = albumId != null && settings.albumOrderIds.isNotEmpty(),
+            canResetOrder = canManageOrder && settings.albumOrderIds.isNotEmpty(),
         )
         val byId = actions.associateBy { action -> action.ordinal + 1 }
         PopupMenu(this, anchor).apply {
@@ -5220,14 +5221,14 @@ class GalleryActivity : Activity() {
         if (raw.isNullOrBlank()) return emptyList()
         return try {
             jsonStringList(JSONArray(raw))
-        } catch (_: RuntimeException) {
+        } catch (_: Exception) {
             emptyList()
         }
     }
 
     private fun jsonStringList(array: JSONArray): List<String> {
         val values = linkedSetOf<String>()
-        for (index in 0 until array.length()) {
+        for (index in 0 until minOf(array.length(), GalleryAlbumOrderPolicy.MAX_STORED_ORDER_IDS)) {
             val value = array.optString(index).trim()
             if (value.isNotBlank()) values.add(value)
         }
