@@ -64,7 +64,7 @@ The following controls have active behavior in the current Development candidate
 - **Rounded-square thumbnails:** toggles GoreeCloud rounded-square clipping for current media and album thumbnails.
 - **Move deleted items to Recycle Bin:** on Android 11+, controls whether the ordinary Gallery Delete action requests Android Trash/Recycling or Android-confirmed permanent deletion. It is enabled by default. Android owns the destructive confirmation surface in both modes.
 
-The settings export/import envelope still preserves compatibility fields for unfinished GIF-animation and empty-folder-cleanup preferences, but the current Settings UI does not surface inactive toggles for behavior that is not implemented.
+The settings export/import envelope preserves the active GIF-animation preference plus a compatibility field for unfinished empty-folder cleanup. **Animate GIFs in thumbnails** is now surfaced in Playback because bounded animated GIF card decoding is implemented; the empty-folder control remains hidden until its behavior exists.
 
 **Protected Photos/password protection** remains intentionally absent from Settings until a real secure-media implementation exists using supported Android/GoreeCloud authentication and protected storage, Privacy Shield consent/visibility policy, GoreeCloud Identity where applicable, and Wardveil trust/security boundaries. Gallery does not present a fake password control as though protection were active.
 
@@ -155,7 +155,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Refine multi-select plus the implemented Move and preserve-original Copy paths from representative-device evidence, including existing-folder and Create & move/Create & copy flows, Move confirmation approve/cancel/deny behavior, mixed-media destinations, stale selection, provider/source/output failures, filename collision behavior, and post-operation refresh.
 - Extend the already-implemented grouping and view-density model only where evidence supports it; continue Copy acceptance plus album creation, rename, full manual reorder, and richer organization work.
 - Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
-- Complete animated GIF thumbnail decoding before treating the saved GIF-animation preference as behaviorally active.
+- Complete representative-device/OEM/profile, accessibility, performance/power, and large/complex-GIF acceptance for the implemented opt-in animated GIF thumbnail path.
 - Complete representative-device fidelity/accessibility acceptance for the implemented first-party photo editor, and separately implement approved metadata-editing workflows.
 - Implement slideshow and other established local presentation actions where supported by historical Gallery evidence.
 - Expand contextual/overflow actions and Share/export acceptance beyond the current Android read-only share handoff where needed.
