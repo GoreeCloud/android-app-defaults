@@ -45,6 +45,9 @@ class LauncherStartupWizardRuntimeTest {
         composeRule.onNodeWithText("Welcome to GoreeCloud Launcher")
             .performScrollTo()
             .assertIsDisplayed()
+        composeRule.onNodeWithText("Step 1 of 3")
+            .performScrollTo()
+            .assertIsDisplayed()
         composeRule.onNodeWithText("Continue").performScrollTo().performClick()
 
         composeRule.onNodeWithText("Build your Home")
@@ -130,18 +133,18 @@ class LauncherStartupWizardRuntimeTest {
             }
         }
 
+        composeRule.onNodeWithText("↑  Apps").assertIsDisplayed()
+        composeRule.onNodeWithText("↓  Search").assertIsDisplayed()
+        composeRule.onNodeWithText("Hold  Edit").assertIsDisplayed()
+        composeRule.onNodeWithText("Place precisely").assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Long-press an app in Apps to drag it to Home/Dock or Pin in Apps; use Pinned first or the ★ filter to keep favorites easy to reach.",
+            "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
         ).assertIsDisplayed()
+        composeRule.onNodeWithText("Move across pages").assertIsDisplayed()
         composeRule.onNodeWithText(
-            "Home apps: keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell.",
+            "Keep holding at a page edge to switch pages, then release on the target.",
         ).assertIsDisplayed()
-        composeRule.onNodeWithText(
-            "Widgets: long-press and drag to a free Home cell or adjacent page edge; movable Universal Search uses the same Home-grid behavior.",
-        ).assertIsDisplayed()
-        composeRule.onNodeWithText(
-            "Folders: long-press a Home folder to move it to a free cell or adjacent page edge; use Add apps at the end of the grid and swipe larger opened folders between pages.",
-        ).assertIsDisplayed()
+        composeRule.onNodeWithText("Keep Apps tidy").assertIsDisplayed()
     }
 
     @Test
@@ -169,6 +172,9 @@ class LauncherStartupWizardRuntimeTest {
         }
 
         composeRule.onNodeWithText("Build your Home")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("Step 2 of 3")
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText("Continue").performScrollTo().performClick()
