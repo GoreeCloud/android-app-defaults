@@ -3120,7 +3120,7 @@ private fun HomeEditorSurface(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    "Swipe pages, then choose what to customize.",
+                    "Arrange pages and Home controls.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -3245,20 +3245,22 @@ private fun HomeEditorPageOverview(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column(Modifier.weight(1f)) {
+            Text(
+                "Home pages",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Surface(
+                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.52f),
+            ) {
                 Text(
-                    "Home pages",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    if (visiblePages.size == 1) {
-                        "One page · Swipe to + Add Page"
-                    } else {
-                        visiblePages.size.toString() + " pages · Swipe between previews or to + Add Page"
-                    },
-                    style = MaterialTheme.typography.bodySmall,
+                    visiblePages.size.toString() +
+                        if (visiblePages.size == 1) " page" else " pages",
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
         }
@@ -3269,8 +3271,8 @@ private fun HomeEditorPageOverview(
                 .weight(1f)
                 .fillMaxWidth()
                 .testTag("launcher-home-editor-page-carousel"),
-            contentPadding = PaddingValues(horizontal = 42.dp),
-            pageSpacing = GlazeMetrics.space3,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            pageSpacing = GlazeMetrics.space2,
             userScrollEnabled = true,
         ) { index ->
             if (index == visiblePages.size) {
@@ -3294,19 +3296,30 @@ private fun HomeEditorPageOverview(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(GlazeMetrics.space4),
+                            .padding(GlazeMetrics.space3),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            "+",
-                            style = MaterialTheme.typography.displaySmall,
+                        Surface(
+                            modifier = Modifier.size(48.dp),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                             color = if (layoutLocked) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                                MaterialTheme.colorScheme.surfaceVariant
                             } else {
-                                MaterialTheme.colorScheme.primary
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                             },
-                        )
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                HomeEditorAddPageGlyph(
+                                    tint = if (layoutLocked) {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    } else {
+                                        MaterialTheme.colorScheme.primary
+                                    },
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
                         Text(
                             "Add Page",
                             style = MaterialTheme.typography.titleMedium,
@@ -3314,9 +3327,9 @@ private fun HomeEditorPageOverview(
                         )
                         Text(
                             if (layoutLocked) {
-                                "Unlock Home layout to add a page"
+                                "Unlock Home layout first"
                             } else {
-                                "Create a new blank Home page"
+                                "Create a blank page"
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -3382,29 +3395,27 @@ private fun HomeEditorPageOverview(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Column {
-                            Text(
-                                if (primary) "Home" else "Page " + (index + 1),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (index == pagerState.currentPage) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                            )
-                            Text(
-                                itemCount.toString() + if (itemCount == 1) " item" else " items",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        Text(
+                            (if (primary) "Home" else "Page " + (index + 1)) +
+                                " · " + itemCount +
+                                if (itemCount == 1) " item" else " items",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (index == pagerState.currentPage) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                         if (canDelete) {
                             TextButton(
                                 onClick = { pendingDeletePageId = page.pageId },
-                                modifier = Modifier.heightIn(min = 48.dp),
+                                modifier = Modifier.heightIn(min = 44.dp),
                                 contentPadding = PaddingValues(horizontal = 8.dp),
                             ) {
                                 Text(
@@ -3457,6 +3468,32 @@ private fun HomeEditorPageOverview(
                     Text("Cancel")
                 }
             },
+        )
+    }
+}
+
+@Composable
+private fun HomeEditorAddPageGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(22.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(
+            tint,
+            Offset(u * 0.50f, u * 0.20f),
+            Offset(u * 0.50f, u * 0.80f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.20f, u * 0.50f),
+            Offset(u * 0.80f, u * 0.50f),
+            stroke,
+            cap = cap,
         )
     }
 }
