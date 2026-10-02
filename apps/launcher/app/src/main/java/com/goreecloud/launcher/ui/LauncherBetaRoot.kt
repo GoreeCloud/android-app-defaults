@@ -2445,6 +2445,9 @@ private fun HomeSurface(
                         LauncherWidgetPickerSheet(
                             apps = apps,
                             availableAndroidWidgets = availableAndroidWidgets,
+                            onDismiss = {
+                                homeOverlay = LauncherHomeOverlay.NONE
+                            },
                             onAddBuiltInWidget = { typeId ->
                                 homeOverlay = LauncherHomeOverlay.NONE
                                 onAddBuiltInWidget(typeId)
@@ -2469,6 +2472,7 @@ private fun HomeSurface(
 private fun LauncherWidgetPickerSheet(
     apps: List<LauncherActivityInfo>,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
+    onDismiss: () -> Unit,
     onAddBuiltInWidget: (String) -> Unit,
     onPickInstalledAndroidWidget: (LauncherWidgetProviderDescriptor) -> Unit,
     onPickAndroidWidget: () -> Unit,
@@ -2500,12 +2504,24 @@ private fun LauncherWidgetPickerSheet(
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                "Choose widget",
-                modifier = Modifier.semantics { heading() },
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    "Choose widget",
+                    modifier = Modifier.semantics { heading() },
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                TextButton(
+                    modifier = Modifier.testTag("launcher-widget-picker-close"),
+                    onClick = onDismiss,
+                ) {
+                    Text("Close")
+                }
+            }
             Text(
                 "GoreeCloud widgets and installed Android widgets in one Launcher gallery.",
                 style = MaterialTheme.typography.bodySmall,

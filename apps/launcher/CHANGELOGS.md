@@ -15,6 +15,8 @@ The Home background now also exposes an explicit accessibility long-click semant
 
 With more than one Home page active, the unified horizontal pager observes vertically dominant swipes and dispatches the configured Home swipe-up/down actions without consuming the pager's horizontal stream. Single-page Home now uses the same Initial-pass, non-consuming vertical observer instead of `detectVerticalDragGestures`, so seeded widgets, app tiles, Search, or other child content cannot win gesture arbitration before Launcher sees the configured global Home swipe. The externally hosted pager remains the sole vertical observer on multi-page Home, preventing duplicate dispatch.
 
+The full-screen widget gallery now exposes an explicit **Close** action in its own header instead of relying only on Android Back to exit. This gives touch, keyboard, accessibility, and runtime clients a first-party dismissal target and lets lifecycle tests close the dialog through supported Launcher UI before destroying the scenario.
+
 **Acceptance boundary:** source changes require fresh exact-head build/JVM/lint/schema, Android 16 runtime, transition-performance, provenance, required-gate, and protected-promotion validation before integration. Physical-device visual comparison remains required after a new APK is produced. Launcher remains Development.
 
 

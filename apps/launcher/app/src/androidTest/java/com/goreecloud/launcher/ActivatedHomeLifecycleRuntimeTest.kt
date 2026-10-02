@@ -2007,18 +2007,21 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
 
-                composeRule
+                val gestureBounds = composeRule
                     .onNodeWithTag(
                         renderedGestureTag,
                         useUnmergedTree = true,
                     )
-                    .performTouchInput {
-                        swipeUp(
-                            startY = center.y + 180f,
-                            endY = center.y - 180f,
-                            durationMillis = 400,
-                        )
-                    }
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+                val gestureX = gestureBounds.center.x.toInt()
+                injectTouchSwipe(
+                    startX = gestureX,
+                    startY = (gestureBounds.top + gestureBounds.height * 0.68f).toInt(),
+                    endX = gestureX,
+                    endY = (gestureBounds.top + gestureBounds.height * 0.32f).toInt(),
+                    durationMillis = 400L,
+                )
 
                 waitForDisplayedTag("launcher-home-editor-fullscreen")
                 composeRule
@@ -2064,35 +2067,51 @@ class ActivatedHomeLifecycleRuntimeTest {
     }
 
     private fun dismissHomeOverlaysBeforeScenarioClose() {
-        val hasTransientOverlay = runCatching {
+        val widgetPickerVisible = runCatching {
+            composeRule
+                .onAllNodesWithTag(
+                    "launcher-widget-picker-sheet",
+                    useUnmergedTree = true,
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }.getOrDefault(false)
+
+        if (widgetPickerVisible) {
+            composeRule
+                .onNodeWithTag(
+                    "launcher-widget-picker-close",
+                    useUnmergedTree = true,
+                )
+                .performClick()
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                runCatching {
+                    composeRule
+                        .onAllNodesWithTag(
+                            "launcher-widget-picker-sheet",
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isEmpty()
+                }.getOrDefault(true)
+            }
+        }
+
+        val wallpaperVisible = runCatching {
             composeRule
                 .onAllNodesWithText("Wallpapers", useUnmergedTree = true)
                 .fetchSemanticsNodes()
-                .isNotEmpty() ||
-                composeRule
-                    .onAllNodesWithTag(
-                        "launcher-widget-picker-sheet",
-                        useUnmergedTree = true,
-                    )
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
+                .isNotEmpty()
         }.getOrDefault(false)
 
-        if (hasTransientOverlay) {
+        if (wallpaperVisible) {
             runShellCommand("input keyevent KEYCODE_BACK")
             composeRule.waitUntil(timeoutMillis = 10_000) {
                 runCatching {
                     composeRule
                         .onAllNodesWithText("Wallpapers", useUnmergedTree = true)
                         .fetchSemanticsNodes()
-                        .isEmpty() &&
-                        composeRule
-                            .onAllNodesWithTag(
-                                "launcher-widget-picker-sheet",
-                                useUnmergedTree = true,
-                            )
-                            .fetchSemanticsNodes()
-                            .isEmpty()
+                        .isEmpty()
                 }.getOrDefault(true)
             }
         }
