@@ -174,6 +174,7 @@ class GallerySettingsPolicyTest {
         assertFalse(settings.deleteEmptyFolders)
         assertFalse(settings.playVideosAutomatically)
         assertFalse(settings.loopVideos)
+        assertFalse(settings.loopSlideshows)
     }
 
     private fun item(albumId: String, albumName: String, displayName: String = "$albumId.jpg") = MediaItem(
