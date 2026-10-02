@@ -52,7 +52,7 @@ enum class LauncherHomeCardStyle(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): LauncherHomeCardStyle =
-            entries.firstOrNull { it.storageValue == value } ?: OFF
+            entries.firstOrNull { it.storageValue == value } ?: CLOCK
     }
 }
 
@@ -288,7 +288,7 @@ data class LauncherGestureAction(
 }
 
 data class LauncherExperiencePreferences(
-    val homeCardStyle: LauncherHomeCardStyle = LauncherHomeCardStyle.OFF,
+    val homeCardStyle: LauncherHomeCardStyle = LauncherHomeCardStyle.CLOCK,
     val showHomeQuickActions: Boolean = false,
     val showHomePageIndicator: Boolean = true,
     val showHomeLabels: Boolean = true,
