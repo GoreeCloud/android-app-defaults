@@ -37,6 +37,46 @@ class GalleryCopyDestinationPolicyTest {
     }
 
     @Test
+    fun `destinations stay on the selected concrete MediaStore volume`() {
+        val camera = media("1", "camera", "Camera", "DCIM/Camera/", volumeName = "external_primary")
+        val removableTrips = media("2", "trips", "Trips", "Pictures/Trips/", volumeName = "1234-5678")
+
+        assertTrue(
+            GalleryCopyDestinationPolicy.existingDestinations(
+                currentScope = listOf(camera, removableTrips),
+                selectedContentUris = setOf(camera.contentUri),
+            ).isEmpty(),
+        )
+    }
+
+    @Test
+    fun `cross volume selections fail closed`() {
+        val camera = media("1", "camera", "Camera", "DCIM/Camera/", volumeName = "external_primary")
+        val removable = media("2", "removable", "Removable", "Pictures/Removable/", volumeName = "1234-5678")
+        val trips = media("3", "trips", "Trips", "Pictures/Trips/", volumeName = "external_primary")
+
+        assertTrue(
+            GalleryCopyDestinationPolicy.existingDestinations(
+                currentScope = listOf(camera, removable, trips),
+                selectedContentUris = setOf(camera.contentUri, removable.contentUri),
+            ).isEmpty(),
+        )
+    }
+
+    @Test
+    fun `invalid source path fails closed instead of manufacturing Copy authority`() {
+        val camera = media("1", "camera", "Camera", null)
+        val trips = media("2", "trips", "Trips", "Pictures/Trips/")
+
+        assertTrue(
+            GalleryCopyDestinationPolicy.existingDestinations(
+                currentScope = listOf(camera, trips),
+                selectedContentUris = setOf(camera.contentUri),
+            ).isEmpty(),
+        )
+    }
+
+    @Test
     fun `foreign selection fails closed`() {
         val camera = media("1", "camera", "Camera", "DCIM/Camera/")
         val trips = media("2", "trips", "Trips", "Pictures/Trips/")
@@ -68,6 +108,7 @@ class GalleryCopyDestinationPolicyTest {
         albumId: String,
         albumName: String,
         relativePath: String?,
+        volumeName: String = "external_primary",
     ) = MediaItem(
         id = id,
         contentUri = "content://media/external/images/media/$id",
@@ -81,6 +122,7 @@ class GalleryCopyDestinationPolicyTest {
         sizeBytes = 100,
         albumId = albumId,
         albumName = albumName,
+        volumeName = volumeName,
         relativePath = relativePath,
     )
 }
