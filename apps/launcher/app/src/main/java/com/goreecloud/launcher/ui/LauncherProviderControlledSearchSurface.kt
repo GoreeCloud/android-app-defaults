@@ -608,7 +608,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 }
                                 if (section.category == LauncherSearchCategory.APPLICATION) {
                                     val topApps = section.items
-                                    topApps.chunked(3).forEachIndexed { index, chunk ->
+                                    topApps.chunked(2).forEachIndexed { index, chunk ->
                                         item(key = "app-grid:" + index) {
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
@@ -625,7 +625,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                         )
                                                     }
                                                 }
-                                                repeat(3 - chunk.size) { Spacer(Modifier.weight(1f)) }
+                                                repeat(2 - chunk.size) { Spacer(Modifier.weight(1f)) }
                                             }
                                         }
                                     }
@@ -1418,51 +1418,52 @@ private fun LauncherGlazeSearchAppTile(
 ) {
     val icon = rememberLauncherAppIcon(action.app)
     Surface(
-        modifier = modifier.heightIn(min = 66.dp),
+        modifier = modifier.heightIn(min = 50.dp),
         onClick = onLaunch,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.50f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.46f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
         ),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (icon != null) {
                 Image(
                     bitmap = icon,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(32.dp).launcherIconMask(),
+                    modifier = Modifier.size(30.dp).launcherIconMask(),
                 )
             } else {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(30.dp)
                         .background(
                             MaterialTheme.colorScheme.primaryContainer,
-                            RoundedCornerShape(11.dp),
+                            RoundedCornerShape(10.dp),
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         result.title.take(1),
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
             Text(
                 result.title,
-                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }
@@ -2747,6 +2748,17 @@ private fun LauncherSearchSourceManager(
                                             "Provider unavailable"
                                         else -> null
                                     }
+                                    val rowSecondaryText =
+                                        statusLabel ?: compactSourceSummary(
+                                            context = context,
+                                            option = option,
+                                            fileSearchRoots = fileSearchRoots,
+                                        )
+                                    val rowSecondaryColor = when {
+                                        errorMessage != null -> MaterialTheme.colorScheme.error
+                                        statusLabel != null -> MaterialTheme.colorScheme.primary
+                                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    }
 
                                     if (sectionIndex > 0) {
                                         HorizontalDivider(
@@ -2793,30 +2805,17 @@ private fun LauncherSearchSourceManager(
                                                     overflow = TextOverflow.Ellipsis,
                                                 )
                                                 Text(
-                                                    compactSourceSummary(
-                                                        context = context,
-                                                        option = option,
-                                                        fileSearchRoots = fileSearchRoots,
-                                                    ),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color =
-                                                        MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    rowSecondaryText,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = rowSecondaryColor,
+                                                    fontWeight = if (statusLabel != null) {
+                                                        FontWeight.SemiBold
+                                                    } else {
+                                                        FontWeight.Normal
+                                                    },
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
                                                 )
-                                                if (statusLabel != null) {
-                                                    Text(
-                                                        statusLabel,
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = if (errorMessage != null) {
-                                                            MaterialTheme.colorScheme.error
-                                                        } else {
-                                                            MaterialTheme.colorScheme.primary
-                                                        },
-                                                        fontWeight = FontWeight.SemiBold,
-                                                        maxLines = 1,
-                                                    )
-                                                }
                                             }
 
                                             Switch(
