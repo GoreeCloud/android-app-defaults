@@ -600,6 +600,25 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         inputSurfaceHost?.showSurface(keyboard)
     }
 
+    override fun onSwitchLanguage() {
+        pendingSwipeCorrection = null
+        pendingPhraseRewrite = null
+        clearComposingBoundary()
+        presentedSuggestions = emptyList()
+        keyboardView?.setSuggestions(emptyList())
+
+        val token = window?.window?.decorView?.windowToken
+        val inputMethodManager = getSystemService(InputMethodManager::class.java)
+        val switched =
+            token != null &&
+                inputMethodManager?.switchToNextInputMethod(token, true) == true
+        if (!switched) {
+            keyboardView?.announceForAccessibility(
+                "No other GoreeCloud Keyboard language is enabled",
+            )
+        }
+    }
+
     override fun onOpenSettings() {
         startActivity(
             Intent(this, KeyboardSettingsActivity::class.java)
