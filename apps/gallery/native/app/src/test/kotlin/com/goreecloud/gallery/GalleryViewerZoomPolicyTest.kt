@@ -59,5 +59,8 @@ class GalleryViewerZoomPolicyTest {
         assertTrue(GalleryViewerZoomPolicy.isPreset(2f))
         assertFalse(GalleryViewerZoomPolicy.isPreset(2.25f))
         assertEquals(250, GalleryViewerZoomPolicy.displayPercent(2.5f))
+        assertTrue(GalleryViewerZoomPolicy.allowsNavigationSwipe(1f, hadMultiplePointers = false))
+        assertFalse(GalleryViewerZoomPolicy.allowsNavigationSwipe(2f, hadMultiplePointers = false))
+        assertFalse(GalleryViewerZoomPolicy.allowsNavigationSwipe(1f, hadMultiplePointers = true))
     }
 }
