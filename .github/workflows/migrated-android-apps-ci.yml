@@ -573,6 +573,26 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           path: apps/gallery/native/artifact-gallery-android/*
+      - name: Stage Android apksigner helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK_ROOT="$ANDROID_SDK_ROOT"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
+          test -x "$APKSIGNER"
+          APKSIGNER_JAR="$(dirname "$APKSIGNER")/lib/apksigner.jar"
+          test -f "$APKSIGNER_JAR"
+          rm -rf artifact-gallery-apksigner
+          mkdir -p artifact-gallery-apksigner
+          cp "$APKSIGNER_JAR" artifact-gallery-apksigner/apksigner.jar
+          sha256sum artifact-gallery-apksigner/apksigner.jar > artifact-gallery-apksigner/SHA256SUMS
+      - name: Upload Android apksigner helper
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-gallery-apksigner-helper
+          if-no-files-found: error
+          retention-days: 1
+          path: apps/gallery/native/artifact-gallery-apksigner/*
 
   gallery-runtime:
     needs:
