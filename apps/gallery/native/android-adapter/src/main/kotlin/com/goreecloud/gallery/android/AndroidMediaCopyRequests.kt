@@ -55,7 +55,7 @@ object AndroidMediaCopyRequests {
         sources: Collection<AndroidMediaCopySource>,
         destinationRelativePath: String,
     ): AndroidMediaCopyResult {
-        check(isSupported()) {
+        check(Build.VERSION.SDK_INT >= MIN_SUPPORTED_API) {
             "MediaStore copy requires Android 11 or newer"
         }
 
