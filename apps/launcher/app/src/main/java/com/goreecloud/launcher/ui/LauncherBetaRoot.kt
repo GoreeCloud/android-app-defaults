@@ -6458,17 +6458,26 @@ private fun AppDrawerSurface(
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                if (order == drawerSortOrder) {
-                                                    "✓ " + order.displayName
-                                                } else {
-                                                    order.displayName
-                                                },
+                                                order.displayName,
                                                 color = if (glass) {
                                                     Color.White.copy(alpha = 0.94f)
                                                 } else {
                                                     MaterialTheme.colorScheme.onSurface
                                                 },
                                             )
+                                        },
+                                        leadingIcon = {
+                                            if (order == drawerSortOrder) {
+                                                LauncherDrawerCheckIcon(
+                                                    color = if (glass) {
+                                                        Color.White.copy(alpha = 0.94f)
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                )
+                                            } else {
+                                                Spacer(Modifier.size(18.dp))
+                                            }
                                         },
                                         onClick = {
                                             onSetSortOrderName(order.name)
@@ -6504,9 +6513,8 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
+                                    LauncherDrawerPinnedIcon(
+                                        active = showPinnedOnly,
                                         color = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
@@ -9991,10 +9999,10 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
+            LauncherDrawerPinnedIcon(
+                active = true,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(12.dp),
             )
         }
     }
