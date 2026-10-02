@@ -3002,7 +3002,19 @@ private fun LauncherSearchSourceManager(
                                                     },
                                                     enabled = ready && index > 0,
                                                 ) {
-                                                    Text("↑  Earlier")
+                                                    Row(
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(4.dp),
+                                                        verticalAlignment =
+                                                            Alignment.CenterVertically,
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            upward = true,
+                                                            tint =
+                                                                MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Earlier")
+                                                    }
                                                 }
                                                 TextButton(
                                                     onClick = {
@@ -3020,7 +3032,19 @@ private fun LauncherSearchSourceManager(
                                                             index in 0 until
                                                                 controls.orderedOptions.lastIndex,
                                                 ) {
-                                                    Text("↓  Later")
+                                                    Row(
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(4.dp),
+                                                        verticalAlignment =
+                                                            Alignment.CenterVertically,
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            upward = false,
+                                                            tint =
+                                                                MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Later")
+                                                    }
                                                 }
                                             }
                                         }
@@ -3031,6 +3055,64 @@ private fun LauncherSearchSourceManager(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSourceMoveGlyph(
+    upward: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(14.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.11f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        if (upward) {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.82f),
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.20f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.20f),
+                androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.42f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.20f),
+                androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.42f),
+                stroke,
+                cap = cap,
+            )
+        } else {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.18f),
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.80f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.80f),
+                androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.58f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.80f),
+                androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.58f),
+                stroke,
+                cap = cap,
+            )
         }
     }
 }
@@ -3056,7 +3138,7 @@ private fun LauncherSearchSourceStatusPill(
     ) {
         Text(
             label,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             style = MaterialTheme.typography.labelSmall,
             color = foreground,
             fontWeight = FontWeight.SemiBold,
@@ -3068,9 +3150,9 @@ private enum class LauncherSearchSourceSection(
     val title: String,
     val subtitle: String,
 ) {
-    DEVICE("On-device", "Fast local sources with no network query"),
-    PERSONAL("Your content", "Permission-scoped personal data and selected folders"),
-    CONNECTED("Connected", "External services and reviewed inline adapters"),
+    DEVICE("On-device", "Apps, shortcuts and local answers"),
+    PERSONAL("Your content", "Permissions and selected folders"),
+    CONNECTED("Connected", "Optional cloud and web sources"),
 }
 
 private fun sourceSectionFor(
@@ -3129,7 +3211,7 @@ private fun connectedSourceDetail(
                 "is enabled. Launcher keeps the short-lived access token in process memory only."
         } else if (BuildConfig.DEBUG) {
             "This CI Development build uses a temporary Android debug signing identity, so Google " +
-                "cannot authorize it as the registered Launcher OAuth client. Use Files → Choose " +
+                "cannot authorize it as the registered Launcher OAuth client. Use Files, then Choose " +
                 "folder for a permission-scoped Drive folder now; inline Drive Search stays off " +
                 "until a protected signed Development build is registered with Google."
         } else {
