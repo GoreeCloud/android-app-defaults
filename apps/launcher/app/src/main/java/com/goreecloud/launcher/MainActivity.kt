@@ -648,20 +648,10 @@ class MainActivity : ComponentActivity() {
                     LauncherStarterHomeDefaultsPolicy.DEFAULT_SECONDARY_PAGE_ID,
                 )
 
+                // Keep a fresh Home intentionally clean. Built-in widgets remain available from
+                // Edit Home → Widgets, but starter provisioning no longer places them automatically.
                 launcherPreferencesRepository.setHomeCardStyle(
-                    com.goreecloud.launcher.core.launcher.LauncherHomeCardStyle.CLOCK,
-                )
-                workspaceRuntimeCoordinator.addBuiltInWidget(
-                    itemId = STARTER_CALENDAR_WIDGET_ID,
-                    typeId = WorkspaceWidgetCatalog.CALENDAR,
-                    columns = launcherPreferences.homeColumns,
-                    rows = launcherPreferences.homeRows,
-                )
-                workspaceRuntimeCoordinator.addBuiltInWidget(
-                    itemId = STARTER_QUICK_ACTIONS_WIDGET_ID,
-                    typeId = WorkspaceWidgetCatalog.QUICK_ACTIONS,
-                    columns = launcherPreferences.homeColumns,
-                    rows = launcherPreferences.homeRows,
+                    com.goreecloud.launcher.core.launcher.LauncherHomeCardStyle.OFF,
                 )
 
                 launcherPreferencesRepository.markStarterLayoutApplied()
@@ -701,6 +691,12 @@ class MainActivity : ComponentActivity() {
                         (placement.descriptor as? WorkspaceWidgetDescriptor.BuiltIn)?.typeId ==
                             WorkspaceWidgetCatalog.GLANCE
                 }
+                val hasSeededStarterWidgets = pagesSnapshot.any { page ->
+                    page.widgetPlacements.any { placement ->
+                        placement.itemId == STARTER_CALENDAR_WIDGET_ID ||
+                            placement.itemId == STARTER_QUICK_ACTIONS_WIDGET_ID
+                    }
+                }
                 val allPagesEmpty = pagesSnapshot.all { page ->
                     page.appKeys.isEmpty() &&
                         page.widgetPlacements.isEmpty() &&
@@ -719,12 +715,16 @@ class MainActivity : ComponentActivity() {
                     allPagesEmpty = allPagesEmpty,
                 )
 
-                if (!hasLegacyStarterGlance && !repairEmptyStarter) {
+                if (!hasLegacyStarterGlance && !hasSeededStarterWidgets && !repairEmptyStarter) {
                     return@LaunchedEffect
                 }
 
                 if (hasLegacyStarterGlance) {
                     workspaceRuntimeCoordinator.removeWidget(STARTER_GLANCE_WIDGET_ID)
+                }
+                if (hasSeededStarterWidgets) {
+                    workspaceRuntimeCoordinator.removeWidget(STARTER_CALENDAR_WIDGET_ID)
+                    workspaceRuntimeCoordinator.removeWidget(STARTER_QUICK_ACTIONS_WIDGET_ID)
                 }
 
                 val secondaryPages = pagesSnapshot.filterNot {
@@ -745,28 +745,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 launcherPreferencesRepository.setHomeCardStyle(
-                    com.goreecloud.launcher.core.launcher.LauncherHomeCardStyle.CLOCK,
+                    com.goreecloud.launcher.core.launcher.LauncherHomeCardStyle.OFF,
                 )
-                if (primaryPage.widgetPlacements.none { it.itemId == STARTER_CALENDAR_WIDGET_ID }) {
-                    workspaceRuntimeCoordinator.addBuiltInWidget(
-                        itemId = STARTER_CALENDAR_WIDGET_ID,
-                        typeId = WorkspaceWidgetCatalog.CALENDAR,
-                        columns = launcherPreferences.homeColumns,
-                        rows = launcherPreferences.homeRows,
-                    )
-                }
-                if (
-                    primaryPage.widgetPlacements.none {
-                        it.itemId == STARTER_QUICK_ACTIONS_WIDGET_ID
-                    }
-                ) {
-                    workspaceRuntimeCoordinator.addBuiltInWidget(
-                        itemId = STARTER_QUICK_ACTIONS_WIDGET_ID,
-                        typeId = WorkspaceWidgetCatalog.QUICK_ACTIONS,
-                        columns = launcherPreferences.homeColumns,
-                        rows = launcherPreferences.homeRows,
-                    )
-                }
             }
 
             LaunchedEffect(
