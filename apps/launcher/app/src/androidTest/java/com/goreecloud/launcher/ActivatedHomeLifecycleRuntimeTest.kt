@@ -77,44 +77,34 @@ class ActivatedHomeLifecycleRuntimeTest {
     private var previousHomeAppMode = LauncherHomeAppMode.NONE
 
     @Before
-    fun isolatePersistedWorkspaceTestsFromAutomaticHomeApps() = runBlocking {
+    fun prepareEstablishedRuntimeState() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         lifecyclePreferencesRepository = LauncherPreferencesRepository(context)
         previousHomeAppMode =
             lifecyclePreferencesRepository.experiencePreferences.first().homeAppMode
+
         lifecyclePreferencesRepository.setHomeAppMode(LauncherHomeAppMode.NONE).join()
+        lifecyclePreferencesRepository.setHomeHintsDismissed(true).join()
+        lifecyclePreferencesRepository.markStartupWizardCompleted().join()
+        lifecyclePreferencesRepository.markStarterLayoutApplied()
         withTimeout(5_000) {
             lifecyclePreferencesRepository.experiencePreferences.first {
-                it.homeAppMode == LauncherHomeAppMode.NONE
+                it.homeAppMode == LauncherHomeAppMode.NONE &&
+                    it.startupWizardCompleted &&
+                    it.starterLayoutApplied
             }
         }
         LauncherLocalUsageRepository(context).clear().join()
+        Unit
     }
 
     @After
     fun restoreAutomaticHomeAppMode() = runBlocking {
+        if (!::lifecyclePreferencesRepository.isInitialized) return@runBlocking
         lifecyclePreferencesRepository.setHomeAppMode(previousHomeAppMode).join()
         withTimeout(5_000) {
             lifecyclePreferencesRepository.experiencePreferences.first {
                 it.homeAppMode == previousHomeAppMode
-            }
-        }
-        Unit
-    }
-
-    @Before
-    fun completeStartupForEstablishedRuntimeTests() = runBlocking {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val preferences = LauncherPreferencesRepository(context)
-        preferences.setHomeHintsDismissed(true).join()
-        preferences.markStartupWizardCompleted().join()
-        // This class validates established Launcher runtime behavior, not first-run provisioning.
-        // Mark the starter layout applied before Activity launch so the starter migration/repair
-        // effect cannot race Home gestures, spatial drag/drop, or lifecycle assertions.
-        preferences.markStarterLayoutApplied()
-        withTimeout(5_000) {
-            preferences.experiencePreferences.first {
-                it.startupWizardCompleted && it.starterLayoutApplied
             }
         }
         Unit
