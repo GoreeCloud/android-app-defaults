@@ -168,6 +168,7 @@ data class GalleryUserSettings(
     val showHiddenItems: Boolean = false,
     val playVideosAutomatically: Boolean = false,
     val loopVideos: Boolean = false,
+    val loopSlideshows: Boolean = false,
     val slideshowInterval: GallerySlideshowInterval = GallerySlideshowInterval.NORMAL,
     val animateGifThumbnails: Boolean = false,
     val deleteEmptyFolders: Boolean = false,
