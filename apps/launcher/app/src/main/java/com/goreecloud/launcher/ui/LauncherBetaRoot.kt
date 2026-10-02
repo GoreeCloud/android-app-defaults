@@ -10101,6 +10101,145 @@ private fun LauncherAppListRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+private fun LauncherHiddenAppsManagerSheet(
+    hiddenApps: List<LauncherActivityInfo>,
+    onRestore: (LauncherActivityInfo) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("launcher-hidden-apps-manager"),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Hidden apps",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "Hidden apps stay installed. Existing Home, Dock and folder placements are unchanged.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) { Text("Done") }
+            }
+
+            if (hiddenApps.isEmpty()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                ) {
+                    Text(
+                        "No hidden apps.",
+                        modifier = Modifier.padding(GlazeMetrics.space3),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 420.dp),
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                ) {
+                    lazyItems(
+                        items = hiddenApps,
+                        key = { app -> app.workspaceKey() },
+                    ) { app ->
+                        val icon = rememberLauncherAppIcon(app)
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("launcher-hidden-app-" + app.workspaceKey()),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+                            ),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(GlazeMetrics.space3),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+                            ) {
+                                if (icon != null) {
+                                    Image(
+                                        bitmap = icon,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(42.dp).launcherIconMask(),
+                                    )
+                                } else {
+                                    Surface(
+                                        modifier = Modifier.size(42.dp),
+                                        shape = RoundedCornerShape(13.dp),
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                    ) {}
+                                }
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        app.label.toString(),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        app.componentName.packageName,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                TextButton(
+                                    onClick = { onRestore(app) },
+                                    modifier = Modifier
+                                        .heightIn(min = 48.dp)
+                                        .testTag("launcher-show-hidden-app-" + app.workspaceKey()),
+                                ) {
+                                    Text("Show")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Text(
+                "Hidden apps are excluded from App Drawer and Universal Search discovery only. " +
+                    "They can still remain on Home, in the Dock, or inside folders until you remove those placements.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(GlazeMetrics.space2))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun LauncherFolderManagerSheet(
     folders: List<LauncherFolder>,
     appsByKey: Map<String, LauncherActivityInfo>,
