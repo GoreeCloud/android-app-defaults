@@ -125,6 +125,9 @@ class GalleryRenderedAcceptanceTest {
 
         onView(withText("Move deleted items to Trash"))
             .check(matches(withText("Move deleted items to Trash")))
+        onView(withText("Loop photo slideshows"))
+            .perform(scrollTo())
+            .check(matches(isDisplayed()))
         onView(withText("Slideshow speed"))
             .perform(scrollTo())
             .check(matches(isDisplayed()))
