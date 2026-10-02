@@ -2259,6 +2259,108 @@ private fun LauncherBackGlyph(
     }
 }
 
+private enum class LauncherSearchSourceUtilityKind {
+    RESET,
+    ORDER,
+    DONE,
+    EARLIER,
+    LATER,
+}
+
+@Composable
+private fun LauncherSearchSourceUtilityButton(
+    kind: LauncherSearchSourceUtilityKind,
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(38.dp)
+            .semantics { contentDescription = label },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherSearchSourceUtilityGlyph(
+                kind = kind,
+                tint = if (enabled) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchSourceUtilityGlyph(
+    kind: LauncherSearchSourceUtilityKind,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(17.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * x1, u * y1),
+                androidx.compose.ui.geometry.Offset(u * x2, u * y2),
+                stroke,
+                cap = cap,
+            )
+        }
+        when (kind) {
+            LauncherSearchSourceUtilityKind.RESET -> {
+                drawArc(
+                    color = tint,
+                    startAngle = 35f,
+                    sweepAngle = 285f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.18f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.64f, u * 0.64f),
+                    style = Stroke(width = stroke, cap = cap),
+                )
+                line(0.26f, 0.22f, 0.19f, 0.40f)
+                line(0.26f, 0.22f, 0.43f, 0.25f)
+            }
+            LauncherSearchSourceUtilityKind.ORDER -> {
+                listOf(0.30f, 0.50f, 0.70f).forEach { y ->
+                    drawCircle(
+                        color = tint,
+                        radius = u * 0.035f,
+                        center = androidx.compose.ui.geometry.Offset(u * 0.22f, u * y),
+                    )
+                    line(0.38f, y, 0.80f, y)
+                }
+            }
+            LauncherSearchSourceUtilityKind.DONE -> {
+                line(0.18f, 0.52f, 0.40f, 0.74f)
+                line(0.40f, 0.74f, 0.82f, 0.28f)
+            }
+            LauncherSearchSourceUtilityKind.EARLIER -> {
+                line(0.50f, 0.80f, 0.50f, 0.24f)
+                line(0.50f, 0.24f, 0.31f, 0.43f)
+                line(0.50f, 0.24f, 0.69f, 0.43f)
+            }
+            LauncherSearchSourceUtilityKind.LATER -> {
+                line(0.50f, 0.20f, 0.50f, 0.76f)
+                line(0.50f, 0.76f, 0.31f, 0.57f)
+                line(0.50f, 0.76f, 0.69f, 0.57f)
+            }
+        }
+    }
+}
+
 @Composable
 private fun LauncherPrivacyShieldGlyph(
     tint: Color,
@@ -2723,18 +2825,26 @@ private fun LauncherSearchSourceManager(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    TextButton(
-                        onClick = onReset,
+                    LauncherSearchSourceUtilityButton(
+                        kind = LauncherSearchSourceUtilityKind.RESET,
+                        label = "Reset Search Sources",
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
+                        onClick = onReset,
+                    )
+                    LauncherSearchSourceUtilityButton(
+                        kind = if (reorderMode) {
+                            LauncherSearchSourceUtilityKind.DONE
+                        } else {
+                            LauncherSearchSourceUtilityKind.ORDER
+                        },
+                        label = if (reorderMode) {
+                            "Finish ordering Search Sources"
+                        } else {
+                            "Order Search Sources"
+                        },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
-                    }
+                        onClick = { reorderMode = !reorderMode },
+                    )
                 }
             }
         }
@@ -2779,20 +2889,32 @@ private fun LauncherSearchSourceManager(
                                     LauncherSearchSectionGlyph(section = section, tint = accent)
                                 }
                             }
-                            Column(Modifier.weight(1f)) {
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
                                 Text(
                                     section.title,
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
-                                Text(
-                                    section.subtitle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                    color = accent.copy(alpha = 0.10f),
+                                ) {
+                                    Text(
+                                        options.size.toString(),
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 2.dp,
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = accent,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
                             }
                         }
 
@@ -2893,7 +3015,7 @@ private fun LauncherSearchSourceManager(
 
                                     if (sectionIndex > 0) {
                                         HorizontalDivider(
-                                            modifier = Modifier.padding(start = 62.dp),
+                                            modifier = Modifier.padding(start = 56.dp),
                                             color = MaterialTheme.colorScheme.onSurface
                                                 .copy(alpha = 0.055f),
                                         )
@@ -3129,7 +3251,12 @@ private fun LauncherSearchSourceManager(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.End,
                                             ) {
-                                                TextButton(
+                                                LauncherSearchSourceUtilityButton(
+                                                    kind =
+                                                        LauncherSearchSourceUtilityKind.EARLIER,
+                                                    label =
+                                                        "Move " + option.displayName + " earlier",
+                                                    enabled = ready && index > 0,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3140,11 +3267,16 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled = ready && index > 0,
-                                                ) {
-                                                    Text("↑  Earlier")
-                                                }
-                                                TextButton(
+                                                )
+                                                LauncherSearchSourceUtilityButton(
+                                                    kind =
+                                                        LauncherSearchSourceUtilityKind.LATER,
+                                                    label =
+                                                        "Move " + option.displayName + " later",
+                                                    enabled =
+                                                        ready &&
+                                                            index in 0 until
+                                                                controls.orderedOptions.lastIndex,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3155,13 +3287,7 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled =
-                                                        ready &&
-                                                            index in 0 until
-                                                                controls.orderedOptions.lastIndex,
-                                                ) {
-                                                    Text("↓  Later")
-                                                }
+                                                )
                                             }
                                         }
                                     }
