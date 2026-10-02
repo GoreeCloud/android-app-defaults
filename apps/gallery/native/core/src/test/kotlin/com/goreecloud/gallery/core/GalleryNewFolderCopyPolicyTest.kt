@@ -50,6 +50,46 @@ class GalleryNewFolderCopyPolicyTest {
     }
 
     @Test
+    fun `cross volume selection cannot establish new folder copy authority`() {
+        val image = media("1", "camera", "Camera", "DCIM/Camera/", volumeName = "external_primary")
+        val video = media(
+            "2",
+            "movies",
+            "Movies",
+            "Movies/",
+            mimeType = "video/mp4",
+            volumeName = "1234-5678",
+        )
+
+        assertNull(
+            GalleryNewFolderCopyPolicy.parentForSelection(
+                currentScope = listOf(image, video),
+                selectedContentUris = setOf(image.contentUri, video.contentUri),
+            ),
+        )
+    }
+
+    @Test
+    fun `same folder path on another volume does not block selected volume destination`() {
+        val image = media("1", "downloads", "Download", "Download/", volumeName = "external_primary")
+        val otherVolume = media(
+            "2",
+            "trip-other",
+            "Trip",
+            "Pictures/Trip/",
+            volumeName = "1234-5678",
+        )
+
+        val destination = GalleryNewFolderCopyPolicy.destinationForSelection(
+            currentScope = listOf(image, otherVolume),
+            selectedContentUris = setOf(image.contentUri),
+            rawFolderName = "Trip",
+        )
+
+        assertEquals("Pictures/Trip/", destination.relativePath)
+    }
+
+    @Test
     fun `foreign selection cannot establish new folder copy authority`() {
         val image = media("1", "downloads", "Download", "Download/")
         assertNull(
@@ -79,6 +119,7 @@ class GalleryNewFolderCopyPolicyTest {
         albumName: String,
         relativePath: String?,
         mimeType: String = "image/jpeg",
+        volumeName: String = "external_primary",
     ) = MediaItem(
         id = id,
         contentUri = if (mimeType.startsWith("video/")) {
@@ -96,6 +137,7 @@ class GalleryNewFolderCopyPolicyTest {
         sizeBytes = 100,
         albumId = albumId,
         albumName = albumName,
+        volumeName = volumeName,
         relativePath = relativePath,
     )
 }
