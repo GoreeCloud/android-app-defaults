@@ -17,10 +17,10 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.6-dev` Development line.
 - Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
 - Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and icon-bearing All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
-- Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open, app-local Pin/Unpin to top, and Details. Album pinning changes only Gallery's local Collections ordering; destructive media actions remain outside these compact card menus.
+- Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; ordinary album cards expose Open, app-local Pin/Unpin to top, bounded Move earlier/Move later ordering, Reset album order when a manual order exists, and Details. Album ordering changes only Gallery's local Collections presentation; destructive media actions remain outside these compact card menus.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
-- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, mockup-aligned circular cover badges, bounded album-detail browsing, app-local persistent Pin/Unpin-to-top ordering for ordinary Albums collections, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
+- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, mockup-aligned circular cover badges, bounded album-detail browsing, app-local persistent Pin/Unpin-to-top plus full bounded manual ordering for ordinary Albums collections, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
 - Device-local Favorites backed only by Gallery app-local state; favorite/unfavorite is available from the viewer and authorized Favorites appear as a dedicated collection.
 - A full-screen bounded media viewer shell with Previous / Next navigation, restrained top chrome, and a bottom action surface. Viewer navigation uses the complete current authorized/presented collection rather than one date group.
 - Android Share handoff for the currently authorized media content URI using read-only URI grant semantics.
@@ -84,7 +84,7 @@ The historical screenshots supplied for the native migration establish the follo
 - A dedicated Albums experience using meaningful cover thumbnails, album names, and item counts.
 - Album/folder browsing that supports visually rich two-column or adaptive cover layouts where appropriate.
 - Search folders/albums plus contextual creation, organization, sorting, and overflow actions.
-- Album actions such as create, rename, full manual reorder beyond the implemented app-local Pin/Unpin-to-top preference, move/copy organization, hide/exclude policy, and details through Android-authorized boundaries.
+- Album actions such as create, rename, acceptance/refinement of the implemented app-local Pin/Unpin plus manual ordering, move/copy organization, hide/exclude policy, and details through Android-authorized boundaries.
 
 ### Photo and media viewer
 
@@ -139,7 +139,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Share/export and approved Android handoff workflows.
 - Edit entry points and approved first-party editing workflows.
 - Delete/trash/recovery flows with explicit destructive-action authorization.
-- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move and preserve-original Copy; broader rename/manual reorder/album-management acceptance remains separate.
+- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move, preserve-original Copy, and app-local manual Album ordering; broader creation/rename/album-management acceptance remains separate.
 - Details/metadata presentation and approved metadata-editing workflows.
 - Slideshow and other established local presentation actions where supported by the historical Gallery product.
 - Hidden/excluded album or media controls and sensitive-media policy governed by Privacy Shield.
@@ -153,7 +153,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Physically validate the dedicated Trash destination on representative Android devices with disposable copied media, including five-tab navigation, single-item viewer Restore/Purge, multi-select Restore/Purge, cancel behavior, mixed photo/video behavior, partial-media permission behavior, permission revocation, empty Trash, provider failure, restart/process recreation, and retention/expiry refresh.
 - Continue destructive-operation acceptance for ordinary Trash/permanent-delete mode, permission changes, post-mutation refresh, OEM/profile behavior, and other required edge cases.
 - Refine multi-select plus the implemented Move and preserve-original Copy paths from representative-device evidence, including existing-folder and Create & move/Create & copy flows, Move confirmation approve/cancel/deny behavior, mixed-media destinations, stale selection, provider/source/output failures, filename collision behavior, and post-operation refresh.
-- Extend the already-implemented grouping and view-density model only where evidence supports it; continue Copy acceptance plus album creation, rename, full manual reorder, and richer organization work.
+- Extend the already-implemented grouping and view-density model only where evidence supports it; continue Copy and manual Album-order acceptance plus album creation, rename, and richer organization work.
 - Expand the bounded image viewer only where true full-resolution zoom/pan is justified, and complete representative-device/accessibility acceptance for the already-implemented native video playback and autoplay/loop behavior.
 - Complete representative-device/OEM/profile, accessibility, performance/power, and large/complex-GIF acceptance for the implemented opt-in animated GIF thumbnail path.
 - Complete representative-device fidelity/accessibility acceptance for the implemented first-party photo editor, and separately implement approved metadata-editing workflows.
