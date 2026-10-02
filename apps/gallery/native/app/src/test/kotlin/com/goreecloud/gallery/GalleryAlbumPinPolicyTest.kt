@@ -7,7 +7,7 @@ class GalleryAlbumPinPolicyTest {
     @Test
     fun `pinned albums move to the front without changing relative order`() {
         assertEquals(
-            listOf("screens", "camera", "downloads", "family"),
+            listOf("camera", "screens", "downloads", "family"),
             GalleryAlbumPinPolicy.orderedIds(
                 availableAlbumIds = listOf("camera", "downloads", "screens", "family"),
                 pinnedAlbumIds = setOf("screens", "camera"),
