@@ -1679,6 +1679,9 @@ class GalleryActivity : Activity() {
                     GalleryCardOverflowAction.OPEN,
                     GalleryCardOverflowAction.PIN_TO_TOP,
                     GalleryCardOverflowAction.UNPIN_FROM_TOP,
+                    GalleryCardOverflowAction.MOVE_EARLIER,
+                    GalleryCardOverflowAction.MOVE_LATER,
+                    GalleryCardOverflowAction.RESET_ALBUM_ORDER,
                     null -> return@setOnMenuItemClickListener false
                 }
                 true
@@ -1689,10 +1692,27 @@ class GalleryActivity : Activity() {
 
     private fun showAlbumOverflowMenu(anchor: View, album: AlbumPresentation) {
         val albumId = album.id
-        val isPinned = albumId != null && albumId in currentUserSettings().pinnedAlbumIds
+        val settings = currentUserSettings()
+        val isPinned = albumId != null && albumId in settings.pinnedAlbumIds
+        val baseAlbumIds = currentBaseAlbumIds()
         val actions = GalleryCardOverflowPolicy.albumActions(
             isPinned = isPinned,
             canPin = albumId != null,
+            canMoveEarlier = albumId != null && GalleryAlbumOrderPolicy.canMove(
+                availableAlbumIds = baseAlbumIds,
+                pinnedAlbumIds = settings.pinnedAlbumIds,
+                manualOrderIds = settings.albumOrderIds,
+                albumId = albumId,
+                direction = GalleryAlbumMoveDirection.EARLIER,
+            ),
+            canMoveLater = albumId != null && GalleryAlbumOrderPolicy.canMove(
+                availableAlbumIds = baseAlbumIds,
+                pinnedAlbumIds = settings.pinnedAlbumIds,
+                manualOrderIds = settings.albumOrderIds,
+                albumId = albumId,
+                direction = GalleryAlbumMoveDirection.LATER,
+            ),
+            canResetOrder = albumId != null && settings.albumOrderIds.isNotEmpty(),
         )
         val byId = actions.associateBy { action -> action.ordinal + 1 }
         PopupMenu(this, anchor).apply {
@@ -1704,6 +1724,11 @@ class GalleryActivity : Activity() {
                     GalleryCardOverflowAction.OPEN -> openAlbumPresentation(album)
                     GalleryCardOverflowAction.PIN_TO_TOP -> setAlbumPinned(album, pinned = true)
                     GalleryCardOverflowAction.UNPIN_FROM_TOP -> setAlbumPinned(album, pinned = false)
+                    GalleryCardOverflowAction.MOVE_EARLIER ->
+                        moveAlbum(album, GalleryAlbumMoveDirection.EARLIER)
+                    GalleryCardOverflowAction.MOVE_LATER ->
+                        moveAlbum(album, GalleryAlbumMoveDirection.LATER)
+                    GalleryCardOverflowAction.RESET_ALBUM_ORDER -> resetAlbumOrder()
                     GalleryCardOverflowAction.DETAILS -> showAlbumDetails(album)
                     GalleryCardOverflowAction.SHARE,
                     GalleryCardOverflowAction.ADD_FAVORITE,
@@ -1740,6 +1765,54 @@ class GalleryActivity : Activity() {
         renderCurrentDestination()
     }
 
+    private fun moveAlbum(album: AlbumPresentation, direction: GalleryAlbumMoveDirection) {
+        val albumId = album.id ?: return
+        val settings = currentUserSettings()
+        val baseAlbumIds = currentBaseAlbumIds()
+        if (albumId !in baseAlbumIds) {
+            Toast.makeText(this, "This album is no longer available.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val updatedOrder = GalleryAlbumOrderPolicy.movedOrder(
+            availableAlbumIds = baseAlbumIds,
+            pinnedAlbumIds = settings.pinnedAlbumIds,
+            manualOrderIds = settings.albumOrderIds,
+            albumId = albumId,
+            direction = direction,
+        )
+        if (updatedOrder == settings.albumOrderIds) return
+
+        galleryPreferences().edit()
+            .putString(ALBUM_ORDER_IDS_KEY, stringListJson(updatedOrder).toString())
+            .apply()
+        Toast.makeText(
+            this,
+            if (direction == GalleryAlbumMoveDirection.EARLIER) {
+                "${album.name} moved earlier"
+            } else {
+                "${album.name} moved later"
+            },
+            Toast.LENGTH_SHORT,
+        ).show()
+        renderCurrentDestination()
+    }
+
+    private fun resetAlbumOrder() {
+        if (currentUserSettings().albumOrderIds.isEmpty()) return
+        galleryPreferences().edit().remove(ALBUM_ORDER_IDS_KEY).apply()
+        Toast.makeText(this, "Album order reset", Toast.LENGTH_SHORT).show()
+        renderCurrentDestination()
+    }
+
+    private fun currentBaseAlbumIds(): List<String> =
+        visibleAuthorizedItems()
+            .buildAlbumCatalog()
+            .let { albums ->
+                if (selectedSort == MediaSortOrder.NEWEST) albums else albums.sortedBy { it.newestAt }
+            }
+            .map { it.id }
+
     private fun renderAlbums(generation: Int, sourceItems: List<MediaItem>) {
         clearSelection(render = false)
         selectionScopeItems = emptyList()
@@ -1750,9 +1823,11 @@ class GalleryActivity : Activity() {
                 if (selectedSort == MediaSortOrder.NEWEST) albums else albums.sortedBy { it.newestAt }
             }
         val catalogById = sortedCatalog.associateBy { it.id }
-        val catalog = GalleryAlbumPinPolicy.orderedIds(
+        val settings = currentUserSettings()
+        val catalog = GalleryAlbumOrderPolicy.orderedIds(
             availableAlbumIds = sortedCatalog.map { it.id },
-            pinnedAlbumIds = currentUserSettings().pinnedAlbumIds,
+            pinnedAlbumIds = settings.pinnedAlbumIds,
+            manualOrderIds = settings.albumOrderIds,
         ).mapNotNull(catalogById::get)
 
         val allFavoriteItems = sourceItems.filter { it.contentUri in favoriteUris }
@@ -4914,6 +4989,7 @@ class GalleryActivity : Activity() {
                 preferences.getString(SORT_PREFERENCE_KEY, GallerySortPreference.NEWEST.storedValue),
             ),
             pinnedAlbumIds = preferences.getStringSet(PINNED_ALBUM_IDS_KEY, emptySet()).orEmpty().toSet(),
+            albumOrderIds = parseStoredAlbumOrder(preferences.getString(ALBUM_ORDER_IDS_KEY, null)),
             includedAlbumIds = preferences.getStringSet(INCLUDED_ALBUM_IDS_KEY, emptySet()).orEmpty().toSet(),
             excludedAlbumIds = preferences.getStringSet(EXCLUDED_ALBUM_IDS_KEY, emptySet()).orEmpty().toSet(),
             showHiddenItems = preferences.getBoolean(SHOW_HIDDEN_ITEMS_KEY, false),
@@ -5029,6 +5105,7 @@ class GalleryActivity : Activity() {
             .put("groupingMode", settings.groupingMode.storedValue)
             .put("sortPreference", settings.sortPreference.storedValue)
             .put("pinnedAlbumIds", stringSetJson(settings.pinnedAlbumIds))
+            .put("albumOrderIds", stringListJson(settings.albumOrderIds))
             .put("includedAlbumIds", stringSetJson(settings.includedAlbumIds))
             .put("excludedAlbumIds", stringSetJson(settings.excludedAlbumIds))
             .put("showHiddenItems", settings.showHiddenItems)
@@ -5077,6 +5154,12 @@ class GalleryActivity : Activity() {
                 PINNED_ALBUM_IDS_KEY,
                 json.optJSONArray("pinnedAlbumIds")?.let(::jsonStringSet) ?: current.pinnedAlbumIds,
             )
+            .putString(
+                ALBUM_ORDER_IDS_KEY,
+                stringListJson(
+                    json.optJSONArray("albumOrderIds")?.let(::jsonStringList) ?: current.albumOrderIds,
+                ).toString(),
+            )
             .putStringSet(
                 INCLUDED_ALBUM_IDS_KEY,
                 json.optJSONArray("includedAlbumIds")?.let(::jsonStringSet) ?: current.includedAlbumIds,
@@ -5123,6 +5206,32 @@ class GalleryActivity : Activity() {
 
     private fun stringSetJson(values: Set<String>): JSONArray = JSONArray().apply {
         values.sorted().forEach { put(it) }
+    }
+
+    private fun stringListJson(values: List<String>): JSONArray = JSONArray().apply {
+        values.asSequence()
+            .map { it.trim() }
+            .filter(String::isNotEmpty)
+            .distinct()
+            .forEach { put(it) }
+    }
+
+    private fun parseStoredAlbumOrder(raw: String?): List<String> {
+        if (raw.isNullOrBlank()) return emptyList()
+        return try {
+            jsonStringList(JSONArray(raw))
+        } catch (_: RuntimeException) {
+            emptyList()
+        }
+    }
+
+    private fun jsonStringList(array: JSONArray): List<String> {
+        val values = linkedSetOf<String>()
+        for (index in 0 until array.length()) {
+            val value = array.optString(index).trim()
+            if (value.isNotBlank()) values.add(value)
+        }
+        return values.toList()
     }
 
     private fun jsonStringSet(array: JSONArray): Set<String> {
@@ -5711,6 +5820,7 @@ class GalleryActivity : Activity() {
         const val GROUPING_MODE_KEY = "grouping_mode"
         const val SORT_PREFERENCE_KEY = "sort_preference"
         const val PINNED_ALBUM_IDS_KEY = "pinned_album_ids"
+        const val ALBUM_ORDER_IDS_KEY = "album_order_ids"
         const val INCLUDED_ALBUM_IDS_KEY = "included_album_ids"
         const val EXCLUDED_ALBUM_IDS_KEY = "excluded_album_ids"
         const val SHOW_HIDDEN_ITEMS_KEY = "show_hidden_items"
