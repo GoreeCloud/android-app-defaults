@@ -133,6 +133,7 @@ The full-screen media viewer receives a restrained Overlay treatment in `gc.14`:
 - the viewer toolbar uses the semantic muted Glaze surface rather than a separate branded gradient so controls remain subordinate to the media;
 - the bottom action area uses a rounded-top muted Glaze overlay with a restrained semantic outline;
 - visible viewer actions use 48dp comfortable targets and retain their existing Android selection feedback and content descriptions;
+- the compact photo view-options control presents Fit, Fill, a bounded 2× zoom preset, and Reset zoom when applicable; pinch zoom and drag-to-pan remain direct media gestures, while the explicit menu preserves a discoverable non-pinch zoom/reset path;
 - photos and videos remain unframed primary content; the design system is applied to chrome rather than placed over the media as decorative cards;
 - delete and other destructive operations retain their existing behavior and confirmation requirements;
 - no blur, remote asset, analytics, tracking, advertising, or network dependency is added.
