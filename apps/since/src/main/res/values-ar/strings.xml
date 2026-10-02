@@ -256,4 +256,16 @@
     <string name="duplicate_tracker_failed">تعذّر تكرار هذا المتتبّع. لم يتم تغيير المتتبّع الأصلي.</string>
     <string name="move_tracker_earlier">نقل للأعلى</string>
     <string name="move_tracker_later">نقل للأسفل</string>
+    <string name="widget_since_title">Since</string>
+    <string name="widget_summary_description">ملخص يحافظ على الخصوصية لعدد المتعقبات النشطة في Since</string>
+    <string name="widget_open_since">فتح Since</string>
+    <string name="widget_active_trackers_zero">لا توجد متعقبات نشطة</string>
+    <plurals name="widget_active_trackers">
+        <item quantity="zero">%1$d متعقب نشط</item>
+        <item quantity="one">متعقب نشط واحد</item>
+        <item quantity="two">متعقبان نشطان</item>
+        <item quantity="few">%1$d متعقبات نشطة</item>
+        <item quantity="many">%1$d متعقبًا نشطًا</item>
+        <item quantity="other">%1$d متعقب نشط</item>
+    </plurals>
 </resources>
