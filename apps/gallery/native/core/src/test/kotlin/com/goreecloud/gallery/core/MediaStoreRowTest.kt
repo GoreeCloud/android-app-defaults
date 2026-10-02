@@ -20,6 +20,7 @@ class MediaStoreRowTest {
                 "height",
                 "duration",
                 "_size",
+                "volume_name",
                 "bucket_id",
                 "bucket_display_name",
                 "relative_path",
@@ -41,6 +42,7 @@ class MediaStoreRowTest {
             height = 3024,
             durationMillis = 999,
             sizeBytes = 4_096,
+            volumeName = " external_primary ",
             bucketId = "  camera  ",
             bucketDisplayName = "  Camera  ",
             relativePath = " DCIM\\Camera ",
@@ -52,6 +54,7 @@ class MediaStoreRowTest {
         assertEquals("image/jpeg", item.mimeType)
         assertEquals(Instant.ofEpochMilli(1_700_000_000_123), item.capturedAt)
         assertEquals(Instant.ofEpochSecond(1_700_000_010), item.modifiedAt)
+        assertEquals("external_primary", item.volumeName)
         assertEquals("camera", item.albumId)
         assertEquals("Camera", item.albumName)
         assertEquals("DCIM/Camera/", item.relativePath)
