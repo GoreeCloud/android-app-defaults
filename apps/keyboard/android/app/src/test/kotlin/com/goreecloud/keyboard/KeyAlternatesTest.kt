@@ -30,6 +30,23 @@ class KeyAlternatesTest {
     }
 
     @Test
+    fun arabicAlternatesExposeAlefHamzaAndDiacriticsWithoutEnglishFallback() {
+        assertEquals(
+            listOf("أ", "إ", "آ", "ٱ"),
+            KeyAlternates.forKey("ا", KeyboardLanguage.ARABIC),
+        )
+        assertEquals(
+            listOf("َ", "ُ", "ِ", "ْ", "ّ", "ً", "ٌ", "ٍ"),
+            KeyAlternates.forKey("ء", KeyboardLanguage.ARABIC),
+        )
+        assertEquals(
+            listOf("؛"),
+            KeyAlternates.forKey("،", KeyboardLanguage.ARABIC),
+        )
+        assertTrue(KeyAlternates.forKey("a", KeyboardLanguage.ARABIC).isEmpty())
+    }
+
+    @Test
     fun unsupportedAndEmptyKeysFailClosed() {
         assertTrue(KeyAlternates.forKey("").isEmpty())
         assertTrue(KeyAlternates.forKey("q").isEmpty())
