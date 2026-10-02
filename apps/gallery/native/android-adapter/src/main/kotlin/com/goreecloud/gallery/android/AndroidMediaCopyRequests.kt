@@ -1,0 +1,199 @@
+package com.goreecloud.gallery.android
+
+import android.content.ContentResolver
+import android.content.ContentValues
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import java.io.IOException
+import java.net.URI
+import java.util.Collections
+
+data class AndroidMediaCopySource(
+    val contentUri: String,
+    val displayName: String,
+    val outputDisplayName: String,
+    val mimeType: String,
+    val capturedAtMillis: Long? = null,
+)
+
+data class AndroidMediaCopyResult(
+    val copiedCount: Int,
+    val failedCount: Int,
+    val copiedContentUris: List<String>,
+) {
+    init {
+        require(copiedCount >= 0)
+        require(failedCount >= 0)
+        require(copiedContentUris.size == copiedCount)
+    }
+}
+
+/**
+ * Copies exact Android-authorized MediaStore image/video items into new MediaStore rows.
+ *
+ * Copy never requests write authority over the source item and never updates its RELATIVE_PATH.
+ * A destination row remains IS_PENDING until all source bytes have been written successfully.
+ * Failed partial output rows are deleted best-effort before the operation continues.
+ */
+object AndroidMediaCopyRequests {
+    const val MIN_SUPPORTED_API = Build.VERSION_CODES.Q
+    const val MAX_COPY_ITEMS = 100
+    const val MAX_DISPLAY_NAME_CHARACTERS = 255
+
+    fun isSupported(apiLevel: Int = Build.VERSION.SDK_INT): Boolean =
+        apiLevel >= MIN_SUPPORTED_API
+
+    fun execute(
+        contentResolver: ContentResolver,
+        sources: Collection<AndroidMediaCopySource>,
+        destinationRelativePath: String,
+    ): AndroidMediaCopyResult {
+        check(isSupported()) {
+            "MediaStore copy requires Android 10 or newer"
+        }
+
+        val normalizedSources = normalizeSources(sources)
+        val destination = AndroidMediaMoveRequests.normalizeDestinationRelativePath(destinationRelativePath)
+        val copiedUris = ArrayList<String>(normalizedSources.size)
+        var failedCount = 0
+
+        normalizedSources.forEach { source ->
+            var outputUri: Uri? = null
+            try {
+                val identity = sourceIdentity(source.contentUri)
+                val collection = when (identity.kind) {
+                    MediaKind.IMAGE -> MediaStore.Images.Media.getContentUri(identity.volumeName)
+                    MediaKind.VIDEO -> MediaStore.Video.Media.getContentUri(identity.volumeName)
+                }
+                val values = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, source.outputDisplayName)
+                    put(MediaStore.MediaColumns.MIME_TYPE, source.mimeType)
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, destination)
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+                    source.capturedAtMillis?.takeIf { it > 0L }?.let {
+                        put(MediaStore.Images.ImageColumns.DATE_TAKEN, it)
+                    }
+                }
+
+                outputUri = contentResolver.insert(collection, values)
+                    ?: throw IOException("MediaStore refused to create the copy output row")
+
+                val input = contentResolver.openInputStream(Uri.parse(source.contentUri))
+                    ?: throw IOException("MediaStore source stream is unavailable")
+                val output = contentResolver.openOutputStream(outputUri, "w")
+                    ?: throw IOException("MediaStore output stream is unavailable")
+                input.use { inputStream ->
+                    output.use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                        outputStream.flush()
+                    }
+                }
+
+                val publish = ContentValues().apply {
+                    put(MediaStore.MediaColumns.IS_PENDING, 0)
+                }
+                if (contentResolver.update(outputUri, publish, null, null) != 1) {
+                    throw IOException("MediaStore copy output could not be published")
+                }
+                copiedUris += outputUri.toString()
+                outputUri = null
+            } catch (_: IllegalArgumentException) {
+                failedCount += 1
+            } catch (_: IllegalStateException) {
+                failedCount += 1
+            } catch (_: SecurityException) {
+                failedCount += 1
+            } catch (_: IOException) {
+                failedCount += 1
+            } catch (_: RuntimeException) {
+                failedCount += 1
+            } finally {
+                outputUri?.let { uri ->
+                    try {
+                        contentResolver.delete(uri, null, null)
+                    } catch (_: RuntimeException) {
+                        // Best effort only: the row is still IS_PENDING and not intentionally published.
+                    }
+                }
+            }
+        }
+
+        return AndroidMediaCopyResult(
+            copiedCount = copiedUris.size,
+            failedCount = failedCount,
+            copiedContentUris = Collections.unmodifiableList(copiedUris),
+        )
+    }
+
+    internal fun normalizeSources(
+        sources: Collection<AndroidMediaCopySource>,
+    ): List<AndroidMediaCopySource> {
+        require(sources.isNotEmpty()) { "at least one media item is required for Copy" }
+        require(sources.size <= MAX_COPY_ITEMS) {
+            "one Copy operation is limited to $MAX_COPY_ITEMS items"
+        }
+
+        val seen = HashSet<String>(sources.size)
+        return sources.map { source ->
+            val contentUri = AndroidMediaStoreItemUriPolicy.requireCanonicalItemUri(source.contentUri)
+            require(seen.add(contentUri)) { "Copy source URIs must be unique" }
+
+            val displayName = normalizeDisplayName(source.displayName)
+            val outputDisplayName = normalizeDisplayName(source.outputDisplayName)
+            val mimeType = source.mimeType.trim().lowercase()
+            require(mimeType.startsWith("image/") || mimeType.startsWith("video/")) {
+                "Copy supports only image/video media"
+            }
+
+            val identity = sourceIdentity(contentUri)
+            require(
+                (identity.kind == MediaKind.IMAGE && mimeType.startsWith("image/")) ||
+                    (identity.kind == MediaKind.VIDEO && mimeType.startsWith("video/")),
+            ) { "Copy MIME type must match the canonical MediaStore item collection" }
+
+            AndroidMediaCopySource(
+                contentUri = contentUri,
+                displayName = displayName,
+                outputDisplayName = outputDisplayName,
+                mimeType = mimeType,
+                capturedAtMillis = source.capturedAtMillis?.takeIf { it > 0L },
+            )
+        }
+    }
+
+    private fun normalizeDisplayName(raw: String): String {
+        val value = raw.trim()
+        require(value.isNotEmpty()) { "media display name must not be blank" }
+        require(value.length <= MAX_DISPLAY_NAME_CHARACTERS) {
+            "media display name exceeds the supported size bound"
+        }
+        require('/' !in value && '\\' !in value && '\u0000' !in value) {
+            "media display name contains unsupported path controls"
+        }
+        return value
+    }
+
+    private fun sourceIdentity(contentUri: String): MediaIdentity {
+        val path = URI(contentUri).path.split('/').filter(String::isNotEmpty)
+        require(path.size == 4 && path[2] == "media") {
+            "Copy source must be a canonical MediaStore item"
+        }
+        val kind = when (path[1]) {
+            "images" -> MediaKind.IMAGE
+            "video" -> MediaKind.VIDEO
+            else -> throw IllegalArgumentException("unsupported MediaStore collection")
+        }
+        return MediaIdentity(volumeName = path[0], kind = kind)
+    }
+
+    private data class MediaIdentity(
+        val volumeName: String,
+        val kind: MediaKind,
+    )
+
+    private enum class MediaKind {
+        IMAGE,
+        VIDEO,
+    }
+}
