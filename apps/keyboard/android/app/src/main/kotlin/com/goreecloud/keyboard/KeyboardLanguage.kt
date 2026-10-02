@@ -13,6 +13,7 @@ enum class KeyboardLanguage(
     val supportsCaseShift: Boolean,
     val supportsLocalEnglishAssistance: Boolean,
     val spacebarLabel: String,
+    val switchTargetLabel: String,
 ) {
     ENGLISH_US(
         primaryLanguageTag = "en-US",
@@ -20,6 +21,7 @@ enum class KeyboardLanguage(
         supportsCaseShift = true,
         supportsLocalEnglishAssistance = true,
         spacebarLabel = "English (US)",
+        switchTargetLabel = "AR",
     ),
     ARABIC(
         primaryLanguageTag = "ar",
@@ -27,6 +29,7 @@ enum class KeyboardLanguage(
         supportsCaseShift = false,
         supportsLocalEnglishAssistance = false,
         spacebarLabel = "العربية",
+        switchTargetLabel = "EN",
     );
 
     companion object {
