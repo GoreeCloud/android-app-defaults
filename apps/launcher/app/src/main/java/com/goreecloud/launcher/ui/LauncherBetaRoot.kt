@@ -3253,9 +3253,9 @@ private fun HomeEditorPageOverview(
                 )
                 Text(
                     if (visiblePages.size == 1) {
-                        "One page · Swipe to + Add Page"
+                        "One page · Swipe to Add Page"
                     } else {
-                        visiblePages.size.toString() + " pages · Swipe between previews or to + Add Page"
+                        visiblePages.size.toString() + " pages · Swipe between previews or to Add Page"
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -5272,10 +5272,9 @@ private fun LauncherBuiltInWidget(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        Text(
-                            "⌕",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                        LauncherWidgetSearchGlyph(
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp),
                         )
                         Column(Modifier.weight(1f)) {
                             Text(
@@ -6641,14 +6640,13 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = if (showPinnedOnly) {
+                                    LauncherDrawerPinnedGlyph(
+                                        tint = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
                                             drawerSecondaryColor
                                         },
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
                             }
@@ -10113,6 +10111,63 @@ private fun LauncherAppTile(
 }
 
 @Composable
+private fun LauncherDrawerPinnedGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = StrokeCap.Round
+        drawCircle(
+            color = tint,
+            radius = u * 0.18f,
+            center = Offset(u * 0.50f, u * 0.32f),
+            style = Stroke(stroke),
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.50f, u * 0.50f),
+            Offset(u * 0.50f, u * 0.82f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.30f, u * 0.54f),
+            Offset(u * 0.70f, u * 0.54f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
+private fun LauncherWidgetSearchGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val u = size.minDimension
+        val stroke = u * 0.085f
+        val cap = StrokeCap.Round
+        drawCircle(
+            color = tint,
+            radius = u * 0.26f,
+            center = Offset(u * 0.42f, u * 0.42f),
+            style = Stroke(stroke),
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.61f, u * 0.61f),
+            Offset(u * 0.84f, u * 0.84f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
 private fun DrawerPinnedMark(
     modifier: Modifier = Modifier,
 ) {
@@ -10128,10 +10183,9 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            LauncherDrawerPinnedGlyph(
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(12.dp),
             )
         }
     }
@@ -10951,12 +11005,10 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
-                                                                        color = MaterialTheme
+                                                                    LauncherDrawerSelectionCheckGlyph(
+                                                                        tint = MaterialTheme
                                                                             .colorScheme.onPrimary,
+                                                                        modifier = Modifier.size(14.dp),
                                                                     )
                                                                 }
                                                             }
@@ -11350,7 +11402,7 @@ internal fun LauncherFolderAppPickerSheet(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                if (alreadyAdded) "✓ Added" else "+ Add",
+                                if (alreadyAdded) "Added" else "Add",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (alreadyAdded) {
                                     MaterialTheme.colorScheme.primary
