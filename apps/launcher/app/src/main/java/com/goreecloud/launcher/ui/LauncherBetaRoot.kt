@@ -691,6 +691,7 @@ fun LauncherBetaRoot(
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
     hiddenHomeSuggestionKeys: Set<String>,
+    hiddenAppKeys: Set<String>,
     drawerPinnedAppKeys: Set<String>,
     drawerPinnedAppOrder: List<String>,
     drawerSortOrderName: String?,
@@ -752,6 +753,7 @@ fun LauncherBetaRoot(
     onMoveDock: (LauncherActivityInfo, WorkspaceMoveDirection) -> Unit,
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
     onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
+    onSetAppHidden: (String, Boolean) -> Unit,
     onSetDrawerAppPinned: (String, Boolean) -> Unit,
     onMoveDrawerPinnedApp: (String, Int) -> Unit,
     onSetDrawerPinnedAppOrder: (List<String>) -> Unit,
@@ -826,6 +828,7 @@ fun LauncherBetaRoot(
     var selectedFolderId by rememberSaveable { mutableStateOf<String?>(null) }
     var folderAppPickerId by rememberSaveable { mutableStateOf<String?>(null) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
+    var showHiddenAppsManager by rememberSaveable { mutableStateOf(false) }
     var folderManagerAddToHome by rememberSaveable { mutableStateOf(false) }
     val primaryFolderProfileId = remember { Process.myUserHandle().hashCode() }
     var folderManagerProfileId by rememberSaveable {
@@ -834,6 +837,14 @@ fun LauncherBetaRoot(
     var folderAssignmentAppKey by rememberSaveable { mutableStateOf<String?>(null) }
     val rootAppsByKey = remember(apps) {
         apps.associateBy { it.workspaceKey() }
+    }
+    val discoverableApps = remember(apps, hiddenAppKeys) {
+        apps.filter { app ->
+            com.goreecloud.launcher.core.launcher.LauncherAppVisibilityPolicy.isDiscoverable(
+                appKey = app.workspaceKey(),
+                hiddenAppKeys = hiddenAppKeys,
+            )
+        }
     }
     val homeFolderIds = remember(homePages) {
         homePages.flatMap { page -> page.folderPlacements.map { it.folderId } }.toSet()
@@ -1416,7 +1427,7 @@ fun LauncherBetaRoot(
                 }
             }
             LauncherSurfaceMode.SEARCH -> LauncherProviderControlledSearchSurface(
-                apps = apps,
+                apps = discoverableApps,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
                 searchProviderPreferences = searchProviderPreferences,
@@ -1463,7 +1474,7 @@ fun LauncherBetaRoot(
                 },
             )
             LauncherSurfaceMode.DRAWER -> AppDrawerSurface(
-                apps = apps,
+                apps = discoverableApps,
                 folders = folders,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
@@ -1502,6 +1513,7 @@ fun LauncherBetaRoot(
                 rootContent = { onOpenThemeManager ->
                     LauncherSettingsRootSurface(
                         apps = apps,
+                        hiddenAppCount = hiddenAppKeys.count(rootAppsByKey::containsKey),
                         preferences = preferences,
                         drawerLayoutMode = drawerLayoutMode,
                         experiencePreferences = experiencePreferences,
@@ -1513,6 +1525,9 @@ fun LauncherBetaRoot(
                             folderManagerProfileId = primaryFolderProfileId
                             folderManagerAddToHome = false
                             showFolderManager = true
+                        },
+                        onManageHiddenApps = {
+                            showHiddenAppsManager = true
                         },
                         onSetHomeGrid = onSetHomeGrid,
                         onSetDrawerColumns = onSetDrawerColumns,
@@ -1574,6 +1589,7 @@ fun LauncherBetaRoot(
                 workspace = workspace,
                 layoutLocked = preferences.layoutLocked,
                 drawerPinned = appKey in drawerPinnedAppKeys,
+                drawerHidden = appKey in hiddenAppKeys,
                 canMoveDrawerPinnedEarlier =
                     selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER && pinnedIndex > 0,
                 canMoveDrawerPinnedLater =
@@ -1615,6 +1631,14 @@ fun LauncherBetaRoot(
                     onSetDrawerAppPinned(
                         appKey,
                         appKey !in drawerPinnedAppKeys,
+                    )
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onToggleDrawerHidden = {
+                    onSetAppHidden(
+                        appKey,
+                        appKey !in hiddenAppKeys,
                     )
                     selectedApp = null
                     selectedAppAnchor = null
@@ -1784,6 +1808,18 @@ fun LauncherBetaRoot(
                 },
             )
         }
+
+    if (showHiddenAppsManager) {
+        LauncherHiddenAppsManagerSheet(
+            hiddenApps = hiddenAppKeys
+                .asSequence()
+                .mapNotNull(rootAppsByKey::get)
+                .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) }
+                .toList(),
+            onRestore = { app -> onSetAppHidden(app.workspaceKey(), false) },
+            onDismiss = { showHiddenAppsManager = false },
+        )
+    }
 
     if (showFolderManager) {
         val managedFolders = folders.filter { folder ->
@@ -7625,6 +7661,7 @@ private fun LauncherSettingsOverviewRow(
 @Suppress("UNUSED_PARAMETER")
 private fun LauncherSettingsRootSurface(
     apps: List<LauncherActivityInfo>,
+    hiddenAppCount: Int,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
@@ -7633,6 +7670,7 @@ private fun LauncherSettingsRootSurface(
     isDefaultHome: Boolean,
     onRequestHomeRole: () -> Unit,
     onManageFolders: () -> Unit,
+    onManageHiddenApps: () -> Unit,
     onSetHomeGrid: (Int, Int) -> Unit,
     onSetDrawerColumns: (Int) -> Unit,
     onSetDrawerLayoutMode: (LauncherDrawerLayoutMode) -> Unit,
@@ -8318,6 +8356,12 @@ private fun LauncherSettingsRootSurface(
                     "Page indicator",
                     experiencePreferences.showDrawerPageIndicator,
                     onSetShowDrawerPageIndicator,
+                )
+                GlazeSettingsAction(
+                    title = "Hidden apps",
+                    summary = "Hide apps from App Drawer and Universal Search without changing Home, Dock or folder placement.",
+                    value = if (hiddenAppCount == 0) "None" else hiddenAppCount.toString(),
+                    onClick = onManageHiddenApps,
                 )
                 SettingSwitch(
                     "Show app count",
@@ -10061,6 +10105,143 @@ private fun LauncherAppListRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+private fun LauncherHiddenAppsManagerSheet(
+    hiddenApps: List<LauncherActivityInfo>,
+    onRestore: (LauncherActivityInfo) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("launcher-hidden-apps-manager"),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Hidden apps",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "Hidden apps stay installed. Existing Home, Dock and folder placements are unchanged.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) { Text("Done") }
+            }
+
+            if (hiddenApps.isEmpty()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                ) {
+                    Text(
+                        "No hidden apps.",
+                        modifier = Modifier.padding(GlazeMetrics.space3),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 420.dp),
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                ) {
+                    lazyItems(
+                        items = hiddenApps,
+                        key = { app -> app.workspaceKey() },
+                    ) { app ->
+                        val icon = rememberLauncherAppIcon(app)
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("launcher-hidden-app-" + app.workspaceKey()),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+                            ),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(GlazeMetrics.space3),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+                            ) {
+                                if (icon != null) {
+                                    Image(
+                                        bitmap = icon,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(42.dp).launcherIconMask(),
+                                    )
+                                } else {
+                                    Surface(
+                                        modifier = Modifier.size(42.dp),
+                                        shape = RoundedCornerShape(13.dp),
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                    ) {}
+                                }
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        app.label.toString(),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        app.componentName.packageName,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                TextButton(
+                                    onClick = { onRestore(app) },
+                                    modifier = Modifier
+                                        .heightIn(min = 48.dp)
+                                        .testTag("launcher-show-hidden-app-" + app.workspaceKey()),
+                                ) {
+                                    Text("Show")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Text(
+                "Hidden apps are excluded from App Drawer and Universal Search discovery only. " +
+                    "They can still remain on Home, in the Dock, or inside folders until you remove those placements.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(GlazeMetrics.space2))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun LauncherFolderManagerSheet(
     folders: List<LauncherFolder>,
     appsByKey: Map<String, LauncherActivityInfo>,
@@ -11364,6 +11545,7 @@ private fun AppContextPopup(
     workspace: WorkspaceState,
     layoutLocked: Boolean,
     drawerPinned: Boolean,
+    drawerHidden: Boolean,
     canMoveDrawerPinnedEarlier: Boolean,
     canMoveDrawerPinnedLater: Boolean,
     canResetDrawerPinnedOrder: Boolean,
@@ -11373,6 +11555,7 @@ private fun AppContextPopup(
     onOpenAppInfo: () -> Unit,
     onRequestUninstall: () -> Unit,
     onToggleDrawerPinned: () -> Unit,
+    onToggleDrawerHidden: () -> Unit,
     onMoveDrawerPinnedEarlier: () -> Unit,
     onMoveDrawerPinnedLater: () -> Unit,
     onResetDrawerPinnedOrder: () -> Unit,
@@ -11548,6 +11731,11 @@ private fun AppContextPopup(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 if (contextOrigin == LauncherAppContextOrigin.DRAWER) {
                     GlazeLauncherPopupAction(
+                        label = if (drawerHidden) "Show in app drawer" else "Hide app",
+                        symbol = GlazePopupActionSymbol.HIDE,
+                        onClick = onToggleDrawerHidden,
+                    )
+                    GlazeLauncherPopupAction(
                         label = if (drawerPinned) "Unpin in Apps" else "Pin in Apps",
                         symbol = GlazePopupActionSymbol.PIN,
                         onClick = onToggleDrawerPinned,
@@ -11638,6 +11826,7 @@ private enum class GlazePopupActionSymbol {
     WIDGET,
     SHORTCUT,
     PIN,
+    HIDE,
     FOLDER,
     INFO,
     UNINSTALL,
@@ -11697,6 +11886,15 @@ private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) 
                 segment(.40f, .86f, .40f, .58f)
                 segment(.40f, .58f, .28f, .48f)
                 segment(.28f, .48f, .28f, .14f)
+            }
+            GlazePopupActionSymbol.HIDE -> {
+                drawCircle(
+                    color = color,
+                    radius = u * .28f,
+                    center = Offset(u * .5f, u * .5f),
+                    style = Stroke(w),
+                )
+                segment(.22f, .22f, .78f, .78f)
             }
             GlazePopupActionSymbol.FOLDER -> {
                 segment(.10f, .25f, .43f, .25f)
