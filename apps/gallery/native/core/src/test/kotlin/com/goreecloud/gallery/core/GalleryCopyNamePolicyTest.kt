@@ -29,6 +29,15 @@ class GalleryCopyNamePolicyTest {
     }
 
     @Test
+    fun `copy names stay within MediaStore display-name bounds`() {
+        val longSource = "a".repeat(250) + ".jpg"
+        val name = GalleryCopyNamePolicy.nextAvailable(longSource, emptySet())
+
+        assertEquals(true, name.length <= GalleryCopyNamePolicy.MAX_DISPLAY_NAME_CHARACTERS)
+        assertEquals(true, name.endsWith(" (copy).jpg"))
+    }
+
+    @Test
     fun `unsafe source display names fail closed`() {
         listOf("", "   ", "Trips/photo.jpg", "Trips\\photo.jpg", "bad\u0000name.jpg").forEach { value ->
             assertFailsWith<IllegalArgumentException> {
