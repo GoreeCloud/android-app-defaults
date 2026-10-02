@@ -93,12 +93,14 @@ Required direction includes:
 - Delete/Trash;
 - More;
 - previous/next navigation and horizontal swipe within the current authorized/presented collection;
+- bounded photo zoom/pan over the already-decoded viewer bitmap, with item-navigation swipes suppressed while zoomed;
+- explicit Fit/Fill/2×/Reset view options so common zoom/reset behavior is not gesture-only;
 - accessible visible navigation alternatives;
 - correct orientation and metadata handling;
 - bounded resource use; and
 - representative-device/OEM/profile validation.
 
-Rich-media behavior must remain bounded to the current authorized presentation. Opt-in animated GIF thumbnails may use Android framework decoding only for authorized GIF items, must preserve aspect ratio, bound decode size/resource use, stop when their presentation leaves the active hierarchy, and fall back to static thumbnails on failure. Video playback, animated-thumbnail device/OEM/accessibility/performance behavior, full-resolution viewing, and other rich-media functionality remain acceptance-gated until verified.
+Rich-media behavior must remain bounded to the current authorized presentation. Opt-in animated GIF thumbnails may use Android framework decoding only for authorized GIF items, must preserve aspect ratio, bound decode size/resource use, stop when their presentation leaves the active hierarchy, and fall back to static thumbnails on failure. Photo zoom/pan may transform only the already-authorized bounded viewer bitmap, must enforce finite scale/pan bounds, must not reinterpret zoom as additional source-media authority, and must preserve an explicit reset path. The current decoder remains viewport-bounded with a 2048px long-edge ceiling; true original/full-resolution zoom and representative-device zoom/pan quality/accessibility/performance acceptance remain separate. Video playback and animated-thumbnail device/OEM/accessibility/performance behavior also remain acceptance-gated until verified.
 
 ## Editing requirements
 
