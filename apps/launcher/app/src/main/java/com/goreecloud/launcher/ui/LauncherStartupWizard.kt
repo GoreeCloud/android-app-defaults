@@ -159,7 +159,10 @@ fun LauncherStartupWizard(
                         .padding(GlazeMetrics.space3),
                     verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                 ) {
-                    WizardProgress(step = step)
+                    WizardProgress(
+                        step = step,
+                        accent = stepAccent,
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -463,7 +466,10 @@ private enum class WizardVisualSymbol {
 }
 
 @Composable
-private fun WizardProgress(step: Int) {
+private fun WizardProgress(
+    step: Int,
+    accent: Color,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -499,7 +505,7 @@ private fun WizardProgress(step: Int) {
                         GlazeMetrics.radiusPill,
                     ),
                     color = if (active) {
-                        MaterialTheme.colorScheme.primary.copy(
+                        accent.copy(
                             alpha = if (index == step) 1f else 0.44f,
                         )
                     } else {
@@ -601,7 +607,7 @@ private fun WizardSearchModeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = MaterialTheme.colorScheme.secondary
     Surface(
         onClick = onClick,
         modifier = modifier.heightIn(min = 132.dp),
@@ -1012,7 +1018,7 @@ private fun WizardHomeModeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accent = MaterialTheme.colorScheme.primary
+    val accent = MaterialTheme.colorScheme.tertiary
     Surface(
         onClick = onClick,
         modifier = modifier.heightIn(min = 82.dp),
@@ -1098,14 +1104,14 @@ private fun WizardCompactChoiceStrip(
                         GlazeMetrics.radiusPill,
                     ),
                     color = if (active) {
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.tertiary
                     } else {
                         MaterialTheme.colorScheme.surface.copy(alpha = 0.68f)
                     },
                     border = BorderStroke(
                         1.dp,
                         if (active) {
-                            MaterialTheme.colorScheme.primary
+                            MaterialTheme.colorScheme.tertiary
                         } else {
                             MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
                         },
@@ -1117,7 +1123,7 @@ private fun WizardCompactChoiceStrip(
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
                             color = if (active) {
-                                MaterialTheme.colorScheme.onPrimary
+                                MaterialTheme.colorScheme.onTertiary
                             } else {
                                 MaterialTheme.colorScheme.onSurface
                             },
