@@ -2806,24 +2806,37 @@ private fun LauncherSearchSourceManager(
                             )
                         }
                     }
-                    Column(Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics {
+                                contentDescription =
+                                    "Private by default. Local sources stay local and connected sources are optional."
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(
                             "Private by default",
+                            modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            if (ready) {
-                                "Local stays local · connected sources are optional."
-                            } else {
-                                "Loading source controls…"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
+                        Surface(
+                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                        ) {
+                            Text(
+                                if (ready) "Local-first" else "Loading",
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
                     LauncherSearchSourceUtilityButton(
                         kind = LauncherSearchSourceUtilityKind.RESET,
