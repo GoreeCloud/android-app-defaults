@@ -112,6 +112,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import com.goreecloud.launcher.core.launcher.LauncherAppIconCache
+import com.goreecloud.launcher.core.launcher.LauncherAppVisibilityPolicy
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearchHomeMode
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
@@ -691,6 +692,7 @@ fun LauncherBetaRoot(
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
     hiddenHomeSuggestionKeys: Set<String>,
+    hiddenAppKeys: Set<String>,
     drawerPinnedAppKeys: Set<String>,
     drawerPinnedAppOrder: List<String>,
     drawerSortOrderName: String?,
@@ -752,6 +754,7 @@ fun LauncherBetaRoot(
     onMoveDock: (LauncherActivityInfo, WorkspaceMoveDirection) -> Unit,
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
     onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
+    onSetAppHidden: (String, Boolean) -> Unit,
     onSetDrawerAppPinned: (String, Boolean) -> Unit,
     onMoveDrawerPinnedApp: (String, Int) -> Unit,
     onSetDrawerPinnedAppOrder: (List<String>) -> Unit,
@@ -826,6 +829,7 @@ fun LauncherBetaRoot(
     var selectedFolderId by rememberSaveable { mutableStateOf<String?>(null) }
     var folderAppPickerId by rememberSaveable { mutableStateOf<String?>(null) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
+    var showHiddenAppsManager by rememberSaveable { mutableStateOf(false) }
     var folderManagerAddToHome by rememberSaveable { mutableStateOf(false) }
     val primaryFolderProfileId = remember { Process.myUserHandle().hashCode() }
     var folderManagerProfileId by rememberSaveable {
@@ -834,6 +838,14 @@ fun LauncherBetaRoot(
     var folderAssignmentAppKey by rememberSaveable { mutableStateOf<String?>(null) }
     val rootAppsByKey = remember(apps) {
         apps.associateBy { it.workspaceKey() }
+    }
+    val discoverableApps = remember(apps, hiddenAppKeys) {
+        apps.filter { app ->
+            LauncherAppVisibilityPolicy.isDiscoverable(
+                appKey = app.workspaceKey(),
+                hiddenAppKeys = hiddenAppKeys,
+            )
+        }
     }
     val homeFolderIds = remember(homePages) {
         homePages.flatMap { page -> page.folderPlacements.map { it.folderId } }.toSet()
@@ -1416,7 +1428,7 @@ fun LauncherBetaRoot(
                 }
             }
             LauncherSurfaceMode.SEARCH -> LauncherProviderControlledSearchSurface(
-                apps = apps,
+                apps = discoverableApps,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
                 searchProviderPreferences = searchProviderPreferences,
@@ -1463,7 +1475,7 @@ fun LauncherBetaRoot(
                 },
             )
             LauncherSurfaceMode.DRAWER -> AppDrawerSurface(
-                apps = apps,
+                apps = discoverableApps,
                 folders = folders,
                 recentAppKeys = recentAppKeys,
                 localLaunchCounts = localLaunchCounts,
