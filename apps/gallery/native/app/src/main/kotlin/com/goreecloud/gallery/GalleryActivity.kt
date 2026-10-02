@@ -554,12 +554,10 @@ class GalleryActivity : Activity() {
                     openAlbumId == null &&
                     !showingFavorites &&
                     currentUserSettings().albumOrderIds.isNotEmpty()
-            galleryPreferences().edit()
+            val editor = galleryPreferences().edit()
                 .putString(SORT_PREFERENCE_KEY, preference.storedValue)
-                .apply {
-                    if (resetManualAlbumOrder) remove(ALBUM_ORDER_IDS_KEY)
-                }
-                .apply()
+            if (resetManualAlbumOrder) editor.remove(ALBUM_ORDER_IDS_KEY)
+            editor.apply()
             renderCurrentDestination()
             announceForAccessibility(
                 if (resetManualAlbumOrder) {
