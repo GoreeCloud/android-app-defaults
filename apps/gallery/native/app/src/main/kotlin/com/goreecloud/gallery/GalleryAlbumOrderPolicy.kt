@@ -96,7 +96,7 @@ internal object GalleryAlbumOrderPolicy {
 
     private fun normalizedIds(values: Collection<String>): List<String> =
         values.asSequence()
-            .map(String::trim)
+            .map { it.trim() }
             .filter(String::isNotEmpty)
             .distinct()
             .toList()
