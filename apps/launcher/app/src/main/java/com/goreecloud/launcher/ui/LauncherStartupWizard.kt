@@ -239,58 +239,49 @@ fun LauncherStartupWizard(
                             )
 
                             WizardSectionTitle("Home apps")
-                            WizardRadioRow(
-                                title = "No automatic apps",
-                                summary = "Keep Home empty until you add apps yourself.",
-                                selected = selectedHomeAppMode == LauncherHomeAppMode.NONE,
-                                onClick = { homeAppModeName = LauncherHomeAppMode.NONE.name },
-                            )
-                            WizardRadioRow(
-                                title = "10 most recent",
-                                summary = "Show recent Launcher-opened apps in free Home slots.",
-                                selected = selectedHomeAppMode == LauncherHomeAppMode.RECENT,
-                                onClick = { homeAppModeName = LauncherHomeAppMode.RECENT.name },
-                            )
-                            WizardRadioRow(
-                                title = "10 most used",
-                                summary = "Show apps with the highest local Launcher launch counts.",
-                                selected = selectedHomeAppMode == LauncherHomeAppMode.MOST_USED,
-                                onClick = { homeAppModeName = LauncherHomeAppMode.MOST_USED.name },
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                WizardHomeModeCard(
+                                    title = "None",
+                                    summary = "Manual only",
+                                    symbol = WizardVisualSymbol.HOME,
+                                    selected = selectedHomeAppMode == LauncherHomeAppMode.NONE,
+                                    onClick = { homeAppModeName = LauncherHomeAppMode.NONE.name },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                WizardHomeModeCard(
+                                    title = "Recent",
+                                    summary = "Up to 10",
+                                    symbol = WizardVisualSymbol.GESTURE,
+                                    selected = selectedHomeAppMode == LauncherHomeAppMode.RECENT,
+                                    onClick = { homeAppModeName = LauncherHomeAppMode.RECENT.name },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                WizardHomeModeCard(
+                                    title = "Most used",
+                                    summary = "Up to 10",
+                                    symbol = WizardVisualSymbol.APPS,
+                                    selected = selectedHomeAppMode == LauncherHomeAppMode.MOST_USED,
+                                    onClick = { homeAppModeName = LauncherHomeAppMode.MOST_USED.name },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
 
                             WizardSectionTitle("Grid and Dock")
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
-                            ) {
-                                listOf("4 x 5", "5 x 6", "6 x 7").forEach { option ->
-                                    OutlinedButton(
-                                        onClick = { gridName = option },
-                                        modifier = Modifier.weight(1f),
-                                    ) {
-                                        Text(
-                                            if (gridName == option) "✓ $option" else option,
-                                            maxLines = 1,
-                                        )
-                                    }
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
-                            ) {
-                                listOf(4, 5, 6).forEach { option ->
-                                    OutlinedButton(
-                                        onClick = { dockSize = option },
-                                        modifier = Modifier.weight(1f),
-                                    ) {
-                                        Text(
-                                            if (dockSize == option) "Dock ✓ $option" else "Dock $option",
-                                            maxLines = 1,
-                                        )
-                                    }
-                                }
-                            }
+                            WizardCompactChoiceStrip(
+                                title = "Grid",
+                                options = listOf("4 x 5", "5 x 6", "6 x 7"),
+                                selected = gridName,
+                                onSelect = { gridName = it },
+                            )
+                            WizardCompactChoiceStrip(
+                                title = "Dock",
+                                options = listOf("4", "5", "6"),
+                                selected = dockSize.toString(),
+                                onSelect = { dockSize = it.toInt() },
+                            )
                             WizardSwitchRow(
                                 title = "Show Home labels",
                                 summary = "Show app names beneath Home icons.",
@@ -985,6 +976,133 @@ private fun WizardInfoCard(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun WizardHomeModeCard(
+    title: String,
+    summary: String,
+    symbol: WizardVisualSymbol,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = MaterialTheme.colorScheme.primary
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 82.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = if (selected) {
+            accent.copy(alpha = 0.13f)
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
+        },
+        border = BorderStroke(
+            1.dp,
+            if (selected) accent.copy(alpha = 0.72f)
+            else MaterialTheme.colorScheme.outlineVariant,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                WizardVisualGlyph(
+                    symbol = symbol,
+                    tint = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                RadioButton(selected = selected, onClick = null)
+            }
+            Text(
+                title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+            )
+            Text(
+                summary,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WizardCompactChoiceStrip(
+    title: String,
+    options: List<String>,
+    selected: String,
+    onSelect: (String) -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.75f),
+        ),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                title,
+                modifier = Modifier.widthIn(min = 38.dp),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            options.forEach { option ->
+                val active = option == selected
+                Surface(
+                    onClick = { onSelect(option) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 42.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                        GlazeMetrics.radiusPill,
+                    ),
+                    color = if (active) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.surface.copy(alpha = 0.68f)
+                    },
+                    border = BorderStroke(
+                        1.dp,
+                        if (active) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
+                        },
+                    ),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            option,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                            color = if (active) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
         }
     }
 }
