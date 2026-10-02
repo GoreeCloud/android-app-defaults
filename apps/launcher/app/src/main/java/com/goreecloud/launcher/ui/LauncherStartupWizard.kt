@@ -1,6 +1,7 @@
 package com.goreecloud.launcher.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -21,6 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +35,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +71,394 @@ fun LauncherStartupWizard(
     initialDockSize: Int = 5,
     initialStep: Int = 0,
     onStepChange: (Int) -> Unit = {},
+    onRequestHomeRole: () -> Unit,
+    onFinish: (LauncherStartupConfiguration) -> Unit,
+) {
+    var step by rememberSaveable(initialStep) { mutableIntStateOf(initialStep.coerceIn(0, 2)) }
+    var homeAppModeName by rememberSaveable {
+        mutableStateOf(initialHomeAppMode.name)
+    }
+    var gridName by rememberSaveable {
+        mutableStateOf("${initialHomeColumns} x ${initialHomeRows}")
+    }
+    var showHomeLabels by rememberSaveable { mutableStateOf(initialShowHomeLabels) }
+    var searchModeName by rememberSaveable {
+        mutableStateOf(initialUniversalSearchHomeMode.name)
+    }
+    var addNewAppsToHome by rememberSaveable { mutableStateOf(initialAddNewAppsToHome) }
+    var showHints by rememberSaveable { mutableStateOf(initialShowHints) }
+    var dockSize by rememberSaveable { mutableIntStateOf(initialDockSize.coerceIn(4, 6)) }
+    var showDetails by rememberSaveable { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(step) {
+        showDetails = false
+        scrollState.scrollTo(0)
+    }
+
+    val selectedHomeAppMode = runCatching { LauncherHomeAppMode.valueOf(homeAppModeName) }
+        .getOrDefault(LauncherHomeAppMode.NONE)
+    val selectedSearchMode = runCatching {
+        LauncherUniversalSearchHomeMode.valueOf(searchModeName)
+    }.getOrDefault(LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY)
+    val selectedGrid = when (gridName) {
+        "4 x 5" -> 4 to 5
+        "6 x 7" -> 6 to 7
+        else -> 5 to 6
+    }
+
+    val stepTitle = when (step) {
+        0 -> "Welcome to GoreeCloud Launcher"
+        1 -> "Build your Home"
+        else -> "Search and gestures"
+    }
+    val stepSummary = when (step) {
+        0 -> "Set the essentials. Everything stays adjustable later."
+        1 -> "Choose what appears automatically; start clean if you prefer."
+        else -> "Pick how Search appears and learn the core gestures at a glance."
+    }
+    val stepSymbol = when (step) {
+        0 -> WizardVisualSymbol.HOME
+        1 -> WizardVisualSymbol.APPS
+        else -> WizardVisualSymbol.SEARCH
+    }
+    val stepAccent = when (step) {
+        0 -> MaterialTheme.colorScheme.primary
+        1 -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.secondary
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
+            contentAlignment = Alignment.Center,
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 720.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    GlazeMetrics.radius2ExtraLarge,
+                ),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                tonalElevation = 0.dp,
+                shadowElevation = 18.dp,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(GlazeMetrics.space4),
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+                ) {
+                    WizardProgress(step = step)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(48.dp),
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                                GlazeMetrics.radiusLarge,
+                            ),
+                            color = stepAccent.copy(alpha = 0.13f),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                WizardVisualGlyph(
+                                    symbol = stepSymbol,
+                                    tint = stepAccent,
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            Text(
+                                text = stepTitle,
+                                modifier = Modifier.semantics { heading() },
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                stepSummary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    when (step) {
+                        0 -> {
+                            WizardFeatureCard(
+                                title = if (isDefaultHome) {
+                                    "Default launcher ready"
+                                } else {
+                                    "Make GoreeCloud Launcher your Home"
+                                },
+                                summary = if (isDefaultHome) {
+                                    "Android already sends the Home action here."
+                                } else {
+                                    "Grant the Android Home role so Launcher can fully replace your current Home."
+                                },
+                                symbol = WizardVisualSymbol.HOME,
+                                accent = MaterialTheme.colorScheme.primary,
+                            )
+                            if (!isDefaultHome) {
+                                Button(
+                                    onClick = onRequestHomeRole,
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text("Set as default launcher")
+                                }
+                            }
+                            WizardFeatureCard(
+                                title = "Private by default",
+                                summary = "Local usage ranking stays on-device; no Android Usage Access or behavioral tracking.",
+                                symbol = WizardVisualSymbol.PRIVACY,
+                                accent = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+
+                        1 -> {
+                            WizardFeatureCard(
+                                title = "Clean starter Home",
+                                summary = "No built-in widgets are placed automatically. Add only the cards and widgets you want.",
+                                symbol = WizardVisualSymbol.WIDGETS,
+                                accent = MaterialTheme.colorScheme.primary,
+                            )
+
+                            WizardSectionTitle("Home apps")
+                            WizardRadioRow(
+                                title = "No automatic apps",
+                                summary = "Keep Home empty until you add apps yourself.",
+                                selected = selectedHomeAppMode == LauncherHomeAppMode.NONE,
+                                onClick = { homeAppModeName = LauncherHomeAppMode.NONE.name },
+                            )
+                            WizardRadioRow(
+                                title = "10 most recent",
+                                summary = "Show recent Launcher-opened apps in free Home slots.",
+                                selected = selectedHomeAppMode == LauncherHomeAppMode.RECENT,
+                                onClick = { homeAppModeName = LauncherHomeAppMode.RECENT.name },
+                            )
+                            WizardRadioRow(
+                                title = "10 most used",
+                                summary = "Show apps with the highest local Launcher launch counts.",
+                                selected = selectedHomeAppMode == LauncherHomeAppMode.MOST_USED,
+                                onClick = { homeAppModeName = LauncherHomeAppMode.MOST_USED.name },
+                            )
+
+                            WizardSectionTitle("Grid and Dock")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                listOf("4 x 5", "5 x 6", "6 x 7").forEach { option ->
+                                    OutlinedButton(
+                                        onClick = { gridName = option },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(
+                                            if (gridName == option) "✓ $option" else option,
+                                            maxLines = 1,
+                                        )
+                                    }
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                listOf(4, 5, 6).forEach { option ->
+                                    OutlinedButton(
+                                        onClick = { dockSize = option },
+                                        modifier = Modifier.weight(1f),
+                                    ) {
+                                        Text(
+                                            if (dockSize == option) "Dock ✓ $option" else "Dock $option",
+                                            maxLines = 1,
+                                        )
+                                    }
+                                }
+                            }
+                            WizardSwitchRow(
+                                title = "Show Home labels",
+                                summary = "Show app names beneath Home icons.",
+                                checked = showHomeLabels,
+                                onCheckedChange = { showHomeLabels = it },
+                            )
+                            WizardSwitchRow(
+                                title = "Add new apps to Home",
+                                summary = "Automatically add newly discovered primary-profile apps.",
+                                checked = addNewAppsToHome,
+                                onCheckedChange = { addNewAppsToHome = it },
+                            )
+                        }
+
+                        else -> {
+                            WizardSectionTitle("Universal Search")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                WizardSearchModeCard(
+                                    title = "Swipe down",
+                                    summary = "Keep Home minimal",
+                                    selected =
+                                        selectedSearchMode ==
+                                            LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY,
+                                    showSearchBar = false,
+                                    onClick = {
+                                        searchModeName =
+                                            LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY.name
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                WizardSearchModeCard(
+                                    title = "Search bar",
+                                    summary = "Keep Search visible",
+                                    selected =
+                                        selectedSearchMode ==
+                                            LauncherUniversalSearchHomeMode.PERMANENT,
+                                    showSearchBar = true,
+                                    onClick = {
+                                        searchModeName =
+                                            LauncherUniversalSearchHomeMode.PERMANENT.name
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+
+                            WizardSectionTitle("Everyday controls")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                WizardMiniFeatureCard(
+                                    title = "Apps",
+                                    summary = "Hold + drag to place",
+                                    symbol = WizardVisualSymbol.APPS,
+                                    accent = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                WizardMiniFeatureCard(
+                                    title = "Widgets",
+                                    summary = "Hold + drag to move",
+                                    symbol = WizardVisualSymbol.WIDGETS,
+                                    accent = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                WizardMiniFeatureCard(
+                                    title = "Folders",
+                                    summary = "Add and move in place",
+                                    symbol = WizardVisualSymbol.FOLDER,
+                                    accent = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                WizardMiniFeatureCard(
+                                    title = "Private Search",
+                                    summary = "Connected sources are opt-in",
+                                    symbol = WizardVisualSymbol.PRIVACY,
+                                    accent = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+
+                            WizardGestureStrip()
+
+                            WizardSwitchRow(
+                                title = "Show Launcher hints",
+                                summary = "Show short, dismissible usage hints. You can re-enable them later.",
+                                checked = showHints,
+                                onCheckedChange = { showHints = it },
+                            )
+
+                            TextButton(
+                                onClick = { showDetails = !showDetails },
+                                modifier = Modifier.align(Alignment.End),
+                            ) {
+                                Text(if (showDetails) "Hide details" else "Learn more")
+                            }
+                            if (showDetails) {
+                                WizardInfoCard(
+                                    title = "Exact placement",
+                                    summary = "Hold an app in Apps and drag it to an exact Home cell or Dock position. Hold a saved Home app at a page edge to switch pages before release.",
+                                )
+                                WizardInfoCard(
+                                    title = "Widgets and folders",
+                                    summary = "Widgets and folders move directly on Home. Edge drops can move them to an adjacent page when the destination is valid.",
+                                )
+                                WizardInfoCard(
+                                    title = "Connected Search",
+                                    summary = "Local Search stays local by default. Connected sources remain off until you explicitly enable and authorize them.",
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(GlazeMetrics.space1))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                    ) {
+                        if (step > 0) {
+                            OutlinedButton(
+                                onClick = {
+                                    val nextStep = (step - 1).coerceAtLeast(0)
+                                    step = nextStep
+                                    onStepChange(nextStep)
+                                },
+                                modifier = Modifier.weight(1f),
+                            ) {
+                                Text("Back")
+                            }
+                        }
+                        Button(
+                            onClick = {
+                                if (step < 2) {
+                                    val nextStep = step + 1
+                                    step = nextStep
+                                    onStepChange(nextStep)
+                                } else {
+                                    onFinish(
+                                        LauncherStartupConfiguration(
+                                            homeAppMode = selectedHomeAppMode,
+                                            homeColumns = selectedGrid.first,
+                                            homeRows = selectedGrid.second,
+                                            showHomeLabels = showHomeLabels,
+                                            universalSearchHomeMode = selectedSearchMode,
+                                            addNewAppsToHome = addNewAppsToHome,
+                                            showHints = showHints,
+                                            dockSize = dockSize,
+                                        ),
+                                    )
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Text(if (step < 2) "Continue" else "Finish setup")
+                        }
+                    }
+                }
+            }
+        }
+    }
+},
     onRequestHomeRole: () -> Unit,
     onFinish: (LauncherStartupConfiguration) -> Unit,
 ) {
@@ -351,6 +747,386 @@ fun LauncherStartupWizard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+        }
+    }
+}
+
+private enum class WizardVisualSymbol {
+    HOME,
+    PRIVACY,
+    APPS,
+    WIDGETS,
+    FOLDER,
+    SEARCH,
+    GESTURE,
+}
+
+@Composable
+private fun WizardProgress(step: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        repeat(3) { index ->
+            val active = index <= step
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(5.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    GlazeMetrics.radiusPill,
+                ),
+                color = if (active) {
+                    MaterialTheme.colorScheme.primary.copy(
+                        alpha = if (index == step) 1f else 0.48f,
+                    )
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+            ) {}
+        }
+    }
+}
+
+@Composable
+private fun WizardFeatureCard(
+    title: String,
+    summary: String,
+    symbol: WizardVisualSymbol,
+    accent: Color,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = accent.copy(alpha = 0.075f),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.16f)),
+    ) {
+        Row(
+            modifier = Modifier.padding(GlazeMetrics.space3),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+        ) {
+            Surface(
+                modifier = Modifier.size(42.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    GlazeMetrics.radiusMedium,
+                ),
+                color = accent.copy(alpha = 0.13f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    WizardVisualGlyph(symbol = symbol, tint = accent)
+                }
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardMiniFeatureCard(
+    title: String,
+    summary: String,
+    symbol: WizardVisualSymbol,
+    accent: Color,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.heightIn(min = 92.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = accent.copy(alpha = 0.07f),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.14f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(GlazeMetrics.space2),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            WizardVisualGlyph(symbol = symbol, tint = accent)
+            Text(
+                title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                summary,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WizardSearchModeCard(
+    title: String,
+    summary: String,
+    selected: Boolean,
+    showSearchBar: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = MaterialTheme.colorScheme.primary
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 150.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = if (selected) {
+            accent.copy(alpha = 0.14f)
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f)
+        },
+        border = BorderStroke(
+            1.dp,
+            if (selected) accent else MaterialTheme.colorScheme.outlineVariant,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(GlazeMetrics.space2),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            WizardSearchPreview(
+                showSearchBar = showSearchBar,
+                selected = selected,
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                RadioButton(selected = selected, onClick = null)
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        summary,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardSearchPreview(
+    showSearchBar: Boolean,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val accent = MaterialTheme.colorScheme.primary
+    val foreground = MaterialTheme.colorScheme.onSurfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(70.dp),
+    ) {
+        val w = size.width
+        val h = size.height
+        val stroke = 1.5.dp.toPx()
+        drawRoundRect(
+            color = surface,
+            topLeft = Offset(w * 0.05f, h * 0.06f),
+            size = androidx.compose.ui.geometry.Size(w * 0.90f, h * 0.88f),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(h * 0.12f),
+        )
+        if (showSearchBar) {
+            drawRoundRect(
+                color = if (selected) accent.copy(alpha = 0.18f) else foreground.copy(alpha = 0.10f),
+                topLeft = Offset(w * 0.13f, h * 0.17f),
+                size = androidx.compose.ui.geometry.Size(w * 0.74f, h * 0.24f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(h * 0.12f),
+            )
+            drawCircle(
+                color = if (selected) accent else foreground,
+                radius = h * 0.055f,
+                center = Offset(w * 0.23f, h * 0.29f),
+                style = Stroke(stroke),
+            )
+            drawLine(
+                color = if (selected) accent else foreground,
+                start = Offset(w * 0.265f, h * 0.325f),
+                end = Offset(w * 0.30f, h * 0.36f),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round,
+            )
+        } else {
+            drawLine(
+                color = if (selected) accent else foreground,
+                start = Offset(w * 0.50f, h * 0.22f),
+                end = Offset(w * 0.50f, h * 0.54f),
+                strokeWidth = stroke * 1.4f,
+                cap = StrokeCap.Round,
+            )
+            drawLine(
+                color = if (selected) accent else foreground,
+                start = Offset(w * 0.40f, h * 0.44f),
+                end = Offset(w * 0.50f, h * 0.54f),
+                strokeWidth = stroke * 1.4f,
+                cap = StrokeCap.Round,
+            )
+            drawLine(
+                color = if (selected) accent else foreground,
+                start = Offset(w * 0.60f, h * 0.44f),
+                end = Offset(w * 0.50f, h * 0.54f),
+                strokeWidth = stroke * 1.4f,
+                cap = StrokeCap.Round,
+            )
+        }
+        repeat(4) { column ->
+            drawCircle(
+                color = foreground.copy(alpha = 0.42f),
+                radius = h * 0.055f,
+                center = Offset(w * (0.22f + column * 0.19f), h * 0.73f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureStrip() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            listOf(
+                "↑  Apps",
+                "↓  Search",
+                "Hold  Edit",
+            ).forEach { label ->
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                        GlazeMetrics.radiusPill,
+                    ),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                ) {
+                    Text(
+                        label,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardVisualGlyph(
+    symbol: WizardVisualSymbol,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(22.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.08f
+        val cap = StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                tint,
+                Offset(u * x1, u * y1),
+                Offset(u * x2, u * y2),
+                stroke,
+                cap = cap,
+            )
+        }
+        when (symbol) {
+            WizardVisualSymbol.HOME -> {
+                line(0.18f, 0.50f, 0.50f, 0.20f)
+                line(0.50f, 0.20f, 0.82f, 0.50f)
+                line(0.28f, 0.44f, 0.28f, 0.82f)
+                line(0.72f, 0.44f, 0.72f, 0.82f)
+                line(0.28f, 0.82f, 0.72f, 0.82f)
+            }
+            WizardVisualSymbol.PRIVACY -> {
+                val path = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * 0.50f, u * 0.10f)
+                    lineTo(u * 0.78f, u * 0.22f)
+                    lineTo(u * 0.74f, u * 0.58f)
+                    lineTo(u * 0.50f, u * 0.88f)
+                    lineTo(u * 0.26f, u * 0.58f)
+                    lineTo(u * 0.22f, u * 0.22f)
+                    close()
+                }
+                drawPath(path, tint, style = Stroke(stroke))
+            }
+            WizardVisualSymbol.APPS -> {
+                listOf(
+                    0.18f to 0.18f,
+                    0.57f to 0.18f,
+                    0.18f to 0.57f,
+                    0.57f to 0.57f,
+                ).forEach { (x, y) ->
+                    drawRoundRect(
+                        tint,
+                        Offset(u * x, u * y),
+                        androidx.compose.ui.geometry.Size(u * 0.25f, u * 0.25f),
+                        androidx.compose.ui.geometry.CornerRadius(u * 0.05f),
+                    )
+                }
+            }
+            WizardVisualSymbol.WIDGETS -> {
+                drawRoundRect(
+                    tint,
+                    Offset(u * 0.14f, u * 0.18f),
+                    androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.64f),
+                    androidx.compose.ui.geometry.CornerRadius(u * 0.10f),
+                    style = Stroke(stroke),
+                )
+                line(0.25f, 0.42f, 0.75f, 0.42f)
+                line(0.25f, 0.60f, 0.60f, 0.60f)
+            }
+            WizardVisualSymbol.FOLDER -> {
+                val path = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * 0.12f, u * 0.32f)
+                    lineTo(u * 0.40f, u * 0.32f)
+                    lineTo(u * 0.48f, u * 0.42f)
+                    lineTo(u * 0.88f, u * 0.42f)
+                    lineTo(u * 0.84f, u * 0.78f)
+                    lineTo(u * 0.12f, u * 0.78f)
+                    close()
+                }
+                drawPath(path, tint, style = Stroke(stroke))
+            }
+            WizardVisualSymbol.SEARCH -> {
+                drawCircle(
+                    tint,
+                    radius = u * 0.24f,
+                    center = Offset(u * 0.43f, u * 0.43f),
+                    style = Stroke(stroke),
+                )
+                line(0.60f, 0.60f, 0.84f, 0.84f)
+            }
+            WizardVisualSymbol.GESTURE -> {
+                line(0.50f, 0.82f, 0.50f, 0.20f)
+                line(0.50f, 0.20f, 0.32f, 0.38f)
+                line(0.50f, 0.20f, 0.68f, 0.38f)
             }
         }
     }
