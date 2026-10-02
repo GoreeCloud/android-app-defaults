@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -543,7 +544,9 @@ private fun WizardHomeCompositionPreview(
     val foreground = MaterialTheme.colorScheme.onSurfaceVariant
     val surface = MaterialTheme.colorScheme.surface
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = "Clean starter Home preview" },
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f),
         border = BorderStroke(
