@@ -5879,50 +5879,39 @@ private fun LauncherUniversalSearchResultRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.64f),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = GlazeMetrics.space3, vertical = 14.dp),
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Surface(
-                modifier = Modifier.size(42.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                modifier = Modifier.size(36.dp),
+                shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        when (result.category) {
-                            LauncherSearchCategory.APPLICATION -> "◫"
-                            LauncherSearchCategory.SHORTCUT -> "↗"
-                            LauncherSearchCategory.CONTACT -> "●"
-                            LauncherSearchCategory.CALL_HISTORY -> "☎"
-                            LauncherSearchCategory.MESSAGE -> "✉"
-                            LauncherSearchCategory.FILE -> "▤"
-                            LauncherSearchCategory.CONNECTED_SOURCE -> "⌕"
-                            LauncherSearchCategory.SETTING -> "⚙"
-                            LauncherSearchCategory.ACTION -> "→"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                    LauncherUniversalSearchCategoryGlyph(
+                        category = result.category,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text(
                     result.title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -5930,7 +5919,7 @@ private fun LauncherUniversalSearchResultRow(
                 result.subtitle?.takeIf { it.isNotBlank() }?.let { subtitle ->
                     Text(
                         subtitle,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -5942,6 +5931,135 @@ private fun LauncherUniversalSearchResultRow(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun LauncherUniversalSearchCategoryGlyph(
+    category: LauncherSearchCategory,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(20.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.085f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float, width: Float = stroke) {
+            drawLine(
+                tint,
+                Offset(u * x1, u * y1),
+                Offset(u * x2, u * y2),
+                width,
+                cap = cap,
+            )
+        }
+        when (category) {
+            LauncherSearchCategory.APPLICATION -> {
+                listOf(
+                    0.16f to 0.16f,
+                    0.57f to 0.16f,
+                    0.16f to 0.57f,
+                    0.57f to 0.57f,
+                ).forEach { (x, y) ->
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = Offset(u * x, u * y),
+                        size = Size(u * 0.27f, u * 0.27f),
+                        cornerRadius = CornerRadius(u * 0.055f),
+                        style = Stroke(width = stroke),
+                    )
+                }
+            }
+            LauncherSearchCategory.SHORTCUT -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * 0.16f, u * 0.30f),
+                    size = Size(u * 0.54f, u * 0.54f),
+                    cornerRadius = CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                line(0.48f, 0.52f, 0.82f, 0.18f)
+                line(0.58f, 0.18f, 0.82f, 0.18f)
+                line(0.82f, 0.18f, 0.82f, 0.42f)
+            }
+            LauncherSearchCategory.CONTACT -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.14f,
+                    center = Offset(u * 0.50f, u * 0.34f),
+                    style = Stroke(width = stroke),
+                )
+                line(0.25f, 0.78f, 0.75f, 0.78f, stroke * 1.4f)
+            }
+            LauncherSearchCategory.CALL_HISTORY -> {
+                line(0.26f, 0.24f, 0.72f, 0.76f, stroke * 1.45f)
+                line(0.22f, 0.22f, 0.35f, 0.18f, stroke * 1.25f)
+                line(0.67f, 0.82f, 0.80f, 0.76f, stroke * 1.25f)
+            }
+            LauncherSearchCategory.MESSAGE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * 0.14f, u * 0.22f),
+                    size = Size(u * 0.72f, u * 0.50f),
+                    cornerRadius = CornerRadius(u * 0.15f),
+                    style = Stroke(width = stroke),
+                )
+                line(0.36f, 0.72f, 0.28f, 0.84f)
+            }
+            LauncherSearchCategory.FILE -> {
+                val path = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * 0.20f, u * 0.12f)
+                    lineTo(u * 0.62f, u * 0.12f)
+                    lineTo(u * 0.82f, u * 0.32f)
+                    lineTo(u * 0.82f, u * 0.88f)
+                    lineTo(u * 0.20f, u * 0.88f)
+                    close()
+                }
+                drawPath(path, color = tint, style = Stroke(width = stroke))
+                line(0.32f, 0.52f, 0.70f, 0.52f)
+                line(0.32f, 0.68f, 0.62f, 0.68f)
+            }
+            LauncherSearchCategory.CONNECTED_SOURCE -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.18f,
+                    center = Offset(u * 0.38f, u * 0.50f),
+                    style = Stroke(width = stroke),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.18f,
+                    center = Offset(u * 0.62f, u * 0.50f),
+                    style = Stroke(width = stroke),
+                )
+                line(0.44f, 0.50f, 0.56f, 0.50f)
+            }
+            LauncherSearchCategory.SETTING -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.22f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(width = stroke),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.06f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(width = stroke),
+                )
+                listOf(
+                    0.50f to 0.12f,
+                    0.50f to 0.88f,
+                    0.12f to 0.50f,
+                    0.88f to 0.50f,
+                ).forEach { (x, y) -> line(0.50f, 0.50f, x, y) }
+            }
+            LauncherSearchCategory.ACTION -> {
+                line(0.20f, 0.50f, 0.80f, 0.50f)
+                line(0.61f, 0.30f, 0.80f, 0.50f)
+                line(0.80f, 0.50f, 0.61f, 0.70f)
+            }
         }
     }
 }
@@ -6492,20 +6610,26 @@ private fun AppDrawerSurface(
                                 shadowElevation = 8.dp,
                             ) {
                                 LauncherDrawerSortOrder.entries.forEach { order ->
+                                    val sortForeground = if (glass) {
+                                        Color.White.copy(alpha = 0.94f)
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                if (order == drawerSortOrder) {
-                                                    "✓ " + order.displayName
-                                                } else {
-                                                    order.displayName
-                                                },
-                                                color = if (glass) {
-                                                    Color.White.copy(alpha = 0.94f)
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurface
-                                                },
+                                                order.displayName,
+                                                color = sortForeground,
                                             )
+                                        },
+                                        leadingIcon = if (order == drawerSortOrder) {
+                                            {
+                                                LauncherSelectionCheckGlyph(
+                                                    tint = sortForeground,
+                                                )
+                                            }
+                                        } else {
+                                            null
                                         },
                                         onClick = {
                                             onSetSortOrderName(order.name)
@@ -6541,14 +6665,13 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = if (showPinnedOnly) {
+                                    DrawerPinGlyph(
+                                        tint = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
                                             drawerSecondaryColor
                                         },
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
                             }
@@ -10013,6 +10136,32 @@ private fun LauncherAppTile(
 }
 
 @Composable
+private fun LauncherSelectionCheckGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(
+            tint,
+            Offset(u * 0.18f, u * 0.52f),
+            Offset(u * 0.40f, u * 0.74f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.40f, u * 0.74f),
+            Offset(u * 0.84f, u * 0.26f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
 private fun DrawerPinnedMark(
     modifier: Modifier = Modifier,
 ) {
@@ -10028,12 +10177,50 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            DrawerPinGlyph(
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
+    }
+}
+
+@Composable
+private fun DrawerPinGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(11.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.11f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(
+            tint,
+            Offset(u * 0.34f, u * 0.20f),
+            Offset(u * 0.70f, u * 0.56f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.30f, u * 0.38f),
+            Offset(u * 0.56f, u * 0.12f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.44f, u * 0.64f),
+            Offset(u * 0.74f, u * 0.34f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.53f, u * 0.63f),
+            Offset(u * 0.26f, u * 0.90f),
+            stroke,
+            cap = cap,
+        )
     }
 }
 
@@ -11250,7 +11437,7 @@ internal fun LauncherFolderAppPickerSheet(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                if (alreadyAdded) "✓ Added" else "+ Add",
+                                if (alreadyAdded) "Added" else "Add",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (alreadyAdded) {
                                     MaterialTheme.colorScheme.primary
