@@ -16,6 +16,15 @@ class GallerySlideshowPolicyTest {
     }
 
     @Test
+    fun `looping wraps to the earliest other eligible photo only`() {
+        val photos = listOf(true, false, true, false)
+
+        assertEquals(0, GallerySlideshowPolicy.nextPhotoIndex(2, photos, loop = true))
+        assertEquals(2, GallerySlideshowPolicy.nextPhotoIndex(0, photos, loop = true))
+        assertNull(GallerySlideshowPolicy.nextPhotoIndex(0, listOf(true, false), loop = true))
+    }
+
+    @Test
     fun `invalid current index fails closed`() {
         assertNull(GallerySlideshowPolicy.nextPhotoIndex(-1, listOf(true)))
         assertNull(GallerySlideshowPolicy.nextPhotoIndex(2, listOf(true)))
