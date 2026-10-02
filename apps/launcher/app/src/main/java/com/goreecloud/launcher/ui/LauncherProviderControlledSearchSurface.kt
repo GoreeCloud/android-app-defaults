@@ -537,7 +537,7 @@ internal fun LauncherProviderControlledSearchSurface(
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
                                 .testTag("launcher-glaze-search-results"),
-                            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             if (topResult != null) {
                                 item(key = "top-result-label") {
@@ -583,6 +583,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                             }
                                         },
                                         onOpenSearchUri = onOpenSearchUri,
+                                        prominent = true,
                                     )
                                 }
                             }
@@ -597,8 +598,8 @@ internal fun LauncherProviderControlledSearchSurface(
                                             .semantics { heading() }
                                             .padding(
                                                 start = GlazeMetrics.space2,
-                                                top = GlazeMetrics.space2,
-                                                bottom = GlazeMetrics.space1,
+                                                top = 8.dp,
+                                                bottom = 4.dp,
                                             ),
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f),
@@ -2262,7 +2263,7 @@ private fun LauncherSearchSourceBadge(
     apps: List<LauncherActivityInfo>,
 ) {
     Surface(
-        modifier = Modifier.size(44.dp),
+        modifier = Modifier.size(40.dp),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
         color = accent.copy(alpha = 0.10f),
     ) {
@@ -2622,14 +2623,14 @@ private fun LauncherSearchSourceManager(
                                 .padding(
                                     start = GlazeMetrics.space2,
                                     end = GlazeMetrics.space3,
-                                    top = GlazeMetrics.space2,
-                                    bottom = GlazeMetrics.space2,
+                                    top = 10.dp,
+                                    bottom = 10.dp,
                                 ),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                         ) {
                             Surface(
-                                modifier = Modifier.size(44.dp),
+                                modifier = Modifier.size(38.dp),
                                 shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                                 color = accent.copy(alpha = 0.11f),
                             ) {
@@ -2640,7 +2641,7 @@ private fun LauncherSearchSourceManager(
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     section.title,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
@@ -2728,22 +2729,22 @@ private fun LauncherSearchSourceManager(
                                         issue == LauncherLocalSearchIssue.SOURCE_UNAVAILABLE ->
                                             "Unavailable"
                                         !permissionGranted && isMessages ->
-                                            "SMS permission required"
+                                            "SMS permission"
                                         !permissionGranted ->
-                                            "Permission required"
+                                            "Needs permission"
                                         option.providerId ==
                                             LauncherFilesSearchProvider.PROVIDER_ID &&
                                             fileSearchRoots.isEmpty() ->
-                                            "Choose a folder to enable"
+                                            "Choose folder"
                                         driveSource && !driveConnectionAvailable ->
-                                            "Signed Development build required"
+                                            "Signed build required"
                                         !connectedHandoffAvailable &&
                                             option.providerId ==
                                                 LauncherConnectedSearchProviderRegistry
                                                     .DROPBOX_PROVIDER_ID ->
-                                            "Dropbox app required for handoff"
+                                            "Dropbox app required"
                                         !connectedHandoffAvailable ->
-                                            "Provider app required for handoff"
+                                            "Provider unavailable"
                                         else -> null
                                     }
 
@@ -2763,8 +2764,8 @@ private fun LauncherSearchSourceManager(
                                                     if (expanded) null else option.providerId
                                             }
                                             .padding(
-                                                horizontal = GlazeMetrics.space2,
-                                                vertical = GlazeMetrics.space2,
+                                                horizontal = 12.dp,
+                                                vertical = 10.dp,
                                             ),
                                         verticalArrangement =
                                             Arrangement.spacedBy(GlazeMetrics.space1),
@@ -3111,21 +3112,19 @@ private fun compactSourceSummary(
     }
     LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID ->
         if (LauncherGoogleDriveAuthorizationState.isConnected()) {
-            "Connected · Online Google Drive"
-        } else if (BuildConfig.DEBUG) {
-            "Google Drive · Inline auth unavailable in CI build"
+            "Cloud · Connected"
         } else {
-            "Google account · Authorization required"
+            "Cloud · Optional"
         }
     LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID ->
-        "Web handoff · Inline adapter not authorized yet"
+        "Web handoff · Optional"
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
-        "App handoff · OAuth adapter not authorized yet"
+        "App handoff · Optional"
     else -> when (option.invocationMode) {
         LauncherSearchProviderInvocationMode.AUTOMATIC_LOCAL -> "Local · Automatic"
-        LauncherSearchProviderInvocationMode.OPT_IN_LOCAL -> "Local · Permission controlled"
-        LauncherSearchProviderInvocationMode.OPT_IN_REMOTE_INLINE -> "Connected · inline when ready"
-        LauncherSearchProviderInvocationMode.EXPLICIT_USER_HANDOFF -> "Connected · tap to search"
+        LauncherSearchProviderInvocationMode.OPT_IN_LOCAL -> "Local · Permission"
+        LauncherSearchProviderInvocationMode.OPT_IN_REMOTE_INLINE -> "Connected · Optional"
+        LauncherSearchProviderInvocationMode.EXPLICIT_USER_HANDOFF -> "Handoff · Optional"
     }
 }
 
