@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 2, 2026 — preserve-original local media Copy
+
+The current Gallery Development line now exposes **Copy** from bounded multi-select. Existing destinations come only from authoritative album/path metadata already present in the current Android-authorized snapshot; every selected source folder is excluded from the existing-destination list to avoid accidental same-folder duplication. **Create & copy** can create a bounded Pictures, Movies, or DCIM destination based on the selected media types and can combine sources from multiple current folders because Copy does not mutate those sources.
+
+Copy reads only exact canonical selected MediaStore image/video item URIs, creates new destination rows with `IS_PENDING=1`, streams source bytes into those rows, and publishes each row only after the write succeeds. Failed partial outputs are deleted best-effort before the operation continues. Originals are never moved or overwritten. Known destination filenames are collision-avoided with deterministic `(copy)`, `(copy 2)`, and later bounded suffixes. A single Copy operation is bounded to 100 unique source items.
+
+This is Development implementation evidence. Representative-device/OEM/profile Copy behavior, large files, provider failures, storage exhaustion, cancellation/lifecycle behavior, metadata fidelity beyond capture time/MIME/display-name handling, accessibility, performance/power, and release acceptance remain open.
+
 ## October 1, 2026 — app-local album pins and configurable slideshow pace
 
 The current Gallery Development line can persistently **Pin to top / Unpin from top** ordinary Albums collections. Pin state stores only authoritative album identifiers already visible in the current authorized snapshot, changes only Gallery's local Collections ordering, ignores stale identifiers when rendering, and does not rename, move, copy, mutate, or create media.
@@ -106,6 +114,16 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Pending move authorization state saves and restores only exact canonical URI lists and an exact canonical destination path across Activity state recreation.
 - Android remains write-authorization authority. Cancellation leaves the move unapplied; approved requests execute the bounded MediaStore update off the UI thread, clear selection and thumbnail cache state, refresh Gallery state, and report moved/failed counts.
 - This Development implementation is not representative physical-device/OEM/profile Move acceptance and does not establish production-safe media mutation.
+
+### Preserve-original Copy Development implementation
+
+- Multi-select exposes Copy when the exact current selection can establish a safe existing or new-folder destination.
+- Existing Copy destinations derive only from consistent authoritative album IDs, names, and provider-owned relative paths in the current authorized scope; all selected source paths are excluded.
+- New-folder Copy supports mixed source folders and selects Pictures for image-only, Movies for video-only, or DCIM for mixed image/video selections.
+- Exact canonical MediaStore source URIs and image/video MIME alignment are revalidated before byte transfer.
+- Output names avoid currently known destination collisions with bounded deterministic copy suffixes.
+- New rows remain MediaStore `IS_PENDING` until bytes are successfully written; failures are cleaned up best-effort and originals remain untouched.
+- Copy is bounded to 100 unique items per operation and performs no network, cloud, arbitrary filesystem, cross-profile, or source-mutation work.
 
 ### First-party photo editing Development implementation
 
