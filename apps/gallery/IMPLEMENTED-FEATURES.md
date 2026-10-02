@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 1, 2026 — bounded viewer zoom and pan
+
+Authorized photos in the full-screen viewer can now use bounded **1×–4×** session-local zoom over the existing decoded viewer bitmap. Pinch gestures adjust zoom, single-finger dragging pans only while zoomed, and horizontal item-navigation swipes are suppressed during zoom/pan so panning cannot accidentally change media.
+
+The compact viewer scale control now opens explicit **Fit entire photo**, **Fill viewer**, **Zoom 2×**, and conditional **Reset zoom** actions. This provides a non-pinch path for the common 2× state and reset while retaining state-specific accessibility announcements. Zoom resets on item changes and does not apply to native video playback.
+
+Pure `GalleryViewerZoomPolicyTest` coverage locks the 1×–4× scale bound, baseline zero translation, viewport-bounded panning, non-finite gesture handling, zoom-state detection, and the accessible 2× preset. This remains presentation over the existing orientation-aware viewer bitmap; the decoder's current viewport/2048px long-edge bound is unchanged, so this is not an unrestricted original-resolution zoom claim.
+
 ## October 1, 2026 — manual app-local Album ordering
 
 Ordinary Albums collections can now be moved **earlier** or **later** from each card's More menu. The preference stores only album identifiers already used by Gallery's authorized collection model and changes Gallery presentation only; it does not rename, move, copy, create, or reorder MediaStore folders.
