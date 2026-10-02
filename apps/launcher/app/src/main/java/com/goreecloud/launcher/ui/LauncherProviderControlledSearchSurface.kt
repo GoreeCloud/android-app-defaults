@@ -2157,6 +2157,125 @@ private fun LauncherPrivacyShieldGlyph(
     }
 }
 
+private enum class LauncherSourceToolbarAction(
+    val contentDescription: String,
+) {
+    RESET("Reset Search Sources"),
+    ORDER("Reorder Search Sources"),
+    DONE("Finish reordering Search Sources"),
+}
+
+@Composable
+private fun LauncherSourceToolbarButton(
+    action: LauncherSourceToolbarAction,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val tint = if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.34f)
+    }
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .semantics { contentDescription = action.contentDescription }
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Surface(
+            modifier = Modifier.size(30.dp),
+            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = if (enabled) 0.44f else 0.22f,
+            ),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.045f),
+            ),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                LauncherSourceToolbarGlyph(
+                    action = action,
+                    tint = tint,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSourceToolbarGlyph(
+    action: LauncherSourceToolbarAction,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when (action) {
+            LauncherSourceToolbarAction.RESET -> {
+                drawArc(
+                    color = tint,
+                    startAngle = -55f,
+                    sweepAngle = 285f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.16f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.68f, u * 0.68f),
+                    style = Stroke(width = stroke, cap = cap),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.24f),
+                    androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.48f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.24f),
+                    androidx.compose.ui.geometry.Offset(u * 0.41f, u * 0.24f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            LauncherSourceToolbarAction.ORDER -> {
+                listOf(0.28f, 0.50f, 0.72f).forEach { y ->
+                    drawCircle(
+                        color = tint,
+                        radius = u * 0.045f,
+                        center = androidx.compose.ui.geometry.Offset(u * 0.20f, u * y),
+                    )
+                    drawLine(
+                        tint,
+                        androidx.compose.ui.geometry.Offset(u * 0.36f, u * y),
+                        androidx.compose.ui.geometry.Offset(u * 0.82f, u * y),
+                        stroke,
+                        cap = cap,
+                    )
+                }
+            }
+            LauncherSourceToolbarAction.DONE -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.54f),
+                    androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.76f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.76f),
+                    androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.28f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun LauncherSourceDisclosureGlyph(
     expanded: Boolean,
@@ -2597,18 +2716,20 @@ private fun LauncherSearchSourceManager(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    TextButton(
-                        onClick = onReset,
+                    LauncherSourceToolbarButton(
+                        action = LauncherSourceToolbarAction.RESET,
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
+                        onClick = onReset,
+                    )
+                    LauncherSourceToolbarButton(
+                        action = if (reorderMode) {
+                            LauncherSourceToolbarAction.DONE
+                        } else {
+                            LauncherSourceToolbarAction.ORDER
+                        },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
-                    }
+                        onClick = { reorderMode = !reorderMode },
+                    )
                 }
             }
         }
