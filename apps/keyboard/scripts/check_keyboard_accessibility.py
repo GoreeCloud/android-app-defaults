@@ -43,7 +43,7 @@ def main() -> None:
             "internal fun performAccessibilityTarget(id: Int)",
             'Action.SHIFT -> "Shift"',
             'Action.BACKSPACE -> "Backspace"',
-            '"Space, \${KeyboardLayout.currentLanguage().spacebarLabel}"',
+            '"Space, ${KeyboardLayout.currentLanguage().spacebarLabel}"',
             'Action.ENTER -> "Enter"',
             'Action.SETTINGS -> "Keyboard settings"',
             "label = hit.entry.accessibilityLabel",
