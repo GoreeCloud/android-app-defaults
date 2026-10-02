@@ -88,6 +88,12 @@ object KeyboardLayout {
             KeyboardLanguage.ARABIC -> arabicNumberRow
         }
 
+    fun primaryComma(language: KeyboardLanguage = activeLanguage): String =
+        when (language) {
+            KeyboardLanguage.ENGLISH_US -> ","
+            KeyboardLanguage.ARABIC -> "،"
+        }
+
     fun characterRows(
         layer: KeyboardLayer,
         language: KeyboardLanguage = activeLanguage,
