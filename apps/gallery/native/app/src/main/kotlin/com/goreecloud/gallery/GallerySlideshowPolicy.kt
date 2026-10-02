@@ -6,11 +6,14 @@ internal object GallerySlideshowPolicy {
     fun nextPhotoIndex(
         currentIndex: Int,
         photoEligibility: List<Boolean>,
+        repeat: Boolean = false,
     ): Int? {
         if (currentIndex !in photoEligibility.indices) return null
         for (index in (currentIndex + 1)..photoEligibility.lastIndex) {
             if (photoEligibility[index]) return index
         }
-        return null
+        if (!repeat) return null
+        val firstPhotoIndex = photoEligibility.indexOfFirst { it }
+        return firstPhotoIndex.takeIf { it >= 0 && it != currentIndex }
     }
 }
