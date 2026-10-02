@@ -589,22 +589,44 @@ internal fun LauncherProviderControlledSearchSurface(
                             }
                             grouped.forEach { section ->
                                 item(key = "header:" + section.category.name) {
-                                    Text(
-                                        section.title + " (" +
-                                            (fullSectionCounts[section.category] ?: section.items.size) +
-                                            ")",
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .semantics { heading() }
                                             .padding(
                                                 start = GlazeMetrics.space2,
+                                                end = GlazeMetrics.space1,
                                                 top = 6.dp,
                                                 bottom = 2.dp,
                                             ),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f),
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            section.title,
+                                            modifier = Modifier.weight(1f),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                                .copy(alpha = 0.78f),
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                            color = MaterialTheme.colorScheme.surfaceVariant
+                                                .copy(alpha = 0.46f),
+                                        ) {
+                                            Text(
+                                                (fullSectionCounts[section.category]
+                                                    ?: section.items.size).toString(),
+                                                modifier = Modifier.padding(
+                                                    horizontal = 7.dp,
+                                                    vertical = 2.dp,
+                                                ),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                        }
+                                    }
                                 }
                                 if (section.category == LauncherSearchCategory.APPLICATION) {
                                     val topApps = section.items
@@ -693,16 +715,40 @@ internal fun LauncherProviderControlledSearchSurface(
                     }
                     if (explicitHandoffs.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        Text(
-                            "Search online",
-                            modifier = Modifier.padding(
-                                start = GlazeMetrics.space2,
-                                top = GlazeMetrics.space1,
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = GlazeMetrics.space2,
+                                    end = GlazeMetrics.space1,
+                                    top = GlazeMetrics.space1,
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                "Search online",
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            ) {
+                                Text(
+                                    "Tap to send",
+                                    modifier = Modifier.padding(
+                                        horizontal = 8.dp,
+                                        vertical = 2.dp,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
                         explicitHandoffs.forEach { provider ->
                             LauncherSearchHandoffRow(
                                 provider = provider,
@@ -713,12 +759,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 },
                             )
                         }
-                        Text(
-                            "Connected queries are sent only after you tap a result.",
-                            modifier = Modifier.padding(horizontal = GlazeMetrics.space2),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f),
-                        )
+                        Spacer(Modifier.height(2.dp))
                     }
                 }
             }
