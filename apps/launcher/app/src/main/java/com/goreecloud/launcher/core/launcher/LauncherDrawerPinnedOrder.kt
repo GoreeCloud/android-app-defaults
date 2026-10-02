@@ -9,6 +9,7 @@ package com.goreecloud.launcher.core.launcher
 data class LauncherDrawerPinnedState(
     val keys: Set<String>,
     val order: List<String>,
+    val hiddenKeys: Set<String> = emptySet(),
 )
 
 internal object LauncherDrawerPinnedOrder {
