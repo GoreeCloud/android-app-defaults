@@ -434,6 +434,7 @@ class KeyboardView @JvmOverloads constructor(
         }
         return when (layer) {
             KeyboardLayer.LETTERS -> buildList {
+                val punctuation = KeyboardLayout.letterPunctuation()
                 if (numberRowVisible) add(KeyboardLayout.numberRow().map(::textKey))
                 add(characterRows[0].map(::textKey))
                 add(characterRows[1].map(::textKey))
@@ -449,9 +450,9 @@ class KeyboardView @JvmOverloads constructor(
                 add(
                     listOf(
                         Key("?123", 1.2f, Action.SYMBOLS),
-                        textKey(",").copy(weight = 0.9f),
+                        textKey(punctuation[0]).copy(weight = 0.9f),
                         Key("space", 4.6f, Action.SPACE),
-                        textKey(".").copy(weight = 0.9f),
+                        textKey(punctuation[1]).copy(weight = 0.9f),
                         Key("↵", 1.2f, Action.ENTER),
                     ),
                 )
