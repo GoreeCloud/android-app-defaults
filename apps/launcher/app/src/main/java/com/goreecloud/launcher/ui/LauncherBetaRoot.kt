@@ -5984,6 +5984,106 @@ private fun LauncherUniversalSearchSurface(
 }
 
 @Composable
+private fun LauncherLocalSearchCategoryGlyph(
+    category: LauncherSearchCategory,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(22.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.085f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                tint,
+                Offset(u * x1, u * y1),
+                Offset(u * x2, u * y2),
+                stroke,
+                cap = cap,
+            )
+        }
+        when (category) {
+            LauncherSearchCategory.APPLICATION -> {
+                listOf(
+                    .18f to .18f,
+                    .56f to .18f,
+                    .18f to .56f,
+                    .56f to .56f,
+                ).forEach { (x, y) ->
+                    drawRoundRect(
+                        tint,
+                        Offset(u * x, u * y),
+                        androidx.compose.ui.geometry.Size(u * .26f, u * .26f),
+                        androidx.compose.ui.geometry.CornerRadius(u * .05f),
+                    )
+                }
+            }
+            LauncherSearchCategory.SHORTCUT,
+            LauncherSearchCategory.ACTION,
+            -> {
+                line(.22f, .72f, .72f, .22f)
+                line(.49f, .22f, .72f, .22f)
+                line(.72f, .22f, .72f, .46f)
+            }
+            LauncherSearchCategory.CONTACT -> {
+                drawCircle(tint, radius = u * .15f, center = Offset(u * .50f, u * .34f))
+                line(.29f, .78f, .71f, .78f)
+            }
+            LauncherSearchCategory.CALL_HISTORY -> {
+                line(.28f, .24f, .70f, .76f)
+                line(.22f, .22f, .35f, .18f)
+                line(.66f, .82f, .80f, .76f)
+            }
+            LauncherSearchCategory.MESSAGE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * .15f, u * .22f),
+                    size = androidx.compose.ui.geometry.Size(u * .70f, u * .48f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .14f),
+                    style = Stroke(stroke),
+                )
+                line(.36f, .70f, .28f, .84f)
+            }
+            LauncherSearchCategory.FILE -> {
+                val folder = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * .12f, u * .30f)
+                    lineTo(u * .39f, u * .30f)
+                    lineTo(u * .47f, u * .40f)
+                    lineTo(u * .88f, u * .40f)
+                    lineTo(u * .84f, u * .78f)
+                    lineTo(u * .12f, u * .78f)
+                    close()
+                }
+                drawPath(folder, tint, style = Stroke(stroke))
+            }
+            LauncherSearchCategory.CONNECTED_SOURCE -> {
+                drawCircle(
+                    tint,
+                    radius = u * .22f,
+                    center = Offset(u * .42f, u * .42f),
+                    style = Stroke(stroke),
+                )
+                line(.58f, .58f, .82f, .82f)
+            }
+            LauncherSearchCategory.SETTING -> {
+                drawCircle(
+                    tint,
+                    radius = u * .24f,
+                    center = Offset(u * .50f, u * .50f),
+                    style = Stroke(stroke),
+                )
+                drawCircle(
+                    tint,
+                    radius = u * .07f,
+                    center = Offset(u * .50f, u * .50f),
+                    style = Stroke(stroke),
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun LauncherUniversalSearchResultRow(
     result: LauncherSearchResult,
     onClick: () -> Unit,
@@ -6023,20 +6123,9 @@ private fun LauncherUniversalSearchResultRow(
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        when (result.category) {
-                            LauncherSearchCategory.APPLICATION -> "◫"
-                            LauncherSearchCategory.SHORTCUT -> "↗"
-                            LauncherSearchCategory.CONTACT -> "●"
-                            LauncherSearchCategory.CALL_HISTORY -> "☎"
-                            LauncherSearchCategory.MESSAGE -> "✉"
-                            LauncherSearchCategory.FILE -> "▤"
-                            LauncherSearchCategory.CONNECTED_SOURCE -> "⌕"
-                            LauncherSearchCategory.SETTING -> "⚙"
-                            LauncherSearchCategory.ACTION -> "→"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                    LauncherLocalSearchCategoryGlyph(
+                        category = result.category,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
