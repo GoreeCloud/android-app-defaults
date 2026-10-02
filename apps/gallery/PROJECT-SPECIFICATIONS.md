@@ -76,7 +76,8 @@ The mature target experience includes:
 - hidden/excluded-media policy;
 - a dedicated primary Trash destination backed by Android MediaStore Trash;
 - Recycle Bin/Trash recovery semantics;
-- organization actions that use Android-authorized provider boundaries; and
+- organization actions that use Android-authorized provider boundaries;
+- app-local Album ordering that may persist provider-owned album identifiers only as presentation metadata, must ignore unavailable identifiers instead of fabricating collections, and must not mutate MediaStore merely to reorder Gallery cards; and
 - clear distinction between ordinary deletion, Trash, restore, and permanent deletion.
 
 ## Viewer requirements
