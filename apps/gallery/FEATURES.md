@@ -139,7 +139,7 @@ The exact migration set is governed by historical GoreeCloud Gallery behavior an
 - Share/export and approved Android handoff workflows.
 - Edit entry points and approved first-party editing workflows.
 - Delete/trash/recovery flows with explicit destructive-action authorization.
-- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move and preserve-original Copy; broader rename/manual reorder/album-management acceptance remains separate.
+- Move/copy/organize actions through Android-supported media boundaries. Current Development source now includes bounded Move, preserve-original Copy, and app-local manual Album ordering; provider-backed album creation/rename and richer album-management acceptance remain separate.
 - Details/metadata presentation and approved metadata-editing workflows.
 - Slideshow and other established local presentation actions where supported by the historical Gallery product.
 - Hidden/excluded album or media controls and sensitive-media policy governed by Privacy Shield.
