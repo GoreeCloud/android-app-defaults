@@ -17,10 +17,10 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.6-dev` Development line.
 - Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
 - Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and icon-bearing All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
-- Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open and Details. Destructive media actions remain outside these compact card menus.
+- Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open, app-local Pin/Unpin to top, and Details. Album pinning changes only Gallery's local Collections ordering; destructive media actions remain outside these compact card menus.
 - Newest / Oldest ordering over the current authorized snapshot.
 - Local search over authorized display names and album names without an additional provider query.
-- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, mockup-aligned circular cover badges, bounded album-detail browsing, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
+- Dedicated Albums browsing with authoritative album covers, names, counts, adaptive two-column/expanded cover cards, mockup-aligned circular cover badges, bounded album-detail browsing, app-local persistent Pin/Unpin-to-top ordering for ordinary Albums collections, and real-data-only smart-access pills for recognized local collections plus Videos when authorized videos exist.
 - Device-local Favorites backed only by Gallery app-local state; favorite/unfavorite is available from the viewer and authorized Favorites appear as a dedicated collection.
 - A full-screen bounded media viewer shell with Previous / Next navigation, restrained top chrome, and a bottom action surface. Viewer navigation uses the complete current authorized/presented collection rather than one date group.
 - Android Share handoff for the currently authorized media content URI using read-only URI grant semantics.
@@ -59,6 +59,7 @@ The following controls have active behavior in the current Development candidate
 - **Export settings / Import settings:** writes or reads a versioned JSON document containing non-secret Gallery preferences, including folder visibility selections. Unknown fields are ignored and imports do not carry passwords, credentials, signing material, or media bytes.
 - **Play videos automatically:** controls whether authorized videos request playback as soon as the native viewer finishes preparing them.
 - **Loop videos:** controls Android-native repeat behavior for the current authorized video while it remains open.
+- **Slideshow speed — Every 3 / 5 / 10 seconds:** controls the delay used by the bounded local photo slideshow. The default remains five seconds and the preference changes presentation only.
 - **Rounded-square thumbnails:** toggles GoreeCloud rounded-square clipping for current media and album thumbnails.
 - **Move deleted items to Recycle Bin:** on Android 11+, controls whether the ordinary Gallery Delete action requests Android Trash/Recycling or Android-confirmed permanent deletion. It is enabled by default. Android owns the destructive confirmation surface in both modes.
 
@@ -82,7 +83,7 @@ The historical screenshots supplied for the native migration establish the follo
 - A dedicated Albums experience using meaningful cover thumbnails, album names, and item counts.
 - Album/folder browsing that supports visually rich two-column or adaptive cover layouts where appropriate.
 - Search folders/albums plus contextual creation, organization, sorting, and overflow actions.
-- Album actions such as create, rename, reorder where supported, move/copy organization, hide/exclude policy, and details through Android-authorized boundaries.
+- Album actions such as create, rename, full manual reorder beyond the implemented app-local Pin/Unpin-to-top preference, move/copy organization, hide/exclude policy, and details through Android-authorized boundaries.
 
 ### Photo and media viewer
 
