@@ -5228,7 +5228,7 @@ class GalleryActivity : Activity() {
 
     private fun jsonStringList(array: JSONArray): List<String> {
         val values = linkedSetOf<String>()
-        for (index in 0 until minOf(array.length(), GalleryAlbumOrderPolicy.MAX_STORED_ORDER_IDS)) {
+        for (index in 0 until minOf(array.length(), GalleryAlbumOrderPolicy.MAX_ORDER_IDS)) {
             val value = array.optString(index).trim()
             if (value.isNotBlank()) values.add(value)
         }
