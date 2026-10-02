@@ -6366,7 +6366,7 @@ private fun AppDrawerSurface(
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f),
                     ) {}
                 }
-                Spacer(Modifier.height(GlazeMetrics.space3))
+                Spacer(Modifier.height(GlazeMetrics.space2))
 
                 if (searchAtTop) {
                     DrawerSearchField(
@@ -6390,7 +6390,7 @@ private fun AppDrawerSurface(
                             } else {
                                 selectedPage.kind.displayName
                             },
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(
@@ -6488,8 +6488,7 @@ private fun AppDrawerSurface(
                             }
                         }
                         if (pinnedAppKeys.isNotEmpty()) {
-                            Surface(
-                                onClick = { showPinnedOnly = !showPinnedOnly },
+                            Box(
                                 modifier = Modifier
                                     .size(48.dp)
                                     .testTag("launcher-drawer-pinned-only")
@@ -6504,23 +6503,38 @@ private fun AppDrawerSurface(
                                         } else {
                                             "All apps"
                                         }
-                                    },
-                                shape = CircleShape,
-                                color = if (showPinnedOnly) {
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
-                                } else {
-                                    Color.Transparent
-                                },
+                                    }
+                                    .clickable { showPinnedOnly = !showPinnedOnly },
+                                contentAlignment = Alignment.Center,
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    LauncherDrawerPinnedIcon(
-                                        active = showPinnedOnly,
-                                        color = if (showPinnedOnly) {
-                                            MaterialTheme.colorScheme.onPrimaryContainer
-                                        } else {
-                                            drawerSecondaryColor
-                                        },
-                                    )
+                                Surface(
+                                    modifier = Modifier.size(32.dp),
+                                    shape = CircleShape,
+                                    color = if (showPinnedOnly) {
+                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                    border = if (showPinnedOnly) {
+                                        BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        LauncherDrawerPinnedIcon(
+                                            active = showPinnedOnly,
+                                            color = if (showPinnedOnly) {
+                                                MaterialTheme.colorScheme.onPrimaryContainer
+                                            } else {
+                                                drawerSecondaryColor
+                                            },
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                    }
                                 }
                             }
                         }
