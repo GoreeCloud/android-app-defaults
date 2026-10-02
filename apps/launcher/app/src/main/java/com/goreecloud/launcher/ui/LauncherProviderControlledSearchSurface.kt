@@ -2404,7 +2404,17 @@ private fun LauncherSearchSourceManager(
                                             debugBuild = BuildConfig.DEBUG,
                                             alreadyConnected = driveConnected,
                                         )
-                                    val providerReady = !driveSource || driveConnected
+                                    val connectedHandoffAvailable =
+                                        !option.providerId.startsWith("connected.") ||
+                                            LauncherConnectedSearchProviderRegistry
+                                                .isExplicitHandoffAvailable(
+                                                    context,
+                                                    option.providerId,
+                                                )
+                                    val providerReady = when {
+                                        driveSource -> driveConnected
+                                        else -> connectedHandoffAvailable
+                                    }
                                     val issue = issues[option.providerId]
                                     val isMessages =
                                         option.providerId ==
@@ -2439,6 +2449,8 @@ private fun LauncherSearchSourceManager(
                                             "Choose a folder to enable"
                                         driveSource && !driveConnectionAvailable ->
                                             "Signed Development build required"
+                                        !connectedHandoffAvailable ->
+                                            "Provider app required"
                                         else -> null
                                     }
 
@@ -2524,7 +2536,10 @@ private fun LauncherSearchSourceManager(
                                                         it,
                                                     )
                                                 },
-                                                enabled = ready && driveConnectionAvailable,
+                                                enabled =
+                                                    ready &&
+                                                        driveConnectionAvailable &&
+                                                        connectedHandoffAvailable,
                                                 modifier = Modifier.testTag(
                                                     "launcher-search-source-" +
                                                         option.providerId,
