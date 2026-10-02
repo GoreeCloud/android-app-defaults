@@ -5,13 +5,29 @@ import kotlin.test.assertEquals
 
 class GalleryCardOverflowPolicyTest {
     @Test
-    fun `album overflow stays intentionally small and non destructive`() {
+    fun `album overflow exposes app local pinning without media mutation`() {
+        assertEquals(
+            listOf(
+                GalleryCardOverflowAction.OPEN,
+                GalleryCardOverflowAction.PIN_TO_TOP,
+                GalleryCardOverflowAction.DETAILS,
+            ),
+            GalleryCardOverflowPolicy.albumActions(isPinned = false, canPin = true),
+        )
+        assertEquals(
+            listOf(
+                GalleryCardOverflowAction.OPEN,
+                GalleryCardOverflowAction.UNPIN_FROM_TOP,
+                GalleryCardOverflowAction.DETAILS,
+            ),
+            GalleryCardOverflowPolicy.albumActions(isPinned = true, canPin = true),
+        )
         assertEquals(
             listOf(
                 GalleryCardOverflowAction.OPEN,
                 GalleryCardOverflowAction.DETAILS,
             ),
-            GalleryCardOverflowPolicy.albumActions(),
+            GalleryCardOverflowPolicy.albumActions(isPinned = false, canPin = false),
         )
     }
 
