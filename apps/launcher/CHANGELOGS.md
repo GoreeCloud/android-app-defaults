@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 2, 2026 — reversible Hidden apps candidate
+
+- Added profile-qualified device-local Hidden apps state for Launcher discovery.
+- App Drawer and Universal Search omit hidden identities while Home, Dock, folders, widgets, Android package state, and Room placement remain untouched.
+- Added app-context **Hide app / Show in app drawer** and a Settings recovery manager with direct **Show** actions.
+- Folded hidden discovery state into the existing atomic Drawer presentation snapshot so MainActivity does not add another independent DataStore collector.
+- Added focused JVM coverage for same-component cross-profile isolation and persistence.
+
+**Acceptance boundary:** Development candidate only. Fresh exact-head protected build/JVM/lint/schema, Android 16 Launcher runtime, transition-performance, accessibility/form-factor, managed/private-profile behavior, backup/recovery policy, and representative-device acceptance remain open.
+
 ## October 2, 2026 — integrate manual App Drawer pinned ordering
 
 Protected PR #185 integrated profile-qualified App Drawer manual pin ordering from exact candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Pinned-first sorting now honors device-local manual ranks, and pinned app context menus expose Move earlier/later controls. The final candidate passed full Launcher Android 16 lifecycle runtime and transition-performance diagnostics plus the complete protected matrix. This is Development integration only; representative-device and release gates remain open.
