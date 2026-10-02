@@ -2043,48 +2043,17 @@ private fun HomeSurface(
                 "launcher-home-swipe-up-" +
                     experiencePreferences.swipeUpAction.storageValue,
             )
-            .then(
-                if (horizontalPagingHostedExternally) {
-                    Modifier
-                } else {
-                    Modifier.pointerInput(swipeThreshold) {
-                        var drag = 0f
-                        var triggered = false
-                        detectVerticalDragGestures(
-                            onDragStart = {
-                                drag = 0f
-                                triggered = false
-                            },
-                            onDragCancel = {
-                                drag = 0f
-                                triggered = false
-                            },
-                            onDragEnd = {
-                                drag = 0f
-                                triggered = false
-                            },
-                            onVerticalDrag = { change, amount ->
-                                change.consume()
-                                if (!triggered) {
-                                    drag += amount
-                                    when {
-                                        drag >= swipeThreshold -> {
-                                            triggered = true
-                                            currentExecuteGestureAction(
-                                                currentGesturePreferences.swipeDownAction,
-                                            )
-                                        }
-                                        drag <= -swipeThreshold -> {
-                                            triggered = true
-                                            currentExecuteGestureAction(
-                                                currentGesturePreferences.swipeUpAction,
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                        )
-                    }
+            .launcherHomePagerVerticalGestureNavigation(
+                enabled = !horizontalPagingHostedExternally,
+                onSwipeUp = {
+                    currentExecuteGestureAction(
+                        currentGesturePreferences.swipeUpAction,
+                    )
+                },
+                onSwipeDown = {
+                    currentExecuteGestureAction(
+                        currentGesturePreferences.swipeDownAction,
+                    )
                 },
             ),
     ) {
