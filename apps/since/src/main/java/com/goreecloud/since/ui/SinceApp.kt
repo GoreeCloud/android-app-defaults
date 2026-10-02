@@ -1621,7 +1621,10 @@ private fun TrackerDetailsScreen(
                 TextButton(onClick = onBack) {
                     Text(stringResource(R.string.back))
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     TextButton(
                         onClick = {
                             val sendIntent = Intent(Intent.ACTION_SEND).apply {
