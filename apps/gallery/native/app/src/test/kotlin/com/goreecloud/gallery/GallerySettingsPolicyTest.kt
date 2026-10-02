@@ -45,6 +45,11 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
+    fun `manual album order is opt in and empty by default`() {
+        assertTrue(GalleryUserSettings().albumOrderIds.isEmpty())
+    }
+
+    @Test
     fun `slideshow interval defaults to five seconds and restores portable values`() {
         assertEquals(GallerySlideshowInterval.NORMAL, GalleryUserSettings().slideshowInterval)
         assertEquals(5_000L, GallerySlideshowInterval.NORMAL.intervalMs)
