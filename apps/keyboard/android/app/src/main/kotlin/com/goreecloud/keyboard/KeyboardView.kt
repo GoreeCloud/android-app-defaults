@@ -451,7 +451,7 @@ class KeyboardView @JvmOverloads constructor(
                 add(
                     listOf(
                         Key("?123", 1.2f, Action.SYMBOLS),
-                        textKey(",").copy(weight = 0.9f),
+                        textKey(KeyboardLayout.primaryComma()).copy(weight = 0.9f),
                         Key("space", 4.6f, Action.SPACE),
                         textKey(".").copy(weight = 0.9f),
                         Key("↵", 1.2f, Action.ENTER),
@@ -498,7 +498,7 @@ class KeyboardView @JvmOverloads constructor(
 
     private fun drawLongPressHint(canvas: Canvas, key: Key, bounds: RectF) {
         if (!longPressHintsEnabled || key.action != Action.TEXT || layer == KeyboardLayer.EMOJI) return
-        val hint = KeyAlternates.forKey(key.label).firstOrNull() ?: return
+        val hint = KeyAlternates.forKey(key.label, KeyboardLayout.currentLanguage()).firstOrNull() ?: return
         val density = resources.displayMetrics.density
         val baseline = bounds.top - longPressHintPaint.ascent() + 2f * density
         canvas.drawText(hint, bounds.right - 6f * density, baseline, longPressHintPaint)
@@ -552,7 +552,7 @@ class KeyboardView @JvmOverloads constructor(
         if (hit.key.action != Action.TEXT || layer == KeyboardLayer.EMOJI || emojiSearchSession.snapshot().active) {
             return emptyList()
         }
-        return KeyAlternates.forKey(renderedKeyLabel(hit.key))
+        return KeyAlternates.forKey(renderedKeyLabel(hit.key), KeyboardLayout.currentLanguage())
     }
 
     private fun isPressedKey(bounds: RectF): Boolean {
