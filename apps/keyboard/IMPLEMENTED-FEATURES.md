@@ -1,5 +1,11 @@
 # GoreeCloud Keyboard — Implemented Features
 
+## October 2, 2026 — English (US) and Arabic subtype foundation
+
+Protected PR #185 integrated a first-party Arabic IME subtype alongside English (US). Android's explicitly selected IME subtype is the sole language authority. Arabic selection renders Arabic letter rows, Arabic-Indic digits, RTL language metadata, an Arabic spacebar label, and no case-shift key. English-only local correction, prediction, swipe-dictionary decoding, and learning capture fail closed while Arabic is active instead of applying English models to Arabic input.
+
+The accepted candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` passed Keyboard source/JVM/build and Android 15 runtime within the complete protected matrix before squash merge as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. The change adds no network, Contacts, microphone, telemetry, or remote-model authority. Broader Arabic alternates/punctuation/dictionaries, explicit switching acceptance, RTL/BiDi host behavior, accessibility, representative-device ergonomics, signing/recovery, and release qualification remain open.
+
 ## September 28, 2026 — Clipboard policy selected-state accessibility
 
 Current-app Clipboard policy chips now expose Android selected state in addition to their visual treatment. Android 11+ also receives explicit **Selected / Not selected** state descriptions, so assistive technology can identify the active Allow / Ask / Paste only / Block policy without relying on color. Android runtime coverage verifies exactly one policy chip is selected for the current snapshot.

@@ -3455,6 +3455,13 @@ class GalleryActivity : Activity() {
                 marginStart = dp(4)
             },
         )
+        val repeatSlideshow = viewerAction("Loop", true, "Repeat slideshow off") {}
+        topBar.addView(
+            repeatSlideshow,
+            LinearLayout.LayoutParams(dp(58), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
+                marginStart = dp(4)
+            },
+        )
         val slideshow = viewerAction("Slide", true, "Start photo slideshow") {}
         topBar.addView(
             slideshow,
@@ -3555,7 +3562,14 @@ class GalleryActivity : Activity() {
         val slideshowInterval = currentUserSettings().slideshowInterval
         var slideshowRunning = false
         var slideshowPaused = false
+        var slideshowRepeats = false
         var slideshowAdvance: Runnable? = null
+
+        fun updateRepeatSlideshowControl() {
+            repeatSlideshow.text = if (slideshowRepeats) "Loop ✓" else "Loop"
+            repeatSlideshow.contentDescription =
+                if (slideshowRepeats) "Repeat slideshow on" else "Repeat slideshow off"
+        }
 
         fun updateSlideshowControl() {
             slideshow.text = when {
@@ -3732,6 +3746,7 @@ class GalleryActivity : Activity() {
             val nextPhotoIndex = GallerySlideshowPolicy.nextPhotoIndex(
                 currentIndex = currentIndex,
                 photoEligibility = items.map { it.mimeType.startsWith("image/") },
+                repeat = slideshowRepeats,
             )
             if (nextPhotoIndex == null) {
                 stopSlideshow(announce = true)
@@ -3745,7 +3760,16 @@ class GalleryActivity : Activity() {
             )
         }
         viewerSlideshowStop = { stopSlideshow() }
+        updateRepeatSlideshowControl()
         updateSlideshowControl()
+
+        repeatSlideshow.setOnClickListener {
+            slideshowRepeats = !slideshowRepeats
+            updateRepeatSlideshowControl()
+            announceForAccessibility(
+                if (slideshowRepeats) "Slideshow repeat enabled" else "Slideshow repeat disabled",
+            )
+        }
 
         slideshow.setOnClickListener {
             if (slideshowRunning) {
@@ -3755,10 +3779,19 @@ class GalleryActivity : Activity() {
             val hasLaterPhoto = GallerySlideshowPolicy.nextPhotoIndex(
                 currentIndex = currentIndex,
                 photoEligibility = items.map { it.mimeType.startsWith("image/") },
+                repeat = slideshowRepeats,
             ) != null
             if (!hasLaterPhoto) {
                 stopSlideshow()
-                Toast.makeText(this, "No later photos are available for slideshow.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    if (slideshowRepeats) {
+                        "At least two photos are required to repeat the slideshow."
+                    } else {
+                        "No later photos are available for slideshow."
+                    },
+                    Toast.LENGTH_SHORT,
+                ).show()
                 return@setOnClickListener
             }
             startOrResumeSlideshow()

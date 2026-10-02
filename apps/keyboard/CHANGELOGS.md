@@ -1,5 +1,9 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 2, 2026 — integrate English/Arabic subtype foundation
+
+Protected PR #185 integrated the bounded English (US) / Arabic IME subtype foundation from exact candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Arabic rows, Arabic-Indic digits, RTL metadata, and language-aware spacebar presentation are active when Android selects the Arabic subtype; English-only assistance fails closed in that mode. Keyboard build/JVM and Android 15 runtime passed inside the protected matrix. Representative-device multilingual/RTL/accessibility and release gates remain open.
+
 ## September 29, 2026 — legacy Unicode-normalization reconciliation candidate
 
 Legacy Keyboard PR #61 contained one substantive behavior not present in the mandatory cutover tree: NFC normalization for canonically equivalent Unicode suggestion matching. This candidate adapts that behavior to the current indexed/ranked `SuggestionEngine` rather than restoring the obsolete earlier engine.

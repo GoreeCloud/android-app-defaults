@@ -30,6 +30,7 @@ class KeyboardLanguageTest {
         assertFalse(language.supportsCaseShift)
         assertFalse(language.supportsLocalEnglishAssistance)
         assertEquals("العربية", language.spacebarLabel)
+        assertEquals("EN", language.switchTargetLabel)
     }
 
     @Test
@@ -54,6 +55,7 @@ class KeyboardLanguageTest {
         assertEquals(KeyboardWritingDirection.LEFT_TO_RIGHT, KeyboardLanguage.ENGLISH_US.writingDirection)
         assertTrue(KeyboardLanguage.ENGLISH_US.supportsCaseShift)
         assertTrue(KeyboardLanguage.ENGLISH_US.supportsLocalEnglishAssistance)
+        assertEquals("AR", KeyboardLanguage.ENGLISH_US.switchTargetLabel)
         assertEquals(
             listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
             KeyboardLayout.characterRows(KeyboardLayer.LETTERS).first(),

@@ -37,6 +37,7 @@ class KeyboardView @JvmOverloads constructor(
         fun onSuggestion(value: String)
         fun onLayerChanged(layer: KeyboardLayer)
         fun onOpenClipboard() = Unit
+        fun onSwitchLanguage() = Unit
         fun onOpenSettings() = Unit
     }
 
@@ -54,6 +55,7 @@ class KeyboardView @JvmOverloads constructor(
         SYMBOLS_MORE,
         EMOJI,
         CLIPBOARD,
+        LANGUAGE,
         SETTINGS,
         EMOJI_SEARCH_CLEAR,
         EMOJI_SEARCH_CLOSE,
@@ -668,6 +670,7 @@ class KeyboardView @JvmOverloads constructor(
         val actions = buildList {
             if (emojiToolbarEnabled) add(Key("emoji", action = Action.EMOJI))
             add(Key("clipboard", action = Action.CLIPBOARD))
+            add(Key("language", action = Action.LANGUAGE))
             add(Key("settings", action = Action.SETTINGS))
         }
 
@@ -750,6 +753,7 @@ class KeyboardView @JvmOverloads constructor(
                 val label = when (key.action) {
                     Action.EMOJI -> "Emoji"
                     Action.CLIPBOARD -> "Clipboard"
+                    Action.LANGUAGE -> "Language"
                     Action.SETTINGS -> "Settings"
                     else -> ""
                 }
@@ -765,6 +769,16 @@ class KeyboardView @JvmOverloads constructor(
         when (key.action) {
             Action.EMOJI -> KeyboardFunctionalGlyphs.drawEmoji(canvas, bounds, iconPaint)
             Action.CLIPBOARD -> KeyboardFunctionalGlyphs.drawClipboard(canvas, bounds, iconPaint)
+            Action.LANGUAGE -> {
+                val baseline = bounds.centerY() -
+                    (utilityTextPaint.descent() + utilityTextPaint.ascent()) / 2f
+                canvas.drawText(
+                    KeyboardLayout.currentLanguage().switchTargetLabel,
+                    bounds.centerX(),
+                    baseline,
+                    utilityTextPaint,
+                )
+            }
             Action.SETTINGS -> KeyboardFunctionalGlyphs.drawSettings(canvas, bounds, iconPaint)
             else -> Unit
         }
@@ -1268,6 +1282,7 @@ class KeyboardView @JvmOverloads constructor(
         Action.SYMBOLS_MORE -> "More symbols"
         Action.EMOJI -> "Emoji"
         Action.CLIPBOARD -> "Clipboard and Secure Paste"
+        Action.LANGUAGE -> "Switch GoreeCloud Keyboard language"
         Action.SETTINGS -> "Keyboard settings"
         Action.EMOJI_SEARCH_CLEAR -> "Clear emoji search"
         Action.EMOJI_SEARCH_CLOSE -> "Close emoji search"
@@ -1360,6 +1375,7 @@ class KeyboardView @JvmOverloads constructor(
             Action.SYMBOLS_MORE -> switchLayer(KeyboardLayer.SYMBOLS_MORE)
             Action.EMOJI -> switchLayer(KeyboardLayer.EMOJI)
             Action.CLIPBOARD -> listener?.onOpenClipboard()
+            Action.LANGUAGE -> listener?.onSwitchLanguage()
             Action.SETTINGS -> listener?.onOpenSettings()
             Action.EMOJI_SEARCH_CLEAR -> {
                 emojiSearchSession.clear()

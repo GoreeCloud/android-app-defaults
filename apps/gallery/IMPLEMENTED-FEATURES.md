@@ -1,5 +1,11 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 2, 2026 — slideshow pause and resume
+
+Protected PR #185 integrated explicit **Pause / Resume** controls into the existing local photo-only slideshow. Pause cancels the pending advance without discarding the current viewer position; Resume continues from that photo using the already-persisted 3/5/10-second interval. Manual Previous/Next, swipe navigation, scale/zoom interaction, Activity pause/destroy, viewer replacement, and viewer close continue to terminate slideshow state so playback never progresses in the background.
+
+The accepted candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` passed Gallery source/unit/lint/build and Android 16 runtime inside the complete protected matrix before squash merge as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. No MediaStore, storage, mutation, account, network, or video authority was expanded. Representative-device presentation, accessibility, orientation/form-factor, performance/power, signing/recovery, and release qualification remain open.
+
 ## October 1, 2026 — bounded viewer zoom and pan
 
 Authorized photos in the full-screen viewer can now use bounded **1×–4×** session-local zoom over the existing decoded viewer bitmap. Pinch gestures adjust zoom, single-finger dragging pans only while zoomed, and horizontal item-navigation swipes are suppressed during zoom/pan so panning cannot accidentally change media.

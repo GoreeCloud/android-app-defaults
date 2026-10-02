@@ -1,5 +1,9 @@
 # GoreeCloud Gallery Changelogs
 
+## October 2, 2026 — integrate slideshow pause/resume
+
+Protected PR #185 integrated session-local Pause / Resume controls for the bounded photo slideshow from exact candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Gallery build/lint/unit and Android 16 runtime passed before integration. Lifecycle exit and manual viewer navigation continue to stop slideshow state, and no media/storage/network authority changed. Representative-device and release acceptance remain open.
+
 ## October 1, 2026 — bounded viewer zoom and pan
 
 ### Added

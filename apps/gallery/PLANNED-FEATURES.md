@@ -1,8 +1,10 @@
 # GoreeCloud Gallery — Planned Features and Open Obligations
 
-## October 2, 2026 — slideshow pause/resume candidate
+## October 2, 2026 — slideshow controls integration and repeat candidate
 
-The current capability-expansion candidate adds explicit **Pause / Resume** controls to the existing local photo-only slideshow. Pausing cancels the pending advance without discarding the viewer position; Resume continues from that photo using the already-persisted 3/5/10-second interval. Manual viewer navigation and lifecycle exit continue to terminate slideshow state rather than allowing background progression. No media authority, permission, storage mutation, network path, or video behavior is expanded. This remains Development candidate work until exact-head Gallery build/lint/runtime validation and protected integration complete.
+Protected PR #185 integrated explicit **Pause / Resume** controls for the existing local photo-only slideshow to authoritative monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Pausing preserves viewer position while lifecycle exit and manual navigation continue to terminate slideshow state. No media authority, permission, storage mutation, network path, or video behavior was expanded.
+
+The current continuation adds a session-local **Loop** control. At the end of a slideshow, repeat wraps to the first eligible photo only when at least two photos are available; a one-photo collection fails closed instead of spinning indefinitely. Repeat does not alter persisted Gallery settings or media state. This increment remains Development candidate work until fresh exact-head Gallery build/lint/runtime validation and protected integration complete.
 
 ## September 29, 2026 — timeline grouping continuation
 

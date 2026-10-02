@@ -16,6 +16,27 @@ class GallerySlideshowPolicyTest {
     }
 
     @Test
+    fun `repeat wraps to first eligible photo but refuses one-photo loops`() {
+        val photos = listOf(true, false, true)
+
+        assertEquals(
+            0,
+            GallerySlideshowPolicy.nextPhotoIndex(
+                currentIndex = 2,
+                photoEligibility = photos,
+                repeat = true,
+            ),
+        )
+        assertNull(
+            GallerySlideshowPolicy.nextPhotoIndex(
+                currentIndex = 0,
+                photoEligibility = listOf(true),
+                repeat = true,
+            ),
+        )
+    }
+
+    @Test
     fun `invalid current index fails closed`() {
         assertNull(GallerySlideshowPolicy.nextPhotoIndex(-1, listOf(true)))
         assertNull(GallerySlideshowPolicy.nextPhotoIndex(2, listOf(true)))
