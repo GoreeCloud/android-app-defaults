@@ -2746,7 +2746,7 @@ private fun LauncherSearchSourceManager(
                         )
                         Text(
                             if (ready) {
-                                "Local stays local · connected sources are optional."
+                                "Local stays local · connected is opt-in."
                             } else {
                                 "Loading source controls…"
                             },
@@ -2756,18 +2756,26 @@ private fun LauncherSearchSourceManager(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    TextButton(
-                        onClick = onReset,
+                    LauncherSearchSourceToolbarButton(
+                        symbol = LauncherSearchSourceToolbarSymbol.RESET,
+                        description = "Reset Search Sources",
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
+                        onClick = onReset,
+                    )
+                    LauncherSearchSourceToolbarButton(
+                        symbol = if (reorderMode) {
+                            LauncherSearchSourceToolbarSymbol.DONE
+                        } else {
+                            LauncherSearchSourceToolbarSymbol.ORDER
+                        },
+                        description = if (reorderMode) {
+                            "Finish reordering Search Sources"
+                        } else {
+                            "Reorder Search Sources"
+                        },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
-                    }
+                        onClick = { reorderMode = !reorderMode },
+                    )
                 }
             }
         }
@@ -3162,7 +3170,12 @@ private fun LauncherSearchSourceManager(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.End,
                                             ) {
-                                                TextButton(
+                                                LauncherSearchSourceToolbarButton(
+                                                    symbol =
+                                                        LauncherSearchSourceToolbarSymbol.EARLIER,
+                                                    description =
+                                                        "Move " + option.displayName + " earlier",
+                                                    enabled = ready && index > 0,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3173,11 +3186,16 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled = ready && index > 0,
-                                                ) {
-                                                    Text("↑  Earlier")
-                                                }
-                                                TextButton(
+                                                )
+                                                LauncherSearchSourceToolbarButton(
+                                                    symbol =
+                                                        LauncherSearchSourceToolbarSymbol.LATER,
+                                                    description =
+                                                        "Move " + option.displayName + " later",
+                                                    enabled =
+                                                        ready &&
+                                                            index in 0 until
+                                                                controls.orderedOptions.lastIndex,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3188,19 +3206,143 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled =
-                                                        ready &&
-                                                            index in 0 until
-                                                                controls.orderedOptions.lastIndex,
-                                                ) {
-                                                    Text("↓  Later")
-                                                }
+                                                )
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private enum class LauncherSearchSourceToolbarSymbol {
+    RESET,
+    ORDER,
+    DONE,
+    EARLIER,
+    LATER,
+}
+
+@Composable
+private fun LauncherSearchSourceToolbarButton(
+    symbol: LauncherSearchSourceToolbarSymbol,
+    description: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val tint = if (enabled) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.40f)
+    }
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { contentDescription = description },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.09f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                when (symbol) {
+                    LauncherSearchSourceToolbarSymbol.RESET -> {
+                        drawArc(
+                            color = tint,
+                            startAngle = 35f,
+                            sweepAngle = 285f,
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.16f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.68f, u * 0.68f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.18f),
+                            androidx.compose.ui.geometry.Offset(u * 0.41f, u * 0.17f),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.18f),
+                            androidx.compose.ui.geometry.Offset(u * 0.27f, u * 0.37f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                    LauncherSearchSourceToolbarSymbol.ORDER -> {
+                        listOf(0.30f, 0.50f, 0.70f).forEach { y ->
+                            drawCircle(
+                                color = tint,
+                                radius = u * 0.04f,
+                                center = androidx.compose.ui.geometry.Offset(u * 0.23f, u * y),
+                            )
+                            drawLine(
+                                color = tint,
+                                start = androidx.compose.ui.geometry.Offset(u * 0.38f, u * y),
+                                end = androidx.compose.ui.geometry.Offset(u * 0.80f, u * y),
+                                strokeWidth = stroke,
+                                cap = cap,
+                            )
+                        }
+                    }
+                    LauncherSearchSourceToolbarSymbol.DONE -> {
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.52f),
+                            androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.74f),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.74f),
+                            androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.28f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                    LauncherSearchSourceToolbarSymbol.EARLIER,
+                    LauncherSearchSourceToolbarSymbol.LATER -> {
+                        val up = symbol == LauncherSearchSourceToolbarSymbol.EARLIER
+                        val tipY = if (up) u * 0.22f else u * 0.78f
+                        val baseY = if (up) u * 0.72f else u * 0.28f
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, baseY),
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                            stroke,
+                            cap = cap,
+                        )
+                        val armY = if (up) u * 0.40f else u * 0.60f
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                            androidx.compose.ui.geometry.Offset(u * 0.30f, armY),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                            androidx.compose.ui.geometry.Offset(u * 0.70f, armY),
+                            stroke,
+                            cap = cap,
+                        )
                     }
                 }
             }
