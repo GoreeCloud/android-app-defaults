@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 1, 2026 — manual app-local Album ordering
+
+Ordinary Albums collections can now be moved **earlier** or **later** from each card's More menu. The preference stores only album identifiers already used by Gallery's authorized collection model and changes Gallery presentation only; it does not rename, move, copy, create, or reorder MediaStore folders.
+
+Pin/Unpin remains the higher-order grouping rule: pinned albums stay in the top group, and manual moves operate only within the album's current pinned or unpinned group. Newly discovered albums fall back to the normal date-sort order, stale stored identifiers do not fabricate collections, and a Settings action can reset manual ordering while preserving Pin/Unpin state.
+
+The ordered identifier list participates in the additive non-secret settings portability envelope. Pure policy coverage locks pinned-group boundaries, stale-ID handling, default fallback for newly visible albums, move availability, and deterministic earlier/later swaps.
+
 ## October 1, 2026 — opt-in animated GIF thumbnails
 
 The current Gallery Development line can animate authorized `image/gif` grid and album-cover thumbnails when **Settings > Playback > Animate GIFs in thumbnails** is enabled. The preference remains off by default and changes presentation only.
@@ -85,7 +93,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Direct Photos, Albums, Videos, Trash, and Settings navigation.
 - Adaptive Photos timeline grids grouped by Today, Yesterday, and calendar date, with sparse dense-mode groups using a larger presentation lane.
 - Videos browsing uses a featured first card followed by responsive cards with local play/duration affordances, title/date metadata, newest-order **Recently added** wording, and icon-bearing category filters derived only from the current authorized snapshot and Gallery-local Favorites.
-- Mockup-aligned overflow controls on video and album cards with 48dp targets and bounded non-destructive contextual actions; ordinary album cards include app-local Pin/Unpin-to-top ordering.
+- Mockup-aligned overflow controls on video and album cards with 48dp targets and bounded non-destructive contextual actions; ordinary album cards include app-local Pin/Unpin-to-top grouping plus Move earlier / Move later ordering.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
 - Album browsing with rounded Raised landscape-cover cards, mockup-aligned circular cover badges, names, counts, adaptive layout, bounded album-detail browsing, persistent app-local pinned ordering for ordinary collections, and compact smart-access pills populated only from existing local collections plus the authorized Videos domain.
@@ -154,7 +162,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Move-deleted-items-to-Trash preference controlling Android-confirmed Trash versus permanent delete behavior on Android 11+.
 - Active persisted autoplay and loop preferences for the native video viewer.
 - Persisted 3/5/10-second slideshow-speed preference for the bounded local photo slideshow, defaulting to five seconds.
-- App-local pinned-album identifiers used only to order ordinary Collections; stale identifiers do not create album authority.
+- App-local pinned-album identifiers plus an ordered album-identifier list used only to organize ordinary Collections presentation; stale identifiers do not create album authority.
 - GIF thumbnail animation is now an active persisted Playback preference backed by bounded Android animated decoding. The empty-folder-cleanup field remains compatibility-only and hidden until that behavior exists.
 
 ### Presentation and repository controls

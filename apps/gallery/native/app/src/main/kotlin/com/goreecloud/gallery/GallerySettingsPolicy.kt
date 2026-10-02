@@ -162,6 +162,7 @@ data class GalleryUserSettings(
     val groupingMode: GalleryGroupingMode = GalleryGroupingMode.DAY,
     val sortPreference: GallerySortPreference = GallerySortPreference.NEWEST,
     val pinnedAlbumIds: Set<String> = emptySet(),
+    val albumOrderIds: List<String> = emptyList(),
     val includedAlbumIds: Set<String> = emptySet(),
     val excludedAlbumIds: Set<String> = emptySet(),
     val showHiddenItems: Boolean = false,
