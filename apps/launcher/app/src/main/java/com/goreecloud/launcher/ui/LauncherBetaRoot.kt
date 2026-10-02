@@ -11038,12 +11038,10 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
-                                                                        color = MaterialTheme
+                                                                    LauncherSelectionCheckGlyph(
+                                                                        tint = MaterialTheme
                                                                             .colorScheme.onPrimary,
+                                                                        modifier = Modifier.size(13.dp),
                                                                     )
                                                                 }
                                                             }
