@@ -26,8 +26,8 @@ data class MediaItem(
      * Android MediaStore RELATIVE_PATH when the provider exposes one.
      *
      * This value is provider-owned metadata, not filesystem authority. Gallery uses it only as an
-     * Android-authorized destination descriptor for move workflows and never turns it into a raw
-     * filesystem path.
+     * Android-authorized destination descriptor for bounded organization workflows and never turns
+     * it into a raw filesystem path.
      */
     val relativePath: String? = null,
 ) {
