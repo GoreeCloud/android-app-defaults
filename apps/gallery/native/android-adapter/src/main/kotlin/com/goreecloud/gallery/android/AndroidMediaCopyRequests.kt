@@ -61,18 +61,30 @@ object AndroidMediaCopyRequests {
 
         val normalizedSources = normalizeSources(sources)
         val destination = AndroidMediaMoveRequests.normalizeDestinationRelativePath(destinationRelativePath)
-        val copiedUris = ArrayList<String>(normalizedSources.size)
+        val preparedSources = normalizedSources.map { source ->
+            val sourceUri = Uri.parse(source.contentUri)
+            PreparedCopySource(
+                source = source,
+                sourceUri = sourceUri,
+                kind = sourceIdentity(source.contentUri).kind,
+                volumeName = resolveConcreteVolumeName(contentResolver, sourceUri),
+            )
+        }
+        require(preparedSources.map { it.volumeName }.distinct().size == 1) {
+            "one Copy operation must remain on one concrete MediaStore volume"
+        }
+
+        val copiedUris = ArrayList<String>(preparedSources.size)
         var failedCount = 0
 
-        normalizedSources.forEach { source ->
+        preparedSources.forEach { prepared ->
+            val source = prepared.source
+            val sourceUri = prepared.sourceUri
             var outputUri: Uri? = null
             try {
-                val sourceUri = Uri.parse(source.contentUri)
-                val identity = sourceIdentity(source.contentUri)
-                val volumeName = resolveConcreteVolumeName(contentResolver, sourceUri)
-                val collection = when (identity.kind) {
-                    MediaKind.IMAGE -> MediaStore.Images.Media.getContentUri(volumeName)
-                    MediaKind.VIDEO -> MediaStore.Video.Media.getContentUri(volumeName)
+                val collection = when (prepared.kind) {
+                    MediaKind.IMAGE -> MediaStore.Images.Media.getContentUri(prepared.volumeName)
+                    MediaKind.VIDEO -> MediaStore.Video.Media.getContentUri(prepared.volumeName)
                 }
                 val values = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, source.outputDisplayName)
@@ -228,6 +240,13 @@ object AndroidMediaCopyRequests {
 
     private data class MediaIdentity(
         val kind: MediaKind,
+    )
+
+    private data class PreparedCopySource(
+        val source: AndroidMediaCopySource,
+        val sourceUri: Uri,
+        val kind: MediaKind,
+        val volumeName: String,
     )
 
     private enum class MediaKind {
