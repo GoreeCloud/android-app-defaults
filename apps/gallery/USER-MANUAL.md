@@ -46,9 +46,22 @@ Image viewing is still a Development viewer path rather than unrestricted full-r
 
 Long-press a visible media tile to enter selection mode, then tap additional items to add or remove them.
 
-Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, and More/Details when exactly one item is selected.
+Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, **Copy** to another authorized folder or **Create & copy** destination while preserving originals, and More/Details when exactly one item is selected.
 
 The `0.6.2-dev` in-place selection renderer is physically verified on the representative device: selecting and deselecting no longer causes the previous whole-screen flash.
+
+## Copy media
+
+Select one or more authorized photos/videos and choose **Copy**.
+
+- Choose an existing eligible local folder, or choose **New folder** to use **Create & copy**.
+- Existing source folders are not offered as Copy destinations in this Development path.
+- Image-only new folders use Pictures, video-only folders use Movies, and mixed selections use DCIM.
+- Gallery creates new MediaStore items and leaves the originals unchanged.
+- New filenames use `(copy)`, `(copy 2)`, and later bounded suffixes when needed to avoid names already visible in the destination.
+- A single operation is bounded to 100 items. Partial failures are reported; failed incomplete destination rows are cleaned up best-effort.
+
+Use disposable copied media for representative-device testing while Copy remains Development and acceptance-gated.
 
 ## Delete and Android Trash
 
