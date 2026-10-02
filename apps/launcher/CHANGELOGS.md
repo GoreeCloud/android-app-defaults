@@ -10,6 +10,8 @@ Fresh starter Home now defaults its Launcher card style to **Off** and does not 
 
 The three-step first-run wizard now uses a top progress rail, semantic accent/color identity, visual Search-mode miniatures, compact Apps/Widgets/Folders/Private Search cards, a concise gesture strip, and **Learn more** for advanced placement/provider detail. Existing HOME-role authority, Android permissions, Search provider execution, connected-source opt-in, query-retention rules, Room workspace authority, and network policy are unchanged.
 
+A follow-on refinement pass tightens ordinary result section headers, app tiles, shortcut panels, fallback rows, and Search Sources cards while preserving comfortable action targets. The setup card is narrower and flatter, now shows an explicit **Step n of 3** label, and uses denser feature/radio/search-mode presentation. The post-setup Home hint now mirrors that visual language with a gesture strip and three short action cues instead of a multi-paragraph instruction block. Android runtime setup was also consolidated into one deterministic established-state fixture so first-run provisioning cannot race lifecycle/spatial tests.
+
 **Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. A new representative-device APK and visual retest remain open; protected Development signing/update continuity, accessibility/large-text/form-factor acceptance, Release Candidate, Production, and Stable remain separate gates.
 
 ## October 2, 2026 — representative-device visual correction after CI-649
