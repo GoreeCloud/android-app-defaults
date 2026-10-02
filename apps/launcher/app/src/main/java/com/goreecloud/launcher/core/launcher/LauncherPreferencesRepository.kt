@@ -52,7 +52,7 @@ enum class LauncherHomeCardStyle(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): LauncherHomeCardStyle =
-            entries.firstOrNull { it.storageValue == value } ?: CLOCK
+            entries.firstOrNull { it.storageValue == value } ?: OFF
     }
 }
 
