@@ -2272,6 +2272,11 @@ private fun LauncherSourceMoveButton(
     description: String,
     onClick: () -> Unit,
 ) {
+    val glyphColor = if (enabled) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f)
+    }
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -2289,21 +2294,21 @@ private fun LauncherSourceMoveButton(
                 val tipY = if (up) u * 0.28f else u * 0.72f
                 val baseY = if (up) u * 0.66f else u * 0.34f
                 drawLine(
-                    MaterialTheme.colorScheme.primary,
+                    glyphColor,
                     androidx.compose.ui.geometry.Offset(u * 0.50f, baseY),
                     androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
                     stroke,
                     cap = cap,
                 )
                 drawLine(
-                    MaterialTheme.colorScheme.primary,
+                    glyphColor,
                     androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
                     androidx.compose.ui.geometry.Offset(u * 0.30f, if (up) u * 0.48f else u * 0.52f),
                     stroke,
                     cap = cap,
                 )
                 drawLine(
-                    MaterialTheme.colorScheme.primary,
+                    glyphColor,
                     androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
                     androidx.compose.ui.geometry.Offset(u * 0.70f, if (up) u * 0.48f else u * 0.52f),
                     stroke,
