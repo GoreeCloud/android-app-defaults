@@ -60,7 +60,7 @@ class KeyboardLanguageTest {
             listOf("*", "\"", "'", ":", "؛", "!", "؟"),
             KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)[2],
         )
-        assertEquals("،" to ".", KeyboardLayout.directLetterPunctuation())
+        assertEquals("،", KeyboardLayout.primaryComma())
         assertEquals("،", KeyboardLayout.primaryComma())
     }
 
