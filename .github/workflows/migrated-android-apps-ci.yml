@@ -510,10 +510,74 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.14.3'
-      - name: Test Gallery native core, adapter, and app
-        run: gradle :core:test :android-adapter:testDebugUnitTest :app:testDebugUnitTest --no-daemon
+      - name: Test and lint Gallery native core, adapter, and app
+        run: gradle :core:test :android-adapter:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug --no-daemon
       - name: Build Gallery native debug APK
         run: gradle :app:assembleDebug --no-daemon
+
+  gallery-runtime:
+    needs:
+      - changes
+      - gallery
+    if: needs.changes.outputs.gallery == 'true' && needs.gallery.result == 'success'
+    name: Gallery Android 16 runtime instrumentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/gallery/native
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle 8.14.3
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.14.3'
+      - name: Detect Android emulator acceleration
+        id: emulator-accel
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 0666 /dev/kvm || true
+          fi
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
+            echo "kvm_available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "kvm_available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::KVM acceleration is unavailable; Gallery Android 16 instrumentation will use software acceleration."
+          fi
+      - name: Run complete Gallery Android 16 instrumentation suite
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 36
+          target: default
+          arch: x86_64
+          disable-animations: true
+          disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
+          script: gradle --project-dir "$GITHUB_WORKSPACE/apps/gallery/native" --no-daemon :app:connectedDebugAndroidTest --stacktrace
+      - name: Upload Gallery Android 16 test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-android16-runtime-reports
+          path: |
+            apps/gallery/native/app/build/reports/androidTests/connected/**
+            apps/gallery/native/app/build/outputs/androidTest-results/connected/**
+          if-no-files-found: warn
+          retention-days: 14
 
   required-gate:
     name: Migrated Android apps required gate
@@ -527,6 +591,7 @@ jobs:
       - keyboard
       - keyboard-runtime
       - gallery
+      - gallery-runtime
     runs-on: ubuntu-24.04
     timeout-minutes: 5
 
@@ -550,6 +615,7 @@ jobs:
 
           GALLERY_CHANGED: ${{ needs.changes.outputs.gallery }}
           GALLERY_RESULT: ${{ needs.gallery.result }}
+          GALLERY_RUNTIME_RESULT: ${{ needs.gallery-runtime.result }}
         run: |
           set -euo pipefail
 
@@ -586,3 +652,4 @@ jobs:
           require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RESULT" "Keyboard"
           require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RUNTIME_RESULT" "Keyboard Android 15 runtime"
           require_result "$GALLERY_CHANGED" "$GALLERY_RESULT" "Gallery"
+          require_result "$GALLERY_CHANGED" "$GALLERY_RUNTIME_RESULT" "Gallery Android 16 runtime"
