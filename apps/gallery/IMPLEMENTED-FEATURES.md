@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 1, 2026 — app-local album pins and configurable slideshow pace
+
+The current Gallery Development line can persistently **Pin to top / Unpin from top** ordinary Albums collections. Pin state stores only authoritative album identifiers already visible in the current authorized snapshot, changes only Gallery's local Collections ordering, ignores stale identifiers when rendering, and does not rename, move, copy, mutate, or create media.
+
+The bounded photo slideshow now uses a persisted **Every 3 seconds / Every 5 seconds / Every 10 seconds** presentation preference, with five seconds as the migration-safe default. The setting participates in the existing additive non-secret settings export/import envelope. Slideshow progression remains bounded to later photos in the current authorized viewer collection and retains the existing lifecycle/manual-navigation cancellation behavior.
+
+Pure unit coverage locks pin ordering/toggling and slideshow interval parsing/defaults. Rendered Settings acceptance requires the active Slideshow speed control to remain present. Representative-device visual/accessibility/form-factor acceptance remains open.
+
 ### Local browsing presentation candidate
 
 The current Gallery candidate exposes three persisted media-grid densities: **Dense**, **Comfortable**, and **Spacious**. Spacious reduces the adaptive baseline by two columns while preserving a minimum two-column grid, so the setting remains usable on narrow screens. The setting stays presentation-only and participates in the existing non-secret settings portability path.
@@ -61,10 +69,10 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Direct Photos, Albums, Videos, Trash, and Settings navigation.
 - Adaptive Photos timeline grids grouped by Today, Yesterday, and calendar date, with sparse dense-mode groups using a larger presentation lane.
 - Videos browsing uses a featured first card followed by responsive cards with local play/duration affordances, title/date metadata, newest-order **Recently added** wording, and icon-bearing category filters derived only from the current authorized snapshot and Gallery-local Favorites.
-- Mockup-aligned overflow controls on video and album cards with 48dp targets and bounded non-destructive contextual actions.
+- Mockup-aligned overflow controls on video and album cards with 48dp targets and bounded non-destructive contextual actions; ordinary album cards include app-local Pin/Unpin-to-top ordering.
 - Newest/Oldest ordering over the current authorized snapshot.
 - Bounded device-local token search over the already-authorized visible media snapshot, matching display name, authoritative album name, MIME type, and image/video kind without a MediaStore re-query, network access, or expanded permission authority.
-- Album browsing with rounded Raised landscape-cover cards, mockup-aligned circular cover badges, names, counts, adaptive layout, bounded album-detail browsing, and compact smart-access pills populated only from existing local collections plus the authorized Videos domain.
+- Album browsing with rounded Raised landscape-cover cards, mockup-aligned circular cover badges, names, counts, adaptive layout, bounded album-detail browsing, persistent app-local pinned ordering for ordinary collections, and compact smart-access pills populated only from existing local collections plus the authorized Videos domain.
 
 ### Favorites, viewer, selection, and sharing
 
@@ -119,6 +127,8 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Rounded-square thumbnail preference.
 - Move-deleted-items-to-Trash preference controlling Android-confirmed Trash versus permanent delete behavior on Android 11+.
 - Active persisted autoplay and loop preferences for the native video viewer.
+- Persisted 3/5/10-second slideshow-speed preference for the bounded local photo slideshow, defaulting to five seconds.
+- App-local pinned-album identifiers used only to order ordinary Collections; stale identifiers do not create album authority.
 - Compatibility-only persisted fields for GIF thumbnail animation and empty-folder cleanup remain import/export-compatible; the current Settings UI does not surface them as active controls before the behavior exists.
 
 ### Presentation and repository controls

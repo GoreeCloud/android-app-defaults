@@ -80,6 +80,22 @@ enum class GalleryViewDensity(
     }
 }
 
+enum class GallerySlideshowInterval(
+    val storedValue: String,
+    val label: String,
+    val intervalMs: Long,
+) {
+    FAST("fast", "Every 3 seconds", 3_000L),
+    NORMAL("normal", "Every 5 seconds", 5_000L),
+    RELAXED("relaxed", "Every 10 seconds", 10_000L),
+    ;
+
+    companion object {
+        fun fromStored(value: String?): GallerySlideshowInterval =
+            entries.firstOrNull { it.storedValue == value } ?: NORMAL
+    }
+}
+
 enum class GalleryVideoFilter(val label: String) {
     ALL("All"),
     SCREEN_RECORDINGS("Screen recordings"),
@@ -145,11 +161,13 @@ data class GalleryUserSettings(
     val viewDensity: GalleryViewDensity = GalleryViewDensity.DENSE,
     val groupingMode: GalleryGroupingMode = GalleryGroupingMode.DAY,
     val sortPreference: GallerySortPreference = GallerySortPreference.NEWEST,
+    val pinnedAlbumIds: Set<String> = emptySet(),
     val includedAlbumIds: Set<String> = emptySet(),
     val excludedAlbumIds: Set<String> = emptySet(),
     val showHiddenItems: Boolean = false,
     val playVideosAutomatically: Boolean = false,
     val loopVideos: Boolean = false,
+    val slideshowInterval: GallerySlideshowInterval = GallerySlideshowInterval.NORMAL,
     val animateGifThumbnails: Boolean = false,
     val deleteEmptyFolders: Boolean = false,
     val moveDeletedItemsToRecycleBin: Boolean = true,
