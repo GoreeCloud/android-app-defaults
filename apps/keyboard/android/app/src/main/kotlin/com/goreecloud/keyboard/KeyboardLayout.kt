@@ -115,13 +115,6 @@ object KeyboardLayout {
         KeyboardLayer.EMOJI -> emojiRows(EmojiCategory.SMILEYS)
     }
 
-    fun directLetterPunctuation(
-        language: KeyboardLanguage = activeLanguage,
-    ): Pair<String, String> = when (language) {
-        KeyboardLanguage.ENGLISH_US -> "," to "."
-        KeyboardLanguage.ARABIC -> "،" to "."
-    }
-
     fun emojiRows(category: EmojiCategory): List<List<String>> =
         emojiRowsByCategory.getValue(category)
 
