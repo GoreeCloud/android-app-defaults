@@ -124,6 +124,8 @@ class GalleryRenderedAcceptanceTest {
 
         onView(withText("Move deleted items to Trash"))
             .check(matches(withText("Move deleted items to Trash")))
+        onView(withText("Slideshow speed"))
+            .check(matches(isDisplayed()))
         onView(withText("Animate GIFs in thumbnails"))
             .check(doesNotExist())
         onView(withText("Delete empty folders after deleting their content"))
