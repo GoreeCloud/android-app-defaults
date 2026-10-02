@@ -3000,6 +3000,8 @@ class GalleryActivity : Activity() {
                 null
             } catch (_: IllegalStateException) {
                 null
+            } catch (_: IOException) {
+                null
             } catch (_: RuntimeException) {
                 null
             }
