@@ -510,10 +510,69 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: '8.14.3'
+      - name: Set Gallery Development artifact identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION_CODE=$((2000000 + GITHUB_RUN_NUMBER))
+          test "$VERSION_CODE" -gt 18
+          echo "GOREECLOUD_GALLERY_DEV_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "EXPECTED_GALLERY_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
       - name: Test and lint Gallery native core, adapter, and app
         run: gradle :core:test :android-adapter:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug --no-daemon
       - name: Build Gallery native debug APK
         run: gradle :app:assembleDebug --no-daemon
+      - name: Stage Gallery Development APK transport artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="$(find app/build/outputs/apk/debug -type f -name '*.apk' -print -quit)"
+          test -n "$APK"
+          SDK_ROOT="$ANDROID_SDK_ROOT"
+          AAPT="$(find "$SDK_ROOT/build-tools" -type f -name aapt -print | sort -V | tail -n 1)"
+          APKSIGNER="$(find "$SDK_ROOT/build-tools" -type f -name apksigner -print | sort -V | tail -n 1)"
+          test -x "$AAPT"
+          test -x "$APKSIGNER"
+          BADGING="$("$AAPT" dump badging "$APK" | head -n 1)"
+          APPLICATION_ID="$(printf '%s\n' "$BADGING" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")"
+          VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionCode='\([^']*\)'.*/\1/p")"
+          VERSION_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p")"
+          echo "Gallery APK transport identity: package=$APPLICATION_ID versionName=$VERSION_NAME versionCode=$VERSION_CODE"
+          test "$APPLICATION_ID" = "com.goreecloud.gallery"
+          test "$VERSION_NAME" = "0.8.7-dev"
+          test "$VERSION_CODE" = "$EXPECTED_GALLERY_VERSION_CODE"
+          "$APKSIGNER" verify --verbose "$APK"
+          ARTIFACT_ROOT="artifact-gallery-android"
+          rm -rf "$ARTIFACT_ROOT"
+          mkdir -p "$ARTIFACT_ROOT"
+          cp "$APK" "$ARTIFACT_ROOT/GoreeCloud-Gallery-Dev-CI-Transport.apk"
+          cat > "$ARTIFACT_ROOT/BUILD-PROVENANCE.txt" <<EOF
+          repository=GoreeCloud/android-app-defaults
+          component_path=apps/gallery/native
+          source_sha=$(git rev-parse HEAD)
+          application_id=$APPLICATION_ID
+          version_name=$VERSION_NAME
+          version_code=$VERSION_CODE
+          workflow=$GITHUB_WORKFLOW
+          run_id=$GITHUB_RUN_ID
+          run_number=$GITHUB_RUN_NUMBER
+          run_attempt=$GITHUB_RUN_ATTEMPT
+          signing_role=ci-debug-transport-only
+          update_in_place_continuity=requires-development-resigning
+          stable_release_authority=none
+          EOF
+          (
+            cd "$ARTIFACT_ROOT"
+            sha256sum ./*.apk > SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+      - name: Upload Gallery Development APK transport sidecar
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-gallery-android-dev-transport
+          if-no-files-found: error
+          retention-days: 14
+          path: apps/gallery/native/artifact-gallery-android/*
 
   gallery-runtime:
     needs:
