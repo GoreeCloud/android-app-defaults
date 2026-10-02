@@ -459,6 +459,7 @@ private enum class WizardVisualSymbol {
     FOLDER,
     SEARCH,
     GESTURE,
+    EDIT,
 }
 
 @Composable
@@ -733,10 +734,10 @@ private fun WizardGestureStrip() {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+                "Apps" to WizardVisualSymbol.APPS,
+                "Search" to WizardVisualSymbol.SEARCH,
+                "Edit" to WizardVisualSymbol.EDIT,
+            ).forEach { (label, symbol) ->
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
@@ -744,14 +745,25 @@ private fun WizardGestureStrip() {
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
+                    Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        WizardVisualGlyph(
+                            symbol = symbol,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
         }
@@ -849,6 +861,13 @@ private fun WizardVisualGlyph(
                 line(0.50f, 0.20f, 0.32f, 0.38f)
                 line(0.50f, 0.20f, 0.68f, 0.38f)
             }
+            WizardVisualSymbol.EDIT -> {
+                line(0.24f, 0.76f, 0.68f, 0.32f)
+                line(0.68f, 0.32f, 0.78f, 0.42f)
+                line(0.78f, 0.42f, 0.34f, 0.86f)
+                line(0.24f, 0.76f, 0.34f, 0.86f)
+                line(0.70f, 0.22f, 0.80f, 0.32f)
+            }
         }
     }
 }
@@ -878,14 +897,17 @@ fun LauncherHomeHintCard(
             WizardHintRow(
                 title = "Place precisely",
                 summary = "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
+                symbol = WizardVisualSymbol.EDIT,
             )
             WizardHintRow(
                 title = "Move across pages",
                 summary = "Keep holding at a page edge to switch pages, then release on the target.",
+                symbol = WizardVisualSymbol.GESTURE,
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or Favorites when you want them together.",
+                symbol = WizardVisualSymbol.APPS,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -903,6 +925,7 @@ fun LauncherHomeHintCard(
 private fun WizardHintRow(
     title: String,
     summary: String,
+    symbol: WizardVisualSymbol,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -921,7 +944,7 @@ private fun WizardHintRow(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     WizardVisualGlyph(
-                        symbol = WizardVisualSymbol.GESTURE,
+                        symbol = symbol,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
