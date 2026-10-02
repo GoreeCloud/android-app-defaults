@@ -111,8 +111,11 @@ class AndroidMediaStoreReader(
                 inspected += 1
                 try {
                     val row = indices.readRow(it, collection.toString())
+                    // Preserve Gallery's established aggregate external content-URI identity for
+                    // Favorites/settings compatibility. row.volumeName remains separately available
+                    // as provider-owned organization metadata for volume-sensitive operations.
                     val itemCollectionUri = AndroidMediaStoreItemUris.collectionUriForMimeType(
-                        volumeName = row.volumeName ?: aggregateVolumeName,
+                        volumeName = aggregateVolumeName,
                         mimeType = row.mimeType,
                     )
                     items += row.copy(collectionUri = itemCollectionUri).toMediaItem()
