@@ -1,5 +1,9 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 2, 2026 — reversible Hidden apps candidate
+
+The current clean-restack candidate adds device-local **Hidden apps** keyed by exact profile-qualified Launcher workspace identity. Hiding suppresses an app from App Drawer and Universal Search discovery only; Android package state and existing Home, Dock, folder, widget, and Room placement remain unchanged. App context exposes **Hide app / Show in app drawer**, and Launcher Settings → App drawer provides a dedicated recovery manager so hidden state remains reversible. Personal and Work identities remain independent even for the same component. Hidden-app state stays outside portable preference v1 pending an explicit versioned backup/recovery policy. No Android permission, network, cloud, telemetry, package mutation, or cross-profile inference is added. This remains Development candidate work until exact-head protected Launcher build/JVM/lint/runtime/performance and promotion gates succeed.
+
 ## October 2, 2026 — pinned ordering integration and reset candidate
 
 Protected PR #185 integrated device-local, profile-qualified manual App Drawer pin ordering to authoritative monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. **Pinned first** honors the manual order and pinned Drawer app menus expose **Move pinned earlier / Move pinned later**. Ordering remains presentation metadata only and does not mutate Home, Dock, folders, package state, cross-profile authority, or portable preference v1.
