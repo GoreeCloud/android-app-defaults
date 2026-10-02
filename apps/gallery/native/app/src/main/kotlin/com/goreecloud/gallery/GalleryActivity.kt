@@ -2982,8 +2982,20 @@ class GalleryActivity : Activity() {
             return
         }
 
+        val selectedVolume = items
+            .mapNotNull { it.volumeName?.trim()?.takeIf(String::isNotEmpty) }
+            .distinct()
+            .singleOrNull()
+        if (selectedVolume == null || items.any { it.volumeName?.trim() != selectedVolume }) {
+            Toast.makeText(this, "Copy requires selected media from one current storage volume.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val occupiedNames = currentScope
-            .filter { it.relativePath == destinationRelativePath }
+            .filter {
+                it.volumeName?.trim() == selectedVolume &&
+                    it.relativePath == destinationRelativePath
+            }
             .map { it.displayName }
             .toMutableSet()
         val sources = try {
