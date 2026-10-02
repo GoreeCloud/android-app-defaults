@@ -2556,11 +2556,24 @@ private fun LauncherWidgetPickerSheet(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
-                TextButton(
-                    modifier = Modifier.testTag("launcher-widget-picker-close"),
+                Surface(
                     onClick = onDismiss,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .testTag("launcher-widget-picker-close")
+                        .semantics { contentDescription = "Close widget picker" },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                    ),
                 ) {
-                    Text("Close")
+                    Box(contentAlignment = Alignment.Center) {
+                        LauncherCloseGlyph(
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
             Text(
@@ -5651,6 +5664,31 @@ private fun GlazeActionChip(
                 maxLines = 1,
             )
         }
+    }
+}
+
+@Composable
+private fun LauncherCloseGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        drawLine(
+            tint,
+            Offset(u * 0.22f, u * 0.22f),
+            Offset(u * 0.78f, u * 0.78f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.78f, u * 0.22f),
+            Offset(u * 0.22f, u * 0.78f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
     }
 }
 
