@@ -872,7 +872,7 @@ fun LauncherHomeHintCard(
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 12.dp,
+        shadowElevation = 10.dp,
     ) {
         Column(
             modifier = Modifier.padding(GlazeMetrics.space3),
@@ -883,30 +883,18 @@ fun LauncherHomeHintCard(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
-            Text(
-                "Swipe up for Apps • Swipe down for Search • Long-press empty Home space for Edit Home.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            WizardGestureStrip()
+            WizardHintRow(
+                title = "Place precisely",
+                summary = "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
             )
-            Text(
-                "Long-press an app in Apps to drag it to Home/Dock or Pin in Apps; use Pinned first or the ★ filter to keep favorites easy to reach.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            WizardHintRow(
+                title = "Move across pages",
+                summary = "Keep holding at a page edge to switch pages, then release on the target.",
             )
-            Text(
-                "Home apps: keep holding at a left or right page edge briefly to switch pages, then release over the exact target cell.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                "Widgets: long-press and drag to a free Home cell or adjacent page edge; movable Universal Search uses the same Home-grid behavior.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                "Folders: long-press a Home folder to move it to a free cell or adjacent page edge; use Add apps at the end of the grid and swipe larger opened folders between pages.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            WizardHintRow(
+                title = "Keep Apps tidy",
+                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -915,6 +903,53 @@ fun LauncherHomeHintCard(
                 Button(onClick = onDismiss) {
                     Text("Got it")
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardHintRow(
+    title: String,
+    summary: String,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Surface(
+                modifier = Modifier.size(28.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusPill),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    WizardVisualGlyph(
+                        symbol = WizardVisualSymbol.GESTURE,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    summary,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
