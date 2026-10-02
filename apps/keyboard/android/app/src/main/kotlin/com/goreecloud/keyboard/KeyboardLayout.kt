@@ -17,10 +17,21 @@ enum class EmojiCategory(val label: String) {
 }
 
 object KeyboardLayout {
-    private val letterRows = listOf(
+    @Volatile
+    private var activeLanguage = KeyboardLanguage.ENGLISH_US
+
+    private val englishNumberRow = keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
+    private val arabicNumberRow = keys("١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", "٠")
+
+    private val englishLetterRows = listOf(
         keys("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
         keys("a", "s", "d", "f", "g", "h", "j", "k", "l"),
         keys("z", "x", "c", "v", "b", "n", "m"),
+    )
+    private val arabicLetterRows = listOf(
+        keys("ض", "ص", "ث", "ق", "ف", "غ", "ع", "ه", "خ", "ح", "ج", "د"),
+        keys("ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط"),
+        keys("ئ", "ء", "ؤ", "ر", "لا", "ى", "ة", "و", "ز", "ظ"),
     )
     private val symbolRows = listOf(
         keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
@@ -65,8 +76,26 @@ object KeyboardLayout {
         ),
     )
 
-    fun characterRows(layer: KeyboardLayer): List<List<String>> = when (layer) {
-        KeyboardLayer.LETTERS -> letterRows
+    fun activateLanguage(language: KeyboardLanguage) {
+        activeLanguage = language
+    }
+
+    fun currentLanguage(): KeyboardLanguage = activeLanguage
+
+    fun numberRow(language: KeyboardLanguage = activeLanguage): List<String> =
+        when (language) {
+            KeyboardLanguage.ENGLISH_US -> englishNumberRow
+            KeyboardLanguage.ARABIC -> arabicNumberRow
+        }
+
+    fun characterRows(
+        layer: KeyboardLayer,
+        language: KeyboardLanguage = activeLanguage,
+    ): List<List<String>> = when (layer) {
+        KeyboardLayer.LETTERS -> when (language) {
+            KeyboardLanguage.ENGLISH_US -> englishLetterRows
+            KeyboardLanguage.ARABIC -> arabicLetterRows
+        }
         KeyboardLayer.SYMBOLS -> symbolRows
         KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
         KeyboardLayer.EMOJI -> emojiRows(EmojiCategory.SMILEYS)
