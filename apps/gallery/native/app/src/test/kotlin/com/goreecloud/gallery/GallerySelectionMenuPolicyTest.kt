@@ -14,7 +14,7 @@ class GallerySelectionMenuPolicyTest {
         )
 
         assertEquals("Select all visible", state.primaryActionLabel)
-        assertFalse(state.showDetails)
+        assertTrue(state.showDetails)
     }
 
     @Test
