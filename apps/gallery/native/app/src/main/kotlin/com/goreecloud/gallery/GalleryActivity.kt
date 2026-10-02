@@ -3844,8 +3844,8 @@ class GalleryActivity : Activity() {
 
         var swipeStartX = 0f
         var swipeStartY = 0f
-        var panLastX = 0f
-        var panLastY = 0f
+        var panLastRawX = 0f
+        var panLastRawY = 0f
         var gestureHadMultiplePointers = false
         preview.setOnTouchListener { _, event ->
             if (currentItemSupportsZoom()) {
@@ -3855,8 +3855,8 @@ class GalleryActivity : Activity() {
                 MotionEvent.ACTION_DOWN -> {
                     swipeStartX = event.x
                     swipeStartY = event.y
-                    panLastX = event.x
-                    panLastY = event.y
+                    panLastRawX = event.rawX
+                    panLastRawY = event.rawY
                     gestureHadMultiplePointers = false
                     true
                 }
@@ -3877,27 +3877,29 @@ class GalleryActivity : Activity() {
                             viewportWidth = preview.width,
                             viewportHeight = preview.height,
                             scale = viewerZoomScale,
-                            proposedX = viewerPanX + (event.x - panLastX),
-                            proposedY = viewerPanY + (event.y - panLastY),
+                            proposedX = viewerPanX + (event.rawX - panLastRawX),
+                            proposedY = viewerPanY + (event.rawY - panLastRawY),
                         )
                         viewerPanX = bounded.x
                         viewerPanY = bounded.y
-                        panLastX = event.x
-                        panLastY = event.y
+                        panLastRawX = event.rawX
+                        panLastRawY = event.rawY
                         applyViewerTransform()
                     }
                     true
                 }
                 MotionEvent.ACTION_POINTER_UP -> {
                     gestureHadMultiplePointers = true
-                    panLastX = event.x
-                    panLastY = event.y
+                    panLastRawX = event.rawX
+                    panLastRawY = event.rawY
                     true
                 }
                 MotionEvent.ACTION_UP -> {
                     if (
-                        gestureHadMultiplePointers ||
-                        GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)
+                        !GalleryViewerZoomPolicy.allowsNavigationSwipe(
+                            scale = viewerZoomScale,
+                            hadMultiplePointers = gestureHadMultiplePointers,
+                        )
                     ) {
                         true
                     } else {
