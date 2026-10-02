@@ -538,7 +538,7 @@ jobs:
           VERSION_CODE="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionCode='\([^']*\)'.*/\1/p")"
           VERSION_NAME="$(printf '%s\n' "$BADGING" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p")"
           echo "Gallery APK transport identity: package=$APPLICATION_ID versionName=$VERSION_NAME versionCode=$VERSION_CODE"
-          test "$APPLICATION_ID" = "com.goreecloud.gallery"
+          test "$APPLICATION_ID" = "com.goreecloud.gallery.dev"
           test "$VERSION_NAME" = "0.8.7-dev"
           test "$VERSION_CODE" = "$EXPECTED_GALLERY_VERSION_CODE"
           "$APKSIGNER" verify --verbose "$APK"
