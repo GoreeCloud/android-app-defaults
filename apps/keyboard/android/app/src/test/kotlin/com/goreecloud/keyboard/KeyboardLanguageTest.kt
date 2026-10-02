@@ -48,6 +48,20 @@ class KeyboardLanguageTest {
     }
 
     @Test
+    fun arabicSubtypeUsesArabicPunctuationWithoutChangingSharedSymbols() {
+        KeyboardLayout.activateLanguage(KeyboardLanguage.ARABIC)
+
+        val symbols = KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS).flatten()
+        assertEquals(listOf("،", "."), KeyboardLayout.letterPunctuation())
+        assertTrue(symbols.contains("؟"))
+        assertTrue(symbols.contains("؛"))
+        assertTrue(symbols.contains("،"))
+        assertTrue(symbols.contains("٪"))
+        assertFalse(symbols.contains("?"))
+        assertFalse(symbols.contains(";"))
+    }
+
+    @Test
     fun englishSubtypeKeepsExistingQwertyFoundation() {
         KeyboardLayout.activateLanguage(KeyboardLanguage.ENGLISH_US)
 
