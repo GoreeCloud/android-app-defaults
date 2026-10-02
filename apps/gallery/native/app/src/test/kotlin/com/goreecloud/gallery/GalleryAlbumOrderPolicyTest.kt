@@ -90,6 +90,21 @@ class GalleryAlbumOrderPolicyTest {
     }
 
     @Test
+    fun `manual order input is bounded and de-duplicated`() {
+        val values = (1..(GalleryAlbumOrderPolicy.MAX_ORDER_IDS + 20)).map { "album-$it" } +
+            listOf("album-1", " ", "album-2")
+
+        val ordered = GalleryAlbumOrderPolicy.orderedIds(
+            availableAlbumIds = values,
+            pinnedAlbumIds = emptySet(),
+            manualOrderIds = values.reversed(),
+        )
+
+        assertEquals(GalleryAlbumOrderPolicy.MAX_ORDER_IDS, ordered.size)
+        assertEquals(ordered.size, ordered.distinct().size)
+    }
+
+    @Test
     fun `move availability follows the current effective section order`() {
         val available = listOf("camera", "downloads", "screens")
 
