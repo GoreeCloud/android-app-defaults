@@ -6599,20 +6599,27 @@ private fun AppDrawerSurface(
                                 shadowElevation = 8.dp,
                             ) {
                                 LauncherDrawerSortOrder.entries.forEach { order ->
+                                    val selectedOrder = order == drawerSortOrder
+                                    val menuForeground = if (glass) {
+                                        Color.White.copy(alpha = 0.94f)
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                if (order == drawerSortOrder) {
-                                                    "✓ " + order.displayName
-                                                } else {
-                                                    order.displayName
-                                                },
-                                                color = if (glass) {
-                                                    Color.White.copy(alpha = 0.94f)
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurface
-                                                },
+                                                order.displayName,
+                                                color = menuForeground,
                                             )
+                                        },
+                                        leadingIcon = {
+                                            if (selectedOrder) {
+                                                LauncherCheckGlyph(
+                                                    tint = menuForeground,
+                                                )
+                                            } else {
+                                                Spacer(Modifier.size(18.dp))
+                                            }
                                         },
                                         onClick = {
                                             onSetSortOrderName(order.name)
@@ -6648,14 +6655,13 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = if (showPinnedOnly) {
+                                    LauncherPinnedGlyph(
+                                        tint = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
                                             drawerSecondaryColor
                                         },
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
                             }
@@ -10120,6 +10126,81 @@ private fun LauncherAppTile(
 }
 
 @Composable
+private fun LauncherCheckGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.11f
+        drawLine(
+            tint,
+            Offset(u * 0.16f, u * 0.52f),
+            Offset(u * 0.40f, u * 0.76f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.40f, u * 0.76f),
+            Offset(u * 0.84f, u * 0.26f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
+private fun LauncherPlusGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(
+            tint,
+            Offset(u * 0.20f, u * 0.50f),
+            Offset(u * 0.80f, u * 0.50f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.50f, u * 0.20f),
+            Offset(u * 0.50f, u * 0.80f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
+private fun LauncherPinnedGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val star = androidx.compose.ui.graphics.Path().apply {
+            moveTo(u * 0.50f, u * 0.08f)
+            lineTo(u * 0.61f, u * 0.35f)
+            lineTo(u * 0.90f, u * 0.36f)
+            lineTo(u * 0.67f, u * 0.54f)
+            lineTo(u * 0.76f, u * 0.84f)
+            lineTo(u * 0.50f, u * 0.67f)
+            lineTo(u * 0.24f, u * 0.84f)
+            lineTo(u * 0.33f, u * 0.54f)
+            lineTo(u * 0.10f, u * 0.36f)
+            lineTo(u * 0.39f, u * 0.35f)
+            close()
+        }
+        drawPath(star, color = tint)
+    }
+}
+
+@Composable
 private fun DrawerPinnedMark(
     modifier: Modifier = Modifier,
 ) {
@@ -10135,10 +10216,9 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            LauncherPinnedGlyph(
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(11.dp),
             )
         }
     }
@@ -10958,12 +11038,11 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
-                                                                        color = MaterialTheme
+                                                                    LauncherCheckGlyph(
+                                                                        tint = MaterialTheme
                                                                             .colorScheme.onPrimary,
+                                                                        modifier = Modifier
+                                                                            .size(13.dp),
                                                                     )
                                                                 }
                                                             }
@@ -11356,16 +11435,32 @@ internal fun LauncherFolderAppPickerSheet(
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
-                            Text(
-                                if (alreadyAdded) "✓ Added" else "+ Add",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (alreadyAdded) {
-                                    MaterialTheme.colorScheme.primary
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                if (alreadyAdded) {
+                                    LauncherCheckGlyph(
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(12.dp),
+                                    )
                                 } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                                maxLines = 1,
-                            )
+                                    LauncherPlusGlyph(
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(12.dp),
+                                    )
+                                }
+                                Text(
+                                    if (alreadyAdded) "Added" else "Add",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (alreadyAdded) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                    maxLines = 1,
+                                )
+                            }
                         }
                     }
                 }
