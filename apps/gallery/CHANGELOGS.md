@@ -1,5 +1,17 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — pinned Albums and configurable slideshow pace
+
+### Added
+- Added **Pin to top / Unpin from top** to ordinary Albums card overflow menus.
+- Persisted pinned album identifiers locally and used them only to order the existing authorized Collections grid; stale pins are ignored rather than fabricating albums.
+- Added a **Slideshow speed** setting with 3-second, 5-second, and 10-second choices; five seconds remains the default.
+- Added pinned-album and slideshow-speed fields to the existing additive non-secret settings portability envelope.
+- Added pure policy coverage plus rendered Settings acceptance for the new presentation controls.
+
+### Boundary
+Both capabilities are app-private presentation behavior. Album pins do not rename, move, copy, create, or mutate MediaStore content, and slideshow pace does not expand media, storage, filesystem, account, network, cloud, or synchronization authority.
+
 ## October 1, 2026 — functional-only Settings cleanup
 
 ### Changed
