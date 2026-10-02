@@ -4,6 +4,9 @@ enum class GalleryCardOverflowAction(val label: String) {
     OPEN("Open"),
     PIN_TO_TOP("Pin to top"),
     UNPIN_FROM_TOP("Unpin from top"),
+    MOVE_EARLIER("Move earlier"),
+    MOVE_LATER("Move later"),
+    RESET_ALBUM_ORDER("Reset album order"),
     SHARE("Share"),
     ADD_FAVORITE("Add to Favorites"),
     REMOVE_FAVORITE("Remove from Favorites"),
@@ -14,6 +17,9 @@ object GalleryCardOverflowPolicy {
     fun albumActions(
         isPinned: Boolean,
         canPin: Boolean,
+        canMoveEarlier: Boolean = false,
+        canMoveLater: Boolean = false,
+        canResetOrder: Boolean = false,
     ): List<GalleryCardOverflowAction> = buildList {
         add(GalleryCardOverflowAction.OPEN)
         if (canPin) {
@@ -21,6 +27,9 @@ object GalleryCardOverflowPolicy {
                 if (isPinned) GalleryCardOverflowAction.UNPIN_FROM_TOP
                 else GalleryCardOverflowAction.PIN_TO_TOP,
             )
+            if (canMoveEarlier) add(GalleryCardOverflowAction.MOVE_EARLIER)
+            if (canMoveLater) add(GalleryCardOverflowAction.MOVE_LATER)
+            if (canResetOrder) add(GalleryCardOverflowAction.RESET_ALBUM_ORDER)
         }
         add(GalleryCardOverflowAction.DETAILS)
     }
