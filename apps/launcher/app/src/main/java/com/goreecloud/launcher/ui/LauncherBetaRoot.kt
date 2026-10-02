@@ -5657,6 +5657,31 @@ private fun GlazeActionChip(
 }
 
 @Composable
+private fun LauncherCheckGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.11f
+        drawLine(
+            tint,
+            Offset(u * 0.18f, u * 0.52f),
+            Offset(u * 0.42f, u * 0.74f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.42f, u * 0.74f),
+            Offset(u * 0.84f, u * 0.26f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
 private fun LauncherQuickActionWidgetButton(
     label: String,
     symbol: GlazePopupActionSymbol?,
@@ -6707,18 +6732,29 @@ private fun AppDrawerSurface(
                                 LauncherDrawerSortOrder.entries.forEach { order ->
                                     DropdownMenuItem(
                                         text = {
-                                            Text(
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                                            ) {
                                                 if (order == drawerSortOrder) {
-                                                    "✓ " + order.displayName
-                                                } else {
-                                                    order.displayName
-                                                },
-                                                color = if (glass) {
-                                                    Color.White.copy(alpha = 0.94f)
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurface
-                                                },
-                                            )
+                                                    LauncherCheckGlyph(
+                                                        tint = if (glass) {
+                                                            Color.White.copy(alpha = 0.94f)
+                                                        } else {
+                                                            MaterialTheme.colorScheme.primary
+                                                        },
+                                                        modifier = Modifier.size(16.dp),
+                                                    )
+                                                }
+                                                Text(
+                                                    order.displayName,
+                                                    color = if (glass) {
+                                                        Color.White.copy(alpha = 0.94f)
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onSurface
+                                                    },
+                                                )
+                                            }
                                         },
                                         onClick = {
                                             onSetSortOrderName(order.name)
@@ -6754,9 +6790,8 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
+                                    GlazePopupActionGlyph(
+                                        symbol = GlazePopupActionSymbol.PIN,
                                         color = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
@@ -8857,7 +8892,7 @@ private fun LauncherSettingsRootSurface(
                                 Text(
                                     "The side-by-side Dev APK cannot bypass Android’s Restricted Settings gate. " +
                                         "If the notification-access switch is greyed out, first open App info and " +
-                                        "choose the top-right menu → Allow restricted settings. Then return and grant " +
+                                        "open the top-right menu and choose Allow restricted settings. Then return and grant " +
                                         "notification access.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -10238,9 +10273,8 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
+            GlazePopupActionGlyph(
+                symbol = GlazePopupActionSymbol.PIN,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
@@ -11061,12 +11095,10 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
-                                                                        color = MaterialTheme
+                                                                    LauncherCheckGlyph(
+                                                                        tint = MaterialTheme
                                                                             .colorScheme.onPrimary,
+                                                                        modifier = Modifier.size(14.dp),
                                                                     )
                                                                 }
                                                             }
@@ -11460,7 +11492,7 @@ internal fun LauncherFolderAppPickerSheet(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                if (alreadyAdded) "✓ Added" else "+ Add",
+                                if (alreadyAdded) "Added" else "Add",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (alreadyAdded) {
                                     MaterialTheme.colorScheme.primary
