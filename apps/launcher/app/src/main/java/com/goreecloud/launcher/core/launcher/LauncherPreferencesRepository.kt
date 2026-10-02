@@ -401,6 +401,7 @@ class LauncherPreferencesRepository(
         val homeHintsDismissed = booleanPreferencesKey("home_hints_dismissed_v1")
         val homeLabelOverrides = stringPreferencesKey("home_label_overrides_v1")
         val hiddenHomeSuggestionKeys = stringSetPreferencesKey("hidden_home_suggestion_keys_v1")
+        val hiddenAppKeys = stringSetPreferencesKey("hidden_app_keys_v1")
         val drawerPinnedAppKeys = stringSetPreferencesKey("drawer_pinned_app_keys_v1")
         val drawerPinnedAppOrder = stringPreferencesKey("drawer_pinned_app_order_v1")
         val drawerSortOrderName = stringPreferencesKey("drawer_sort_order_name_v1")
@@ -453,6 +454,10 @@ class LauncherPreferencesRepository(
                     order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
                     pinnedKeys = keys,
                 ),
+                hiddenKeys = values[Keys.hiddenAppKeys]
+                    .orEmpty()
+                    .filterNot(String::isBlank)
+                    .toSet(),
             )
         }
         .distinctUntilChanged()
@@ -463,6 +468,10 @@ class LauncherPreferencesRepository(
 
     val drawerPinnedAppOrder: Flow<List<String>> = drawerPinnedState
         .map { it.order }
+        .distinctUntilChanged()
+
+    val hiddenAppKeys: Flow<Set<String>> = drawerPinnedState
+        .map { it.hiddenKeys }
         .distinctUntilChanged()
 
     /**
@@ -908,6 +917,23 @@ class LauncherPreferencesRepository(
                 values.remove(Keys.hiddenHomeSuggestionKeys)
             } else {
                 values[Keys.hiddenHomeSuggestionKeys] = updated
+            }
+        }
+    }
+
+    fun setAppHidden(appKey: String, hidden: Boolean): Job = scope.launch {
+        if (appKey.isBlank()) return@launch
+        dataStore.edit { values ->
+            val updated = values[Keys.hiddenAppKeys].orEmpty().toMutableSet()
+            if (hidden) {
+                updated += appKey
+            } else {
+                updated -= appKey
+            }
+            if (updated.isEmpty()) {
+                values.remove(Keys.hiddenAppKeys)
+            } else {
+                values[Keys.hiddenAppKeys] = updated
             }
         }
     }
