@@ -4,7 +4,7 @@
 
 ### Added
 - Added **Move earlier** and **Move later** to ordinary Album card overflow menus when movement is available inside the album's current pinned or unpinned section.
-- Added **Reset album order** when a manual order override exists; reset preserves Pin/Unpin state and restores the current Newest/Oldest-derived base order for ordinary Albums.
+- Added **Reset album order** when a manual order override exists; reset preserves Pin/Unpin state and restores the current Newest/Oldest-derived base order for ordinary Albums. The Albums header reports **Custom order** while overridden, and an explicit Albums-root Newest/Oldest sort change also clears the override.
 - Persisted ordered album identifiers as non-secret Gallery-local presentation state and included the ordered list in the existing additive settings export/import envelope.
 - Preserved temporarily unavailable stored identifiers during active moves while ignoring them for rendering, so permission/visibility churn does not fabricate albums or silently erase the local preference.
 - Added pure ordering/overflow/default-state regression coverage.
