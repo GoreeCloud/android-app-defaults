@@ -8,10 +8,13 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.view.inputmethod.InputMethodSubtype
 
 class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private var shifted = false
     private var currentLayer = KeyboardLayer.LETTERS
+    private var activeLanguage = KeyboardLanguage.ENGLISH_US
 
     // No active editor has granted ordinary-field behavior yet. Keep the process default fail-closed
     // until onStartInput/onStartInputView provide concrete EditorInfo for the current session.
@@ -60,6 +63,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onCreateInputView(): View {
+        applyLanguage(resolveCurrentSubtypeLanguage(), resetTransientInput = false)
         typingSettings = settingsStore.load()
         packagedEnglishDictionary.preload()
         val builtInDictionary = packagedEnglishDictionary.words
@@ -71,7 +75,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             view.listener = this
             currentLayer = KeyboardLayer.LETTERS
             view.setLayer(currentLayer)
-            view.setShifted(shifted)
+            view.setShifted(shifted && activeLanguage.supportsCaseShift)
             view.setKeyHeightPreference(typingSettings.keyHeight)
             view.setToolbarStyle(typingSettings.toolbarStyle)
             view.setKeyPressHapticsEnabled(typingSettings.hapticFeedbackEnabled)
@@ -141,6 +145,15 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         updateSuggestions()
     }
 
+    override fun onCurrentInputMethodSubtypeChanged(newSubtype: InputMethodSubtype?) {
+        super.onCurrentInputMethodSubtypeChanged(newSubtype)
+        applyLanguage(
+            KeyboardLanguage.fromSubtypeLocale(newSubtype?.locale),
+            resetTransientInput = true,
+        )
+        updateSuggestions()
+    }
+
     override fun onFinishInput() {
         discardClipboardEdit()
         clipboardController.onInputViewHidden()
@@ -178,7 +191,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         if (clipboardEditId != null) {
             val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
             clipboardEditBuffer.append(
-                if (shifted && isLetterText) value.uppercase() else value,
+                if (shifted && activeLanguage.supportsCaseShift && isLetterText) value.uppercase() else value,
             )
             clipboardEditSurface?.updateText(clipboardEditBuffer.toString())
             resetOneShotShift()
@@ -188,7 +201,8 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         pendingPhraseRewrite = null
 
         val isLetterText = value.codePoints().allMatch { Character.isLetter(it) }
-        val output = if (shifted && isLetterText) value.uppercase() else value
+        val output =
+            if (shifted && activeLanguage.supportsCaseShift && isLetterText) value.uppercase() else value
 
         if (!isLetterText && value in AUTOCORRECT_BOUNDARIES) {
             commitBoundary(value)
@@ -259,6 +273,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private fun commitDecodedSwipe(decodedCandidates: List<String>) {
         if (
             sensitiveInput ||
+            !activeLanguage.supportsLocalEnglishAssistance ||
             !typingSettings.swipeTypingEnabled ||
             decodedCandidates.isEmpty()
         ) return
@@ -386,6 +401,11 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     override fun onShift() {
+        if (!activeLanguage.supportsCaseShift) {
+            shifted = false
+            keyboardView?.setShifted(false)
+            return
+        }
         shifted = !shifted
         keyboardView?.setShifted(shifted)
     }
@@ -397,6 +417,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
         if (
             editorSuppressesLanguageAssistance ||
+            !activeLanguage.supportsLocalEnglishAssistance ||
             !typingSettings.suggestionsEnabled ||
             sensitiveInput ||
             composingCaptureExhausted
@@ -618,6 +639,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun beginEditorSession(info: EditorInfo?) {
+        applyLanguage(resolveCurrentSubtypeLanguage(), resetTransientInput = false)
         typingSettings = settingsStore.load()
         shifted = false
         currentLayer = KeyboardLayer.LETTERS
@@ -668,7 +690,8 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             KeyboardNumberRowPolicy.isVisible(typingSettings, sensitiveInput),
         )
         keyboardView?.setSwipeTypingEnabled(
-            !EditorSuggestionPolicy.shouldSuppressGestureTyping(inputType) &&
+            activeLanguage.supportsLocalEnglishAssistance &&
+                !EditorSuggestionPolicy.shouldSuppressGestureTyping(inputType) &&
                 typingSettings.swipeTypingEnabled,
         )
         keyboardView?.setKeyPressSoundEnabled(
@@ -680,6 +703,43 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         clipboardController.updateEditor(
             packageName = info.packageName,
             sensitive = sensitiveInput,
+        )
+    }
+
+    private fun applyLanguage(
+        language: KeyboardLanguage,
+        resetTransientInput: Boolean,
+    ) {
+        activeLanguage = language
+        KeyboardLayout.activateLanguage(language)
+        if (!language.supportsCaseShift) {
+            shifted = false
+            keyboardView?.setShifted(false)
+        }
+        if (resetTransientInput) {
+            cancelScheduledSuggestionRefresh()
+            composingWord.clear()
+            committedHistory.clear()
+            composingStartsCapitalized = false
+            sentenceStartPending = false
+            composingCaptureExhausted = false
+            presentedSuggestions = emptyList()
+            pendingSwipeCorrection = null
+            pendingPhraseRewrite = null
+            keyboardView?.setSuggestions(emptyList())
+        }
+        keyboardView?.setLayer(currentLayer)
+        keyboardView?.setSwipeTypingEnabled(
+            language.supportsLocalEnglishAssistance &&
+                !sensitiveInput &&
+                typingSettings.swipeTypingEnabled,
+        )
+    }
+
+    private fun resolveCurrentSubtypeLanguage(): KeyboardLanguage {
+        val inputMethodManager = getSystemService(InputMethodManager::class.java)
+        return KeyboardLanguage.fromSubtypeLocale(
+            inputMethodManager?.currentInputMethodSubtype?.locale,
         )
     }
 
@@ -951,6 +1011,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         if (
             sensitiveInput ||
             editorSuppressesLanguageAssistance ||
+            !activeLanguage.supportsLocalEnglishAssistance ||
             composingCaptureExhausted
         ) {
             cancelScheduledSuggestionRefresh()
@@ -978,6 +1039,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         if (
             sensitiveInput ||
             editorSuppressesLanguageAssistance ||
+            !activeLanguage.supportsLocalEnglishAssistance ||
             composingCaptureExhausted
         ) {
             presentedSuggestions = emptyList()
@@ -1105,7 +1167,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun languageCaptureAllowed(): Boolean =
-        !sensitiveInput && !editorSuppressesLanguageAssistance
+        activeLanguage.supportsLocalEnglishAssistance &&
+            !sensitiveInput &&
+            !editorSuppressesLanguageAssistance
 
     private fun personalizationAllowed(): Boolean =
         typingSettings.learnFromTypingEnabled &&
@@ -1115,6 +1179,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     private fun refreshAutomaticShift() {
         if (
             sensitiveInput ||
+            !activeLanguage.supportsCaseShift ||
             !typingSettings.autoCapitalizeEnabled
         ) {
             shifted = false
@@ -1129,7 +1194,12 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun applyAutomaticShiftIfNeeded() {
-        if (sensitiveInput || !typingSettings.autoCapitalizeEnabled || !sentenceStartPending) return
+        if (
+            sensitiveInput ||
+            !activeLanguage.supportsCaseShift ||
+            !typingSettings.autoCapitalizeEnabled ||
+            !sentenceStartPending
+        ) return
         shifted = true
         keyboardView?.setShifted(true)
     }
