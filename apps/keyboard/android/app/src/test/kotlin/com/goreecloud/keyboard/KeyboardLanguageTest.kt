@@ -61,6 +61,7 @@ class KeyboardLanguageTest {
             KeyboardLayout.characterRows(KeyboardLayer.SYMBOLS)[2],
         )
         assertEquals("،" to ".", KeyboardLayout.directLetterPunctuation())
+        assertEquals("،", KeyboardLayout.primaryComma())
     }
 
     @Test
@@ -79,5 +80,6 @@ class KeyboardLanguageTest {
             listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
             KeyboardLayout.numberRow(),
         )
+        assertEquals(",", KeyboardLayout.primaryComma())
     }
 }
