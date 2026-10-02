@@ -1,0 +1,7 @@
+<resources>
+    <color name="widget_since_surface">#FF171B24</color>
+    <color name="widget_since_primary">#FFF4F6FB</color>
+    <color name="widget_since_secondary">#FFB6C0D4</color>
+    <color name="widget_since_accent">#FFA8C7FF</color>
+    <color name="widget_since_outline">#26F4F6FB</color>
+</resources>
