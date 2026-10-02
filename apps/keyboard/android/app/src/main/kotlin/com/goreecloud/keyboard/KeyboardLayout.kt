@@ -33,10 +33,15 @@ object KeyboardLayout {
         keys("ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط"),
         keys("ئ", "ء", "ؤ", "ر", "لا", "ى", "ة", "و", "ز", "ظ"),
     )
-    private val symbolRows = listOf(
-        keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
+    private val englishSymbolRows = listOf(
+        englishNumberRow,
         keys("@", "#", "$", "%", "&", "-", "+", "(", ")"),
         keys("*", "\"", "'", ":", ";", "!", "?"),
+    )
+    private val arabicSymbolRows = listOf(
+        arabicNumberRow,
+        keys("@", "#", "$", "%", "&", "-", "+", "(", ")"),
+        keys("*", "\"", "'", ":", "؛", "!", "؟"),
     )
     private val moreSymbolRows = listOf(
         keys("[", "]", "{", "}", "<", ">", "=", "\\", "|"),
@@ -102,9 +107,19 @@ object KeyboardLayout {
             KeyboardLanguage.ENGLISH_US -> englishLetterRows
             KeyboardLanguage.ARABIC -> arabicLetterRows
         }
-        KeyboardLayer.SYMBOLS -> symbolRows
+        KeyboardLayer.SYMBOLS -> when (language) {
+            KeyboardLanguage.ENGLISH_US -> englishSymbolRows
+            KeyboardLanguage.ARABIC -> arabicSymbolRows
+        }
         KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
         KeyboardLayer.EMOJI -> emojiRows(EmojiCategory.SMILEYS)
+    }
+
+    fun directLetterPunctuation(
+        language: KeyboardLanguage = activeLanguage,
+    ): Pair<String, String> = when (language) {
+        KeyboardLanguage.ENGLISH_US -> "," to "."
+        KeyboardLanguage.ARABIC -> "،" to "."
     }
 
     fun emojiRows(category: EmojiCategory): List<List<String>> =
