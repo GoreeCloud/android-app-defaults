@@ -961,7 +961,7 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or the pinned filter to group them.",
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
