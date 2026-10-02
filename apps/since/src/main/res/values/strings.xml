@@ -255,4 +255,12 @@
     <string name="duplicate_tracker_failed">Could not duplicate this tracker. Your original tracker was not changed.</string>
     <string name="move_tracker_earlier">Move earlier</string>
     <string name="move_tracker_later">Move later</string>
+    <string name="widget_since_title">Since</string>
+    <string name="widget_summary_description">Privacy-safe summary of active Since trackers</string>
+    <string name="widget_open_since">Open Since</string>
+    <string name="widget_active_trackers_zero">No active trackers</string>
+    <plurals name="widget_active_trackers">
+        <item quantity="one">%1$d active tracker</item>
+        <item quantity="other">%1$d active trackers</item>
+    </plurals>
 </resources>
