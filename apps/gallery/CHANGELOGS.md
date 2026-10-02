@@ -1,5 +1,18 @@
 # GoreeCloud Gallery Changelogs
 
+## October 1, 2026 — bounded viewer zoom and pan
+
+### Added
+- Added photo-only pinch zoom from 1× through a bounded 4× maximum over the existing full-screen viewer bitmap.
+- Added single-finger panning while zoomed with translation bounded to the scaled viewer viewport.
+- Suppressed horizontal item-navigation swipes while zoomed or after a multi-pointer zoom gesture.
+- Reworked the viewer scale control into explicit Fit, Fill, 2× Zoom, and conditional Reset zoom options with accessibility announcements.
+- Reset zoom/pan when navigating to a different media item and keep zoom unavailable for native video playback.
+- Added pure zoom-policy coverage for scale limits, pan bounds, invalid gesture input, zoom-state detection, and the 2× preset.
+
+### Boundary
+This capability changes presentation only. It does not increase MediaStore scope, decode authority, storage access, mutation authority, or network/cloud access. The image decoder remains bounded to the current viewport and a 2048px long-edge ceiling, so this does not claim original-resolution/full-resolution zoom.
+
 ## October 1, 2026 — manual app-local Album ordering
 
 ### Added
