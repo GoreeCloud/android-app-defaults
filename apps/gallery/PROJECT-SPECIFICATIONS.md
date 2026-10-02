@@ -120,7 +120,7 @@ Selection authority must remain bounded to the current authorized/presented medi
 
 Bulk Share and Favorites must resolve only current authorized items and preserve deterministic behavior.
 
-Destructive operations and Move must use Android-supported user-authorized MediaStore mechanisms. Stale, foreign, malformed, collection-only, non-MediaStore, file, or network mutation targets must fail closed.
+Destructive operations and Move must use Android-supported user-authorized MediaStore mechanisms. Preserve-original Copy must create new MediaStore rows rather than borrowing Move write authority: it must remain bounded to current authorized image/video items, one concrete provider-owned media volume per operation, Android-supported related-copy insertion semantics, pending-row publication, and cleanup of failed unpublished outputs. Stale, foreign, malformed, collection-only, non-MediaStore, file, or network operation targets must fail closed.
 
 Android 10 and earlier must not gain unapproved legacy direct-delete workarounds merely to mimic newer MediaStore mutation APIs.
 

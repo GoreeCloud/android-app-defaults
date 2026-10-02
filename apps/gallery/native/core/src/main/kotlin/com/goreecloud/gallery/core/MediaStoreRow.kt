@@ -19,6 +19,7 @@ object MediaStoreProjection {
     const val HEIGHT = "height"
     const val DURATION = "duration"
     const val SIZE = "_size"
+    const val VOLUME_NAME = "volume_name"
     const val BUCKET_ID = "bucket_id"
     const val BUCKET_DISPLAY_NAME = "bucket_display_name"
     const val RELATIVE_PATH = "relative_path"
@@ -33,6 +34,7 @@ object MediaStoreProjection {
         HEIGHT,
         DURATION,
         SIZE,
+        VOLUME_NAME,
         BUCKET_ID,
         BUCKET_DISPLAY_NAME,
         RELATIVE_PATH,
@@ -55,6 +57,7 @@ data class MediaStoreRow(
     val height: Int?,
     val durationMillis: Long?,
     val sizeBytes: Long,
+    val volumeName: String? = null,
     val bucketId: String?,
     val bucketDisplayName: String?,
     val relativePath: String? = null,
@@ -82,6 +85,7 @@ data class MediaStoreRow(
     fun toMediaItem(): MediaItem {
         val normalizedCollection = collectionUri.trimEnd('/')
         val normalizedMimeType = mimeType.lowercase()
+        val normalizedVolumeName = volumeName?.trim()?.takeIf { it.isNotEmpty() }
         val normalizedBucketId = bucketId?.trim()?.takeIf { it.isNotEmpty() }
         val normalizedBucketName = bucketDisplayName?.trim()?.takeIf { it.isNotEmpty() }
         val normalizedRelativePath = relativePath
@@ -102,6 +106,7 @@ data class MediaStoreRow(
             height = height,
             durationMillis = if (normalizedMimeType.startsWith("video/")) durationMillis else null,
             sizeBytes = sizeBytes,
+            volumeName = normalizedVolumeName,
             albumId = if (hasCompleteAlbum) normalizedBucketId else null,
             albumName = if (hasCompleteAlbum) normalizedBucketName else null,
             relativePath = normalizedRelativePath,

@@ -23,6 +23,7 @@ object AndroidMediaStoreProjection {
         MediaStore.MediaColumns.HEIGHT,
         MediaStore.MediaColumns.DURATION,
         MediaStore.MediaColumns.SIZE,
+        MediaStore.MediaColumns.VOLUME_NAME,
         MediaStore.MediaColumns.BUCKET_ID,
         MediaStore.MediaColumns.BUCKET_DISPLAY_NAME,
         MediaStore.MediaColumns.RELATIVE_PATH,
@@ -81,7 +82,7 @@ class AndroidMediaStoreReader(
         require(maxRows in 1..MAX_ROWS) { "maxRows must be between 1 and $MAX_ROWS" }
 
         val collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        val volumeName = MediaStore.getVolumeName(collection)
+        val aggregateVolumeName = MediaStore.getVolumeName(collection)
         val selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?, ?)"
         val selectionArgs = arrayOf(
             MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
@@ -110,8 +111,11 @@ class AndroidMediaStoreReader(
                 inspected += 1
                 try {
                     val row = indices.readRow(it, collection.toString())
+                    // Preserve Gallery's established aggregate external content-URI identity for
+                    // Favorites/settings compatibility. row.volumeName remains separately available
+                    // as provider-owned organization metadata for volume-sensitive operations.
                     val itemCollectionUri = AndroidMediaStoreItemUris.collectionUriForMimeType(
-                        volumeName = volumeName,
+                        volumeName = aggregateVolumeName,
                         mimeType = row.mimeType,
                     )
                     items += row.copy(collectionUri = itemCollectionUri).toMediaItem()
@@ -136,6 +140,7 @@ class AndroidMediaStoreReader(
         val height: Int,
         val duration: Int,
         val size: Int,
+        val volumeName: Int,
         val bucketId: Int,
         val bucketDisplayName: Int,
         val relativePath: Int,
@@ -151,6 +156,7 @@ class AndroidMediaStoreReader(
             height = cursor.getPositiveNullableInt(height),
             durationMillis = cursor.getNullableLong(duration),
             sizeBytes = cursor.getRequiredLong(size, MediaStoreProjection.SIZE),
+            volumeName = cursor.getNullableString(volumeName),
             bucketId = cursor.getNullableString(bucketId),
             bucketDisplayName = cursor.getNullableString(bucketDisplayName),
             relativePath = cursor.getNullableString(relativePath),
@@ -167,6 +173,7 @@ class AndroidMediaStoreReader(
                 height = cursor.getColumnIndexOrThrow(MediaStoreProjection.HEIGHT),
                 duration = cursor.getColumnIndexOrThrow(MediaStoreProjection.DURATION),
                 size = cursor.getColumnIndexOrThrow(MediaStoreProjection.SIZE),
+                volumeName = cursor.getColumnIndexOrThrow(MediaStoreProjection.VOLUME_NAME),
                 bucketId = cursor.getColumnIndexOrThrow(MediaStoreProjection.BUCKET_ID),
                 bucketDisplayName = cursor.getColumnIndexOrThrow(MediaStoreProjection.BUCKET_DISPLAY_NAME),
                 relativePath = cursor.getColumnIndexOrThrow(MediaStoreProjection.RELATIVE_PATH),

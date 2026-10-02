@@ -46,9 +46,23 @@ Image viewing is still a Development viewer path rather than unrestricted full-r
 
 Long-press a visible media tile to enter selection mode, then tap additional items to add or remove them.
 
-Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, and More/Details when exactly one item is selected.
+Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, **Copy** to another authorized folder or **Create & copy** destination while preserving originals, and More/Details when exactly one item is selected.
 
 The `0.6.2-dev` in-place selection renderer is physically verified on the representative device: selecting and deselecting no longer causes the previous whole-screen flash.
+
+## Copy media
+
+On Android 11 or newer, select one or more authorized photos/videos and choose **Copy**.
+
+- Choose an existing eligible local folder, or choose **New folder** to use **Create & copy**.
+- Existing source folders are not offered as Copy destinations in this Development path.
+- One Copy operation must stay on one concrete Android media volume. Mixed source folders are allowed only when they belong to that same volume; selections spanning internal/removable media volumes fail closed.
+- Image-only new folders use Pictures, video-only folders use Movies, and mixed selections use DCIM.
+- Gallery creates new MediaStore items on each source item's concrete provider-owned MediaStore volume and leaves the originals unchanged. The Development path uses Android 11's related-copy insertion contract rather than enabling a separate Android 10 fallback.
+- New filenames use `(copy)`, `(copy 2)`, and later bounded suffixes when needed to avoid names already visible in the destination; long source names are shortened as needed to remain within the supported MediaStore display-name bound.
+- A single operation is bounded to 100 items. Partial failures are reported; failed incomplete destination rows are cleaned up best-effort.
+
+Use disposable copied media for representative-device testing while Copy remains Development and acceptance-gated.
 
 ## Delete and Android Trash
 
@@ -159,7 +173,7 @@ Gallery keeps browsing controls local to the device. **Sort** in the media heade
 
 ## Major capability backlog
 
-The native restoration still includes more work than the earlier rough "11 features" estimate implied. Distinct remaining capability areas include full physical Recycle Bin acceptance; full-resolution image viewing and physical orientation acceptance; native video playback plus autoplay/loop behavior; animated GIF behavior; approved photo/video editing; approved metadata editing; Move and Copy; broader selection tools where appropriate; album creation, rename, reorder and richer album actions; richer grouping/timeline modes; additional view-density/layout controls; slideshow and other established local presentation actions; broader contextual/overflow actions; broader export/share workflows where required; secure Private/Protected Photos; fuller hidden/sensitive-media policy; automatic empty-folder cleanup; and any additional established first-party Gallery capability verified by historical GoreeCloud Gallery evidence.
+The native restoration still includes more work than the earlier rough "11 features" estimate implied. Distinct remaining capability areas include full physical Recycle Bin acceptance; full-resolution image viewing and physical orientation acceptance; native video playback plus autoplay/loop behavior; animated GIF behavior; approved photo/video editing; approved metadata editing; representative-device acceptance and refinement of the implemented Move and preserve-original Copy paths; broader selection tools where appropriate; album creation, rename, reorder and richer album actions; richer grouping/timeline modes; additional view-density/layout controls; slideshow and other established local presentation actions; broader contextual/overflow actions; broader export/share workflows where required; secure Private/Protected Photos; fuller hidden/sensitive-media policy; automatic empty-folder cleanup; and any additional established first-party Gallery capability verified by historical GoreeCloud Gallery evidence.
 
 Separate release gates include GLAZE UI V1.6 application acceptance, accessibility/adaptive/OEM/profile testing, Privacy Shield/Wardveil/Everkeep/Identity/Mesh integration where applicable, long-lived signing, upgrade/recovery validation, production approval, and Stable qualification.
 
