@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 1, 2026 — opt-in animated GIF thumbnails
+
+The current Gallery Development line can animate authorized `image/gif` grid and album-cover thumbnails when **Settings > Playback > Animate GIFs in thumbnails** is enabled. The preference remains off by default and changes presentation only.
+
+Animated decoding is isolated behind Android 9/API 28 framework support, preserves source aspect ratio, never upscales, and caps the requested decode edge at 512 px. Decode/security/provider failures fall back to the established static MediaStore thumbnail path. Animated drawables start only after binding to the current generation/tag and stop when their ImageView detaches.
+
+Pure policy coverage locks MIME routing, aspect-ratio sizing, no-upscale behavior, and the 512 px bound. Rendered Settings acceptance now requires the GIF toggle to remain visible. Representative-device/OEM/profile behavior, accessibility, large/complex GIF resource use, performance/power, and release acceptance remain open.
+
 ## October 2, 2026 — preserve-original local media Copy
 
 The current Gallery Development line now exposes **Copy** from bounded multi-select. Existing destinations come only from authoritative album/path metadata already present in the current Android-authorized snapshot; every selected source folder is excluded from the existing-destination list to avoid accidental same-folder duplication. **Create & copy** can create a bounded Pictures, Movies, or DCIM destination based on the selected media types and can combine sources from multiple current folders when every selected item belongs to the same concrete MediaStore volume.
@@ -147,7 +155,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 - Active persisted autoplay and loop preferences for the native video viewer.
 - Persisted 3/5/10-second slideshow-speed preference for the bounded local photo slideshow, defaulting to five seconds.
 - App-local pinned-album identifiers used only to order ordinary Collections; stale identifiers do not create album authority.
-- Compatibility-only persisted fields for GIF thumbnail animation and empty-folder cleanup remain import/export-compatible; the current Settings UI does not surface them as active controls before the behavior exists.
+- GIF thumbnail animation is now an active persisted Playback preference backed by bounded Android animated decoding. The empty-folder-cleanup field remains compatibility-only and hidden until that behavior exists.
 
 ### Presentation and repository controls
 
