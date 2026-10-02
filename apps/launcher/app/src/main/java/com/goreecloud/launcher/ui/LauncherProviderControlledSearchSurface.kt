@@ -1487,24 +1487,24 @@ private fun LauncherGlazeShortcutPanel(
             .heightIn(min = 56.dp)
             .testTag("launcher-glaze-shortcut-panel"),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.38f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.045f),
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 10.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (icon != null) {
                 Image(
                     bitmap = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp).launcherIconMask(),
+                    modifier = Modifier.size(30.dp).launcherIconMask(),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -1519,9 +1519,9 @@ private fun LauncherGlazeShortcutPanel(
             )
             Row(
                 modifier = Modifier
-                    .widthIn(max = 184.dp)
+                    .widthIn(max = 168.dp)
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 shortcuts.forEach { shortcut ->
@@ -1736,27 +1736,38 @@ private fun LauncherGlazeSearchResult(
     val appAction = result.action as? LaunchApplicationSearchAction
     val appIcon = if (appAction != null) rememberLauncherAppIcon(appAction.app) else null
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
-    val iconSize = if (prominent) 42.dp else 34.dp
+    val iconSize = if (prominent) 42.dp else 32.dp
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(
             if (prominent) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
         ),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = if (prominent) 0.68f else 0.50f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = if (prominent) 0.07f else 0.05f),
-        ),
+        color = if (prominent) {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.68f)
+        } else {
+            Color.Transparent
+        },
+        border = if (prominent) {
+            BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+            )
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = if (prominent) 8.dp else 2.dp),
+                .padding(
+                    horizontal = if (prominent) 10.dp else 4.dp,
+                    vertical = if (prominent) 8.dp else 0.dp,
+                ),
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = if (prominent) 56.dp else 48.dp),
+                    .heightIn(min = if (prominent) 56.dp else 44.dp),
                 onClick = onActivate,
                 shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                 color = Color.Transparent,
@@ -1764,7 +1775,7 @@ private fun LauncherGlazeSearchResult(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
                 ) {
                     if (appIcon != null) {
                         Image(
@@ -1812,9 +1823,9 @@ private fun LauncherGlazeSearchResult(
                                 overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        sourceLabel?.let {
+                        if (sourceLabel != null && (prominent || result.subtitle == null)) {
                             Text(
-                                it,
+                                sourceLabel,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 maxLines = 1,
