@@ -467,6 +467,9 @@ class MainActivity : ComponentActivity() {
             val drawerPinnedAppKeys by launcherPreferencesRepository.drawerPinnedAppKeys.collectAsStateWithLifecycle(
                 initialValue = emptySet(),
             )
+            val drawerPinnedAppOrder by launcherPreferencesRepository.drawerPinnedAppOrder.collectAsStateWithLifecycle(
+                initialValue = emptyList(),
+            )
             val drawerSortOrderName by launcherPreferencesRepository.drawerSortOrderName.collectAsStateWithLifecycle(
                 initialValue = null,
             )
@@ -1143,6 +1146,7 @@ class MainActivity : ComponentActivity() {
                             localLaunchCounts = localLaunchCounts,
                             hiddenHomeSuggestionKeys = hiddenHomeSuggestionKeys,
                             drawerPinnedAppKeys = drawerPinnedAppKeys,
+                            drawerPinnedAppOrder = drawerPinnedAppOrder,
                             drawerSortOrderName = drawerSortOrderName,
                             searchProviderPreferences = searchProviderPreferences,
                             fileSearchRoots = fileSearchRoots,
@@ -1544,6 +1548,7 @@ class MainActivity : ComponentActivity() {
                             },
                             onSetHomeSuggestionHidden = launcherPreferencesRepository::setHomeSuggestionHidden,
                             onSetDrawerAppPinned = launcherPreferencesRepository::setDrawerAppPinned,
+                            onMoveDrawerPinnedApp = launcherPreferencesRepository::moveDrawerPinnedApp,
                             onSetDrawerSortOrderName = launcherPreferencesRepository::setDrawerSortOrderName,
                             onRequestUninstall = ::requestUninstall,
                             onOpenWallpaperPicker = ::openWallpaperPicker,
