@@ -439,19 +439,6 @@ class LauncherPreferencesRepository(
         .distinctUntilChanged()
 
     /**
-     * User-controlled Launcher discovery suppression keyed by exact profile-qualified app identity.
-     * Hidden apps remain installed and retain existing Home, Dock, and folder placement.
-     */
-    val hiddenAppKeys: Flow<Set<String>> = dataStore.data
-        .map { values ->
-            values[Keys.hiddenAppKeys]
-                .orEmpty()
-                .filterNot(String::isBlank)
-                .toSet()
-        }
-        .distinctUntilChanged()
-
-    /**
      * Device-local App Drawer pin presentation state. Workspace keys include Android profile
      * identity. Membership and manual order are decoded from one preference snapshot.
      */
@@ -467,6 +454,10 @@ class LauncherPreferencesRepository(
                     order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
                     pinnedKeys = keys,
                 ),
+                hiddenKeys = values[Keys.hiddenAppKeys]
+                    .orEmpty()
+                    .filterNot(String::isBlank)
+                    .toSet(),
             )
         }
         .distinctUntilChanged()
@@ -477,6 +468,14 @@ class LauncherPreferencesRepository(
 
     val drawerPinnedAppOrder: Flow<List<String>> = drawerPinnedState
         .map { it.order }
+        .distinctUntilChanged()
+
+    /**
+     * User-controlled discovery suppression keyed by exact profile-qualified app identity.
+     * Derived from the same snapshot as Drawer pins to keep Activity collection atomic.
+     */
+    val hiddenAppKeys: Flow<Set<String>> = drawerPinnedState
+        .map { it.hiddenKeys }
         .distinctUntilChanged()
 
     /**
