@@ -434,13 +434,17 @@ class KeyboardView @JvmOverloads constructor(
         }
         return when (layer) {
             KeyboardLayer.LETTERS -> buildList {
-                if (numberRowVisible) add(DIGIT_ROW.map(::textKey))
+                if (numberRowVisible) add(KeyboardLayout.numberRow().map(::textKey))
                 add(characterRows[0].map(::textKey))
                 add(characterRows[1].map(::textKey))
                 add(
-                    listOf(Key("⇧", 1.25f, Action.SHIFT)) +
-                        characterRows[2].map(::textKey) +
-                        listOf(Key("⌫", 1.25f, Action.BACKSPACE)),
+                    buildList {
+                        if (KeyboardLayout.currentLanguage().supportsCaseShift) {
+                            add(Key("⇧", 1.25f, Action.SHIFT))
+                        }
+                        addAll(characterRows[2].map(::textKey))
+                        add(Key("⌫", 1.25f, Action.BACKSPACE))
+                    },
                 )
                 add(
                     listOf(
@@ -515,8 +519,12 @@ class KeyboardView @JvmOverloads constructor(
     }
 
     private fun renderedKeyLabel(key: Key): String = when {
-        key.action == Action.SPACE && layer == KeyboardLayer.LETTERS -> "English (US)"
-        key.action == Action.TEXT && shifted && layer == KeyboardLayer.LETTERS -> key.label.uppercase()
+        key.action == Action.SPACE && layer == KeyboardLayer.LETTERS ->
+            KeyboardLayout.currentLanguage().spacebarLabel
+        key.action == Action.TEXT &&
+            shifted &&
+            layer == KeyboardLayer.LETTERS &&
+            KeyboardLayout.currentLanguage().supportsCaseShift -> key.label.uppercase()
         else -> key.label
     }
 

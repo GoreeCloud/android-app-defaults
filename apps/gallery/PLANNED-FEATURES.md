@@ -1,5 +1,9 @@
 # GoreeCloud Gallery — Planned Features and Open Obligations
 
+## October 2, 2026 — slideshow pause/resume candidate
+
+The current capability-expansion candidate adds explicit **Pause / Resume** controls to the existing local photo-only slideshow. Pausing cancels the pending advance without discarding the viewer position; Resume continues from that photo using the already-persisted 3/5/10-second interval. Manual viewer navigation and lifecycle exit continue to terminate slideshow state rather than allowing background progression. No media authority, permission, storage mutation, network path, or video behavior is expanded. This remains Development candidate work until exact-head Gallery build/lint/runtime validation and protected integration complete.
+
 ## September 29, 2026 — timeline grouping continuation
 
 The current candidate advances the richer-browsing backlog with local **Day / Month / Year / None** grouping plus a persisted **Newest first / Oldest first** presentation preference over the same authorized media snapshot. Day and Newest first remain migration-safe defaults. Settings portability includes grouping and sort order, and the same continuation restores the previously exported-but-not-imported `viewDensity` value. Broader timeline navigation, additional layout controls, and representative-device/adaptive-layout acceptance remain open. Fresh exact-head validation is required.

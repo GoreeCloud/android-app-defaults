@@ -3,6 +3,7 @@
     <string name="app_name">GoreeCloud Keyboard</string>
     <string name="ime_name">GoreeCloud Keyboard</string>
     <string name="subtype_en_us">English (United States)</string>
+    <string name="subtype_ar">Arabic</string>
 
     <string name="portable_preferences_title">Portable preference</string>
     <string name="portable_preferences_summary">Export or import the last emoji category you explicitly selected.</string>

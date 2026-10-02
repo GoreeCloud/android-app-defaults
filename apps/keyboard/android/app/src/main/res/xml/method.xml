@@ -7,4 +7,9 @@
         android:imeSubtypeMode="keyboard"
         android:isAsciiCapable="true"
         android:label="@string/subtype_en_us" />
+    <subtype
+        android:imeSubtypeLocale="ar"
+        android:imeSubtypeMode="keyboard"
+        android:isAsciiCapable="false"
+        android:label="@string/subtype_ar" />
 </input-method>

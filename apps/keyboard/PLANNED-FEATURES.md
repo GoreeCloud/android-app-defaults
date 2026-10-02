@@ -1,5 +1,9 @@
 # GoreeCloud Keyboard — Planned Features
 
+## October 2, 2026 — English/Arabic subtype foundation candidate
+
+The current capability-expansion candidate adds a bounded first-party Arabic layout foundation alongside English (US). Android's explicitly selected IME subtype is the sole language authority; the keyboard does not infer language from device locale, application identity, editor text, or surrounding content. Arabic selection renders Arabic letter rows, Arabic-Indic digits, RTL language metadata, an Arabic spacebar label, and no case-shift key. English-only local correction, prediction, swipe-dictionary decoding, and learning capture fail closed while Arabic is active rather than applying English models to Arabic text. The change adds no network, Contacts, microphone, telemetry, or remote language-model authority. Focused JVM coverage verifies subtype mapping, direction/case policy, and English/Arabic row selection. Broader Arabic alternates, locale-aware punctuation, Arabic dictionaries/prediction, BiDi editor acceptance, physical-device ergonomics, accessibility, and multilingual switching acceptance remain open. This remains Development candidate work until protected exact-head validation and integration complete.
+
 ## 2026-09-29 setup replay continuation
 
 Draft PR #97 now makes voluntary setup replay semantically explicit: replay uses a distinct review title, its first-step exit control says **Close replay**, and instrumentation verifies that closing replay preserves completed first-use state. This is a local guidance/accessibility correction only; exact-head CI and representative-device/TalkBack/Switch Access review remain separate gates.
