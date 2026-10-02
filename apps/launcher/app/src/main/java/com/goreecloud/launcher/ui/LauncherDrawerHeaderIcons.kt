@@ -155,3 +155,64 @@ internal fun LauncherDrawerSettingsIcon(
         }
     }
 }
+
+
+@Composable
+internal fun LauncherDrawerPinnedIcon(
+    active: Boolean,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier.size(22.dp)) {
+        val stroke = 1.8.dp.toPx()
+        val pin = Path().apply {
+            moveTo(size.width * 0.36f, size.height * 0.16f)
+            lineTo(size.width * 0.67f, size.height * 0.16f)
+            lineTo(size.width * 0.62f, size.height * 0.38f)
+            lineTo(size.width * 0.75f, size.height * 0.51f)
+            lineTo(size.width * 0.56f, size.height * 0.58f)
+            lineTo(size.width * 0.50f, size.height * 0.82f)
+            lineTo(size.width * 0.44f, size.height * 0.58f)
+            lineTo(size.width * 0.25f, size.height * 0.51f)
+            lineTo(size.width * 0.38f, size.height * 0.38f)
+            close()
+        }
+        if (active) {
+            drawPath(path = pin, color = color)
+        } else {
+            drawPath(
+                path = pin,
+                color = color,
+                style = Stroke(
+                    width = stroke,
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+internal fun LauncherDrawerCheckIcon(
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier.size(18.dp)) {
+        val stroke = 1.9.dp.toPx()
+        drawLine(
+            color = color,
+            start = Offset(size.width * 0.18f, size.height * 0.52f),
+            end = Offset(size.width * 0.42f, size.height * 0.74f),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = color,
+            start = Offset(size.width * 0.42f, size.height * 0.74f),
+            end = Offset(size.width * 0.82f, size.height * 0.28f),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+    }
+}
