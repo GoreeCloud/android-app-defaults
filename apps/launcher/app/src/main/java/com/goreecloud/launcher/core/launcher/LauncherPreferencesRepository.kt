@@ -438,30 +438,31 @@ class LauncherPreferencesRepository(
         .distinctUntilChanged()
 
     /**
-     * Device-local App Drawer pins. Workspace keys already include Android profile identity, so a
-     * pinned Work app never aliases a same-package User app. Pinning is presentation metadata only:
-     * it does not move apps onto Home/Dock and intentionally remains outside portable preference v1.
+     * Device-local App Drawer pin presentation state. Workspace keys include Android profile
+     * identity. Membership and manual order are decoded from one preference snapshot.
      */
-    val drawerPinnedAppKeys: Flow<Set<String>> = dataStore.data
+    val drawerPinnedState: Flow<LauncherDrawerPinnedState> = dataStore.data
         .map { values ->
-            values[Keys.drawerPinnedAppKeys]
+            val keys = values[Keys.drawerPinnedAppKeys]
                 .orEmpty()
                 .filterNot(String::isBlank)
                 .toSet()
+            LauncherDrawerPinnedState(
+                keys = keys,
+                order = LauncherDrawerPinnedOrder.reconcile(
+                    order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
+                    pinnedKeys = keys,
+                ),
+            )
         }
         .distinctUntilChanged()
 
-    /**
-     * Device-local order for App Drawer pins. Membership remains the pinned-key set; malformed or
-     * stale ordering metadata fails closed to a deterministic reconciliation of current pins.
-     */
-    val drawerPinnedAppOrder: Flow<List<String>> = dataStore.data
-        .map { values ->
-            LauncherDrawerPinnedOrder.reconcile(
-                order = LauncherDrawerPinnedOrder.decode(values[Keys.drawerPinnedAppOrder]),
-                pinnedKeys = values[Keys.drawerPinnedAppKeys].orEmpty().filterNot(String::isBlank).toSet(),
-            )
-        }
+    val drawerPinnedAppKeys: Flow<Set<String>> = drawerPinnedState
+        .map { it.keys }
+        .distinctUntilChanged()
+
+    val drawerPinnedAppOrder: Flow<List<String>> = drawerPinnedState
+        .map { it.order }
         .distinctUntilChanged()
 
     /**
