@@ -36,6 +36,22 @@ class AndroidMediaCopyRequestsTest {
     }
 
     @Test
+    fun `copy rejects operations beyond the bounded item limit`() {
+        val sources = (1..(AndroidMediaCopyRequests.MAX_COPY_ITEMS + 1)).map { id ->
+            AndroidMediaCopySource(
+                contentUri = "content://media/external/images/media/$id",
+                displayName = "IMG_$id.jpg",
+                outputDisplayName = "IMG_$id (copy).jpg",
+                mimeType = "image/jpeg",
+            )
+        }
+
+        assertFailsWith<IllegalArgumentException> {
+            AndroidMediaCopyRequests.normalizeSources(sources)
+        }
+    }
+
+    @Test
     fun `copy rejects duplicate or foreign source URIs`() {
         val image = AndroidMediaCopySource(
             contentUri = "content://media/external/images/media/10",
