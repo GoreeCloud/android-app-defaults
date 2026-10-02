@@ -770,112 +770,133 @@ private fun LauncherSearchSuggestionPresentationControl(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(GlazeMetrics.radius2ExtraLarge),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.86f),
+        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.76f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.065f),
         ),
-        shadowElevation = 3.dp,
     ) {
-        Column(
-            modifier = Modifier.padding(GlazeMetrics.space3),
-            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 "Suggestion tabs",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
             )
-            Text(
-                "Choose icons, words, or both.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.44f),
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                ),
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    LauncherSearchSuggestionPresentation.entries.forEach { option ->
-                        val active = option == selected
-                        val glyph = when (option) {
-                            LauncherSearchSuggestionPresentation.ICONS -> "▦"
-                            LauncherSearchSuggestionPresentation.WORDS -> "≡"
-                            LauncherSearchSuggestionPresentation.BOTH -> "▦≡"
-                        }
-                        Surface(
-                            onClick = { onSelect(option) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .heightIn(min = 52.dp)
-                                .semantics {
-                                    contentDescription =
-                                        "Search suggestion tabs: " + option.displayName
-                                },
-                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                            color = if (active) {
+                LauncherSearchSuggestionPresentation.entries.forEach { option ->
+                    val active = option == selected
+                    Surface(
+                        onClick = { onSelect(option) },
+                        modifier = Modifier
+                            .heightIn(min = 38.dp)
+                            .semantics {
+                                contentDescription =
+                                    "Search suggestion tabs: " + option.displayName
+                            },
+                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                        color = if (active) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.46f)
+                        },
+                        border = BorderStroke(
+                            1.dp,
+                            if (active) {
                                 MaterialTheme.colorScheme.primary
                             } else {
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.62f)
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f)
                             },
-                            border = BorderStroke(
-                                1.dp,
-                                if (active) {
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.74f)
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
-                                },
-                            ),
-                            shadowElevation = if (active) 2.dp else 0.dp,
+                        ),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                Text(
-                                    glyph,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = if (active) {
-                                        MaterialTheme.colorScheme.onPrimary
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                                    fontWeight = FontWeight.Bold,
-                                )
-                                Spacer(Modifier.size(6.dp))
-                                Text(
-                                    option.displayName,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = if (active) {
-                                        MaterialTheme.colorScheme.onPrimary
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                                    fontWeight = if (active) {
-                                        FontWeight.Bold
-                                    } else {
-                                        FontWeight.SemiBold
-                                    },
-                                )
-                            }
+                            LauncherSuggestionPresentationGlyph(
+                                option = option,
+                                tint = if (active) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                            Text(
+                                option.displayName,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                                color = if (active) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                                maxLines = 1,
+                            )
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSuggestionPresentationGlyph(
+    option: LauncherSearchSuggestionPresentation,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        fun iconGrid(left: Float, width: Float) {
+            val cell = width * 0.32f
+            val gap = width * 0.16f
+            repeat(2) { row ->
+                repeat(2) { col ->
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = androidx.compose.ui.geometry.Offset(
+                            left + col * (cell + gap),
+                            u * 0.22f + row * (cell + gap),
+                        ),
+                        size = androidx.compose.ui.geometry.Size(cell, cell),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(cell * 0.22f),
+                    )
+                }
+            }
+        }
+        fun wordLines(left: Float, right: Float) {
+            listOf(0.32f, 0.50f, 0.68f).forEach { y ->
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * left, u * y),
+                    androidx.compose.ui.geometry.Offset(u * right, u * y),
+                    stroke,
+                    cap = cap,
+                )
+            }
+        }
+        when (option) {
+            LauncherSearchSuggestionPresentation.ICONS -> iconGrid(u * 0.20f, u * 0.60f)
+            LauncherSearchSuggestionPresentation.WORDS -> wordLines(0.18f, 0.82f)
+            LauncherSearchSuggestionPresentation.BOTH -> {
+                iconGrid(u * 0.06f, u * 0.36f)
+                wordLines(0.55f, 0.94f)
             }
         }
     }
@@ -2071,6 +2092,32 @@ private fun LauncherSearchResultCategoryGlyph(
 }
 
 @Composable
+private fun LauncherBackGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(20.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.11f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.68f, u * 0.18f),
+            androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.50f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.50f),
+            androidx.compose.ui.geometry.Offset(u * 0.68f, u * 0.82f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
 private fun LauncherPrivacyShieldGlyph(
     tint: Color,
     modifier: Modifier = Modifier,
@@ -2441,6 +2488,8 @@ private fun LauncherLocalSearchSourceGlyph(
 @Composable
 private fun LauncherSearchSourceManager(
     apps: List<LauncherActivityInfo>,
+    suggestionPresentation: LauncherSearchSuggestionPresentation,
+    onSelectSuggestionPresentation: (LauncherSearchSuggestionPresentation) -> Unit,
     persisted: LauncherSearchProviderPreferenceDecodeResult?,
     controls: LauncherSearchProviderControlState,
     fileSearchRoots: List<Uri>,
@@ -2472,6 +2521,13 @@ private fun LauncherSearchSourceManager(
             .testTag("launcher-search-source-manager"),
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
     ) {
+        item(key = "suggestion-presentation") {
+            LauncherSearchSuggestionPresentationControl(
+                selected = suggestionPresentation,
+                onSelect = onSelectSuggestionPresentation,
+            )
+        }
+
         item(key = "provider-controls") {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
@@ -2496,7 +2552,7 @@ private fun LauncherSearchSourceManager(
                     horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                 ) {
                     Surface(
-                        modifier = Modifier.size(44.dp),
+                        modifier = Modifier.size(38.dp),
                         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
                     ) {
