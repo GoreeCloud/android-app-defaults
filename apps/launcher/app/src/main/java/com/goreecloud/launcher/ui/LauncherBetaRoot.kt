@@ -5272,9 +5272,7 @@ private fun LauncherBuiltInWidget(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        Text(
-                            "⌕",
-                            style = MaterialTheme.typography.headlineMedium,
+                        LauncherSearchMagnifier(
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Column(Modifier.weight(1f)) {
