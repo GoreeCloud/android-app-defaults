@@ -2783,11 +2783,11 @@ private fun WidgetPickerBuiltInCard(
                             color = previewColor,
                         )
 
-                        WorkspaceWidgetCatalog.ANALOG_CLOCK -> Text(
-                            "◷",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.ANALOG_CLOCK ->
+                            LauncherWidgetAnalogClockPreview(
+                                tint = previewColor,
+                                modifier = Modifier.size(38.dp),
+                            )
 
                         WorkspaceWidgetCatalog.DATE -> Text(
                             now.dayOfMonth.toString(),
@@ -2810,17 +2810,18 @@ private fun WidgetPickerBuiltInCard(
 
                         WorkspaceWidgetCatalog.SEARCH -> LauncherSearchMagnifier(previewColor)
 
-                        WorkspaceWidgetCatalog.QUICK_ACTIONS -> Text(
-                            "•••",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.QUICK_ACTIONS ->
+                            LauncherWidgetQuickActionsPreview(
+                                tint = previewColor,
+                                modifier = Modifier.size(width = 54.dp, height = 38.dp),
+                            )
 
-                        WorkspaceWidgetCatalog.BATTERY -> Text(
-                            "▰",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.BATTERY ->
+                            LauncherSystemGlyph(
+                                symbol = LauncherSystemGlyphSymbol.BATTERY,
+                                tint = previewColor,
+                                modifier = Modifier.size(34.dp),
+                            )
 
                         WorkspaceWidgetCatalog.LAUNCHER_STATUS -> Text(
                             "GC",
@@ -2852,6 +2853,77 @@ private fun WidgetPickerBuiltInCard(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+    }
+}
+
+@Composable
+private fun LauncherWidgetAnalogClockPreview(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val u = size.minDimension
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val stroke = u * 0.065f
+        drawCircle(
+            color = tint,
+            radius = u * 0.42f,
+            center = center,
+            style = Stroke(width = stroke),
+        )
+        drawLine(
+            color = tint,
+            start = center,
+            end = Offset(center.x, center.y - u * 0.22f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            color = tint,
+            start = center,
+            end = Offset(center.x + u * 0.18f, center.y + u * 0.10f),
+            strokeWidth = stroke * 0.85f,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
+private fun LauncherWidgetQuickActionsPreview(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val gap = size.minDimension * 0.12f
+        val cellWidth = (size.width - gap * 3f) / 2f
+        val cellHeight = (size.height - gap * 3f) / 2f
+        repeat(2) { row ->
+            repeat(2) { column ->
+                drawRoundRect(
+                    color = if (row == 0 && column == 0) {
+                        tint.copy(alpha = 0.32f)
+                    } else {
+                        tint.copy(alpha = 0.16f)
+                    },
+                    topLeft = Offset(
+                        gap + column * (cellWidth + gap),
+                        gap + row * (cellHeight + gap),
+                    ),
+                    size = androidx.compose.ui.geometry.Size(cellWidth, cellHeight),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                        minOf(cellWidth, cellHeight) * 0.28f,
+                    ),
+                )
+                drawCircle(
+                    color = tint.copy(alpha = 0.88f),
+                    radius = minOf(cellWidth, cellHeight) * 0.11f,
+                    center = Offset(
+                        gap + column * (cellWidth + gap) + cellWidth * 0.50f,
+                        gap + row * (cellHeight + gap) + cellHeight * 0.50f,
+                    ),
+                )
+            }
         }
     }
 }
