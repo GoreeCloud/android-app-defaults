@@ -108,6 +108,15 @@ class ActivatedHomeLifecycleRuntimeTest {
         val preferences = LauncherPreferencesRepository(context)
         preferences.setHomeHintsDismissed(true).join()
         preferences.markStartupWizardCompleted().join()
+        // This class validates established Launcher runtime behavior, not first-run provisioning.
+        // Mark the starter layout applied before Activity launch so the starter migration/repair
+        // effect cannot race Home gestures, spatial drag/drop, or lifecycle assertions.
+        preferences.markStarterLayoutApplied()
+        withTimeout(5_000) {
+            preferences.experiencePreferences.first {
+                it.startupWizardCompleted && it.starterLayoutApplied
+            }
+        }
     }
 
     @Test
