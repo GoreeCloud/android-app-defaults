@@ -3900,11 +3900,17 @@ class GalleryActivity : Activity() {
                 checked = settings.loopVideos,
             ) { setBooleanSetting(LOOP_VIDEOS_KEY, it) },
         )
+        val gifAnimationSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
         library.addView(
             settingToggleRow(
                 title = "Animate GIFs in thumbnails",
-                subtitle = "When on, GIF cards animate while visible. The setting changes presentation only.",
-                checked = settings.animateGifThumbnails,
+                subtitle = if (gifAnimationSupported) {
+                    "When on, GIF cards animate while visible. The setting changes presentation only."
+                } else {
+                    "Requires Android 9 or newer; static GIF thumbnails remain active on this device."
+                },
+                checked = gifAnimationSupported && settings.animateGifThumbnails,
+                enabled = gifAnimationSupported,
             ) { setBooleanSetting(ANIMATE_GIF_THUMBNAILS_KEY, it) },
         )
         library.addView(
@@ -4258,12 +4264,16 @@ class GalleryActivity : Activity() {
         title: String,
         subtitle: String,
         checked: Boolean,
+        enabled: Boolean = true,
         onToggle: (Boolean) -> Unit,
     ): LinearLayout = settingBaseRow(
         title = title,
         subtitle = subtitle,
-        enabled = true,
-        trailing = settingsPill(if (checked) "On" else "Off", emphasized = checked),
+        enabled = enabled,
+        trailing = settingsPill(
+            if (!enabled) "Unavailable" else if (checked) "On" else "Off",
+            emphasized = enabled && checked,
+        ),
     ) {
         onToggle(!checked)
         renderSettingsDestinationOnly()
