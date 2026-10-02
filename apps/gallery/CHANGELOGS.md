@@ -6,8 +6,8 @@
 - Added **Copy** to bounded Gallery multi-select alongside the existing Move path.
 - Added existing-folder Copy destinations derived only from the current Android-authorized album/path snapshot while excluding every selected source path.
 - Added **Create & copy** with Pictures / Movies / DCIM rooting based on selected media type, including mixed-source selections.
-- Added deterministic bounded destination-name collision handling using `(copy)`, `(copy 2)`, and later suffixes.
-- Added a MediaStore Copy executor that creates `IS_PENDING` destination rows, streams exact selected source bytes, publishes only successful outputs, and cleans failed partial rows best-effort.
+- Added deterministic bounded destination-name collision handling using `(copy)`, `(copy 2)`, and later suffixes, with generated names trimmed as needed to remain within the supported MediaStore display-name bound.
+- Added an Android 11+ MediaStore Copy executor that resolves each source row's concrete provider-owned `VOLUME_NAME`, rejects synthetic aggregate-volume insertion, supplies `QUERY_ARG_RELATED_URI`, creates `IS_PENDING` destination rows, streams exact selected source bytes, publishes only successful outputs, and cleans failed partial rows best-effort.
 - Added core and adapter policy coverage for foreign selections, metadata conflicts, new-folder authority, naming, canonical URIs, duplicate sources, and MIME/collection mismatch.
 
 ### Boundary
