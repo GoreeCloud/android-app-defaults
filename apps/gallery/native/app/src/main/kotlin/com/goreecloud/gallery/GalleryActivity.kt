@@ -39,6 +39,8 @@ import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
 import android.widget.Toast
+import com.goreecloud.gallery.android.AndroidMediaCopyRequests
+import com.goreecloud.gallery.android.AndroidMediaCopySource
 import com.goreecloud.gallery.android.AndroidMediaMovePendingState
 import com.goreecloud.gallery.android.AndroidMediaMoveRequests
 import com.goreecloud.gallery.android.AndroidMediaMutationMode
@@ -50,9 +52,13 @@ import com.goreecloud.gallery.core.GalleryBulkActionPolicy
 import com.goreecloud.gallery.core.AuthorizedMediaSearch
 import com.goreecloud.gallery.core.GalleryDragSelectionPolicy
 import com.goreecloud.gallery.core.GalleryDragSelectionSession
+import com.goreecloud.gallery.core.GalleryCopyDestination
+import com.goreecloud.gallery.core.GalleryCopyDestinationPolicy
+import com.goreecloud.gallery.core.GalleryCopyNamePolicy
 import com.goreecloud.gallery.core.GalleryFavoriteBulkAction
 import com.goreecloud.gallery.core.GalleryMoveDestination
 import com.goreecloud.gallery.core.GalleryMoveDestinationPolicy
+import com.goreecloud.gallery.core.GalleryNewFolderCopyPolicy
 import com.goreecloud.gallery.core.GalleryNewFolderMovePolicy
 import com.goreecloud.gallery.core.GallerySelectionPolicy
 import com.goreecloud.gallery.core.MediaItem
@@ -120,6 +126,7 @@ class GalleryActivity : Activity() {
     private var pendingMediaMutation: AndroidMediaMutationPendingState? = null
     private var pendingMediaMove: AndroidMediaMovePendingState? = null
     private var mediaMoveExecutionInProgress = false
+    private var mediaCopyExecutionInProgress = false
     private var setupDialog: AlertDialog? = null
 
     private val inSelectionMode: Boolean
@@ -799,6 +806,7 @@ class GalleryActivity : Activity() {
             else -> "Permanently delete selected media after Android confirmation"
         }
         val moveSupported = AndroidMediaMoveRequests.isSupported()
+        val copySupported = AndroidMediaCopyRequests.isSupported()
         val currentScope = visibleAuthorizedItems()
         val moveDestinations = if (selectedItems.isEmpty()) {
             emptyList()
@@ -814,6 +822,20 @@ class GalleryActivity : Activity() {
                 selectedContentUris = selectedUris,
             )
         }
+        val copyDestinations = if (selectedItems.isEmpty()) {
+            emptyList()
+        } else {
+            GalleryCopyDestinationPolicy.existingDestinations(
+                currentScope = currentScope,
+                selectedContentUris = selectedUris,
+            )
+        }
+        val newCopyFolderParent = if (selectedItems.isEmpty()) null else {
+            GalleryNewFolderCopyPolicy.parentForSelection(
+                currentScope = currentScope,
+                selectedContentUris = selectedUris,
+            )
+        }
         val moveDescription = when {
             !moveSupported -> "Move requires Android 11 or newer in this Development build"
             moveDestinations.isNotEmpty() && newFolderParent != null ->
@@ -821,6 +843,14 @@ class GalleryActivity : Activity() {
             moveDestinations.isNotEmpty() -> "Move selected media to an existing authorized folder"
             newFolderParent != null -> "Create a new folder inside ${newFolderParent.displayName} and move selected media there"
             else -> "No eligible move destination is available for this selection"
+        }
+        val copyDescription = when {
+            !copySupported -> "Copy requires Android 10 or newer"
+            copyDestinations.isNotEmpty() && newCopyFolderParent != null ->
+                "Copy selected media while preserving the originals, or create a new folder inside $newCopyFolderParent"
+            copyDestinations.isNotEmpty() -> "Copy selected media to another authorized local folder"
+            newCopyFolderParent != null -> "Create a new folder inside $newCopyFolderParent and copy selected media there"
+            else -> "No eligible copy destination is available for this selection"
         }
 
         val actions = listOf(
@@ -835,12 +865,29 @@ class GalleryActivity : Activity() {
                 selectedItems.isNotEmpty() &&
                     moveSupported &&
                     (moveDestinations.isNotEmpty() || newFolderParent != null) &&
-                    pendingMediaMove == null,
+                    pendingMediaMove == null &&
+                    !mediaCopyExecutionInProgress,
                 moveDescription,
             ) {
                 showMoveDestinationDialog()
             },
-            selectionAction("Delete", selectedItems.isNotEmpty() && deleteSupported, deletionDescription) {
+            selectionAction(
+                "Copy",
+                selectedItems.isNotEmpty() &&
+                    copySupported &&
+                    (copyDestinations.isNotEmpty() || newCopyFolderParent != null) &&
+                    !mediaCopyExecutionInProgress &&
+                    pendingMediaMove == null &&
+                    pendingMediaMutation == null,
+                copyDescription,
+            ) {
+                showCopyDestinationDialog()
+            },
+            selectionAction(
+                "Delete",
+                selectedItems.isNotEmpty() && deleteSupported && !mediaCopyExecutionInProgress,
+                deletionDescription,
+            ) {
                 requestMediaDeletion(selectedItems)
             },
             selectionAction("More", selectedItems.size == 1, "Show details for the selected item") {
@@ -2423,7 +2470,7 @@ class GalleryActivity : Activity() {
             Toast.makeText(this, "Move requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
             return
         }
-        if (pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress) return
+        if (pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
 
         val selectedItems = currentSelectedItems()
         val currentScope = visibleAuthorizedItems()
@@ -2541,7 +2588,7 @@ class GalleryActivity : Activity() {
     }
 
     private fun showNewFolderDialog(items: List<MediaItem>, parentDisplayName: String) {
-        if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress) return
+        if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
 
         var dialog: AlertDialog? = null
         val folderNameField = EditText(this).apply {
@@ -2663,9 +2710,329 @@ class GalleryActivity : Activity() {
         )
     }
 
+    private fun showCopyDestinationDialog() {
+        if (!AndroidMediaCopyRequests.isSupported()) {
+            Toast.makeText(this, "Copy requires Android 10 or newer.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
+
+        val selectedItems = currentSelectedItems()
+        val currentScope = visibleAuthorizedItems()
+        val destinations = GalleryCopyDestinationPolicy.existingDestinations(
+            currentScope = currentScope,
+            selectedContentUris = selectedUris,
+        )
+        val newFolderParent = GalleryNewFolderCopyPolicy.parentForSelection(
+            currentScope = currentScope,
+            selectedContentUris = selectedUris,
+        )
+        if (selectedItems.isEmpty() || (destinations.isEmpty() && newFolderParent == null)) {
+            Toast.makeText(this, "No eligible copy destination is available for this selection.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        var dialog: AlertDialog? = null
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(14))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_OVERLAY_DP,
+            )
+        }
+        panel.addView(TextView(this).apply {
+            text = "Copy"
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        panel.addView(TextView(this).apply {
+            text = if (newFolderParent != null) {
+                "Choose another local folder, or create a new folder inside $newFolderParent. Originals remain unchanged."
+            } else {
+                "Choose another local folder from media Android currently authorizes. Originals remain unchanged."
+            }
+            setTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            setLineSpacing(0f, 1.06f)
+            setPadding(0, dp(4), 0, dp(14))
+        })
+
+        if (newFolderParent != null) {
+            panel.addView(
+                glazeDialogActionRow(
+                    title = "New folder",
+                    subtitle = "Create inside $newFolderParent",
+                    actionDescription = "Create a new folder and copy selected media",
+                ) {
+                    dialog?.dismiss()
+                    showNewCopyFolderDialog(selectedItems, newFolderParent)
+                },
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    bottomMargin = dp(10)
+                },
+            )
+        }
+
+        destinations.forEach { destination ->
+            panel.addView(
+                glazeDialogActionRow(
+                    title = destination.displayName,
+                    subtitle = "${itemCountLabel(destination.itemCount)} · Existing local folder",
+                    actionDescription = "Copy selected media here and preserve originals",
+                ) {
+                    requestMediaCopy(selectedItems, destination)
+                    dialog?.dismiss()
+                },
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    bottomMargin = dp(7)
+                },
+            )
+        }
+
+        panel.addView(TextView(this).apply {
+            text = "Cancel"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setTextColor(accentColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            background = roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.SHAPE_CONTROL_DP)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Cancel copy"
+            setOnClickListener { dialog?.dismiss() }
+        })
+
+        dialog = AlertDialog.Builder(this).setView(panel).create()
+        dialog?.setOnShowListener {
+            dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+            dialog?.window?.setDimAmount(0.42f)
+            dialog?.window?.setLayout(
+                resources.displayMetrics.widthPixels - dp(32),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+        }
+        dialog?.show()
+        dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setDimAmount(0.42f)
+        dialog?.window?.setLayout(
+            resources.displayMetrics.widthPixels - dp(32),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+    }
+
+    private fun showNewCopyFolderDialog(items: List<MediaItem>, parentDisplayName: String) {
+        if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
+
+        var dialog: AlertDialog? = null
+        val folderNameField = EditText(this).apply {
+            hint = "Folder name"
+            setSingleLine(true)
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(primaryTextColor())
+            setHintTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.CONTROL,
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            contentDescription = "New copy folder name"
+        }
+        val createAction = TextView(this).apply {
+            text = "Create & copy"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(accentColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            background = roundedSurface(withAlpha(accentColor(), 0.12f), GalleryGlazeContract.SHAPE_CONTROL_DP)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Create new folder and copy selected media"
+        }
+        val cancelAction = TextView(this).apply {
+            text = "Cancel"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            setBackgroundColor(Color.TRANSPARENT)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Cancel new copy folder"
+            setOnClickListener { dialog?.dismiss() }
+        }
+
+        createAction.setOnClickListener {
+            val destination = try {
+                GalleryNewFolderCopyPolicy.destinationForSelection(
+                    currentScope = visibleAuthorizedItems(),
+                    selectedContentUris = selectedUris,
+                    rawFolderName = folderNameField.text?.toString().orEmpty(),
+                )
+            } catch (error: IllegalArgumentException) {
+                folderNameField.error = error.message ?: "Choose a valid folder name"
+                folderNameField.requestFocus()
+                return@setOnClickListener
+            }
+            dialog?.dismiss()
+            requestMediaCopy(items, destination.relativePath)
+        }
+
+        val actions = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            setPadding(0, dp(14), 0, 0)
+            addView(cancelAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
+                marginEnd = dp(6)
+            })
+            addView(createAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f))
+        }
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(18))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_OVERLAY_DP,
+            )
+            addView(TextView(context).apply {
+                text = "New folder"
+                setTextColor(primaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+                setTypeface(typeface, Typeface.BOLD)
+            })
+            addView(TextView(context).apply {
+                text = "Create inside $parentDisplayName and copy ${itemCountLabel(items.size)} there. The originals remain unchanged."
+                setTextColor(secondaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+                setLineSpacing(0f, 1.06f)
+                setPadding(0, dp(4), 0, dp(14))
+            })
+            addView(folderNameField, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52)))
+            addView(actions)
+        }
+
+        dialog = AlertDialog.Builder(this).setView(panel).create()
+        dialog?.setOnShowListener {
+            dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+            dialog?.window?.setDimAmount(0.42f)
+            dialog?.window?.setLayout(
+                resources.displayMetrics.widthPixels - dp(32),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+            folderNameField.requestFocus()
+            folderNameField.post {
+                (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
+                    ?.showSoftInput(folderNameField, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+        dialog?.show()
+        dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setDimAmount(0.42f)
+        dialog?.window?.setLayout(
+            resources.displayMetrics.widthPixels - dp(32),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+    }
+
+    private fun requestMediaCopy(items: List<MediaItem>, destination: GalleryCopyDestination) =
+        requestMediaCopy(items, destination.relativePath)
+
+    private fun requestMediaCopy(items: List<MediaItem>, destinationRelativePath: String) {
+        if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
+        if (!AndroidMediaCopyRequests.isSupported()) {
+            Toast.makeText(this, "Copy requires Android 10 or newer.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentScope = visibleAuthorizedItems()
+        val currentByUri = currentScope.associateBy { it.contentUri }
+        if (items.any { currentByUri[it.contentUri] != it }) {
+            Toast.makeText(this, "The selected media changed before Copy could start.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val occupiedNames = currentScope
+            .filter { it.relativePath == destinationRelativePath }
+            .map { it.displayName }
+            .toMutableSet()
+        val sources = try {
+            items.map { item ->
+                val outputName = GalleryCopyNamePolicy.nextAvailable(item.displayName, occupiedNames)
+                occupiedNames += outputName
+                AndroidMediaCopySource(
+                    contentUri = item.contentUri,
+                    displayName = item.displayName,
+                    outputDisplayName = outputName,
+                    mimeType = item.mimeType,
+                    capturedAtMillis = item.capturedAt?.toEpochMilli(),
+                )
+            }
+        } catch (_: IllegalArgumentException) {
+            Toast.makeText(this, "Gallery refused an invalid Copy source.", Toast.LENGTH_SHORT).show()
+            return
+        } catch (_: IllegalStateException) {
+            Toast.makeText(this, "Gallery could not allocate a safe Copy name.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        mediaCopyExecutionInProgress = true
+        renderNavigation()
+        thread(name = "goreecloud-gallery-mediastore-copy") {
+            val result = try {
+                AndroidMediaCopyRequests.execute(
+                    contentResolver = contentResolver,
+                    sources = sources,
+                    destinationRelativePath = destinationRelativePath,
+                )
+            } catch (_: IllegalArgumentException) {
+                null
+            } catch (_: IllegalStateException) {
+                null
+            } catch (_: RuntimeException) {
+                null
+            }
+
+            runOnUiThread {
+                mediaCopyExecutionInProgress = false
+                if (isFinishing || isDestroyed) return@runOnUiThread
+
+                clearSelection(render = false)
+                thumbnailCache.evictAll()
+                val message = when {
+                    result == null -> "Copy could not be completed"
+                    result.failedCount == 0 && result.copiedCount == 1 -> "Copied 1 item"
+                    result.failedCount == 0 -> "Copied ${result.copiedCount} items"
+                    result.copiedCount == 0 && result.failedCount == 1 -> "Copy failed for 1 item"
+                    result.copiedCount == 0 -> "Copy failed for ${result.failedCount} items"
+                    else -> "Copied ${result.copiedCount} items · ${result.failedCount} failed"
+                }
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
+                val accessScope = currentMediaAccessScope()
+                if (GalleryMediaAccessPolicy.canRead(accessScope)) {
+                    loadLocalLibrary(accessScope)
+                } else {
+                    renderPermissionState()
+                }
+            }
+        }
+    }
+
     private fun glazeDialogActionRow(
         title: String,
         subtitle: String,
+        actionDescription: String = "Move selected media here",
         onClick: () -> Unit,
     ): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
@@ -2707,7 +3074,7 @@ class GalleryActivity : Activity() {
         isClickable = true
         isFocusable = true
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-        contentDescription = "$title. $subtitle. Move selected media here."
+        contentDescription = "$title. $subtitle. $actionDescription."
         setOnClickListener { onClick() }
     }
 
@@ -2715,7 +3082,7 @@ class GalleryActivity : Activity() {
         requestMediaMove(items, destination.relativePath)
 
     private fun requestMediaMove(items: List<MediaItem>, destinationRelativePath: String) {
-        if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress) return
+        if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
         if (!AndroidMediaMoveRequests.isSupported()) {
             Toast.makeText(this, "Move requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
             return
@@ -2799,7 +3166,7 @@ class GalleryActivity : Activity() {
     }
 
     private fun requestMediaDeletion(items: List<MediaItem>) {
-        if (items.isEmpty() || pendingMediaMutation != null || pendingMediaMove != null || mediaMoveExecutionInProgress) return
+        if (items.isEmpty() || pendingMediaMutation != null || pendingMediaMove != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
         if (!AndroidMediaMutationRequests.isSupported()) {
             Toast.makeText(
                 this,
