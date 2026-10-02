@@ -1163,21 +1163,24 @@ private fun LauncherSearchHandoffRow(
             .semantics {
                 contentDescription = "Search " + provider.displayName + " for " + query
             },
-        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = GlazeMetrics.space2, vertical = GlazeMetrics.space1),
+                .padding(horizontal = 12.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Surface(
-                modifier = Modifier.size(44.dp),
+                modifier = Modifier.size(36.dp),
                 shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.70f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (icon != null) {
@@ -1185,7 +1188,7 @@ private fun LauncherSearchHandoffRow(
                             bitmap = icon,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(28.dp).launcherIconMask(),
+                            modifier = Modifier.size(24.dp).launcherIconMask(),
                         )
                     } else {
                         LauncherConnectedProviderFallbackGlyph(provider.providerId)
@@ -1194,22 +1197,23 @@ private fun LauncherSearchHandoffRow(
             }
             Column(Modifier.weight(1f)) {
                 Text(
-                    "Search " + provider.displayName + " for “" + query + "”",
+                    provider.displayName,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    "Open the full online results",
+                    "Search online for “" + query + "”",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(
-                "›",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
+            LauncherSourceDisclosureGlyph(
+                expanded = false,
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
@@ -1416,38 +1420,40 @@ private fun LauncherGlazeSearchAppTile(
 ) {
     val icon = rememberLauncherAppIcon(action.app)
     Surface(
-        modifier = modifier.heightIn(min = 96.dp),
+        modifier = modifier.heightIn(min = 74.dp),
         onClick = onLaunch,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.50f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
         ),
-        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 3.dp, vertical = GlazeMetrics.space2),
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (icon != null) {
                 Image(
                     bitmap = icon,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(42.dp).launcherIconMask(),
+                    modifier = Modifier.size(34.dp).launcherIconMask(),
                 )
             } else {
                 Box(
-                    modifier = Modifier.size(42.dp).background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(14.dp),
-                    ),
+                    modifier = Modifier
+                        .size(34.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            RoundedCornerShape(11.dp),
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         result.title.take(1),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
@@ -1458,6 +1464,7 @@ private fun LauncherGlazeSearchAppTile(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -1476,63 +1483,231 @@ private fun LauncherGlazeShortcutPanel(
 ) {
     val icon = if (app != null) rememberLauncherAppIcon(app) else null
     Surface(
-        modifier = Modifier.fillMaxWidth().testTag("launcher-glaze-shortcut-panel"),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 60.dp)
+            .testTag("launcher-glaze-shortcut-panel"),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
         ),
     ) {
-        Column(
-            modifier = Modifier.padding(GlazeMetrics.space2),
-            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
-            ) {
-                if (icon != null) {
-                    Image(
-                        bitmap = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp).launcherIconMask(),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
-                Text(
-                    app?.let(::launcherVisibleAppLabel) ?: packageName.substringAfterLast('.'),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+            if (icon != null) {
+                Image(
+                    bitmap = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp).launcherIconMask(),
+                    contentScale = ContentScale.Fit,
                 )
             }
-            shortcuts.chunked(3).forEach { row ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
-                ) {
-                    row.forEach { shortcut ->
-                        androidx.compose.material3.OutlinedButton(
-                            onClick = {
-                                (shortcut.action as? LauncherLaunchShortcutSearchAction)
-                                    ?.let(onLaunchShortcut)
-                            },
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                        ) {
-                            Text(
-                                shortcut.title,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        }
-                    }
-                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+            Text(
+                app?.let(::launcherVisibleAppLabel) ?: packageName.substringAfterLast('.'),
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Row(
+                modifier = Modifier
+                    .widthIn(max = 196.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                shortcuts.forEach { shortcut ->
+                    LauncherShortcutActionButton(
+                        result = shortcut,
+                        onLaunchShortcut = onLaunchShortcut,
+                    )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherShortcutActionButton(
+    result: LauncherSearchResult,
+    onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
+) {
+    val action = result.action as? LauncherLaunchShortcutSearchAction ?: return
+    Surface(
+        onClick = { onLaunchShortcut(action) },
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { contentDescription = result.title },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.56f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherShortcutActionGlyph(
+                label = result.title,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherShortcutActionGlyph(
+    label: String,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    val normalized = label.lowercase()
+    Canvas(modifier.size(20.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.085f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when {
+            "voice" in normalized || "microphone" in normalized -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.12f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.28f, u * 0.48f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.14f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.48f),
+                    androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.58f),
+                    stroke,
+                    cap = cap,
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = 0f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.34f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.56f, u * 0.42f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.75f),
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.88f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            "camera" in normalized -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.12f, u * 0.28f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.76f, u * 0.52f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.10f),
+                    style = Stroke(width = stroke),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.13f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.54f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.28f),
+                    androidx.compose.ui.geometry.Offset(u * 0.41f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.41f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.59f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            "image" in normalized || "photo" in normalized -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.12f, u * 0.16f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.76f, u * 0.68f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.10f),
+                    style = Stroke(width = stroke),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.07f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.35f, u * 0.38f),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.20f, u * 0.72f),
+                    androidx.compose.ui.geometry.Offset(u * 0.43f, u * 0.50f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.43f, u * 0.50f),
+                    androidx.compose.ui.geometry.Offset(u * 0.58f, u * 0.64f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.58f, u * 0.64f),
+                    androidx.compose.ui.geometry.Offset(u * 0.78f, u * 0.44f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            "template" in normalized || "document" in normalized || "new" in normalized -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.12f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.56f, u * 0.76f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.40f),
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.70f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.35f, u * 0.55f),
+                    androidx.compose.ui.geometry.Offset(u * 0.65f, u * 0.55f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            else -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.25f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.43f, u * 0.43f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.61f, u * 0.61f),
+                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.84f),
+                    stroke,
+                    cap = cap,
+                )
             }
         }
     }
@@ -1556,28 +1731,33 @@ private fun LauncherGlazeSearchResult(
     sourceLabel: String?,
     onActivate: () -> Unit,
     onOpenSearchUri: (LauncherOpenUriSearchAction) -> Unit,
+    prominent: Boolean = false,
 ) {
     val isContact = result.category == LauncherSearchCategory.CONTACT
     val appAction = result.action as? LaunchApplicationSearchAction
     val appIcon = if (appAction != null) rememberLauncherAppIcon(appAction.app) else null
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
+    val iconSize = if (prominent) 42.dp else 34.dp
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.64f),
+        shape = RoundedCornerShape(
+            if (prominent) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
+        ),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = if (prominent) 0.68f else 0.50f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = if (prominent) 0.07f else 0.05f),
         ),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(
-                horizontal = GlazeMetrics.space3,
-                vertical = GlazeMetrics.space1,
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = if (prominent) 8.dp else 4.dp),
         ) {
             Surface(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = if (prominent) 56.dp else 44.dp),
                 onClick = onActivate,
                 shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                 color = Color.Transparent,
@@ -1585,25 +1765,25 @@ private fun LauncherGlazeSearchResult(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     if (appIcon != null) {
                         Image(
                             bitmap = appIcon,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(42.dp).launcherIconMask(),
+                            modifier = Modifier.size(iconSize).launcherIconMask(),
                         )
                     } else if (isContact) {
                         Surface(
-                            modifier = Modifier.size(38.dp),
+                            modifier = Modifier.size(iconSize),
                             shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                             color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
                                     result.title.trim().take(1).uppercase(),
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                             }
@@ -1614,10 +1794,14 @@ private fun LauncherGlazeSearchResult(
                     Column(Modifier.weight(1f)) {
                         Text(
                             result.title,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = if (prominent) {
+                                MaterialTheme.typography.titleSmall
+                            } else {
+                                MaterialTheme.typography.bodyMedium
+                            },
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold,
-                            maxLines = 2,
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                         result.subtitle?.let {
@@ -1641,34 +1825,39 @@ private fun LauncherGlazeSearchResult(
                     }
                     Text(
                         when {
-                            isContact -> "View ›"
-                            result.action is LauncherCopyTextSearchAction -> "Copy ›"
-                            else -> "Open ›"
+                            isContact -> "View"
+                            result.action is LauncherCopyTextSearchAction -> "Copy"
+                            else -> "Open"
                         },
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }
             if (isContact && number != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     androidx.compose.material3.OutlinedButton(
                         onClick = {
-                            onOpenSearchUri(LauncherOpenUriSearchAction(
-                                Intent.ACTION_DIAL,
-                                Uri.fromParts("tel", number, null).toString(),
-                            ))
+                            onOpenSearchUri(
+                                LauncherOpenUriSearchAction(
+                                    Intent.ACTION_DIAL,
+                                    Uri.fromParts("tel", number, null).toString(),
+                                ),
+                            )
                         },
-                        modifier = Modifier.heightIn(min = 48.dp),
+                        modifier = Modifier.heightIn(min = 40.dp),
                     ) { Text("Call") }
                     androidx.compose.material3.OutlinedButton(
                         onClick = {
-                            onOpenSearchUri(LauncherOpenUriSearchAction(
-                                Intent.ACTION_SENDTO,
-                                Uri.fromParts("smsto", number, null).toString(),
-                            ))
+                            onOpenSearchUri(
+                                LauncherOpenUriSearchAction(
+                                    Intent.ACTION_SENDTO,
+                                    Uri.fromParts("smsto", number, null).toString(),
+                                ),
+                            )
                         },
-                        modifier = Modifier.heightIn(min = 48.dp),
+                        modifier = Modifier.heightIn(min = 40.dp),
                     ) { Text("Message") }
                 }
             }
