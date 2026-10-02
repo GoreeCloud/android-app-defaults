@@ -3,6 +3,7 @@ package com.goreecloud.launcher.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -51,6 +52,9 @@ class LauncherStartupWizardRuntimeTest {
         composeRule.onNodeWithText("Continue").performScrollTo().performClick()
 
         composeRule.onNodeWithText("Build your Home")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Clean starter Home preview")
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText("None")
