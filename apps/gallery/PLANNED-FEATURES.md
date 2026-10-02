@@ -1,5 +1,9 @@
 # GoreeCloud Gallery — Planned Features and Open Obligations
 
+## October 2, 2026 — bounded selection overflow candidate
+
+The current capability-expansion candidate exposes **Select all visible / Clear selection** through the existing multi-select More menu without adding another persistent action button. Selection remains bounded to the current Android-authorized and presented media scope through `GallerySelectionPolicy.selectAll`; stale or foreign content URIs cannot be added by this control. Details remains available only for a one-item selection. Focused JVM policy coverage verifies partial, complete, empty, and stale-selection states. No new MediaStore permission, mutation authority, filesystem access, account, network, or cloud authority is added. This remains Development candidate work until exact-head protected validation and integration complete.
+
 ## October 2, 2026 — slideshow controls integration and repeat candidate
 
 Protected PR #185 integrated explicit **Pause / Resume** controls for the existing local photo-only slideshow to authoritative monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Pausing preserves viewer position while lifecycle exit and manual navigation continue to terminate slideshow state. No media authority, permission, storage mutation, network path, or video behavior was expanded.
