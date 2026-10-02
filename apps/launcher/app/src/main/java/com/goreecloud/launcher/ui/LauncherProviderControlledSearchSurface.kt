@@ -351,7 +351,7 @@ internal fun LauncherProviderControlledSearchSurface(
                 Text(
                     "Search Sources",
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -598,11 +598,11 @@ internal fun LauncherProviderControlledSearchSurface(
                                             .semantics { heading() }
                                             .padding(
                                                 start = GlazeMetrics.space2,
-                                                top = 8.dp,
-                                                bottom = 4.dp,
+                                                top = 6.dp,
+                                                bottom = 2.dp,
                                             ),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.82f),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f),
                                         fontWeight = FontWeight.SemiBold,
                                     )
                                 }
@@ -781,7 +781,7 @@ private fun LauncherSearchSuggestionPresentationControl(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -802,7 +802,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                     Surface(
                         onClick = { onSelect(option) },
                         modifier = Modifier
-                            .heightIn(min = 38.dp)
+                            .heightIn(min = 44.dp)
                             .semantics {
                                 contentDescription =
                                     "Search suggestion tabs: " + option.displayName
@@ -823,7 +823,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                         ),
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
@@ -1418,7 +1418,7 @@ private fun LauncherGlazeSearchAppTile(
 ) {
     val icon = rememberLauncherAppIcon(action.app)
     Surface(
-        modifier = modifier.heightIn(min = 74.dp),
+        modifier = modifier.heightIn(min = 66.dp),
         onClick = onLaunch,
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.50f),
         border = BorderStroke(
@@ -1428,7 +1428,7 @@ private fun LauncherGlazeSearchAppTile(
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -1437,12 +1437,12 @@ private fun LauncherGlazeSearchAppTile(
                     bitmap = icon,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(34.dp).launcherIconMask(),
+                    modifier = Modifier.size(32.dp).launcherIconMask(),
                 )
             } else {
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(32.dp)
                         .background(
                             MaterialTheme.colorScheme.primaryContainer,
                             RoundedCornerShape(11.dp),
@@ -1483,7 +1483,7 @@ private fun LauncherGlazeShortcutPanel(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 60.dp)
+            .heightIn(min = 56.dp)
             .testTag("launcher-glaze-shortcut-panel"),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
@@ -1503,7 +1503,7 @@ private fun LauncherGlazeShortcutPanel(
                 Image(
                     bitmap = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(36.dp).launcherIconMask(),
+                    modifier = Modifier.size(32.dp).launcherIconMask(),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -1518,7 +1518,7 @@ private fun LauncherGlazeShortcutPanel(
             )
             Row(
                 modifier = Modifier
-                    .widthIn(max = 196.dp)
+                    .widthIn(max = 184.dp)
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1543,7 +1543,7 @@ private fun LauncherShortcutActionButton(
     Surface(
         onClick = { onLaunchShortcut(action) },
         modifier = Modifier
-            .size(40.dp)
+            .size(48.dp)
             .semantics { contentDescription = result.title },
         shape = RoundedCornerShape(GlazeMetrics.radiusPill),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.56f),
@@ -1750,12 +1750,12 @@ private fun LauncherGlazeSearchResult(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = if (prominent) 8.dp else 4.dp),
+                .padding(horizontal = 10.dp, vertical = if (prominent) 8.dp else 2.dp),
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = if (prominent) 56.dp else 44.dp),
+                    .heightIn(min = if (prominent) 56.dp else 48.dp),
                 onClick = onActivate,
                 shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                 color = Color.Transparent,
@@ -2263,7 +2263,7 @@ private fun LauncherSearchSourceBadge(
     apps: List<LauncherActivityInfo>,
 ) {
     Surface(
-        modifier = Modifier.size(40.dp),
+        modifier = Modifier.size(36.dp),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
         color = accent.copy(alpha = 0.10f),
     ) {
@@ -2285,7 +2285,7 @@ private fun LauncherSearchSourceBadge(
                         bitmap = icon,
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
-                        modifier = Modifier.size(28.dp).launcherIconMask(),
+                        modifier = Modifier.size(24.dp).launcherIconMask(),
                     )
                 } else {
                     LauncherConnectedProviderFallbackGlyph(
@@ -2520,7 +2520,7 @@ private fun LauncherSearchSourceManager(
         modifier = modifier
             .fillMaxWidth()
             .testTag("launcher-search-source-manager"),
-        verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         item(key = "suggestion-presentation") {
             LauncherSearchSuggestionPresentationControl(
@@ -2538,7 +2538,7 @@ private fun LauncherSearchSourceManager(
                     1.dp,
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                 ),
-                shadowElevation = 2.dp,
+                shadowElevation = 0.dp,
             ) {
                 Row(
                     modifier = Modifier
@@ -2546,14 +2546,14 @@ private fun LauncherSearchSourceManager(
                         .padding(
                             start = GlazeMetrics.space2,
                             end = GlazeMetrics.space1,
-                            top = GlazeMetrics.space1,
-                            bottom = GlazeMetrics.space1,
+                            top = 6.dp,
+                            bottom = 6.dp,
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                 ) {
                     Surface(
-                        modifier = Modifier.size(38.dp),
+                        modifier = Modifier.size(34.dp),
                         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
                     ) {
@@ -2608,13 +2608,13 @@ private fun LauncherSearchSourceManager(
 
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(GlazeMetrics.radius2ExtraLarge),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.84f),
                     border = BorderStroke(
                         1.dp,
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                     ),
-                    shadowElevation = 3.dp,
+                    shadowElevation = 1.dp,
                 ) {
                     Column {
                         Row(
@@ -2623,14 +2623,14 @@ private fun LauncherSearchSourceManager(
                                 .padding(
                                     start = GlazeMetrics.space2,
                                     end = GlazeMetrics.space3,
-                                    top = 10.dp,
-                                    bottom = 10.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp,
                                 ),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                         ) {
                             Surface(
-                                modifier = Modifier.size(38.dp),
+                                modifier = Modifier.size(32.dp),
                                 shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                                 color = accent.copy(alpha = 0.11f),
                             ) {
@@ -2765,7 +2765,7 @@ private fun LauncherSearchSourceManager(
                                             }
                                             .padding(
                                                 horizontal = 12.dp,
-                                                vertical = 10.dp,
+                                                vertical = 8.dp,
                                             ),
                                         verticalArrangement =
                                             Arrangement.spacedBy(GlazeMetrics.space1),
@@ -3164,17 +3164,17 @@ private fun LauncherProviderSearchRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.60f),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
         border = BorderStroke(
             1.dp,
             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
         ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(GlazeMetrics.space3),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f)) {
                 Text(result.title, fontWeight = FontWeight.SemiBold)
