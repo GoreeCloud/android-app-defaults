@@ -1905,7 +1905,6 @@ private fun LauncherSearchResultCategoryGlyph(
 }
 
 @Composable
-@Composable
 private fun LauncherPrivacyShieldGlyph(
     tint: Color,
     modifier: Modifier = Modifier,
@@ -2208,6 +2207,7 @@ private fun LauncherLocalSearchSourceGlyph(
     }
 }
 
+@Composable
 private fun LauncherSearchSourceManager(
     persisted: LauncherSearchProviderPreferenceDecodeResult?,
     controls: LauncherSearchProviderControlState,
