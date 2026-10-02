@@ -15,10 +15,9 @@ internal object GallerySelectionMenuPolicy {
             visible.isNotEmpty() &&
                 selectedContentUris.size == visible.size &&
                 visible.all(selectedContentUris::contains)
-        val visibleSelectedCount = visible.count(selectedContentUris::contains)
         return GallerySelectionMenuState(
             primaryActionLabel = if (allVisibleSelected) "Clear selection" else "Select all visible",
-            showDetails = visibleSelectedCount == 1,
+            showDetails = selectedContentUris.size == 1,
         )
     }
 }
