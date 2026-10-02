@@ -895,10 +895,49 @@ class GalleryActivity : Activity() {
             ) {
                 requestMediaDeletion(selectedItems)
             },
-            selectionAction("More", selectedItems.size == 1, "Show details for the selected item") {
-                selectedItems.singleOrNull()?.let(::showItemDetails)
-            },
+            selectionAction("More", currentScope.isNotEmpty(), "More selection actions") {},
         )
+        actions.lastOrNull()?.let { moreAction ->
+            moreAction.setOnClickListener {
+                PopupMenu(this, moreAction).apply {
+                    val allVisibleSelected =
+                        currentScope.isNotEmpty() &&
+                            selectedUris.size == currentScope.size &&
+                            currentScope.all { it.contentUri in selectedUris }
+                    menu.add(
+                        0,
+                        1,
+                        0,
+                        if (allVisibleSelected) "Clear selection" else "Select all visible",
+                    )
+                    if (selectedItems.size == 1) {
+                        menu.add(0, 2, 1, "Details")
+                    }
+                    setOnMenuItemClickListener { item ->
+                        when (item.itemId) {
+                            1 -> {
+                                if (allVisibleSelected) {
+                                    clearSelection()
+                                } else {
+                                    selectedUris.clear()
+                                    selectedUris.addAll(
+                                        GallerySelectionPolicy.selectAll(currentScope),
+                                    )
+                                    renderSelectionState()
+                                }
+                                true
+                            }
+                            2 -> {
+                                selectedItems.singleOrNull()?.let(::showItemDetails)
+                                true
+                            }
+                            else -> false
+                        }
+                    }
+                    show()
+                }
+            }
+        }
         actions.forEachIndexed { index, view ->
             selectionActionCapsule.addView(
                 view,
