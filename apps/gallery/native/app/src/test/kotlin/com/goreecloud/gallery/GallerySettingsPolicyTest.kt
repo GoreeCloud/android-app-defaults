@@ -45,6 +45,15 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
+    fun `slideshow interval defaults to five seconds and restores portable values`() {
+        assertEquals(GallerySlideshowInterval.NORMAL, GalleryUserSettings().slideshowInterval)
+        assertEquals(5_000L, GallerySlideshowInterval.NORMAL.intervalMs)
+        assertEquals(GallerySlideshowInterval.FAST, GallerySlideshowInterval.fromStored("fast"))
+        assertEquals(GallerySlideshowInterval.RELAXED, GallerySlideshowInterval.fromStored("relaxed"))
+        assertEquals(GallerySlideshowInterval.NORMAL, GallerySlideshowInterval.fromStored("future-value"))
+    }
+
+    @Test
     fun `video presentation uses mockup-aligned recency wording`() {
         assertEquals(
             "Recently added",
