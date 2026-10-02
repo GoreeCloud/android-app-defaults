@@ -1635,7 +1635,12 @@ class GalleryActivity : Activity() {
     }
 
     private fun showAlbumOverflowMenu(anchor: View, album: AlbumPresentation) {
-        val actions = GalleryCardOverflowPolicy.albumActions()
+        val albumId = album.id
+        val isPinned = albumId != null && albumId in currentUserSettings().pinnedAlbumIds
+        val actions = GalleryCardOverflowPolicy.albumActions(
+            isPinned = isPinned,
+            canPin = albumId != null,
+        )
         val byId = actions.associateBy { action -> action.ordinal + 1 }
         PopupMenu(this, anchor).apply {
             actions.forEach { action ->
@@ -1644,6 +1649,8 @@ class GalleryActivity : Activity() {
             setOnMenuItemClickListener { menuItem ->
                 when (byId[menuItem.itemId]) {
                     GalleryCardOverflowAction.OPEN -> openAlbumPresentation(album)
+                    GalleryCardOverflowAction.PIN_TO_TOP -> setAlbumPinned(album, pinned = true)
+                    GalleryCardOverflowAction.UNPIN_FROM_TOP -> setAlbumPinned(album, pinned = false)
                     GalleryCardOverflowAction.DETAILS -> showAlbumDetails(album)
                     GalleryCardOverflowAction.SHARE,
                     GalleryCardOverflowAction.ADD_FAVORITE,
@@ -1656,15 +1663,44 @@ class GalleryActivity : Activity() {
         }
     }
 
+    private fun setAlbumPinned(album: AlbumPresentation, pinned: Boolean) {
+        val albumId = album.id ?: return
+        val availableAlbumIds = visibleAuthorizedItems().buildAlbumCatalog().map { it.id }.toSet()
+        if (albumId !in availableAlbumIds) {
+            Toast.makeText(this, "This album is no longer available.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val updated = GalleryAlbumPinPolicy.toggled(
+            pinnedAlbumIds = currentUserSettings().pinnedAlbumIds,
+            albumId = albumId,
+            pinned = pinned,
+        )
+        galleryPreferences().edit()
+            .putStringSet(PINNED_ALBUM_IDS_KEY, updated)
+            .apply()
+        Toast.makeText(
+            this,
+            if (pinned) "${album.name} pinned to top" else "${album.name} unpinned",
+            Toast.LENGTH_SHORT,
+        ).show()
+        renderCurrentDestination()
+    }
+
     private fun renderAlbums(generation: Int, sourceItems: List<MediaItem>) {
         clearSelection(render = false)
         selectionScopeItems = emptyList()
         val query = searchQuery.trim().lowercase()
         val searchedItems = AuthorizedMediaSearch.search(sourceItems, searchQuery)
-        val catalog = searchedItems.buildAlbumCatalog()
+        val sortedCatalog = searchedItems.buildAlbumCatalog()
             .let { albums ->
                 if (selectedSort == MediaSortOrder.NEWEST) albums else albums.sortedBy { it.newestAt }
             }
+        val catalogById = sortedCatalog.associateBy { it.id }
+        val catalog = GalleryAlbumPinPolicy.orderedIds(
+            availableAlbumIds = sortedCatalog.map { it.id },
+            pinnedAlbumIds = currentUserSettings().pinnedAlbumIds,
+        ).mapNotNull(catalogById::get)
 
         val allFavoriteItems = sourceItems.filter { it.contentUri in favoriteUris }
         val favoriteItems = if (query.isBlank() || "favorites".contains(query)) {
@@ -3046,6 +3082,7 @@ class GalleryActivity : Activity() {
         var currentIndex = initialIndex
         var activePlaybackPlan: GalleryViewerPlaybackPlan? = null
         var viewerScaleMode = GalleryViewerScaleMode.FIT
+        val slideshowInterval = currentUserSettings().slideshowInterval
         var slideshowRunning = false
         var slideshowAdvance: Runnable? = null
 
@@ -3053,7 +3090,7 @@ class GalleryActivity : Activity() {
             slideshow.text = if (slideshowRunning) "Stop" else "Slide"
             slideshow.contentDescription =
                 if (slideshowRunning) "Stop photo slideshow"
-                else "Start photo slideshow"
+                else "Start photo slideshow, ${slideshowInterval.label.lowercase()}"
         }
 
         fun stopSlideshow(announce: Boolean = false) {
@@ -3158,7 +3195,7 @@ class GalleryActivity : Activity() {
             renderCurrentItem()
             overlay.postDelayed(
                 checkNotNull(slideshowAdvance),
-                GallerySlideshowPolicy.DEFAULT_INTERVAL_MS,
+                slideshowInterval.intervalMs,
             )
         }
         viewerSlideshowStop = { stopSlideshow() }
@@ -3182,7 +3219,7 @@ class GalleryActivity : Activity() {
             announceForAccessibility("Photo slideshow started")
             overlay.postDelayed(
                 checkNotNull(slideshowAdvance),
-                GallerySlideshowPolicy.DEFAULT_INTERVAL_MS,
+                slideshowInterval.intervalMs,
             )
         }
 
@@ -3459,6 +3496,13 @@ class GalleryActivity : Activity() {
                 subtitle = "When on, videos repeat continuously while they remain open in the viewer.",
                 checked = settings.loopVideos,
             ) { setBooleanSetting(LOOP_VIDEOS_KEY, it) },
+        )
+        library.addView(
+            settingChoiceRow(
+                title = "Slideshow speed",
+                subtitle = "Choose how long each photo remains visible before the slideshow advances.",
+                value = settings.slideshowInterval.label,
+            ) { showSlideshowIntervalDialog() },
         )
         library.addView(settingsSectionHeader("Deletion & recovery"))
         library.addView(
@@ -4065,6 +4109,96 @@ class GalleryActivity : Activity() {
         )
     }
 
+    private fun showSlideshowIntervalDialog() {
+        val current = currentUserSettings().slideshowInterval
+        var dialog: AlertDialog? = null
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(14))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_OVERLAY_DP,
+            )
+        }
+        panel.addView(TextView(this).apply {
+            text = "Slideshow speed"
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        panel.addView(TextView(this).apply {
+            text = "Choose the delay between photos. This is a local presentation preference and does not change media files."
+            setTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            setLineSpacing(0f, 1.06f)
+            setPadding(0, dp(4), 0, dp(14))
+        })
+
+        GallerySlideshowInterval.entries.forEach { interval ->
+            panel.addView(
+                glazeDialogChoiceRow(
+                    title = interval.label,
+                    subtitle = when (interval) {
+                        GallerySlideshowInterval.FAST -> "Move quickly through the current authorized photo collection"
+                        GallerySlideshowInterval.NORMAL -> "Use the Gallery default slideshow pace"
+                        GallerySlideshowInterval.RELAXED -> "Keep each photo visible longer"
+                    },
+                    selected = interval == current,
+                ) {
+                    galleryPreferences().edit()
+                        .putString(SLIDESHOW_INTERVAL_KEY, interval.storedValue)
+                        .apply()
+                    renderSettingsDestinationOnly()
+                    dialog?.dismiss()
+                },
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = dp(7)
+                },
+            )
+        }
+
+        panel.addView(TextView(this).apply {
+            text = "Cancel"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setTextColor(accentColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            background = roundedSurface(Color.TRANSPARENT, 16)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Cancel slideshow speed selection"
+            setOnClickListener { dialog?.dismiss() }
+        })
+
+        dialog = AlertDialog.Builder(this)
+            .setView(panel)
+            .create()
+        dialog?.setOnShowListener {
+            dialog?.window?.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(Color.TRANSPARENT),
+            )
+            dialog?.window?.setDimAmount(0.42f)
+            dialog?.window?.setLayout(
+                resources.displayMetrics.widthPixels - dp(32),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+        }
+        dialog?.show()
+        dialog?.window?.setBackgroundDrawable(
+            android.graphics.drawable.ColorDrawable(Color.TRANSPARENT),
+        )
+        dialog?.window?.setDimAmount(0.42f)
+        dialog?.window?.setLayout(
+            resources.displayMetrics.widthPixels - dp(32),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+    }
+
     private fun showSortPreferenceDialog() {
         val current = currentUserSettings().sortPreference
         var dialog: AlertDialog? = null
@@ -4359,11 +4493,15 @@ class GalleryActivity : Activity() {
             sortPreference = GallerySortPreference.fromStored(
                 preferences.getString(SORT_PREFERENCE_KEY, GallerySortPreference.NEWEST.storedValue),
             ),
+            pinnedAlbumIds = preferences.getStringSet(PINNED_ALBUM_IDS_KEY, emptySet()).orEmpty().toSet(),
             includedAlbumIds = preferences.getStringSet(INCLUDED_ALBUM_IDS_KEY, emptySet()).orEmpty().toSet(),
             excludedAlbumIds = preferences.getStringSet(EXCLUDED_ALBUM_IDS_KEY, emptySet()).orEmpty().toSet(),
             showHiddenItems = preferences.getBoolean(SHOW_HIDDEN_ITEMS_KEY, false),
             playVideosAutomatically = preferences.getBoolean(PLAY_VIDEOS_AUTOMATICALLY_KEY, false),
             loopVideos = preferences.getBoolean(LOOP_VIDEOS_KEY, false),
+            slideshowInterval = GallerySlideshowInterval.fromStored(
+                preferences.getString(SLIDESHOW_INTERVAL_KEY, GallerySlideshowInterval.NORMAL.storedValue),
+            ),
             animateGifThumbnails = preferences.getBoolean(ANIMATE_GIF_THUMBNAILS_KEY, false),
             deleteEmptyFolders = preferences.getBoolean(DELETE_EMPTY_FOLDERS_KEY, false),
             moveDeletedItemsToRecycleBin = preferences.getBoolean(MOVE_DELETED_TO_RECYCLE_BIN_KEY, true),
@@ -4470,11 +4608,13 @@ class GalleryActivity : Activity() {
             .put("viewDensity", settings.viewDensity.storedValue)
             .put("groupingMode", settings.groupingMode.storedValue)
             .put("sortPreference", settings.sortPreference.storedValue)
+            .put("pinnedAlbumIds", stringSetJson(settings.pinnedAlbumIds))
             .put("includedAlbumIds", stringSetJson(settings.includedAlbumIds))
             .put("excludedAlbumIds", stringSetJson(settings.excludedAlbumIds))
             .put("showHiddenItems", settings.showHiddenItems)
             .put("playVideosAutomatically", settings.playVideosAutomatically)
             .put("loopVideos", settings.loopVideos)
+            .put("slideshowInterval", settings.slideshowInterval.storedValue)
             .put("animateGifThumbnails", settings.animateGifThumbnails)
             .put("deleteEmptyFolders", settings.deleteEmptyFolders)
             .put("moveDeletedItemsToRecycleBin", settings.moveDeletedItemsToRecycleBin)
@@ -4500,12 +4640,23 @@ class GalleryActivity : Activity() {
         val importedSortPreference =
             GallerySortPreference.entries.firstOrNull { it.storedValue == rawSortPreference }
                 ?: throw IllegalArgumentException("Unsupported sort preference")
+        val rawSlideshowInterval = json.optString(
+            "slideshowInterval",
+            current.slideshowInterval.storedValue,
+        )
+        val importedSlideshowInterval =
+            GallerySlideshowInterval.entries.firstOrNull { it.storedValue == rawSlideshowInterval }
+                ?: throw IllegalArgumentException("Unsupported slideshow interval")
 
         galleryPreferences().edit()
             .putString(FILE_LOADING_PRIORITY_KEY, importedPriority.storedValue)
             .putString(VIEW_DENSITY_KEY, importedDensity.storedValue)
             .putString(GROUPING_MODE_KEY, importedGrouping.storedValue)
             .putString(SORT_PREFERENCE_KEY, importedSortPreference.storedValue)
+            .putStringSet(
+                PINNED_ALBUM_IDS_KEY,
+                json.optJSONArray("pinnedAlbumIds")?.let(::jsonStringSet) ?: current.pinnedAlbumIds,
+            )
             .putStringSet(
                 INCLUDED_ALBUM_IDS_KEY,
                 json.optJSONArray("includedAlbumIds")?.let(::jsonStringSet) ?: current.includedAlbumIds,
@@ -4520,6 +4671,7 @@ class GalleryActivity : Activity() {
                 json.optBoolean("playVideosAutomatically", current.playVideosAutomatically),
             )
             .putBoolean(LOOP_VIDEOS_KEY, json.optBoolean("loopVideos", current.loopVideos))
+            .putString(SLIDESHOW_INTERVAL_KEY, importedSlideshowInterval.storedValue)
             .putBoolean(
                 ANIMATE_GIF_THUMBNAILS_KEY,
                 json.optBoolean("animateGifThumbnails", current.animateGifThumbnails),
@@ -5062,11 +5214,13 @@ class GalleryActivity : Activity() {
         const val VIEW_DENSITY_KEY = "view_density"
         const val GROUPING_MODE_KEY = "grouping_mode"
         const val SORT_PREFERENCE_KEY = "sort_preference"
+        const val PINNED_ALBUM_IDS_KEY = "pinned_album_ids"
         const val INCLUDED_ALBUM_IDS_KEY = "included_album_ids"
         const val EXCLUDED_ALBUM_IDS_KEY = "excluded_album_ids"
         const val SHOW_HIDDEN_ITEMS_KEY = "show_hidden_items"
         const val PLAY_VIDEOS_AUTOMATICALLY_KEY = "play_videos_automatically"
         const val LOOP_VIDEOS_KEY = "loop_videos"
+        const val SLIDESHOW_INTERVAL_KEY = "slideshow_interval"
         const val ANIMATE_GIF_THUMBNAILS_KEY = "animate_gif_thumbnails"
         const val DELETE_EMPTY_FOLDERS_KEY = "delete_empty_folders"
         const val MOVE_DELETED_TO_RECYCLE_BIN_KEY = "move_deleted_items_to_recycle_bin"
