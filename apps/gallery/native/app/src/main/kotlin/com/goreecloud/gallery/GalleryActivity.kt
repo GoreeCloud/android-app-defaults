@@ -918,7 +918,10 @@ class GalleryActivity : Activity() {
                                     selectedUris.addAll(
                                         GallerySelectionPolicy.selectAll(currentScope),
                                     )
-                                    renderSelectionState()
+                                    refreshRenderedSelectionState()
+                                    updateHeader()
+                                    renderNavigation()
+                                    announceSelectionCount()
                                 }
                                 true
                             }
