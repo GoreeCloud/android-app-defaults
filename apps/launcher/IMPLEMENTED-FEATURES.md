@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 2, 2026 — compact Search, clean starter Home, and visual onboarding
+
+Protected PR #194 integrates the representative-device density and onboarding tranche. Universal Search uses denser ordinary results, compact per-app shortcut rows with action glyphs, a distinct Top result, tighter section spacing, and bounded ellipsis for long labels. Search Sources uses compact navigation chrome, keeps Suggestion tabs inside the normal scroll content, shortens list-level status copy, preserves full connected-source representation, and keeps technical/privacy detail in expandable rows.
+
+Fresh starter provisioning no longer places first-party Calendar or Quick actions widgets automatically and sets the starter Home card to Off without changing the established persisted fallback for existing users. The narrow migration/repair path removes only reserved historical starter widget identities; user-created widget placements remain untouched. The full built-in widget catalog stays available from Edit Home → Widgets.
+
+The first-run wizard now uses a top progress treatment, distinct accent identity, miniature Search-mode previews, compact Home/Grid/Dock choices, concise feature cards, a gesture strip, and Learn more for advanced details instead of a documentation-style page. Post-setup hints use the same concise visual language.
+
+Exact PR head `ef21e27304071c332ec72b2c1497332c6be2dbf9` passed Mandatory app migration provenance #660, Android Development Foundation #1152, Migrated Android apps CI #686, and Protected promotion #640 before squash merge as `a318fd982d0fa7ba437cca1a2a1fad5fcfe16be3`. Exact-head sidecar artifact `11250649680` contains package `com.goreecloud.launcher.dev`, version `0.1.0-dev`, versionCode `1000686`, APK SHA-256 `53cf5ae8864b98a61c8fa5309f19096434c9bd4fab652ee85adcb9b381f5c7bd`, and declares `ci-debug-installability-only` signing with update-in-place continuity not established.
+
+**Acceptance boundary:** Development integration only. CI-686 is staged for representative-device visual retesting. Protected Development signing/update continuity, accessibility/large-text/landscape/foldable acceptance, Release Candidate, Production, Stable, Seal, and Anchor remain open.
+
 ## October 2, 2026 — representative-device UI correction after CI-649
 
 Protected PR #192 integrates the first screenshot-driven follow-up after the CI-649 representative-device pass. Launcher-owned Calendar, Weather, and Quick actions Home widgets now use lighter wallpaper-aware Glaze surfaces; Edit Home and New Folder replace visible font/Unicode pseudo-icons with Launcher-owned vector geometry; Edit Home page previews use widget-specific miniature structures instead of generic blue blocks; the App Drawer sort/new-folder/settings artwork and sort popup are visually aligned to the dark Glaze drawer; fixed five-column Drawer labels use bounded single-line ellipsis; and Universal Search Sources keeps the complete registered connected-source catalog visible even when an optional handoff application is unavailable.
