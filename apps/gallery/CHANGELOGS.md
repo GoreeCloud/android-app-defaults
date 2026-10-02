@@ -1,5 +1,17 @@
 # GoreeCloud Gallery Changelogs
 
+## October 2, 2026 — full app-local manual Album ordering
+
+### Added
+- Added **Move earlier** and **Move later** to ordinary Album card overflow menus when movement is available inside the album's current pinned or unpinned section.
+- Added **Reset album order** when a manual order override exists; reset preserves Pin/Unpin state and restores the current Newest/Oldest-derived base order for ordinary Albums.
+- Persisted ordered album identifiers as non-secret Gallery-local presentation state and included the ordered list in the existing additive settings export/import envelope.
+- Preserved temporarily unavailable stored identifiers during active moves while ignoring them for rendering, so permission/visibility churn does not fabricate albums or silently erase the local preference.
+- Added pure ordering/overflow/default-state regression coverage.
+
+### Boundary
+Manual Album ordering changes only Gallery presentation. It does not rename folders, move/copy media, create collections, widen Android media authority, merge profiles, or contact a network/cloud service. Representative-device/accessibility/persistence acceptance and broader album creation/rename workflows remain open.
+
 ## October 1, 2026 — opt-in animated GIF thumbnails
 
 ### Added
