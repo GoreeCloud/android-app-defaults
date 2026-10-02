@@ -33,10 +33,15 @@ object KeyboardLayout {
         keys("ش", "س", "ي", "ب", "ل", "ا", "ت", "ن", "م", "ك", "ط"),
         keys("ئ", "ء", "ؤ", "ر", "لا", "ى", "ة", "و", "ز", "ظ"),
     )
-    private val symbolRows = listOf(
+    private val englishSymbolRows = listOf(
         keys("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
         keys("@", "#", "$", "%", "&", "-", "+", "(", ")"),
         keys("*", "\"", "'", ":", ";", "!", "?"),
+    )
+    private val arabicSymbolRows = listOf(
+        keys("١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩", "٠"),
+        keys("@", "#", "$", "٪", "&", "-", "+", "(", ")"),
+        keys("*", "\"", "'", ":", "؛", "!", "؟", "،"),
     )
     private val moreSymbolRows = listOf(
         keys("[", "]", "{", "}", "<", ">", "=", "\\", "|"),
@@ -88,6 +93,12 @@ object KeyboardLayout {
             KeyboardLanguage.ARABIC -> arabicNumberRow
         }
 
+    fun letterPunctuation(language: KeyboardLanguage = activeLanguage): List<String> =
+        when (language) {
+            KeyboardLanguage.ENGLISH_US -> listOf(",", ".")
+            KeyboardLanguage.ARABIC -> listOf("،", ".")
+        }
+
     fun characterRows(
         layer: KeyboardLayer,
         language: KeyboardLanguage = activeLanguage,
@@ -96,7 +107,10 @@ object KeyboardLayout {
             KeyboardLanguage.ENGLISH_US -> englishLetterRows
             KeyboardLanguage.ARABIC -> arabicLetterRows
         }
-        KeyboardLayer.SYMBOLS -> symbolRows
+        KeyboardLayer.SYMBOLS -> when (language) {
+            KeyboardLanguage.ENGLISH_US -> englishSymbolRows
+            KeyboardLanguage.ARABIC -> arabicSymbolRows
+        }
         KeyboardLayer.SYMBOLS_MORE -> moreSymbolRows
         KeyboardLayer.EMOJI -> emojiRows(EmojiCategory.SMILEYS)
     }
