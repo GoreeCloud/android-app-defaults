@@ -1,5 +1,18 @@
 # GoreeCloud Gallery Changelogs
 
+## October 2, 2026 — preserve-original MediaStore Copy
+
+### Added
+- Added **Copy** to bounded Gallery multi-select alongside the existing Move path.
+- Added existing-folder Copy destinations derived only from the current Android-authorized album/path snapshot while excluding every selected source path.
+- Added **Create & copy** with Pictures / Movies / DCIM rooting based on selected media type, including mixed-source selections.
+- Added deterministic bounded destination-name collision handling using `(copy)`, `(copy 2)`, and later suffixes.
+- Added a MediaStore Copy executor that creates `IS_PENDING` destination rows, streams exact selected source bytes, publishes only successful outputs, and cleans failed partial rows best-effort.
+- Added core and adapter policy coverage for foreign selections, metadata conflicts, new-folder authority, naming, canonical URIs, duplicate sources, and MIME/collection mismatch.
+
+### Boundary
+Copy preserves originals and does not use Move's Android write-authorization request. It adds no arbitrary filesystem, network, cloud, account, synchronization, cross-profile, source-overwrite, source-delete, or source-move authority. Representative-device/OEM/profile, large-file/failure, metadata-fidelity, accessibility, performance, and release acceptance remain open.
+
 ## October 1, 2026 — pinned Albums and configurable slideshow pace
 
 ### Added
