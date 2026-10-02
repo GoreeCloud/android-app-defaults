@@ -232,7 +232,8 @@ class GalleryActivity : Activity() {
         if (
             pendingMediaMutation != null ||
             pendingMediaMove != null ||
-            mediaMoveExecutionInProgress
+            mediaMoveExecutionInProgress ||
+            mediaCopyExecutionInProgress
         ) return
         if (destination == GalleryDestination.SETTINGS) {
             renderCurrentDestination()
@@ -845,7 +846,7 @@ class GalleryActivity : Activity() {
             else -> "No eligible move destination is available for this selection"
         }
         val copyDescription = when {
-            !copySupported -> "Copy requires Android 10 or newer"
+            !copySupported -> "Copy requires Android 11 or newer in this Development build"
             copyDestinations.isNotEmpty() && newCopyFolderParent != null ->
                 "Copy selected media while preserving the originals, or create a new folder inside $newCopyFolderParent"
             copyDestinations.isNotEmpty() -> "Copy selected media to another authorized local folder"
@@ -2712,7 +2713,7 @@ class GalleryActivity : Activity() {
 
     private fun showCopyDestinationDialog() {
         if (!AndroidMediaCopyRequests.isSupported()) {
-            Toast.makeText(this, "Copy requires Android 10 or newer.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Copy requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
             return
         }
         if (pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
@@ -2951,7 +2952,7 @@ class GalleryActivity : Activity() {
     private fun requestMediaCopy(items: List<MediaItem>, destinationRelativePath: String) {
         if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
         if (!AndroidMediaCopyRequests.isSupported()) {
-            Toast.makeText(this, "Copy requires Android 10 or newer.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Copy requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
             return
         }
 
