@@ -36,8 +36,10 @@ class WorkspaceAuthoritativePlacementObserverRuntimeTest {
         context = InstrumentationRegistry.getInstrumentation().targetContext
         context.deleteDatabase(DATABASE_NAME)
         database = openDatabase()
-        workspaceDataStoreFile = File(context.cacheDir, WORKSPACE_DATASTORE_FILE)
-        workspaceDataStoreFile.delete()
+        workspaceDataStoreFile = File(
+            context.cacheDir,
+            "launcher-authoritative-observer-${System.nanoTime()}.preferences_pb",
+        )
     }
 
     @After
@@ -56,7 +58,7 @@ class WorkspaceAuthoritativePlacementObserverRuntimeTest {
 
         assertEquals(
             WorkspaceAuthoritativePlacementState.WaitingForInitialization,
-            observer.observe().first(),
+            withTimeout(5_000) { observer.observe().first() },
         )
 
         repository.ensureDefaults(INITIAL_FAVORITES, INITIAL_DOCK)
@@ -221,7 +223,7 @@ class WorkspaceAuthoritativePlacementObserverRuntimeTest {
 
     private companion object {
         const val DATABASE_NAME = "launcher-authoritative-observer-test.db"
-        const val WORKSPACE_DATASTORE_FILE = "launcher-authoritative-observer.preferences_pb"
+        const val WORKSPACE_DATASTORE_FILE_PREFIX = "launcher-authoritative-observer"
         const val DATASTORE_ADDED = "10:com.example.datastore-added/.MainActivity"
         const val ROOM_ADDED = "10:com.example.room-added/.MainActivity"
         const val DIVERGENT_FAVORITE = "10:com.example.divergent/.MainActivity"
