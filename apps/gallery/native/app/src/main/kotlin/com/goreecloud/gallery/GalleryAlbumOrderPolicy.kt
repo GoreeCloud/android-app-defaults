@@ -73,7 +73,13 @@ internal object GalleryAlbumOrderPolicy {
             GalleryAlbumMoveDirection.EARLIER -> groupIndex - 1
             GalleryAlbumMoveDirection.LATER -> groupIndex + 1
         }
-        if (targetGroupIndex !in group.indices) return preferredAlbumOrderIds.distinct()
+        val availableSet = availableAlbumIds
+            .filter(String::isNotBlank)
+            .toSet()
+        val stale = preferredAlbumOrderIds
+            .filter { it.isNotBlank() && it !in availableSet }
+            .distinct()
+        if (targetGroupIndex !in group.indices) return ordered + stale
 
         val targetId = group[targetGroupIndex]
         val mutable = ordered.toMutableList()
@@ -83,10 +89,6 @@ internal object GalleryAlbumOrderPolicy {
         mutable[to] = mutable[from]
         mutable[from] = displaced
 
-        val availableSet = availableAlbumIds.toSet()
-        val stale = preferredAlbumOrderIds
-            .filter { it.isNotBlank() && it !in availableSet }
-            .distinct()
         return mutable + stale
     }
 }
