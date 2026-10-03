@@ -459,6 +459,7 @@ private enum class WizardVisualSymbol {
     FOLDER,
     SEARCH,
     GESTURE,
+    EDIT,
 }
 
 @Composable
@@ -733,25 +734,43 @@ private fun WizardGestureStrip() {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+                Triple("Swipe up", "Apps", WizardVisualSymbol.APPS),
+                Triple("Swipe down", "Search", WizardVisualSymbol.SEARCH),
+                Triple("Hold", "Edit", WizardVisualSymbol.EDIT),
+            ).forEach { (gesture, destination, symbol) ->
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                        GlazeMetrics.radiusPill,
+                        GlazeMetrics.radiusMedium,
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
+                    Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        WizardVisualGlyph(
+                            symbol = symbol,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                gesture,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                            Text(
+                                destination,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -849,6 +868,13 @@ private fun WizardVisualGlyph(
                 line(0.50f, 0.20f, 0.32f, 0.38f)
                 line(0.50f, 0.20f, 0.68f, 0.38f)
             }
+            WizardVisualSymbol.EDIT -> {
+                line(0.25f, 0.74f, 0.68f, 0.31f)
+                line(0.68f, 0.31f, 0.78f, 0.41f)
+                line(0.78f, 0.41f, 0.35f, 0.84f)
+                line(0.25f, 0.74f, 0.35f, 0.84f)
+                line(0.24f, 0.86f, 0.40f, 0.82f)
+            }
         }
     }
 }
@@ -885,7 +911,7 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or the Favorites filter when you want them together.",
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
