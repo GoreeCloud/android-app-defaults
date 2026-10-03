@@ -3339,9 +3339,9 @@ private enum class LauncherSearchSourceSection(
     val title: String,
     val subtitle: String,
 ) {
-    DEVICE("On-device", "Fast local sources with no network query"),
-    PERSONAL("Your content", "Permission-scoped personal data and selected folders"),
-    CONNECTED("Connected", "External services and reviewed inline adapters"),
+    DEVICE("On-device", "Local and private"),
+    PERSONAL("Your content", "Permissions and selected folders"),
+    CONNECTED("Connected", "Optional online services"),
 }
 
 private fun sourceSectionFor(
