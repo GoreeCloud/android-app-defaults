@@ -404,6 +404,7 @@ class LauncherPreferencesRepository(
         val hiddenAppKeys = stringSetPreferencesKey("hidden_app_keys_v1")
         val drawerPinnedAppKeys = stringSetPreferencesKey("drawer_pinned_app_keys_v1")
         val drawerPinnedAppOrder = stringPreferencesKey("drawer_pinned_app_order_v1")
+        val drawerCustomAppOrder = stringPreferencesKey("drawer_custom_app_order_v1")
         val drawerSortOrderName = stringPreferencesKey("drawer_sort_order_name_v1")
         val portableRestoreJournal = stringPreferencesKey("portable_restore_journal_v1")
     }
@@ -468,6 +469,14 @@ class LauncherPreferencesRepository(
 
     val drawerPinnedAppOrder: Flow<List<String>> = drawerPinnedState
         .map { it.order }
+        .distinctUntilChanged()
+
+    /**
+     * Device-local custom application order for the App Drawer. Exact profile-qualified workspace
+     * keys are stored separately from pin membership/order and remain outside portable v1.
+     */
+    val drawerCustomAppOrder: Flow<List<String>> = dataStore.data
+        .map { values -> LauncherDrawerCustomOrder.decode(values[Keys.drawerCustomAppOrder]) }
         .distinctUntilChanged()
 
     /**
@@ -1024,6 +1033,20 @@ class LauncherPreferencesRepository(
                 pinnedKeys = pinnedKeys,
             )
             values[Keys.drawerPinnedAppOrder] = LauncherDrawerPinnedOrder.encode(reconciled)
+        }
+    }
+
+    fun setDrawerCustomAppOrder(order: List<String>): Job = scope.launch {
+        val normalized = order.asSequence()
+            .filterNot(String::isBlank)
+            .distinct()
+            .toList()
+        dataStore.edit { values ->
+            if (normalized.isEmpty()) {
+                values.remove(Keys.drawerCustomAppOrder)
+            } else {
+                values[Keys.drawerCustomAppOrder] = LauncherDrawerCustomOrder.encode(normalized)
+            }
         }
     }
 
