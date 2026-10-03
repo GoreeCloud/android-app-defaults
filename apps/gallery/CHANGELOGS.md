@@ -1,5 +1,19 @@
 # GoreeCloud Gallery Changelogs
 
+## October 3, 2026 — system-gallery entry-point candidate
+
+### Added
+- Added the Android app-gallery category to the canonical Gallery Activity for OS-level Gallery discovery.
+- Added a dedicated exported image/video VIEW, REVIEW, and REVIEW_SECURE Activity that renders only the caller-supplied local `content:` or `file:` URI.
+- Added fail-closed intent policy coverage that rejects remote schemes and unsupported media types.
+- Added `ACCESS_MEDIA_LOCATION` declaration so an OS-owned system-gallery role can apply Android's standard media-location permission policy when appropriate.
+
+### Security and privacy boundary
+The external viewer does not enumerate the device library, perform network access, accept http(s) media, or broaden MediaStore mutation authority. Secure review uses a secure window. Default-role assignment and any replacement of the Lineage gallery remain the responsibility of the GoreeCloud OS Mobile distribution, not a side effect of installing the Gallery APK.
+
+### Verification boundary
+Fresh exact-head source/unit/lint/build and Android 16 runtime validation are required before integration. Physical `dre` role/default routing and rollback remain separate GoreeCloud OS Mobile acceptance gates.
+
 ## October 3, 2026 — bottom-navigation optical alignment
 
 ### Changed
