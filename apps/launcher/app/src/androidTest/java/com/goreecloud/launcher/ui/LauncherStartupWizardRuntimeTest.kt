@@ -3,6 +3,7 @@ package com.goreecloud.launcher.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -102,8 +103,10 @@ class LauncherStartupWizardRuntimeTest {
         composeRule.onNodeWithText("Search and gestures")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Apps")
+        composeRule.onNodeWithText("Everyday controls")
             .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Swipe up for Apps")
             .assertIsDisplayed()
         composeRule.onNodeWithText("Widgets")
             .performScrollTo()
@@ -133,9 +136,9 @@ class LauncherStartupWizardRuntimeTest {
             }
         }
 
-        composeRule.onNodeWithText("↑  Apps").assertIsDisplayed()
-        composeRule.onNodeWithText("↓  Search").assertIsDisplayed()
-        composeRule.onNodeWithText("Hold  Edit").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Swipe up for Apps").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Swipe down for Search").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Hold Home to edit").assertIsDisplayed()
         composeRule.onNodeWithText("Place precisely").assertIsDisplayed()
         composeRule.onNodeWithText(
             "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
