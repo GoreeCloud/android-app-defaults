@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 2, 2026 — widget and glyph polish follow-up candidate
+
+This follow-up continues the representative-device visual cleanup after the compact Search/onboarding integration. Launcher-owned built-in widgets remain opt-in on Home, but the widgets and picker themselves now receive a denser presentation pass: Quick actions becomes one compact four-action rail instead of a bulky 2×2 button block; Search, Battery, overflow, analog-clock preview, pinned-state, selection, result-category, Search Sources reorder, and onboarding gesture affordances use Launcher-owned vector geometry instead of font/Unicode pseudo-icons; compact Weather presentation uses a smaller 48 dp interaction-safe footprint and shorter permission copy; and first-party widget-picker cards use smaller previews, inline span metadata, bounded descriptions, and tighter installed-widget rows.
+
+The source guard now rejects the reviewed pseudo-glyph characters in the three Launcher-owned UI surfaces covered by this pass so OEM font differences cannot silently reintroduce inconsistent iconography.
+
+No widget, Search provider, permission, account, network, query-retention, workspace, profile, or Home-placement authority changes in this candidate. Built-in widgets remain user-added rather than starter-provisioned.
+
+**Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. Representative-device visual retest, accessibility/large-text/form-factor acceptance, protected Development signing/update continuity, Release Candidate, Production, and Stable remain open.
+
 ## October 2, 2026 — compact Search, clean starter Home, and visual onboarding candidate
 
 Representative-device CI-661 screenshots and owner feedback exposed a density/first-run tranche that remained outside the previous visual corrections. Universal Search shortcut results still consumed large vertical cards; Search Sources repeated its title in an oversized card and kept the large Suggestion tabs control outside the scrolling source list; fresh starter Home still inherited automatic first-party cards; and onboarding presented several operational concepts as long documentation paragraphs.
