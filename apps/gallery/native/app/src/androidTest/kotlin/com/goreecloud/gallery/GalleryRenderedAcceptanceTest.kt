@@ -343,10 +343,7 @@ class GalleryRenderedAcceptanceTest {
                     .map(root::getChildAt)
                     .filterIsInstance<LinearLayout>()
                     .filter { candidate ->
-                        val labels = (0 until candidate.childCount).mapNotNull { index ->
-                            (candidate.getChildAt(index) as? TextView)?.text?.toString()
-                        }
-                        labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
+                        isPrimaryNavigationCapsule(candidate)
                     }
 
                 if (capsules.size != 1) {
