@@ -1,23 +1,12 @@
 # GoreeCloud Launcher — Implemented Features
 
-## October 3, 2026 — App Lock and UI polish
+## October 3, 2026 — App Lock and owner-feedback UI candidate
 
-Development source adds App Lock controls, the requested floating Dock treatment, improved glyphs, a clearer phone widget catalog, and lighter setup/help presentation. Broader representative-device acceptance remains open.
+Development source now contains device-local, profile-qualified **App Lock** membership, a **Privacy & security** settings destination, app-context Lock/Unlock actions, and Android device-authentication gating for Launcher-originated app and app-shortcut launches. The App Lock manager includes app search, **All / Locked** filtering, per-app switches, Personal/Work plus package context, and empty-state handling. Apps grid, compact, list, and category views expose a small Launcher-owned lock mark and accessible locked-state semantics. Startup setup also surfaces App Lock directly.
 
-## October 3, 2026 — App Lock and owner-feedback UI tranche
+The same Development source makes the ordinary Dock background-free, keeps material behind only the intentional Edge/drag-feedback states, removes the wallpaper-backed pill around Home page dots, uses a readable single-column built-in widget catalog on phone widths, reduces setup/help visual weight, replaces the Apps search text close mark with a vector glyph, and refines Settings/Search-source vector geometry. App Lock stores no PIN, password, biometric material, authentication token, telemetry, or network state; Android remains the authentication authority.
 
-Development source now includes profile-qualified App Lock controls, Android authentication before Launcher-originated launches of selected apps, a Privacy & security settings destination, a background-free floating Dock, refined Launcher-owned glyphs, a one-column phone widget catalog, and lighter setup/help presentation. App Lock state is device-local and does not claim control over launches initiated outside GoreeCloud Launcher.
-
-**Acceptance boundary:** Development only. Representative-device security, accessibility, large-text, form-factor, protected signing/update continuity, release, Stable, Seal, and Anchor gates remain open.
-
-## October 3, 2026 — App Lock and owner-feedback presentation tranche
-
-Development source now contains device-local, profile-qualified App Lock membership, a **Privacy & security** settings destination, per-app Lock/Unlock context actions, and Android device-credential gating before Launcher-originated app launches. The implementation stores no PIN, password, biometric material, authentication token, telemetry, or network state. When Android has no secure screen lock or cannot provide an authentication intent, the protected launch fails closed.
-
-Presentation changes in the same tranche make the ordinary Dock background-free, keep Edge/drag feedback bounded, switch phone widget browsing to a readable one-column catalog, reduce setup and hint visual weight, replace the literal default-HOME warning character with a vector glyph, add a dedicated security glyph, round line caps across Launcher-owned settings/context vectors, and refine Search Sources contact/call icon geometry.
-
-**Acceptance boundary:** implemented in Development source only. System-wide app blocking is not claimed; direct launches outside GoreeCloud Launcher are outside this feature's authority. Representative-device security/interaction acceptance, accessibility/reflow/form-factor validation, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
-
+**Acceptance boundary:** implemented in the active Development candidate, not yet integrated into authoritative main. App Lock does not claim system-wide blocking: launches that originate outside GoreeCloud Launcher remain outside this feature's authority. Current-head protected validation, representative-device security/interaction acceptance, accessibility/reflow/form-factor validation, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
 
 ## October 3, 2026 — onboarding and Search-source scanability follow-up
 
