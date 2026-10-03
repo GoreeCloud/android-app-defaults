@@ -1638,7 +1638,13 @@ class GalleryActivity : Activity() {
             }
             isClickable = true
             isFocusable = true
+            GalleryInteractionFeedback.applyBoundedRipple(
+                this,
+                foregroundColor,
+                GalleryGlazeContract.SHAPE_CAPSULE_DP,
+            )
             isSelected = selected
+            tooltipText = filter.label + " videos"
             contentDescription = filter.label + " videos" + if (selected) ", selected" else ""
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 stateDescription = if (selected) "Selected" else null
@@ -2411,6 +2417,7 @@ class GalleryActivity : Activity() {
             isClickable = true
             isLongClickable = true
             isFocusable = true
+            GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, cornerDp)
             isSelected = selected
             contentDescription = mediaTileContentDescription(item, selected)
             setOnClickListener {
