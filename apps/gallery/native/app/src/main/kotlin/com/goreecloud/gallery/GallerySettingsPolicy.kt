@@ -92,6 +92,8 @@ enum class GalleryNavigationDisplayMode(
     ;
 
     companion object {
+        const val PREFERENCE_KEY = "navigation_display_mode"
+
         fun fromStored(value: String?): GalleryNavigationDisplayMode =
             entries.firstOrNull { it.storedValue == value } ?: ICONS_ONLY
     }
