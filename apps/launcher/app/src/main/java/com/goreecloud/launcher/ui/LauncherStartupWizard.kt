@@ -98,6 +98,11 @@ fun LauncherStartupWizard(
 
     val selectedHomeAppMode = runCatching { LauncherHomeAppMode.valueOf(homeAppModeName) }
         .getOrDefault(LauncherHomeAppMode.NONE)
+    val selectedHomeAppLabel = when (selectedHomeAppMode) {
+        LauncherHomeAppMode.NONE -> "None"
+        LauncherHomeAppMode.RECENT -> "Recent"
+        LauncherHomeAppMode.MOST_USED -> "Most used"
+    }
     val selectedSearchMode = runCatching {
         LauncherUniversalSearchHomeMode.valueOf(searchModeName)
     }.getOrDefault(LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY)
@@ -113,9 +118,9 @@ fun LauncherStartupWizard(
         else -> "Search and gestures"
     }
     val stepSummary = when (step) {
-        0 -> "Set the essentials. Everything stays adjustable later."
-        1 -> "Choose what appears automatically; start clean if you prefer."
-        else -> "Pick how Search appears and learn the core gestures at a glance."
+        0 -> "Choose the essentials. Change anything later."
+        1 -> "Start clean, then choose what appears automatically."
+        else -> "Choose Search and learn the core gestures."
     }
     val stepSymbol = when (step) {
         0 -> WizardVisualSymbol.HOME
@@ -238,36 +243,18 @@ fun LauncherStartupWizard(
                                 accent = MaterialTheme.colorScheme.primary,
                             )
 
-                            WizardSectionTitle("Home apps")
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                WizardHomeModeCard(
-                                    title = "None",
-                                    summary = "Manual only",
-                                    symbol = WizardVisualSymbol.HOME,
-                                    selected = selectedHomeAppMode == LauncherHomeAppMode.NONE,
-                                    onClick = { homeAppModeName = LauncherHomeAppMode.NONE.name },
-                                    modifier = Modifier.weight(1f),
-                                )
-                                WizardHomeModeCard(
-                                    title = "Recent",
-                                    summary = "Up to 10",
-                                    symbol = WizardVisualSymbol.GESTURE,
-                                    selected = selectedHomeAppMode == LauncherHomeAppMode.RECENT,
-                                    onClick = { homeAppModeName = LauncherHomeAppMode.RECENT.name },
-                                    modifier = Modifier.weight(1f),
-                                )
-                                WizardHomeModeCard(
-                                    title = "Most used",
-                                    summary = "Up to 10",
-                                    symbol = WizardVisualSymbol.APPS,
-                                    selected = selectedHomeAppMode == LauncherHomeAppMode.MOST_USED,
-                                    onClick = { homeAppModeName = LauncherHomeAppMode.MOST_USED.name },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
+                            WizardCompactChoiceStrip(
+                                title = "Home apps",
+                                options = listOf("None", "Recent", "Most used"),
+                                selected = selectedHomeAppLabel,
+                                onSelect = { selected ->
+                                    homeAppModeName = when (selected) {
+                                        "Recent" -> LauncherHomeAppMode.RECENT.name
+                                        "Most used" -> LauncherHomeAppMode.MOST_USED.name
+                                        else -> LauncherHomeAppMode.NONE.name
+                                    }
+                                },
+                            )
 
                             WizardSectionTitle("Grid and Dock")
                             WizardCompactChoiceStrip(
@@ -284,13 +271,13 @@ fun LauncherStartupWizard(
                             )
                             WizardSwitchRow(
                                 title = "Show Home labels",
-                                summary = "Show app names beneath Home icons.",
+                                summary = "Show names beneath Home icons.",
                                 checked = showHomeLabels,
                                 onCheckedChange = { showHomeLabels = it },
                             )
                             WizardSwitchRow(
                                 title = "Add new apps to Home",
-                                summary = "Automatically add newly discovered primary-profile apps.",
+                                summary = "Place newly installed apps on Home.",
                                 checked = addNewAppsToHome,
                                 onCheckedChange = { addNewAppsToHome = it },
                             )
@@ -374,7 +361,7 @@ fun LauncherStartupWizard(
 
                             WizardSwitchRow(
                                 title = "Show Launcher hints",
-                                summary = "Show short, dismissible usage hints. You can re-enable them later.",
+                                summary = "Show short, dismissible usage tips.",
                                 checked = showHints,
                                 onCheckedChange = { showHints = it },
                             )
@@ -603,7 +590,7 @@ private fun WizardSearchModeCard(
     val accent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 132.dp),
+        modifier = modifier.heightIn(min = 120.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = if (selected) {
             accent.copy(alpha = 0.14f)
@@ -721,8 +708,19 @@ private fun WizardSearchPreview(
     }
 }
 
+private enum class WizardGestureKind {
+    UP,
+    DOWN,
+    HOLD,
+}
+
 @Composable
 private fun WizardGestureStrip() {
+    val cues = listOf(
+        WizardGestureKind.UP to "Apps",
+        WizardGestureKind.DOWN to "Search",
+        WizardGestureKind.HOLD to "Edit",
+    )
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
@@ -732,11 +730,7 @@ private fun WizardGestureStrip() {
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+            cues.forEach { (kind, label) ->
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
@@ -744,15 +738,73 @@ private fun WizardGestureStrip() {
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
+                    Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        WizardGestureGlyph(
+                            kind = kind,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.size(5.dp))
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureGlyph(
+    kind: WizardGestureKind,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                tint,
+                Offset(u * x1, u * y1),
+                Offset(u * x2, u * y2),
+                stroke,
+                cap = cap,
+            )
+        }
+        when (kind) {
+            WizardGestureKind.UP -> {
+                line(0.50f, 0.80f, 0.50f, 0.22f)
+                line(0.50f, 0.22f, 0.30f, 0.42f)
+                line(0.50f, 0.22f, 0.70f, 0.42f)
+            }
+            WizardGestureKind.DOWN -> {
+                line(0.50f, 0.20f, 0.50f, 0.78f)
+                line(0.50f, 0.78f, 0.30f, 0.58f)
+                line(0.50f, 0.78f, 0.70f, 0.58f)
+            }
+            WizardGestureKind.HOLD -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.18f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(stroke),
+                )
+                drawCircle(
+                    color = tint.copy(alpha = 0.42f),
+                    radius = u * 0.34f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(stroke * 0.75f),
+                )
             }
         }
     }
@@ -885,7 +937,7 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or the Pinned filter when you want them together.",
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -975,62 +1027,6 @@ private fun WizardInfoCard(
                 summary,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun WizardHomeModeCard(
-    title: String,
-    summary: String,
-    symbol: WizardVisualSymbol,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val accent = MaterialTheme.colorScheme.primary
-    Surface(
-        onClick = onClick,
-        modifier = modifier.heightIn(min = 82.dp),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = if (selected) {
-            accent.copy(alpha = 0.13f)
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
-        },
-        border = BorderStroke(
-            1.dp,
-            if (selected) accent.copy(alpha = 0.72f)
-            else MaterialTheme.colorScheme.outlineVariant,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                WizardVisualGlyph(
-                    symbol = symbol,
-                    tint = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                RadioButton(selected = selected, onClick = null)
-            }
-            Text(
-                title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-            )
-            Text(
-                summary,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
             )
         }
     }
