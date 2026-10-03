@@ -572,18 +572,22 @@ class RecycleBinActivity : Activity() {
         navigationCapsule.visibility = View.GONE
         actionBar.visibility = View.VISIBLE
         val actions = listOf(
-            textAction("Select all", "Select all currently loaded trashed media") {
+            iconAction(R.drawable.ic_gallery_select_all, "Select all currently loaded trashed media") {
                 selectedUris.clear()
                 selectedUris.addAll(GallerySelectionPolicy.selectAll(trashedItems))
                 renderSelectionState()
             },
-            textAction("Restore", "Restore selected media through Android confirmation") {
+            iconAction(R.drawable.ic_gallery_restore, "Restore selected media through Android confirmation") {
                 requestMutation(AndroidMediaMutationMode.RESTORE)
             },
-            textAction("Delete permanently", "Permanently delete selected media through Android confirmation") {
+            iconAction(
+                R.drawable.ic_gallery_delete,
+                "Permanently delete selected media through Android confirmation",
+                destructive = true,
+            ) {
                 requestMutation(AndroidMediaMutationMode.DELETE)
             },
-            textAction("Cancel", "Clear Trash selection") {
+            iconAction(R.drawable.ic_gallery_close, "Clear Trash selection") {
                 selectedUris.clear()
                 renderSelectionState()
             },
@@ -640,9 +644,10 @@ class RecycleBinActivity : Activity() {
             setPadding(dp(10), dp(8), dp(10), dp(8))
             background = roundedSurface(0xd9141416.toInt(), 22)
         }
-        val viewerBack = viewerAction("‹", "Close Trash viewer") { closeViewer() }.apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-        }
+        val viewerBack = viewerIconAction(
+            R.drawable.ic_gallery_back,
+            "Close Trash viewer",
+        ) { closeViewer() }
         topBar.addView(viewerBack, LinearLayout.LayoutParams(dp(48), dp(48)))
         val viewerTitle = TextView(this).apply {
             setTextColor(Color.WHITE)
@@ -695,9 +700,19 @@ class RecycleBinActivity : Activity() {
             setPadding(dp(6), dp(6), dp(6), dp(6))
             background = roundedSurface(0xe8141416.toInt(), 24)
         }
-        val restore = viewerAction("Restore", "Restore this media through Android confirmation") {}
-        val purge = viewerAction("Delete permanently", "Permanently delete this media through Android confirmation") {}
-        val more = viewerAction("More", "Show details for this trashed media") {}
+        val restore = viewerIconAction(
+            R.drawable.ic_gallery_restore,
+            "Restore this media through Android confirmation",
+        ) {}
+        val purge = viewerIconAction(
+            R.drawable.ic_gallery_delete,
+            "Permanently delete this media through Android confirmation",
+            destructive = true,
+        ) {}
+        val more = viewerIconAction(
+            R.drawable.ic_gallery_more,
+            "Show details for this trashed media",
+        ) {}
         listOf(restore, purge, more).forEachIndexed { index, action ->
             bottomBar.addView(action, LinearLayout.LayoutParams(0, dp(60), 1f).apply {
                 if (index > 0) marginStart = dp(3)
@@ -911,6 +926,7 @@ class RecycleBinActivity : Activity() {
     private fun iconAction(
         iconResource: Int,
         description: String,
+        destructive: Boolean = false,
         onClick: () -> Unit,
     ): TextView = TextView(this).apply {
         text = ""
@@ -919,8 +935,9 @@ class RecycleBinActivity : Activity() {
         minWidth = dp(48)
         setPadding(dp(12), dp(12), dp(12), dp(12))
         setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
-        compoundDrawableTintList = ColorStateList.valueOf(accentColor())
-        background = roundedSurface(withAlpha(accentColor(), 0.10f), 18)
+        val foreground = if (destructive) 0xffc62828.toInt() else accentColor()
+        compoundDrawableTintList = ColorStateList.valueOf(foreground)
+        background = roundedSurface(withAlpha(foreground, if (destructive) 0.11f else 0.10f), 18)
         isClickable = true
         isFocusable = true
         contentDescription = description
@@ -940,6 +957,32 @@ class RecycleBinActivity : Activity() {
         isClickable = true
         isFocusable = true
         contentDescription = description
+        setOnClickListener { onClick() }
+    }
+
+    private fun viewerIconAction(
+        iconResource: Int,
+        description: String,
+        destructive: Boolean = false,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minHeight = dp(48)
+        minWidth = dp(48)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(
+            if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+        )
+        background = roundedSurface(
+            if (destructive) 0x28ff6b6b else 0x26ffffff,
+            18,
+        )
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
         setOnClickListener { onClick() }
     }
 
