@@ -1,5 +1,15 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — optically centered bottom navigation
+
+Icons-only bottom navigation now centers each 22dp glyph directly inside its equal-width destination slot instead of using a top compound drawable with an empty text line. This removes the vertical lift visible on-device and eliminates the accumulated horizontal skew caused by per-item start margins.
+
+Selected destinations now use a mode-aware inset Glaze control surface: icons-only keeps a compact focused pill while text-only and icons-with-text retain enough room for labels. The same shared presentation code is used by the main Gallery Activity, Trash, and the physical-device refinement layer, preventing the three paths from drifting apart.
+
+Every icon-only destination keeps its accessibility content description and selected-state semantics and now also exposes a tooltip label. The setup wizard was shortened and slightly densified so the navigation/default explanation is easier to scan without adding new setup friction.
+
+Pure policy tests and Android rendered acceptance tests lock centered icon placement, equal slot widths, even distribution, compact selected material, and tooltip availability. These are presentation changes only and add no media, storage, network, account, cloud, or mutation authority.
+
 ## October 2, 2026 — foreground live library refresh and navigation presentation
 
 The Gallery Activity now observes Android MediaStore while it is visible and debounces provider change notifications before silently re-reading the current authorized media snapshot. A live refresh does not replace the grid with the full loading panel, preserves still-valid selection, and keeps the current scroll offset when the user is already below the top. Refresh is deferred while the full-screen viewer or an Android-confirmed Gallery media mutation is active, then reconciled after that conflicting surface clears.
