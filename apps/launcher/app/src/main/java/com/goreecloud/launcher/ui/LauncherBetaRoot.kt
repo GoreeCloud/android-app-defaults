@@ -121,6 +121,7 @@ import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.LauncherDrawerBackdrop
+import com.goreecloud.launcher.core.launcher.LauncherDrawerCustomOrder
 import com.goreecloud.launcher.core.launcher.LauncherDrawerEntryMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerHeaderPresentation
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
@@ -698,6 +699,7 @@ fun LauncherBetaRoot(
     hiddenAppKeys: Set<String>,
     drawerPinnedAppKeys: Set<String>,
     drawerPinnedAppOrder: List<String>,
+    drawerCustomAppOrder: List<String>,
     drawerSortOrderName: String?,
     searchProviderPreferences: com.goreecloud.launcher.core.launcher.LauncherSearchProviderPreferenceDecodeResult?,
     fileSearchRoots: List<Uri>,
@@ -763,6 +765,7 @@ fun LauncherBetaRoot(
     onClearDrawerPinnedApps: () -> Unit,
     onMoveDrawerPinnedApp: (String, Int) -> Unit,
     onSetDrawerPinnedAppOrder: (List<String>) -> Unit,
+    onSetDrawerCustomAppOrder: (List<String>) -> Unit,
     onSetDrawerSortOrderName: (String?) -> Unit,
     onRequestUninstall: (LauncherActivityInfo) -> Unit,
     themeMode: GlazeThemeMode,
@@ -1487,6 +1490,7 @@ fun LauncherBetaRoot(
                 localLaunchCounts = localLaunchCounts,
                 pinnedAppKeys = drawerPinnedAppKeys,
                 pinnedAppOrder = drawerPinnedAppOrder,
+                customAppOrder = drawerCustomAppOrder,
                 sortOrderName = drawerSortOrderName,
                 preferences = preferences,
                 drawerLayoutMode = drawerLayoutMode,
@@ -1504,6 +1508,7 @@ fun LauncherBetaRoot(
                     folderManagerAddToHome = profileId == primaryFolderProfileId
                     showFolderManager = true
                 },
+                onSetCustomAppOrder = onSetDrawerCustomAppOrder,
                 onSetSortOrderName = onSetDrawerSortOrderName,
                 onOpenSettings = {
                     drawerSearchRequested = false
@@ -6413,9 +6418,11 @@ private fun orderedDrawerVisualEntries(
     localLaunchCounts: Map<String, Long>,
     pinnedAppKeys: Set<String>,
     pinnedAppOrder: List<String>,
+    customAppOrder: List<String>,
 ): List<LauncherDrawerVisualEntry> {
     val recentRanks = recentAppKeys.withIndex().associate { (index, key) -> key to index }
     val pinnedRanks = pinnedAppOrder.withIndex().associate { (index, key) -> key to index }
+    val customRanks = customAppOrder.withIndex().associate { (index, key) -> key to index }
     return buildList {
         apps.forEach { app ->
             add(
@@ -6452,6 +6459,12 @@ private fun orderedDrawerVisualEntries(
                     ?.app
                     ?.workspaceKey()
                     ?.let(pinnedRanks::get)
+            },
+            customRank = { entry ->
+                (entry as? LauncherDrawerVisualEntry.Application)
+                    ?.app
+                    ?.workspaceKey()
+                    ?.let(customRanks::get)
             },
         )
     }
@@ -6621,6 +6634,7 @@ private fun AppDrawerSurface(
     localLaunchCounts: Map<String, Long>,
     pinnedAppKeys: Set<String>,
     pinnedAppOrder: List<String>,
+    customAppOrder: List<String>,
     sortOrderName: String?,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
@@ -6630,6 +6644,7 @@ private fun AppDrawerSurface(
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
     onManageFolders: (Int) -> Unit,
+    onSetCustomAppOrder: (List<String>) -> Unit,
     onSetSortOrderName: (String?) -> Unit,
     onOpenSettings: () -> Unit,
     onHome: () -> Unit,
@@ -6944,6 +6959,21 @@ private fun AppDrawerSurface(
                                             )
                                         },
                                         onClick = {
+                                            if (
+                                                order == LauncherDrawerSortOrder.CUSTOM_APPS &&
+                                                customAppOrder.isEmpty()
+                                            ) {
+                                                onSetCustomAppOrder(
+                                                    apps
+                                                        .sortedWith(
+                                                            compareBy<LauncherActivityInfo> {
+                                                                it.label.toString()
+                                                                    .lowercase(Locale.ROOT)
+                                                            }.thenBy { it.workspaceKey() },
+                                                        )
+                                                        .map { it.workspaceKey() },
+                                                )
+                                            }
                                             onSetSortOrderName(order.name)
                                             showDrawerSortMenu = false
                                         },
@@ -7139,6 +7169,7 @@ private fun AppDrawerSurface(
                             localLaunchCounts = localLaunchCounts,
                             pinnedAppKeys = pinnedAppKeys,
                             pinnedAppOrder = pinnedAppOrder,
+                            customAppOrder = customAppOrder,
                             query = drawerQuery,
                             preferences = preferences,
                             drawerLayoutMode = drawerLayoutMode,
@@ -7287,6 +7318,7 @@ private fun DrawerAppsContent(
     localLaunchCounts: Map<String, Long>,
     pinnedAppKeys: Set<String>,
     pinnedAppOrder: List<String>,
+    customAppOrder: List<String>,
     query: String,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
@@ -7307,6 +7339,7 @@ private fun DrawerAppsContent(
         localLaunchCounts,
         pinnedAppKeys,
         pinnedAppOrder,
+        customAppOrder,
         sortOrder,
     ) {
         orderedDrawerVisualEntries(
@@ -7317,6 +7350,7 @@ private fun DrawerAppsContent(
             localLaunchCounts = localLaunchCounts,
             pinnedAppKeys = pinnedAppKeys,
             pinnedAppOrder = pinnedAppOrder,
+            customAppOrder = customAppOrder,
         )
     }
     if (entries.isEmpty() && query.isNotBlank()) {
