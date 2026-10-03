@@ -3237,7 +3237,7 @@ private fun compactSourceSummary(
 ): String = when (option.providerId) {
     LauncherFilesSearchProvider.PROVIDER_ID -> when (fileSearchRoots.size) {
         0 -> "No folder selected"
-        1 -> "Folders · 1 selected"
+        1 -> "1 folder selected"
         else -> "Folders · " + fileSearchRoots.size + " selected"
     }
     LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID ->
