@@ -69,6 +69,7 @@ import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
@@ -6702,7 +6703,7 @@ private fun AppDrawerSurface(
                                         } else {
                                             drawerSecondaryColor
                                         },
-                                        size = 19.dp,
+                                        glyphSize = 19.dp,
                                     )
                                 }
                             }
@@ -10185,7 +10186,7 @@ private fun DrawerPinnedMark(
             GlazePopupActionGlyph(
                 symbol = GlazePopupActionSymbol.PIN,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                size = 12.dp,
+                glyphSize = 12.dp,
             )
         }
     }
@@ -11880,9 +11881,9 @@ private enum class GlazePopupActionSymbol {
 private fun GlazePopupActionGlyph(
     symbol: GlazePopupActionSymbol,
     color: Color,
-    size: Dp = 22.dp,
+    glyphSize: Dp = 22.dp,
 ) {
-    Canvas(Modifier.size(size)) {
+    Canvas(Modifier.size(glyphSize)) {
         val u = size.minDimension
         val w = 1.8.dp.toPx()
         fun segment(x1: Float, y1: Float, x2: Float, y2: Float) {
