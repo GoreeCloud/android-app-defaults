@@ -1,5 +1,15 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — compact glyph-only Gallery shell
+
+The primary Gallery shell now uses a fixed glyph-only bottom rail rather than a large floating capsule. The five destinations remain Photos, Albums, Videos, Trash, and Settings, but the rail is 48dp high with equal slots, centered glyphs, low elevation, normal-control corner geometry, and a small inset selected treatment. Destination names remain in accessibility semantics and tooltips, and selection changes use bounded micro motion without enlarging the active tab.
+
+Photos, Albums, and Videos now use one compact media-access row when Android has not granted readable media instead of stacking a permission card and a second empty-state card. Empty states elsewhere use lightweight canvas presentation rather than full-width raised cards.
+
+Settings now groups related rows inside shared section surfaces. Individual rows are transparent within the group, use compact typography and spacing, preserve accessible row targets, and align switches, chevrons, and action glyphs consistently. The primary-navigation display chooser is no longer shown because labels are not part of the Gallery navigation presentation.
+
+Trash uses the same shared navigation dimensions, a smaller header, an integrated transparent Refresh glyph, lightweight Android-authority guidance, and compact access/empty states.
+
 ## October 3, 2026 — Android system-gallery integration foundation
 
 Gallery now exposes Android's app-gallery category and a dedicated exported image/video VIEW/REVIEW surface so an operating-system distribution can use `com.goreecloud.gallery` as its system Gallery package instead of only launching Gallery from its icon. The external viewer accepts only explicit `content:` or `file:` image/video URIs supplied by Android, rejects remote schemes and unrelated MIME types, and never enumerates a broader library from an external request.
