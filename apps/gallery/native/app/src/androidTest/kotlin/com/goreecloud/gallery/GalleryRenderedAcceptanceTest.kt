@@ -79,10 +79,7 @@ class GalleryRenderedAcceptanceTest {
                 .map(root::getChildAt)
                 .filterIsInstance<LinearLayout>()
                 .first { candidate ->
-                    val labels = (0 until candidate.childCount).mapNotNull { index ->
-                        (candidate.getChildAt(index) as? TextView)?.text?.toString()
-                    }
-                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
+                    isPrimaryNavigationCapsule(candidate)
                 }
 
             assertTrue("Navigation capsule must clip child material to its rounded outline", capsule.clipToOutline)
@@ -234,10 +231,7 @@ class GalleryRenderedAcceptanceTest {
                 .map(root::getChildAt)
                 .filterIsInstance<LinearLayout>()
                 .single { candidate ->
-                    val labels = (0 until candidate.childCount).mapNotNull { index ->
-                        (candidate.getChildAt(index) as? TextView)?.text?.toString()
-                    }
-                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
+                    isPrimaryNavigationCapsule(candidate)
                 }
 
             val decor = activity.window.decorView
@@ -278,10 +272,25 @@ class GalleryRenderedAcceptanceTest {
         }
     }
 
+    private fun isPrimaryNavigationCapsule(candidate: LinearLayout): Boolean {
+        if (candidate.childCount != PRIMARY_NAVIGATION_LABELS.size) return false
+        val labels = (0 until candidate.childCount).mapNotNull { index ->
+            (candidate.getChildAt(index) as? TextView)?.let(::navigationLabel)
+        }
+        return labels.size == PRIMARY_NAVIGATION_LABELS.size &&
+            labels.toSet() == PRIMARY_NAVIGATION_LABELS
+    }
+
+    private fun navigationLabel(control: TextView): String? {
+        val description = control.contentDescription?.toString().orEmpty()
+        return PRIMARY_NAVIGATION_LABELS.firstOrNull { label ->
+            description == label || description == "$label, selected"
+        }
+    }
+
     private fun tapNavigationControlWithEspresso(label: String) {
         onView(
             allOf(
-                withText(label),
                 withContentDescription(label),
                 isDisplayed(),
                 isClickable(),
@@ -297,10 +306,7 @@ class GalleryRenderedAcceptanceTest {
                 .map(root::getChildAt)
                 .filterIsInstance<LinearLayout>()
                 .filter { candidate ->
-                    val labels = (0 until candidate.childCount).mapNotNull { index ->
-                        (candidate.getChildAt(index) as? TextView)?.text?.toString()
-                    }
-                    labels.toSet() == setOf("Photos", "Albums", "Videos", "Trash", "Settings")
+                    isPrimaryNavigationCapsule(candidate)
                 }
 
             assertTrue(
@@ -311,7 +317,7 @@ class GalleryRenderedAcceptanceTest {
             val control = (0 until capsules.single().childCount)
                 .map(capsules.single()::getChildAt)
                 .filterIsInstance<TextView>()
-                .singleOrNull { it.text?.toString() == label }
+                .singleOrNull { navigationLabel(it) == label }
 
             assertTrue(
                 "Expected visible clickable $label navigation control",
@@ -366,7 +372,7 @@ class GalleryRenderedAcceptanceTest {
                         append(control.isAttachedToWindow)
                     }
                 }
-                val selected = controls.singleOrNull { it.text?.toString() == expectedLabel }
+                val selected = controls.singleOrNull { navigationLabel(it) == expectedLabel }
                 settled =
                     selected != null &&
                         selected.isSelected &&
@@ -415,7 +421,7 @@ class GalleryRenderedAcceptanceTest {
         }
 
         override fun matchesSafely(view: View): Boolean {
-            if (view !is TextView || view.text?.toString() != expectedLabel || !view.isSelected) return false
+            if (view !is TextView || navigationLabel(view) != expectedLabel || !view.isSelected) return false
             return view.contentDescription?.toString() == "$expectedLabel, selected"
         }
     }
@@ -431,6 +437,7 @@ class GalleryRenderedAcceptanceTest {
     }
 
     private companion object {
+        val PRIMARY_NAVIGATION_LABELS = setOf("Photos", "Albums", "Videos", "Trash", "Settings")
         const val NAVIGATION_SETTLE_TIMEOUT_MILLIS = 2_000L
         const val NAVIGATION_SETTLE_POLL_MILLIS = 25L
     }
