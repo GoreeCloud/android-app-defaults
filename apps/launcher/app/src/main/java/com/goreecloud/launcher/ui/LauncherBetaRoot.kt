@@ -8817,6 +8817,7 @@ private fun LauncherSettingsRootSurface(
                     summary = "Hide apps from App Drawer and Universal Search. Home, Dock and folders stay unchanged.",
                     value = if (hiddenAppCount == 0) "None" else hiddenAppCount.toString(),
                     onClick = onManageHiddenApps,
+                    modifier = Modifier.testTag("launcher-settings-hidden-apps"),
                 )
             }
 
@@ -9795,9 +9796,10 @@ private fun GlazeSettingsAction(
     summary: String,
     value: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         onClick = onClick,
         shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.54f),
