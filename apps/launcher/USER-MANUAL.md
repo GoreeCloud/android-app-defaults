@@ -32,6 +32,10 @@ Recent/most-used suggestions are presentation-only. They fill otherwise-empty Ho
 
 The ranking store is local and privacy-bounded. It retains only application workspace keys, aggregate Launcher launch counts, and a bounded recency ordering. It does not request Android Usage Access or retain launch timestamps, dwell time, Search queries, or network telemetry for this feature.
 
+## App Lock
+
+Use **Launcher settings → Privacy & security → App Lock** to manage locked apps. App Lock applies to launches started from GoreeCloud Launcher.
+
 ## Home screen
 
 The primary Home experience is a launcher-style surface. Android renders the device wallpaper behind the launcher window, and Home presents the persisted application grid and Dock over that surface without requesting wallpaper-storage privileges.
