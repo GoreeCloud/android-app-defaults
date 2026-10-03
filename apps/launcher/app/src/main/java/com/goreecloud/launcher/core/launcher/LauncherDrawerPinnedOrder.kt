@@ -101,7 +101,7 @@ internal object LauncherDrawerCustomOrder {
         appKey: String,
         delta: Int,
     ): List<String> {
-        val reconciled = reconcile(order, availableKeys).toMutableList()
+        val reconciled = reconcile(order, availableKeys)
         if (delta == 0 || appKey !in profileKeys) return reconciled
 
         val profileOrder = reconciled.filter { it in profileKeys }.toMutableList()
@@ -112,9 +112,36 @@ internal object LauncherDrawerCustomOrder {
 
         val value = profileOrder.removeAt(from)
         profileOrder.add(to, value)
-        val replacement = profileOrder.iterator()
+        return replaceProfileOrder(
+            order = reconciled,
+            availableKeys = availableKeys,
+            profileKeys = profileKeys,
+            replacementProfileOrder = profileOrder,
+        )
+    }
+
+    fun replaceProfileOrder(
+        order: List<String>,
+        availableKeys: Set<String>,
+        profileKeys: Set<String>,
+        replacementProfileOrder: List<String>,
+    ): List<String> {
+        val reconciled = reconcile(order, availableKeys)
+        val validProfileKeys = profileKeys.intersect(availableKeys)
+        if (validProfileKeys.isEmpty()) return reconciled
+
+        val replacement = replacementProfileOrder
+            .asSequence()
+            .filter { it in validProfileKeys }
+            .distinct()
+            .toMutableList()
+        val seen = replacement.toHashSet()
+        replacement += reconciled.asSequence()
+            .filter { it in validProfileKeys && it !in seen }
+
+        val iterator = replacement.iterator()
         return reconciled.map { key ->
-            if (key in profileKeys) replacement.next() else key
+            if (key in validProfileKeys) iterator.next() else key
         }
     }
 }
