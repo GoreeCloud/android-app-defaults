@@ -1044,7 +1044,7 @@ private fun WizardCompactChoiceStrip(
                         .weight(1f)
                         .heightIn(min = 44.dp)
                         .semantics {
-                            selected = active
+                            this.selected = active
                             role = Role.RadioButton
                         },
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
