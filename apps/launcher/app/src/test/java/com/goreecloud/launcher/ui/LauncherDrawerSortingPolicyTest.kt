@@ -268,4 +268,33 @@ class LauncherDrawerSortingPolicyTest {
             LauncherDrawerSortingPolicy.order(listOf(lone), { it.label }, { it.stableKey }),
         )
     }
+    @Test
+    fun customAppsUsesExplicitAppRankBeforeAlphabeticalFallback() {
+        val entries = listOf(
+            Entry("Alpha", "app:alpha"),
+            Entry("Banking", "folder:banking"),
+            Entry("Bravo", "app:bravo"),
+            Entry("Charlie", "app:charlie"),
+        )
+        val ranks = mapOf(
+            "app:charlie" to 0,
+            "app:alpha" to 1,
+            "app:bravo" to 2,
+        )
+
+        val sorted = LauncherDrawerSortingPolicy.order(
+            entries = entries,
+            label = { it.label },
+            key = { it.stableKey },
+            sortOrder = LauncherDrawerSortOrder.CUSTOM_APPS,
+            customRank = { ranks[it.stableKey] },
+        )
+
+        assertEquals(
+            listOf("app:charlie", "app:alpha", "app:bravo", "folder:banking"),
+            sorted.map { it.stableKey },
+        )
+    }
+
+
 }
