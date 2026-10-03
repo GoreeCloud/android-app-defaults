@@ -1,5 +1,9 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 3, 2026 — selective density follow-up candidate
+
+A clean follow-up branch is stacked on the current PR #216 polish head and deliberately drops stale conflicting variants from historical PR #217. The retained increment further compacts Search Sources recovery/microcopy/reorder controls, reuses the onboarding segmented-choice model for Home-app behavior, adds step-aware setup progress color, and strengthens the Universal Search clear-query runtime regression. It does not widen provider, permission, profile, workspace, network, or persistence authority. This remains Development candidate work until exact-head protected validation and integration complete.
+
 ## October 2, 2026 — pinned ordering integration and reset candidate
 
 Protected PR #185 integrated device-local, profile-qualified manual App Drawer pin ordering to authoritative monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. **Pinned first** honors the manual order and pinned Drawer app menus expose **Move pinned earlier / Move pinned later**. Ordering remains presentation metadata only and does not mutate Home, Dock, folders, package state, cross-profile authority, or portable preference v1.
