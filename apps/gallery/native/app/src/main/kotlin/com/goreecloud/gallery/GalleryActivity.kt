@@ -2607,6 +2607,9 @@ class GalleryActivity : Activity() {
             val selectionVisibility = if (selected) View.VISIBLE else View.GONE
             tile.isSelected = selected
             tile.contentDescription = mediaTileContentDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                tile.stateDescription = if (selected) "Selected" else null
+            }
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = selectionVisibility
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = selectionVisibility
             tile.findViewWithTag<View>(VIDEO_PLAY_TAG)?.visibility =
