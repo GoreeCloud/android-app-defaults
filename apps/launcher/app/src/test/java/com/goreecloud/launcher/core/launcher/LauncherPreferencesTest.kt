@@ -265,6 +265,70 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun customDrawerOrderMovesOnlyInsideExactProfileSlots() {
+        val userOne = "0:com.example/.One"
+        val workOne = "10:com.example/.One"
+        val userTwo = "0:com.example/.Two"
+        val workTwo = "10:com.example/.Two"
+        val available = setOf(userOne, workOne, userTwo, workTwo)
+
+        val moved = LauncherDrawerCustomOrder.moveWithinProfile(
+            order = listOf(userOne, workOne, userTwo, workTwo),
+            availableKeys = available,
+            profileKeys = setOf(userOne, userTwo),
+            appKey = userTwo,
+            delta = -1,
+        )
+
+        assertEquals(
+            listOf(userTwo, workOne, userOne, workTwo),
+            moved,
+        )
+        assertEquals(
+            listOf(userOne, workOne, userTwo, workTwo),
+            LauncherDrawerCustomOrder.replaceProfileOrder(
+                order = moved,
+                availableKeys = available,
+                profileKeys = setOf(userOne, userTwo),
+                replacementProfileOrder = listOf(userOne, userTwo),
+            ),
+        )
+    }
+
+    @Test
+    fun customDrawerOrderPersistsIndependentlyFromPinsAndHiddenApps() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("drawer-custom-order.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            val personal = "0:com.example/.Main"
+            val work = "10:com.example/.Main"
+
+            repository.setDrawerCustomAppOrder(listOf(work, personal)).join()
+            repository.setDrawerAppPinned(personal, true).join()
+            repository.setAppHidden(work, true).join()
+
+            assertEquals(listOf(work, personal), repository.drawerCustomAppOrder.first())
+
+            repository.clearDrawerPinnedApps().join()
+            repository.clearHiddenApps().join()
+
+            assertEquals(listOf(work, personal), repository.drawerCustomAppOrder.first())
+            assertEquals(emptySet<String>(), repository.drawerPinnedAppKeys.first())
+            assertEquals(emptySet<String>(), repository.hiddenAppKeys.first())
+
+            repository.setDrawerCustomAppOrder(emptyList()).join()
+            assertEquals(emptyList<String>(), repository.drawerCustomAppOrder.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun drawerSortSelectionPersistsAndCanResetToDefault() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
