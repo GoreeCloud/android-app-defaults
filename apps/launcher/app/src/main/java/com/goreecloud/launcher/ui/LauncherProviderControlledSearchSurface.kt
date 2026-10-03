@@ -2230,7 +2230,7 @@ private fun LauncherContactQuickAction(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
-    val tint = tint
+    val tint = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
         modifier = Modifier
