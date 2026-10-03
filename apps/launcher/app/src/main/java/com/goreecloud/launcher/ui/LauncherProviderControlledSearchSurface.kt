@@ -3210,7 +3210,7 @@ private enum class LauncherSearchSourceSection(
 ) {
     DEVICE("On-device", "Local · no network"),
     PERSONAL("Your content", "Contacts, messages, and files"),
-    CONNECTED("Connected", "External services and reviewed inline adapters"),
+    CONNECTED("Connected", "Optional external services"),
 }
 
 private fun sourceSectionFor(
