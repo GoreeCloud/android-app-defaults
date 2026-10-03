@@ -3694,8 +3694,16 @@ class GalleryActivity : Activity() {
             },
         )
 
-        val previous = viewerAction("‹", true, "Previous media") {}
-        val next = viewerAction("›", true, "Next media") {}
+        val previous = viewerIconAction(
+            R.drawable.ic_gallery_chevron_left,
+            true,
+            "Previous media",
+        ) {}
+        val next = viewerIconAction(
+            R.drawable.ic_gallery_chevron_right,
+            true,
+            "Next media",
+        ) {}
         overlay.addView(
             previous,
             FrameLayout.LayoutParams(dp(52), dp(64)).apply {
@@ -5843,28 +5851,6 @@ class GalleryActivity : Activity() {
 
     private fun galleryPreferences() =
         getSharedPreferences(GallerySetupPreferences.PREFERENCES_NAME, MODE_PRIVATE)
-
-    private fun viewerAction(
-        label: String,
-        enabled: Boolean,
-        description: String,
-        onClick: () -> Unit,
-    ): TextView = TextView(this).apply {
-        text = label
-        gravity = Gravity.CENTER
-        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-        setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(0x26ffffff, 18)
-        isEnabled = enabled
-        isClickable = enabled
-        isFocusable = enabled
-        alpha = if (enabled) 1f else 0.35f
-        contentDescription = description
-        if (enabled) setOnClickListener { onClick() }
-    }
 
     private fun viewerIconAction(
         iconResource: Int,
