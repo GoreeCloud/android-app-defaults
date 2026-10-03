@@ -10756,7 +10756,7 @@ private fun LauncherAppLockManagerSheet(
                 Column(Modifier.weight(1f)) {
                     Text(
                         "App Lock",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
@@ -10765,10 +10765,23 @@ private fun LauncherAppLockManagerSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                TextButton(
+                Surface(
                     onClick = onDismiss,
-                    modifier = Modifier.heightIn(min = 48.dp),
-                ) { Text("Done") }
+                    modifier = Modifier
+                        .size(48.dp)
+                        .testTag("launcher-app-lock-close")
+                        .semantics { contentDescription = "Close App Lock" },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        GlazePopupActionGlyph(
+                            symbol = GlazePopupActionSymbol.CLOSE,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            iconSize = 18.dp,
+                        )
+                    }
+                }
             }
 
             Surface(
