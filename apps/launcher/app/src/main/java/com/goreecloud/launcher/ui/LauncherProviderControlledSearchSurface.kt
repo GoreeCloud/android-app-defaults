@@ -2583,18 +2583,26 @@ private fun LauncherSearchSourceManager(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    TextButton(
-                        onClick = onReset,
+                    LauncherSourceToolbarAction(
+                        action = LauncherSourceToolbarActionType.RESET,
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
+                        contentDescription = "Reset Search source order and enabled defaults",
+                        onClick = onReset,
+                    )
+                    LauncherSourceToolbarAction(
+                        action = if (reorderMode) {
+                            LauncherSourceToolbarActionType.DONE
+                        } else {
+                            LauncherSourceToolbarActionType.ORDER
+                        },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
-                    }
+                        contentDescription = if (reorderMode) {
+                            "Finish ordering Search sources"
+                        } else {
+                            "Reorder Search sources"
+                        },
+                        onClick = { reorderMode = !reorderMode },
+                    )
                 }
             }
         }
