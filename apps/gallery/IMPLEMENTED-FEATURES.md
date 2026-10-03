@@ -1,5 +1,21 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — icon-first action surfaces
+
+Gallery now uses compact icon controls for persistent viewer, selection, Trash, photo-editor transform, and Settings action chrome. Crop ratios remain short text values, while repeated actions such as Share, Favorite, Move, Copy, Delete, More, Rotate, Flip, Reset, Refresh, and Play/Pause use glyphs with descriptive accessibility names and tooltips.
+
+The change keeps 48dp interaction targets for persistent action chrome, preserves selected/toggled semantics, and gives destructive actions distinct treatment. MediaStore authority, Android permission scope, confirmation behavior, local Favorites, and save-copy semantics are unchanged.
+
+Android runtime/rendered coverage verifies the icon-only photo-editor controls and Trash Refresh affordance. This slice is stacked on the unified navigation-glyph candidate and keeps its `0.8.10-dev` Development identity.
+
+## October 3, 2026 — unified bottom-navigation glyph family
+
+The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
+
+Each destination also receives bounded Android ripple feedback without replacing the selected Glaze background, tooltip label, content description, or selected-state semantics. The same assets and shared presentation path cover the main Gallery surface and Android-managed Trash.
+
+Rendered Android acceptance verifies shared glyph bounds and ripple presence, including the Trash navigation path. The change is presentation-only and does not expand permissions, media scope, mutation authority, filesystem access, account/network access, or release qualification.
+
 ## October 3, 2026 — optically centered bottom navigation
 
 Icons-only bottom navigation now centers each 22dp glyph directly inside its equal-width destination slot instead of using a top compound drawable with an empty text line. This removes the vertical lift visible on-device and eliminates the accumulated horizontal skew caused by per-item start margins.
