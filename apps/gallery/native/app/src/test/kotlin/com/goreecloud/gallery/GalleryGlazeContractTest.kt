@@ -103,7 +103,19 @@ class GalleryGlazeContractTest {
         assertEquals(3, GalleryGlazeContract.videoGridColumns(600))
         assertEquals(3, GalleryGlazeContract.videoGridColumns(900))
         assertEquals(4, GalleryGlazeContract.videoGridColumns(1280))
-        assertEquals(840, GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP)
+        assertFalse(GalleryGlazeContract.videoUsesFeaturedCard(390))
+        assertTrue(GalleryGlazeContract.videoUsesFeaturedCard(600))
+        assertEquals(600, GalleryGlazeContract.VIDEO_FEATURED_MIN_WIDTH_DP)
+        assertEquals(720, GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP)
+    }
+
+    @Test
+    fun `Trash grid favors legible phone thumbnails before scaling wider`() {
+        assertEquals(3, GalleryGlazeContract.trashGridColumns(320))
+        assertEquals(3, GalleryGlazeContract.trashGridColumns(390))
+        assertEquals(4, GalleryGlazeContract.trashGridColumns(600))
+        assertEquals(5, GalleryGlazeContract.trashGridColumns(900))
+        assertEquals(6, GalleryGlazeContract.trashGridColumns(1280))
     }
 
     @Test
