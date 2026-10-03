@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — App Lock and owner-feedback UI candidate
+
+Development source now contains device-local, profile-qualified **App Lock** membership, a **Privacy & security** settings destination, app-context Lock/Unlock actions, and Android device-authentication gating for Launcher-originated app and app-shortcut launches. The App Lock manager includes app search, **All / Locked** filtering, per-app switches, Personal/Work plus package context, and empty-state handling. Apps grid, compact, list, and category views expose a small Launcher-owned lock mark and accessible locked-state semantics. Startup setup also surfaces App Lock directly.
+
+The same Development source makes the ordinary Dock background-free, keeps material behind only the intentional Edge/drag-feedback states, removes the wallpaper-backed pill around Home page dots, uses a readable single-column built-in widget catalog on phone widths, reduces setup/help visual weight, replaces the Apps search text close mark with a vector glyph, and refines Settings/Search-source vector geometry. App Lock stores no PIN, password, biometric material, authentication token, telemetry, or network state; Android remains the authentication authority.
+
+**Acceptance boundary:** implemented in the active Development candidate, not yet integrated into authoritative main. App Lock does not claim system-wide blocking: launches that originate outside GoreeCloud Launcher remain outside this feature's authority. Current-head protected validation, representative-device security/interaction acceptance, accessibility/reflow/form-factor validation, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
+
 ## October 3, 2026 — onboarding and Search-source scanability follow-up
 
 Protected PR #224 integrates compact segmented **Home apps**, Grid, and Dock setup choices with a 48 dp interaction floor and explicit radio-button selected-state semantics; active-step progress accenting; shorter setup and Search-mode presentation; direct **Sources** recovery from unavailable-source Search warnings; Launcher-owned Search-source reorder glyphs; shorter source/folder/provider summaries; bounded fallback-result titles; and end-to-end clear-query recovery coverage. The non-clickable gesture guide remains compact at a 44 dp card height without being treated as an actionable touch target. Search actions, including the Search Sources Back control, retain a 48 dp interaction floor.

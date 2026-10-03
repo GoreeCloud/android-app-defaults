@@ -1198,16 +1198,17 @@ fun HomePageDots(
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    val indicatorBackground = when (presentation.materialRole) {
-        GlazeV16MaterialRole.SOLID -> MaterialTheme.colorScheme.surface
-        GlazeV16MaterialRole.RAISED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
-        GlazeV16MaterialRole.CLEAR_GLASS -> GlazeAtmosphere.canvasBlack.copy(alpha = 0.18f)
-        GlazeV16MaterialRole.FUNCTIONAL_GLASS ->
-            GlazeAtmosphere.canvasBlack.copy(alpha = 0.26f)
-        else -> GlazeAtmosphere.canvasBlack.copy(alpha = 0.24f)
+    val indicatorBackground = if (usesWallpaperGlass) {
+        Color.Transparent
+    } else {
+        when (presentation.materialRole) {
+            GlazeV16MaterialRole.SOLID -> MaterialTheme.colorScheme.surface
+            GlazeV16MaterialRole.RAISED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
+            else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+        }
     }
     val indicatorOutline = if (usesWallpaperGlass) {
-        Color.White.copy(alpha = 0.12f)
+        Color.Transparent
     } else {
         MaterialTheme.colorScheme.outlineVariant
     }
@@ -1224,19 +1225,19 @@ fun HomePageDots(
             shape = RoundedCornerShape(GlazeMetrics.radiusPill),
             color = indicatorBackground,
             border = BorderStroke(1.dp, indicatorOutline),
-            shadowElevation = if (usesWallpaperGlass) 1.dp else 0.dp,
+            shadowElevation = 0.dp,
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 pages.forEach { page ->
                     val selected = page.pageId == selectedPageId
                     Surface(
                         modifier = Modifier
-                            .width(if (selected) 16.dp else 5.dp)
-                            .height(5.dp),
+                            .width(if (selected) 14.dp else 4.dp)
+                            .height(4.dp),
                         shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                         color = if (selected) {
                             indicatorForeground.copy(alpha = 0.96f)
