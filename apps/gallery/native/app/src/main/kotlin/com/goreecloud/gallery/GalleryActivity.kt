@@ -1897,6 +1897,7 @@ class GalleryActivity : Activity() {
                             setTextSize(TypedValue.COMPLEX_UNIT_SP, 15.5f)
                             setTypeface(typeface, Typeface.BOLD)
                             maxLines = 1
+                            ellipsize = TextUtils.TruncateAt.END
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         },
                     )
