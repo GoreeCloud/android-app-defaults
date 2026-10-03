@@ -1,12 +1,10 @@
 # GoreeCloud Launcher — Planned Features
 
-## October 3, 2026 — App Lock follow-up
+## October 3, 2026 — App Lock acceptance and portability remain
 
-App Lock now exists in Development source. Physical-device, accessibility, form-factor, signing, update-continuity, and release acceptance remain open.
+The active Development candidate contains Launcher-managed App Lock for exact profile-qualified app identities, including searchable **All / Locked** management, app-context controls, locked-state indicators in Apps, setup discoverability, and Android-authenticated Launcher-originated app/shortcut launches.
 
-## October 3, 2026 — App Lock acceptance work remains
-
-The Development source now contains Launcher-managed App Lock for profile-qualified apps. Remaining work is representative-device acceptance for successful and cancelled authentication, secure-lock setup recovery, personal/Work profile behavior, accessibility, large text, RTL/localization, form factors, protected Development signing/update continuity, and a separately versioned portable-state policy. Launches that originate outside GoreeCloud Launcher remain outside this feature's authority.
+Remaining work is acceptance and portability: complete the current exact-head protected validation matrix; verify successful, cancelled, and unavailable authentication on representative physical devices; exercise personal/Work/Shelter/private-space lifecycle and same-package isolation; validate TalkBack/Switch Access, hardware keyboard, large/extra-large text, RTL/localization, phone/tablet/foldable layouts, contrast and reduced-motion/transparency behavior; provision and verify protected Development signing/update continuity; and define a separately versioned portable-state policy before locked membership is ever exported. Launches initiated outside GoreeCloud Launcher remain outside this feature's authority, and any future system-wide protection requires an Android-authorized mechanism appropriate to that scope.
 
 ## October 3, 2026 — Hidden apps integrated; acceptance and recovery work remains
 
