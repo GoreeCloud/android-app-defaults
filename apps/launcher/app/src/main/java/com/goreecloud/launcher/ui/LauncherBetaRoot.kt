@@ -7795,8 +7795,8 @@ private enum class LauncherSettingsCategory(
     ),
     DRAWER(
         "App drawer",
-        "Layout, profiles, density, labels and header actions",
-        "apps drawer grid compact list category work profile user profile columns rows spacing sort folder header labels count search placement backdrop",
+        "Layout, profiles, hidden apps, density and labels",
+        "apps drawer grid compact list category work profile user profile hidden hide visibility privacy columns rows spacing sort folder header labels count search placement backdrop",
     ),
     FOLDERS(
         "Folders",
@@ -10660,7 +10660,8 @@ private fun LauncherHiddenAppsManagerSheet(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        app.componentName.packageName,
+                                        (if (app.user == Process.myUserHandle()) "User app" else "Work app") +
+                                            " · " + app.componentName.packageName,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
