@@ -2810,16 +2810,13 @@ private fun WidgetPickerBuiltInCard(
 
                         WorkspaceWidgetCatalog.SEARCH -> LauncherSearchMagnifier(previewColor)
 
-                        WorkspaceWidgetCatalog.QUICK_ACTIONS -> Text(
-                            "•••",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
+                        WorkspaceWidgetCatalog.QUICK_ACTIONS -> LauncherQuickActionsGlyph(
+                            tint = previewColor,
                         )
 
-                        WorkspaceWidgetCatalog.BATTERY -> Text(
-                            "▰",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
+                        WorkspaceWidgetCatalog.BATTERY -> LauncherBatteryGlyph(
+                            charging = false,
+                            tint = previewColor,
                         )
 
                         WorkspaceWidgetCatalog.LAUNCHER_STATUS -> Text(
@@ -4295,14 +4292,13 @@ internal fun HomeFolderTile(
                     ) {
                         if (previewApps.isEmpty()) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    "＋",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = if (labelOnWallpaper) {
+                                LauncherPlusGlyph(
+                                    tint = if (labelOnWallpaper) {
                                         Color.White.copy(alpha = 0.78f)
                                     } else {
                                         MaterialTheme.colorScheme.onSurfaceVariant
                                     },
+                                    modifier = Modifier.size(20.dp),
                                 )
                             }
                         } else {
@@ -5379,6 +5375,32 @@ private fun LauncherBuiltInWidget(
                         textAlign = TextAlign.Center,
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherQuickActionsGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(24.dp)) {
+        val u = size.minDimension
+        val cell = u * 0.28f
+        val gap = u * 0.12f
+        val start = u * 0.16f
+        repeat(2) { row ->
+            repeat(2) { column ->
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(
+                        start + column * (cell + gap),
+                        start + row * (cell + gap),
+                    ),
+                    size = Size(cell, cell),
+                    cornerRadius = CornerRadius(u * 0.07f),
+                )
             }
         }
     }
