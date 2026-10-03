@@ -352,9 +352,9 @@ fun LauncherStartupWizard(
                                     modifier = Modifier.weight(1f),
                                 )
                                 WizardMiniFeatureCard(
-                                    title = "Private Search",
-                                    summary = "Connected sources are opt-in",
-                                    symbol = WizardVisualSymbol.PRIVACY,
+                                    title = "App Lock",
+                                    summary = "Protect selected app launches",
+                                    symbol = WizardVisualSymbol.LOCK,
                                     accent = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.weight(1f),
                                 )
@@ -448,6 +448,7 @@ private enum class WizardVisualSymbol {
     WIDGETS,
     FOLDER,
     SEARCH,
+    LOCK,
     GESTURE,
     EDIT,
 }
@@ -860,6 +861,24 @@ private fun WizardVisualGlyph(
                     style = Stroke(stroke),
                 )
                 line(0.60f, 0.60f, 0.84f, 0.84f)
+            }
+            WizardVisualSymbol.LOCK -> {
+                drawRoundRect(
+                    tint,
+                    Offset(u * 0.24f, u * 0.44f),
+                    androidx.compose.ui.geometry.Size(u * 0.52f, u * 0.38f),
+                    androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(stroke),
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(u * 0.31f, u * 0.17f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.38f, u * 0.46f),
+                    style = Stroke(stroke),
+                )
             }
             WizardVisualSymbol.GESTURE -> {
                 line(0.50f, 0.82f, 0.50f, 0.20f)
