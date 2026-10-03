@@ -2093,6 +2093,110 @@ private fun LauncherSearchResultCategoryGlyph(
     }
 }
 
+private enum class LauncherSourceToolbarActionType {
+    RESET,
+    ORDER,
+    DONE,
+}
+
+@Composable
+private fun LauncherSourceToolbarAction(
+    action: LauncherSourceToolbarActionType,
+    enabled: Boolean,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    val tint = if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.36f)
+    }
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { this.contentDescription = contentDescription },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = if (enabled) 0.42f else 0.20f,
+        ),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(
+                alpha = if (enabled) 0.06f else 0.03f,
+            ),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.09f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                when (action) {
+                    LauncherSourceToolbarActionType.RESET -> {
+                        drawArc(
+                            color = tint,
+                            startAngle = -35f,
+                            sweepAngle = 290f,
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.14f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.72f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.19f, u * 0.17f),
+                            androidx.compose.ui.geometry.Offset(u * 0.19f, u * 0.38f),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.19f, u * 0.17f),
+                            androidx.compose.ui.geometry.Offset(u * 0.40f, u * 0.17f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                    LauncherSourceToolbarActionType.ORDER -> {
+                        listOf(0.28f, 0.50f, 0.72f).forEach { y ->
+                            drawCircle(
+                                color = tint,
+                                radius = u * 0.045f,
+                                center = androidx.compose.ui.geometry.Offset(u * 0.20f, u * y),
+                            )
+                            drawLine(
+                                tint,
+                                androidx.compose.ui.geometry.Offset(u * 0.36f, u * y),
+                                androidx.compose.ui.geometry.Offset(u * 0.82f, u * y),
+                                stroke,
+                                cap = cap,
+                            )
+                        }
+                    }
+                    LauncherSourceToolbarActionType.DONE -> {
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.52f),
+                            androidx.compose.ui.geometry.Offset(u * 0.40f, u * 0.73f),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.40f, u * 0.73f),
+                            androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.28f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun LauncherBackGlyph(
     tint: Color,
