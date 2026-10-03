@@ -530,9 +530,6 @@ internal fun LauncherProviderControlledSearchSurface(
                         }
                     } else {
                         val topResult = results.firstOrNull()
-                        val fullSectionCounts = results
-                            .groupBy { result -> result.category }
-                            .mapValues { (_, items) -> items.size }
                         val grouped = LauncherGlazeSearchGroups.group(results.drop(1))
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
@@ -590,9 +587,7 @@ internal fun LauncherProviderControlledSearchSurface(
                             grouped.forEach { section ->
                                 item(key = "header:" + section.category.name) {
                                     Text(
-                                        section.title + " (" +
-                                            (fullSectionCounts[section.category] ?: section.items.size) +
-                                            ")",
+                                        section.title,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .semantics { heading() }
@@ -822,10 +817,9 @@ private fun LauncherSearchSuggestionPresentationControl(
                             },
                         ),
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        Box(
+                            modifier = Modifier.size(44.dp),
+                            contentAlignment = Alignment.Center,
                         ) {
                             LauncherSuggestionPresentationGlyph(
                                 option = option,
@@ -834,17 +828,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                                 } else {
                                     MaterialTheme.colorScheme.onSurfaceVariant
                                 },
-                            )
-                            Text(
-                                option.displayName,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
-                                color = if (active) {
-                                    MaterialTheme.colorScheme.onPrimary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                                maxLines = 1,
+                                modifier = Modifier.size(18.dp),
                             )
                         }
                     }
@@ -1162,21 +1146,18 @@ private fun LauncherSearchHandoffRow(
                 contentDescription = "Search " + provider.displayName + " for " + query
             },
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-        ),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f),
+        border = null,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 7.dp),
+                .padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Surface(
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(32.dp),
                 shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.70f),
             ) {
@@ -1186,7 +1167,7 @@ private fun LauncherSearchHandoffRow(
                             bitmap = icon,
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(24.dp).launcherIconMask(),
+                            modifier = Modifier.size(22.dp).launcherIconMask(),
                         )
                     } else {
                         LauncherConnectedProviderFallbackGlyph(provider.providerId)
@@ -1202,7 +1183,7 @@ private fun LauncherSearchHandoffRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    "Search online for “" + query + "”",
+                    "Tap to search for “" + query + "”",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -1420,11 +1401,8 @@ private fun LauncherGlazeSearchAppTile(
     Surface(
         modifier = modifier.heightIn(min = 50.dp),
         onClick = onLaunch,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.46f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-        ),
+        color = Color.Transparent,
+        border = null,
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
     ) {
         Row(
@@ -1487,11 +1465,8 @@ private fun LauncherGlazeShortcutPanel(
             .heightIn(min = 56.dp)
             .testTag("launcher-glaze-shortcut-panel"),
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
-        ),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.28f),
+        border = null,
     ) {
         Row(
             modifier = Modifier
@@ -1742,11 +1717,19 @@ private fun LauncherGlazeSearchResult(
         shape = RoundedCornerShape(
             if (prominent) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
         ),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = if (prominent) 0.68f else 0.50f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = if (prominent) 0.07f else 0.05f),
-        ),
+        color = if (prominent) {
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.68f)
+        } else {
+            Color.Transparent
+        },
+        border = if (prominent) {
+            BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+            )
+        } else {
+            null
+        },
     ) {
         Column(
             modifier = Modifier
@@ -2639,7 +2622,11 @@ private fun LauncherSearchSourceManager(
                                     LauncherSearchSectionGlyph(section = section, tint = accent)
                                 }
                             }
-                            Column(Modifier.weight(1f)) {
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
                                 Text(
                                     section.title,
                                     style = MaterialTheme.typography.titleSmall,
@@ -2647,11 +2634,9 @@ private fun LauncherSearchSourceManager(
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
-                                    section.subtitle,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    options.size.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
                                 )
                             }
                         }
@@ -2837,37 +2822,6 @@ private fun LauncherSearchSourceManager(
                                             )
                                         }
 
-                                        if (
-                                            option.providerId ==
-                                                LauncherFilesSearchProvider.PROVIDER_ID &&
-                                            fileSearchRoots.isEmpty()
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.End,
-                                            ) {
-                                                TextButton(
-                                                    onClick = onChooseFileSearchRoot,
-                                                    enabled = ready,
-                                                    modifier = Modifier.heightIn(min = 44.dp),
-                                                ) {
-                                                    Row(
-                                                        horizontalArrangement =
-                                                            Arrangement.spacedBy(6.dp),
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                    ) {
-                                                        LauncherLocalSearchSourceGlyph(
-                                                            providerId =
-                                                                LauncherFilesSearchProvider.PROVIDER_ID,
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.size(18.dp),
-                                                        )
-                                                        Text("Choose folder")
-                                                    }
-                                                }
-                                            }
-                                        }
-
                                         if (expanded) {
                                             Surface(
                                                 modifier = Modifier.fillMaxWidth(),
@@ -3001,8 +2955,17 @@ private fun LauncherSearchSourceManager(
                                                         )
                                                     },
                                                     enabled = ready && index > 0,
+                                                    modifier = Modifier.semantics {
+                                                        contentDescription =
+                                                            "Move " + option.displayName + " earlier"
+                                                    },
                                                 ) {
-                                                    Text("↑  Earlier")
+                                                    LauncherSourceMoveGlyph(
+                                                        up = true,
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                    )
+                                                    Spacer(Modifier.width(4.dp))
+                                                    Text("Earlier")
                                                 }
                                                 TextButton(
                                                     onClick = {
@@ -3019,8 +2982,17 @@ private fun LauncherSearchSourceManager(
                                                         ready &&
                                                             index in 0 until
                                                                 controls.orderedOptions.lastIndex,
+                                                    modifier = Modifier.semantics {
+                                                        contentDescription =
+                                                            "Move " + option.displayName + " later"
+                                                    },
                                                 ) {
-                                                    Text("↓  Later")
+                                                    LauncherSourceMoveGlyph(
+                                                        up = false,
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                    )
+                                                    Spacer(Modifier.width(4.dp))
+                                                    Text("Later")
                                                 }
                                             }
                                         }
@@ -3032,6 +3004,43 @@ private fun LauncherSearchSourceManager(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LauncherSourceMoveGlyph(
+    up: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        val tipY = if (up) 0.20f else 0.80f
+        val tailY = if (up) 0.80f else 0.20f
+        val armY = if (up) 0.38f else 0.62f
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.50f, u * tailY),
+            androidx.compose.ui.geometry.Offset(u * 0.50f, u * tipY),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.50f, u * tipY),
+            androidx.compose.ui.geometry.Offset(u * 0.30f, u * armY),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.50f, u * tipY),
+            androidx.compose.ui.geometry.Offset(u * 0.70f, u * armY),
+            stroke,
+            cap = cap,
+        )
     }
 }
 
@@ -3066,11 +3075,10 @@ private fun LauncherSearchSourceStatusPill(
 
 private enum class LauncherSearchSourceSection(
     val title: String,
-    val subtitle: String,
 ) {
-    DEVICE("On-device", "Fast local sources with no network query"),
-    PERSONAL("Your content", "Permission-scoped personal data and selected folders"),
-    CONNECTED("Connected", "External services and reviewed inline adapters"),
+    DEVICE("On-device"),
+    PERSONAL("Your content"),
+    CONNECTED("Connected"),
 }
 
 private fun sourceSectionFor(
@@ -3155,11 +3163,8 @@ private fun LauncherProviderSearchRow(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
-        ),
+        color = Color.Transparent,
+        border = null,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 7.dp),
