@@ -904,14 +904,17 @@ fun LauncherHomeHintCard(
             WizardHintRow(
                 title = "Place precisely",
                 summary = "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
+                symbol = WizardVisualSymbol.EDIT,
             )
             WizardHintRow(
                 title = "Move across pages",
                 summary = "Keep holding at a page edge to switch pages, then release on the target.",
+                symbol = WizardVisualSymbol.GESTURE,
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
                 summary = "Pin important apps, then use Pinned first or the Favorites filter when you want them together.",
+                symbol = WizardVisualSymbol.APPS,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -929,6 +932,7 @@ fun LauncherHomeHintCard(
 private fun WizardHintRow(
     title: String,
     summary: String,
+    symbol: WizardVisualSymbol,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -947,7 +951,7 @@ private fun WizardHintRow(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     WizardVisualGlyph(
-                        symbol = WizardVisualSymbol.GESTURE,
+                        symbol = symbol,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
