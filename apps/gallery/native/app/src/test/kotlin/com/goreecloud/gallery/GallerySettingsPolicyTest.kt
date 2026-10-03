@@ -45,6 +45,21 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
+    fun `bottom navigation defaults to icon only and restores all supported display modes`() {
+        val settings = GalleryUserSettings()
+        assertEquals(GalleryNavigationDisplayMode.ICONS_ONLY, settings.navigationDisplayMode)
+        assertTrue(GalleryNavigationDisplayMode.ICONS_ONLY.showIcon)
+        assertFalse(GalleryNavigationDisplayMode.ICONS_ONLY.showLabel)
+        assertFalse(GalleryNavigationDisplayMode.TEXT_ONLY.showIcon)
+        assertTrue(GalleryNavigationDisplayMode.TEXT_ONLY.showLabel)
+        assertTrue(GalleryNavigationDisplayMode.ICONS_AND_TEXT.showIcon)
+        assertTrue(GalleryNavigationDisplayMode.ICONS_AND_TEXT.showLabel)
+        assertEquals(GalleryNavigationDisplayMode.TEXT_ONLY, GalleryNavigationDisplayMode.fromStored("text"))
+        assertEquals(GalleryNavigationDisplayMode.ICONS_AND_TEXT, GalleryNavigationDisplayMode.fromStored("both"))
+        assertEquals(GalleryNavigationDisplayMode.ICONS_ONLY, GalleryNavigationDisplayMode.fromStored("future-value"))
+    }
+
+    @Test
     fun `slideshow interval defaults to five seconds and restores portable values`() {
         assertEquals(GallerySlideshowInterval.NORMAL, GalleryUserSettings().slideshowInterval)
         assertEquals(5_000L, GallerySlideshowInterval.NORMAL.intervalMs)
