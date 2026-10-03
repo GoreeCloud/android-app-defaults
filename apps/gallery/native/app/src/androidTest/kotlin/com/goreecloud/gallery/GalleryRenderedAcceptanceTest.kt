@@ -2,6 +2,7 @@ package com.goreecloud.gallery
 
 import android.graphics.Rect
 import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import android.os.SystemClock
 import android.view.Gravity
@@ -113,6 +114,21 @@ class GalleryRenderedAcceptanceTest {
             assertTrue(
                 "Selected icons-only navigation should use inset Glaze material",
                 selected.background is InsetDrawable,
+            )
+            val expectedIconPx =
+                (GalleryGlazeContract.NAVIGATION_ICON_DP * activity.resources.displayMetrics.density)
+                    .toInt()
+            assertTrue(
+                "All primary navigation glyphs should render at the shared optical size",
+                controls.all { control ->
+                    val icon = control.compoundDrawables[0] ?: return@all false
+                    kotlin.math.abs(icon.bounds.width() - expectedIconPx) <= 1 &&
+                        kotlin.math.abs(icon.bounds.height() - expectedIconPx) <= 1
+                },
+            )
+            assertTrue(
+                "Each navigation target should expose bounded ripple feedback",
+                controls.all { it.foreground is RippleDrawable },
             )
             assertTrue(
                 "Each icon-only destination should retain a discoverable tooltip",
