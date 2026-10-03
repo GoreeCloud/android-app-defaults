@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — restacked Theme and Home-page glyph-control follow-up
+
+The current stacked Development follow-up replaces remaining text-heavy page-management chrome on the newer Home-page carousel rather than carrying the superseded earlier layout forward. Theme Manager now uses a 48 dp semantic completion glyph instead of a text **Done** control. Home page management uses Launcher-owned 48 dp glyph controls for **Add page**, **Done**, **Move earlier**, **Move later**, and **Delete empty page**, while preserving the existing page carousel, layout-lock behavior, empty-page guard, primary-Home protection, Room mutation authority, and page-selection behavior.
+
+The controls retain explicit accessibility descriptions and first-party vector geometry rather than font symbols. No Android permission, provider, network, App Lock, page-persistence, gesture-routing, telemetry, or workspace-authority boundary changes in this tranche.
+
+**Acceptance boundary:** this follow-up is restacked on the current PR #231 Development parent revision and remains unintegrated. Its exact head requires fresh Launcher build/JVM/lint/schema, Android 16 runtime, transition-performance, provenance, Foundation, migrated-app required-gate, and protected-promotion evidence after the parent line is accepted. Representative-device visual/accessibility/large-text/RTL/form-factor and protected Development signing/update continuity remain open.
+
 ## October 3, 2026 — App Lock and representative-device UI polish candidate
 
 Current Development source adds profile-qualified **App Lock** under **Launcher settings → Privacy & security** and the app context menu. Selected apps require Android device authentication before Launcher-originated app or app-shortcut launches proceed. Membership is device-local, keyed by exact profile-qualified Launcher identity, and remains outside portable preference v1. The App Lock manager now includes app search, **All / Locked** filtering, compact profile/package context, and direct lock-state switches; locked apps are also visually identified in Apps grid, compact, list, and category presentation. First-run setup now surfaces App Lock as an everyday control.
