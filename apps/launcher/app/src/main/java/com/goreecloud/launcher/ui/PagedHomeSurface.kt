@@ -471,6 +471,93 @@ internal fun homePageEdgeDropTarget(
     )
 }
 
+private enum class HomePageManagerGlyph {
+    ADD,
+    DONE,
+    EARLIER,
+    LATER,
+    DELETE,
+}
+
+@Composable
+private fun HomePageManagerGlyphAction(
+    contentDescription: String,
+    glyph: HomePageManagerGlyph,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    destructive: Boolean = false,
+) {
+    val tint = when {
+        destructive -> MaterialTheme.colorScheme.error
+        enabled -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.34f)
+    }
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier
+            .size(48.dp)
+            .semantics { this.contentDescription = contentDescription },
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = if (enabled) 0.48f else 0.28f,
+        ),
+        border = BorderStroke(
+            1.dp,
+            tint.copy(alpha = if (enabled) 0.12f else 0.06f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.10f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * x1, u * y1),
+                        end = Offset(u * x2, u * y2),
+                        strokeWidth = stroke,
+                        cap = cap,
+                    )
+                }
+                when (glyph) {
+                    HomePageManagerGlyph.ADD -> {
+                        line(0.20f, 0.50f, 0.80f, 0.50f)
+                        line(0.50f, 0.20f, 0.50f, 0.80f)
+                    }
+                    HomePageManagerGlyph.DONE -> {
+                        line(0.18f, 0.54f, 0.42f, 0.76f)
+                        line(0.42f, 0.76f, 0.84f, 0.25f)
+                    }
+                    HomePageManagerGlyph.EARLIER -> {
+                        line(0.78f, 0.50f, 0.24f, 0.50f)
+                        line(0.24f, 0.50f, 0.46f, 0.28f)
+                        line(0.24f, 0.50f, 0.46f, 0.72f)
+                    }
+                    HomePageManagerGlyph.LATER -> {
+                        line(0.22f, 0.50f, 0.76f, 0.50f)
+                        line(0.76f, 0.50f, 0.54f, 0.28f)
+                        line(0.76f, 0.50f, 0.54f, 0.72f)
+                    }
+                    HomePageManagerGlyph.DELETE -> {
+                        drawRoundRect(
+                            color = tint,
+                            topLeft = Offset(u * 0.30f, u * 0.34f),
+                            size = Size(u * 0.40f, u * 0.46f),
+                            cornerRadius = CornerRadius(u * 0.05f),
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                        )
+                        line(0.24f, 0.28f, 0.76f, 0.28f)
+                        line(0.40f, 0.20f, 0.60f, 0.20f)
+                    }
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePageManagerSheet(
@@ -554,15 +641,22 @@ fun HomePageManagerSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+                ) {
+                    HomePageManagerGlyphAction(
+                        contentDescription = "Add Home page",
+                        glyph = HomePageManagerGlyph.ADD,
                         onClick = onCreatePage,
                         enabled = !layoutLocked,
                         modifier = Modifier.testTag("launcher-home-page-add"),
-                    ) {
-                        Text("+ Add")
-                    }
-                    TextButton(onClick = onDismiss) { Text("Done") }
+                    )
+                    HomePageManagerGlyphAction(
+                        contentDescription = "Done editing Home pages",
+                        glyph = HomePageManagerGlyph.DONE,
+                        onClick = onDismiss,
+                    )
                 }
             }
 
@@ -760,33 +854,34 @@ private fun HomePageManagerCard(
             } else {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    OutlinedButton(
+                    HomePageManagerGlyphAction(
+                        contentDescription = "Move page earlier",
+                        glyph = HomePageManagerGlyph.EARLIER,
                         onClick = onMoveEarlier,
                         enabled = canMoveEarlier,
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 6.dp),
-                    ) { Text("Earlier", style = MaterialTheme.typography.labelSmall) }
-                    OutlinedButton(
+                    )
+                    Spacer(Modifier.width(GlazeMetrics.space2))
+                    HomePageManagerGlyphAction(
+                        contentDescription = "Move page later",
+                        glyph = HomePageManagerGlyph.LATER,
                         onClick = onMoveLater,
                         enabled = canMoveLater,
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 6.dp),
-                    ) { Text("Later", style = MaterialTheme.typography.labelSmall) }
-                }
-
-                if (canDelete) {
-                    TextButton(
-                        onClick = onDelete,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            "Delete empty page",
-                            color = MaterialTheme.colorScheme.error,
+                    )
+                    if (canDelete) {
+                        Spacer(Modifier.width(GlazeMetrics.space2))
+                        HomePageManagerGlyphAction(
+                            contentDescription = "Delete empty Home page",
+                            glyph = HomePageManagerGlyph.DELETE,
+                            onClick = onDelete,
+                            destructive = true,
                         )
                     }
-                } else if (!layoutLocked && itemCount > 0) {
+                }
+
+                if (!canDelete && !layoutLocked && itemCount > 0) {
                     Text(
                         "Move its items before deleting.",
                         style = MaterialTheme.typography.labelSmall,
