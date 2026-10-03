@@ -17,6 +17,9 @@
 - Strengthened Android state semantics for stateful icon controls: selected media tiles, selected dialog choices, selection actions, and active viewer toggles now expose explicit state descriptions where supported.
 - Media-access actions now pair concise labels with contextual first-party glyphs (choose media, change access, refresh/retry) so high-consequence permission/recovery actions remain explicit without reverting to text-only chrome.
 - Preserved Glaze control refinement for dynamically labeled media-access actions and explicitly exposed destructive-action state semantics on Trash permanent-delete controls.
+- Settings value rows now pair concise values with chevron glyphs and expose the current value through Android state descriptions; boolean settings use vector on/off switch glyphs rather than text-only On/Off pills.
+- Added specific save-copy and clear-cache glyphs so those actions no longer reuse generic download/reset imagery.
+- Photos/Albums/Videos/search empty states now render as semantic Glaze icon cards, while Trash adds a matching semantic empty-state card and compact-width-safe ellipsized header text.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
