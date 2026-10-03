@@ -274,8 +274,9 @@ class ActivatedHomeLifecycleRuntimeTest {
             }
         } finally {
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -738,8 +739,9 @@ class ActivatedHomeLifecycleRuntimeTest {
             directlyAddedPageId?.let { runtime?.deleteEmptyHomePage(it) }
             createdSecondaryPageId?.let { runtime?.deleteEmptyHomePage(it) }
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -888,8 +890,9 @@ class ActivatedHomeLifecycleRuntimeTest {
             runtime?.removeWidget(widgetItemId)
             createdSecondaryPageId?.let { runtime?.deleteEmptyHomePage(it) }
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -1076,8 +1079,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                 previousSwipeUp,
             ).join()
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -1335,8 +1339,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                 previousSwipeDown,
             ).join()
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -1539,8 +1544,9 @@ class ActivatedHomeLifecycleRuntimeTest {
             }
         } finally {
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -1616,8 +1622,9 @@ class ActivatedHomeLifecycleRuntimeTest {
             }
         } finally {
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -1739,8 +1746,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                 previousTapAndHold,
             ).join()
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -1869,8 +1877,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                 previousTapAndHold,
             ).join()
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -2035,8 +2044,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                 previousTapAndHold,
             ).join()
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -2143,8 +2153,9 @@ class ActivatedHomeLifecycleRuntimeTest {
                 previousSwipeUp,
             ).join()
             if (!alreadyDefaultHome) {
-                runShellCommand(
-                    "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+                removeHomeRoleAndAwait(
+                    roleManager = roleManager,
+                    packageName = context.packageName,
                 )
             }
         }
@@ -2448,6 +2459,20 @@ class ActivatedHomeLifecycleRuntimeTest {
             y = endY.toFloat(),
             eventTime = SystemClock.uptimeMillis(),
         )
+    }
+
+    private suspend fun removeHomeRoleAndAwait(
+        roleManager: RoleManager,
+        packageName: String,
+    ) {
+        runShellCommand(
+            "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        )
+        withTimeout(10_000) {
+            while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                delay(100)
+            }
+        }
     }
 
     private fun runShellCommand(command: String) {
