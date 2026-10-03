@@ -10458,6 +10458,7 @@ private fun LauncherAppTile(
     compact: Boolean,
     fixedGridGeometry: Boolean = false,
     pinnedInDrawer: Boolean = false,
+    lockedByLauncher: Boolean = false,
     onClick: () -> Unit,
     onLongClick: (Rect?) -> Unit,
     modifier: Modifier,
@@ -10546,7 +10547,12 @@ private fun LauncherAppTile(
                 onLongClick = { onLongClick(tileBounds) },
             )
             .semantics {
-                if (pinnedInDrawer) stateDescription = "Pinned in Apps"
+                stateDescription = when {
+                    pinnedInDrawer && lockedByLauncher -> "Pinned in Apps. App Lock enabled"
+                    pinnedInDrawer -> "Pinned in Apps"
+                    lockedByLauncher -> "App Lock enabled"
+                    else -> null
+                }
             }
             .padding(horizontal = 2.dp, vertical = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -10578,6 +10584,11 @@ private fun LauncherAppTile(
             if (pinnedInDrawer) {
                 DrawerPinnedMark(
                     modifier = Modifier.align(Alignment.TopStart),
+                )
+            }
+            if (lockedByLauncher) {
+                DrawerLockedMark(
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
         }
