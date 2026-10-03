@@ -3082,7 +3082,18 @@ private fun LauncherSearchSourceManager(
                                                     },
                                                     enabled = ready && index > 0,
                                                 ) {
-                                                    Text("↑  Earlier")
+                                                    Row(
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(5.dp),
+                                                        verticalAlignment =
+                                                            Alignment.CenterVertically,
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            earlier = true,
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Earlier")
+                                                    }
                                                 }
                                                 TextButton(
                                                     onClick = {
@@ -3100,7 +3111,18 @@ private fun LauncherSearchSourceManager(
                                                             index in 0 until
                                                                 controls.orderedOptions.lastIndex,
                                                 ) {
-                                                    Text("↓  Later")
+                                                    Row(
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(5.dp),
+                                                        verticalAlignment =
+                                                            Alignment.CenterVertically,
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            earlier = false,
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Later")
+                                                    }
                                                 }
                                             }
                                         }
@@ -3112,6 +3134,44 @@ private fun LauncherSearchSourceManager(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LauncherSourceMoveGlyph(
+    earlier: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        val centerX = u * 0.50f
+        val startY = if (earlier) u * 0.76f else u * 0.24f
+        val endY = if (earlier) u * 0.24f else u * 0.76f
+        drawLine(
+            color = tint,
+            start = androidx.compose.ui.geometry.Offset(centerX, startY),
+            end = androidx.compose.ui.geometry.Offset(centerX, endY),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        val armY = if (earlier) u * 0.42f else u * 0.58f
+        drawLine(
+            color = tint,
+            start = androidx.compose.ui.geometry.Offset(centerX, endY),
+            end = androidx.compose.ui.geometry.Offset(u * 0.30f, armY),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        drawLine(
+            color = tint,
+            start = androidx.compose.ui.geometry.Offset(centerX, endY),
+            end = androidx.compose.ui.geometry.Offset(u * 0.70f, armY),
+            strokeWidth = stroke,
+            cap = cap,
+        )
     }
 }
 
