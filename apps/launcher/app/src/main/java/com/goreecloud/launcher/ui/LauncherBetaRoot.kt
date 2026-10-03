@@ -8594,26 +8594,31 @@ private fun LauncherSettingsRootSurface(
                 visible = selectedSettingsCategory == LauncherSettingsCategory.HOME,
             ) {
                 Text(
-                    "Dock material",
+                    "Dock style",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )
                 ChoiceRow(
-                    choices = listOf("Glass", "Clear", "Edge"),
+                    choices = listOf("Floating", "Minimal", "Edge"),
                     selected = when (experiencePreferences.dockStyle) {
-                        LauncherDockStyle.GLASS -> "Glass"
-                        LauncherDockStyle.CLEAR -> "Clear"
+                        LauncherDockStyle.GLASS -> "Floating"
+                        LauncherDockStyle.CLEAR -> "Minimal"
                         LauncherDockStyle.EDGE -> "Edge"
                     },
                     onChoice = {
                         onSetDockStyle(
                             when (it) {
-                                "Clear" -> LauncherDockStyle.CLEAR
+                                "Minimal" -> LauncherDockStyle.CLEAR
                                 "Edge" -> LauncherDockStyle.EDGE
                                 else -> LauncherDockStyle.GLASS
                             },
                         )
                     },
+                )
+                Text(
+                    "Floating and Minimal keep app icons directly on the wallpaper without a Dock background.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 SettingsReadOnlyRow("Capacity", "Adaptive · horizontal overflow")
                 SettingsReadOnlyRow("Edit", "Long-press an app")
