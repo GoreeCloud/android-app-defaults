@@ -679,10 +679,14 @@ class RecycleBinActivity : Activity() {
             },
         )
 
-        val previous = viewerAction("‹", "Previous trashed media") {}
-        val next = viewerAction("›", "Next trashed media") {}
-        previous.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-        next.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        val previous = viewerIconAction(
+            R.drawable.ic_gallery_chevron_left,
+            "Previous trashed media",
+        ) {}
+        val next = viewerIconAction(
+            R.drawable.ic_gallery_chevron_right,
+            "Next trashed media",
+        ) {}
         overlay.addView(previous, FrameLayout.LayoutParams(dp(52), dp(64)).apply {
             gravity = Gravity.START or Gravity.CENTER_VERTICAL
             marginStart = dp(10)
@@ -966,22 +970,6 @@ class RecycleBinActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
-        setOnClickListener { onClick() }
-    }
-
-    private fun viewerAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
-        text = label
-        gravity = Gravity.CENTER
-        minHeight = dp(48)
-        minWidth = dp(48)
-        setPadding(dp(8), 0, dp(8), 0)
-        setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, if (label.length > 12) 10.5f else 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(0x26ffffff, 18)
-        isClickable = true
-        isFocusable = true
-        contentDescription = description
         setOnClickListener { onClick() }
     }
 
