@@ -2837,19 +2837,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.SHAPE_CONTROL_DP)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel move"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel move") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
@@ -2904,19 +2900,8 @@ class GalleryActivity : Activity() {
             isFocusable = true
             contentDescription = "Create new folder and move selected media"
         }
-        val cancelAction = TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setPadding(dp(14), 0, dp(14), 0)
-            setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            setBackgroundColor(Color.TRANSPARENT)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel new folder"
-            setOnClickListener { dialog?.dismiss() }
+        val cancelAction = dialogDismissAction("Cancel new folder") {
+            dialog?.dismiss()
         }
 
         createAction.setOnClickListener {
@@ -2939,9 +2924,15 @@ class GalleryActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
             setPadding(0, dp(14), 0, 0)
-            addView(cancelAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
-                marginEnd = dp(6)
-            })
+            addView(
+                cancelAction,
+                LinearLayout.LayoutParams(
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ).apply {
+                    marginEnd = dp(6)
+                },
+            )
             addView(createAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f))
         }
         val panel = LinearLayout(this).apply {
@@ -3084,19 +3075,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.SHAPE_CONTROL_DP)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel copy"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel copy") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this).setView(panel).create()
         dialog?.setOnShowListener {
@@ -3149,19 +3136,8 @@ class GalleryActivity : Activity() {
             isFocusable = true
             contentDescription = "Create new folder and copy selected media"
         }
-        val cancelAction = TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setPadding(dp(14), 0, dp(14), 0)
-            setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            setBackgroundColor(Color.TRANSPARENT)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel new copy folder"
-            setOnClickListener { dialog?.dismiss() }
+        val cancelAction = dialogDismissAction("Cancel new copy folder") {
+            dialog?.dismiss()
         }
 
         createAction.setOnClickListener {
@@ -3184,9 +3160,15 @@ class GalleryActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
             setPadding(0, dp(14), 0, 0)
-            addView(cancelAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
-                marginEnd = dp(6)
-            })
+            addView(
+                cancelAction,
+                LinearLayout.LayoutParams(
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ).apply {
+                    marginEnd = dp(6)
+                },
+            )
             addView(createAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f))
         }
         val panel = LinearLayout(this).apply {
@@ -4810,6 +4792,23 @@ class GalleryActivity : Activity() {
             }
     }
 
+    private fun dialogDismissAction(
+        description: String,
+        onClick: () -> Unit,
+    ): ImageView = ImageView(this).apply {
+        setImageResource(R.drawable.ic_gallery_close)
+        setColorFilter(accentColor())
+        scaleType = ImageView.ScaleType.CENTER_INSIDE
+        setPadding(dp(13), dp(13), dp(13), dp(13))
+        background = roundedSurface(withAlpha(accentColor(), 0.08f), 16)
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(this, accentColor(), 16)
+        setOnClickListener { onClick() }
+    }
+
     private fun setupProgressRail(step: Int): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
@@ -5057,19 +5056,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel file loading priority selection"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel file loading priority selection") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
@@ -5147,19 +5142,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel bottom navigation display selection"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel bottom navigation display selection") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
@@ -5238,19 +5229,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel view-density selection"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel view-density selection") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
@@ -5328,19 +5315,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel slideshow speed selection"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel slideshow speed selection") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
@@ -5418,19 +5401,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel media sort selection"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel media sort selection") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
@@ -5509,19 +5488,15 @@ class GalleryActivity : Activity() {
             )
         }
 
-        panel.addView(TextView(this).apply {
-            text = "Cancel"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(Color.TRANSPARENT, 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Cancel media grouping selection"
-            setOnClickListener { dialog?.dismiss() }
-        })
+        panel.addView(
+            dialogDismissAction("Cancel media grouping selection") { dialog?.dismiss() },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ).apply {
+                gravity = Gravity.END
+            },
+        )
 
         dialog = AlertDialog.Builder(this)
             .setView(panel)
