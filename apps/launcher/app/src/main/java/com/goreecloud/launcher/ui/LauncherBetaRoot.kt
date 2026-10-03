@@ -10735,6 +10735,23 @@ private fun LauncherAppLockManagerSheet(
     onSetLocked: (LauncherActivityInfo, Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    var query by rememberSaveable { mutableStateOf("") }
+    var showLockedOnly by rememberSaveable { mutableStateOf(false) }
+    val visibleApps = remember(apps, lockedAppKeys, query, showLockedOnly) {
+        apps.filter { app ->
+            (!showLockedOnly || app.workspaceKey() in lockedAppKeys) &&
+                (
+                    query.isBlank() ||
+                        LauncherLocalAppSearch.matches(
+                            label = app.label.toString(),
+                            packageName = app.componentName.packageName,
+                            rawQuery = query,
+                        )
+                )
+        }
+    }
+    val lockedCount = lockedAppKeys.count { key -> apps.any { it.workspaceKey() == key } }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = Modifier.testTag("launcher-app-lock-manager"),
@@ -10760,7 +10777,7 @@ private fun LauncherAppLockManagerSheet(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        "Require Android device authentication before Launcher opens selected apps.",
+                        "$lockedCount locked · " + apps.size + " available",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -10805,7 +10822,7 @@ private fun LauncherAppLockManagerSheet(
                 verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
             ) {
                 lazyItems(
-                    items = apps,
+                    items = visibleApps,
                     key = { app -> app.workspaceKey() },
                 ) { app ->
                     val appKey = app.workspaceKey()
@@ -10843,7 +10860,8 @@ private fun LauncherAppLockManagerSheet(
                                     overflow = TextOverflow.Ellipsis,
                                 )
                                 Text(
-                                    if (app.user == Process.myUserHandle()) "User app" else "Work app",
+                                    (if (app.user == Process.myUserHandle()) "Personal" else "Work") +
+                                        " · " + app.componentName.packageName,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
