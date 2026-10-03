@@ -1407,6 +1407,7 @@ class GalleryActivity : Activity() {
                     title = "Gallery hint",
                     message = contextualHint.second,
                     actionLabel = "Dismiss",
+                    actionIcon = R.drawable.ic_gallery_close,
                     onAction = {
                         setupPreferences.dismissContextualHint(contextualHint.first)
                         renderCurrentDestination(generation)
@@ -6319,6 +6320,7 @@ class GalleryActivity : Activity() {
         title: String,
         message: String,
         actionLabel: String? = null,
+        actionIcon: Int? = null,
         onAction: (() -> Unit)? = null,
     ): LinearLayout {
         return LinearLayout(this).apply {
@@ -6346,19 +6348,49 @@ class GalleryActivity : Activity() {
                 setPadding(0, dp(7), 0, if (actionLabel == null) dp(8) else 0)
             })
             if (actionLabel != null && onAction != null) {
-                addView(TextView(context).apply {
-                    text = actionLabel
-                    gravity = Gravity.CENTER
-                    minHeight = dp(48)
-                    setPadding(dp(16), dp(12), dp(16), dp(12))
-                    setTextColor(primaryTextColor())
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                    setTypeface(typeface, Typeface.BOLD)
-                    isClickable = true
-                    isFocusable = true
-                    contentDescription = "$actionLabel $title"
-                    setOnClickListener { onAction() }
-                })
+                if (actionIcon != null) {
+                    addView(
+                        ImageView(context).apply {
+                            setImageResource(actionIcon)
+                            setColorFilter(accentColor())
+                            scaleType = ImageView.ScaleType.CENTER_INSIDE
+                            setPadding(dp(13), dp(13), dp(13), dp(13))
+                            background = roundedSurface(withAlpha(accentColor(), 0.11f), 16)
+                            isClickable = true
+                            isFocusable = true
+                            contentDescription = "$actionLabel $title"
+                            tooltipText = actionLabel
+                            GalleryInteractionFeedback.applyBoundedRipple(
+                                this,
+                                accentColor(),
+                                16,
+                            )
+                            setOnClickListener { onAction() }
+                        },
+                        LinearLayout.LayoutParams(dp(48), dp(48)).apply {
+                            topMargin = dp(4)
+                        },
+                    )
+                } else {
+                    addView(TextView(context).apply {
+                        text = actionLabel
+                        gravity = Gravity.CENTER
+                        minHeight = dp(48)
+                        setPadding(dp(16), dp(12), dp(16), dp(12))
+                        setTextColor(primaryTextColor())
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                        setTypeface(typeface, Typeface.BOLD)
+                        isClickable = true
+                        isFocusable = true
+                        contentDescription = "$actionLabel $title"
+                        GalleryInteractionFeedback.applyBoundedRipple(
+                            this,
+                            primaryTextColor(),
+                            16,
+                        )
+                        setOnClickListener { onAction() }
+                    })
+                }
             }
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
