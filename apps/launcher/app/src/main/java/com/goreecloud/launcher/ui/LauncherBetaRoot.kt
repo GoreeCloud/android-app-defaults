@@ -6813,7 +6813,7 @@ private fun AppDrawerSurface(
     val layoutDescription = when (drawerLayoutMode) {
         LauncherDrawerLayoutMode.GRID -> "Grid · ${preferences.drawerColumns} columns"
         LauncherDrawerLayoutMode.COMPACT -> "Compact · ${preferences.drawerColumns} columns"
-        LauncherDrawerLayoutMode.LIST -> "Alphabetical list"
+        LauncherDrawerLayoutMode.LIST -> "List"
         LauncherDrawerLayoutMode.CATEGORY -> "Grouped by app category"
     }
     val searchEnabled =
