@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — deterministic established-state runtime fixture
+
+The Android 16 Launcher runtime suite exposed an intermittent setup race: the starter-layout-applied marker was persisted through a fire-and-forget DataStore coroutine while lifecycle and transition fixtures immediately waited on the resulting state. Under a slow managed emulator, the 5-second fixture wait could expire before that asynchronous write committed, failing the first runtime case and leaving the full connected test task stalled until its outer timeout.
+
+The starter-layout persistence operation now returns its write `Job`, matching the repository's other mutable preference APIs. Android lifecycle and transition-performance fixtures explicitly join that write before reading established-state preferences, and JVM coverage verifies the join contract. MainActivity behavior is unchanged; production callers may continue to ignore the returned job where observation is already reactive.
+
+**Boundary:** runtime-harness and preference-write determinism only. No Launcher UI, gesture semantics, workspace authority, permissions, data model, or release status changes.
+
 ## October 2, 2026 — compact Search, clean starter Home, and visual onboarding candidate
 
 Representative-device CI-661 screenshots and owner feedback exposed a density/first-run tranche that remained outside the previous visual corrections. Universal Search shortcut results still consumed large vertical cards; Search Sources repeated its title in an oversized card and kept the large Suggestion tabs control outside the scrolling source list; fresh starter Home still inherited automatic first-party cards; and onboarding presented several operational concepts as long documentation paragraphs.
