@@ -1064,6 +1064,14 @@ class GalleryActivity : Activity() {
         alpha = if (enabled) 1f else 0.42f
         contentDescription = description
         tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = when {
+                !enabled -> "Unavailable"
+                destructive -> "Destructive action"
+                selected -> "Selected"
+                else -> null
+            }
+        }
         GalleryInteractionFeedback.applyBoundedRipple(this, foreground, 18)
         if (enabled) setOnClickListener { onClick() }
     }
@@ -2448,6 +2456,9 @@ class GalleryActivity : Activity() {
             GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, cornerDp)
             isSelected = selected
             contentDescription = mediaTileContentDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                stateDescription = if (selected) "Selected" else null
+            }
             setOnClickListener {
                 if (inSelectionMode) toggleSelection(item, items)
                 else showAuthorizedViewer(items, index, generation)
@@ -5625,6 +5636,9 @@ class GalleryActivity : Activity() {
         isFocusable = true
         isSelected = selected
         contentDescription = "$title. $subtitle.${if (selected) " Selected." else ""}"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (selected) "Selected" else null
+        }
         GalleryInteractionFeedback.applyBoundedRipple(
             this,
             if (selected) accentColor() else primaryTextColor(),
@@ -5992,6 +6006,9 @@ class GalleryActivity : Activity() {
             roundedSurface(0x26ffffff, 18)
         }
         control.isSelected = selected
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            control.stateDescription = if (selected) "Active" else null
+        }
     }
 
     private fun iconHeaderAction(
