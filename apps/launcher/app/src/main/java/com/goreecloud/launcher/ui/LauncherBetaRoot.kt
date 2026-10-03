@@ -1594,6 +1594,20 @@ fun LauncherBetaRoot(
         selectedAppAnchor?.let { anchor ->
             val appKey = app.workspaceKey()
             val pinnedIndex = drawerPinnedAppOrder.indexOf(appKey)
+            val customOrderActive =
+                drawerSortOrderName == LauncherDrawerSortOrder.CUSTOM_APPS.name
+            val customAvailableKeys = rootAppsByKey.keys
+            val customProfileKeys = discoverableApps
+                .asSequence()
+                .filter { visibleApp -> visibleApp.user == app.user }
+                .map { visibleApp -> visibleApp.workspaceKey() }
+                .toSet()
+            val reconciledCustomOrder = LauncherDrawerCustomOrder.reconcile(
+                order = drawerCustomAppOrder,
+                availableKeys = customAvailableKeys,
+            )
+            val visibleCustomProfileOrder = reconciledCustomOrder.filter(customProfileKeys::contains)
+            val customIndex = visibleCustomProfileOrder.indexOf(appKey)
             AppContextPopup(
                 app = app,
                 anchor = anchor,
@@ -1610,6 +1624,16 @@ fun LauncherBetaRoot(
                 canResetDrawerPinnedOrder =
                     selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
                         drawerPinnedAppKeys.size > 1,
+                customOrderActive =
+                    selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
+                        customOrderActive,
+                canMoveCustomEarlier = customOrderActive && customIndex > 0,
+                canMoveCustomLater =
+                    customOrderActive &&
+                        customIndex >= 0 &&
+                        customIndex < visibleCustomProfileOrder.lastIndex,
+                canResetCustomOrder =
+                    customOrderActive && visibleCustomProfileOrder.size > 1,
                 hiddenFromLauncher = appKey in hiddenAppKeys,
                 availableAndroidWidgets = availableAndroidWidgets,
                 onHomeAction = {
@@ -1671,6 +1695,56 @@ fun LauncherBetaRoot(
                         )
                         .map { it.first }
                     onSetDrawerPinnedAppOrder(alphabeticalOrder)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onMoveCustomEarlier = {
+                    onSetDrawerCustomAppOrder(
+                        LauncherDrawerCustomOrder.moveWithinProfile(
+                            order = drawerCustomAppOrder,
+                            availableKeys = customAvailableKeys,
+                            profileKeys = customProfileKeys,
+                            appKey = appKey,
+                            delta = -1,
+                        ),
+                    )
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onMoveCustomLater = {
+                    onSetDrawerCustomAppOrder(
+                        LauncherDrawerCustomOrder.moveWithinProfile(
+                            order = drawerCustomAppOrder,
+                            availableKeys = customAvailableKeys,
+                            profileKeys = customProfileKeys,
+                            appKey = appKey,
+                            delta = 1,
+                        ),
+                    )
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onResetCustomOrder = {
+                    val alphabeticalProfileOrder = customProfileKeys
+                        .mapNotNull { key ->
+                            rootAppsByKey[key]?.let { orderedApp ->
+                                key to orderedApp.label.toString()
+                            }
+                        }
+                        .sortedWith(
+                            compareBy<Pair<String, String>> {
+                                it.second.lowercase(Locale.ROOT)
+                            }.thenBy { it.first },
+                        )
+                        .map { it.first }
+                    onSetDrawerCustomAppOrder(
+                        LauncherDrawerCustomOrder.replaceProfileOrder(
+                            order = drawerCustomAppOrder,
+                            availableKeys = customAvailableKeys,
+                            profileKeys = customProfileKeys,
+                            replacementProfileOrder = alphabeticalProfileOrder,
+                        ),
+                    )
                     selectedApp = null
                     selectedAppAnchor = null
                 },
@@ -12250,6 +12324,10 @@ private fun AppContextPopup(
     canMoveDrawerPinnedEarlier: Boolean,
     canMoveDrawerPinnedLater: Boolean,
     canResetDrawerPinnedOrder: Boolean,
+    customOrderActive: Boolean,
+    canMoveCustomEarlier: Boolean,
+    canMoveCustomLater: Boolean,
+    canResetCustomOrder: Boolean,
     hiddenFromLauncher: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
     onHomeAction: () -> Unit,
@@ -12260,6 +12338,9 @@ private fun AppContextPopup(
     onMoveDrawerPinnedEarlier: () -> Unit,
     onMoveDrawerPinnedLater: () -> Unit,
     onResetDrawerPinnedOrder: () -> Unit,
+    onMoveCustomEarlier: () -> Unit,
+    onMoveCustomLater: () -> Unit,
+    onResetCustomOrder: () -> Unit,
     onToggleHidden: () -> Unit,
     onAddToFolder: () -> Unit,
     onOpenWidgets: (List<LauncherWidgetProviderDescriptor>) -> Unit,
@@ -12455,6 +12536,26 @@ private fun AppContextPopup(
                             symbol = GlazePopupActionSymbol.PIN,
                             onClick = onResetDrawerPinnedOrder,
                             enabled = canResetDrawerPinnedOrder,
+                        )
+                    }
+                    if (customOrderActive) {
+                        GlazeLauncherPopupAction(
+                            label = "Move custom earlier",
+                            symbol = GlazePopupActionSymbol.APPS,
+                            onClick = onMoveCustomEarlier,
+                            enabled = canMoveCustomEarlier,
+                        )
+                        GlazeLauncherPopupAction(
+                            label = "Move custom later",
+                            symbol = GlazePopupActionSymbol.APPS,
+                            onClick = onMoveCustomLater,
+                            enabled = canMoveCustomLater,
+                        )
+                        GlazeLauncherPopupAction(
+                            label = "Reset custom order A–Z",
+                            symbol = GlazePopupActionSymbol.APPS,
+                            onClick = onResetCustomOrder,
+                            enabled = canResetCustomOrder,
                         )
                     }
                 }
