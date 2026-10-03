@@ -6417,10 +6417,35 @@ class GalleryActivity : Activity() {
     private fun thumbnailCacheKey(namespace: String, contentUri: String): String = "$namespace:$contentUri"
 
     private fun emptyState(title: String, message: String): LinearLayout {
+        val iconResource = when {
+            searchQuery.isNotBlank() -> R.drawable.ic_gallery_search
+            destination == GalleryDestination.ALBUMS -> R.drawable.ic_gallery_nav_albums
+            destination == GalleryDestination.VIDEOS -> R.drawable.ic_gallery_nav_videos
+            destination == GalleryDestination.SETTINGS -> R.drawable.ic_gallery_nav_settings
+            else -> R.drawable.ic_gallery_nav_photos
+        }
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(dp(20), dp(28), dp(20), dp(20))
+            setPadding(dp(20), dp(24), dp(20), dp(20))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.RAISED,
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
+            addView(
+                ImageView(context).apply {
+                    setImageResource(iconResource)
+                    setColorFilter(accentColor())
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setPadding(dp(10), dp(10), dp(10), dp(10))
+                    background = roundedSurface(withAlpha(accentColor(), 0.11f), 22)
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                },
+                LinearLayout.LayoutParams(dp(44), dp(44)).apply {
+                    bottomMargin = dp(10)
+                },
+            )
             addView(TextView(context).apply {
                 text = title
                 gravity = Gravity.CENTER
@@ -6440,7 +6465,7 @@ class GalleryActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                topMargin = dp(16)
+                topMargin = dp(14)
             }
         }
     }
