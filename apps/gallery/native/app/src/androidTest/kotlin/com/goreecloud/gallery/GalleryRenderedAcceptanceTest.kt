@@ -209,11 +209,12 @@ class GalleryRenderedAcceptanceTest {
         activityRule.scenario.onActivity { activity ->
             val root = activity.findViewById<ViewGroup>(android.R.id.content)
 
-            val densityRow = findByContentDescriptionPrefix(root, "View density.")
-            assertNotNull("View density setting row should be rendered", densityRow)
+            val densityRow = checkNotNull(
+                findByContentDescriptionPrefix(root, "View density."),
+            ) { "View density setting row should be rendered" }
             assertTrue(
                 "Choice setting rows should show a compact trailing chevron glyph",
-                checkNotNull(densityRow).containsTrailingCompoundDrawable(),
+                densityRow.containsTrailingCompoundDrawable(),
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 assertTrue(
@@ -222,11 +223,12 @@ class GalleryRenderedAcceptanceTest {
                 )
             }
 
-            val roundedRow = findByContentDescriptionPrefix(root, "Rounded-square thumbnails.")
-            assertNotNull("Rounded-square thumbnails setting row should be rendered", roundedRow)
+            val roundedRow = checkNotNull(
+                findByContentDescriptionPrefix(root, "Rounded-square thumbnails."),
+            ) { "Rounded-square thumbnails setting row should be rendered" }
             assertTrue(
                 "Toggle setting rows should use a vector state indicator instead of On/Off text",
-                checkNotNull(roundedRow).containsImageViewDescendant(),
+                roundedRow.containsImageViewDescendant(),
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 assertTrue(
