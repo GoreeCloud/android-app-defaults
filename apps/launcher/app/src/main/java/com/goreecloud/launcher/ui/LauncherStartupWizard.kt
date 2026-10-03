@@ -716,7 +716,11 @@ private fun WizardGestureStrip() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.62f),
+        ),
     ) {
         Row(
             modifier = Modifier.padding(6.dp),
@@ -728,11 +732,13 @@ private fun WizardGestureStrip() {
                 Triple("Hold", "Edit", WizardVisualSymbol.EDIT),
             ).forEach { (gesture, destination, symbol) ->
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 44.dp),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                         GlazeMetrics.radiusMedium,
                     ),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.76f),
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
