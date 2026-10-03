@@ -80,6 +80,25 @@ enum class GalleryViewDensity(
     }
 }
 
+enum class GalleryNavigationDisplayMode(
+    val storedValue: String,
+    val label: String,
+    val showIcon: Boolean,
+    val showLabel: Boolean,
+) {
+    ICONS_ONLY("icons", "Icons only", showIcon = true, showLabel = false),
+    TEXT_ONLY("text", "Text only", showIcon = false, showLabel = true),
+    ICONS_AND_TEXT("both", "Icons & text", showIcon = true, showLabel = true),
+    ;
+
+    companion object {
+        const val PREFERENCE_KEY = "navigation_display_mode"
+
+        fun fromStored(value: String?): GalleryNavigationDisplayMode =
+            entries.firstOrNull { it.storedValue == value } ?: ICONS_ONLY
+    }
+}
+
 enum class GallerySlideshowInterval(
     val storedValue: String,
     val label: String,
@@ -159,6 +178,7 @@ object GalleryVideoFilterPolicy {
 data class GalleryUserSettings(
     val fileLoadingPriority: GalleryFileLoadingPriority = GalleryFileLoadingPriority.FAST,
     val viewDensity: GalleryViewDensity = GalleryViewDensity.DENSE,
+    val navigationDisplayMode: GalleryNavigationDisplayMode = GalleryNavigationDisplayMode.ICONS_ONLY,
     val groupingMode: GalleryGroupingMode = GalleryGroupingMode.DAY,
     val sortPreference: GallerySortPreference = GallerySortPreference.NEWEST,
     val pinnedAlbumIds: Set<String> = emptySet(),

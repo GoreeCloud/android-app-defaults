@@ -17,9 +17,13 @@ Use **disposable copied photos and videos** when testing Restore, permanent dele
 
 On supported Android versions, the app may operate with selected-media access rather than broad image/video access.
 
+While Gallery remains in the foreground, it observes Android MediaStore and automatically refreshes the current authorized snapshot after local media changes. Newly created photos/videos should therefore appear without closing and reopening the app. Gallery still performs a fresh authoritative read when returning to the Activity after it has been backgrounded.
+
 ## Main destinations
 
 The current native Development experience provides direct **Photos**, **Albums**, **Videos**, **Trash**, and **Settings** destinations.
+
+The bottom navigation defaults to **Icons only**. Use **Settings > Appearance > Bottom navigation** to switch to **Text only** or **Icons & text**. Destination names remain available to accessibility services in every visual mode. Tapping the already-selected destination returns that view to the top.
 
 - Photos uses an adaptive local timeline grid. Dense day groups retain the compact multi-column layout, while sparse one- and two-item groups use a larger three-column presentation lane closer to the current Gallery mockup.
 - Videos uses a featured first card followed by two-column phone cards (three columns on wider layouts), with play affordances, duration badges, title/date metadata, and category chips that appear only when the current Android-authorized snapshot actually contains matching Screen recordings, Camera, or Favorites media.

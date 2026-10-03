@@ -1,5 +1,21 @@
 # GoreeCloud Gallery Changelogs
 
+## October 2, 2026 — live library refresh and navigation polish
+
+### Added
+- Added a foreground MediaStore observer with bounded debounce so newly created, edited, moved, copied, restored, or removed local media can refresh the authorized Gallery snapshot without requiring an app relaunch.
+- Added a silent refresh path that avoids replacing the current grid with the full loading state, retains still-valid multi-selection, and preserves the current scroll offset when the user is already browsing below the top.
+- Added **Settings > Appearance > Bottom navigation** with **Icons only** (default), **Text only**, and **Icons & text** modes. Accessibility destination names remain available in every visual mode, and the preference participates in settings export/import.
+- Added rounded Glaze popup surfaces for three-dot overflow/context menus in light and dark themes.
+
+### Changed
+- Tapping the already-selected primary destination now returns its current view to the top.
+- Compact video cards now ellipsize long filenames on one line instead of wrapping awkwardly.
+- Advanced the Development identity to `0.8.8-dev` and require delivered CI version codes above the previously staged `2000709` build.
+
+### Boundary
+Live refresh observes only Android MediaStore URIs and re-reads only the current Android-authorized media scope. No network, account, filesystem, broader storage, background sync, or additional media permission authority was added. Gallery remains Development/non-Stable.
+
 ## October 2, 2026 — isolate the Development install channel
 
 Gallery Development debug builds now use the approved variant identity `com.goreecloud.gallery.dev` while the canonical product identity remains `com.goreecloud.gallery`. This prevents a differently signed Development APK from colliding with an existing canonical Gallery installation, allows both variants to coexist during representative-device testing, and establishes the package boundary required for future persistent-signer in-place Development updates. Versioning remains `0.8.7-dev` with a monotonically increasing CI-derived Android versionCode for delivered Development artifacts. Gallery remains Development/non-Stable.

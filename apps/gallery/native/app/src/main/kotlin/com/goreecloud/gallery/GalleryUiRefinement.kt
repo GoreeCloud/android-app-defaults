@@ -1,6 +1,7 @@
 package com.goreecloud.gallery
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
@@ -135,7 +136,8 @@ object GalleryUiRefinement {
     }
 
     private fun refineNavigation(activity: Activity, capsule: LinearLayout) {
-        val capsuleMarker = "navigation-capsule-v3"
+        val mode = navigationDisplayMode(activity)
+        val capsuleMarker = "navigation-capsule-v4:${mode.storedValue}"
         if (capsule.getTag(R.id.gallery_navigation_surface_tag) != capsuleMarker) {
             // Keep the outer bar optically quieter than the selected item so state is not conveyed
             // by color alone and the active CONTROL surface remains the strongest navigation cue.
@@ -154,25 +156,27 @@ object GalleryUiRefinement {
 
         for (index in 0 until capsule.childCount) {
             val item = capsule.getChildAt(index) as? TextView ?: continue
-            val label = item.text?.toString() ?: continue
+            val label = navigationLabel(item) ?: continue
             val icon = navigationIcons[label] ?: continue
             // GalleryActivity owns the navigation selection and accessibility identity. Read that
             // identity rather than replacing it from presentation-only refinement state.
             val activityDescription = item.contentDescription?.toString().orEmpty()
             val selected = activityDescription == "$label, selected" || item.isSelected
-            val marker = "navigation:$label:$selected:v4"
+            val marker = "navigation:$label:$selected:${mode.storedValue}:v5"
             if (item.getTag(R.id.gallery_ui_refinement_tag) == marker) continue
 
             val foreground = if (selected) activityAccent(activity) else activityPrimaryText(activity)
+            item.text = if (mode.showLabel) label else ""
             item.setTextSize(TypedValue.COMPLEX_UNIT_SP, GalleryGlazeContract.NAVIGATION_LABEL_SP)
             item.setTextColor(foreground)
             item.setTypeface(null, if (selected) Typeface.BOLD else Typeface.NORMAL)
-            val drawable = activity.getDrawable(icon)?.mutate()
+            val drawable = if (mode.showIcon) activity.getDrawable(icon)?.mutate() else null
             val iconPx = dp(activity, GalleryGlazeContract.NAVIGATION_ICON_DP)
             drawable?.setBounds(0, 0, iconPx, iconPx)
             item.setCompoundDrawables(null, drawable, null, null)
             item.compoundDrawableTintList = ColorStateList.valueOf(foreground)
-            item.compoundDrawablePadding = dp(activity, 2)
+            item.compoundDrawablePadding =
+                if (mode.showIcon && mode.showLabel) dp(activity, 2) else 0
             item.setPadding(dp(activity, 4), dp(activity, 2), dp(activity, 4), dp(activity, 2))
             item.background = if (selected) {
                 GalleryGlazeSurfaces.drawable(
@@ -195,7 +199,7 @@ object GalleryUiRefinement {
             val child = root.getChildAt(index) as? LinearLayout ?: continue
             if (child.childCount != navigationIcons.size) continue
             val labels = (0 until child.childCount).mapNotNull { childIndex ->
-                (child.getChildAt(childIndex) as? TextView)?.text?.toString()
+                (child.getChildAt(childIndex) as? TextView)?.let(::navigationLabel)
             }
             if (labels.size == navigationIcons.size && labels.toSet() == navigationIcons.keys) {
                 return child
@@ -203,6 +207,24 @@ object GalleryUiRefinement {
         }
         return null
     }
+
+    private fun navigationLabel(item: TextView): String? {
+        val visibleLabel = item.text?.toString().orEmpty()
+        if (visibleLabel in navigationIcons) return visibleLabel
+
+        val description = item.contentDescription?.toString().orEmpty()
+        return navigationIcons.keys.firstOrNull { label ->
+            description == label || description.startsWith("$label,")
+        }
+    }
+
+    private fun navigationDisplayMode(activity: Activity): GalleryNavigationDisplayMode =
+        GalleryNavigationDisplayMode.fromStored(
+            activity.getSharedPreferences(
+                GallerySetupPreferences.PREFERENCES_NAME,
+                Context.MODE_PRIVATE,
+            ).getString(GalleryNavigationDisplayMode.PREFERENCE_KEY, null),
+        )
 
     private fun refineRecycleBinChrome(activity: RecycleBinActivity, root: FrameLayout) {
         var actionBar: LinearLayout? = null
