@@ -383,7 +383,9 @@ Launcher is intended to act as a unified entry point into compatible GoreeCloud 
 ## Wardveil Security
 
 - Security-aware launcher experiences and security-state indicators.
-- Protected application access where supported.
+- Optional **App Lock** for launches initiated by GoreeCloud Launcher, using one local 4–6 digit PIN or 4–9 dot pattern credential and profile-qualified locked-app identities.
+- App Lock must state that it is Launcher-only protection: it does not prevent an app from opening through another launcher, Android notifications, links, system surfaces, Settings, recents, or other operating-system entry points.
+- Protected application access beyond Launcher-local launch gating only where a separately authorized Android/platform security mechanism actually provides it.
 - Suspicious-application warnings where supported.
 - Direct Security Center access.
 - Security-sensitive contextual actions.
