@@ -1104,11 +1104,11 @@ Validation:
 
 **Lifecycle boundary:** Development only. Representative-device permission behavior, profile isolation, accessibility, latency, distribution-policy review, release qualification, production, and Stable acceptance remain open under issue #80.
 
-## September 22, 2026 — PR #228 connected persisted Universal Search source controls
+## September 22, 2026 — legacy standalone PR #228 connected persisted Universal Search source controls
 
 **Change type:** Universal Search provider controls; rendered Sources management; Development implementation.
 
-PR #228, **Connect persisted Universal Search source controls on current main**, was guarded-squash merged to `main` as `1e1f72c6a994e8381c0eecf3bd9fc3db17a44dde`.
+Legacy standalone-repository PR #228, **Connect persisted Universal Search source controls on current main**, was guarded-squash merged to `main` as `1e1f72c6a994e8381c0eecf3bd9fc3db17a44dde`.
 
 Implemented:
 
@@ -1152,11 +1152,11 @@ Validation:
 
 **Lifecycle boundary:** Development only. Representative-device visual quality, resolution/orientation rendering, picker accessibility, sustained performance/power, Human Visual Excellence, release qualification, production, and Stable acceptance remain open under issue #80.
 
-## September 22, 2026 — PR #223 removed persistent app-drawer header actions
+## September 22, 2026 — legacy standalone PR #223 removed persistent app-drawer header actions
 
 **Change type:** App drawer interaction; navigation cleanup; Development implementation.
 
-PR #223, **Use gesture-only app drawer dismissal**, was guarded-squash merged to `main` as `c09e2d581f300271f762422eef206631769f73b1`.
+Legacy standalone-repository PR #223, **Use gesture-only app drawer dismissal**, was guarded-squash merged to `main` as `c09e2d581f300271f762422eef206631769f73b1`.
 
 Implemented:
 
