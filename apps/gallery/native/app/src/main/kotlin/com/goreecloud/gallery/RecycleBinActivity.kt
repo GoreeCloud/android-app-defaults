@@ -178,7 +178,7 @@ class RecycleBinActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             setPadding(
                 dp(horizontalGutterDp()),
-                dp(14),
+                dp(10),
                 dp(horizontalGutterDp()),
                 dp(GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP),
             )
@@ -195,7 +195,7 @@ class RecycleBinActivity : Activity() {
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             },
-            LinearLayout.LayoutParams(dp(34), dp(34)).apply {
+            LinearLayout.LayoutParams(dp(32), dp(32)).apply {
                 marginEnd = dp(8)
             },
         )
@@ -208,7 +208,7 @@ class RecycleBinActivity : Activity() {
             setTextColor(primaryTextColor())
             setTextSize(
                 TypedValue.COMPLEX_UNIT_SP,
-                if (resources.configuration.screenWidthDp < 360) 26f else 29f,
+                if (resources.configuration.screenWidthDp < 360) 25f else 27f,
             )
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
@@ -217,7 +217,7 @@ class RecycleBinActivity : Activity() {
         headerSubtitle = TextView(this).apply {
             text = "Android controls Trash retention and expiration"
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.75f)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
         }
@@ -227,7 +227,7 @@ class RecycleBinActivity : Activity() {
             marginStart = dp(4)
         })
         header.addView(
-            iconAction(R.drawable.ic_gallery_refresh, "Refresh Trash") { loadRecycleBin() },
+            headerIconAction(R.drawable.ic_gallery_refresh, "Refresh Trash") { loadRecycleBin() },
             LinearLayout.LayoutParams(dp(48), dp(48)),
         )
         content.addView(header)
@@ -241,14 +241,14 @@ class RecycleBinActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                topMargin = dp(8)
-                bottomMargin = dp(2)
+                topMargin = dp(3)
+                bottomMargin = 0
             },
         )
 
         body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(8), 0, 0)
+            setPadding(0, dp(4), 0, 0)
         }
         content.addView(body)
 
@@ -277,10 +277,7 @@ class RecycleBinActivity : Activity() {
     }
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
-        val navigationMode = GalleryNavigationDisplayMode.fromStored(
-            getSharedPreferences(GallerySetupPreferences.PREFERENCES_NAME, MODE_PRIVATE)
-                .getString(GalleryNavigationDisplayMode.PREFERENCE_KEY, null),
-        )
+        val navigationMode = GalleryNavigationDisplayMode.ICONS_ONLY
         val items = listOf(
             Triple("Photos", R.drawable.ic_gallery_nav_photos, GalleryNavigationContract.PHOTOS),
             Triple("Albums", R.drawable.ic_gallery_nav_albums, GalleryNavigationContract.ALBUMS),
@@ -299,7 +296,7 @@ class RecycleBinActivity : Activity() {
                         iconRes = icon,
                         mode = navigationMode,
                         selected = selected,
-                        foreground = if (selected) accentColor() else primaryTextColor(),
+                        foreground = if (selected) accentColor() else secondaryTextColor(),
                     )
                     isSelected = selected
                     isClickable = true
@@ -342,13 +339,14 @@ class RecycleBinActivity : Activity() {
     private fun bottomCapsuleSurface(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        setPadding(dp(3), dp(3), dp(3), dp(3))
+        setPadding(0, 0, 0, 0)
         background = GalleryGlazeSurfaces.drawable(
             context,
             GalleryGlazeSurfaces.Role.CHROME,
             GalleryGlazeContract.NAVIGATION_RADIUS_DP,
         )
         elevation = dp(GalleryGlazeContract.NAVIGATION_ELEVATION_DP).toFloat()
+        clipToOutline = true
     }
 
     private fun loadRecycleBin() {
@@ -370,7 +368,7 @@ class RecycleBinActivity : Activity() {
             trashedItems = emptyList()
             headerTitle.text = "Trash"
             headerSubtitle.text = "Media access required"
-            body.addView(emptyState("Media access required", "Open GoreeCloud Gallery and allow Android media access before browsing Trash."))
+            body.addView(emptyState("Media access required", "Choose media in Gallery before opening Trash."))
             return
         }
 
@@ -965,6 +963,31 @@ class RecycleBinActivity : Activity() {
         return "$minutes:${remainder.toString().padStart(2, '0')}"
     }
 
+    private fun headerIconAction(
+        iconResource: Int,
+        description: String,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+        background = null
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            accentColor(),
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
+        setOnClickListener { onClick() }
+    }
+
     private fun iconAction(
         iconResource: Int,
         description: String,
@@ -1035,58 +1058,54 @@ class RecycleBinActivity : Activity() {
 
     private fun messageRow(title: String, message: String): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(dp(14), dp(14), dp(14), dp(14))
-        background = roundedSurface(withAlpha(primaryTextColor(), if (isNightMode()) 0.09f else 0.04f), 18)
+        setPadding(dp(2), dp(5), dp(2), dp(5))
+        background = null
         addView(TextView(context).apply {
             text = title
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
             setTypeface(typeface, Typeface.BOLD)
         })
         addView(TextView(context).apply {
             text = message
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.25f)
-            setLineSpacing(0f, 1.05f)
-            setPadding(0, dp(4), 0, 0)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
+            setLineSpacing(0f, 1.03f)
+            setPadding(0, dp(2), 0, 0)
         })
     }
 
     private fun emptyState(title: String, message: String): View = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER
-        setPadding(dp(18), dp(22), dp(18), dp(18))
-        background = roundedSurface(
-            withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.045f),
-            20,
-        )
+        setPadding(dp(12), dp(18), dp(12), dp(14))
+        background = null
         addView(
             ImageView(context).apply {
                 setImageResource(R.drawable.ic_gallery_nav_trash)
                 setColorFilter(accentColor())
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
-                setPadding(dp(10), dp(10), dp(10), dp(10))
-                background = roundedSurface(withAlpha(accentColor(), 0.11f), 22)
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                alpha = 0.82f
             },
-            LinearLayout.LayoutParams(dp(44), dp(44)).apply {
-                bottomMargin = dp(10)
+            LinearLayout.LayoutParams(dp(34), dp(34)).apply {
+                bottomMargin = dp(7)
             },
         )
         addView(TextView(context).apply {
             text = title
             gravity = Gravity.CENTER
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             setTypeface(typeface, Typeface.BOLD)
         })
         addView(TextView(context).apply {
             text = message
             gravity = Gravity.CENTER
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setLineSpacing(0f, 1.08f)
-            setPadding(0, dp(6), 0, 0)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.75f)
+            setLineSpacing(0f, 1.04f)
+            setPadding(0, dp(4), 0, 0)
         })
     }
 
