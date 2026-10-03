@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
+import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -101,23 +101,54 @@ class PhotoEditorSystemBarsRuntimeTest {
                         )
                     }
 
-                    val controlsScroll = (0 until root.childCount)
-                        .map(root::getChildAt)
-                        .filterIsInstance<HorizontalScrollView>()
-                        .single()
-                    val controlsRect = Rect().also { controlsScroll.getGlobalVisibleRect(it) }
-                    assertTrue(
-                        "Photo editor controls must stay above navigation/gesture safe edge",
-                        controlsRect.bottom <= decorRect.bottom - safe.bottom,
-                    )
-                    assertTrue(
-                        "Photo editor controls must stay inside left safe edge",
-                        controlsRect.left >= decorRect.left + safe.left,
-                    )
-                    assertTrue(
-                        "Photo editor controls must stay inside right safe edge",
-                        controlsRect.right <= decorRect.right - safe.right,
-                    )
+                    val transformControls = listOf(
+                        "Rotate photo 90 degrees left",
+                        "Rotate photo 90 degrees right",
+                        "Flip photo horizontally",
+                        "Reset rotation, flip, and crop",
+                    ).map { description ->
+                        checkNotNull(findByContentDescription(root, description)) {
+                            "Missing photo editor transform control: $description"
+                        }
+                    }
+                    transformControls.forEach { control ->
+                        val rect = Rect().also { control.getGlobalVisibleRect(it) }
+                        assertTrue(
+                            "Photo editor controls must stay above navigation/gesture safe edge",
+                            rect.bottom <= decorRect.bottom - safe.bottom,
+                        )
+                        assertTrue(
+                            "Photo editor controls must stay inside left safe edge",
+                            rect.left >= decorRect.left + safe.left,
+                        )
+                        assertTrue(
+                            "Photo editor controls must stay inside right safe edge",
+                            rect.right <= decorRect.right - safe.right,
+                        )
+                        val textControl = control as? TextView
+                        assertNotNull("Photo editor transform actions should use icon controls", textControl)
+                        assertTrue(
+                            "Photo editor transform icon controls should not render text labels",
+                            checkNotNull(textControl).text.isNullOrEmpty(),
+                        )
+                        assertTrue(
+                            "Photo editor transform icon controls should render a centered glyph",
+                            textControl.compoundDrawables[0] != null,
+                        )
+                    }
+
+                    listOf(checkNotNull(cancel), checkNotNull(save)).forEach { control ->
+                        val textControl = control as? TextView
+                        assertNotNull("Photo editor top actions should use icon controls", textControl)
+                        assertTrue(
+                            "Photo editor top icon controls should not render text labels",
+                            checkNotNull(textControl).text.isNullOrEmpty(),
+                        )
+                        assertTrue(
+                            "Photo editor top icon controls should render a glyph",
+                            textControl.compoundDrawables[0] != null,
+                        )
+                    }
                 }
             }
         } finally {
