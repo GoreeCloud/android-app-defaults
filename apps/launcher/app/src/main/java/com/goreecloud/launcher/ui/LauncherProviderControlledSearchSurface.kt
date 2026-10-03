@@ -2198,6 +2198,34 @@ private fun LauncherSourceToolbarAction(
 }
 
 @Composable
+private fun LauncherSourceFolderAction(
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { contentDescription = "Choose a folder to search" },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.primary.copy(
+            alpha = if (enabled) 0.10f else 0.04f,
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherLocalSearchSourceGlyph(
+                providerId = LauncherFilesSearchProvider.PROVIDER_ID,
+                tint = MaterialTheme.colorScheme.primary.copy(
+                    alpha = if (enabled) 1f else 0.35f,
+                ),
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+@Composable
 private fun LauncherBackGlyph(
     tint: Color,
     modifier: Modifier = Modifier,
