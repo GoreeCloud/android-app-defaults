@@ -102,7 +102,7 @@ class LauncherStartupWizardRuntimeTest {
         composeRule.onNodeWithText("Search and gestures")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Apps")
+        composeRule.onNodeWithText("Hold + drag to place")
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText("Widgets")
