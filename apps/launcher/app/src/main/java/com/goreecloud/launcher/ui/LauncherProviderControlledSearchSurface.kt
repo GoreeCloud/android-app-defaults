@@ -2324,26 +2324,27 @@ private fun LauncherContactQuickAction(
                 val cap = androidx.compose.ui.graphics.StrokeCap.Round
                 when (type) {
                     LauncherContactQuickActionType.CALL -> {
-                        drawLine(
-                            tint,
-                            androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.24f),
-                            androidx.compose.ui.geometry.Offset(u * 0.70f, u * 0.76f),
-                            stroke * 1.5f,
-                            cap = cap,
-                        )
-                        drawLine(
-                            tint,
-                            androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.22f),
-                            androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.18f),
-                            stroke * 1.4f,
-                            cap = cap,
-                        )
-                        drawLine(
-                            tint,
-                            androidx.compose.ui.geometry.Offset(u * 0.66f, u * 0.82f),
-                            androidx.compose.ui.geometry.Offset(u * 0.80f, u * 0.76f),
-                            stroke * 1.4f,
-                            cap = cap,
+                        val handset = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(u * 0.28f, u * 0.19f)
+                            cubicTo(
+                                u * 0.18f, u * 0.31f,
+                                u * 0.27f, u * 0.58f,
+                                u * 0.46f, u * 0.73f,
+                            )
+                            cubicTo(
+                                u * 0.61f, u * 0.85f,
+                                u * 0.78f, u * 0.84f,
+                                u * 0.82f, u * 0.70f,
+                            )
+                        }
+                        drawPath(
+                            path = handset,
+                            color = tint,
+                            style = Stroke(
+                                width = stroke * 1.22f,
+                                cap = cap,
+                                join = androidx.compose.ui.graphics.StrokeJoin.Round,
+                            ),
                         )
                     }
                     LauncherContactQuickActionType.MESSAGE -> {
@@ -2722,37 +2723,58 @@ private fun LauncherLocalSearchSourceGlyph(
             LauncherContactsSearchProvider.PROVIDER_ID -> {
                 drawCircle(
                     color = tint,
-                    radius = u * 0.15f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.34f),
+                    radius = u * 0.14f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.33f),
+                    style = Stroke(width = stroke),
                 )
-                drawLine(
+                drawArc(
                     color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.78f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.78f),
-                    strokeWidth = stroke * 1.55f,
-                    cap = round,
+                    startAngle = 200f,
+                    sweepAngle = 140f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.50f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.56f, u * 0.34f),
+                    style = Stroke(
+                        width = stroke,
+                        cap = round,
+                    ),
                 )
             }
             LauncherCallHistorySearchProvider.PROVIDER_ID -> {
+                val handset = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * 0.28f, u * 0.19f)
+                    cubicTo(
+                        u * 0.18f, u * 0.31f,
+                        u * 0.27f, u * 0.58f,
+                        u * 0.46f, u * 0.73f,
+                    )
+                    cubicTo(
+                        u * 0.61f, u * 0.85f,
+                        u * 0.78f, u * 0.84f,
+                        u * 0.82f, u * 0.70f,
+                    )
+                }
+                drawPath(
+                    path = handset,
+                    color = tint,
+                    style = Stroke(
+                        width = stroke * 1.22f,
+                        cap = round,
+                        join = androidx.compose.ui.graphics.StrokeJoin.Round,
+                    ),
+                )
                 drawLine(
                     color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.26f, u * 0.24f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.76f),
-                    strokeWidth = stroke * 1.65f,
+                    start = androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.18f),
+                    end = androidx.compose.ui.geometry.Offset(u * 0.35f, u * 0.25f),
+                    strokeWidth = stroke * 1.40f,
                     cap = round,
                 )
                 drawLine(
                     color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.22f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.35f, u * 0.18f),
-                    strokeWidth = stroke * 1.55f,
-                    cap = round,
-                )
-                drawLine(
-                    color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.67f, u * 0.82f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.80f, u * 0.76f),
-                    strokeWidth = stroke * 1.55f,
+                    start = androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.69f),
+                    end = androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.76f),
+                    strokeWidth = stroke * 1.40f,
                     cap = round,
                 )
             }
