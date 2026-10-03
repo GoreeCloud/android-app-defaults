@@ -441,9 +441,19 @@ internal fun LauncherProviderControlledSearchSurface(
                         placeholder = "Search with GoreeCloud…",
                         inputTestTag = "launcher-universal-search-field",
                         trailingContent = {
-                            LauncherUniversalSearchSettingsAction(
-                                onClick = { showSources = true },
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                if (query.isNotBlank()) {
+                                    LauncherUniversalSearchClearAction(
+                                        onClick = { query = "" },
+                                    )
+                                }
+                                LauncherUniversalSearchSettingsAction(
+                                    onClick = { showSources = true },
+                                )
+                            }
                         },
                     )
                     if (idleSearch) {
@@ -490,12 +500,31 @@ internal fun LauncherProviderControlledSearchSurface(
                             shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                             color = MaterialTheme.colorScheme.errorContainer,
                         ) {
-                            Text(
-                                "Some sources are unavailable. Review their permissions or status.",
-                                modifier = Modifier.padding(GlazeMetrics.space2),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = GlazeMetrics.space2,
+                                        end = GlazeMetrics.space1,
+                                        top = 2.dp,
+                                        bottom = 2.dp,
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+                            ) {
+                                Text(
+                                    "Some sources need attention.",
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                                TextButton(
+                                    onClick = { showSources = true },
+                                    modifier = Modifier.heightIn(min = 44.dp),
+                                ) {
+                                    Text("Sources")
+                                }
+                            }
                         }
                     }
 
@@ -527,6 +556,14 @@ internal fun LauncherProviderControlledSearchSurface(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            TextButton(
+                                onClick = { showSources = true },
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .heightIn(min = 40.dp),
+                            ) {
+                                Text("Search sources")
+                            }
                         }
                     } else {
                         val topResult = results.firstOrNull()
@@ -1302,6 +1339,43 @@ private fun LauncherConnectedProviderFallbackGlyph(
                     start = androidx.compose.ui.geometry.Offset(unit * 0.58f, unit * 0.58f),
                     end = androidx.compose.ui.geometry.Offset(unit * 0.80f, unit * 0.80f),
                     strokeWidth = strokeWidth,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherUniversalSearchClearAction(
+    onClick: () -> Unit,
+) {
+    val iconColor = MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(48.dp)
+            .testTag("launcher-universal-search-clear")
+            .semantics { contentDescription = "Clear Universal Search query" },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = Color.Transparent,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val strokeWidth = 1.8.dp.toPx()
+                val inset = 4.dp.toPx()
+                drawLine(
+                    color = iconColor,
+                    start = androidx.compose.ui.geometry.Offset(inset, inset),
+                    end = androidx.compose.ui.geometry.Offset(size.width - inset, size.height - inset),
+                    strokeWidth = strokeWidth,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                )
+                drawLine(
+                    color = iconColor,
+                    start = androidx.compose.ui.geometry.Offset(size.width - inset, inset),
+                    end = androidx.compose.ui.geometry.Offset(inset, size.height - inset),
+                    strokeWidth = strokeWidth,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
                 )
             }
         }
@@ -2654,6 +2728,12 @@ private fun LauncherSearchSourceManager(
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
+                            LauncherSearchSourceStatusPill(
+                                label = controls.orderedOptions.count { option ->
+                                    option in options && controls.isEnabled(option.providerId)
+                                }.toString() + "/" + options.size + " enabled",
+                                isError = false,
+                            )
                         }
 
                         Surface(
@@ -3167,7 +3247,12 @@ private fun LauncherProviderSearchRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text(result.title, fontWeight = FontWeight.SemiBold)
+                Text(
+                    result.title,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 // A launcher search presents app labels, never diagnostic package names.
                 result.subtitle?.takeUnless { result.category == LauncherSearchCategory.APPLICATION }?.let {
                     Text(
