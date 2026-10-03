@@ -909,46 +909,46 @@ class ActivatedHomeLifecycleRuntimeTest {
         val previousSwipeUp = preferencesRepository.experiencePreferences.first().swipeUpAction
         val appsAction = LauncherGestureAction.builtIn(LauncherGestureActionType.APPS)
 
-        if (!alreadyDefaultHome) {
-            runShellCommand(
-                "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
-            )
-            withTimeout(10_000) {
-                while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                    delay(100)
-                }
+        // Always reassert HOME ownership before any potentially blocking setup. A prior case
+        // can release the role and return Android to stock Launcher between RoleManager reads; if
+        // this test waits on inventory while no GoreeCloud Activity is alive, the instrumentation
+        // process can be background-frozen before its coroutine timeout can run.
+        runShellCommand(
+            "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+        )
+        withTimeout(10_000) {
+            while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                delay(100)
             }
         }
 
+        val repository = WorkspaceRepository(context)
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
         try {
-            preferencesRepository.setGestureAction(
-                LauncherHomeGesture.SWIPE_UP,
-                appsAction,
-            ).join()
-            withTimeout(10_000) {
-                preferencesRepository.experiencePreferences.first { preferences ->
-                    preferences.swipeUpAction == appsAction
-                }
-            }
-
-            val apps = withTimeout(10_000) {
-                LauncherAppsRepository(context).apps.first { candidates ->
-                    candidates.any { it.componentName.packageName != context.packageName }
-                }
-            }
-            val candidate = apps.first { it.componentName.packageName != context.packageName }
-            val candidateKey = candidate.workspaceKey()
-            val repository = WorkspaceRepository(context)
-            repository.ensureDefaults(
-                favoriteKeys = listOf(candidateKey),
-                dockKeys = emptyList(),
-            )
-
-            val scenario = ActivityScenario.launch(MainActivity::class.java)
             try {
                 withTimeout(15_000) {
                     repository.state.first { it.authority == WorkspaceAuthority.ROOM }
                 }
+                waitForDisplayedTag("launcher-home-swipe-surface")
+                composeRule.waitForIdle()
+
+                preferencesRepository.setGestureAction(
+                    LauncherHomeGesture.SWIPE_UP,
+                    appsAction,
+                ).join()
+                withTimeout(10_000) {
+                    preferencesRepository.experiencePreferences.first { preferences ->
+                        preferences.swipeUpAction == appsAction
+                    }
+                }
+
+                val apps = withTimeout(10_000) {
+                    LauncherAppsRepository(context).apps.first { candidates ->
+                        candidates.any { it.componentName.packageName != context.packageName }
+                    }
+                }
+                val candidate = apps.first { it.componentName.packageName != context.packageName }
+                val candidateKey = candidate.workspaceKey()
 
                 val runtime = WorkspaceProductionRuntimeCoordinator(
                     authorityRepository = repository,
@@ -958,11 +958,8 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
 
                 // ROOM authority can become visible before the launched Home finishes startup-owned
-                // reconciliation. Wait for the real Home surface plus both authoritative Room
-                // projections before performing this test-owned setup mutation; otherwise a healthy
-                // guarded write can legitimately lose a snapshot race and contaminate later tests.
-                waitForDisplayedTag("launcher-home-swipe-surface")
-                composeRule.waitForIdle()
+                // reconciliation. The real Home surface is already alive above; now wait for both
+                // authoritative Room projections before performing this test-owned setup mutation.
                 withTimeout(10_000) {
                     runtime.observeHomePages().first { state ->
                         state is WorkspacePagedHomeState.Ready
