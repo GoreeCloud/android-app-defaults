@@ -1,5 +1,21 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — onboarding and Search-source scanability follow-up
+
+Protected PR #224 integrates compact segmented **Home apps**, Grid, and Dock setup choices with a 48 dp interaction floor and explicit radio-button selected-state semantics; active-step progress accenting; shorter setup and Search-mode presentation; direct **Sources** recovery from unavailable-source Search warnings; Launcher-owned Search-source reorder glyphs; shorter source/folder/provider summaries; bounded fallback-result titles; and end-to-end clear-query recovery coverage. The non-clickable gesture guide remains compact at a 44 dp card height without being treated as an actionable touch target. Search actions, including the Search Sources Back control, retain a 48 dp interaction floor.
+
+Exact head `8ee98f3286e7e2e67677393664a905086a8d8581` passed provenance `37140755406`, Android Development Foundation `37140755431`, Migrated Android apps CI `37140755457` including the complete Launcher Android 16 runtime and transition diagnostics, and Protected promotion `37140755404` before expected-head-protected squash merge as authoritative main `06c4be22844c8f97e9c3fdee7757629ab11ccdb9`.
+
+**Acceptance boundary:** Development integration only. Representative-device visual/accessibility/large-text/form-factor acceptance, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
+
+## October 3, 2026 — reversible profile-qualified Hidden apps
+
+Protected PR #223 integrates device-local Hidden Apps state keyed by exact profile-qualified Launcher workspace identity. **Hide from Apps & Search / Show in Apps & Search** affects only App Drawer and Universal Search discovery; it does not disable or uninstall packages or remove existing Home, Dock, folder, widget, or Room placement. Launcher Settings → App drawer → **Hidden apps** exposes a count and direct **Show** recovery actions, distinguishes User and Work identities, and indexes hidden/hide/visibility terms for Settings search.
+
+Exact head `4ce68c0201cb2779c91c3203e68a8d75fdc07cd6` passed Migrated Android apps CI `37138104658` including complete Launcher Android 16 runtime and transition diagnostics, migration provenance `37138104703`, Android Development Foundation `37138104654`, and Protected promotion `37138104626` before expected-head-protected squash merge as `b433104499372248d03cd0fed89fa729b6db1d77`. The same integration hardens HOME-role runtime-test isolation without changing production HOME authority.
+
+**Acceptance boundary:** Development integration only. Portable Hidden Apps backup/recovery policy, representative personal/Work/Shelter/private-space behavior, accessibility/large-text/form-factor acceptance, protected signing/update continuity, release qualification, Stable, Seal, and Anchor remain open.
+
 ## October 2, 2026 — compact Universal Search, clean starter Home, and visual onboarding
 
 Protected PR #194 integrates the CI-661 follow-up density and first-run redesign. Universal Search now keeps a distinct Top result while ordinary app matches, app-shortcut groups, handoff rows, and section headers use substantially denser presentation. Search Sources uses compact back/title navigation, keeps Suggestion tabs inside the normal scrolling list, flattens grouped source presentation, keeps the complete registered connected-source catalog visible, and reduces source rows to a concise two-line hierarchy with expanded details for technical/privacy information.
@@ -30,11 +46,11 @@ Exact PR head `e670a9662780c8d257fec4869d639cf252447650` passed Mandatory app mi
 
 **Acceptance boundary:** Development integration only. Representative physical-device mockup comparison, accessibility/large-text/form-factor acceptance, protected Development signing/update continuity, release qualification, Production, Stable, Seal, and Anchor remain open.
 
-## October 2, 2026 — manual App Drawer pinned ordering
+## October 2, 2026 — manual App Drawer pinned ordering and A–Z reset
 
-Protected PR #185 integrated device-local, profile-qualified manual ordering for pinned App Drawer applications. **Pinned first** honors the persisted manual rank, and pinned Drawer app menus expose **Move pinned earlier / Move pinned later**. Pin membership remains the existing profile-qualified key set; order is presentation metadata only, stays outside portable preference v1, and does not mutate Home, Dock, folders, package state, or cross-profile authority.
+Protected PR #185 integrated device-local, profile-qualified manual ordering for pinned App Drawer applications. **Pinned first** honors the persisted manual rank, and pinned Drawer app menus expose **Move pinned earlier / Move pinned later**. Protected PR #186 then added **Reset pinned order A–Z** when more than one Drawer app is pinned. Reset derives deterministic case-normalized label order from currently known profile-qualified app identities, uses the workspace key as a stable tie-break, persists only pinned-key order, and retains existing reconciliation behavior when pin membership later changes.
 
-The accepted candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` passed the complete protected exact-head matrix, including Launcher source/JVM/lint/build, full Android 16 lifecycle runtime, transition-performance diagnostics, the migrated-app required gate, Android Development required gate, provenance, and protected promotion before squash merge as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Representative-device accessibility, large-text/form-factor, performance/power, protected signing/update continuity, recovery, and release qualification remain open.
+PR #185 exact head `69a65412f24271ecb627b2eb5aaf96b55de9e570` passed its complete protected exact-head matrix before squash merge as `7902e7bd58a510591e6c8f8778a3872df4c77642`. PR #186 exact head `d7dbd5b6cdb0b478f668aa406be774f1ee036420` then passed Mandatory app migration provenance `36990802823`, Android Development Foundation `36990802838`, Migrated Android apps CI `36990802796`, and Protected promotion `36990802778` before merge as `1bd60b949696d7774058ed19b7a6ecf67126e293`. Pin membership/order remains device-local presentation metadata outside portable preference v1 and does not mutate Home, Dock, folders, package state, or cross-profile authority. Representative-device accessibility, large-text/form-factor, performance/power, protected signing/update continuity, recovery, and release qualification remain open.
 
 ## October 1, 2026 — local Universal Search Quick answers
 
