@@ -12,6 +12,8 @@ Remaining font/Unicode pseudo-glyph controls in the media grid and viewer paths 
 
 The setup wizard now uses a compact visual progress rail and icon-first Back/Return/Continue/Finish actions. The step labels, content descriptions, replay behavior, and persisted onboarding state remain unchanged.
 
+Long destination or album titles are constrained to a single ellipsized header line, keeping Search/Sort and Back affordances stable at compact widths. Inline search close, media-access actions, album quick-access chips, and album cards now use the same bounded press-feedback contract as the rest of Gallery chrome.
+
 ## October 3, 2026 — unified bottom-navigation glyph family
 
 The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
