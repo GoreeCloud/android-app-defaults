@@ -6492,6 +6492,7 @@ private fun LauncherDrawerVisualTile(
 private fun StableDrawerVerticalGrid(
     entries: List<LauncherDrawerVisualEntry>,
     allApps: List<LauncherActivityInfo>,
+    lockedAppKeys: Set<String>,
     columns: Int,
     iconScale: Float,
     showLabel: Boolean,
@@ -6537,6 +6538,7 @@ private fun StableDrawerVerticalGrid(
                             LauncherDrawerVisualTile(
                                 entry = entry,
                                 allApps = allApps,
+                                lockedAppKeys = lockedAppKeys,
                                 iconScale = iconScale,
                                 showLabel = showLabel,
                                 compact = compact,
@@ -6581,6 +6583,7 @@ private fun StableDrawerVerticalGrid(
                             LauncherDrawerVisualTile(
                                 entry = entry,
                                 allApps = allApps,
+                                lockedAppKeys = lockedAppKeys,
                                 iconScale = iconScale,
                                 showLabel = showLabel,
                                 compact = compact,
@@ -7409,6 +7412,7 @@ private fun DrawerAppsContent(
                         LauncherDrawerVisualTile(
                             entry = entry,
                             allApps = apps,
+                            lockedAppKeys = lockedAppKeys,
                             iconScale = preferences.iconScale,
                             showLabel = experiencePreferences.showDrawerLabels,
                             compact = drawerLayoutMode == LauncherDrawerLayoutMode.COMPACT,
@@ -7448,6 +7452,7 @@ private fun DrawerAppsContent(
             StableDrawerVerticalGrid(
                 entries = entries,
                 allApps = apps,
+                lockedAppKeys = lockedAppKeys,
                 columns = preferences.drawerColumns,
                 iconScale = preferences.iconScale,
                 showLabel = experiencePreferences.showDrawerLabels,
@@ -7533,6 +7538,7 @@ private fun DrawerAppsContent(
                         is LauncherDrawerVisualEntry.Folder -> LauncherDrawerVisualTile(
                             entry = entry,
                             allApps = apps,
+                            lockedAppKeys = lockedAppKeys,
                             iconScale = preferences.iconScale,
                             showLabel = true,
                             compact = true,
@@ -7570,6 +7576,7 @@ private fun DrawerAppsContent(
                         LauncherDrawerVisualTile(
                             entry = entry,
                             allApps = apps,
+                            lockedAppKeys = lockedAppKeys,
                             iconScale = preferences.iconScale,
                             showLabel = experiencePreferences.showDrawerLabels,
                             compact = false,
