@@ -551,6 +551,9 @@ class RecycleBinActivity : Activity() {
             val selected = uri in selectedUris
             tile.isSelected = selected
             tile.contentDescription = tileDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                tile.stateDescription = if (selected) "Selected" else null
+            }
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
         }
