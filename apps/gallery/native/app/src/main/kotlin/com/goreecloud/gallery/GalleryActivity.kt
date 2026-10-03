@@ -1155,7 +1155,8 @@ class GalleryActivity : Activity() {
                 destination != GalleryDestination.TRASH &&
                 visibleItems.isNotEmpty()
         sortControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
-        searchControl.visibility = if (showMediaControls) View.VISIBLE else View.GONE
+        searchControl.visibility =
+            if (showMediaControls && searchContainer.visibility != View.VISIBLE) View.VISIBLE else View.GONE
         videoFilterStripView?.visibility =
             if (destination == GalleryDestination.VIDEOS) View.VISIBLE else View.GONE
     }
@@ -5997,9 +5998,7 @@ class GalleryActivity : Activity() {
         } else {
             searchContainer.visibility = View.VISIBLE
             searchField.requestFocus()
-            searchControl.setImageResource(R.drawable.ic_gallery_close)
-            searchControl.setColorFilter(primaryTextColor())
-            searchControl.contentDescription = "Close search"
+            searchControl.visibility = View.GONE
             searchContainer.post {
                 (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
                     ?.showSoftInput(searchField, InputMethodManager.SHOW_IMPLICIT)
@@ -6013,6 +6012,7 @@ class GalleryActivity : Activity() {
         searchControl.setImageResource(R.drawable.ic_gallery_search)
         searchControl.setColorFilter(primaryTextColor())
         searchControl.contentDescription = "Search the current Gallery destination"
+        searchControl.visibility = View.VISIBLE
         (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow(searchField.windowToken, 0)
         if (clearQuery) {
