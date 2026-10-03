@@ -195,7 +195,7 @@ class RecycleBinActivity : Activity() {
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             },
-            LinearLayout.LayoutParams(dp(36), dp(36)).apply {
+            LinearLayout.LayoutParams(dp(34), dp(34)).apply {
                 marginEnd = dp(8)
             },
         )
@@ -208,7 +208,7 @@ class RecycleBinActivity : Activity() {
             setTextColor(primaryTextColor())
             setTextSize(
                 TypedValue.COMPLEX_UNIT_SP,
-                if (resources.configuration.screenWidthDp < 360) 27f else 30f,
+                if (resources.configuration.screenWidthDp < 360) 26f else 29f,
             )
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
