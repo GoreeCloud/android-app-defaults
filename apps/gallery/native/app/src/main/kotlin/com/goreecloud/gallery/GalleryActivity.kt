@@ -41,6 +41,7 @@ import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.PopupWindow
 import android.widget.ScrollView
 import android.widget.Space
 import android.widget.TextView
@@ -510,7 +511,7 @@ class GalleryActivity : Activity() {
         }
         row.addView(
             brandMark,
-            LinearLayout.LayoutParams(dp(40), dp(40)).apply {
+            LinearLayout.LayoutParams(dp(36), dp(36)).apply {
                 marginEnd = dp(8)
             },
         )
@@ -542,7 +543,7 @@ class GalleryActivity : Activity() {
             setTextColor(primaryTextColor)
             setTextSize(
                 TypedValue.COMPLEX_UNIT_SP,
-                if (resources.configuration.screenWidthDp < 360) 28f else 32f,
+                if (resources.configuration.screenWidthDp < 360) 27f else 30f,
             )
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
@@ -551,7 +552,7 @@ class GalleryActivity : Activity() {
         }
         headerSubtitle = TextView(this).apply {
             setTextColor(secondaryTextColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
             setPadding(0, dp(1), 0, 0)
@@ -1297,8 +1298,8 @@ class GalleryActivity : Activity() {
             library.removeAllViews()
             library.addView(
                 emptyState(
-                    title = "Your library stays private",
-                    message = "Gallery only reads media Android authorizes. No GoreeCloud account or network connection is required.",
+                    title = "No media selected",
+                    message = "Choose media above to show only the photos and videos you approve. You can change access later.",
                 ),
             )
             updateHeader()
@@ -1732,44 +1733,47 @@ class GalleryActivity : Activity() {
     }
 
     private fun renderVideoCards(items: List<MediaItem>, generation: Int) {
-        val gutterPx = dp(
-            GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp),
-        )
+        val widthDp = resources.configuration.screenWidthDp
+        val gutterPx = dp(GalleryGlazeContract.horizontalGutterDp(widthDp))
         val availableWidth = (
             resources.displayMetrics.widthPixels - (gutterPx * 2)
         ).coerceAtLeast(dp(240))
+        val useFeaturedCard =
+            GalleryGlazeContract.videoUsesFeaturedCard(widthDp) && items.size >= 3
 
-        val featured = items.first()
-        val featuredWidth = availableWidth.coerceAtMost(
-            dp(GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP),
-        )
-        library.addView(
-            videoCard(
-                item = featured,
-                collectionItems = items,
-                collectionIndex = 0,
-                generation = generation,
-                thumbnailHeight = ((featuredWidth * 9f) / 16f).toInt().coerceAtLeast(dp(160)),
-                featured = true,
-            ),
-            LinearLayout.LayoutParams(
-                featuredWidth,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                gravity = Gravity.CENTER_HORIZONTAL
-            },
-        )
+        var firstGridIndex = 0
+        if (useFeaturedCard) {
+            val featured = items.first()
+            val featuredWidth = availableWidth.coerceAtMost(
+                dp(GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP),
+            )
+            library.addView(
+                videoCard(
+                    item = featured,
+                    collectionItems = items,
+                    collectionIndex = 0,
+                    generation = generation,
+                    thumbnailHeight = ((featuredWidth * 9f) / 16f).toInt().coerceAtLeast(dp(160)),
+                    featured = true,
+                ),
+                LinearLayout.LayoutParams(
+                    featuredWidth,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    gravity = Gravity.CENTER_HORIZONTAL
+                },
+            )
+            firstGridIndex = 1
+        }
 
-        if (items.size == 1) return
+        if (firstGridIndex >= items.size) return
 
-        val columns = GalleryGlazeContract.videoGridColumns(
-            resources.configuration.screenWidthDp,
-        )
+        val columns = GalleryGlazeContract.videoGridColumns(widthDp)
         val gaps = dp(VIDEO_CARD_GAP_DP) * (columns - 1)
         val cardWidth = ((availableWidth - gaps) / columns).coerceAtLeast(dp(136))
         val thumbnailHeight = ((cardWidth * 9f) / 16f).toInt().coerceAtLeast(dp(88))
 
-        items.drop(1).chunked(columns).forEachIndexed { rowIndex, rowItems ->
+        items.drop(firstGridIndex).chunked(columns).forEachIndexed { rowIndex, rowItems ->
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.START
@@ -1806,7 +1810,11 @@ class GalleryActivity : Activity() {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                 ).apply {
-                    topMargin = dp(if (rowIndex == 0) 12 else VIDEO_CARD_GAP_DP)
+                    topMargin = dp(
+                        if (rowIndex == 0 && useFeaturedCard) 12
+                        else if (rowIndex == 0) 4
+                        else VIDEO_CARD_GAP_DP,
+                    )
                 },
             )
         }
@@ -1844,7 +1852,7 @@ class GalleryActivity : Activity() {
         LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(10), dp(6), dp(2), 0)
+            setPadding(dp(9), dp(5), dp(1), 0)
 
             addView(
                 LinearLayout(context).apply {
@@ -1857,7 +1865,7 @@ class GalleryActivity : Activity() {
                             setTextColor(primaryTextColor())
                             setTextSize(
                                 TypedValue.COMPLEX_UNIT_SP,
-                                if (featured) 17f else 14f,
+                                if (featured) 16f else 13.5f,
                             )
                             setTypeface(typeface, Typeface.BOLD)
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -1870,9 +1878,9 @@ class GalleryActivity : Activity() {
                             setTextColor(secondaryTextColor())
                             setTextSize(
                                 TypedValue.COMPLEX_UNIT_SP,
-                                if (featured) 12.5f else 11.5f,
+                                if (featured) 12f else 11f,
                             )
-                            setPadding(0, dp(2), 0, 0)
+                            setPadding(0, dp(1), 0, 0)
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         },
                     )
@@ -1959,31 +1967,121 @@ class GalleryActivity : Activity() {
 
     private fun showVideoOverflowMenu(anchor: View, item: MediaItem) {
         val actions = GalleryCardOverflowPolicy.videoActions(item.contentUri in favoriteUris)
-        val byId = actions.associateBy { action -> action.ordinal + 1 }
-        PopupMenu(this, anchor).apply {
-            actions.forEach { action ->
-                menu.add(0, action.ordinal + 1, action.ordinal, action.label)
-            }
-            setOnMenuItemClickListener { menuItem ->
-                when (byId[menuItem.itemId]) {
-                    GalleryCardOverflowAction.SHARE -> shareSingleItem(item)
-                    GalleryCardOverflowAction.ADD_FAVORITE,
-                    GalleryCardOverflowAction.REMOVE_FAVORITE -> {
-                        toggleFavorite(item)
-                        renderCurrentDestination()
-                    }
-                    GalleryCardOverflowAction.DETAILS -> showItemDetails(item)
-                    GalleryCardOverflowAction.OPEN,
-                    GalleryCardOverflowAction.PIN_TO_TOP,
-                    GalleryCardOverflowAction.UNPIN_FROM_TOP,
-                    GalleryCardOverflowAction.MOVE_EARLIER,
-                    GalleryCardOverflowAction.MOVE_LATER,
-                    null -> return@setOnMenuItemClickListener false
-                }
-                true
-            }
-            show()
+        lateinit var popup: PopupWindow
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(8), dp(8), dp(8), dp(8))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
+            clipToOutline = true
+            elevation = dp(8).toFloat()
         }
+
+        actions.forEach { action ->
+            val iconResource = when (action) {
+                GalleryCardOverflowAction.SHARE -> R.drawable.ic_gallery_share
+                GalleryCardOverflowAction.ADD_FAVORITE -> R.drawable.ic_gallery_favorite_outline
+                GalleryCardOverflowAction.REMOVE_FAVORITE -> R.drawable.ic_gallery_favorite
+                GalleryCardOverflowAction.DETAILS -> R.drawable.ic_gallery_info
+                else -> R.drawable.ic_gallery_more
+            }
+            panel.addView(
+                videoOverflowActionRow(
+                    iconResource = iconResource,
+                    label = action.label,
+                ) {
+                    popup.dismiss()
+                    when (action) {
+                        GalleryCardOverflowAction.SHARE -> shareSingleItem(item)
+                        GalleryCardOverflowAction.ADD_FAVORITE,
+                        GalleryCardOverflowAction.REMOVE_FAVORITE -> {
+                            toggleFavorite(item)
+                            renderCurrentDestination()
+                        }
+                        GalleryCardOverflowAction.DETAILS -> showItemDetails(item)
+                        GalleryCardOverflowAction.OPEN,
+                        GalleryCardOverflowAction.PIN_TO_TOP,
+                        GalleryCardOverflowAction.UNPIN_FROM_TOP,
+                        GalleryCardOverflowAction.MOVE_EARLIER,
+                        GalleryCardOverflowAction.MOVE_LATER -> Unit
+                    }
+                },
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ),
+            )
+        }
+
+        val popupWidth = dp(216)
+        val estimatedHeight = dp(actions.size * GalleryGlazeContract.GENERAL_TARGET_DP + 16)
+        popup = PopupWindow(
+            panel,
+            popupWidth,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true,
+        ).apply {
+            isOutsideTouchable = true
+            isFocusable = true
+            elevation = dp(8).toFloat()
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+        }
+
+        val location = IntArray(2)
+        anchor.getLocationOnScreen(location)
+        val screenWidth = resources.displayMetrics.widthPixels
+        val screenHeight = resources.displayMetrics.heightPixels
+        val popupX = (location[0] + anchor.width - popupWidth)
+            .coerceIn(dp(8), (screenWidth - popupWidth - dp(8)).coerceAtLeast(dp(8)))
+        val maximumY = (screenHeight - estimatedHeight - dp(12)).coerceAtLeast(dp(8))
+        val popupY = (location[1] + anchor.height - estimatedHeight)
+            .coerceIn(dp(8), maximumY)
+        popup.showAtLocation(anchor, Gravity.TOP or Gravity.START, popupX, popupY)
+    }
+
+    private fun videoOverflowActionRow(
+        iconResource: Int,
+        label: String,
+        onClick: () -> Unit,
+    ): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        setPadding(dp(10), 0, dp(12), 0)
+        isClickable = true
+        isFocusable = true
+        contentDescription = label
+        tooltipText = label
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            accentColor(),
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
+        addView(
+            ImageView(context).apply {
+                setImageResource(iconResource)
+                setColorFilter(accentColor())
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+            LinearLayout.LayoutParams(dp(24), dp(24)).apply {
+                marginEnd = dp(12)
+            },
+        )
+        addView(
+            TextView(context).apply {
+                text = label
+                setTextColor(primaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                setTypeface(typeface, Typeface.BOLD)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
+        )
+        setOnClickListener { onClick() }
     }
 
     private fun showAlbumOverflowMenu(anchor: View, album: AlbumPresentation) {
@@ -4738,7 +4836,7 @@ class GalleryActivity : Activity() {
 
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(22), dp(22), dp(22), dp(16))
+            setPadding(dp(18), dp(18), dp(18), dp(14))
             background = GalleryGlazeSurfaces.drawable(
                 context,
                 GalleryGlazeSurfaces.Role.OVERLAY,
@@ -4749,15 +4847,15 @@ class GalleryActivity : Activity() {
         panel.addView(TextView(this).apply {
             text = if (replay) "Review Gallery setup" else "Set up Gallery"
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
             setTypeface(typeface, Typeface.BOLD)
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         })
         panel.addView(TextView(this).apply {
             text = "Step ${step + 1} of ${GallerySetupPreferences.STEP_COUNT}"
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-            setPadding(0, dp(4), 0, dp(7))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setPadding(0, dp(3), 0, dp(6))
         })
         panel.addView(
             setupProgressRail(step),
@@ -4765,7 +4863,7 @@ class GalleryActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 dp(6),
             ).apply {
-                bottomMargin = dp(14)
+                bottomMargin = dp(12)
             },
         )
 
@@ -4775,12 +4873,12 @@ class GalleryActivity : Activity() {
             0 -> {
                 title = "Your local media library"
                 body =
-                    "Browse Photos, Albums, Videos, Trash, and Settings from the bottom bar. It starts with icons only; change the display in Settings > Appearance > Bottom navigation."
+                    "Use the bottom bar for Photos, Albums, Videos, Trash, and Settings. Navigation starts icon-only; change it in Settings > Appearance."
             }
             1 -> {
                 title = "You control media access"
                 body =
-                    "Gallery only reads media Android grants. Browsing stays local. This Development build does not claim cloud backup or Protected Photos are active."
+                    "Gallery reads only media Android grants, and browsing stays local. Cloud backup and Protected Photos are not active in this Development build."
             }
             else -> {
                 title = "Choose your guidance"
@@ -4798,9 +4896,9 @@ class GalleryActivity : Activity() {
         panel.addView(TextView(this).apply {
             text = body
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setLineSpacing(0f, 1.06f)
-            setPadding(0, dp(6), 0, dp(14))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            setLineSpacing(0f, 1.05f)
+            setPadding(0, dp(5), 0, dp(12))
         })
 
         if (step == 2) {
@@ -4810,10 +4908,11 @@ class GalleryActivity : Activity() {
                     title = "Contextual hints",
                     subtitle = "Optional tips only. Privacy, permission, destructive-action, error, and system messages remain visible.",
                     enabled = true,
-                    trailing = settingsPill(
-                        if (hintsEnabled) "On" else "Off",
-                        emphasized = hintsEnabled,
+                    trailing = settingsToggleIndicator(
+                        checked = hintsEnabled,
+                        enabled = true,
                     ),
+                    stateDescriptionText = if (hintsEnabled) "On" else "Off",
                 ) {
                     setupPreferences.setContextualHintsEnabled(!hintsEnabled)
                     showSetupWizard(replay = replay, requestedStep = step)
@@ -4824,7 +4923,7 @@ class GalleryActivity : Activity() {
         val controls = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
-            setPadding(0, dp(10), 0, 0)
+            setPadding(0, dp(8), 0, 0)
         }
 
         if (step > 0) {
@@ -4909,6 +5008,9 @@ class GalleryActivity : Activity() {
                         android.graphics.drawable.ColorDrawable(Color.TRANSPARENT),
                     )
                     dialog.window?.setDimAmount(0.42f)
+                    val dialogWidth = (resources.displayMetrics.widthPixels - dp(24))
+                        .coerceAtMost(dp(560))
+                    dialog.window?.setLayout(dialogWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
                 }
                 dialog.show()
             }
@@ -4982,7 +5084,7 @@ class GalleryActivity : Activity() {
         setTextColor(primaryTextColor())
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.5f)
         setTypeface(typeface, Typeface.BOLD)
-        setPadding(dp(2), dp(16), 0, dp(6))
+        setPadding(dp(2), dp(14), 0, dp(5))
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 
@@ -5046,8 +5148,8 @@ class GalleryActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            minimumHeight = dp(64)
-            setPadding(dp(12), dp(8), dp(8), dp(8))
+            minimumHeight = dp(60)
+            setPadding(dp(12), dp(7), dp(7), dp(7))
             background = GalleryGlazeSurfaces.drawable(
                 context,
                 GalleryGlazeSurfaces.Role.RAISED,
@@ -5062,15 +5164,15 @@ class GalleryActivity : Activity() {
             labels.addView(TextView(context).apply {
                 text = title
                 setTextColor(primaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
                 setTypeface(typeface, Typeface.BOLD)
             })
             labels.addView(TextView(context).apply {
                 text = subtitle
                 setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
-                setLineSpacing(0f, 1.06f)
-                setPadding(0, dp(3), dp(8), 0)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f)
+                setLineSpacing(0f, 1.04f)
+                setPadding(0, dp(2), dp(7), 0)
             })
             addView(labels, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
             addView(trailing)
@@ -5094,7 +5196,7 @@ class GalleryActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                bottomMargin = dp(4)
+                bottomMargin = dp(3)
             }
         }
     }
@@ -5115,21 +5217,21 @@ class GalleryActivity : Activity() {
     private fun settingsPill(label: String, emphasized: Boolean): TextView = TextView(this).apply {
         text = label
         gravity = Gravity.CENTER
-        minWidth = dp(58)
-        minHeight = dp(36)
-        setPadding(dp(10), 0, dp(7), 0)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
+        minWidth = dp(48)
+        minHeight = dp(32)
+        setPadding(dp(8), 0, dp(6), 0)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
         setTypeface(typeface, Typeface.BOLD)
         setTextColor(if (emphasized) accentColor() else primaryTextColor())
         setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_gallery_chevron_right, 0)
         compoundDrawableTintList = ColorStateList.valueOf(
             if (emphasized) accentColor() else secondaryTextColor(),
         )
-        compoundDrawablePadding = dp(4)
+        compoundDrawablePadding = dp(3)
         background = roundedSurface(
-            if (emphasized) withAlpha(accentColor(), 0.13f)
-            else withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.055f),
-            14,
+            if (emphasized) withAlpha(accentColor(), 0.12f)
+            else withAlpha(primaryTextColor(), if (isNightMode()) 0.09f else 0.045f),
+            13,
         )
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
@@ -5145,17 +5247,17 @@ class GalleryActivity : Activity() {
             when {
                 !enabled -> secondaryTextColor()
                 checked -> accentColor()
-                else -> primaryTextColor()
+                else -> secondaryTextColor()
             },
         )
         scaleType = ImageView.ScaleType.CENTER_INSIDE
-        minimumWidth = dp(52)
-        minimumHeight = dp(36)
-        setPadding(dp(8), dp(8), dp(8), dp(8))
+        minimumWidth = dp(48)
+        minimumHeight = dp(32)
+        setPadding(dp(8), dp(6), dp(8), dp(6))
         background = roundedSurface(
-            if (enabled && checked) withAlpha(accentColor(), 0.13f)
-            else withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.055f),
-            14,
+            if (enabled && checked) withAlpha(accentColor(), 0.12f)
+            else withAlpha(primaryTextColor(), if (isNightMode()) 0.09f else 0.045f),
+            13,
         )
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
@@ -6449,7 +6551,7 @@ class GalleryActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(dp(20), dp(24), dp(20), dp(20))
+            setPadding(dp(18), dp(20), dp(18), dp(18))
             background = GalleryGlazeSurfaces.drawable(
                 context,
                 GalleryGlazeSurfaces.Role.RAISED,
@@ -6460,34 +6562,34 @@ class GalleryActivity : Activity() {
                     setImageResource(iconResource)
                     setColorFilter(accentColor())
                     scaleType = ImageView.ScaleType.CENTER_INSIDE
-                    setPadding(dp(10), dp(10), dp(10), dp(10))
-                    background = roundedSurface(withAlpha(accentColor(), 0.11f), 22)
+                    setPadding(dp(9), dp(9), dp(9), dp(9))
+                    background = roundedSurface(withAlpha(accentColor(), 0.10f), 20)
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 },
-                LinearLayout.LayoutParams(dp(44), dp(44)).apply {
-                    bottomMargin = dp(10)
+                LinearLayout.LayoutParams(dp(40), dp(40)).apply {
+                    bottomMargin = dp(8)
                 },
             )
             addView(TextView(context).apply {
                 text = title
                 gravity = Gravity.CENTER
                 setTextColor(primaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16.5f)
                 setTypeface(typeface, Typeface.BOLD)
             })
             addView(TextView(context).apply {
                 text = message
                 gravity = Gravity.CENTER
                 setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
-                setLineSpacing(0f, 1.08f)
-                setPadding(0, dp(7), 0, 0)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+                setLineSpacing(0f, 1.06f)
+                setPadding(0, dp(6), 0, 0)
             })
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                topMargin = dp(14)
+                topMargin = dp(10)
             }
         }
     }
