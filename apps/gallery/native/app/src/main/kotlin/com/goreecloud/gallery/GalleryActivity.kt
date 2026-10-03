@@ -4970,6 +4970,7 @@ class GalleryActivity : Activity() {
         subtitle = subtitle,
         enabled = enabled,
         trailing = settingsPill(value, emphasized = false),
+        stateDescriptionText = value,
         onClick = onClick,
     )
 
@@ -4997,10 +4998,11 @@ class GalleryActivity : Activity() {
         title = title,
         subtitle = subtitle,
         enabled = enabled,
-        trailing = settingsPill(
-            if (!enabled) "Unavailable" else if (checked) "On" else "Off",
-            emphasized = enabled && checked,
+        trailing = settingsToggleIndicator(
+            checked = checked,
+            enabled = enabled,
         ),
+        stateDescriptionText = if (!enabled) "Unavailable" else if (checked) "On" else "Off",
     ) {
         onToggle(!checked)
         renderSettingsDestinationOnly()
@@ -5011,6 +5013,7 @@ class GalleryActivity : Activity() {
         subtitle: String,
         enabled: Boolean,
         trailing: View,
+        stateDescriptionText: String? = null,
         onClick: () -> Unit,
     ): LinearLayout {
         return LinearLayout(this).apply {
@@ -5049,6 +5052,9 @@ class GalleryActivity : Activity() {
             isFocusable = enabled
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             contentDescription = "$title. $subtitle"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                stateDescription = stateDescriptionText
+            }
             if (enabled) {
                 GalleryInteractionFeedback.applyBoundedRipple(
                     this,
@@ -5082,14 +5088,45 @@ class GalleryActivity : Activity() {
     private fun settingsPill(label: String, emphasized: Boolean): TextView = TextView(this).apply {
         text = label
         gravity = Gravity.CENTER
-        minWidth = dp(52)
+        minWidth = dp(58)
         minHeight = dp(36)
-        setPadding(dp(10), 0, dp(10), 0)
+        setPadding(dp(10), 0, dp(7), 0)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
         setTypeface(typeface, Typeface.BOLD)
         setTextColor(if (emphasized) accentColor() else primaryTextColor())
+        setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_gallery_chevron_right, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(
+            if (emphasized) accentColor() else secondaryTextColor(),
+        )
+        compoundDrawablePadding = dp(4)
         background = roundedSurface(
             if (emphasized) withAlpha(accentColor(), 0.13f)
+            else withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.055f),
+            14,
+        )
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+    }
+
+    private fun settingsToggleIndicator(
+        checked: Boolean,
+        enabled: Boolean,
+    ): ImageView = ImageView(this).apply {
+        setImageResource(
+            if (checked) R.drawable.ic_gallery_toggle_on else R.drawable.ic_gallery_toggle_off,
+        )
+        setColorFilter(
+            when {
+                !enabled -> secondaryTextColor()
+                checked -> accentColor()
+                else -> primaryTextColor()
+            },
+        )
+        scaleType = ImageView.ScaleType.CENTER_INSIDE
+        minWidth = dp(52)
+        minHeight = dp(36)
+        setPadding(dp(8), dp(8), dp(8), dp(8))
+        background = roundedSurface(
+            if (enabled && checked) withAlpha(accentColor(), 0.13f)
             else withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.055f),
             14,
         )
