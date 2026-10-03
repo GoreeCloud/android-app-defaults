@@ -2933,6 +2933,16 @@ private fun LauncherSearchSourceManager(
                                                 )
                                             }
 
+                                            if (
+                                                option.providerId ==
+                                                    LauncherFilesSearchProvider.PROVIDER_ID &&
+                                                fileSearchRoots.isEmpty()
+                                            ) {
+                                                LauncherSourceFolderAction(
+                                                    enabled = ready,
+                                                    onClick = onChooseFileSearchRoot,
+                                                )
+                                            }
                                             Switch(
                                                 checked =
                                                     enabled &&
@@ -2959,37 +2969,6 @@ private fun LauncherSearchSourceManager(
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                                                     .copy(alpha = 0.72f),
                                             )
-                                        }
-
-                                        if (
-                                            option.providerId ==
-                                                LauncherFilesSearchProvider.PROVIDER_ID &&
-                                            fileSearchRoots.isEmpty()
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.End,
-                                            ) {
-                                                TextButton(
-                                                    onClick = onChooseFileSearchRoot,
-                                                    enabled = ready,
-                                                    modifier = Modifier.heightIn(min = 44.dp),
-                                                ) {
-                                                    Row(
-                                                        horizontalArrangement =
-                                                            Arrangement.spacedBy(6.dp),
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                    ) {
-                                                        LauncherLocalSearchSourceGlyph(
-                                                            providerId =
-                                                                LauncherFilesSearchProvider.PROVIDER_ID,
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.size(18.dp),
-                                                        )
-                                                        Text("Choose folder")
-                                                    }
-                                                }
-                                            }
                                         }
 
                                         if (expanded) {
