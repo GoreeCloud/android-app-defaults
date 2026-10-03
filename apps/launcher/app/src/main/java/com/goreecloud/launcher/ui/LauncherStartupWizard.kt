@@ -774,69 +774,6 @@ private fun WizardGestureStrip() {
     }
 }
 
-private enum class WizardGestureCue {
-    UP,
-    DOWN,
-    HOLD,
-}
-
-@Composable
-private fun WizardGestureCueGlyph(
-    cue: WizardGestureCue,
-    tint: Color,
-    modifier: Modifier = Modifier,
-) {
-    Canvas(modifier.size(16.dp)) {
-        val u = size.minDimension
-        val stroke = u * 0.10f
-        val cap = StrokeCap.Round
-        val cx = u * 0.50f
-        when (cue) {
-            WizardGestureCue.UP,
-            WizardGestureCue.DOWN -> {
-                val up = cue == WizardGestureCue.UP
-                val startY = if (up) u * 0.78f else u * 0.22f
-                val endY = if (up) u * 0.22f else u * 0.78f
-                drawLine(
-                    tint,
-                    Offset(cx, startY),
-                    Offset(cx, endY),
-                    stroke,
-                    cap = cap,
-                )
-                val armY = if (up) u * 0.39f else u * 0.61f
-                drawLine(
-                    tint,
-                    Offset(cx, endY),
-                    Offset(u * 0.30f, armY),
-                    stroke,
-                    cap = cap,
-                )
-                drawLine(
-                    tint,
-                    Offset(cx, endY),
-                    Offset(u * 0.70f, armY),
-                    stroke,
-                    cap = cap,
-                )
-            }
-            WizardGestureCue.HOLD -> {
-                drawCircle(
-                    color = tint,
-                    radius = u * 0.13f,
-                    center = Offset(cx, u * 0.50f),
-                )
-                drawCircle(
-                    color = tint,
-                    radius = u * 0.31f,
-                    center = Offset(cx, u * 0.50f),
-                    style = Stroke(width = stroke * 0.75f),
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun WizardVisualGlyph(
     symbol: WizardVisualSymbol,
