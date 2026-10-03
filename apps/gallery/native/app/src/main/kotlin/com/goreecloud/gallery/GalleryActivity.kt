@@ -2895,10 +2895,18 @@ class GalleryActivity : Activity() {
             setTextColor(accentColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
             setTypeface(typeface, Typeface.BOLD)
+            setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_gallery_move, 0, 0, 0)
+            compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+            compoundDrawablePadding = dp(7)
             background = roundedSurface(withAlpha(accentColor(), 0.12f), GalleryGlazeContract.SHAPE_CONTROL_DP)
             isClickable = true
             isFocusable = true
             contentDescription = "Create new folder and move selected media"
+            GalleryInteractionFeedback.applyBoundedRipple(
+                this,
+                accentColor(),
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
         }
         val cancelAction = dialogDismissAction("Cancel new folder") {
             dialog?.dismiss()
@@ -3131,10 +3139,18 @@ class GalleryActivity : Activity() {
             setTextColor(accentColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
             setTypeface(typeface, Typeface.BOLD)
+            setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_gallery_copy, 0, 0, 0)
+            compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+            compoundDrawablePadding = dp(7)
             background = roundedSurface(withAlpha(accentColor(), 0.12f), GalleryGlazeContract.SHAPE_CONTROL_DP)
             isClickable = true
             isFocusable = true
             contentDescription = "Create new folder and copy selected media"
+            GalleryInteractionFeedback.applyBoundedRipple(
+                this,
+                accentColor(),
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
         }
         val cancelAction = dialogDismissAction("Cancel new copy folder") {
             dialog?.dismiss()
@@ -3371,6 +3387,11 @@ class GalleryActivity : Activity() {
         isFocusable = true
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         contentDescription = "$title. $subtitle. $actionDescription."
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            accentColor(),
+            GalleryGlazeContract.SHAPE_CONTAINER_DP,
+        )
         setOnClickListener { onClick() }
     }
 
@@ -5559,12 +5580,13 @@ class GalleryActivity : Activity() {
         })
         addView(labels, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         addView(
-            TextView(context).apply {
-                text = if (selected) "✓" else ""
-                gravity = Gravity.CENTER
-                setTextColor(if (selected) Color.WHITE else secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-                setTypeface(typeface, Typeface.BOLD)
+            ImageView(context).apply {
+                if (selected) {
+                    setImageResource(R.drawable.ic_gallery_check_white)
+                    setColorFilter(Color.WHITE)
+                }
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                setPadding(dp(6), dp(6), dp(6), dp(6))
                 background = roundedSurface(
                     if (selected) accentColor() else withAlpha(primaryTextColor(), 0.06f),
                     15,
@@ -5577,6 +5599,11 @@ class GalleryActivity : Activity() {
         isFocusable = true
         isSelected = selected
         contentDescription = "$title. $subtitle.${if (selected) " Selected." else ""}"
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            if (selected) accentColor() else primaryTextColor(),
+            GalleryGlazeContract.SHAPE_CONTAINER_DP,
+        )
         setOnClickListener { onClick() }
     }
 
