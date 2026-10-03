@@ -1,5 +1,9 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 3, 2026 — App Lock follow-up
+
+App Lock now exists in Development source. Physical-device, accessibility, form-factor, signing, update-continuity, and release acceptance remain open.
+
 ## October 3, 2026 — App Lock acceptance work remains
 
 The Development source now contains Launcher-managed App Lock for profile-qualified apps. Remaining work is representative-device acceptance for successful and cancelled authentication, secure-lock setup recovery, personal/Work profile behavior, accessibility, large text, RTL/localization, form factors, protected Development signing/update continuity, and a separately versioned portable-state policy. Launches that originate outside GoreeCloud Launcher remain outside this feature's authority.
