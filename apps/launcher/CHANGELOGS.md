@@ -14,6 +14,8 @@ A follow-on refinement pass tightens ordinary result section headers, converts a
 
 A further interaction-density pass adds an explicit **Clear query** control inside active Universal Search, turns unavailable-source and no-result guidance into direct **Sources / Search sources** actions, adds per-group enabled-count pills in Search Sources, and clamps fallback result titles to one line. The startup wizard now uses the same compact segmented selector for **Home apps** that it already uses for Grid and Dock, shortens setup guidance, and reduces the visual height of Search-mode choices without changing persisted configuration semantics.
 
+A glyph-consistency pass removes the remaining device-font-dependent stars, checkmarks, category symbols, battery/charging symbols, and onboarding gesture arrows from the affected Launcher surfaces. App Drawer pin/filter and selected-sort states, folder selection, fallback Search categories, battery previews/widgets, and setup gesture cues now use Launcher-owned vector geometry with accessible text/state retained separately.
+
 **Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. A new representative-device APK and visual retest remain open; protected Development signing/update continuity, accessibility/large-text/form-factor acceptance, Release Candidate, Production, and Stable remain separate gates.
 
 ## October 2, 2026 — representative-device visual correction after CI-649
