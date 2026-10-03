@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — App Lock and owner-feedback UI tranche
+
+Development source now includes profile-qualified App Lock controls, Android authentication before Launcher-originated launches of selected apps, a Privacy & security settings destination, a background-free floating Dock, refined Launcher-owned glyphs, a one-column phone widget catalog, and lighter setup/help presentation. App Lock state is device-local and does not claim control over launches initiated outside GoreeCloud Launcher.
+
+**Acceptance boundary:** Development only. Representative-device security, accessibility, large-text, form-factor, protected signing/update continuity, release, Stable, Seal, and Anchor gates remain open.
+
 ## October 3, 2026 — App Lock and owner-feedback presentation tranche
 
 Development source now contains device-local, profile-qualified App Lock membership, a **Privacy & security** settings destination, per-app Lock/Unlock context actions, and Android device-credential gating before Launcher-originated app launches. The implementation stores no PIN, password, biometric material, authentication token, telemetry, or network state. When Android has no secure screen lock or cannot provide an authentication intent, the protected launch fails closed.
