@@ -270,6 +270,23 @@ Naming an integration establishes no implementation claim. Each participating sy
 - Platform integration must be substantive; visual labels do not prove integration.
 - Core Home and current Apps behavior remain offline-capable and currently request no Android `INTERNET` permission.
 
+## App Lock security boundary
+
+App Lock is an optional Launcher-local launch gate, not a claim of Android-wide application protection.
+
+Normative requirements:
+
+- Launcher may support one local App Lock credential at a time: a **4–6 digit PIN** or a **4–9 dot pattern with no repeated dot**.
+- Raw PIN/pattern material must never be persisted. The local verifier must use a per-configuration cryptographically random salt and a deliberately expensive password-based derivation function; the current Development implementation uses PBKDF2-HMAC-SHA256 with a 256-bit verifier.
+- Locked applications must be identified with Launcher’s profile-qualified workspace identity so work/private-profile records do not collapse into a package-name-only lock.
+- Long-press application menus on Home and Apps must expose a Launcher-owned lock glyph/action. Creating a first lock may enter setup; removing a lock must require successful verification of the current credential.
+- Launcher Settings must expose App Lock under a security-oriented category, including credential setup/change, locked-app management, disable, and the Launcher-only warning.
+- All Launcher-owned app-dispatch routes must honor the lock before dispatch: Home, Apps, folders, Launcher gesture app targets, Universal Search app results, and application shortcuts initiated by Launcher.
+- Five consecutive failed verification attempts must trigger a local cooldown before another attempt; failure state must persist across recomposition/activity recreation rather than being a purely visual counter.
+- The App Lock credential verifier, locked-app set, and throttle state must remain app-private and must not enter Launcher portable backup/restore, Android cloud backup, or device-transfer payloads unless a separately reviewed encrypted recovery design is introduced.
+- Launcher must plainly warn that App Lock does **not** prevent launch through another launcher, notifications, recents, links, Android Settings/system surfaces, or other independently authorized components.
+- Launcher must not request Accessibility Service, device-admin, overlay abuse, or another elevated privilege merely to simulate an Android-wide app lock.
+
 ## Stable blockers
 
 Stable qualification still requires, as applicable:
