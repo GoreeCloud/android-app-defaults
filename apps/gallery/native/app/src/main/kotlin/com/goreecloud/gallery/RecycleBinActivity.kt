@@ -515,14 +515,12 @@ class RecycleBinActivity : Activity() {
                 })
             }
             addView(
-                TextView(context).apply {
+                ImageView(context).apply {
                     tag = SELECTION_CHECK_TAG
                     visibility = if (selected) View.VISIBLE else View.GONE
-                    text = "✓"
-                    gravity = Gravity.CENTER
-                    setTextColor(Color.WHITE)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    setTypeface(typeface, Typeface.BOLD)
+                    setImageResource(R.drawable.ic_gallery_check_white)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setPadding(dp(6), dp(6), dp(6), dp(6))
                     background = roundedSurface(accentColor(), 14)
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 },
