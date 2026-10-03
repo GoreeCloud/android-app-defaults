@@ -1,5 +1,15 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 2, 2026 — foreground live library refresh and navigation presentation
+
+The Gallery Activity now observes Android MediaStore while it is visible and debounces provider change notifications before silently re-reading the current authorized media snapshot. A live refresh does not replace the grid with the full loading panel, preserves still-valid selection, and keeps the current scroll offset when the user is already below the top. Refresh is deferred while the full-screen viewer or an Android-confirmed Gallery media mutation is active, then reconciled after that conflicting surface clears.
+
+The primary bottom navigation now has a persisted presentation preference with **Icons only** as the default plus **Text only** and **Icons & text** alternatives under Settings > Appearance. Visual labels are independent from accessibility identity, so icons-only mode retains destination names and selected-state semantics for assistive technology. The preference is included in Gallery's additive settings portability envelope.
+
+All Android PopupMenu-based overflow/context surfaces now inherit a rounded Glaze popup background in both light and dark themes. Compact video cards also keep long titles to a single ellipsized line, and re-selecting the current bottom destination scrolls its view to the top.
+
+These changes alter local observation and presentation only; they do not expand MediaStore permission scope, mutation authority, filesystem access, account/network authority, or release status.
+
 ## October 2, 2026 — slideshow pause and resume
 
 Protected PR #185 integrated explicit **Pause / Resume** controls into the existing local photo-only slideshow. Pause cancels the pending advance without discarding the current viewer position; Resume continues from that photo using the already-persisted 3/5/10-second interval. Manual Previous/Next, swipe navigation, scale/zoom interaction, Activity pause/destroy, viewer replacement, and viewer close continue to terminate slideshow state so playback never progresses in the background.
