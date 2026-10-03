@@ -1058,7 +1058,7 @@ class GalleryActivity : Activity() {
     ): TextView = TextView(this).apply {
         text = ""
         gravity = Gravity.CENTER
-        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        minimumHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
         minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
         setPadding(dp(11), dp(11), dp(11), dp(11))
         val foreground = when {
