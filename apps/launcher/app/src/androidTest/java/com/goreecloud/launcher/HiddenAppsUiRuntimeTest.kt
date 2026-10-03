@@ -41,7 +41,7 @@ class HiddenAppsUiRuntimeTest {
     private var previousHiddenKeys: Set<String> = emptySet()
 
     @Before
-    fun prepareEstablishedLauncher() = runBlocking {
+    fun prepareEstablishedLauncher(): Unit = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         preferencesRepository = LauncherPreferencesRepository(context)
         previousHomeAppMode = preferencesRepository.experiencePreferences.first().homeAppMode
@@ -88,7 +88,7 @@ class HiddenAppsUiRuntimeTest {
                     it.starterLayoutApplied
             }
         }
-
+        Unit
     }
 
     @After
