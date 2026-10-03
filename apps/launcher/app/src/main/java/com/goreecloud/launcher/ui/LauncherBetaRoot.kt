@@ -112,6 +112,8 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import com.goreecloud.launcher.core.launcher.LauncherAppIconCache
+import com.goreecloud.launcher.core.launcher.LauncherAppLockCredentialType
+import com.goreecloud.launcher.core.launcher.LauncherAppLockState
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearchHomeMode
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
@@ -725,6 +727,11 @@ fun LauncherBetaRoot(
     isDefaultHome: Boolean,
     onRequestHomeRole: () -> Unit,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
+    appLockState: LauncherAppLockState,
+    onToggleAppLock: (LauncherActivityInfo) -> Unit,
+    onSetUpAppLock: (LauncherAppLockCredentialType) -> Unit,
+    onChangeAppLockCredential: () -> Unit,
+    onDisableAppLock: () -> Unit,
     onOpenAppInfo: (LauncherActivityInfo) -> Unit,
     onAddBuiltInWidget: (String) -> Unit,
     onSetManagedHomeSearchEnabled: (Boolean) -> Unit,
@@ -1548,6 +1555,11 @@ fun LauncherBetaRoot(
                         onSetDockStyle = onSetDockStyle,
                         onSetWallpaperShade = onSetWallpaperShade,
                         onSetGestureAction = onSetGestureAction,
+                        appLockState = appLockState,
+                        onSetUpAppLock = onSetUpAppLock,
+                        onChangeAppLockCredential = onChangeAppLockCredential,
+                        onDisableAppLock = onDisableAppLock,
+                        onUnlockApp = onToggleAppLock,
                         onOpenThemeManager = onOpenThemeManager,
                         onBack = { surfaceModeName = LauncherSurfaceMode.HOME.name },
                     )
@@ -1584,6 +1596,12 @@ fun LauncherBetaRoot(
                     selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
                         drawerPinnedAppKeys.size > 1,
                 availableAndroidWidgets = availableAndroidWidgets,
+                appLocked = appLockState.isLocked(appKey),
+                onToggleAppLock = {
+                    onToggleAppLock(app)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
                 onHomeAction = {
                     if (
                         selectedAppContextOrigin == LauncherAppContextOrigin.HOME &&
@@ -7374,6 +7392,11 @@ private enum class LauncherSettingsCategory(
         "Local unread indicators and privacy controls",
         "notification badge badges unread dots numeric access privacy size corner",
     ),
+    SECURITY(
+        "Security",
+        "App Lock and Launcher protection",
+        "security app lock locked pin pattern credential privacy protection",
+    ),
     SYSTEM(
         "System & setup",
         "Default Home, onboarding and Development status",
@@ -7509,6 +7532,29 @@ private fun LauncherSettingsCategoryIcon(
                     color = color,
                     radius = size.minDimension * 0.10f,
                     center = Offset(size.width * 0.73f, size.height * 0.27f),
+                )
+            }
+            LauncherSettingsCategory.SECURITY -> {
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(size.width * 0.20f, size.height * 0.45f),
+                    size = androidx.compose.ui.geometry.Size(size.width * 0.60f, size.height * 0.38f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.08f),
+                    style = Stroke(stroke),
+                )
+                drawArc(
+                    color = color,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.31f, size.height * 0.14f),
+                    size = androidx.compose.ui.geometry.Size(size.width * 0.38f, size.height * 0.48f),
+                    style = Stroke(stroke),
+                )
+                drawCircle(
+                    color = color,
+                    radius = size.minDimension * 0.045f,
+                    center = Offset(size.width * 0.50f, size.height * 0.64f),
                 )
             }
             LauncherSettingsCategory.SYSTEM -> {
@@ -7704,6 +7750,11 @@ private fun LauncherSettingsRootSurface(
     onSetDockStyle: (LauncherDockStyle) -> Unit,
     onSetWallpaperShade: (LauncherWallpaperShade) -> Unit,
     onSetGestureAction: (LauncherHomeGesture, LauncherGestureAction) -> Unit,
+    appLockState: LauncherAppLockState,
+    onSetUpAppLock: (LauncherAppLockCredentialType) -> Unit,
+    onChangeAppLockCredential: () -> Unit,
+    onDisableAppLock: () -> Unit,
+    onUnlockApp: (LauncherActivityInfo) -> Unit,
     onOpenThemeManager: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -8807,6 +8858,21 @@ private fun LauncherSettingsRootSurface(
                         showIconPackPicker = false
                     },
                     onDismiss = { showIconPackPicker = false },
+                )
+            }
+
+            SettingsSection(
+                "App Lock",
+                "PIN or pattern protection for Launcher-started apps",
+                visible = selectedSettingsCategory == LauncherSettingsCategory.SECURITY,
+            ) {
+                LauncherAppLockSettingsContent(
+                    state = appLockState,
+                    apps = apps,
+                    onSetUp = onSetUpAppLock,
+                    onChangeCredential = onChangeAppLockCredential,
+                    onDisable = onDisableAppLock,
+                    onUnlockApp = onUnlockApp,
                 )
             }
 
@@ -11408,6 +11474,8 @@ private fun AppContextPopup(
     canMoveDrawerPinnedLater: Boolean,
     canResetDrawerPinnedOrder: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
+    appLocked: Boolean,
+    onToggleAppLock: () -> Unit,
     onHomeAction: () -> Unit,
     onToggleDock: () -> Unit,
     onOpenAppInfo: () -> Unit,
@@ -11504,6 +11572,7 @@ private fun AppContextPopup(
                                 add("$badgeCount " + if (badgeCount == 1) "notification" else "notifications")
                             }
                             if (drawerPinned) add("Pinned in Apps")
+                            if (appLocked) add("Locked")
                             if (layoutLocked) add("Home layout locked")
                         }.joinToString(" · ")
                         if (status.isNotBlank()) {
@@ -11614,6 +11683,11 @@ private fun AppContextPopup(
                     }
                 }
                 GlazeLauncherPopupAction(
+                    label = if (appLocked) "Unlock app" else "Lock app",
+                    symbol = GlazePopupActionSymbol.LOCK,
+                    onClick = onToggleAppLock,
+                )
+                GlazeLauncherPopupAction(
                     label = "Add to folder",
                     symbol = GlazePopupActionSymbol.FOLDER,
                     onClick = onAddToFolder,
@@ -11683,6 +11757,7 @@ private enum class GlazePopupActionSymbol {
     APPS,
     SETTINGS,
     INFO,
+    LOCK,
     UNINSTALL,
 }
 
@@ -11814,6 +11889,29 @@ private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) 
                 drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
                 drawCircle(color, radius = w * .65f, center = Offset(u * .5f, u * .33f))
                 segment(.50f, .47f, .50f, .70f)
+            }
+            GlazePopupActionSymbol.LOCK -> {
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(u * .18f, u * .43f),
+                    size = androidx.compose.ui.geometry.Size(u * .64f, u * .42f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .08f),
+                    style = Stroke(w),
+                )
+                drawArc(
+                    color = color,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(u * .30f, u * .12f),
+                    size = androidx.compose.ui.geometry.Size(u * .40f, u * .50f),
+                    style = Stroke(w),
+                )
+                drawCircle(
+                    color = color,
+                    radius = u * .045f,
+                    center = Offset(u * .50f, u * .63f),
+                )
             }
             GlazePopupActionSymbol.UNINSTALL -> {
                 segment(.24f, .24f, .76f, .76f)
