@@ -450,6 +450,11 @@ private enum class WizardVisualSymbol {
 
 @Composable
 private fun WizardProgress(step: Int) {
+    val accent = when (step) {
+        0 -> MaterialTheme.colorScheme.primary
+        1 -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.secondary
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -468,7 +473,8 @@ private fun WizardProgress(step: Int) {
             Text(
                 "Step ${step + 1} of 3",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = accent,
+                fontWeight = FontWeight.SemiBold,
             )
         }
         Row(
@@ -476,7 +482,7 @@ private fun WizardProgress(step: Int) {
             horizontalArrangement = Arrangement.spacedBy(5.dp),
         ) {
             repeat(3) { index ->
-                val active = index <= step
+                val reached = index <= step
                 Surface(
                     modifier = Modifier
                         .weight(1f)
@@ -484,10 +490,8 @@ private fun WizardProgress(step: Int) {
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                         GlazeMetrics.radiusPill,
                     ),
-                    color = if (active) {
-                        MaterialTheme.colorScheme.primary.copy(
-                            alpha = if (index == step) 1f else 0.44f,
-                        )
+                    color = if (reached) {
+                        accent.copy(alpha = if (index == step) 1f else 0.34f)
                     } else {
                         MaterialTheme.colorScheme.surfaceVariant
                     },
@@ -713,33 +717,112 @@ private fun WizardGestureStrip() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.62f),
+        ),
     ) {
         Row(
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+                WizardGestureCue.UP to "Apps",
+                WizardGestureCue.DOWN to "Search",
+                WizardGestureCue.HOLD to "Edit",
+            ).forEach { (cue, label) ->
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 44.dp),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                         GlazeMetrics.radiusPill,
                     ),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.76f),
                 ) {
-                    Text(
-                        label,
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        WizardGestureCueGlyph(
+                            cue = cue,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.size(5.dp))
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+private enum class WizardGestureCue {
+    UP,
+    DOWN,
+    HOLD,
+}
+
+@Composable
+private fun WizardGestureCueGlyph(
+    cue: WizardGestureCue,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = StrokeCap.Round
+        val cx = u * 0.50f
+        when (cue) {
+            WizardGestureCue.UP,
+            WizardGestureCue.DOWN -> {
+                val up = cue == WizardGestureCue.UP
+                val startY = if (up) u * 0.78f else u * 0.22f
+                val endY = if (up) u * 0.22f else u * 0.78f
+                drawLine(
+                    tint,
+                    Offset(cx, startY),
+                    Offset(cx, endY),
+                    stroke,
+                    cap = cap,
+                )
+                val armY = if (up) u * 0.39f else u * 0.61f
+                drawLine(
+                    tint,
+                    Offset(cx, endY),
+                    Offset(u * 0.30f, armY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(cx, endY),
+                    Offset(u * 0.70f, armY),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            WizardGestureCue.HOLD -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.13f,
+                    center = Offset(cx, u * 0.50f),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.31f,
+                    center = Offset(cx, u * 0.50f),
+                    style = Stroke(width = stroke * 0.75f),
+                )
             }
         }
     }
