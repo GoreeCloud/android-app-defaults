@@ -369,6 +369,12 @@ fun LauncherStartupWizard(
                                     modifier = Modifier.weight(1f),
                                 )
                             }
+                            WizardFeatureCard(
+                                title = "App Lock",
+                                summary = "Optional PIN or pattern protection for apps opened from Launcher.",
+                                symbol = WizardVisualSymbol.LOCK,
+                                accent = MaterialTheme.colorScheme.secondary,
+                            )
 
                             WizardGestureStrip()
 
@@ -397,6 +403,10 @@ fun LauncherStartupWizard(
                                 WizardInfoCard(
                                     title = "Connected Search",
                                     summary = "Local Search stays local by default. Connected sources remain off until you explicitly enable and authorize them.",
+                                )
+                                WizardInfoCard(
+                                    title = "App Lock scope",
+                                    summary = "App Lock can challenge apps started from GoreeCloud Launcher, but it does not lock an app everywhere in Android. Other launchers, notifications, links, system surfaces, or Settings may still open it.",
                                 )
                             }
                         }
@@ -458,6 +468,7 @@ private enum class WizardVisualSymbol {
     WIDGETS,
     FOLDER,
     SEARCH,
+    LOCK,
     GESTURE,
 }
 
@@ -843,6 +854,29 @@ private fun WizardVisualGlyph(
                     style = Stroke(stroke),
                 )
                 line(0.60f, 0.60f, 0.84f, 0.84f)
+            }
+            WizardVisualSymbol.LOCK -> {
+                drawRoundRect(
+                    tint,
+                    Offset(u * 0.18f, u * 0.43f),
+                    androidx.compose.ui.geometry.Size(u * 0.64f, u * 0.42f),
+                    androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(stroke),
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(u * 0.30f, u * 0.12f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.40f, u * 0.50f),
+                    style = Stroke(stroke),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.045f,
+                    center = Offset(u * 0.50f, u * 0.63f),
+                )
             }
             WizardVisualSymbol.GESTURE -> {
                 line(0.50f, 0.82f, 0.50f, 0.20f)
