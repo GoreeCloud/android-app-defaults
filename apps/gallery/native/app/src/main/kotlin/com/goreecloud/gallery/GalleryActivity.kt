@@ -906,14 +906,27 @@ class GalleryActivity : Activity() {
         }
 
         val actions = listOf(
-            selectionAction("Share", selectedItems.isNotEmpty(), "Share selected media") {
+            selectionAction(
+                R.drawable.ic_gallery_share,
+                selectedItems.isNotEmpty(),
+                "Share selected media",
+            ) {
                 shareSelectedItems()
             },
-            selectionAction(favoriteLabel, selectedItems.isNotEmpty(), "$favoriteLabel selected media") {
+            selectionAction(
+                if (favoriteAction == GalleryFavoriteBulkAction.REMOVE) {
+                    R.drawable.ic_gallery_favorite
+                } else {
+                    R.drawable.ic_gallery_favorite_outline
+                },
+                selectedItems.isNotEmpty(),
+                "$favoriteLabel selected media",
+                selected = favoriteAction == GalleryFavoriteBulkAction.REMOVE,
+            ) {
                 applySelectedFavoriteAction()
             },
             selectionAction(
-                "Move",
+                R.drawable.ic_gallery_move,
                 selectedItems.isNotEmpty() &&
                     moveSupported &&
                     (moveDestinations.isNotEmpty() || newFolderParent != null) &&
@@ -924,7 +937,7 @@ class GalleryActivity : Activity() {
                 showMoveDestinationDialog()
             },
             selectionAction(
-                "Copy",
+                R.drawable.ic_gallery_copy,
                 selectedItems.isNotEmpty() &&
                     selectedItems.size <= AndroidMediaCopyRequests.MAX_COPY_ITEMS &&
                     copySupported &&
@@ -937,13 +950,18 @@ class GalleryActivity : Activity() {
                 showCopyDestinationDialog()
             },
             selectionAction(
-                "Delete",
+                R.drawable.ic_gallery_delete,
                 selectedItems.isNotEmpty() && deleteSupported && !mediaCopyExecutionInProgress,
                 deletionDescription,
+                destructive = true,
             ) {
                 requestMediaDeletion(selectedItems)
             },
-            selectionAction("More", currentScope.isNotEmpty(), "More selection actions") {},
+            selectionAction(
+                R.drawable.ic_gallery_more,
+                currentScope.isNotEmpty(),
+                "More selection actions",
+            ) {},
         )
         actions.lastOrNull()?.let { moreAction ->
             moreAction.setOnClickListener {
@@ -995,26 +1013,42 @@ class GalleryActivity : Activity() {
     }
 
     private fun selectionAction(
-        label: String,
+        iconResource: Int,
         enabled: Boolean,
         description: String,
+        selected: Boolean = false,
+        destructive: Boolean = false,
         onClick: () -> Unit,
     ): TextView = TextView(this).apply {
-        text = label
+        text = ""
         gravity = Gravity.CENTER
         minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 10.5f)
-        setTypeface(typeface, Typeface.BOLD)
-        setTextColor(if (enabled) accentColor() else secondaryTextColor())
+        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        setPadding(dp(11), dp(11), dp(11), dp(11))
+        val foreground = when {
+            !enabled -> secondaryTextColor()
+            destructive -> 0xffc62828.toInt()
+            selected -> accentColor()
+            else -> accentColor()
+        }
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(foreground)
         background = roundedSurface(
-            if (enabled) withAlpha(accentColor(), 0.10f) else Color.TRANSPARENT,
+            when {
+                !enabled -> Color.TRANSPARENT
+                destructive -> withAlpha(0xffc62828.toInt(), 0.11f)
+                selected -> withAlpha(accentColor(), 0.18f)
+                else -> withAlpha(accentColor(), 0.10f)
+            },
             18,
         )
         isEnabled = enabled
         isClickable = enabled
         isFocusable = enabled
+        isSelected = selected
         alpha = if (enabled) 1f else 0.42f
         contentDescription = description
+        tooltipText = description
         if (enabled) setOnClickListener { onClick() }
     }
 
@@ -3590,9 +3624,11 @@ class GalleryActivity : Activity() {
             setPadding(dp(10), dp(8), dp(10), dp(8))
             background = roundedSurface(0xd9141416.toInt(), 22)
         }
-        val viewerBack = viewerAction("‹", true, "Close viewer") { closeAuthorizedViewer() }.apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-        }
+        val viewerBack = viewerIconAction(
+            R.drawable.ic_gallery_back,
+            true,
+            "Close viewer",
+        ) { closeAuthorizedViewer() }
         topBar.addView(
             viewerBack,
             LinearLayout.LayoutParams(dp(GalleryGlazeContract.GENERAL_TARGET_DP), dp(GalleryGlazeContract.GENERAL_TARGET_DP)),
@@ -3617,24 +3653,36 @@ class GalleryActivity : Activity() {
             addView(viewerSubtitle)
         }
         topBar.addView(viewerTitles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        val scaleMode = viewerAction("Fit", true, "Viewer scale: Fit") {}
+        val scaleMode = viewerIconAction(
+            R.drawable.ic_gallery_fit,
+            true,
+            "Viewer scale: Fit",
+        ) {}
         topBar.addView(
             scaleMode,
-            LinearLayout.LayoutParams(dp(64), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
+            LinearLayout.LayoutParams(dp(GalleryGlazeContract.GENERAL_TARGET_DP), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
                 marginStart = dp(4)
             },
         )
-        val repeatSlideshow = viewerAction("Loop", true, "Repeat slideshow off") {}
+        val repeatSlideshow = viewerIconAction(
+            R.drawable.ic_gallery_repeat,
+            true,
+            "Repeat slideshow off",
+        ) {}
         topBar.addView(
             repeatSlideshow,
-            LinearLayout.LayoutParams(dp(58), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
+            LinearLayout.LayoutParams(dp(GalleryGlazeContract.GENERAL_TARGET_DP), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
                 marginStart = dp(4)
             },
         )
-        val slideshow = viewerAction("Slide", true, "Start photo slideshow") {}
+        val slideshow = viewerIconAction(
+            R.drawable.ic_gallery_slideshow,
+            true,
+            "Start photo slideshow",
+        ) {}
         topBar.addView(
             slideshow,
-            LinearLayout.LayoutParams(dp(64), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
+            LinearLayout.LayoutParams(dp(GalleryGlazeContract.GENERAL_TARGET_DP), dp(GalleryGlazeContract.GENERAL_TARGET_DP)).apply {
                 marginStart = dp(4)
             },
         )
@@ -3672,20 +3720,26 @@ class GalleryActivity : Activity() {
             background = roundedSurface(0xe8141416.toInt(), 24)
         }
 
-        val share = viewerAction("Share", true, "Share this media") {}
-        val favorite = viewerAction("Favorite", true, "Favorite this media") {}
-        val edit = viewerAction("Edit", true, "Edit this photo") {}
+        val share = viewerIconAction(R.drawable.ic_gallery_share, true, "Share this media") {}
+        val favorite = viewerIconAction(
+            R.drawable.ic_gallery_favorite_outline,
+            true,
+            "Favorite this media",
+        ) {}
+        val edit = viewerIconAction(R.drawable.ic_gallery_edit, true, "Edit this photo") {}
         val deleteSupported = AndroidMediaMutationRequests.isSupported()
-        val delete = viewerAction(
-            "Delete",
+        val delete = viewerIconAction(
+            R.drawable.ic_gallery_delete,
             deleteSupported,
             when {
                 !deleteSupported -> "Delete requires Android 11 or newer in this Development build"
                 currentUserSettings().moveDeletedItemsToRecycleBin -> "Move this media to the Android Recycle Bin"
                 else -> "Permanently delete this media after Android confirmation"
             },
-        ) {}
-        val more = viewerAction("More", true, "Show media details") {}
+        ) {}.apply {
+            compoundDrawableTintList = ColorStateList.valueOf(0xffff8a80.toInt())
+        }
+        val more = viewerIconAction(R.drawable.ic_gallery_more, true, "Show media details") {}
 
         listOf(share, favorite, edit, delete, more).forEachIndexed { index, item ->
             bottomBar.addView(
@@ -3705,7 +3759,11 @@ class GalleryActivity : Activity() {
             },
         )
 
-        val playbackToggle = viewerAction("Play", true, "Play video") {}.apply {
+        val playbackToggle = viewerIconAction(
+            R.drawable.ic_gallery_play,
+            true,
+            "Play video",
+        ) {}.apply {
             visibility = View.GONE
         }
         overlay.addView(
@@ -3735,22 +3793,28 @@ class GalleryActivity : Activity() {
         var slideshowAdvance: Runnable? = null
 
         fun updateRepeatSlideshowControl() {
-            repeatSlideshow.text = if (slideshowRepeats) "Loop ✓" else "Loop"
+            setViewerActionIcon(
+                repeatSlideshow,
+                R.drawable.ic_gallery_repeat,
+                selected = slideshowRepeats,
+            )
             repeatSlideshow.contentDescription =
                 if (slideshowRepeats) "Repeat slideshow on" else "Repeat slideshow off"
+            repeatSlideshow.tooltipText = repeatSlideshow.contentDescription
         }
 
         fun updateSlideshowControl() {
-            slideshow.text = when {
-                slideshowRunning -> "Pause"
-                slideshowPaused -> "Resume"
-                else -> "Slide"
-            }
+            setViewerActionIcon(
+                slideshow,
+                if (slideshowRunning) R.drawable.ic_gallery_pause else R.drawable.ic_gallery_slideshow,
+                selected = slideshowRunning,
+            )
             slideshow.contentDescription = when {
                 slideshowRunning -> "Pause photo slideshow"
                 slideshowPaused -> "Resume photo slideshow, ${slideshowInterval.label.lowercase()}"
                 else -> "Start photo slideshow, ${slideshowInterval.label.lowercase()}"
             }
+            slideshow.tooltipText = slideshow.contentDescription
         }
 
         fun stopSlideshow(announce: Boolean = false) {
@@ -3799,14 +3863,12 @@ class GalleryActivity : Activity() {
             preview.translationY = viewerPanY
 
             val zoomed = GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)
-            scaleMode.text = if (zoomed) {
-                "${GalleryViewerZoomPolicy.displayPercent(viewerZoomScale)}%"
-            } else {
-                when (viewerScaleMode) {
-                    GalleryViewerScaleMode.FIT -> "Fit"
-                    GalleryViewerScaleMode.FILL -> "Fill"
-                }
+            val scaleIcon = when {
+                zoomed -> R.drawable.ic_gallery_zoom
+                viewerScaleMode == GalleryViewerScaleMode.FIT -> R.drawable.ic_gallery_fit
+                else -> R.drawable.ic_gallery_fill
             }
+            setViewerActionIcon(scaleMode, scaleIcon, selected = zoomed)
             scaleMode.contentDescription = when {
                 !currentItemSupportsZoom() -> "View options are available for photos only"
                 zoomed ->
@@ -3817,6 +3879,7 @@ class GalleryActivity : Activity() {
                 else ->
                     "Viewer view: Fill. Tap for Fit, Fill, and zoom options."
             }
+            scaleMode.tooltipText = scaleMode.contentDescription
         }
 
         fun resetViewerZoom() {
@@ -3868,8 +3931,13 @@ class GalleryActivity : Activity() {
             next.isEnabled = currentIndex < items.lastIndex
             next.alpha = if (next.isEnabled) 1f else 0.30f
             val isFavorite = item.contentUri in favoriteUris
-            favorite.text = if (isFavorite) "♥ Saved" else "♡ Favorite"
+            setViewerActionIcon(
+                favorite,
+                if (isFavorite) R.drawable.ic_gallery_favorite else R.drawable.ic_gallery_favorite_outline,
+                selected = isFavorite,
+            )
             favorite.contentDescription = if (isFavorite) "Remove from Favorites" else "Add to Favorites"
+            favorite.tooltipText = favorite.contentDescription
             val photoEditable = item.mimeType.startsWith("image/")
             edit.isEnabled = photoEditable
             edit.isClickable = photoEditable
@@ -3892,9 +3960,14 @@ class GalleryActivity : Activity() {
                     videoSurface.load(item.contentUri, playbackPlan)
                     videoSurface.visibility = View.VISIBLE
                     playbackToggle.visibility = View.VISIBLE
-                    playbackToggle.text = if (playbackPlan.shouldAutoPlay) "Pause" else "Play"
+                    setViewerActionIcon(
+                        playbackToggle,
+                        if (playbackPlan.shouldAutoPlay) R.drawable.ic_gallery_pause else R.drawable.ic_gallery_play,
+                        selected = playbackPlan.shouldAutoPlay,
+                    )
                     playbackToggle.contentDescription =
                         if (playbackPlan.shouldAutoPlay) "Pause video" else "Play video"
+                    playbackToggle.tooltipText = playbackToggle.contentDescription
                 } catch (_: IllegalArgumentException) {
                     videoSurface.visibility = View.GONE
                     playbackToggle.visibility = View.GONE
@@ -4017,12 +4090,13 @@ class GalleryActivity : Activity() {
             }
             if (videoSurface.isPlaying()) {
                 videoSurface.pause()
-                playbackToggle.text = "Play"
+                setViewerActionIcon(playbackToggle, R.drawable.ic_gallery_play)
                 playbackToggle.contentDescription = "Play video"
             } else if (videoSurface.play()) {
-                playbackToggle.text = "Pause"
+                setViewerActionIcon(playbackToggle, R.drawable.ic_gallery_pause, selected = true)
                 playbackToggle.contentDescription = "Pause video"
             }
+            playbackToggle.tooltipText = playbackToggle.contentDescription
         }
 
         previous.setOnClickListener {
@@ -4424,7 +4498,8 @@ class GalleryActivity : Activity() {
                 settingActionRow(
                     title = "Reset album order",
                     subtitle = "Return Albums to the current date-sort order while keeping Pin/Unpin choices.",
-                    actionLabel = "Reset",
+                    actionIcon = R.drawable.ic_gallery_reset,
+                    actionDescription = "Reset album order",
                 ) {
                     galleryPreferences().edit().remove(ALBUM_ORDER_IDS_KEY).apply()
                     Toast.makeText(this, "Album order reset", Toast.LENGTH_SHORT).show()
@@ -4445,7 +4520,8 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Clear cache",
                 subtitle = "Clears the current in-memory thumbnail cache. Photos and videos are never deleted.",
-                actionLabel = "Clear",
+                actionIcon = R.drawable.ic_gallery_reset,
+                    actionDescription = "Clear cache",
             ) {
                 thumbnailCache.evictAll()
                 Toast.makeText(this, "Thumbnail cache cleared", Toast.LENGTH_SHORT).show()
@@ -4457,14 +4533,16 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Export Favorites",
                 subtitle = "Export Gallery's local favorite content-URI list. Media files are not exported.",
-                actionLabel = "Export",
+                actionIcon = R.drawable.ic_gallery_share,
+                    actionDescription = "Export Favorites",
             ) { createJsonDocument(EXPORT_FAVORITES_REQUEST, "GoreeCloud-Gallery-Favorites.json") },
         )
         library.addView(
             settingActionRow(
                 title = "Import Favorites",
                 subtitle = "Merge a Gallery Favorites export into the local Favorites set without expanding media permission.",
-                actionLabel = "Import",
+                actionIcon = R.drawable.ic_gallery_download,
+                    actionDescription = "Import Favorites",
             ) { openJsonDocument(IMPORT_FAVORITES_REQUEST) },
         )
 
@@ -4473,14 +4551,16 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Export settings",
                 subtitle = "Export non-secret Gallery preferences, including folder visibility selections.",
-                actionLabel = "Export",
+                actionIcon = R.drawable.ic_gallery_share,
+                    actionDescription = "Export settings",
             ) { createJsonDocument(EXPORT_SETTINGS_REQUEST, "GoreeCloud-Gallery-Settings.json") },
         )
         library.addView(
             settingActionRow(
                 title = "Import settings",
                 subtitle = "Import a compatible GoreeCloud Gallery settings file. Unknown fields are ignored.",
-                actionLabel = "Import",
+                actionIcon = R.drawable.ic_gallery_download,
+                    actionDescription = "Import settings",
             ) { openJsonDocument(IMPORT_SETTINGS_REQUEST) },
         )
 
@@ -4498,7 +4578,8 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Reset dismissed hints",
                 subtitle = "Show Gallery tips you previously dismissed without changing onboarding or other settings.",
-                actionLabel = "Reset",
+                actionIcon = R.drawable.ic_gallery_reset,
+                    actionDescription = "Reset dismissed hints",
             ) {
                 GallerySetupPreferences(this).resetDismissedContextualHints()
                 Toast.makeText(this, "Dismissed Gallery hints reset", Toast.LENGTH_SHORT).show()
@@ -4508,7 +4589,8 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Replay setup",
                 subtitle = "Review first-use guidance without resetting favorites, media access, or Gallery preferences.",
-                actionLabel = "Open",
+                actionIcon = R.drawable.ic_gallery_play,
+                    actionDescription = "Replay setup",
             ) { showSetupWizard(replay = true, requestedStep = 0) },
         )
     }
@@ -4727,13 +4809,14 @@ class GalleryActivity : Activity() {
     private fun settingActionRow(
         title: String,
         subtitle: String,
-        actionLabel: String,
+        actionIcon: Int,
+        actionDescription: String,
         onClick: () -> Unit,
     ): LinearLayout = settingBaseRow(
         title = title,
         subtitle = subtitle,
         enabled = true,
-        trailing = settingsPill(actionLabel, emphasized = true),
+        trailing = settingsIconPill(actionIcon, actionDescription),
         onClick = onClick,
     )
 
@@ -4807,6 +4890,19 @@ class GalleryActivity : Activity() {
                 bottomMargin = dp(6)
             }
         }
+    }
+
+    private fun settingsIconPill(iconResource: Int, description: String): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minWidth = dp(44)
+        minHeight = dp(40)
+        setPadding(dp(10), dp(8), dp(10), dp(8))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+        background = roundedSurface(withAlpha(accentColor(), 0.13f), 16)
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        tooltipText = description
     }
 
     private fun settingsPill(label: String, emphasized: Boolean): TextView = TextView(this).apply {
@@ -5770,6 +5866,45 @@ class GalleryActivity : Activity() {
         alpha = if (enabled) 1f else 0.35f
         contentDescription = description
         if (enabled) setOnClickListener { onClick() }
+    }
+
+    private fun viewerIconAction(
+        iconResource: Int,
+        enabled: Boolean,
+        description: String,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        background = roundedSurface(0x26ffffff, 18)
+        isEnabled = enabled
+        isClickable = enabled
+        isFocusable = enabled
+        alpha = if (enabled) 1f else 0.35f
+        contentDescription = description
+        tooltipText = description
+        setViewerActionIcon(this, iconResource)
+        if (enabled) setOnClickListener { onClick() }
+    }
+
+    private fun setViewerActionIcon(
+        control: TextView,
+        iconResource: Int,
+        selected: Boolean = false,
+    ) {
+        control.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        control.compoundDrawableTintList = ColorStateList.valueOf(
+            if (selected) accentColor() else Color.WHITE,
+        )
+        control.background = if (selected) {
+            roundedSurface(withAlpha(accentColor(), 0.24f), 18)
+        } else {
+            roundedSurface(0x26ffffff, 18)
+        }
+        control.isSelected = selected
     }
 
     private fun iconHeaderAction(
