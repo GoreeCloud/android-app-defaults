@@ -198,7 +198,7 @@ class PhotoEditorActivity : Activity() {
         topBar.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
         saveButton = editorIconButton(
-            R.drawable.ic_gallery_download,
+            R.drawable.ic_gallery_save_copy,
             "Save the edited photo as a new copy and keep the original",
         ) {
             saveEditedCopy()
