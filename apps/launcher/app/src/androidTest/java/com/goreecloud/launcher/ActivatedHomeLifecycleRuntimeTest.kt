@@ -149,14 +149,17 @@ class ActivatedHomeLifecycleRuntimeTest {
         val alreadyDefaultHome =
             roleManager.isRoleAvailable(RoleManager.ROLE_HOME) && roleManager.isRoleHeld(RoleManager.ROLE_HOME)
 
-        if (!alreadyDefaultHome) {
-            runShellCommand(
-                "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
-            )
-            withTimeout(10_000) {
-                while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                    delay(100)
-                }
+        // Reassert HOME ownership even when RoleManager just reported this package as the
+        // holder. The role service can briefly expose the old holder state while the previous
+        // test's removal is still settling, which otherwise lets this case launch against stock
+        // Launcher and wait forever for GoreeCloud Home semantics. add-role-holder is idempotent
+        // when the package is already the holder; restore the original ownership in finally.
+        runShellCommand(
+            "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+        )
+        withTimeout(10_000) {
+            while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                delay(100)
             }
         }
 
