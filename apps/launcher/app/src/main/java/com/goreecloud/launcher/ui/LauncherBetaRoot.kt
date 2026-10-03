@@ -74,6 +74,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -696,6 +697,7 @@ fun LauncherBetaRoot(
     localLaunchCounts: Map<String, Long>,
     hiddenHomeSuggestionKeys: Set<String>,
     hiddenAppKeys: Set<String>,
+    lockedAppKeys: Set<String>,
     drawerPinnedAppKeys: Set<String>,
     drawerPinnedAppOrder: List<String>,
     drawerSortOrderName: String?,
@@ -758,6 +760,7 @@ fun LauncherBetaRoot(
     onSetHomeLabelOverride: (LauncherActivityInfo, String?) -> Unit,
     onSetHomeSuggestionHidden: (String, Boolean) -> Unit,
     onSetAppHidden: (String, Boolean) -> Unit,
+    onSetAppLocked: (String, Boolean) -> Unit,
     onSetDrawerAppPinned: (String, Boolean) -> Unit,
     onMoveDrawerPinnedApp: (String, Int) -> Unit,
     onSetDrawerPinnedAppOrder: (List<String>) -> Unit,
@@ -833,6 +836,7 @@ fun LauncherBetaRoot(
     var folderAppPickerId by rememberSaveable { mutableStateOf<String?>(null) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
     var showHiddenAppsManager by rememberSaveable { mutableStateOf(false) }
+    var showAppLockManager by rememberSaveable { mutableStateOf(false) }
     var folderManagerAddToHome by rememberSaveable { mutableStateOf(false) }
     val primaryFolderProfileId = remember { Process.myUserHandle().hashCode() }
     var folderManagerProfileId by rememberSaveable {
@@ -1531,6 +1535,8 @@ fun LauncherBetaRoot(
                         },
                         hiddenAppCount = hiddenAppKeys.count(rootAppsByKey::containsKey),
                         onManageHiddenApps = { showHiddenAppsManager = true },
+                        lockedAppCount = lockedAppKeys.count(rootAppsByKey::containsKey),
+                        onManageAppLock = { showAppLockManager = true },
                         onSetHomeGrid = onSetHomeGrid,
                         onSetDrawerColumns = onSetDrawerColumns,
                         onSetDrawerLayoutMode = onSetDrawerLayoutMode,
@@ -1601,6 +1607,7 @@ fun LauncherBetaRoot(
                     selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
                         drawerPinnedAppKeys.size > 1,
                 hiddenFromLauncher = appKey in hiddenAppKeys,
+                lockedByLauncher = appKey in lockedAppKeys,
                 availableAndroidWidgets = availableAndroidWidgets,
                 onHomeAction = {
                     if (
@@ -1666,6 +1673,11 @@ fun LauncherBetaRoot(
                 },
                 onToggleHidden = {
                     onSetAppHidden(appKey, appKey !in hiddenAppKeys)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onToggleLocked = {
+                    onSetAppLocked(appKey, appKey !in lockedAppKeys)
                     selectedApp = null
                     selectedAppAnchor = null
                 },
@@ -1817,6 +1829,16 @@ fun LauncherBetaRoot(
                 .toList(),
             onRestore = { app -> onSetAppHidden(app.workspaceKey(), false) },
             onDismiss = { showHiddenAppsManager = false },
+        )
+    }
+
+    if (showAppLockManager) {
+        LauncherAppLockManagerSheet(
+            apps = rootAppsByKey.values
+                .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) },
+            lockedAppKeys = lockedAppKeys,
+            onSetLocked = { app, locked -> onSetAppLocked(app.workspaceKey(), locked) },
+            onDismiss = { showAppLockManager = false },
         )
     }
 
@@ -2636,19 +2658,24 @@ private fun LauncherWidgetPickerSheet(
                 )
             }
         } else {
-            filteredBuiltIns.chunked(2).forEach { row ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
-                ) {
-                    row.forEach { typeId ->
-                        WidgetPickerBuiltInCard(
-                            typeId = typeId,
-                            onClick = { onAddBuiltInWidget(typeId) },
-                            modifier = Modifier.weight(1f),
-                        )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val columns = if (maxWidth >= 720.dp) 2 else 1
+                Column(verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2)) {
+                    filteredBuiltIns.chunked(columns).forEach { row ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                        ) {
+                            row.forEach { typeId ->
+                                WidgetPickerBuiltInCard(
+                                    typeId = typeId,
+                                    onClick = { onAddBuiltInWidget(typeId) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                        }
                     }
-                    if (row.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
         }
@@ -6085,8 +6112,8 @@ private fun LauncherUniversalSearchSurface(
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         "Universal Search",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         "Launcher-owned local search and actions",
@@ -7823,6 +7850,11 @@ private enum class LauncherSettingsCategory(
         "Local unread indicators and privacy controls",
         "notification badge badges unread dots numeric access privacy size corner",
     ),
+    SECURITY(
+        "Privacy & security",
+        "App Lock, hidden apps and protected launch controls",
+        "security privacy app lock locked authentication credential protect hidden apps",
+    ),
     SYSTEM(
         "System & setup",
         "Default Home, onboarding and Development status",
@@ -7844,12 +7876,14 @@ private fun LauncherSettingsCategoryIcon(
                     start = Offset(size.width * 0.16f, size.height * 0.48f),
                     end = Offset(size.width * 0.50f, size.height * 0.18f),
                     strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                 )
                 drawLine(
                     color = color,
                     start = Offset(size.width * 0.50f, size.height * 0.18f),
                     end = Offset(size.width * 0.84f, size.height * 0.48f),
                     strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                 )
                 drawRoundRect(
                     color = color,
@@ -7896,6 +7930,7 @@ private fun LauncherSettingsCategoryIcon(
                     start = Offset(size.width * 0.19f, size.height * 0.31f),
                     end = Offset(size.width * 0.42f, size.height * 0.31f),
                     strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                 )
             }
             LauncherSettingsCategory.SEARCH -> {
@@ -7910,6 +7945,7 @@ private fun LauncherSettingsCategoryIcon(
                     start = Offset(size.width * 0.62f, size.height * 0.62f),
                     end = Offset(size.width * 0.83f, size.height * 0.83f),
                     strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                 )
             }
             LauncherSettingsCategory.LOOK_AND_FEEL -> {
@@ -7945,6 +7981,7 @@ private fun LauncherSettingsCategoryIcon(
                     start = Offset(size.width * 0.38f, size.height * 0.41f),
                     end = Offset(size.width * 0.62f, size.height * 0.59f),
                     strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                 )
             }
             LauncherSettingsCategory.BADGES -> {
@@ -7958,6 +7995,44 @@ private fun LauncherSettingsCategoryIcon(
                     color = color,
                     radius = size.minDimension * 0.10f,
                     center = Offset(size.width * 0.73f, size.height * 0.27f),
+                )
+            }
+            LauncherSettingsCategory.SECURITY -> {
+                val p = Path().apply {
+                    moveTo(size.width * 0.50f, size.height * 0.12f)
+                    lineTo(size.width * 0.80f, size.height * 0.24f)
+                    lineTo(size.width * 0.76f, size.height * 0.58f)
+                    quadraticBezierTo(
+                        size.width * 0.70f,
+                        size.height * 0.78f,
+                        size.width * 0.50f,
+                        size.height * 0.88f,
+                    )
+                    quadraticBezierTo(
+                        size.width * 0.30f,
+                        size.height * 0.78f,
+                        size.width * 0.24f,
+                        size.height * 0.58f,
+                    )
+                    lineTo(size.width * 0.20f, size.height * 0.24f)
+                    close()
+                }
+                drawPath(p, color = color, style = Stroke(stroke))
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(size.width * 0.38f, size.height * 0.46f),
+                    size = Size(size.width * 0.24f, size.height * 0.20f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.04f),
+                    style = Stroke(stroke),
+                )
+                drawArc(
+                    color = color,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.40f, size.height * 0.32f),
+                    size = Size(size.width * 0.20f, size.height * 0.24f),
+                    style = Stroke(stroke),
                 )
             }
             LauncherSettingsCategory.SYSTEM -> {
@@ -7987,6 +8062,7 @@ private fun LauncherSettingsCategoryIcon(
                             Offset(size.width * 0.50f, size.height * 0.88f)
                         },
                         strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                     )
                 }
             }
@@ -8121,6 +8197,8 @@ private fun LauncherSettingsRootSurface(
     onManageFolders: () -> Unit,
     hiddenAppCount: Int,
     onManageHiddenApps: () -> Unit,
+    lockedAppCount: Int,
+    onManageAppLock: () -> Unit,
     onSetHomeGrid: (Int, Int) -> Unit,
     onSetDrawerColumns: (Int) -> Unit,
     onSetDrawerLayoutMode: (LauncherDrawerLayoutMode) -> Unit,
@@ -8231,7 +8309,7 @@ private fun LauncherSettingsRootSurface(
                     )
                     Text(
                         selectedSettingsCategory?.summary
-                            ?: "Customize GoreeCloud Launcher without digging through one long page.",
+                            ?: "Home, apps, search, appearance and privacy in one place.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -8275,11 +8353,10 @@ private fun LauncherSettingsRootSurface(
                                 color = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "!",
+                                    GlazePopupActionGlyph(
+                                        symbol = GlazePopupActionSymbol.INFO,
                                         color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Bold,
+                                        iconSize = 22.dp,
                                     )
                                 }
                             }
@@ -9269,6 +9346,32 @@ private fun LauncherSettingsRootSurface(
             }
 
             SettingsSection(
+                "Privacy & security",
+                "Protected Launcher actions",
+                visible = selectedSettingsCategory == LauncherSettingsCategory.SECURITY,
+            ) {
+                GlazeSettingsAction(
+                    title = "App Lock",
+                    summary = "Require Android device authentication before Launcher opens selected apps.",
+                    value = if (lockedAppCount == 0) "None" else "$lockedAppCount locked",
+                    onClick = onManageAppLock,
+                    modifier = Modifier.testTag("launcher-settings-app-lock"),
+                )
+                Text(
+                    "App Lock protects launches that begin inside GoreeCloud Launcher. Android Settings, " +
+                        "notifications, deep links, other launchers, and other apps remain outside Launcher authority.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                GlazeSettingsAction(
+                    title = "Hidden apps",
+                    summary = "Manage apps hidden from Apps and Universal Search.",
+                    value = if (hiddenAppCount == 0) "None" else hiddenAppCount.toString(),
+                    onClick = onManageHiddenApps,
+                )
+            }
+
+            SettingsSection(
                 "System",
                 "Default HOME and Development status",
                 visible = selectedSettingsCategory == LauncherSettingsCategory.SYSTEM,
@@ -10168,16 +10271,18 @@ internal fun GlazeDock(
                 onDockBoundsChanged(bounds)
             },
         shape = shape,
-        color = color,
-        border = border,
-        // Keep the Dock visually floating without casting a full-width horizontal shadow line.
-        shadowElevation = when (resolvedPresentation.materialRole) {
-            GlazeV16MaterialRole.CLEAR_GLASS,
-            GlazeV16MaterialRole.FUNCTIONAL_GLASS,
-            -> 0.dp
-            GlazeV16MaterialRole.SOLID -> 1.dp
-            GlazeV16MaterialRole.RAISED -> 2.dp
-            else -> 0.dp
+        color = if (style == LauncherDockStyle.EDGE || dockHovered) color else Color.Transparent,
+        border = if (style == LauncherDockStyle.EDGE || dockHovered) border else null,
+        // The normal Dock is intentionally background-free: icons float directly on wallpaper.
+        // A bounded surface appears only for the explicit Edge style or active drag feedback.
+        shadowElevation = if (style == LauncherDockStyle.EDGE || dockHovered) {
+            when (resolvedPresentation.materialRole) {
+                GlazeV16MaterialRole.SOLID -> 1.dp
+                GlazeV16MaterialRole.RAISED -> 2.dp
+                else -> 0.dp
+            }
+        } else {
+            0.dp
         },
     ) {
         BoxWithConstraints(
@@ -10551,6 +10656,126 @@ private fun LauncherAppListRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LauncherAppLockManagerSheet(
+    apps: List<LauncherActivityInfo>,
+    lockedAppKeys: Set<String>,
+    onSetLocked: (LauncherActivityInfo, Boolean) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("launcher-app-lock-manager"),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "App Lock",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "Require Android device authentication before Launcher opens selected apps.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) { Text("Done") }
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+            ) {
+                Text(
+                    "Launcher-only boundary: direct launches from notifications, Android Settings, " +
+                        "deep links, other launchers, or another app are not intercepted.",
+                    modifier = Modifier.padding(GlazeMetrics.space3),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 480.dp),
+                verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+            ) {
+                lazyItems(
+                    items = apps,
+                    key = { app -> app.workspaceKey() },
+                ) { app ->
+                    val appKey = app.workspaceKey()
+                    val locked = appKey in lockedAppKeys
+                    val icon = rememberLauncherAppIcon(app)
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("launcher-app-lock-" + appKey),
+                        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 64.dp)
+                                .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+                        ) {
+                            if (icon != null) {
+                                Image(
+                                    bitmap = icon,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.size(40.dp).launcherIconMask(),
+                                )
+                            }
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    app.label.toString(),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                                Text(
+                                    if (app.user == Process.myUserHandle()) "User app" else "Work app",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(
+                                checked = locked,
+                                onCheckedChange = { onSetLocked(app, it) },
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -12007,6 +12232,7 @@ private fun AppContextPopup(
     canMoveDrawerPinnedLater: Boolean,
     canResetDrawerPinnedOrder: Boolean,
     hiddenFromLauncher: Boolean,
+    lockedByLauncher: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
     onHomeAction: () -> Unit,
     onToggleDock: () -> Unit,
@@ -12017,6 +12243,7 @@ private fun AppContextPopup(
     onMoveDrawerPinnedLater: () -> Unit,
     onResetDrawerPinnedOrder: () -> Unit,
     onToggleHidden: () -> Unit,
+    onToggleLocked: () -> Unit,
     onAddToFolder: () -> Unit,
     onOpenWidgets: (List<LauncherWidgetProviderDescriptor>) -> Unit,
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
@@ -12105,6 +12332,7 @@ private fun AppContextPopup(
                                 add("$badgeCount " + if (badgeCount == 1) "notification" else "notifications")
                             }
                             if (drawerPinned) add("Pinned in Apps")
+                            if (lockedByLauncher) add("App Lock")
                             if (layoutLocked) add("Home layout locked")
                         }.joinToString(" · ")
                         if (status.isNotBlank()) {
@@ -12221,6 +12449,11 @@ private fun AppContextPopup(
                     enabled = canAddToFolder && !layoutLocked,
                 )
                 GlazeLauncherPopupAction(
+                    label = if (lockedByLauncher) "Remove App Lock" else "Lock app",
+                    symbol = GlazePopupActionSymbol.LOCK,
+                    onClick = onToggleLocked,
+                )
+                GlazeLauncherPopupAction(
                     label = if (hiddenFromLauncher) "Show in Apps & Search" else "Hide from Apps & Search",
                     symbol = GlazePopupActionSymbol.VISIBILITY,
                     onClick = onToggleHidden,
@@ -12290,6 +12523,7 @@ private enum class GlazePopupActionSymbol {
     SETTINGS,
     CHECK,
     INFO,
+    LOCK,
     VISIBILITY,
     UNINSTALL,
 }
@@ -12305,7 +12539,13 @@ private fun GlazePopupActionGlyph(
         val u = size.minDimension
         val w = 1.8.dp.toPx()
         fun segment(x1: Float, y1: Float, x2: Float, y2: Float) {
-            drawLine(color, Offset(x1 * u, y1 * u), Offset(x2 * u, y2 * u), strokeWidth = w)
+            drawLine(
+                color,
+                Offset(x1 * u, y1 * u),
+                Offset(x2 * u, y2 * u),
+                strokeWidth = w,
+                cap = StrokeCap.Round,
+            )
         }
         when (symbol) {
             GlazePopupActionSymbol.HOME -> {
@@ -12430,6 +12670,29 @@ private fun GlazePopupActionGlyph(
                 drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
                 drawCircle(color, radius = w * .65f, center = Offset(u * .5f, u * .33f))
                 segment(.50f, .47f, .50f, .70f)
+            }
+            GlazePopupActionSymbol.LOCK -> {
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(u * .24f, u * .43f),
+                    size = Size(u * .52f, u * .40f),
+                    cornerRadius = CornerRadius(u * .08f),
+                    style = Stroke(w),
+                )
+                drawArc(
+                    color = color,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(u * .31f, u * .16f),
+                    size = Size(u * .38f, u * .48f),
+                    style = Stroke(w),
+                )
+                drawCircle(
+                    color = color,
+                    radius = u * .035f,
+                    center = Offset(u * .50f, u * .61f),
+                )
             }
             GlazePopupActionSymbol.VISIBILITY -> {
                 drawOval(
