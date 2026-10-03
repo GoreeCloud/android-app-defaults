@@ -718,20 +718,24 @@ class GalleryActivity : Activity() {
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
         val navigationMode = currentUserSettings().navigationDisplayMode
-        GalleryDestination.entries.forEachIndexed { index, item ->
+        GalleryDestination.entries.forEach { item ->
             val label = navigationLabel(item)
+            val selected = destination == item
             val view = TextView(this@GalleryActivity).apply {
-                text = if (navigationMode.showLabel) label else ""
-                gravity = Gravity.CENTER
-                minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-                setCompoundDrawablesWithIntrinsicBounds(
-                    0,
-                    if (navigationMode.showIcon) navigationIcon(item) else 0,
-                    0,
-                    0,
+                GalleryNavigationStyling.apply(
+                    activity = this@GalleryActivity,
+                    item = this,
+                    label = label,
+                    iconRes = navigationIcon(item),
+                    mode = navigationMode,
+                    selected = selected,
+                    foreground = if (selected) accentColor() else primaryTextColor(),
                 )
-                compoundDrawablePadding = if (navigationMode.showIcon && navigationMode.showLabel) dp(2) else 0
+                isSelected = selected
+                contentDescription = "$label${if (selected) ", selected" else ""}"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    stateDescription = if (selected) "Selected" else null
+                }
                 isClickable = true
                 isFocusable = true
                 setOnClickListener {
@@ -762,9 +766,7 @@ class GalleryActivity : Activity() {
             navigationItems[item] = view
             addView(
                 view,
-                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply {
-                    if (index > 0) marginStart = dp(2)
-                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f),
             )
         }
     }
@@ -821,21 +823,14 @@ class GalleryActivity : Activity() {
             val selected = destination == item
             val label = navigationLabel(item)
             val foreground = if (selected) accentColor() else primaryTextColor()
-            view.text = if (navigationMode.showLabel) label else ""
-            view.setCompoundDrawablesWithIntrinsicBounds(
-                0,
-                if (navigationMode.showIcon) navigationIcon(item) else 0,
-                0,
-                0,
-            )
-            view.compoundDrawablePadding =
-                if (navigationMode.showIcon && navigationMode.showLabel) dp(2) else 0
-            view.compoundDrawableTintList = ColorStateList.valueOf(foreground)
-            view.setTextColor(foreground)
-            view.setTypeface(view.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
-            view.background = roundedSurface(
-                if (selected) withAlpha(accentColor(), 0.13f) else Color.TRANSPARENT,
-                18,
+            GalleryNavigationStyling.apply(
+                activity = this,
+                item = view,
+                label = label,
+                iconRes = navigationIcon(item),
+                mode = navigationMode,
+                selected = selected,
+                foreground = foreground,
             )
             view.isSelected = selected
             view.contentDescription = "$label${if (selected) ", selected" else ""}"
