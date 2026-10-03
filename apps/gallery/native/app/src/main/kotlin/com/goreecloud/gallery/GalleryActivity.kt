@@ -2815,7 +2815,7 @@ class GalleryActivity : Activity() {
             panel.addView(TextView(this).apply {
                 text = "New folder requires selected items from one current folder."
                 setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
                 setPadding(dp(4), dp(2), dp(4), dp(10))
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             })
@@ -4943,7 +4943,7 @@ class GalleryActivity : Activity() {
             labels.addView(TextView(context).apply {
                 text = subtitle
                 setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
                 setLineSpacing(0f, 1.06f)
                 setPadding(0, dp(3), dp(8), 0)
             })
