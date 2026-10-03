@@ -20,6 +20,10 @@ Media-access controls use contextual glyph-plus-label treatment rather than text
 
 Dynamic media-access labels continue to receive the same Glaze persistent-control treatment, and destructive Trash controls expose explicit destructive-action state semantics where Android supports state descriptions.
 
+Settings choices now use value-plus-chevron affordances with explicit state descriptions, and boolean settings use vector on/off switch indicators instead of text-only state pills. Save-copy and cache clearing use dedicated first-party glyphs rather than overloaded generic symbols.
+
+Empty Photos, Albums, Videos, search-result, and Trash surfaces now use raised semantic Glaze icon cards to reduce visually empty whitespace and make state identity scannable without adding another action. Trash header text also follows the compact-width ellipsis contract.
+
 ## October 3, 2026 — unified bottom-navigation glyph family
 
 The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
