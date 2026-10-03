@@ -81,7 +81,7 @@ class LauncherTransitionPerformanceRuntimeTest {
                     }
             }
         }
-        preferences.markStarterLayoutApplied()
+        preferences.markStarterLayoutApplied().join()
     }
 
     @Test
