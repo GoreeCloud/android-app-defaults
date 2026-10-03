@@ -56,6 +56,10 @@ import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.ClearTokenRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.Scope
+import com.goreecloud.launcher.core.launcher.LauncherAppLockCredentialType
+import com.goreecloud.launcher.core.launcher.LauncherAppLockRepository
+import com.goreecloud.launcher.core.launcher.LauncherAppLockState
+import com.goreecloud.launcher.core.launcher.LauncherAppLockVerificationResult
 import com.goreecloud.launcher.core.launcher.LauncherAppWidgetHostController
 import com.goreecloud.launcher.core.launcher.LauncherAppsRepository
 import com.goreecloud.launcher.core.launcher.LauncherBuiltInWallpaperId
@@ -133,6 +137,8 @@ import com.goreecloud.launcher.ui.HomePageManagerSheet
 import com.goreecloud.launcher.ui.LauncherAppDragData
 import com.goreecloud.launcher.ui.LauncherAppDragOrigin
 import com.goreecloud.launcher.ui.LayoutLockHoldControl
+import com.goreecloud.launcher.ui.LauncherAppLockSetupDialog
+import com.goreecloud.launcher.ui.LauncherAppLockVerifyDialog
 import com.goreecloud.launcher.ui.LauncherBetaRoot
 import com.goreecloud.launcher.ui.LauncherIconAppearance
 import com.goreecloud.launcher.ui.LauncherHomeHintCard
@@ -169,6 +175,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var fileSearchPreferencesRepository: LauncherFileSearchPreferencesRepository
     private lateinit var installedAppBaselineRepository: LauncherInstalledAppBaselineRepository
     private lateinit var localUsageRepository: LauncherLocalUsageRepository
+    private lateinit var appLockRepository: LauncherAppLockRepository
     private lateinit var folderRepository: LauncherFolderRepository
     private lateinit var appWidgetHostController: LauncherAppWidgetHostController
     private lateinit var themeRepository: GlazeThemeRepository
@@ -331,6 +338,7 @@ class MainActivity : ComponentActivity() {
         fileSearchPreferencesRepository = LauncherFileSearchPreferencesRepository(this)
         installedAppBaselineRepository = LauncherInstalledAppBaselineRepository(this)
         localUsageRepository = LauncherLocalUsageRepository(this)
+        appLockRepository = LauncherAppLockRepository(this)
         folderRepository = LauncherFolderRepository(this)
         appWidgetHostController = LauncherAppWidgetHostController(this)
         themeRepository = GlazeThemeRepository(this)
@@ -454,6 +462,9 @@ class MainActivity : ComponentActivity() {
             val localRecentAppKeys by localUsageRepository.recentAppKeys.collectAsStateWithLifecycle(
                 initialValue = emptyList(),
             )
+            val appLockState by appLockRepository.state.collectAsStateWithLifecycle(
+                initialValue = LauncherAppLockState(),
+            )
             val searchProviderPreferences by searchProviderPreferencesState.collectAsStateWithLifecycle()
             val fileSearchRoots by fileSearchPreferencesRepository.roots.collectAsStateWithLifecycle(
                 initialValue = emptyList(),
@@ -517,6 +528,18 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(LauncherSurfaceMode.HOME.name)
             }
             var primaryHomeEditorRequestSequence by rememberSaveable { mutableStateOf(0L) }
+            var showAppLockSetup by remember { mutableStateOf(false) }
+            var appLockSetupInitialType by remember {
+                mutableStateOf(LauncherAppLockCredentialType.PIN)
+            }
+            var pendingAppToLockAfterSetup by remember {
+                mutableStateOf<LauncherActivityInfo?>(null)
+            }
+            var appLockVerificationTitle by remember { mutableStateOf<String?>(null) }
+            var appLockVerificationSubtitle by remember { mutableStateOf("") }
+            var appLockVerificationError by remember { mutableStateOf<String?>(null) }
+            var appLockVerificationBusy by remember { mutableStateOf(false) }
+            var appLockVerifiedAction by remember { mutableStateOf<(() -> Unit)?>(null) }
             val primarySurfaceMode = runCatching {
                 LauncherSurfaceMode.valueOf(primarySurfaceModeName)
             }.getOrDefault(LauncherSurfaceMode.HOME)
@@ -530,10 +553,61 @@ class MainActivity : ComponentActivity() {
                 setSystemBarIconAppearance(useDarkIcons = useDarkSystemBarIcons)
             }
 
-            val launchApp: (LauncherActivityInfo) -> Unit = { app ->
+            val performAppLaunch: (LauncherActivityInfo) -> Unit = { app ->
                 appsRepository.launch(app)
                 if (experiencePreferences.homeAppMode != LauncherHomeAppMode.NONE) {
                     localUsageRepository.recordLaunch(app.workspaceKey())
+                }
+            }
+
+            val requestAppLockVerification: (String, String, () -> Unit) -> Unit =
+                { title, subtitle, action ->
+                    if (!appLockState.configured || appLockState.credentialType == null) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "App Lock needs to be set up again.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    } else {
+                        appLockVerificationTitle = title
+                        appLockVerificationSubtitle = subtitle
+                        appLockVerificationError = null
+                        appLockVerifiedAction = action
+                    }
+                }
+
+            val launchApp: (LauncherActivityInfo) -> Unit = { app ->
+                if (appLockState.isLocked(app.workspaceKey())) {
+                    requestAppLockVerification(
+                        "Unlock " + app.label,
+                        "Enter your App Lock credential to open this app from GoreeCloud Launcher.",
+                    ) {
+                        performAppLaunch(app)
+                    }
+                } else {
+                    performAppLaunch(app)
+                }
+            }
+
+            val toggleAppLock: (LauncherActivityInfo) -> Unit = { app ->
+                val key = app.workspaceKey()
+                if (!appLockState.configured) {
+                    pendingAppToLockAfterSetup = app
+                    appLockSetupInitialType = LauncherAppLockCredentialType.PIN
+                    showAppLockSetup = true
+                } else if (appLockState.isLocked(key)) {
+                    requestAppLockVerification(
+                        "Unlock " + app.label,
+                        "Confirm your App Lock credential before removing protection.",
+                    ) {
+                        lifecycleScope.launch {
+                            appLockRepository.setAppLocked(key, false)
+                        }
+                    }
+                } else {
+                    lifecycleScope.launch {
+                        appLockRepository.setAppLocked(key, true)
+                    }
                 }
             }
 
@@ -1230,6 +1304,38 @@ class MainActivity : ComponentActivity() {
                             isDefaultHome = isDefaultHome,
                             onRequestHomeRole = ::requestHomeRole,
                             onLaunchApp = launchApp,
+                            appLockState = appLockState,
+                            onToggleAppLock = toggleAppLock,
+                            onSetUpAppLock = { type ->
+                                pendingAppToLockAfterSetup = null
+                                appLockSetupInitialType = type
+                                showAppLockSetup = true
+                            },
+                            onChangeAppLockCredential = {
+                                val type = appLockState.credentialType
+                                if (type != null) {
+                                    requestAppLockVerification(
+                                        "Change App Lock credential",
+                                        "Confirm your current credential before replacing it.",
+                                    ) {
+                                        pendingAppToLockAfterSetup = null
+                                        appLockSetupInitialType = type
+                                        showAppLockSetup = true
+                                    }
+                                }
+                            },
+                            onDisableAppLock = {
+                                if (appLockState.credentialType != null) {
+                                    requestAppLockVerification(
+                                        "Turn off App Lock",
+                                        "Confirm your credential. This removes all Launcher app locks.",
+                                    ) {
+                                        lifecycleScope.launch {
+                                            appLockRepository.clearCredential()
+                                        }
+                                    }
+                                }
+                            },
                             onOpenAppInfo = appsRepository::openDetails,
                             onAddBuiltInWidget = ::addBuiltInWidget,
                             onSetManagedHomeSearchEnabled = ::setManagedHomeSearchEnabled,
@@ -1491,18 +1597,33 @@ class MainActivity : ComponentActivity() {
                             onChooseFileSearchRoot = ::chooseFileSearchRoot,
                             onRemoveFileSearchRoot = ::confirmRemoveFileSearchRoot,
                             onLaunchSearchShortcut = { action ->
-                                runCatching {
-                                    appsRepository.launchShortcut(
-                                        packageName = action.packageName,
-                                        shortcutId = action.shortcutId,
-                                        user = action.user,
+                                val launchShortcut = {
+                                    runCatching {
+                                        appsRepository.launchShortcut(
+                                            packageName = action.packageName,
+                                            shortcutId = action.shortcutId,
+                                            user = action.user,
+                                        )
+                                    }.onFailure {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "That shortcut is no longer available.",
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    }
+                                }
+                                val app = apps.firstOrNull { candidate ->
+                                    candidate.componentName.packageName == action.packageName &&
+                                        candidate.user == action.user
+                                }
+                                if (app != null && appLockState.isLocked(app.workspaceKey())) {
+                                    requestAppLockVerification(
+                                        "Unlock " + app.label,
+                                        "Enter your App Lock credential to use this app shortcut.",
+                                        launchShortcut,
                                     )
-                                }.onFailure {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        "That shortcut is no longer available.",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
+                                } else {
+                                    launchShortcut()
                                 }
                             },
                             onOpenSearchUri = ::openSearchUri,
@@ -1894,6 +2015,105 @@ class MainActivity : ComponentActivity() {
                             onOpenAndroidPicker = {
                                 showWallpaperPicker = false
                                 openSystemWallpaperPicker()
+                            },
+                        )
+                    }
+
+                    if (showAppLockSetup) {
+                        LauncherAppLockSetupDialog(
+                            initialType = appLockSetupInitialType,
+                            onConfigure = { type, credential ->
+                                lifecycleScope.launch {
+                                    val configured = withContext(Dispatchers.Default) {
+                                        appLockRepository.configure(type, credential)
+                                    }
+                                    if (configured) {
+                                        pendingAppToLockAfterSetup?.let { target ->
+                                            appLockRepository.setAppLocked(
+                                                target.workspaceKey(),
+                                                true,
+                                            )
+                                        }
+                                        pendingAppToLockAfterSetup = null
+                                        showAppLockSetup = false
+                                    } else {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "That App Lock credential is not valid.",
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    }
+                                }
+                            },
+                            onDismiss = {
+                                pendingAppToLockAfterSetup = null
+                                showAppLockSetup = false
+                            },
+                        )
+                    }
+
+                    val verificationTitle = appLockVerificationTitle
+                    val verificationType = appLockState.credentialType
+                    if (verificationTitle != null && verificationType != null) {
+                        LauncherAppLockVerifyDialog(
+                            title = verificationTitle,
+                            subtitle = appLockVerificationSubtitle,
+                            credentialType = verificationType,
+                            errorMessage = appLockVerificationError,
+                            busy = appLockVerificationBusy,
+                            onSubmit = { credential ->
+                                if (!appLockVerificationBusy) {
+                                    appLockVerificationBusy = true
+                                    lifecycleScope.launch {
+                                        val result = withContext(Dispatchers.Default) {
+                                            appLockRepository.verify(
+                                                verificationType,
+                                                credential,
+                                            )
+                                        }
+                                        when (result) {
+                                            LauncherAppLockVerificationResult.Success -> {
+                                                val action = appLockVerifiedAction
+                                                appLockVerificationTitle = null
+                                                appLockVerificationSubtitle = ""
+                                                appLockVerificationError = null
+                                                appLockVerifiedAction = null
+                                                appLockVerificationBusy = false
+                                                action?.invoke()
+                                            }
+                                            LauncherAppLockVerificationResult.NotConfigured -> {
+                                                appLockVerificationError =
+                                                    "App Lock is no longer configured."
+                                                appLockVerificationBusy = false
+                                            }
+                                            is LauncherAppLockVerificationResult.Invalid -> {
+                                                appLockVerificationError =
+                                                    "Incorrect credential. " +
+                                                        result.attemptsRemaining +
+                                                        " attempts remaining."
+                                                appLockVerificationBusy = false
+                                            }
+                                            is LauncherAppLockVerificationResult.Cooldown -> {
+                                                val seconds =
+                                                    ((result.remainingMillis + 999L) / 1000L)
+                                                        .coerceAtLeast(1L)
+                                                appLockVerificationError =
+                                                    "Too many attempts. Try again in " +
+                                                        seconds +
+                                                        " seconds."
+                                                appLockVerificationBusy = false
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            onDismiss = {
+                                if (!appLockVerificationBusy) {
+                                    appLockVerificationTitle = null
+                                    appLockVerificationSubtitle = ""
+                                    appLockVerificationError = null
+                                    appLockVerifiedAction = null
+                                }
                             },
                         )
                     }
