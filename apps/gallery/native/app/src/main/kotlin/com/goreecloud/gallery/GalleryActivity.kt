@@ -2049,7 +2049,7 @@ class GalleryActivity : Activity() {
     ): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
-        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        minimumHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
         setPadding(dp(10), 0, dp(12), 0)
         isClickable = true
         isFocusable = true
