@@ -3,6 +3,7 @@ package com.goreecloud.launcher.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -102,16 +103,16 @@ class LauncherStartupWizardRuntimeTest {
         composeRule.onNodeWithText("Search and gestures")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Apps")
+        composeRule.onNodeWithTag("launcher-wizard-feature-apps")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Widgets")
+        composeRule.onNodeWithTag("launcher-wizard-feature-widgets")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Folders")
+        composeRule.onNodeWithTag("launcher-wizard-feature-folder")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Private Search")
+        composeRule.onNodeWithTag("launcher-wizard-feature-privacy")
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText("Learn more")
@@ -133,9 +134,9 @@ class LauncherStartupWizardRuntimeTest {
             }
         }
 
-        composeRule.onNodeWithText("↑  Apps").assertIsDisplayed()
-        composeRule.onNodeWithText("↓  Search").assertIsDisplayed()
-        composeRule.onNodeWithText("Hold  Edit").assertIsDisplayed()
+        composeRule.onNodeWithTag("launcher-wizard-gesture-swipe_up").assertIsDisplayed()
+        composeRule.onNodeWithTag("launcher-wizard-gesture-swipe_down").assertIsDisplayed()
+        composeRule.onNodeWithTag("launcher-wizard-gesture-hold").assertIsDisplayed()
         composeRule.onNodeWithText("Place precisely").assertIsDisplayed()
         composeRule.onNodeWithText(
             "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",

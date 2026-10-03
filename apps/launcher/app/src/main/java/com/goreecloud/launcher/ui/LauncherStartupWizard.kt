@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -567,7 +568,9 @@ private fun WizardMiniFeatureCard(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.heightIn(min = 82.dp),
+        modifier = modifier
+            .heightIn(min = 82.dp)
+            .testTag("launcher-wizard-feature-" + symbol.name.lowercase()),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = accent.copy(alpha = 0.07f),
         border = BorderStroke(1.dp, accent.copy(alpha = 0.14f)),
@@ -721,8 +724,19 @@ private fun WizardSearchPreview(
     }
 }
 
+private enum class WizardGestureCue {
+    SWIPE_UP,
+    SWIPE_DOWN,
+    HOLD,
+}
+
 @Composable
 private fun WizardGestureStrip() {
+    val cues = listOf(
+        WizardGestureCue.SWIPE_UP to "Apps",
+        WizardGestureCue.SWIPE_DOWN to "Search",
+        WizardGestureCue.HOLD to "Edit",
+    )
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
@@ -732,27 +746,92 @@ private fun WizardGestureStrip() {
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+            cues.forEach { (cue, label) ->
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("launcher-wizard-gesture-" + cue.name.lowercase()),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                         GlazeMetrics.radiusPill,
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
+                    Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        WizardGestureCueGlyph(
+                            cue = cue,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.size(5.dp))
+                        Text(
+                            label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureCueGlyph(
+    cue: WizardGestureCue,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = StrokeCap.Round
+        when (cue) {
+            WizardGestureCue.SWIPE_UP,
+            WizardGestureCue.SWIPE_DOWN,
+            -> {
+                val upward = cue == WizardGestureCue.SWIPE_UP
+                val tipY = if (upward) u * 0.18f else u * 0.82f
+                val tailY = if (upward) u * 0.82f else u * 0.18f
+                val armY = if (upward) u * 0.38f else u * 0.62f
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, tailY),
+                    Offset(u * 0.50f, tipY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, tipY),
+                    Offset(u * 0.30f, armY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, tipY),
+                    Offset(u * 0.70f, armY),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            WizardGestureCue.HOLD -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.14f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                )
+                drawCircle(
+                    color = tint.copy(alpha = 0.48f),
+                    radius = u * 0.30f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(width = stroke),
+                )
             }
         }
     }
@@ -885,7 +964,7 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or the Pinned filter when you want them together.",
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),

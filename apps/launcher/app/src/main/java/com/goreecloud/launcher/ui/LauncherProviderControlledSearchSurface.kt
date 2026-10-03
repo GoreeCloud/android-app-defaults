@@ -2141,6 +2141,43 @@ private fun LauncherPrivacyShieldGlyph(
 }
 
 @Composable
+private fun LauncherSourceMoveGlyph(
+    upward: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        val tipY = if (upward) u * 0.22f else u * 0.78f
+        val tailY = if (upward) u * 0.78f else u * 0.22f
+        val armY = if (upward) u * 0.40f else u * 0.60f
+        drawLine(
+            color = tint,
+            start = androidx.compose.ui.geometry.Offset(u * 0.50f, tailY),
+            end = androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        drawLine(
+            color = tint,
+            start = androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+            end = androidx.compose.ui.geometry.Offset(u * 0.30f, armY),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        drawLine(
+            color = tint,
+            start = androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+            end = androidx.compose.ui.geometry.Offset(u * 0.70f, armY),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
 private fun LauncherSourceDisclosureGlyph(
     expanded: Boolean,
     tint: Color,
@@ -3002,7 +3039,18 @@ private fun LauncherSearchSourceManager(
                                                     },
                                                     enabled = ready && index > 0,
                                                 ) {
-                                                    Text("↑  Earlier")
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(4.dp),
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            upward = true,
+                                                            tint =
+                                                                MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Earlier")
+                                                    }
                                                 }
                                                 TextButton(
                                                     onClick = {
@@ -3020,7 +3068,18 @@ private fun LauncherSearchSourceManager(
                                                             index in 0 until
                                                                 controls.orderedOptions.lastIndex,
                                                 ) {
-                                                    Text("↓  Later")
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(4.dp),
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            upward = false,
+                                                            tint =
+                                                                MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Later")
+                                                    }
                                                 }
                                             }
                                         }
