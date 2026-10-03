@@ -137,18 +137,14 @@ object GalleryUiRefinement {
 
     private fun refineNavigation(activity: Activity, capsule: LinearLayout) {
         val mode = navigationDisplayMode(activity)
-        val capsuleMarker = "navigation-capsule-v4:${mode.storedValue}"
+        val capsuleMarker = "navigation-capsule-v5:${mode.storedValue}"
         if (capsule.getTag(R.id.gallery_navigation_surface_tag) != capsuleMarker) {
-            // Keep the outer bar optically quieter than the selected item so state is not conveyed
-            // by color alone and the active CONTROL surface remains the strongest navigation cue.
             capsule.background = GalleryGlazeSurfaces.drawable(
                 activity,
                 GalleryGlazeSurfaces.Role.OVERLAY,
                 GalleryGlazeContract.NAVIGATION_RADIUS_DP,
             )
             capsule.elevation = dp(activity, GalleryGlazeContract.NAVIGATION_ELEVATION_DP).toFloat()
-            // The active destination is a nested capsule. Clip child painting to the parent outline so
-            // its selected-state material can never spill through the rounded outer shell on-device.
             capsule.clipChildren = true
             capsule.clipToOutline = true
             capsule.setTag(R.id.gallery_navigation_surface_tag, capsuleMarker)
@@ -158,35 +154,21 @@ object GalleryUiRefinement {
             val item = capsule.getChildAt(index) as? TextView ?: continue
             val label = navigationLabel(item) ?: continue
             val icon = navigationIcons[label] ?: continue
-            // GalleryActivity owns the navigation selection and accessibility identity. Read that
-            // identity rather than replacing it from presentation-only refinement state.
             val activityDescription = item.contentDescription?.toString().orEmpty()
             val selected = activityDescription == "$label, selected" || item.isSelected
-            val marker = "navigation:$label:$selected:${mode.storedValue}:v5"
+            val marker = "navigation:$label:$selected:${mode.storedValue}:v6"
             if (item.getTag(R.id.gallery_ui_refinement_tag) == marker) continue
 
             val foreground = if (selected) activityAccent(activity) else activityPrimaryText(activity)
-            item.text = if (mode.showLabel) label else ""
-            item.setTextSize(TypedValue.COMPLEX_UNIT_SP, GalleryGlazeContract.NAVIGATION_LABEL_SP)
-            item.setTextColor(foreground)
-            item.setTypeface(null, if (selected) Typeface.BOLD else Typeface.NORMAL)
-            val drawable = if (mode.showIcon) activity.getDrawable(icon)?.mutate() else null
-            val iconPx = dp(activity, GalleryGlazeContract.NAVIGATION_ICON_DP)
-            drawable?.setBounds(0, 0, iconPx, iconPx)
-            item.setCompoundDrawables(null, drawable, null, null)
-            item.compoundDrawableTintList = ColorStateList.valueOf(foreground)
-            item.compoundDrawablePadding =
-                if (mode.showIcon && mode.showLabel) dp(activity, 2) else 0
-            item.setPadding(dp(activity, 4), dp(activity, 2), dp(activity, 4), dp(activity, 2))
-            item.background = if (selected) {
-                GalleryGlazeSurfaces.drawable(
-                    activity,
-                    GalleryGlazeSurfaces.Role.CONTROL,
-                    GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP,
-                )
-            } else {
-                ColorDrawable(Color.TRANSPARENT)
-            }
+            GalleryNavigationStyling.apply(
+                activity = activity,
+                item = item,
+                label = label,
+                iconRes = icon,
+                mode = mode,
+                selected = selected,
+                foreground = foreground,
+            )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 item.stateDescription = if (selected) "Selected" else null
             }
