@@ -2962,18 +2962,12 @@ private fun LauncherSearchSourceManager(
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
-                            Surface(
-                                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                                color = accent.copy(alpha = 0.10f),
-                            ) {
-                                Text(
-                                    options.size.toString(),
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = accent,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
+                            LauncherSearchSourceStatusPill(
+                                label = controls.orderedOptions.count { option ->
+                                    option in options && controls.isEnabled(option.providerId)
+                                }.toString() + "/" + options.size + " enabled",
+                                isError = false,
+                            )
                         }
 
                         Surface(
