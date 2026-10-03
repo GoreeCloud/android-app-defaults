@@ -66,6 +66,7 @@ object GalleryGlazeContract {
     const val MAX_RENDERED_MEDIA_ROWS = 100
     const val MIN_GRID_TILE_DP = 78
     const val MIN_ALBUM_TILE_DP = 132
+    const val MAX_FEATURED_VIDEO_WIDTH_DP = 840
 
     // Current V1.6 Gallery navigation baseline plus local icon/label adapter details.
     const val NAVIGATION_HEIGHT_DP = 60
@@ -105,5 +106,12 @@ object GalleryGlazeContract {
         widthDp >= 840 -> 4
         widthDp >= 600 -> 3
         else -> 2
+    }
+
+    fun videoGridColumns(widthDp: Int): Int = when {
+        widthDp >= 1200 -> 4
+        widthDp >= 600 -> 3
+        widthDp >= 360 -> 2
+        else -> 1
     }
 }
