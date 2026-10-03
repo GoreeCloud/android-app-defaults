@@ -1,5 +1,37 @@
 # GoreeCloud Gallery Changelogs
 
+## October 3, 2026 — icon-first action chrome
+
+### Changed
+- Replaced text-heavy full-screen viewer controls with compact icon/glyph actions for view mode, slideshow/repeat, Share, Favorite, Edit, Delete, More, and video Play/Pause while retaining accessible names, tooltips, selected state, and 48dp minimum targets.
+- Rebuilt multi-selection actions around icon-first Share, Favorite, Move, Copy, Delete, and More controls; destructive actions keep distinct semantic treatment rather than relying on icon shape alone.
+- Replaced Trash Refresh, Trash selection actions, and Trash viewer actions with matching icon-first controls while preserving Android-managed Trash authority and confirmation behavior.
+- Reworked the first-party photo editor so Cancel/Save, Rotate left/right, Flip, and Reset are icon controls; crop aspect presets remain short textual ratios because the value itself is the useful affordance.
+- Replaced text pills for Settings actions such as Clear, Import/Export, reset, and setup replay with compact glyph affordances while keeping the whole setting row labeled and accessible.
+- This action-chrome slice is stacked on the unified-navigation-glyph candidate and therefore retains its `0.8.10-dev` Development identity and monotonic CI version-code contract.
+
+### Verification
+- Extended Android runtime coverage for icon-only photo-editor chrome and safe-area placement.
+- Extended rendered Trash acceptance to require an icon-only Refresh control while preserving minimum target size, Glaze refinement, and the unified navigation ripple checks.
+
+### Boundary
+This is a presentation and interaction-density pass. It does not add storage, filesystem, network, account, cloud, Protected Photos, or new media-mutation authority, and it does not establish Production Acceptance, Stable, Seal, or Anchor status.
+
+## October 3, 2026 — unified navigation glyph system
+
+### Changed
+- Replaced the five mixed-style bottom-navigation symbols with a consistent 24×24 outline glyph family using one stroke language across Photos, Albums, Videos, Trash, and Settings.
+- Preserved the 22dp rendered optical size established by the preceding alignment pass.
+- Added bounded per-destination ripple feedback while keeping selected Glaze material, accessibility state, and icon-only tooltips intact.
+- Advanced the Development identity to `0.8.10-dev`; delivered CI version codes must exceed `2000741`.
+
+### Verification
+- Rendered Android acceptance now checks the shared glyph bounds and ripple feedback on the primary Gallery navigation.
+- Trash rendered acceptance verifies the same ripple treatment on the Android-managed recovery destination.
+
+### Boundary
+This is a presentation/interaction refinement only. It does not change destination authority, media permissions, local-storage scope, network/account access, destructive-operation authority, or release status.
+
 ## October 3, 2026 — bottom-navigation optical alignment
 
 ### Changed
