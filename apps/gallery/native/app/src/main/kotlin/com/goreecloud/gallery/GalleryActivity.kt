@@ -2815,7 +2815,7 @@ class GalleryActivity : Activity() {
             panel.addView(TextView(this).apply {
                 text = "New folder requires selected items from one current folder."
                 setTextColor(secondaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
                 setPadding(dp(4), dp(2), dp(4), dp(10))
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             })
@@ -4860,7 +4860,7 @@ class GalleryActivity : Activity() {
         setTextColor(primaryTextColor())
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.5f)
         setTypeface(typeface, Typeface.BOLD)
-        setPadding(dp(2), dp(18), 0, dp(7))
+        setPadding(dp(2), dp(16), 0, dp(6))
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 
@@ -4921,8 +4921,8 @@ class GalleryActivity : Activity() {
         return LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            minimumHeight = dp(68)
-            setPadding(dp(14), dp(10), dp(10), dp(10))
+            minimumHeight = dp(64)
+            setPadding(dp(12), dp(8), dp(8), dp(8))
             background = GalleryGlazeSurfaces.drawable(
                 context,
                 GalleryGlazeSurfaces.Role.RAISED,
@@ -4937,7 +4937,7 @@ class GalleryActivity : Activity() {
             labels.addView(TextView(context).apply {
                 text = title
                 setTextColor(primaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.5f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
                 setTypeface(typeface, Typeface.BOLD)
             })
             labels.addView(TextView(context).apply {
@@ -4966,7 +4966,7 @@ class GalleryActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                bottomMargin = dp(6)
+                bottomMargin = dp(4)
             }
         }
     }
