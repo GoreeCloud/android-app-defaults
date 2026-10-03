@@ -259,6 +259,27 @@ class HiddenAppsUiRuntimeTest {
                     useUnmergedTree = true,
                 )
                 .assertIsDisplayed()
+            composeRule
+                .onNodeWithTag("launcher-app-lock-search", useUnmergedTree = true)
+                .assertIsDisplayed()
+            composeRule
+                .onNodeWithTag("launcher-app-lock-filter-all", useUnmergedTree = true)
+                .assertIsDisplayed()
+            composeRule
+                .onNodeWithTag("launcher-app-lock-filter-locked", useUnmergedTree = true)
+                .assertIsDisplayed()
+            composeRule
+                .onNodeWithTag("launcher-app-lock-close", useUnmergedTree = true)
+                .performClick()
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-app-lock-manager",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isEmpty()
+            }
         } finally {
             scenario.close()
         }
