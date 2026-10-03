@@ -8798,7 +8798,7 @@ private fun LauncherSettingsRootSurface(
                                 Text(
                                     "The side-by-side Dev APK cannot bypass Android’s Restricted Settings gate. " +
                                         "If the notification-access switch is greyed out, first open App info and " +
-                                        "choose the top-right menu → Allow restricted settings. Then return and grant " +
+                                        "choose the top-right menu and select Allow restricted settings. Then return and grant " +
                                         "notification access.",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
