@@ -10801,6 +10801,16 @@ private fun LauncherAppLockManagerSheet(
                 }
             }
 
+            GlazeAppSearchField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("launcher-app-lock-search"),
+                placeholder = "Search apps",
+                inputTestTag = "launcher-app-lock-search-input",
+            )
+
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
