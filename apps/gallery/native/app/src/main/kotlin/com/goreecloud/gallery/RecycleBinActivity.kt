@@ -15,6 +15,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
@@ -205,13 +206,20 @@ class RecycleBinActivity : Activity() {
         headerTitle = TextView(this).apply {
             text = "Trash"
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                if (resources.configuration.screenWidthDp < 360) 28f else 32f,
+            )
             setTypeface(typeface, Typeface.BOLD)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
         }
         headerSubtitle = TextView(this).apply {
             text = "Android controls Trash retention and expiration"
             setTextColor(secondaryTextColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
         }
         titles.addView(headerTitle)
         titles.addView(headerSubtitle)
@@ -219,8 +227,8 @@ class RecycleBinActivity : Activity() {
             marginStart = dp(4)
         })
         header.addView(
-            textAction("Refresh", "Refresh Trash") { loadRecycleBin() },
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48)),
+            iconAction(R.drawable.ic_gallery_refresh, "Refresh Trash") { loadRecycleBin() },
+            LinearLayout.LayoutParams(dp(48), dp(48)),
         )
         content.addView(header)
 
@@ -473,8 +481,12 @@ class RecycleBinActivity : Activity() {
             isClickable = true
             isLongClickable = true
             isFocusable = true
+            GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, 14)
             isSelected = selected
             contentDescription = tileDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                stateDescription = if (selected) "Selected" else null
+            }
             setOnClickListener {
                 if (selectedUris.isNotEmpty()) {
                     toggleSelection(item)
@@ -515,14 +527,12 @@ class RecycleBinActivity : Activity() {
                 })
             }
             addView(
-                TextView(context).apply {
+                ImageView(context).apply {
                     tag = SELECTION_CHECK_TAG
                     visibility = if (selected) View.VISIBLE else View.GONE
-                    text = "✓"
-                    gravity = Gravity.CENTER
-                    setTextColor(Color.WHITE)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    setTypeface(typeface, Typeface.BOLD)
+                    setImageResource(R.drawable.ic_gallery_check_white)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setPadding(dp(6), dp(6), dp(6), dp(6))
                     background = roundedSurface(accentColor(), 14)
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 },
@@ -549,6 +559,9 @@ class RecycleBinActivity : Activity() {
             val selected = uri in selectedUris
             tile.isSelected = selected
             tile.contentDescription = tileDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                tile.stateDescription = if (selected) "Selected" else null
+            }
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
         }
@@ -572,18 +585,22 @@ class RecycleBinActivity : Activity() {
         navigationCapsule.visibility = View.GONE
         actionBar.visibility = View.VISIBLE
         val actions = listOf(
-            textAction("Select all", "Select all currently loaded trashed media") {
+            iconAction(R.drawable.ic_gallery_select_all, "Select all currently loaded trashed media") {
                 selectedUris.clear()
                 selectedUris.addAll(GallerySelectionPolicy.selectAll(trashedItems))
                 renderSelectionState()
             },
-            textAction("Restore", "Restore selected media through Android confirmation") {
+            iconAction(R.drawable.ic_gallery_restore, "Restore selected media through Android confirmation") {
                 requestMutation(AndroidMediaMutationMode.RESTORE)
             },
-            textAction("Delete permanently", "Permanently delete selected media through Android confirmation") {
+            iconAction(
+                R.drawable.ic_gallery_delete,
+                "Permanently delete selected media through Android confirmation",
+                destructive = true,
+            ) {
                 requestMutation(AndroidMediaMutationMode.DELETE)
             },
-            textAction("Cancel", "Clear Trash selection") {
+            iconAction(R.drawable.ic_gallery_close, "Clear Trash selection") {
                 selectedUris.clear()
                 renderSelectionState()
             },
@@ -640,9 +657,10 @@ class RecycleBinActivity : Activity() {
             setPadding(dp(10), dp(8), dp(10), dp(8))
             background = roundedSurface(0xd9141416.toInt(), 22)
         }
-        val viewerBack = viewerAction("‹", "Close Trash viewer") { closeViewer() }.apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-        }
+        val viewerBack = viewerIconAction(
+            R.drawable.ic_gallery_back,
+            "Close Trash viewer",
+        ) { closeViewer() }
         topBar.addView(viewerBack, LinearLayout.LayoutParams(dp(48), dp(48)))
         val viewerTitle = TextView(this).apply {
             setTextColor(Color.WHITE)
@@ -676,10 +694,14 @@ class RecycleBinActivity : Activity() {
             },
         )
 
-        val previous = viewerAction("‹", "Previous trashed media") {}
-        val next = viewerAction("›", "Next trashed media") {}
-        previous.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-        next.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        val previous = viewerIconAction(
+            R.drawable.ic_gallery_chevron_left,
+            "Previous trashed media",
+        ) {}
+        val next = viewerIconAction(
+            R.drawable.ic_gallery_chevron_right,
+            "Next trashed media",
+        ) {}
         overlay.addView(previous, FrameLayout.LayoutParams(dp(52), dp(64)).apply {
             gravity = Gravity.START or Gravity.CENTER_VERTICAL
             marginStart = dp(10)
@@ -695,9 +717,19 @@ class RecycleBinActivity : Activity() {
             setPadding(dp(6), dp(6), dp(6), dp(6))
             background = roundedSurface(0xe8141416.toInt(), 24)
         }
-        val restore = viewerAction("Restore", "Restore this media through Android confirmation") {}
-        val purge = viewerAction("Delete permanently", "Permanently delete this media through Android confirmation") {}
-        val more = viewerAction("More", "Show details for this trashed media") {}
+        val restore = viewerIconAction(
+            R.drawable.ic_gallery_restore,
+            "Restore this media through Android confirmation",
+        ) {}
+        val purge = viewerIconAction(
+            R.drawable.ic_gallery_delete,
+            "Permanently delete this media through Android confirmation",
+            destructive = true,
+        ) {}
+        val more = viewerIconAction(
+            R.drawable.ic_gallery_more,
+            "Show details for this trashed media",
+        ) {}
         listOf(restore, purge, more).forEachIndexed { index, action ->
             bottomBar.addView(action, LinearLayout.LayoutParams(0, dp(60), 1f).apply {
                 if (index > 0) marginStart = dp(3)
@@ -908,34 +940,63 @@ class RecycleBinActivity : Activity() {
         return "$minutes:${remainder.toString().padStart(2, '0')}"
     }
 
-    private fun textAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
-        text = label
-        gravity = Gravity.CENTER
-        minHeight = dp(48)
-        setPadding(dp(10), 0, dp(10), 0)
-        setTextColor(accentColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, if (label.length > 12) 10.5f else 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(withAlpha(accentColor(), 0.10f), 18)
-        isClickable = true
-        isFocusable = true
-        contentDescription = description
-        setOnClickListener { onClick() }
-    }
-
-    private fun viewerAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
-        text = label
+    private fun iconAction(
+        iconResource: Int,
+        description: String,
+        destructive: Boolean = false,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
         gravity = Gravity.CENTER
         minHeight = dp(48)
         minWidth = dp(48)
-        setPadding(dp(8), 0, dp(8), 0)
-        setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, if (label.length > 12) 10.5f else 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(0x26ffffff, 18)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        val foreground = if (destructive) 0xffc62828.toInt() else accentColor()
+        compoundDrawableTintList = ColorStateList.valueOf(foreground)
+        background = roundedSurface(withAlpha(foreground, if (destructive) 0.11f else 0.10f), 18)
         isClickable = true
         isFocusable = true
         contentDescription = description
+        tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (destructive) "Destructive action" else null
+        }
+        GalleryInteractionFeedback.applyBoundedRipple(this, foreground, 18)
+        setOnClickListener { onClick() }
+    }
+
+    private fun viewerIconAction(
+        iconResource: Int,
+        description: String,
+        destructive: Boolean = false,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minHeight = dp(48)
+        minWidth = dp(48)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(
+            if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+        )
+        background = roundedSurface(
+            if (destructive) 0x28ff6b6b else 0x26ffffff,
+            18,
+        )
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (destructive) "Destructive action" else null
+        }
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+            18,
+        )
         setOnClickListener { onClick() }
     }
 
@@ -965,7 +1026,43 @@ class RecycleBinActivity : Activity() {
         })
     }
 
-    private fun emptyState(title: String, message: String): View = messageRow(title, message)
+    private fun emptyState(title: String, message: String): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER
+        setPadding(dp(18), dp(22), dp(18), dp(18))
+        background = roundedSurface(
+            withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.045f),
+            20,
+        )
+        addView(
+            ImageView(context).apply {
+                setImageResource(R.drawable.ic_gallery_nav_trash)
+                setColorFilter(accentColor())
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                setPadding(dp(10), dp(10), dp(10), dp(10))
+                background = roundedSurface(withAlpha(accentColor(), 0.11f), 22)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+            LinearLayout.LayoutParams(dp(44), dp(44)).apply {
+                bottomMargin = dp(10)
+            },
+        )
+        addView(TextView(context).apply {
+            text = title
+            gravity = Gravity.CENTER
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        addView(TextView(context).apply {
+            text = message
+            gravity = Gravity.CENTER
+            setTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setLineSpacing(0f, 1.08f)
+            setPadding(0, dp(6), 0, 0)
+        })
+    }
 
     private fun roundedSurface(color: Int, radiusDp: Int): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE

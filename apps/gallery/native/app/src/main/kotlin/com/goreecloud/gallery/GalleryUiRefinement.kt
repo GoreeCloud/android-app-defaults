@@ -118,12 +118,17 @@ object GalleryUiRefinement {
     private fun refinePersistentControls(activity: Activity, root: FrameLayout) {
         walk(root) { view ->
             val description = view.contentDescription?.toString() ?: return@walk
-            if (description !in persistentControlDescriptions) return@walk
-            val primary = description in primaryPersistentControlDescriptions
+            val canonicalDescription = when {
+                description.startsWith("Gallery media access action") ->
+                    "Gallery media access action"
+                else -> description
+            }
+            if (canonicalDescription !in persistentControlDescriptions) return@walk
+            val primary = canonicalDescription in primaryPersistentControlDescriptions
             styleControl(
                 activity = activity,
                 view = view,
-                marker = "control:$description",
+                marker = "control:$canonicalDescription",
                 role = if (primary) GalleryGlazeSurfaces.Role.CONTROL else GalleryGlazeSurfaces.Role.RAISED,
                 elevationDp = if (primary) 2 else 1,
             )

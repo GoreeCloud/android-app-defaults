@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
@@ -82,6 +84,25 @@ object GalleryNavigationStyling {
             ColorDrawable(Color.TRANSPARENT)
         }
 
+        item.foreground = RippleDrawable(
+            ColorStateList.valueOf(
+                Color.argb(
+                    32,
+                    Color.red(foreground),
+                    Color.green(foreground),
+                    Color.blue(foreground),
+                ),
+            ),
+            null,
+            GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = dp(
+                    activity,
+                    GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP,
+                ).toFloat()
+                setColor(Color.WHITE)
+            },
+        )
         item.tooltipText = label
     }
 
