@@ -3253,9 +3253,9 @@ private fun HomeEditorPageOverview(
                 )
                 Text(
                     if (visiblePages.size == 1) {
-                        "One page · Swipe to + Add Page"
+                        "One page · Swipe to the Add page card"
                     } else {
-                        visiblePages.size.toString() + " pages · Swipe between previews or to + Add Page"
+                        visiblePages.size.toString() + " pages · Swipe between previews or to Add page"
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -3298,14 +3298,13 @@ private fun HomeEditorPageOverview(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            "+",
-                            style = MaterialTheme.typography.displaySmall,
-                            color = if (layoutLocked) {
+                        LauncherPlusGlyph(
+                            tint = if (layoutLocked) {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             } else {
                                 MaterialTheme.colorScheme.primary
                             },
+                            modifier = Modifier.size(34.dp),
                         )
                         Text(
                             "Add Page",
@@ -5272,10 +5271,9 @@ private fun LauncherBuiltInWidget(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        Text(
-                            "⌕",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                        LauncherSearchGlyph(
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp),
                         )
                         Column(Modifier.weight(1f)) {
                             Text(
@@ -5341,10 +5339,10 @@ private fun LauncherBuiltInWidget(
                             color = foreground.copy(alpha = 0.70f),
                         )
                     }
-                    Text(
-                        if (battery.charging) "⚡" else "▰",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                    LauncherBatteryGlyph(
+                        charging = battery.charging,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(30.dp),
                     )
                 }
             }
@@ -5382,6 +5380,100 @@ private fun LauncherBuiltInWidget(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun LauncherPlusGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(20.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(
+            tint,
+            Offset(u * 0.18f, u * 0.50f),
+            Offset(u * 0.82f, u * 0.50f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.50f, u * 0.18f),
+            Offset(u * 0.50f, u * 0.82f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
+private fun LauncherSearchGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(24.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.085f
+        drawCircle(
+            color = tint,
+            radius = u * 0.25f,
+            center = Offset(u * 0.42f, u * 0.42f),
+            style = Stroke(width = stroke),
+        )
+        drawLine(
+            tint,
+            Offset(u * 0.60f, u * 0.60f),
+            Offset(u * 0.84f, u * 0.84f),
+            stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
+private fun LauncherBatteryGlyph(
+    charging: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(28.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.075f
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(u * 0.12f, u * 0.28f),
+            size = Size(u * 0.66f, u * 0.44f),
+            cornerRadius = CornerRadius(u * 0.08f),
+            style = Stroke(width = stroke),
+        )
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(u * 0.80f, u * 0.40f),
+            size = Size(u * 0.08f, u * 0.20f),
+            cornerRadius = CornerRadius(u * 0.03f),
+        )
+        if (charging) {
+            val bolt = androidx.compose.ui.graphics.Path().apply {
+                moveTo(u * 0.48f, u * 0.32f)
+                lineTo(u * 0.34f, u * 0.52f)
+                lineTo(u * 0.46f, u * 0.52f)
+                lineTo(u * 0.38f, u * 0.70f)
+                lineTo(u * 0.62f, u * 0.45f)
+                lineTo(u * 0.50f, u * 0.45f)
+                close()
+            }
+            drawPath(bolt, tint)
+        } else {
+            drawRoundRect(
+                color = tint.copy(alpha = 0.82f),
+                topLeft = Offset(u * 0.18f, u * 0.36f),
+                size = Size(u * 0.40f, u * 0.28f),
+                cornerRadius = CornerRadius(u * 0.05f),
+            )
         }
     }
 }
@@ -10945,12 +11037,11 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
+                                                                    LauncherDrawerSelectionCheckIcon(
                                                                         color = MaterialTheme
                                                                             .colorScheme.onPrimary,
+                                                                        modifier =
+                                                                            Modifier.size(14.dp),
                                                                     )
                                                                 }
                                                             }
@@ -11018,12 +11109,11 @@ internal fun LauncherFolderContentsSheet(
                                                                 contentAlignment =
                                                                     Alignment.Center,
                                                             ) {
-                                                                Text(
-                                                                    "＋",
-                                                                    style = MaterialTheme
-                                                                        .typography.titleLarge,
-                                                                    color = MaterialTheme
+                                                                LauncherPlusGlyph(
+                                                                    tint = MaterialTheme
                                                                         .colorScheme.onSurface,
+                                                                    modifier =
+                                                                        Modifier.size(20.dp),
                                                                 )
                                                             }
                                                         }
