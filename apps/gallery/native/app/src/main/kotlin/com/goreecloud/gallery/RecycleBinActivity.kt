@@ -945,21 +945,6 @@ class RecycleBinActivity : Activity() {
         setOnClickListener { onClick() }
     }
 
-    private fun textAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
-        text = label
-        gravity = Gravity.CENTER
-        minHeight = dp(48)
-        setPadding(dp(10), 0, dp(10), 0)
-        setTextColor(accentColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, if (label.length > 12) 10.5f else 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(withAlpha(accentColor(), 0.10f), 18)
-        isClickable = true
-        isFocusable = true
-        contentDescription = description
-        setOnClickListener { onClick() }
-    }
-
     private fun viewerIconAction(
         iconResource: Int,
         description: String,
