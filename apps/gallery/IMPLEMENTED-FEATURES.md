@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — representative-device compactness pass
+
+Representative-device screenshots drove a second compactness pass across setup, access-empty, Settings, Videos, and Trash. Setup now uses tighter copy/spacing and a true vector toggle for Contextual hints. The no-access Photos surface no longer repeats the same privacy statement twice. Settings rows and value/toggle affordances are visually lighter without reducing the row-level accessible target.
+
+Videos now treats phone space as a grid-first surface: the oversized first-item hero is suppressed below 600dp, while tablets and wider layouts retain a bounded feature card. The video More menu is a first-party rounded Glaze overlay with semantic glyphs instead of the platform-default rectangular popup.
+
+Trash favors three larger thumbnail columns on phones before scaling up on wider classes, and its Android-managed authority callout is more compact. These are presentation-only changes; Android MediaStore authority, confirmation requirements, Favorites ownership, and network/account boundaries are unchanged.
+
 ## October 3, 2026 — icon-first action surfaces
 
 Gallery now uses compact icon controls for persistent viewer, selection, Trash, photo-editor transform, and Settings action chrome. Crop ratios remain short text values, while repeated actions such as Share, Favorite, Move, Copy, Delete, More, Rotate, Flip, Reset, Refresh, and Play/Pause use glyphs with descriptive accessibility names and tooltips.
