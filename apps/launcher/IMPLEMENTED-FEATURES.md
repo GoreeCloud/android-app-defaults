@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — App Lock Development candidate
+
+The current Development branch adds optional Launcher-local **App Lock** with a shared 4–6 digit PIN or 4–9 distinct-dot pattern credential, a dedicated **Security → App Lock** settings surface, long-press **Lock app / Unlock app** actions with a Launcher-owned lock glyph, profile-qualified locked-app identities, and launch gating for Launcher-owned application dispatch paths. Universal Search application shortcuts are gated by the corresponding application lock as well.
+
+Credential material is local-only: the raw PIN/pattern is never persisted. The current verifier uses a random 128-bit salt and PBKDF2-HMAC-SHA256 with 150,000 iterations to derive a 256-bit verifier. Five failed verification attempts create a persisted 30-second cooldown. Removing a lock, changing the credential, and disabling App Lock require the current credential. The App Lock DataStore is outside Launcher’s explicit Android backup/device-transfer allowlist and outside the portable Launcher backup model.
+
+Every App Lock setup/settings/unlock surface warns that this is **Launcher-only protection**. It does not block launches through another launcher, notifications, recents, deep links, Settings, or other Android system surfaces, and Launcher gains no Accessibility Service, device-admin, overlay, usage-access, account, network, or other elevated security authority from this feature.
+
+**Acceptance boundary:** Development candidate only. Exact-head JVM/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates remain required before integration, followed by representative-device PIN/pattern/context-menu/settings validation.
+
 ## October 2, 2026 — representative-device UI correction after CI-649
 
 Protected PR #192 integrates the first screenshot-driven follow-up after the CI-649 representative-device pass. Launcher-owned Calendar, Weather, and Quick actions Home widgets now use lighter wallpaper-aware Glaze surfaces; Edit Home and New Folder replace visible font/Unicode pseudo-icons with Launcher-owned vector geometry; Edit Home page previews use widget-specific miniature structures instead of generic blue blocks; the App Drawer sort/new-folder/settings artwork and sort popup are visually aligned to the dark Glaze drawer; fixed five-column Drawer labels use bounded single-line ellipsis; and Universal Search Sources keeps the complete registered connected-source catalog visible even when an optional handoff application is unavailable.
