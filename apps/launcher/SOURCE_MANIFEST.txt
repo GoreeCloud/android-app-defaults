@@ -35,6 +35,7 @@ app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceProm
 app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceRoomPlacementRepositoryRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceRoomRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceStartupReconcilerRuntimeTest.kt
+app/src/androidTest/java/com/goreecloud/launcher/ui/LauncherAppLockUiRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/ui/LauncherStartupWizardRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/ui/LauncherTransitionPerformanceRuntimeTest.kt
 app/src/debug/res/values/strings.xml
