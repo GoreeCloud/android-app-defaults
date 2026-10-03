@@ -68,7 +68,18 @@ enum class GalleryViewDensity(
     fun mediaGridColumnsForGroup(widthDp: Int, itemCount: Int): Int {
         val baseline = mediaGridColumns(widthDp)
         if (itemCount <= 0 || baseline <= 3) return baseline
-        return if (itemCount < baseline) 3 else baseline
+        if (itemCount < baseline) return 3
+
+        val balanced = (baseline - 1).coerceAtLeast(3)
+        val baselineRows = (itemCount + baseline - 1) / baseline
+        val balancedRows = (itemCount + balanced - 1) / balanced
+        if (baselineRows != balancedRows) return baseline
+
+        val baselineLastRow = itemCount % baseline
+        val balancedLastRow = itemCount % balanced
+        val baselineOccupancy = if (baselineLastRow == 0) baseline else baselineLastRow
+        val balancedOccupancy = if (balancedLastRow == 0) balanced else balancedLastRow
+        return if (balancedOccupancy > baselineOccupancy) balanced else baseline
     }
 
     fun next(): GalleryViewDensity =
