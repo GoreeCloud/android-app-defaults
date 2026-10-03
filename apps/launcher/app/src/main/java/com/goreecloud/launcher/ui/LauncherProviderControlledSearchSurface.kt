@@ -1822,36 +1822,36 @@ private fun LauncherGlazeSearchResult(
                             )
                         }
                     }
+                    if (isContact && number != null) {
+                        LauncherContactQuickAction(
+                            type = LauncherContactQuickActionType.CALL,
+                            contentDescription = "Call " + result.title,
+                            onClick = {
+                                onOpenSearchUri(
+                                    LauncherOpenUriSearchAction(
+                                        Intent.ACTION_DIAL,
+                                        Uri.fromParts("tel", number, null).toString(),
+                                    ),
+                                )
+                            },
+                        )
+                        LauncherContactQuickAction(
+                            type = LauncherContactQuickActionType.MESSAGE,
+                            contentDescription = "Message " + result.title,
+                            onClick = {
+                                onOpenSearchUri(
+                                    LauncherOpenUriSearchAction(
+                                        Intent.ACTION_SENDTO,
+                                        Uri.fromParts("smsto", number, null).toString(),
+                                    ),
+                                )
+                            },
+                        )
+                    }
                     LauncherSearchResultTrailingGlyph(
                         copy = result.action is LauncherCopyTextSearchAction,
                         tint = MaterialTheme.colorScheme.primary,
                     )
-                }
-            }
-            if (isContact && number != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.OutlinedButton(
-                        onClick = {
-                            onOpenSearchUri(
-                                LauncherOpenUriSearchAction(
-                                    Intent.ACTION_DIAL,
-                                    Uri.fromParts("tel", number, null).toString(),
-                                ),
-                            )
-                        },
-                        modifier = Modifier.heightIn(min = 40.dp),
-                    ) { Text("Call") }
-                    androidx.compose.material3.OutlinedButton(
-                        onClick = {
-                            onOpenSearchUri(
-                                LauncherOpenUriSearchAction(
-                                    Intent.ACTION_SENDTO,
-                                    Uri.fromParts("smsto", number, null).toString(),
-                                ),
-                            )
-                        },
-                        modifier = Modifier.heightIn(min = 40.dp),
-                    ) { Text("Message") }
                 }
             }
         }
