@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — icon-first action surfaces
+
+Gallery now uses compact icon controls for persistent viewer, selection, Trash, photo-editor transform, and Settings action chrome. Crop ratios remain short text values, while repeated actions such as Share, Favorite, Move, Copy, Delete, More, Rotate, Flip, Reset, Refresh, and Play/Pause use glyphs with descriptive accessibility names and tooltips.
+
+The change keeps 48dp interaction targets for persistent action chrome, preserves selected/toggled semantics, and gives destructive actions distinct treatment. MediaStore authority, Android permission scope, confirmation behavior, local Favorites, and save-copy semantics are unchanged.
+
+Android runtime/rendered coverage verifies the icon-only photo-editor controls and Trash Refresh affordance. This slice is stacked on the unified navigation-glyph candidate and keeps its `0.8.10-dev` Development identity.
+
 ## October 3, 2026 — unified bottom-navigation glyph family
 
 The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
