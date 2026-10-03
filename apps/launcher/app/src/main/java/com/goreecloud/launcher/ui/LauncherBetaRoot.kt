@@ -10690,6 +10690,7 @@ private fun LauncherAppListRow(
     app: LauncherActivityInfo,
     iconScale: Float,
     pinnedInDrawer: Boolean = false,
+    lockedByLauncher: Boolean = false,
     onClick: () -> Unit,
     onLongClick: (Rect?) -> Unit,
     dragData: LauncherAppDragData? = null,
@@ -10730,7 +10731,12 @@ private fun LauncherAppListRow(
                 onLongClick = { onLongClick(rowBounds) },
             )
             .semantics {
-                if (pinnedInDrawer) stateDescription = "Pinned in Apps"
+                stateDescription = when {
+                    pinnedInDrawer && lockedByLauncher -> "Pinned in Apps. App Lock enabled"
+                    pinnedInDrawer -> "Pinned in Apps"
+                    lockedByLauncher -> "App Lock enabled"
+                    else -> null
+                }
             }
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -10758,6 +10764,11 @@ private fun LauncherAppListRow(
             if (pinnedInDrawer) {
                 DrawerPinnedMark(
                     modifier = Modifier.align(Alignment.TopStart),
+                )
+            }
+            if (lockedByLauncher) {
+                DrawerLockedMark(
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
         }
