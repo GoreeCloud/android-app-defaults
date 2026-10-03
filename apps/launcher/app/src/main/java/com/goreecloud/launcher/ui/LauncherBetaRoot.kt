@@ -2613,12 +2613,12 @@ private fun LauncherWidgetPickerSheet(
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
-                TextButton(
-                    modifier = Modifier.testTag("launcher-widget-picker-close"),
+                LauncherHeaderGlyphAction(
+                    contentDescription = "Close widget picker",
+                    symbol = GlazePopupActionSymbol.CLOSE,
                     onClick = onDismiss,
-                ) {
-                    Text("Close")
-                }
+                    modifier = Modifier.testTag("launcher-widget-picker-close"),
+                )
             }
             Text(
                 "GoreeCloud widgets and installed Android widgets in one Launcher gallery.",
@@ -2627,15 +2627,11 @@ private fun LauncherWidgetPickerSheet(
             )
         }
 
-        OutlinedTextField(
+        LauncherSettingsSearchField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("launcher-widget-search-field"),
-            singleLine = true,
-            label = { Text("Search widgets") },
-            placeholder = { Text("GoreeCloud widget, app, or package") },
+            placeholder = "Search widgets",
+            inputTestTag = "launcher-widget-search-field",
         )
 
         Text(
@@ -8074,14 +8070,16 @@ private fun LauncherSettingsCategoryIcon(
 private fun LauncherSettingsSearchField(
     value: String,
     onValueChange: (String) -> Unit,
+    placeholder: String = "Search Launcher settings",
+    inputTestTag: String? = null,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.70f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.48f),
         ),
     ) {
         val searchIconColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -8089,9 +8087,9 @@ private fun LauncherSettingsSearchField(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 54.dp)
-                .padding(horizontal = GlazeMetrics.space3),
+                .padding(start = GlazeMetrics.space3, end = GlazeMetrics.space2),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
         ) {
             Canvas(Modifier.size(22.dp)) {
                 val stroke = 2.dp.toPx()
@@ -8106,12 +8104,21 @@ private fun LauncherSettingsSearchField(
                     start = Offset(size.width * 0.64f, size.height * 0.64f),
                     end = Offset(size.width * 0.84f, size.height * 0.84f),
                     strokeWidth = stroke,
+                    cap = StrokeCap.Round,
                 )
             }
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .then(
+                        if (inputTestTag != null) {
+                            Modifier.testTag(inputTestTag)
+                        } else {
+                            Modifier
+                        },
+                    ),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurface,
@@ -8119,14 +8126,34 @@ private fun LauncherSettingsSearchField(
                 decorationBox = { inner ->
                     if (value.isBlank()) {
                         Text(
-                            "Search Launcher settings",
+                            placeholder,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                     inner()
                 },
             )
+            if (value.isNotBlank()) {
+                Surface(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .semantics { contentDescription = "Clear search" },
+                    onClick = { onValueChange("") },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        GlazePopupActionGlyph(
+                            symbol = GlazePopupActionSymbol.CLOSE,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            iconSize = 16.dp,
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -8304,8 +8331,8 @@ private fun LauncherSettingsRootSurface(
                 Column(Modifier.weight(1f)) {
                     Text(
                         selectedSettingsCategory?.title ?: "Launcher settings",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         selectedSettingsCategory?.summary
@@ -8315,11 +8342,17 @@ private fun LauncherSettingsRootSurface(
                     )
                 }
                 if (selectedSettingsCategory == null) {
-                    GlazeTextAction("Done", onBack)
+                    LauncherHeaderGlyphAction(
+                        contentDescription = "Done",
+                        symbol = GlazePopupActionSymbol.CHECK,
+                        onClick = onBack,
+                    )
                 } else {
-                    GlazeTextAction("Back") {
-                        selectedSettingsCategoryName = null
-                    }
+                    LauncherHeaderGlyphAction(
+                        contentDescription = "Back",
+                        symbol = GlazePopupActionSymbol.BACK,
+                        onClick = { selectedSettingsCategoryName = null },
+                    )
                 }
             }
 
@@ -9929,6 +9962,35 @@ private fun GlazeSettingsAction(
                 value,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherHeaderGlyphAction(
+    contentDescription: String,
+    symbol: GlazePopupActionSymbol,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier
+            .size(48.dp)
+            .semantics { this.contentDescription = contentDescription },
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.48f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            GlazePopupActionGlyph(
+                symbol = symbol,
+                color = MaterialTheme.colorScheme.onSurface,
+                iconSize = 20.dp,
             )
         }
     }
@@ -12527,6 +12589,8 @@ private enum class GlazePopupActionSymbol {
     APPS,
     SETTINGS,
     CHECK,
+    BACK,
+    CLOSE,
     INFO,
     LOCK,
     VISIBILITY,
@@ -12670,6 +12734,14 @@ private fun GlazePopupActionGlyph(
             GlazePopupActionSymbol.CHECK -> {
                 segment(.18f, .52f, .40f, .72f)
                 segment(.40f, .72f, .82f, .28f)
+            }
+            GlazePopupActionSymbol.BACK -> {
+                segment(.68f, .18f, .34f, .50f)
+                segment(.34f, .50f, .68f, .82f)
+            }
+            GlazePopupActionSymbol.CLOSE -> {
+                segment(.24f, .24f, .76f, .76f)
+                segment(.76f, .24f, .24f, .76f)
             }
             GlazePopupActionSymbol.INFO -> {
                 drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
