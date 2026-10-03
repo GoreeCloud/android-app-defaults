@@ -38,6 +38,8 @@ Tap a visible photo or video to open the bounded full-screen viewer.
 
 The viewer now uses compact icon/glyph actions rather than labeled text buttons for its persistent chrome. Long-press/hover tooltips and accessibility names describe each control, selected/toggled states remain exposed, and destructive Delete retains distinct treatment.
 
+The first-use setup also uses icon-first navigation controls with a visible three-step progress rail. Screen titles and explanatory guidance remain textual; Back, Return, Continue, and Finish are exposed as glyph controls with descriptive accessibility names.
+
 - Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale.
 - For photos, use the viewer's view-options control for **Fit entire photo**, **Fill viewer**, or **Zoom 2×**. You can also pinch from 1× up to 4×; while zoomed, drag the photo to pan. Item-navigation swipes are disabled while zoomed so a pan does not change photos. Choose **Reset zoom** or navigate to another item to return to baseline zoom.
 - Share hands the current content URI to Android with a read-only URI grant.
