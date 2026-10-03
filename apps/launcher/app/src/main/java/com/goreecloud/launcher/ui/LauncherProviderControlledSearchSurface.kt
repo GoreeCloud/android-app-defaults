@@ -3238,7 +3238,7 @@ private fun compactSourceSummary(
     LauncherFilesSearchProvider.PROVIDER_ID -> when (fileSearchRoots.size) {
         0 -> "No folder selected"
         1 -> "1 folder selected"
-        else -> "Folders · " + fileSearchRoots.size + " selected"
+        else -> fileSearchRoots.size.toString() + " folders selected"
     }
     LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID ->
         if (LauncherGoogleDriveAuthorizationState.isConnected()) {
