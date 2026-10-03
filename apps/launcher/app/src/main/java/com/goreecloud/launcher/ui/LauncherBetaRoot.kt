@@ -6861,11 +6861,7 @@ private fun AppDrawerSurface(
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                if (order == drawerSortOrder) {
-                                                    "✓ " + order.displayName
-                                                } else {
-                                                    order.displayName
-                                                },
+                                                order.displayName,
                                                 color = if (glass) {
                                                     Color.White.copy(alpha = 0.94f)
                                                 } else {
@@ -6876,6 +6872,21 @@ private fun AppDrawerSurface(
                                         onClick = {
                                             onSetSortOrderName(order.name)
                                             showDrawerSortMenu = false
+                                        },
+                                        trailingIcon = if (order == drawerSortOrder) {
+                                            {
+                                                GlazePopupActionGlyph(
+                                                    symbol = GlazePopupActionSymbol.CHECK,
+                                                    color = if (glass) {
+                                                        Color.White.copy(alpha = 0.94f)
+                                                    } else {
+                                                        MaterialTheme.colorScheme.primary
+                                                    },
+                                                    size = 15.dp,
+                                                )
+                                            }
+                                        } else {
+                                            null
                                         },
                                     )
                                 }
@@ -6907,14 +6918,14 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
+                                    GlazePopupActionGlyph(
+                                        symbol = GlazePopupActionSymbol.PIN,
                                         color = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
                                             drawerSecondaryColor
                                         },
+                                        size = 17.dp,
                                     )
                                 }
                             }
@@ -10394,10 +10405,10 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
+            GlazePopupActionGlyph(
+                symbol = GlazePopupActionSymbol.PIN,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
+                size = 11.dp,
             )
         }
     }
@@ -11217,12 +11228,12 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
+                                                                    GlazePopupActionGlyph(
+                                                                        symbol =
+                                                                            GlazePopupActionSymbol.CHECK,
                                                                         color = MaterialTheme
                                                                             .colorScheme.onPrimary,
+                                                                        size = 12.dp,
                                                                     )
                                                                 }
                                                             }
@@ -11616,7 +11627,7 @@ internal fun LauncherFolderAppPickerSheet(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                if (alreadyAdded) "✓ Added" else "+ Add",
+                                if (alreadyAdded) "Added" else "Add",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (alreadyAdded) {
                                     MaterialTheme.colorScheme.primary
@@ -12085,14 +12096,19 @@ private enum class GlazePopupActionSymbol {
     WALLPAPER,
     APPS,
     SETTINGS,
+    CHECK,
     INFO,
     UNINSTALL,
 }
 
 /** Decorative vector geometry; labels remain the accessible action description. */
 @Composable
-private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) {
-    Canvas(Modifier.size(22.dp)) {
+private fun GlazePopupActionGlyph(
+    symbol: GlazePopupActionSymbol,
+    color: Color,
+    size: Dp = 22.dp,
+) {
+    Canvas(Modifier.size(size)) {
         val u = size.minDimension
         val w = 1.8.dp.toPx()
         fun segment(x1: Float, y1: Float, x2: Float, y2: Float) {
@@ -12212,6 +12228,10 @@ private fun GlazePopupActionGlyph(symbol: GlazePopupActionSymbol, color: Color) 
                 ).forEach { (x, y) ->
                     segment(.50f, .50f, x, y)
                 }
+            }
+            GlazePopupActionSymbol.CHECK -> {
+                segment(.18f, .52f, .40f, .72f)
+                segment(.40f, .72f, .82f, .28f)
             }
             GlazePopupActionSymbol.INFO -> {
                 drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
