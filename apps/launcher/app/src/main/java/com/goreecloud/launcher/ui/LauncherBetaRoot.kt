@@ -7182,14 +7182,14 @@ private fun DrawerSearchField(
                     color = Color.Transparent,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            "×",
-                            style = MaterialTheme.typography.titleMedium,
+                        GlazePopupActionGlyph(
+                            symbol = GlazePopupActionSymbol.CLOSE,
                             color = if (darkSurface) {
                                 Color.White.copy(alpha = 0.78f)
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             },
+                            iconSize = 17.dp,
                         )
                     }
                 }
