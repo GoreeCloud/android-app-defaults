@@ -2941,7 +2941,7 @@ private fun LauncherSearchSourceManager(
                                             fileSearchRoots.isEmpty() ->
                                             "Choose folder"
                                         driveSource && !driveConnectionAvailable ->
-                                            "Signed build required"
+                                            "Connect unavailable"
                                         !connectedHandoffAvailable &&
                                             option.providerId ==
                                                 LauncherConnectedSearchProviderRegistry
@@ -3321,7 +3321,7 @@ private fun compactSourceSummary(
     LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID ->
         "Web · Optional"
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
-        "App handoff · Optional"
+        "App · Optional"
     else -> when (option.invocationMode) {
         LauncherSearchProviderInvocationMode.AUTOMATIC_LOCAL -> "Local · Automatic"
         LauncherSearchProviderInvocationMode.OPT_IN_LOCAL -> "Local · Permission"
