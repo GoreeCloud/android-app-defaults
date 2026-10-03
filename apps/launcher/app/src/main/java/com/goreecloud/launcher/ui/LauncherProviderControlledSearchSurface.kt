@@ -2766,6 +2766,18 @@ private fun LauncherSearchSourceManager(
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
+                            Surface(
+                                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                color = accent.copy(alpha = 0.10f),
+                            ) {
+                                Text(
+                                    options.size.toString(),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = accent,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
                         }
 
                         Surface(
