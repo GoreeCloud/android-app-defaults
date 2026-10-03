@@ -184,6 +184,7 @@ class MainActivity : ComponentActivity() {
         MutableStateFlow<LauncherPortableRestoreRecoveryCoordinator.Result?>(null)
     private var pendingAppWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
     private var pendingAppLockApp: LauncherActivityInfo? = null
+    private var pendingAppLockShortcut: LauncherLaunchShortcutSearchAction? = null
     private var pendingAppLockRecordUsage: Boolean = false
     private var showWallpaperPicker by mutableStateOf(false)
     private var pendingSearchProviderSnapshot: LauncherSearchProviderPreferenceSnapshot? = null
@@ -201,11 +202,16 @@ class MainActivity : ComponentActivity() {
     private val appLockAuthenticationRequest =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val app = pendingAppLockApp
+            val shortcut = pendingAppLockShortcut
             val recordUsage = pendingAppLockRecordUsage
             pendingAppLockApp = null
+            pendingAppLockShortcut = null
             pendingAppLockRecordUsage = false
-            if (result.resultCode == Activity.RESULT_OK && app != null) {
-                completeAppLaunch(app, recordUsage)
+            if (result.resultCode == Activity.RESULT_OK) {
+                when {
+                    shortcut != null -> completeShortcutLaunch(shortcut)
+                    app != null -> completeAppLaunch(app, recordUsage)
+                }
             }
         }
 
@@ -1496,19 +1502,11 @@ class MainActivity : ComponentActivity() {
                             onChooseFileSearchRoot = ::chooseFileSearchRoot,
                             onRemoveFileSearchRoot = ::confirmRemoveFileSearchRoot,
                             onLaunchSearchShortcut = { action ->
-                                runCatching {
-                                    appsRepository.launchShortcut(
-                                        packageName = action.packageName,
-                                        shortcutId = action.shortcutId,
-                                        user = action.user,
-                                    )
-                                }.onFailure {
-                                    Toast.makeText(
-                                        this@MainActivity,
-                                        "That shortcut is no longer available.",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                                }
+                                requestShortcutLaunch(
+                                    action = action,
+                                    apps = apps,
+                                    lockedAppKeys = lockedAppKeys,
+                                )
                             },
                             onOpenSearchUri = ::openSearchUri,
                             onOpenDocument = ::openDocument,
@@ -1911,7 +1909,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Suppress("DEPRECATION")
     private fun requestAppLaunch(
         app: LauncherActivityInfo,
         lockedAppKeys: Set<String>,
@@ -1922,6 +1919,42 @@ class MainActivity : ComponentActivity() {
             return
         }
 
+        beginAppLockAuthentication(
+            label = app.label.toString(),
+            app = app,
+            recordUsage = recordUsage,
+        )
+    }
+
+    private fun requestShortcutLaunch(
+        action: LauncherLaunchShortcutSearchAction,
+        apps: List<LauncherActivityInfo>,
+        lockedAppKeys: Set<String>,
+    ) {
+        val matchingApps = apps.filter { app ->
+            app.user == action.user &&
+                app.componentName.packageName == action.packageName
+        }
+        val locked = matchingApps.any { app -> app.workspaceKey() in lockedAppKeys }
+        if (!locked) {
+            completeShortcutLaunch(action)
+            return
+        }
+
+        beginAppLockAuthentication(
+            label = matchingApps.firstOrNull()?.label?.toString()
+                ?: action.packageName.substringAfterLast('.'),
+            shortcut = action,
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun beginAppLockAuthentication(
+        label: String,
+        app: LauncherActivityInfo? = null,
+        shortcut: LauncherLaunchShortcutSearchAction? = null,
+        recordUsage: Boolean = false,
+    ) {
         val keyguardManager = getSystemService(KeyguardManager::class.java)
         if (!keyguardManager.isDeviceSecure) {
             Toast.makeText(
@@ -1936,7 +1969,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val credentialIntent = keyguardManager.createConfirmDeviceCredentialIntent(
-            "Unlock ${app.label}",
+            "Unlock $label",
             "Authenticate to open this app from GoreeCloud Launcher.",
         )
         if (credentialIntent == null) {
@@ -1949,6 +1982,7 @@ class MainActivity : ComponentActivity() {
         }
 
         pendingAppLockApp = app
+        pendingAppLockShortcut = shortcut
         pendingAppLockRecordUsage = recordUsage
         appLockAuthenticationRequest.launch(credentialIntent)
     }
@@ -1960,6 +1994,22 @@ class MainActivity : ComponentActivity() {
         appsRepository.launch(app)
         if (recordUsage) {
             localUsageRepository.recordLaunch(app.workspaceKey())
+        }
+    }
+
+    private fun completeShortcutLaunch(action: LauncherLaunchShortcutSearchAction) {
+        runCatching {
+            appsRepository.launchShortcut(
+                packageName = action.packageName,
+                shortcutId = action.shortcutId,
+                user = action.user,
+            )
+        }.onFailure {
+            Toast.makeText(
+                this,
+                "That shortcut is no longer available.",
+                Toast.LENGTH_SHORT,
+            ).show()
         }
     }
 
