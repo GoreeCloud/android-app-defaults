@@ -511,20 +511,43 @@ class RecycleBinActivity : Activity() {
                 FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
             )
             if (item.mimeType.startsWith("video/")) {
-                addView(TextView(context).apply {
-                    text = item.durationMillis?.let(::formatDuration) ?: "VIDEO"
-                    setTextColor(Color.WHITE)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
-                    setTypeface(typeface, Typeface.BOLD)
-                    gravity = Gravity.CENTER
-                    setPadding(dp(7), dp(3), dp(7), dp(3))
-                    background = roundedSurface(0xb3000000.toInt(), 9)
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                }, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                    gravity = Gravity.END or Gravity.BOTTOM
-                    marginEnd = dp(5)
-                    bottomMargin = dp(5)
-                })
+                addView(
+                    ImageView(context).apply {
+                        tag = VIDEO_PLAY_TAG
+                        visibility = if (selectedUris.isEmpty()) View.VISIBLE else View.GONE
+                        setImageResource(R.drawable.ic_gallery_play)
+                        setColorFilter(Color.WHITE)
+                        scaleType = ImageView.ScaleType.CENTER_INSIDE
+                        setPadding(dp(12), dp(12), dp(12), dp(12))
+                        background = roundedSurface(0xb3000000.toInt(), 20)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    },
+                    FrameLayout.LayoutParams(dp(40), dp(40)).apply {
+                        gravity = Gravity.CENTER
+                    },
+                )
+                item.durationMillis?.let { durationMillis ->
+                    addView(
+                        TextView(context).apply {
+                            text = formatDuration(durationMillis)
+                            setTextColor(Color.WHITE)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+                            setTypeface(typeface, Typeface.BOLD)
+                            gravity = Gravity.CENTER
+                            setPadding(dp(7), dp(3), dp(7), dp(3))
+                            background = roundedSurface(0xb3000000.toInt(), 9)
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ).apply {
+                            gravity = Gravity.END or Gravity.BOTTOM
+                            marginEnd = dp(5)
+                            bottomMargin = dp(5)
+                        },
+                    )
+                }
             }
             addView(
                 ImageView(context).apply {
@@ -564,6 +587,8 @@ class RecycleBinActivity : Activity() {
             }
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
+            tile.findViewWithTag<View>(VIDEO_PLAY_TAG)?.visibility =
+                if (selectedUris.isEmpty()) View.VISIBLE else View.GONE
         }
         headerTitle.text = if (selectedUris.isEmpty()) "Trash" else if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
         if (selectedUris.isEmpty()) {
@@ -1130,6 +1155,7 @@ class RecycleBinActivity : Activity() {
         private const val VIEWER_CACHE_PREFIX = "recycle-viewer"
         private const val SELECTION_OVERLAY_TAG = "goreecloud_recycle_selection_overlay"
         private const val SELECTION_CHECK_TAG = "goreecloud_recycle_selection_check"
+        private const val VIDEO_PLAY_TAG = "goreecloud_recycle_video_play"
         private const val LOCAL_STATE_PREFERENCES = "goreecloud_gallery_local_state"
         private const val FAVORITES_KEY = "favorite_content_uris"
 
