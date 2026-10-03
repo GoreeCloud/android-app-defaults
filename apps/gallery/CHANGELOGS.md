@@ -8,10 +8,13 @@
 - Replaced Trash Refresh, Trash selection actions, and Trash viewer actions with matching icon-first controls while preserving Android-managed Trash authority and confirmation behavior.
 - Reworked the first-party photo editor so Cancel/Save, Rotate left/right, Flip, and Reset are icon controls; crop aspect presets remain short textual ratios because the value itself is the useful affordance.
 - Replaced text pills for Settings actions such as Clear, Import/Export, reset, and setup replay with compact glyph affordances while keeping the whole setting row labeled and accessible.
-- This action-chrome slice is stacked on the unified-navigation-glyph candidate and therefore retains its `0.8.10-dev` Development identity and monotonic CI version-code contract.
+- The current-main candidate now consolidates the unified navigation-glyph and icon-first action passes in one directly based branch while retaining the `0.8.10-dev` Development identity and monotonic CI version-code contract.
+- Replaced remaining font/Unicode pseudo-glyph controls with first-party vector artwork for previous/next navigation, video play overlays, media-selection checks, card overflow, and directional affordances.
+- Added bounded press/ripple feedback to first-party viewer, selection, header, Settings, Trash, and editor controls.
+- Photo-editor crop presets now expose an explicit selected visual/accessibility state, beginning with Original and clearing when the crop becomes custom.
 
 ### Verification
-- Extended Android runtime coverage for icon-only photo-editor chrome and safe-area placement.
+- Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
 - Extended rendered Trash acceptance to require an icon-only Refresh control while preserving minimum target size, Glaze refinement, and the unified navigation ripple checks.
 
 ### Boundary
