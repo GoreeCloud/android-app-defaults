@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — Launcher-local App Lock candidate
+
+Adds a new **Security → App Lock** capability with one Launcher-local PIN or pattern credential, long-press Lock/Unlock actions on application context menus, a Launcher-owned lock glyph, locked-app management in Settings, and credential challenges before Launcher dispatches a locked application or its Launcher search shortcut. PINs are constrained to 4–6 digits; patterns use 4–9 distinct dots.
+
+Security behavior is deliberately bounded. Raw credentials are never stored; the local store retains a random salt plus PBKDF2-HMAC-SHA256 verifier, profile-qualified app keys, and brute-force throttle state. Five failed attempts trigger a persisted 30-second cooldown. The App Lock DataStore is excluded from the current Android backup/device-transfer allowlist and from portable Launcher backup/restore.
+
+Setup, settings, unlock, and onboarding copy explicitly warn that App Lock works **only within GoreeCloud Launcher**. It does not claim to stop launches from another launcher, notifications, recents, links, Settings, or other Android system surfaces, and it introduces no Accessibility Service, device-admin, overlay, usage-access, account, network, or additional Android permission authority.
+
+**Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/unit/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. Representative-device PIN/pattern entry, long-press menu, Search shortcut, Settings-management, cooldown, accessibility, large-text, and process-recreation acceptance remain separate evidence gates.
+
 ## October 2, 2026 — compact Search, clean starter Home, and visual onboarding candidate
 
 Representative-device CI-661 screenshots and owner feedback exposed a density/first-run tranche that remained outside the previous visual corrections. Universal Search shortcut results still consumed large vertical cards; Search Sources repeated its title in an oversized card and kept the large Suggestion tabs control outside the scrolling source list; fresh starter Home still inherited automatic first-party cards; and onboarding presented several operational concepts as long documentation paragraphs.
