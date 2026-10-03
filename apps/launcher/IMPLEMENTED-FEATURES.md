@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — restacked Theme and Home-page glyph-control candidate
+
+Development source now replaces Theme Manager's text completion action and the current Home-page carousel's **Add page**, **Done**, **Move earlier**, **Move later**, and **Delete empty page** controls with Launcher-owned semantic vector actions. Every compact control keeps a 48 dp target and an explicit accessibility description. Existing page selection, layout lock, primary-page protection, empty-page deletion guard, Room workspace mutation, App Lock, provider, permission, and gesture authority remain unchanged.
+
+**Acceptance boundary:** implemented on a stacked Development candidate, not authoritative main. Fresh exact-head validation and representative-device accessibility/reflow/form-factor acceptance remain required before integration or any stronger lifecycle claim.
+
 ## October 3, 2026 — App Lock and owner-feedback UI candidate
 
 Development source now contains device-local, profile-qualified **App Lock** membership, a **Privacy & security** settings destination, app-context Lock/Unlock actions, and Android device-authentication gating for Launcher-originated app and app-shortcut launches. The App Lock manager includes app search, **All / Locked** filtering, per-app switches, Personal/Work plus package context, and empty-state handling. Apps grid, compact, list, and category views expose a small Launcher-owned lock mark and accessible locked-state semantics. Startup setup also surfaces App Lock directly.
