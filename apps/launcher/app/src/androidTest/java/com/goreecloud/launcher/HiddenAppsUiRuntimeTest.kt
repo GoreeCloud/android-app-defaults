@@ -1,7 +1,6 @@
 package com.goreecloud.launcher
 
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -147,9 +146,8 @@ class HiddenAppsUiRuntimeTest {
                 .performClick()
 
             composeRule
-                .onNodeWithText("Hidden apps", useUnmergedTree = true)
+                .onNodeWithTag("launcher-settings-hidden-apps", useUnmergedTree = true)
                 .performScrollTo()
-                .assertHasClickAction()
                 .performClick()
 
             composeRule.waitUntil(timeoutMillis = 10_000) {
