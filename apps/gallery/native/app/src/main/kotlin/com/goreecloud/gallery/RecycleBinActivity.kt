@@ -948,6 +948,9 @@ class RecycleBinActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (destructive) "Destructive action" else null
+        }
         GalleryInteractionFeedback.applyBoundedRipple(this, foreground, 18)
         setOnClickListener { onClick() }
     }
@@ -975,6 +978,9 @@ class RecycleBinActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (destructive) "Destructive action" else null
+        }
         GalleryInteractionFeedback.applyBoundedRipple(
             this,
             if (destructive) 0xffff8a80.toInt() else Color.WHITE,
