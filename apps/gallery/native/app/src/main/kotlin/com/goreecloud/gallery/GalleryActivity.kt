@@ -4464,7 +4464,8 @@ class GalleryActivity : Activity() {
                 settingActionRow(
                     title = "Reset album order",
                     subtitle = "Return Albums to the current date-sort order while keeping Pin/Unpin choices.",
-                    actionLabel = "Reset",
+                    actionIcon = R.drawable.ic_gallery_reset,
+                    actionDescription = "Reset album order",
                 ) {
                     galleryPreferences().edit().remove(ALBUM_ORDER_IDS_KEY).apply()
                     Toast.makeText(this, "Album order reset", Toast.LENGTH_SHORT).show()
@@ -4485,7 +4486,8 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Clear cache",
                 subtitle = "Clears the current in-memory thumbnail cache. Photos and videos are never deleted.",
-                actionLabel = "Clear",
+                actionIcon = R.drawable.ic_gallery_reset,
+                    actionDescription = "Clear cache",
             ) {
                 thumbnailCache.evictAll()
                 Toast.makeText(this, "Thumbnail cache cleared", Toast.LENGTH_SHORT).show()
@@ -4497,14 +4499,16 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Export Favorites",
                 subtitle = "Export Gallery's local favorite content-URI list. Media files are not exported.",
-                actionLabel = "Export",
+                actionIcon = R.drawable.ic_gallery_share,
+                    actionDescription = "Export Favorites",
             ) { createJsonDocument(EXPORT_FAVORITES_REQUEST, "GoreeCloud-Gallery-Favorites.json") },
         )
         library.addView(
             settingActionRow(
                 title = "Import Favorites",
                 subtitle = "Merge a Gallery Favorites export into the local Favorites set without expanding media permission.",
-                actionLabel = "Import",
+                actionIcon = R.drawable.ic_gallery_download,
+                    actionDescription = "Import Favorites",
             ) { openJsonDocument(IMPORT_FAVORITES_REQUEST) },
         )
 
@@ -4513,14 +4517,16 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Export settings",
                 subtitle = "Export non-secret Gallery preferences, including folder visibility selections.",
-                actionLabel = "Export",
+                actionIcon = R.drawable.ic_gallery_share,
+                    actionDescription = "Export settings",
             ) { createJsonDocument(EXPORT_SETTINGS_REQUEST, "GoreeCloud-Gallery-Settings.json") },
         )
         library.addView(
             settingActionRow(
                 title = "Import settings",
                 subtitle = "Import a compatible GoreeCloud Gallery settings file. Unknown fields are ignored.",
-                actionLabel = "Import",
+                actionIcon = R.drawable.ic_gallery_download,
+                    actionDescription = "Import settings",
             ) { openJsonDocument(IMPORT_SETTINGS_REQUEST) },
         )
 
@@ -4538,7 +4544,8 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Reset dismissed hints",
                 subtitle = "Show Gallery tips you previously dismissed without changing onboarding or other settings.",
-                actionLabel = "Reset",
+                actionIcon = R.drawable.ic_gallery_reset,
+                    actionDescription = "Reset dismissed hints",
             ) {
                 GallerySetupPreferences(this).resetDismissedContextualHints()
                 Toast.makeText(this, "Dismissed Gallery hints reset", Toast.LENGTH_SHORT).show()
@@ -4548,7 +4555,8 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Replay setup",
                 subtitle = "Review first-use guidance without resetting favorites, media access, or Gallery preferences.",
-                actionLabel = "Open",
+                actionIcon = R.drawable.ic_gallery_play,
+                    actionDescription = "Replay setup",
             ) { showSetupWizard(replay = true, requestedStep = 0) },
         )
     }
@@ -4767,13 +4775,14 @@ class GalleryActivity : Activity() {
     private fun settingActionRow(
         title: String,
         subtitle: String,
-        actionLabel: String,
+        actionIcon: Int,
+        actionDescription: String,
         onClick: () -> Unit,
     ): LinearLayout = settingBaseRow(
         title = title,
         subtitle = subtitle,
         enabled = true,
-        trailing = settingsPill(actionLabel, emphasized = true),
+        trailing = settingsIconPill(actionIcon, actionDescription),
         onClick = onClick,
     )
 
@@ -4847,6 +4856,19 @@ class GalleryActivity : Activity() {
                 bottomMargin = dp(6)
             }
         }
+    }
+
+    private fun settingsIconPill(iconResource: Int, description: String): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minWidth = dp(44)
+        minHeight = dp(40)
+        setPadding(dp(10), dp(8), dp(10), dp(8))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+        background = roundedSurface(withAlpha(accentColor(), 0.13f), 16)
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        tooltipText = description
     }
 
     private fun settingsPill(label: String, emphasized: Boolean): TextView = TextView(this).apply {
