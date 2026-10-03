@@ -105,7 +105,13 @@ class GalleryGlazeContractTest {
         assertEquals(4, GalleryGlazeContract.NAVIGATION_ELEVATION_DP)
         assertEquals(82, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
         assertEquals(28, GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP)
-        assertEquals(21, GalleryGlazeContract.NAVIGATION_ICON_DP)
+        assertEquals(22, GalleryGlazeContract.NAVIGATION_ICON_DP)
+        assertEquals(4, GalleryGlazeContract.NAVIGATION_ITEM_HORIZONTAL_PADDING_DP)
+        assertEquals(1, GalleryGlazeContract.NAVIGATION_ITEM_VERTICAL_PADDING_DP)
+        assertTrue(
+            GalleryGlazeContract.NAVIGATION_ICON_ONLY_SELECTED_HORIZONTAL_INSET_DP >
+                GalleryGlazeContract.NAVIGATION_LABELED_SELECTED_HORIZONTAL_INSET_DP,
+        )
         assertTrue(
             GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP >=
                 GalleryGlazeContract.NAVIGATION_HEIGHT_DP + GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP,
