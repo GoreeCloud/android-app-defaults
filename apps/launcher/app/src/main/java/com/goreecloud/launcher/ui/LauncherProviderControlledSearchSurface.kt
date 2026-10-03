@@ -3535,7 +3535,12 @@ private fun LauncherProviderSearchRow(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text(result.title, fontWeight = FontWeight.SemiBold)
+                Text(
+                    result.title,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 // A launcher search presents app labels, never diagnostic package names.
                 result.subtitle?.takeUnless { result.category == LauncherSearchCategory.APPLICATION }?.let {
                     Text(
