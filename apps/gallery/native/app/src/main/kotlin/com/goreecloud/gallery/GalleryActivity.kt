@@ -577,7 +577,7 @@ class GalleryActivity : Activity() {
         )
 
         sortControl = iconHeaderAction(
-            R.drawable.ic_gallery_sort,
+            sortIconResource(),
             "Change Gallery sort order",
         ) {
             val preference = if (selectedSort == MediaSortOrder.NEWEST) {
@@ -1183,6 +1183,7 @@ class GalleryActivity : Activity() {
         backControl.contentDescription = "Back to Albums"
         backControl.tooltipText = "Back to Albums"
         val sortLabel = sortOrderLabel()
+        sortControl.setImageResource(sortIconResource())
         sortControl.contentDescription = "Sort order: $sortLabel. Double tap to change."
         sortControl.tooltipText = "Sort: $sortLabel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -6165,6 +6166,13 @@ class GalleryActivity : Activity() {
 
     private fun sortOrderLabel(): String =
         if (selectedSort == MediaSortOrder.NEWEST) "Newest first" else "Oldest first"
+
+    private fun sortIconResource(): Int =
+        if (selectedSort == MediaSortOrder.NEWEST) {
+            R.drawable.ic_gallery_sort_newest
+        } else {
+            R.drawable.ic_gallery_sort_oldest
+        }
 
     private fun timelineSectionHeader(label: String, count: Int): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
