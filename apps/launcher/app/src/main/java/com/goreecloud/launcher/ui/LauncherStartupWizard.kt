@@ -968,62 +968,6 @@ private fun WizardInfoCard(
 }
 
 @Composable
-private fun WizardHomeModeCard(
-    title: String,
-    summary: String,
-    symbol: WizardVisualSymbol,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val accent = MaterialTheme.colorScheme.primary
-    Surface(
-        onClick = onClick,
-        modifier = modifier.heightIn(min = 82.dp),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = if (selected) {
-            accent.copy(alpha = 0.13f)
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
-        },
-        border = BorderStroke(
-            1.dp,
-            if (selected) accent.copy(alpha = 0.72f)
-            else MaterialTheme.colorScheme.outlineVariant,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                WizardVisualGlyph(
-                    symbol = symbol,
-                    tint = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                RadioButton(selected = selected, onClick = null)
-            }
-            Text(
-                title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-            )
-            Text(
-                summary,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
-        }
-    }
-}
-
-@Composable
 private fun WizardCompactChoiceStrip(
     title: String,
     options: List<String>,
