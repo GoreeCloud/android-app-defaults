@@ -5131,8 +5131,8 @@ class GalleryActivity : Activity() {
             },
         )
         scaleType = ImageView.ScaleType.CENTER_INSIDE
-        minWidth = dp(52)
-        minHeight = dp(36)
+        minimumWidth = dp(52)
+        minimumHeight = dp(36)
         setPadding(dp(8), dp(8), dp(8), dp(8))
         background = roundedSurface(
             if (enabled && checked) withAlpha(accentColor(), 0.13f)
