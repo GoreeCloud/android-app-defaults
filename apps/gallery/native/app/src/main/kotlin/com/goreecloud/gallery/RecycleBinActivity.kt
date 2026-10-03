@@ -473,6 +473,7 @@ class RecycleBinActivity : Activity() {
             isClickable = true
             isLongClickable = true
             isFocusable = true
+            GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, 14)
             isSelected = selected
             contentDescription = tileDescription(item, selected)
             setOnClickListener {
