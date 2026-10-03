@@ -542,11 +542,15 @@ class GalleryActivity : Activity() {
             setTextColor(primaryTextColor)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
             setTypeface(typeface, Typeface.BOLD)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
         headerSubtitle = TextView(this).apply {
             setTextColor(secondaryTextColor)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
             setPadding(0, dp(1), 0, 0)
         }
         titles.addView(headerTitle)
@@ -647,7 +651,13 @@ class GalleryActivity : Activity() {
                 isClickable = true
                 isFocusable = true
                 contentDescription = "Close search"
+                tooltipText = "Close search"
                 background = roundedSurface(Color.TRANSPARENT, 16)
+                GalleryInteractionFeedback.applyBoundedRipple(
+                    this,
+                    primaryTextColor(),
+                    16,
+                )
                 setOnClickListener { closeSearch() }
             },
             LinearLayout.LayoutParams(
@@ -703,6 +713,11 @@ class GalleryActivity : Activity() {
             isClickable = true
             isFocusable = true
             contentDescription = "Gallery media access action"
+            GalleryInteractionFeedback.applyBoundedRipple(
+                this,
+                accentColor(),
+                15,
+            )
         }
         accessPanel.addView(action)
 
@@ -2222,6 +2237,12 @@ class GalleryActivity : Activity() {
         isClickable = true
         isFocusable = true
         contentDescription = "$label, ${itemCountLabel(count)}"
+        tooltipText = label
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            primaryTextColor(),
+            GalleryGlazeContract.SHAPE_CAPSULE_DP,
+        )
         setOnClickListener { onClick() }
     }
 
@@ -2303,6 +2324,11 @@ class GalleryActivity : Activity() {
             isClickable = true
             isFocusable = true
             contentDescription = "${album.name}, ${itemCountLabel(album.count)}"
+            GalleryInteractionFeedback.applyBoundedRipple(
+                this,
+                primaryTextColor(),
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
             setOnClickListener { openAlbumPresentation(album) }
             addView(
                 FrameLayout(context).apply {
