@@ -30,6 +30,7 @@ class PhotoEditorActivity : Activity() {
     private lateinit var status: TextView
     private lateinit var saveButton: TextView
     private val editControls = mutableListOf<TextView>()
+    private val aspectControls = linkedMapOf<String, TextView>()
 
     private var sourceUri: Uri? = null
     private var sourceDisplayName: String = "Photo"
@@ -128,7 +129,10 @@ class PhotoEditorActivity : Activity() {
         )
         cropOverlay = GalleryCropOverlayView(this).apply {
             visibility = View.INVISIBLE
-            onCropChanged = { editPlan = editPlan.copy(crop = it) }
+            onCropChanged = {
+                editPlan = editPlan.copy(crop = it)
+                updateAspectSelection(null)
+            }
         }
         stage.addView(
             cropOverlay,
@@ -278,15 +282,18 @@ class PhotoEditorActivity : Activity() {
             gravity = Gravity.CENTER
         }
         addAspectControl(aspectRow, "Original", "Reset crop to the full photo") {
-            setCropPreset(GalleryNormalizedCrop.FULL)
+            setCropPreset(GalleryNormalizedCrop.FULL, "Original")
         }
-        addAspectControl(aspectRow, "1:1", "Crop photo to a centered square") { setAspectPreset(1f) }
+        addAspectControl(aspectRow, "1:1", "Crop photo to a centered square") {
+            setAspectPreset(1f, "1:1")
+        }
         addAspectControl(aspectRow, "4:3", "Crop photo to a centered four by three rectangle") {
-            setAspectPreset(4f / 3f)
+            setAspectPreset(4f / 3f, "4:3")
         }
         addAspectControl(aspectRow, "16:9", "Crop photo to a centered sixteen by nine rectangle") {
-            setAspectPreset(16f / 9f)
+            setAspectPreset(16f / 9f, "16:9")
         }
+        updateAspectSelection("Original")
 
         val controls = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -354,6 +361,7 @@ class PhotoEditorActivity : Activity() {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
         }
         editControls += control
+        aspectControls[label] = control
         row.addView(
             control,
             LinearLayout.LayoutParams(0, dp(44), 1f).apply {
@@ -418,6 +426,9 @@ class PhotoEditorActivity : Activity() {
                     preview.setImageBitmap(transformed)
                     cropOverlay.setSourceSize(transformed.width, transformed.height)
                     cropOverlay.setCrop(plan.crop, notify = false)
+                    updateAspectSelection(
+                        if (plan.crop == GalleryNormalizedCrop.FULL) "Original" else null,
+                    )
                     cropOverlay.visibility = View.VISIBLE
                     if (oldPreview != null && oldPreview !== source && oldPreview !== transformed) oldPreview.recycle()
                     setWorking(
@@ -431,17 +442,39 @@ class PhotoEditorActivity : Activity() {
         }
     }
 
-    private fun setAspectPreset(aspect: Float) {
+    private fun setAspectPreset(aspect: Float, label: String) {
         val bitmap = previewBitmap ?: return
-        setCropPreset(GalleryPhotoEditPolicy.centerCropForAspect(bitmap.width, bitmap.height, aspect))
+        setCropPreset(
+            GalleryPhotoEditPolicy.centerCropForAspect(bitmap.width, bitmap.height, aspect),
+            label,
+        )
     }
 
-    private fun setCropPreset(crop: GalleryNormalizedCrop) {
+    private fun setCropPreset(crop: GalleryNormalizedCrop, label: String?) {
         if (working) return
         editPlan = editPlan.copy(crop = crop)
         cropOverlay.setCrop(crop, notify = false)
+        updateAspectSelection(label)
         status.text = "Crop updated. Drag the crop handles or photo area for a custom crop."
-        cropOverlay.announceForAccessibility("Crop updated")
+        cropOverlay.announceForAccessibility(
+            if (label == null) "Crop updated" else "$label crop selected",
+        )
+    }
+
+    private fun updateAspectSelection(selectedLabel: String?) {
+        aspectControls.forEach { (label, control) ->
+            val selected = label == selectedLabel
+            control.isSelected = selected
+            control.setTypeface(control.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
+            control.setTextColor(if (selected) accentColor() else Color.WHITE)
+            control.background = roundedSurface(
+                if (selected) withAlpha(accentColor(), 0.26f) else 0x2effffff,
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                control.stateDescription = if (selected) "Selected" else null
+            }
+        }
     }
 
     private fun saveEditedCopy() {
@@ -586,6 +619,22 @@ class PhotoEditorActivity : Activity() {
         )
         setOnClickListener { onClick() }
     }
+
+    private fun accentColor(): Int {
+        val attributes = obtainStyledAttributes(intArrayOf(android.R.attr.colorAccent))
+        return try {
+            attributes.getColor(0, 0xff80cbc4.toInt())
+        } finally {
+            attributes.recycle()
+        }
+    }
+
+    private fun withAlpha(color: Int, alpha: Float): Int = Color.argb(
+        (255 * alpha.coerceIn(0f, 1f)).toInt(),
+        Color.red(color),
+        Color.green(color),
+        Color.blue(color),
+    )
 
     private fun roundedSurface(color: Int, radiusDp: Int): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
