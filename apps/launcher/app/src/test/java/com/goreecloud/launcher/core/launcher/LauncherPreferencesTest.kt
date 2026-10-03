@@ -79,6 +79,27 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun starterLayoutPersistenceCanBeJoinedBeforeRuntimeReadsIt() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("starter-layout-join.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            repository.markStarterLayoutApplied().join()
+
+            assertEquals(
+                true,
+                repository.experiencePreferences.first().starterLayoutApplied,
+            )
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun hiddenHomeSuggestionsPersistIndependentlyFromManualPlacementPreferences() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
