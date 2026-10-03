@@ -1,5 +1,8 @@
 package com.goreecloud.launcher
 
+import android.content.pm.LauncherActivityInfo
+import android.content.pm.LauncherApps
+import android.os.Process
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -264,6 +267,127 @@ class HiddenAppsUiRuntimeTest {
             scenario.close()
         }
     }
+
+    @Test
+    fun pinnedAppsManagerUnpinsAllSeededApps() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val seededApp = primaryInstalledApp(context.getSystemService(LauncherApps::class.java), context.packageName)
+        val seededKey = inventoryKey(seededApp)
+        preferencesRepository.setDrawerAppPinned(seededKey, true).join()
+
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+        try {
+            openAppDrawerSettingsManager("launcher-settings-pinned-apps")
+
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-pinned-app-" + seededKey,
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            composeRule
+                .onNodeWithTag("launcher-unpin-all-apps", useUnmergedTree = true)
+                .performClick()
+
+            withTimeout(10_000) {
+                preferencesRepository.drawerPinnedAppKeys.first { it.isEmpty() }
+            }
+            composeRule
+                .onNodeWithText("No pinned apps.", useUnmergedTree = true)
+                .assertIsDisplayed()
+        } finally {
+            scenario.close()
+        }
+    }
+
+    @Test
+    fun hiddenAppsManagerShowsAllSeededApps() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val seededApp = primaryInstalledApp(context.getSystemService(LauncherApps::class.java), context.packageName)
+        val seededKey = inventoryKey(seededApp)
+        preferencesRepository.setAppHidden(seededKey, true).join()
+
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+        try {
+            openAppDrawerSettingsManager("launcher-settings-hidden-apps")
+
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-hidden-app-" + seededKey,
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            composeRule
+                .onNodeWithTag("launcher-show-all-hidden-apps", useUnmergedTree = true)
+                .performClick()
+
+            withTimeout(10_000) {
+                preferencesRepository.hiddenAppKeys.first { it.isEmpty() }
+            }
+            composeRule
+                .onNodeWithText("No hidden apps.", useUnmergedTree = true)
+                .assertIsDisplayed()
+        } finally {
+            scenario.close()
+        }
+    }
+
+    private fun openAppDrawerSettingsManager(settingsActionTag: String) {
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule
+                .onAllNodesWithTag(
+                    "launcher-home-empty-space-actions",
+                    useUnmergedTree = true,
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeRule
+            .onNodeWithTag(
+                "launcher-home-empty-space-actions",
+                useUnmergedTree = true,
+            )
+            .performSemanticsAction(SemanticsActions.OnLongClick)
+
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule
+                .onAllNodesWithTag(
+                    "launcher-home-editor-fullscreen",
+                    useUnmergedTree = true,
+                )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeRule
+            .onAllNodesWithText("Settings", useUnmergedTree = true)[0]
+            .performClick()
+        composeRule
+            .onNodeWithText("App drawer", useUnmergedTree = true)
+            .performClick()
+        composeRule
+            .onNodeWithTag(settingsActionTag, useUnmergedTree = true)
+            .performScrollTo()
+            .performClick()
+    }
+
+    private fun primaryInstalledApp(
+        launcherApps: LauncherApps,
+        launcherPackageName: String,
+    ): LauncherActivityInfo =
+        launcherApps
+            .getActivityList(null, Process.myUserHandle())
+            .first { app -> app.componentName.packageName != launcherPackageName }
+
+    private fun inventoryKey(app: LauncherActivityInfo): String =
+        app.user.hashCode().toString() + ":" + app.componentName.flattenToString()
 
 
 }
