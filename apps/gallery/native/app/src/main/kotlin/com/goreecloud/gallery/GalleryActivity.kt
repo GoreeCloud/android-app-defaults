@@ -1181,7 +1181,13 @@ class GalleryActivity : Activity() {
         backControl.visibility = if (showBack) View.VISIBLE else View.GONE
         brandMark.visibility = if (showBack) View.GONE else View.VISIBLE
         backControl.contentDescription = "Back to Albums"
-        sortControl.contentDescription = "Sort order: ${sortOrderLabel()}. Double tap to change."
+        backControl.tooltipText = "Back to Albums"
+        val sortLabel = sortOrderLabel()
+        sortControl.contentDescription = "Sort order: $sortLabel. Double tap to change."
+        sortControl.tooltipText = "Sort: $sortLabel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            sortControl.stateDescription = sortLabel
+        }
         searchField.hint = when {
             destination == GalleryDestination.PHOTOS -> "Search photos"
             destination == GalleryDestination.VIDEOS -> "Search videos"
@@ -4618,7 +4624,7 @@ class GalleryActivity : Activity() {
             settingActionRow(
                 title = "Clear cache",
                 subtitle = "Clears the current in-memory thumbnail cache. Photos and videos are never deleted.",
-                actionIcon = R.drawable.ic_gallery_reset,
+                actionIcon = R.drawable.ic_gallery_clear_cache,
                     actionDescription = "Clear cache",
             ) {
                 thumbnailCache.evictAll()
@@ -6132,6 +6138,7 @@ class GalleryActivity : Activity() {
         searchControl.setImageResource(R.drawable.ic_gallery_search)
         searchControl.setColorFilter(primaryTextColor())
         searchControl.contentDescription = "Search the current Gallery destination"
+        searchControl.tooltipText = "Search the current Gallery destination"
         searchControl.visibility = View.VISIBLE
         (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
             ?.hideSoftInputFromWindow(searchField.windowToken, 0)
