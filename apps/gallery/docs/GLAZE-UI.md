@@ -132,13 +132,25 @@ The full-screen media viewer receives a restrained Overlay treatment in `gc.14`:
 
 - the viewer toolbar uses the semantic muted Glaze surface rather than a separate branded gradient so controls remain subordinate to the media;
 - the bottom action area uses a rounded-top muted Glaze overlay with a restrained semantic outline;
-- visible viewer actions use 48dp comfortable targets and retain their existing Android selection feedback and content descriptions;
+- visible viewer actions use compact icon/glyph controls inside 48dp comfortable targets, retain Android selection feedback, content descriptions, and tooltips, and keep destructive actions semantically distinct;
 - the compact photo view-options control presents Fit, Fill, a bounded 2× zoom preset, and Reset zoom when applicable; pinch zoom and drag-to-pan remain direct media gestures, while the explicit menu preserves a discoverable non-pinch zoom/reset path;
 - photos and videos remain unframed primary content; the design system is applied to chrome rather than placed over the media as decorative cards;
 - delete and other destructive operations retain their existing behavior and confirmation requirements;
 - no blur, remote asset, analytics, tracking, advertising, or network dependency is added.
 
 The media viewer intentionally uses a quieter Glaze treatment than Settings or browsing navigation. GoreeCloud identity should be recognizable in the controls without competing with the user’s photo or video.
+
+## Icon-first action controls
+
+Gallery uses icon/glyph controls for persistent, repeated action chrome when the meaning can remain clear through platform-familiar iconography plus accessibility semantics. This includes full-screen viewer actions, multi-selection actions, Trash Refresh/selection/viewer actions, photo-editor transforms, and compact Settings action affordances.
+
+The icon-first rule does not remove labels where the text itself is the value. Crop ratios such as **1:1**, **4:3**, and **16:9**, preference values, titles, explanatory copy, and ambiguous menu choices remain textual. Every icon-only action must preserve a descriptive accessibility name, a discoverability tooltip where Android supports it, at least a 48dp comfortable interaction target for persistent chrome, visible enabled/disabled state, and explicit selected/toggled semantics where applicable. Destructive actions must not rely on the trash-can glyph alone; they retain semantic danger treatment and Android-owned confirmation where required.
+
+The photo editor uses a two-row control composition on compact phones instead of a horizontally scrolling strip of long labels: transform actions are equal-width glyph controls and aspect presets are short value labels. The active crop preset receives explicit selected styling and state semantics; dragging to a custom crop clears that preset state. Settings action rows keep the complete row title/subtitle as the semantic label while the trailing action becomes a compact glyph. This reduces visual density without turning the interface into unlabeled mystery icons.
+
+Persistent action chrome must use first-party vector geometry rather than Unicode/font pseudo-glyphs when a governed icon exists or can be provided. Viewer previous/next controls, media play overlays, selection checks, overflow affordances, and navigation chevrons therefore use vector assets. First-party icon controls should also provide bounded press feedback that follows the control geometry without replacing selected or destructive semantics. Header title and subtitle text must remain single-line and ellipsized when needed so compact-width action geometry stays stable. Album cards, album quick-access chips, media-access actions, and inline-search dismissal participate in the same bounded feedback contract. Stateful icon surfaces must expose non-color state semantics through Android selection/state-description APIs when supported, including active viewer toggles, selected media tiles, selected dialog choices, and selected bulk-action states. Permission and recovery actions may use glyph-plus-label controls rather than icon-only controls when the visible text is materially important to authorization clarity; Gallery's media-access action follows this exception with contextual first-party glyphs.
+
+Settings state presentation distinguishes actions, choices, and booleans: actions use compact glyph affordances; choices keep the current textual value and add a directional chevron while exposing the value as state semantics; boolean rows use vector on/off switch indicators while the row itself exposes On/Off/Unavailable through Android state descriptions. Empty library/search/Trash surfaces use a raised semantic icon card with the icon treated as decorative because the adjacent title/message remain the accessibility authority.
 
 ## Transient surfaces and dialogs
 
