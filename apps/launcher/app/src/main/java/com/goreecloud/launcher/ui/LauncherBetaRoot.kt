@@ -61,6 +61,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
@@ -68,6 +70,7 @@ import androidx.compose.ui.draganddrop.DragAndDropTransferData
 import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -6882,7 +6885,7 @@ private fun AppDrawerSurface(
                                                     } else {
                                                         MaterialTheme.colorScheme.primary
                                                     },
-                                                    size = 15.dp,
+                                                    iconSize = 15.dp,
                                                 )
                                             }
                                         } else {
@@ -6925,7 +6928,7 @@ private fun AppDrawerSurface(
                                         } else {
                                             drawerSecondaryColor
                                         },
-                                        size = 17.dp,
+                                        iconSize = 17.dp,
                                     )
                                 }
                             }
@@ -10408,7 +10411,7 @@ private fun DrawerPinnedMark(
             GlazePopupActionGlyph(
                 symbol = GlazePopupActionSymbol.PIN,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                size = 11.dp,
+                iconSize = 11.dp,
             )
         }
     }
@@ -11233,7 +11236,7 @@ internal fun LauncherFolderContentsSheet(
                                                                             GlazePopupActionSymbol.CHECK,
                                                                         color = MaterialTheme
                                                                             .colorScheme.onPrimary,
-                                                                        size = 12.dp,
+                                                                        iconSize = 12.dp,
                                                                     )
                                                                 }
                                                             }
@@ -12106,9 +12109,9 @@ private enum class GlazePopupActionSymbol {
 private fun GlazePopupActionGlyph(
     symbol: GlazePopupActionSymbol,
     color: Color,
-    size: Dp = 22.dp,
+    iconSize: Dp = 22.dp,
 ) {
-    Canvas(Modifier.size(size)) {
+    Canvas(Modifier.size(iconSize)) {
         val u = size.minDimension
         val w = 1.8.dp.toPx()
         fun segment(x1: Float, y1: Float, x2: Float, y2: Float) {
