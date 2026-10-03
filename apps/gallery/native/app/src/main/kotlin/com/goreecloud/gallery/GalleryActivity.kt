@@ -4651,8 +4651,17 @@ class GalleryActivity : Activity() {
             text = "Step ${step + 1} of ${GallerySetupPreferences.STEP_COUNT}"
             setTextColor(secondaryTextColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-            setPadding(0, dp(4), 0, dp(14))
+            setPadding(0, dp(4), 0, dp(7))
         })
+        panel.addView(
+            setupProgressRail(step),
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(6),
+            ).apply {
+                bottomMargin = dp(14)
+            },
+        )
 
         val title: String
         val body: String
@@ -4713,55 +4722,48 @@ class GalleryActivity : Activity() {
         }
 
         if (step > 0) {
-            controls.addView(TextView(this).apply {
-                text = "Back"
-                gravity = Gravity.CENTER
-                minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-                setPadding(dp(14), 0, dp(14), 0)
-                setTextColor(primaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                setTypeface(typeface, Typeface.BOLD)
-                isClickable = true
-                isFocusable = true
-                contentDescription = "Back in Gallery setup"
-                setOnClickListener {
+            controls.addView(
+                setupIconAction(
+                    R.drawable.ic_gallery_chevron_left,
+                    "Back in Gallery setup",
+                    emphasized = false,
+                ) {
                     if (!replay) setupPreferences.setOnboardingStep(step - 1)
                     showSetupWizard(replay = replay, requestedStep = step - 1)
-                }
-            })
+                },
+                LinearLayout.LayoutParams(
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ).apply {
+                    marginEnd = dp(6)
+                },
+            )
         } else if (replay) {
-            controls.addView(TextView(this).apply {
-                text = "Return"
-                gravity = Gravity.CENTER
-                minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-                setPadding(dp(14), 0, dp(14), 0)
-                setTextColor(primaryTextColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                setTypeface(typeface, Typeface.BOLD)
-                isClickable = true
-                isFocusable = true
-                contentDescription = "Return to Gallery"
-                setOnClickListener {
+            controls.addView(
+                setupIconAction(
+                    R.drawable.ic_gallery_close,
+                    "Return to Gallery",
+                    emphasized = false,
+                ) {
                     setupDialog?.dismiss()
                     setupDialog = null
-                }
-            })
+                },
+                LinearLayout.LayoutParams(
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ).apply {
+                    marginEnd = dp(6)
+                },
+            )
         }
 
-        controls.addView(TextView(this).apply {
-            val last = step == GallerySetupPreferences.STEP_COUNT - 1
-            text = if (last) "Finish" else "Continue"
-            gravity = Gravity.CENTER
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-            setPadding(dp(16), 0, dp(16), 0)
-            setTextColor(accentColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(withAlpha(accentColor(), 0.12f), 16)
-            isClickable = true
-            isFocusable = true
-            contentDescription = if (last) "Finish Gallery setup" else "Continue Gallery setup"
-            setOnClickListener {
+        val last = step == GallerySetupPreferences.STEP_COUNT - 1
+        controls.addView(
+            setupIconAction(
+                if (last) R.drawable.ic_gallery_check_white else R.drawable.ic_gallery_chevron_right,
+                if (last) "Finish Gallery setup" else "Continue Gallery setup",
+                emphasized = true,
+            ) {
                 if (last) {
                     if (!replay) {
                         setupPreferences.completeSetup()
@@ -4773,8 +4775,12 @@ class GalleryActivity : Activity() {
                     if (!replay) setupPreferences.setOnboardingStep(step + 1)
                     showSetupWizard(replay = replay, requestedStep = step + 1)
                 }
-            }
-        })
+            },
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ),
+        )
         panel.addView(
             controls,
             LinearLayout.LayoutParams(
@@ -4800,6 +4806,52 @@ class GalleryActivity : Activity() {
                 }
                 dialog.show()
             }
+    }
+
+    private fun setupProgressRail(step: Int): LinearLayout = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        repeat(GallerySetupPreferences.STEP_COUNT) { index ->
+            addView(
+                View(context).apply {
+                    background = roundedSurface(
+                        if (index <= step) accentColor() else withAlpha(primaryTextColor(), 0.10f),
+                        3,
+                    )
+                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                },
+                LinearLayout.LayoutParams(0, dp(4), 1f).apply {
+                    if (index > 0) marginStart = dp(6)
+                },
+            )
+        }
+    }
+
+    private fun setupIconAction(
+        iconResource: Int,
+        description: String,
+        emphasized: Boolean,
+        onClick: () -> Unit,
+    ): ImageView = ImageView(this).apply {
+        setImageResource(iconResource)
+        setColorFilter(if (emphasized) accentColor() else primaryTextColor())
+        scaleType = ImageView.ScaleType.CENTER_INSIDE
+        setPadding(dp(13), dp(13), dp(13), dp(13))
+        background = roundedSurface(
+            if (emphasized) withAlpha(accentColor(), 0.14f)
+            else withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.055f),
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            if (emphasized) accentColor() else primaryTextColor(),
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
+        setOnClickListener { onClick() }
     }
 
     private fun settingsSectionHeader(label: String): TextView = TextView(this).apply {
