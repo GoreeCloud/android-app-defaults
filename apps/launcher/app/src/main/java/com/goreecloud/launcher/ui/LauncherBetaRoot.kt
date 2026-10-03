@@ -10547,11 +10547,13 @@ private fun LauncherAppTile(
                 onLongClick = { onLongClick(tileBounds) },
             )
             .semantics {
-                stateDescription = when {
-                    pinnedInDrawer && lockedByLauncher -> "Pinned in Apps. App Lock enabled"
-                    pinnedInDrawer -> "Pinned in Apps"
-                    lockedByLauncher -> "App Lock enabled"
-                    else -> null
+                when {
+                    pinnedInDrawer && lockedByLauncher ->
+                        stateDescription = "Pinned in Apps. App Lock enabled"
+                    pinnedInDrawer ->
+                        stateDescription = "Pinned in Apps"
+                    lockedByLauncher ->
+                        stateDescription = "App Lock enabled"
                 }
             }
             .padding(horizontal = 2.dp, vertical = 2.dp),
@@ -10731,11 +10733,13 @@ private fun LauncherAppListRow(
                 onLongClick = { onLongClick(rowBounds) },
             )
             .semantics {
-                stateDescription = when {
-                    pinnedInDrawer && lockedByLauncher -> "Pinned in Apps. App Lock enabled"
-                    pinnedInDrawer -> "Pinned in Apps"
-                    lockedByLauncher -> "App Lock enabled"
-                    else -> null
+                when {
+                    pinnedInDrawer && lockedByLauncher ->
+                        stateDescription = "Pinned in Apps. App Lock enabled"
+                    pinnedInDrawer ->
+                        stateDescription = "Pinned in Apps"
+                    lockedByLauncher ->
+                        stateDescription = "App Lock enabled"
                 }
             }
             .padding(horizontal = 8.dp, vertical = 6.dp),
