@@ -10678,7 +10678,6 @@ private fun LauncherHiddenAppsManagerSheet(
                         items = hiddenApps,
                         key = { app -> app.workspaceKey() },
                     ) { app ->
-                        val icon = rememberLauncherAppIcon(app)
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
