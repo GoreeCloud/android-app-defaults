@@ -97,9 +97,9 @@ enum class GalleryNavigationDisplayMode(
     val showIcon: Boolean,
     val showLabel: Boolean,
 ) {
-    ICONS_ONLY("icons", "Icons only", showIcon = true, showLabel = false),
-    TEXT_ONLY("text", "Text only", showIcon = false, showLabel = true),
-    ICONS_AND_TEXT("both", "Icons & text", showIcon = true, showLabel = true),
+    ICONS_ONLY("icons", "Glyphs only", showIcon = true, showLabel = false),
+    TEXT_ONLY("text", "Legacy text preference", showIcon = true, showLabel = false),
+    ICONS_AND_TEXT("both", "Legacy combined preference", showIcon = true, showLabel = false),
     ;
 
     companion object {
