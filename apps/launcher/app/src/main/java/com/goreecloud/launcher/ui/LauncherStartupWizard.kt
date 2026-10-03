@@ -721,6 +721,14 @@ private fun WizardSearchPreview(
     }
 }
 
+private enum class WizardGestureCue(
+    val label: String,
+) {
+    APPS("Apps"),
+    SEARCH("Search"),
+    EDIT("Edit"),
+}
+
 @Composable
 private fun WizardGestureStrip() {
     Surface(
@@ -732,11 +740,7 @@ private fun WizardGestureStrip() {
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+            WizardGestureCue.entries.forEach { cue ->
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
@@ -744,15 +748,97 @@ private fun WizardGestureStrip() {
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
+                    Row(
                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        WizardGestureCueGlyph(
+                            cue = cue,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.size(5.dp))
+                        Text(
+                            cue.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureCueGlyph(
+    cue: WizardGestureCue,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = StrokeCap.Round
+        when (cue) {
+            WizardGestureCue.APPS,
+            WizardGestureCue.SEARCH -> {
+                val up = cue == WizardGestureCue.APPS
+                val tipY = if (up) u * 0.18f else u * 0.82f
+                val baseY = if (up) u * 0.76f else u * 0.24f
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, baseY),
+                    Offset(u * 0.50f, tipY),
+                    stroke,
+                    cap = cap,
+                )
+                val armY = if (up) u * 0.38f else u * 0.62f
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, tipY),
+                    Offset(u * 0.30f, armY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, tipY),
+                    Offset(u * 0.70f, armY),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            WizardGestureCue.EDIT -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.19f,
+                    center = Offset(u * 0.50f, u * 0.40f),
+                    style = Stroke(stroke),
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, u * 0.58f),
+                    Offset(u * 0.50f, u * 0.86f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.37f, u * 0.74f),
+                    Offset(u * 0.50f, u * 0.86f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.63f, u * 0.74f),
+                    Offset(u * 0.50f, u * 0.86f),
+                    stroke,
+                    cap = cap,
+                )
             }
         }
     }

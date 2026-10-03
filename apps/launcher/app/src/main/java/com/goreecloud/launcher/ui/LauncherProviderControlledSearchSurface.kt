@@ -1822,21 +1822,20 @@ private fun LauncherGlazeSearchResult(
                             )
                         }
                     }
-                    Text(
-                        when {
-                            isContact -> "View"
-                            result.action is LauncherCopyTextSearchAction -> "Copy"
-                            else -> "Open"
-                        },
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
+                    LauncherSearchResultActionButton(
+                        result = result,
+                        isContact = isContact,
+                        onClick = onActivate,
                     )
                 }
             }
             if (isContact && number != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.OutlinedButton(
+                Row(
+                    modifier = Modifier.padding(top = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    LauncherContactQuickActionButton(
+                        action = LauncherContactQuickAction.CALL,
                         onClick = {
                             onOpenSearchUri(
                                 LauncherOpenUriSearchAction(
@@ -1845,9 +1844,9 @@ private fun LauncherGlazeSearchResult(
                                 ),
                             )
                         },
-                        modifier = Modifier.heightIn(min = 40.dp),
-                    ) { Text("Call") }
-                    androidx.compose.material3.OutlinedButton(
+                    )
+                    LauncherContactQuickActionButton(
+                        action = LauncherContactQuickAction.MESSAGE,
                         onClick = {
                             onOpenSearchUri(
                                 LauncherOpenUriSearchAction(
@@ -1856,8 +1855,183 @@ private fun LauncherGlazeSearchResult(
                                 ),
                             )
                         },
-                        modifier = Modifier.heightIn(min = 40.dp),
-                    ) { Text("Message") }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private enum class LauncherSearchResultActionSymbol {
+    OPEN,
+    COPY,
+    VIEW,
+}
+
+@Composable
+private fun LauncherSearchResultActionButton(
+    result: LauncherSearchResult,
+    isContact: Boolean,
+    onClick: () -> Unit,
+) {
+    val symbol = when {
+        isContact -> LauncherSearchResultActionSymbol.VIEW
+        result.action is LauncherCopyTextSearchAction -> LauncherSearchResultActionSymbol.COPY
+        else -> LauncherSearchResultActionSymbol.OPEN
+    }
+    val description = when (symbol) {
+        LauncherSearchResultActionSymbol.VIEW -> "View " + result.title
+        LauncherSearchResultActionSymbol.COPY -> "Copy " + result.title
+        LauncherSearchResultActionSymbol.OPEN -> "Open " + result.title
+    }
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { contentDescription = description },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.44f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherSearchResultActionGlyph(
+                symbol = symbol,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchResultActionGlyph(
+    symbol: LauncherSearchResultActionSymbol,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when (symbol) {
+            LauncherSearchResultActionSymbol.OPEN,
+            LauncherSearchResultActionSymbol.VIEW -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.50f),
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.50f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.54f, u * 0.30f),
+                    androidx.compose.ui.geometry.Offset(u * 0.74f, u * 0.50f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.74f, u * 0.50f),
+                    androidx.compose.ui.geometry.Offset(u * 0.54f, u * 0.70f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            LauncherSearchResultActionSymbol.COPY -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.28f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.46f, u * 0.52f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.12f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.46f, u * 0.52f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+            }
+        }
+    }
+}
+
+private enum class LauncherContactQuickAction {
+    CALL,
+    MESSAGE,
+}
+
+@Composable
+private fun LauncherContactQuickActionButton(
+    action: LauncherContactQuickAction,
+    onClick: () -> Unit,
+) {
+    val description = when (action) {
+        LauncherContactQuickAction.CALL -> "Call contact"
+        LauncherContactQuickAction.MESSAGE -> "Message contact"
+    }
+    val tint = MaterialTheme.colorScheme.primary
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { contentDescription = description },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.095f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                when (action) {
+                    LauncherContactQuickAction.CALL -> {
+                        drawLine(
+                            color = tint,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.24f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.76f),
+                            strokeWidth = stroke * 1.45f,
+                            cap = cap,
+                        )
+                        drawLine(
+                            color = tint,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.22f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.18f),
+                            strokeWidth = stroke * 1.30f,
+                            cap = cap,
+                        )
+                        drawLine(
+                            color = tint,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.66f, u * 0.82f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.80f, u * 0.76f),
+                            strokeWidth = stroke * 1.30f,
+                            cap = cap,
+                        )
+                    }
+                    LauncherContactQuickAction.MESSAGE -> {
+                        drawRoundRect(
+                            color = tint,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.20f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.50f),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.14f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            color = tint,
+                            start = androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.70f),
+                            end = androidx.compose.ui.geometry.Offset(u * 0.26f, u * 0.84f),
+                            strokeWidth = stroke,
+                            cap = cap,
+                        )
+                    }
                 }
             }
         }
@@ -2573,7 +2747,7 @@ private fun LauncherSearchSourceManager(
                         )
                         Text(
                             if (ready) {
-                                "Local stays local · connected sources are optional."
+                                "Local stays local · connected is opt-in."
                             } else {
                                 "Loading source controls…"
                             },
@@ -2583,18 +2757,26 @@ private fun LauncherSearchSourceManager(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    TextButton(
-                        onClick = onReset,
+                    LauncherSearchSourceToolbarButton(
+                        symbol = LauncherSearchSourceToolbarSymbol.RESET,
+                        description = "Reset Search Sources",
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
+                        onClick = onReset,
+                    )
+                    LauncherSearchSourceToolbarButton(
+                        symbol = if (reorderMode) {
+                            LauncherSearchSourceToolbarSymbol.DONE
+                        } else {
+                            LauncherSearchSourceToolbarSymbol.ORDER
+                        },
+                        description = if (reorderMode) {
+                            "Finish reordering Search Sources"
+                        } else {
+                            "Reorder Search Sources"
+                        },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
-                    }
+                        onClick = { reorderMode = !reorderMode },
+                    )
                 }
             }
         }
@@ -2989,7 +3171,12 @@ private fun LauncherSearchSourceManager(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.End,
                                             ) {
-                                                TextButton(
+                                                LauncherSearchSourceToolbarButton(
+                                                    symbol =
+                                                        LauncherSearchSourceToolbarSymbol.EARLIER,
+                                                    description =
+                                                        "Move " + option.displayName + " earlier",
+                                                    enabled = ready && index > 0,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3000,11 +3187,16 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled = ready && index > 0,
-                                                ) {
-                                                    Text("↑  Earlier")
-                                                }
-                                                TextButton(
+                                                )
+                                                LauncherSearchSourceToolbarButton(
+                                                    symbol =
+                                                        LauncherSearchSourceToolbarSymbol.LATER,
+                                                    description =
+                                                        "Move " + option.displayName + " later",
+                                                    enabled =
+                                                        ready &&
+                                                            index in 0 until
+                                                                controls.orderedOptions.lastIndex,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3015,19 +3207,143 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled =
-                                                        ready &&
-                                                            index in 0 until
-                                                                controls.orderedOptions.lastIndex,
-                                                ) {
-                                                    Text("↓  Later")
-                                                }
+                                                )
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private enum class LauncherSearchSourceToolbarSymbol {
+    RESET,
+    ORDER,
+    DONE,
+    EARLIER,
+    LATER,
+}
+
+@Composable
+private fun LauncherSearchSourceToolbarButton(
+    symbol: LauncherSearchSourceToolbarSymbol,
+    description: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val tint = if (enabled) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.40f)
+    }
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { contentDescription = description },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.09f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                when (symbol) {
+                    LauncherSearchSourceToolbarSymbol.RESET -> {
+                        drawArc(
+                            color = tint,
+                            startAngle = 35f,
+                            sweepAngle = 285f,
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.16f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.68f, u * 0.68f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.18f),
+                            androidx.compose.ui.geometry.Offset(u * 0.41f, u * 0.17f),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.18f),
+                            androidx.compose.ui.geometry.Offset(u * 0.27f, u * 0.37f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                    LauncherSearchSourceToolbarSymbol.ORDER -> {
+                        listOf(0.30f, 0.50f, 0.70f).forEach { y ->
+                            drawCircle(
+                                color = tint,
+                                radius = u * 0.04f,
+                                center = androidx.compose.ui.geometry.Offset(u * 0.23f, u * y),
+                            )
+                            drawLine(
+                                color = tint,
+                                start = androidx.compose.ui.geometry.Offset(u * 0.38f, u * y),
+                                end = androidx.compose.ui.geometry.Offset(u * 0.80f, u * y),
+                                strokeWidth = stroke,
+                                cap = cap,
+                            )
+                        }
+                    }
+                    LauncherSearchSourceToolbarSymbol.DONE -> {
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.52f),
+                            androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.74f),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.74f),
+                            androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.28f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                    LauncherSearchSourceToolbarSymbol.EARLIER,
+                    LauncherSearchSourceToolbarSymbol.LATER -> {
+                        val up = symbol == LauncherSearchSourceToolbarSymbol.EARLIER
+                        val tipY = if (up) u * 0.22f else u * 0.78f
+                        val baseY = if (up) u * 0.72f else u * 0.28f
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, baseY),
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                            stroke,
+                            cap = cap,
+                        )
+                        val armY = if (up) u * 0.40f else u * 0.60f
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                            androidx.compose.ui.geometry.Offset(u * 0.30f, armY),
+                            stroke,
+                            cap = cap,
+                        )
+                        drawLine(
+                            tint,
+                            androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                            androidx.compose.ui.geometry.Offset(u * 0.70f, armY),
+                            stroke,
+                            cap = cap,
+                        )
                     }
                 }
             }

@@ -1,6 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
-## October 2, 2026 — compact Search, clean starter Home, and visual onboarding candidate
+## October 2, 2026 — Search action and onboarding glyph consistency candidate
+
+A follow-on Development polish pass removes remaining text-heavy action affordances and font-dependent pseudo-glyphs from the newly compact Search/onboarding surfaces. Ordinary Universal Search rows now use compact Launcher-owned vector action controls for Open/View/Copy; contact Call/Message actions use dedicated glyph buttons instead of text buttons; Search Sources Reset/Order and per-source Earlier/Later controls use accessible vector actions; and onboarding gesture cues use Launcher-owned swipe/hold geometry instead of Unicode arrows.
+
+The change is presentation-only. Existing Search activation semantics, contact dial/message intents, Search Source ordering/reset behavior, provider execution, Android permissions, query-retention policy, onboarding decisions, workspace authority, and network boundaries remain unchanged.
+
+**Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. Representative-device visual retest remains required after merge.
+
+## October 2, 2026 — compact Search, clean starter Home, and visual onboarding
 
 Representative-device CI-661 screenshots and owner feedback exposed a density/first-run tranche that remained outside the previous visual corrections. Universal Search shortcut results still consumed large vertical cards; Search Sources repeated its title in an oversized card and kept the large Suggestion tabs control outside the scrolling source list; fresh starter Home still inherited automatic first-party cards; and onboarding presented several operational concepts as long documentation paragraphs.
 
@@ -12,7 +20,7 @@ The three-step first-run wizard now uses a top progress rail, semantic accent/co
 
 A follow-on refinement pass tightens ordinary result section headers, converts application matches into compact two-column icon/name rows, compacts shortcut panels and fallback rows, collapses Search Source rows to a two-line name/status-or-summary hierarchy, and removes the nested inner card layer from grouped Search Sources while preserving comfortable action targets. The setup card is narrower and flatter, now shows an explicit **Step n of 3** label, replaces three full-width automatic-Home radio cards with compact **None / Recent / Most used** visual choices, and replaces six large Grid/Dock buttons with two compact segmented strips. Search-mode presentation remains visual rather than paragraph-led. The post-setup Home hint mirrors that language with a gesture strip and three short action cues instead of a multi-paragraph instruction block. Android runtime setup is consolidated into one deterministic established-state fixture so first-run provisioning cannot race lifecycle/spatial tests.
 
-**Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. A new representative-device APK and visual retest remain open; protected Development signing/update continuity, accessibility/large-text/form-factor acceptance, Release Candidate, Production, and Stable remain separate gates.
+**Integration evidence:** protected PR #194 merged exact validated head `ef21e27304071c332ec72b2c1497332c6be2dbf9` as monorepo main `a318fd982d0fa7ba437cca1a2a1fad5fcfe16be3`. Mandatory app migration provenance #660, Android Development Foundation #1152, Migrated Android apps CI #686, and Protected promotion #640 all succeeded on the exact PR head. The migrated-app lane passed Launcher validation/JVM/lint/build, Room schema verification, Development APK staging, the complete Android 16 runtime suite, transition-performance diagnostics, and the required gate. Exact-head sidecar artifact `11250649680` contains package `com.goreecloud.launcher.dev`, version `0.1.0-dev`, versionCode `1000686`, APK SHA-256 `53cf5ae8864b98a61c8fa5309f19096434c9bd4fab652ee85adcb9b381f5c7bd`, and declares `ci-debug-installability-only` signing with update-in-place continuity not established. CI-686 is staged in the canonical GoreeCloud Drive Development delivery area for representative-device visual retesting. **Acceptance boundary:** Development integration only. Protected Development signing/update continuity, accessibility/large-text/form-factor acceptance, Release Candidate, Production, and Stable remain separate gates.
 
 ## October 2, 2026 — representative-device visual correction after CI-649
 
