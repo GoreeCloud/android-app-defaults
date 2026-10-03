@@ -953,6 +953,13 @@ class LauncherPreferencesRepository(
         }
     }
 
+    /** Reveal every app currently hidden by Launcher without touching package/workspace state. */
+    fun clearHiddenApps(): Job = scope.launch {
+        dataStore.edit { values ->
+            values.remove(Keys.hiddenAppKeys)
+        }
+    }
+
     fun setDrawerAppPinned(appKey: String, pinned: Boolean): Job = scope.launch {
         if (appKey.isBlank()) return@launch
         dataStore.edit { values ->
@@ -973,6 +980,14 @@ class LauncherPreferencesRepository(
                 )
                 values[Keys.drawerPinnedAppOrder] = LauncherDrawerPinnedOrder.encode(reconciled)
             }
+        }
+    }
+
+    /** Clear App Drawer pin membership and its presentation order in one atomic edit. */
+    fun clearDrawerPinnedApps(): Job = scope.launch {
+        dataStore.edit { values ->
+            values.remove(Keys.drawerPinnedAppKeys)
+            values.remove(Keys.drawerPinnedAppOrder)
         }
     }
 

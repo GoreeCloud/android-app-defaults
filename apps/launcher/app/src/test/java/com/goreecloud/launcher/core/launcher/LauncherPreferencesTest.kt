@@ -106,6 +106,60 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun clearHiddenAppsRevealsAllProfilesWithoutChangingDrawerPins() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("clear-hidden-apps.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            val personal = "0:com.example/.Main"
+            val work = "10:com.example/.Main"
+
+            repository.setAppHidden(personal, true).join()
+            repository.setAppHidden(work, true).join()
+            repository.setDrawerAppPinned(personal, true).join()
+
+            repository.clearHiddenApps().join()
+
+            assertEquals(emptySet<String>(), repository.hiddenAppKeys.first())
+            assertEquals(setOf(personal), repository.drawerPinnedAppKeys.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
+    fun clearDrawerPinnedAppsClearsMembershipAndOrderWithoutChangingHiddenState() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("clear-drawer-pins.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            val personal = "0:com.example/.Main"
+            val work = "10:com.example/.Main"
+
+            repository.setDrawerAppPinned(personal, true).join()
+            repository.setDrawerAppPinned(work, true).join()
+            repository.setDrawerPinnedAppOrder(listOf(work, personal)).join()
+            repository.setAppHidden(work, true).join()
+
+            repository.clearDrawerPinnedApps().join()
+
+            assertEquals(emptySet<String>(), repository.drawerPinnedAppKeys.first())
+            assertEquals(emptyList<String>(), repository.drawerPinnedAppOrder.first())
+            assertEquals(setOf(work), repository.hiddenAppKeys.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun hiddenHomeSuggestionsPersistIndependentlyFromManualPlacementPreferences() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
