@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -281,7 +282,7 @@ internal fun LauncherAppLockSettingsContent(
         return
     }
 
-    SettingsReadOnlyRow(
+    AppLockReadOnlyRow(
         "Credential",
         when (state.credentialType) {
             LauncherAppLockCredentialType.PIN -> "4–6 digit PIN"
@@ -289,7 +290,7 @@ internal fun LauncherAppLockSettingsContent(
             null -> "Unavailable"
         },
     )
-    SettingsReadOnlyRow(
+    AppLockReadOnlyRow(
         "Locked apps",
         state.lockedAppKeys.size.toString(),
     )
@@ -370,6 +371,34 @@ internal fun LauncherAppLockSettingsContent(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+@Composable
+private fun AppLockReadOnlyRow(
+    label: String,
+    value: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 @Composable
@@ -514,6 +543,7 @@ private fun AppLockPatternPad(
     enabled: Boolean,
 ) {
     val selected = pattern.mapNotNull { it.digitToIntOrNull() }.filter { it in 0..8 }
+    val primaryColor = MaterialTheme.colorScheme.primary
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -540,7 +570,7 @@ private fun AppLockPatternPad(
                     }
                     selected.zipWithNext().forEach { (from, to) ->
                         drawLine(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = primaryColor,
                             start = center(from),
                             end = center(to),
                             strokeWidth = 3.dp.toPx(),
