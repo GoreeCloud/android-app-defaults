@@ -944,6 +944,7 @@ class RecycleBinActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(this, foreground, 18)
         setOnClickListener { onClick() }
     }
 
@@ -970,6 +971,11 @@ class RecycleBinActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+            18,
+        )
         setOnClickListener { onClick() }
     }
 
