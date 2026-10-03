@@ -540,7 +540,10 @@ class GalleryActivity : Activity() {
         }
         headerTitle = TextView(this).apply {
             setTextColor(primaryTextColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                if (resources.configuration.screenWidthDp < 360) 28f else 32f,
+            )
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
