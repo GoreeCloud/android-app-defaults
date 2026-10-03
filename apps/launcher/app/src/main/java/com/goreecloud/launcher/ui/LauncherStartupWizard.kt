@@ -39,7 +39,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -1039,7 +1042,11 @@ private fun WizardCompactChoiceStrip(
                     onClick = { onSelect(option) },
                     modifier = Modifier
                         .weight(1f)
-                        .heightIn(min = 42.dp),
+                        .heightIn(min = 44.dp)
+                        .semantics {
+                            selected = active
+                            role = Role.RadioButton
+                        },
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                         GlazeMetrics.radiusPill,
                     ),
