@@ -158,7 +158,7 @@ fun LauncherStartupWizard(
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 tonalElevation = 0.dp,
-                shadowElevation = 12.dp,
+                shadowElevation = 6.dp,
             ) {
                 Column(
                     modifier = Modifier
@@ -195,7 +195,7 @@ fun LauncherStartupWizard(
                             Text(
                                 text = stepTitle,
                                 modifier = Modifier.semantics { heading() },
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.SemiBold,
                             )
                             Text(
@@ -883,11 +883,14 @@ fun LauncherHomeHintCard(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.widthIn(max = 620.dp),
+        modifier = modifier.widthIn(max = 560.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 10.dp,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.70f),
+        ),
+        shadowElevation = 4.dp,
     ) {
         Column(
             modifier = Modifier.padding(GlazeMetrics.space3),
@@ -910,8 +913,8 @@ fun LauncherHomeHintCard(
                 symbol = WizardVisualSymbol.GESTURE,
             )
             WizardHintRow(
-                title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the Favorites filter when you want them together.",
+                title = "Organize Apps",
+                summary = "Pin important apps and use Pinned first when you want them together.",
                 symbol = WizardVisualSymbol.APPS,
             )
             Row(
@@ -935,7 +938,7 @@ private fun WizardHintRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
