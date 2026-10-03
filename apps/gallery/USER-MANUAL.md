@@ -36,14 +36,20 @@ The bottom navigation defaults to **Icons only**. In this mode, each glyph is ce
 
 Tap a visible photo or video to open the bounded full-screen viewer.
 
+The viewer now uses compact icon/glyph actions rather than labeled text buttons for its persistent chrome. Long-press/hover tooltips and accessibility names describe each control, selected/toggled states remain exposed, and destructive Delete retains distinct treatment.
+
+The first-use setup also uses icon-first navigation controls with a visible three-step progress rail. Screen titles and explanatory guidance remain textual; Back, Return, Continue, and Finish are exposed as glyph controls with descriptive accessibility names.
+
+Settings choices show the current value with a compact chevron, while boolean Settings use a visual switch glyph instead of a separate On/Off text pill; TalkBack/state semantics still announce the current value. Empty Photos, Albums, Videos, search results, and Trash states use semantic icon cards for quicker visual recognition.
+
 - Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale.
 - For photos, use the viewer's view-options control for **Fit entire photo**, **Fill viewer**, or **Zoom 2×**. You can also pinch from 1× up to 4×; while zoomed, drag the photo to pan. Item-navigation swipes are disabled while zoomed so a pan does not change photos. Choose **Reset zoom** or navigate to another item to return to baseline zoom.
 - Share hands the current content URI to Android with a read-only URI grant.
 - Favorite/Unfavorite changes Gallery's device-local Favorites state.
 - More displays available media details.
 - Delete on Android 11+ routes through Android's system-owned Trash or permanent-delete confirmation according to the current setting.
-- Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled.
-- Slide/Stop runs the photo-only slideshow using the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.
+- Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled. In the editor, Cancel/Save, Rotate left/right, Flip, and Reset are icon controls, while **Original**, **1:1**, **4:3**, and **16:9** remain short textual crop presets because the ratio is the value being chosen.
+- The slideshow control changes between slideshow and pause glyphs while retaining an accessibility label; repeat uses a selected state instead of adding a text checkmark. The photo-only slideshow uses the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.
 
 Image viewing now includes bounded session-local zoom/pan over the existing orientation-aware viewer bitmap, but it is still a Development viewer path rather than unrestricted original-resolution zoom: the underlying decode remains bounded to the current viewport with a 2048px long-edge ceiling. Authorized videos use the native bounded playback surface with Play/Pause, lifecycle-safe pause/resume, and the persisted autoplay/loop preferences; representative-device playback and zoom/pan acceptance remain separate.
 
@@ -51,7 +57,7 @@ Image viewing now includes bounded session-local zoom/pan over the existing orie
 
 Long-press a visible media tile to enter selection mode, then tap additional items to add or remove them.
 
-Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, **Copy** to another authorized folder or **Create & copy** destination while preserving originals, and More/Details when exactly one item is selected.
+Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, **Copy** to another authorized folder or **Create & copy** destination while preserving originals, and More/Details when exactly one item is selected. These persistent selection actions are icon-first; accessible names and tooltips preserve their labels for assistive technology and discovery.
 
 The `0.6.2-dev` in-place selection renderer is physically verified on the representative device: selecting and deselecting no longer causes the previous whole-screen flash.
 
@@ -104,6 +110,7 @@ Ordinary Photos/Albums/Videos media queries continue to exclude trashed items by
 When no selection is active, tap a visible trashed-media tile to open the Trash viewer.
 
 - Use **Previous** and **Next** across the currently loaded trashed-media collection.
+- The viewer uses icon/glyph actions for Back, Restore, permanent Delete, and More while keeping the same accessibility names and Android confirmation behavior.
 - **Restore** asks Android to restore the current item from Trash.
 - **Delete permanently** asks Android to permanently delete the current trashed item.
 - **More** shows the available media details and explicitly identifies the item as being in Android Recycle Bin state.
@@ -112,12 +119,14 @@ The Trash viewer remains a bounded recovery surface. It does not broaden ordinar
 
 ### Selecting trashed items
 
-Long-press a visible Trash tile to enter selection mode, then tap additional items to toggle them. Selection updates resident tiles in place. The current action surface provides:
+Long-press a visible Trash tile to enter selection mode, then tap additional items to toggle them. Selection updates resident tiles in place. The current action surface is icon-first and provides:
 
 - **Select all** — select the currently loaded trashed items.
 - **Restore** — ask Android to restore the selected items from Trash.
 - **Delete permanently** — ask Android to permanently delete the selected trashed items.
 - **Cancel** — clear the current selection.
+
+Each glyph keeps an explicit accessibility label and tooltip; the permanent-delete action keeps destructive styling.
 
 ### Restore
 
@@ -152,7 +161,7 @@ The Trash/Recycle Bin implementation originated in rendered `0.7.1-dev` acceptan
 
 ## Settings
 
-Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, slideshow speed, Favorites/settings import/export (including app-local album pins and slideshow pace), cache clearing, and the Trash versus permanent-delete choice on supported Android versions.
+Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, slideshow speed, Favorites/settings import/export (including app-local album pins and slideshow pace), cache clearing, and the Trash versus permanent-delete choice on supported Android versions. Action rows such as Clear, Import/Export, Reset, and Replay setup use compact trailing glyphs; the full row title and description remain the accessibility and semantic label.
 
 Video autoplay and looping are active viewer preferences. **Animate GIFs in thumbnails** is also active under Playback; it is off by default and, when enabled, animates authorized GIF cards/covers while they are visible. Automatic empty-folder cleanup remains a compatibility-only settings field and is not shown as an active control.
 
