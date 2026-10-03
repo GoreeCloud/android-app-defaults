@@ -119,7 +119,7 @@ class LauncherStartupWizardRuntimeTest {
         composeRule.onNodeWithText("Folders")
             .performScrollTo()
             .assertIsDisplayed()
-        composeRule.onNodeWithText("Private Search")
+        composeRule.onNodeWithText("App Lock")
             .performScrollTo()
             .assertIsDisplayed()
         composeRule.onNodeWithText("Learn more")
