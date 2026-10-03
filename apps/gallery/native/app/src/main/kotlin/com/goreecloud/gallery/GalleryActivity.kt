@@ -707,7 +707,7 @@ class GalleryActivity : Activity() {
         )
 
         action = TextView(this).apply {
-            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            minimumHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
             gravity = Gravity.CENTER
             setPadding(dp(12), 0, dp(12), 0)
             setTextColor(accentColor())
