@@ -721,7 +721,6 @@ private fun WizardSearchPreview(
     }
 }
 
-@Composable
 private enum class WizardGestureCue {
     SWIPE_UP,
     SWIPE_DOWN,
