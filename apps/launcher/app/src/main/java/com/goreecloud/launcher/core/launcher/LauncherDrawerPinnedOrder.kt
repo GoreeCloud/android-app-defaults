@@ -66,3 +66,56 @@ internal object LauncherDrawerPinnedOrder {
         return reconciled
     }
 }
+
+/**
+ * Device-local custom ordering for App Drawer application identities.
+ *
+ * Unlike Home folders or Room placement, this is presentation metadata only. Keys remain the exact
+ * profile-qualified Launcher workspace identities already used by the drawer and Hidden Apps.
+ */
+internal object LauncherDrawerCustomOrder {
+    fun encode(keys: List<String>): String = LauncherDrawerPinnedOrder.encode(keys)
+
+    fun decode(raw: String?): List<String> = LauncherDrawerPinnedOrder.decode(raw)
+
+    fun reconcile(
+        order: List<String>,
+        availableKeys: Set<String>,
+    ): List<String> {
+        if (availableKeys.isEmpty()) return emptyList()
+        val result = order.filter { it in availableKeys }.distinct().toMutableList()
+        val seen = result.toHashSet()
+        result += availableKeys.asSequence().filterNot(seen::contains).sorted()
+        return result
+    }
+
+    /**
+     * Move one app relative only to peers in its exact Android profile while preserving the slots
+     * occupied by every other profile. This keeps User/Work/private identities independent even
+     * when their keys share one device-local order record.
+     */
+    fun moveWithinProfile(
+        order: List<String>,
+        availableKeys: Set<String>,
+        profileKeys: Set<String>,
+        appKey: String,
+        delta: Int,
+    ): List<String> {
+        val reconciled = reconcile(order, availableKeys).toMutableList()
+        if (delta == 0 || appKey !in profileKeys) return reconciled
+
+        val profileOrder = reconciled.filter { it in profileKeys }.toMutableList()
+        val from = profileOrder.indexOf(appKey)
+        if (from < 0) return reconciled
+        val to = (from + delta).coerceIn(0, profileOrder.lastIndex)
+        if (from == to) return reconciled
+
+        val value = profileOrder.removeAt(from)
+        profileOrder.add(to, value)
+        val replacement = profileOrder.iterator()
+        return reconciled.map { key ->
+            if (key in profileKeys) replacement.next() else key
+        }
+    }
+}
+
