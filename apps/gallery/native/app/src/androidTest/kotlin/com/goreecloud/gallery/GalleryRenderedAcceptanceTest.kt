@@ -91,7 +91,7 @@ class GalleryRenderedAcceptanceTest {
                 controls.all { control ->
                     control.compoundDrawables[0] != null &&
                         control.compoundDrawables[1] == null &&
-                        control.gravity and Gravity.CENTER == Gravity.CENTER &&
+                        (control.gravity and Gravity.CENTER) == Gravity.CENTER &&
                         !control.includeFontPadding
                 },
             )
@@ -518,6 +518,6 @@ class GalleryRenderedAcceptanceTest {
                 view.compoundDrawables[0] != null &&
                 view.compoundDrawables[1] == null &&
                 view.text.isNullOrEmpty() &&
-                view.gravity and Gravity.CENTER == Gravity.CENTER
+                (view.gravity and Gravity.CENTER) == Gravity.CENTER
     }
 }
