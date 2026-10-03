@@ -1,5 +1,20 @@
 # GoreeCloud Gallery Changelogs
 
+## October 3, 2026 — unified navigation glyph system
+
+### Changed
+- Replaced the five mixed-style bottom-navigation symbols with a consistent 24×24 outline glyph family using one stroke language across Photos, Albums, Videos, Trash, and Settings.
+- Preserved the 22dp rendered optical size established by the preceding alignment pass.
+- Added bounded per-destination ripple feedback while keeping selected Glaze material, accessibility state, and icon-only tooltips intact.
+- Advanced the Development identity to `0.8.10-dev`; delivered CI version codes must exceed `2000741`.
+
+### Verification
+- Rendered Android acceptance now checks the shared glyph bounds and ripple feedback on the primary Gallery navigation.
+- Trash rendered acceptance verifies the same ripple treatment on the Android-managed recovery destination.
+
+### Boundary
+This is a presentation/interaction refinement only. It does not change destination authority, media permissions, local-storage scope, network/account access, destructive-operation authority, or release status.
+
 ## October 3, 2026 — bottom-navigation optical alignment
 
 ### Changed
