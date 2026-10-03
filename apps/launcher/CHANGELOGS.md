@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — Theme and Home-page glyph-control follow-up
+
+A stacked Development follow-up continues the Launcher-owned iconography cleanup without changing Home workspace authority. Theme Manager replaces its text **Done** control with a 48 dp semantic completion glyph. The Home page manager replaces text **Add** and **More** actions with first-party 48 dp glyph controls and adds matching leading glyphs for move-earlier, move-later, and delete actions while retaining the existing page ordering, empty-page deletion, layout-lock, and Room mutation boundaries.
+
+The controls remain fully described for accessibility, use Launcher-owned vector geometry rather than font symbols, and preserve the surrounding Glaze material hierarchy. No Android permission, network/provider behavior, App Lock authority, page persistence rule, gesture routing, or Home placement behavior changes in this tranche.
+
+**Acceptance boundary:** this follow-up is stacked on the active App Lock/UI candidate and remains Development-only until its exact head passes the protected validation matrix and is integrated through the governed main path. Representative-device visual/accessibility/large-text/form-factor acceptance and protected Development signing/update continuity remain open.
+
 ## October 3, 2026 — App Lock and representative-device UI polish candidate
 
 Current Development source adds profile-qualified **App Lock** under **Launcher settings → Privacy & security** and the app context menu. Selected apps require Android device authentication before Launcher-originated app or app-shortcut launches proceed. Membership is device-local, keyed by exact profile-qualified Launcher identity, and remains outside portable preference v1. The App Lock manager now includes app search, **All / Locked** filtering, compact profile/package context, and direct lock-state switches; locked apps are also visually identified in Apps grid, compact, list, and category presentation. First-run setup now surfaces App Lock as an everyday control.
