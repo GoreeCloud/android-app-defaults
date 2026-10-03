@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -199,6 +200,41 @@ class GalleryRenderedAcceptanceTest {
             .check(doesNotExist())
         onView(withText("Password protect photos"))
             .check(doesNotExist())
+    }
+
+    @Test
+    fun settingsChoicesAndTogglesExposeCompactGlyphStateAffordances() {
+        activateNavigationControl("Settings")
+
+        activityRule.scenario.onActivity { activity ->
+            val root = activity.findViewById<ViewGroup>(android.R.id.content)
+
+            val densityRow = findByContentDescriptionPrefix(root, "View density.")
+            assertNotNull("View density setting row should be rendered", densityRow)
+            assertTrue(
+                "Choice setting rows should show a compact trailing chevron glyph",
+                checkNotNull(densityRow).containsTrailingCompoundDrawable(),
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                assertTrue(
+                    "Choice setting rows should expose the current value as state",
+                    !densityRow.stateDescription.isNullOrEmpty(),
+                )
+            }
+
+            val roundedRow = findByContentDescriptionPrefix(root, "Rounded-square thumbnails.")
+            assertNotNull("Rounded-square thumbnails setting row should be rendered", roundedRow)
+            assertTrue(
+                "Toggle setting rows should use a vector state indicator instead of On/Off text",
+                checkNotNull(roundedRow).containsImageViewDescendant(),
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                assertTrue(
+                    "Toggle setting rows should expose On/Off state semantics",
+                    roundedRow.stateDescription?.toString() in setOf("On", "Off", "Unavailable"),
+                )
+            }
+        }
     }
 
     @Test
@@ -489,6 +525,33 @@ class GalleryRenderedAcceptanceTest {
             if (view !is TextView || navigationLabel(view) != expectedLabel || !view.isSelected) return false
             return view.contentDescription?.toString() == "$expectedLabel, selected"
         }
+    }
+
+    private fun findByContentDescriptionPrefix(root: View, prefix: String): View? {
+        if (root.contentDescription?.toString()?.startsWith(prefix) == true) return root
+        val group = root as? ViewGroup ?: return null
+        for (index in 0 until group.childCount) {
+            findByContentDescriptionPrefix(group.getChildAt(index), prefix)?.let { return it }
+        }
+        return null
+    }
+
+    private fun View.containsTrailingCompoundDrawable(): Boolean {
+        if (this is TextView && compoundDrawables[2] != null) return true
+        val group = this as? ViewGroup ?: return false
+        for (index in 0 until group.childCount) {
+            if (group.getChildAt(index).containsTrailingCompoundDrawable()) return true
+        }
+        return false
+    }
+
+    private fun View.containsImageViewDescendant(): Boolean {
+        if (this is ImageView) return true
+        val group = this as? ViewGroup ?: return false
+        for (index in 0 until group.childCount) {
+            if (group.getChildAt(index).containsImageViewDescendant()) return true
+        }
+        return false
     }
 
     private fun hasSelectedStateDescription() = object : TypeSafeMatcher<View>() {
