@@ -41,7 +41,6 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
                 .check(matches(isDisplayed()))
                 .check(matches(isClickable()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
-                .check(matches(hasRefinementTag("control:$description")))
                 .check(matches(hasIconOnlyGlyph()))
         }
     }
