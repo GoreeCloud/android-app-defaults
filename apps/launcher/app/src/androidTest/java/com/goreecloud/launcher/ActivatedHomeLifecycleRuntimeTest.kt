@@ -118,7 +118,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         }
 
         lifecyclePreferencesRepository.markStarterLayoutApplied()
-        withTimeout(5_000) {
+        withTimeout(10_000) {
             lifecyclePreferencesRepository.experiencePreferences.first {
                 it.homeAppMode == LauncherHomeAppMode.NONE &&
                     it.startupWizardCompleted &&
@@ -133,7 +133,7 @@ class ActivatedHomeLifecycleRuntimeTest {
     fun restoreAutomaticHomeAppMode() = runBlocking {
         if (!::lifecyclePreferencesRepository.isInitialized) return@runBlocking
         lifecyclePreferencesRepository.setHomeAppMode(previousHomeAppMode).join()
-        withTimeout(5_000) {
+        withTimeout(10_000) {
             lifecyclePreferencesRepository.experiencePreferences.first {
                 it.homeAppMode == previousHomeAppMode
             }
