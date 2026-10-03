@@ -2184,6 +2184,130 @@ private fun LauncherSearchResultCategoryGlyph(
     }
 }
 
+private enum class LauncherSourceUtilityAction {
+    RESET,
+    ORDER,
+    DONE,
+}
+
+@Composable
+private fun LauncherSourceUtilityButton(
+    action: LauncherSourceUtilityAction,
+    contentDescription: String,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    active: Boolean = false,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(44.dp)
+            .semantics { this.contentDescription = contentDescription },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = if (active) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f)
+        },
+        border = BorderStroke(
+            1.dp,
+            if (active) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.045f)
+            },
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherSourceUtilityGlyph(
+                action = action,
+                tint = if (enabled) {
+                    if (active) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.30f)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherSourceUtilityGlyph(
+    action: LauncherSourceUtilityAction,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when (action) {
+            LauncherSourceUtilityAction.RESET -> {
+                drawArc(
+                    color = tint,
+                    startAngle = -45f,
+                    sweepAngle = 270f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.18f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.64f, u * 0.64f),
+                    style = Stroke(width = stroke, cap = cap),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.40f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.44f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            LauncherSourceUtilityAction.ORDER -> {
+                listOf(0.30f, 0.50f, 0.70f).forEach { y ->
+                    drawCircle(
+                        color = tint,
+                        radius = u * 0.035f,
+                        center = androidx.compose.ui.geometry.Offset(u * 0.24f, u * y),
+                    )
+                    drawLine(
+                        tint,
+                        androidx.compose.ui.geometry.Offset(u * 0.38f, u * y),
+                        androidx.compose.ui.geometry.Offset(u * 0.80f, u * y),
+                        stroke,
+                        cap = cap,
+                    )
+                }
+            }
+            LauncherSourceUtilityAction.DONE -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.20f, u * 0.52f),
+                    androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.72f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.72f),
+                    androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.28f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun LauncherBackGlyph(
     tint: Color,
@@ -2622,71 +2746,68 @@ private fun LauncherSearchSourceManager(
         }
 
         item(key = "provider-controls") {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                ),
-                shadowElevation = 0.dp,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = GlazeMetrics.space2,
-                            end = GlazeMetrics.space1,
-                            top = 6.dp,
-                            bottom = 6.dp,
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                Surface(
+                    modifier = Modifier.size(32.dp),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
                 ) {
-                    Surface(
-                        modifier = Modifier.size(34.dp),
-                        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            LauncherPrivacyShieldGlyph(
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            "Private by default",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface,
+                    Box(contentAlignment = Alignment.Center) {
+                        LauncherPrivacyShieldGlyph(
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(19.dp),
                         )
-                        Text(
-                            if (ready) {
-                                "Local stays local · connected sources are optional."
-                            } else {
-                                "Loading source controls…"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    TextButton(
-                        onClick = onReset,
-                        enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
-                        enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
                     }
                 }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                ) {
+                    Text(
+                        "Private by default",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        if (ready) {
+                            "Local stays local · connected sources are optional"
+                        } else {
+                            "Loading source controls…"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                LauncherSourceUtilityButton(
+                    action = LauncherSourceUtilityAction.RESET,
+                    contentDescription = "Reset Search Sources",
+                    onClick = onReset,
+                    enabled = ready,
+                )
+                LauncherSourceUtilityButton(
+                    action = if (reorderMode) {
+                        LauncherSourceUtilityAction.DONE
+                    } else {
+                        LauncherSourceUtilityAction.ORDER
+                    },
+                    contentDescription = if (reorderMode) {
+                        "Finish ordering Search Sources"
+                    } else {
+                        "Order Search Sources"
+                    },
+                    onClick = { reorderMode = !reorderMode },
+                    enabled = ready && controls.orderedOptions.size > 1,
+                    active = reorderMode,
+                )
             }
         }
 
