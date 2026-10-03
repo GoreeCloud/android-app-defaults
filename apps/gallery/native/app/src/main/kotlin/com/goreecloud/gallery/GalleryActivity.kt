@@ -511,7 +511,7 @@ class GalleryActivity : Activity() {
         }
         row.addView(
             brandMark,
-            LinearLayout.LayoutParams(dp(36), dp(36)).apply {
+            LinearLayout.LayoutParams(dp(34), dp(34)).apply {
                 marginEnd = dp(8)
             },
         )
@@ -543,7 +543,7 @@ class GalleryActivity : Activity() {
             setTextColor(primaryTextColor)
             setTextSize(
                 TypedValue.COMPLEX_UNIT_SP,
-                if (resources.configuration.screenWidthDp < 360) 27f else 30f,
+                if (resources.configuration.screenWidthDp < 360) 26f else 29f,
             )
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
@@ -5216,10 +5216,10 @@ class GalleryActivity : Activity() {
 
     private fun settingsPill(label: String, emphasized: Boolean): TextView = TextView(this).apply {
         text = label
-        gravity = Gravity.CENTER
-        minWidth = dp(48)
+        gravity = Gravity.CENTER_VERTICAL or Gravity.END
+        minWidth = dp(44)
         minHeight = dp(32)
-        setPadding(dp(8), 0, dp(6), 0)
+        setPadding(dp(6), 0, dp(2), 0)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.25f)
         setTypeface(typeface, Typeface.BOLD)
         setTextColor(if (emphasized) accentColor() else primaryTextColor())
@@ -5227,12 +5227,8 @@ class GalleryActivity : Activity() {
         compoundDrawableTintList = ColorStateList.valueOf(
             if (emphasized) accentColor() else secondaryTextColor(),
         )
-        compoundDrawablePadding = dp(3)
-        background = roundedSurface(
-            if (emphasized) withAlpha(accentColor(), 0.12f)
-            else withAlpha(primaryTextColor(), if (isNightMode()) 0.09f else 0.045f),
-            13,
-        )
+        compoundDrawablePadding = dp(2)
+        background = null
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
 
@@ -5253,12 +5249,8 @@ class GalleryActivity : Activity() {
         scaleType = ImageView.ScaleType.CENTER_INSIDE
         minimumWidth = dp(48)
         minimumHeight = dp(32)
-        setPadding(dp(8), dp(6), dp(8), dp(6))
-        background = roundedSurface(
-            if (enabled && checked) withAlpha(accentColor(), 0.12f)
-            else withAlpha(primaryTextColor(), if (isNightMode()) 0.09f else 0.045f),
-            13,
-        )
+        setPadding(dp(7), dp(6), dp(7), dp(6))
+        background = null
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
 
