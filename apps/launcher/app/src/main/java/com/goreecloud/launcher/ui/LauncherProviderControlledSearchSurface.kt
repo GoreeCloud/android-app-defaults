@@ -520,7 +520,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 )
                                 TextButton(
                                     onClick = { showSources = true },
-                                    modifier = Modifier.heightIn(min = 44.dp),
+                                    modifier = Modifier.heightIn(min = 48.dp),
                                 ) {
                                     Text("Sources")
                                 }
@@ -839,7 +839,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                     Surface(
                         onClick = { onSelect(option) },
                         modifier = Modifier
-                            .heightIn(min = 44.dp)
+                            .heightIn(min = 48.dp)
                             .semantics {
                                 contentDescription =
                                     "Search suggestion tabs: " + option.displayName
@@ -3241,7 +3241,7 @@ private fun LauncherSearchSourceManager(
                                                             onClick = onChooseFileSearchRoot,
                                                             enabled = ready,
                                                             modifier =
-                                                                Modifier.heightIn(min = 44.dp),
+                                                                Modifier.heightIn(min = 48.dp),
                                                         ) {
                                                             Text(
                                                                 if (fileSearchRoots.isEmpty()) {
