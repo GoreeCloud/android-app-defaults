@@ -97,6 +97,16 @@ class GalleryGlazeContractTest {
     }
 
     @Test
+    fun `video grid protects narrow phones and scales across large screens`() {
+        assertEquals(1, GalleryGlazeContract.videoGridColumns(320))
+        assertEquals(2, GalleryGlazeContract.videoGridColumns(390))
+        assertEquals(3, GalleryGlazeContract.videoGridColumns(600))
+        assertEquals(3, GalleryGlazeContract.videoGridColumns(900))
+        assertEquals(4, GalleryGlazeContract.videoGridColumns(1280))
+        assertEquals(840, GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP)
+    }
+
+    @Test
     fun `navigation capsule preserves current V1_6 baseline and local icon semantics`() {
         assertEquals(60, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
         assertEquals(26, GalleryGlazeContract.NAVIGATION_RADIUS_DP)
