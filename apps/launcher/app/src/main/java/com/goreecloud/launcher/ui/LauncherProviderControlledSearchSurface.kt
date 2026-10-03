@@ -2141,6 +2141,123 @@ private fun LauncherPrivacyShieldGlyph(
 }
 
 @Composable
+private fun LauncherSourceResetGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.09f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawArc(
+            color = tint,
+            startAngle = 40f,
+            sweepAngle = 280f,
+            useCenter = false,
+            topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.16f),
+            size = androidx.compose.ui.geometry.Size(u * 0.68f, u * 0.68f),
+            style = Stroke(width = stroke, cap = cap),
+        )
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.26f),
+            androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.08f),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.08f),
+            androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.08f),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
+private fun LauncherSourceOrderGlyph(
+    done: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.09f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        if (done) {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.54f),
+                androidx.compose.ui.geometry.Offset(u * 0.40f, u * 0.74f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.40f, u * 0.74f),
+                androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.28f),
+                stroke,
+                cap = cap,
+            )
+        } else {
+            listOf(0.28f, 0.50f, 0.72f).forEach { y ->
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.035f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.20f, u * y),
+                )
+                drawLine(
+                    color = tint,
+                    start = androidx.compose.ui.geometry.Offset(u * 0.34f, u * y),
+                    end = androidx.compose.ui.geometry.Offset(u * 0.82f, u * y),
+                    strokeWidth = stroke,
+                    cap = cap,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSourceMoveGlyph(
+    earlier: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        val x = u * 0.50f
+        val fromY = if (earlier) u * 0.78f else u * 0.22f
+        val toY = if (earlier) u * 0.22f else u * 0.78f
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(x, fromY),
+            androidx.compose.ui.geometry.Offset(x, toY),
+            stroke,
+            cap = cap,
+        )
+        val armY = if (earlier) u * 0.38f else u * 0.62f
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(x, toY),
+            androidx.compose.ui.geometry.Offset(u * 0.34f, armY),
+            stroke,
+            cap = cap,
+        )
+        drawLine(
+            tint,
+            androidx.compose.ui.geometry.Offset(x, toY),
+            androidx.compose.ui.geometry.Offset(u * 0.66f, armY),
+            stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
 private fun LauncherSourceDisclosureGlyph(
     expanded: Boolean,
     tint: Color,
@@ -2583,17 +2700,60 @@ private fun LauncherSearchSourceManager(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    TextButton(
+                    Surface(
                         onClick = onReset,
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .semantics { contentDescription = "Reset Search source order" },
+                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.44f),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                        ),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            LauncherSourceResetGlyph(
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    Surface(
                         onClick = { reorderMode = !reorderMode },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .semantics {
+                                contentDescription =
+                                    if (reorderMode) "Finish reordering Search sources"
+                                    else "Reorder Search sources"
+                            },
+                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                        color = if (reorderMode) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.44f)
+                        },
+                        border = BorderStroke(
+                            1.dp,
+                            if (reorderMode) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+                            } else {
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+                            },
+                        ),
                     ) {
-                        Text(if (reorderMode) "Done" else "Order")
+                        Box(contentAlignment = Alignment.Center) {
+                            LauncherSourceOrderGlyph(
+                                done = reorderMode,
+                                tint = if (reorderMode) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -3002,7 +3162,18 @@ private fun LauncherSearchSourceManager(
                                                     },
                                                     enabled = ready && index > 0,
                                                 ) {
-                                                    Text("↑  Earlier")
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(4.dp),
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            earlier = true,
+                                                            tint =
+                                                                MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Earlier")
+                                                    }
                                                 }
                                                 TextButton(
                                                     onClick = {
@@ -3020,7 +3191,18 @@ private fun LauncherSearchSourceManager(
                                                             index in 0 until
                                                                 controls.orderedOptions.lastIndex,
                                                 ) {
-                                                    Text("↓  Later")
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement =
+                                                            Arrangement.spacedBy(4.dp),
+                                                    ) {
+                                                        LauncherSourceMoveGlyph(
+                                                            earlier = false,
+                                                            tint =
+                                                                MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text("Later")
+                                                    }
                                                 }
                                             }
                                         }
