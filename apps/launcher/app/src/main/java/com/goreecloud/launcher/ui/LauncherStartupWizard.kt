@@ -593,7 +593,7 @@ private fun WizardSearchModeCard(
     val accent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 122.dp),
+        modifier = modifier.heightIn(min = 120.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = if (selected) {
             accent.copy(alpha = 0.14f)
