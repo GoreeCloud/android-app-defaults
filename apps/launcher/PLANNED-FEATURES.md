@@ -1,5 +1,9 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 3, 2026 — App Lock acceptance work remains
+
+The Development source now contains Launcher-managed App Lock for profile-qualified apps. Remaining work is representative-device acceptance for successful and cancelled authentication, secure-lock setup recovery, personal/Work profile behavior, accessibility, large text, RTL/localization, form factors, protected Development signing/update continuity, and a separately versioned portable-state policy. Launches that originate outside GoreeCloud Launcher remain outside this feature's authority.
+
 ## October 3, 2026 — Hidden apps integrated; acceptance and recovery work remains
 
 Protected PR #223 integrated profile-qualified Hidden Apps persistence, App Drawer/Universal Search suppression, reversible app-context Hide/Show controls, and Launcher Settings recovery on exact head `4ce68c0201cb2779c91c3203e68a8d75fdc07cd6`, merging as `b433104499372248d03cd0fed89fa729b6db1d77` after the complete protected matrix passed. The user-visible source capability is therefore implemented rather than a pending presentation candidate.
