@@ -1,5 +1,15 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — compact glyph-only Gallery shell
+
+The primary Gallery shell now uses a fixed glyph-only bottom rail rather than a large floating capsule. The five destinations remain Photos, Albums, Videos, Trash, and Settings, but the rail is 48dp high with equal slots, centered glyphs, low elevation, normal-control corner geometry, and a small inset selected treatment. Destination names remain in accessibility semantics and tooltips, and selection changes use bounded micro motion without enlarging the active tab.
+
+Photos, Albums, and Videos now use one compact media-access row when Android has not granted readable media instead of stacking a permission card and a second empty-state card. Empty states elsewhere use lightweight canvas presentation rather than full-width raised cards.
+
+Settings now groups related rows inside shared section surfaces. Individual rows are transparent within the group, use compact typography and spacing, preserve accessible row targets, and align switches, chevrons, and action glyphs consistently. The primary-navigation display chooser is no longer shown because labels are not part of the Gallery navigation presentation.
+
+Trash uses the same shared navigation dimensions, a smaller header, an integrated transparent Refresh glyph, lightweight Android-authority guidance, and compact access/empty states.
+
 ## October 3, 2026 — Android system-gallery integration foundation
 
 Gallery now exposes Android's app-gallery category and a dedicated exported image/video VIEW/REVIEW surface so an operating-system distribution can use `com.goreecloud.gallery` as its system Gallery package instead of only launching Gallery from its icon. The external viewer accepts only explicit `content:` or `file:` image/video URIs supplied by Android, rejects remote schemes and unrelated MIME types, and never enumerates a broader library from an external request.
@@ -7,6 +17,51 @@ Gallery now exposes Android's app-gallery category and a dedicated exported imag
 Secure-review requests add Android's secure-window flag. Image decoding is bounded to the current display scale, video playback stays local to the supplied URI, and failures are handled without expanding storage or network authority. Gallery also declares `ACCESS_MEDIA_LOCATION`, matching Android's system-gallery role permission model while retaining Android-owned media authorization.
 
 This is application-side Development groundwork for GoreeCloud OS Mobile default-role integration. It does not by itself make Gallery the default on arbitrary Android installations, remove another gallery package, or establish representative-device/system-role acceptance.
+
+
+## October 3, 2026 — representative-device compactness pass
+
+Representative-device screenshots drove a second compactness pass across setup, access-empty, Settings, Videos, and Trash. Setup now uses tighter copy/spacing and a true vector toggle for Contextual hints. The no-access Photos surface no longer repeats the same privacy statement twice. Settings rows and value/toggle affordances are visually lighter without reducing the row-level accessible target.
+
+Videos now treats phone space as a grid-first surface: the oversized first-item hero is suppressed below 600dp, while tablets and wider layouts retain a bounded feature card. The video More menu is a first-party rounded Glaze overlay with semantic glyphs instead of the platform-default rectangular popup.
+
+Trash favors three larger thumbnail columns on phones before scaling up on wider classes, and its Android-managed authority callout is more compact. These are presentation-only changes; Android MediaStore authority, confirmation requirements, Favorites ownership, and network/account boundaries are unchanged.
+
+## October 3, 2026 — icon-first action surfaces
+
+Gallery now uses compact icon controls for persistent viewer, selection, Trash, photo-editor transform, and Settings action chrome. Crop ratios remain short text values, while repeated actions such as Share, Favorite, Move, Copy, Delete, More, Rotate, Flip, Reset, Refresh, and Play/Pause use glyphs with descriptive accessibility names and tooltips.
+
+The change keeps 48dp interaction targets for persistent action chrome, preserves selected/toggled semantics, and gives destructive actions distinct treatment. MediaStore authority, Android permission scope, confirmation behavior, local Favorites, and save-copy semantics are unchanged.
+
+Android runtime/rendered coverage verifies the icon-only photo-editor controls, selected crop-preset state, and Trash Refresh affordance. The current-main candidate directly consolidates this work with the unified navigation-glyph system and keeps its `0.8.10-dev` Development identity.
+
+Remaining font/Unicode pseudo-glyph controls in the media grid and viewer paths have also been replaced by first-party vectors. Icon controls now receive bounded press feedback, and the photo editor visually identifies the active crop preset while preserving custom-crop behavior.
+
+The setup wizard now uses a compact visual progress rail and icon-first Back/Return/Continue/Finish actions. The step labels, content descriptions, replay behavior, and persisted onboarding state remain unchanged.
+
+Long destination or album titles are constrained to a single ellipsized header line, keeping Search/Sort and Back affordances stable at compact widths. Inline search close, media-access actions, album quick-access chips, and album cards now use the same bounded press-feedback contract as the rest of Gallery chrome.
+
+Stateful icon controls also expose explicit Android state descriptions where supported. This includes selected media tiles, selected transient choices, active selection actions, and active viewer toggles; the visible state is therefore reinforced beyond color and icon shape.
+
+Media-access controls use contextual glyph-plus-label treatment rather than text-only buttons. The visible label is retained for permission clarity while Choose media, Change access, Refresh, and Try again receive matching first-party visual cues and tooltips.
+
+Dynamic media-access labels continue to receive the same Glaze persistent-control treatment, and destructive Trash controls expose explicit destructive-action state semantics where Android supports state descriptions.
+
+Settings choices now use value-plus-chevron affordances with explicit state descriptions, and boolean settings use vector on/off switch indicators instead of text-only state pills. Save-copy and cache clearing use dedicated first-party glyphs rather than overloaded generic symbols.
+
+Empty Photos, Albums, Videos, search-result, and Trash surfaces now use raised semantic Glaze icon cards to reduce visually empty whitespace and make state identity scannable without adding another action. Trash header text also follows the compact-width ellipsis contract.
+
+Videos now adapt their follow-on card grid across narrow phones, ordinary phones, tablets, and very wide layouts, while the featured card is capped and centered on large screens. Album quick-access pills always include a first-party glyph. Video tiles no longer substitute the word “VIDEO” when duration is unavailable: the play glyph carries media-type identity and a duration badge appears only when the provider exposes one; Trash mirrors that presentation.
+
+Dense Photos groups also rebalance the column count when a one-column reduction keeps the same number of rows and produces a fuller trailing row. This preserves the configured density while avoiding visually weak arrangements such as four thumbnails followed by only two when a balanced three-by-two presentation fits in the same vertical space.
+
+## October 3, 2026 — unified bottom-navigation glyph family
+
+The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
+
+Each destination also receives bounded Android ripple feedback without replacing the selected Glaze background, tooltip label, content description, or selected-state semantics. The same assets and shared presentation path cover the main Gallery surface and Android-managed Trash.
+
+Rendered Android acceptance verifies shared glyph bounds and ripple presence, including the Trash navigation path. The change is presentation-only and does not expand permissions, media scope, mutation authority, filesystem access, account/network access, or release qualification.
 
 ## October 3, 2026 — optically centered bottom navigation
 

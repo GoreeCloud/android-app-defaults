@@ -44,7 +44,6 @@ object GalleryUiRefinement {
         "Change Gallery sort order",
         "Close search",
         "Gallery media access action",
-        "Refresh Trash",
     )
 
     private val primaryPersistentControlDescriptions = setOf(
@@ -118,12 +117,17 @@ object GalleryUiRefinement {
     private fun refinePersistentControls(activity: Activity, root: FrameLayout) {
         walk(root) { view ->
             val description = view.contentDescription?.toString() ?: return@walk
-            if (description !in persistentControlDescriptions) return@walk
-            val primary = description in primaryPersistentControlDescriptions
+            val canonicalDescription = when {
+                description.startsWith("Gallery media access action") ->
+                    "Gallery media access action"
+                else -> description
+            }
+            if (canonicalDescription !in persistentControlDescriptions) return@walk
+            val primary = canonicalDescription in primaryPersistentControlDescriptions
             styleControl(
                 activity = activity,
                 view = view,
-                marker = "control:$description",
+                marker = "control:$canonicalDescription",
                 role = if (primary) GalleryGlazeSurfaces.Role.CONTROL else GalleryGlazeSurfaces.Role.RAISED,
                 elevationDp = if (primary) 2 else 1,
             )
@@ -131,15 +135,16 @@ object GalleryUiRefinement {
     }
 
     private fun refineNavigation(activity: Activity, capsule: LinearLayout) {
-        val mode = navigationDisplayMode(activity)
-        val capsuleMarker = "navigation-capsule-v5:${mode.storedValue}"
+        val mode = GalleryNavigationDisplayMode.ICONS_ONLY
+        val capsuleMarker = "navigation-rail-v7:glyph-only"
         if (capsule.getTag(R.id.gallery_navigation_surface_tag) != capsuleMarker) {
             capsule.background = GalleryGlazeSurfaces.drawable(
                 activity,
-                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeSurfaces.Role.CHROME,
                 GalleryGlazeContract.NAVIGATION_RADIUS_DP,
             )
             capsule.elevation = dp(activity, GalleryGlazeContract.NAVIGATION_ELEVATION_DP).toFloat()
+            capsule.setPadding(0, 0, 0, 0)
             capsule.clipChildren = true
             capsule.clipToOutline = true
             capsule.setTag(R.id.gallery_navigation_surface_tag, capsuleMarker)
@@ -151,7 +156,7 @@ object GalleryUiRefinement {
             val icon = navigationIcons[label] ?: continue
             val activityDescription = item.contentDescription?.toString().orEmpty()
             val selected = activityDescription == "$label, selected" || item.isSelected
-            val marker = "navigation:$label:$selected:${mode.storedValue}:v6"
+            val marker = "navigation:$label:$selected:glyph-only:v7"
             if (item.getTag(R.id.gallery_ui_refinement_tag) == marker) continue
 
             val foreground = if (selected) activityAccent(activity) else activityPrimaryText(activity)

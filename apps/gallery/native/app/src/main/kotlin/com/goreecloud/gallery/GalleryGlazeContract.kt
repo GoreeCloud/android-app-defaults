@@ -66,24 +66,24 @@ object GalleryGlazeContract {
     const val MAX_RENDERED_MEDIA_ROWS = 100
     const val MIN_GRID_TILE_DP = 78
     const val MIN_ALBUM_TILE_DP = 132
+    const val MAX_FEATURED_VIDEO_WIDTH_DP = 720
+    const val VIDEO_FEATURED_MIN_WIDTH_DP = 600
 
-    // Current V1.6 Gallery navigation baseline plus local icon/label adapter details.
-    const val NAVIGATION_HEIGHT_DP = 60
-    const val NAVIGATION_RADIUS_DP = 26
-    const val NAVIGATION_SIDE_MARGIN_DP = 16
-    const val NAVIGATION_BOTTOM_MARGIN_DP = 10
-    const val NAVIGATION_ELEVATION_DP = 4
-    const val NAVIGATION_RESERVED_SPACE_DP = 82
-    const val CONTENT_BOTTOM_INSET_DP = 28
-    const val NAVIGATION_ICON_DP = 22
+    // Gallery primary navigation is intentionally glyph-only and compact on every screen.
+    const val NAVIGATION_HEIGHT_DP = 48
+    const val NAVIGATION_RADIUS_DP = 14
+    const val NAVIGATION_SIDE_MARGIN_DP = 12
+    const val NAVIGATION_BOTTOM_MARGIN_DP = 5
+    const val NAVIGATION_ELEVATION_DP = 1
+    const val NAVIGATION_RESERVED_SPACE_DP = 60
+    const val CONTENT_BOTTOM_INSET_DP = 14
+    const val NAVIGATION_ICON_DP = 21
     const val NAVIGATION_LABEL_SP = 10.5f
-    const val NAVIGATION_ITEM_RADIUS_DP = SHAPE_CAPSULE_DP
-    const val NAVIGATION_ITEM_HORIZONTAL_PADDING_DP = 4
-    const val NAVIGATION_ITEM_VERTICAL_PADDING_DP = 1
-    const val NAVIGATION_ICON_ONLY_SELECTED_HORIZONTAL_INSET_DP = 8
-    const val NAVIGATION_ICON_ONLY_SELECTED_VERTICAL_INSET_DP = 4
-    const val NAVIGATION_LABELED_SELECTED_HORIZONTAL_INSET_DP = 3
-    const val NAVIGATION_LABELED_SELECTED_VERTICAL_INSET_DP = 3
+    const val NAVIGATION_ITEM_RADIUS_DP = 10
+    const val NAVIGATION_ITEM_HORIZONTAL_PADDING_DP = 0
+    const val NAVIGATION_ITEM_VERTICAL_PADDING_DP = 0
+    const val NAVIGATION_SELECTED_HORIZONTAL_INSET_DP = 18
+    const val NAVIGATION_SELECTED_VERTICAL_INSET_DP = 7
 
     fun horizontalGutterDp(widthDp: Int): Int = when {
         widthDp >= 1200 -> SPACE_REGION_DP
@@ -105,5 +105,22 @@ object GalleryGlazeContract {
         widthDp >= 840 -> 4
         widthDp >= 600 -> 3
         else -> 2
+    }
+
+    fun videoGridColumns(widthDp: Int): Int = when {
+        widthDp >= 1200 -> 4
+        widthDp >= 600 -> 3
+        widthDp >= 360 -> 2
+        else -> 1
+    }
+
+    fun videoUsesFeaturedCard(widthDp: Int): Boolean =
+        widthDp >= VIDEO_FEATURED_MIN_WIDTH_DP
+
+    fun trashGridColumns(widthDp: Int): Int = when {
+        widthDp >= 1200 -> 6
+        widthDp >= 840 -> 5
+        widthDp >= 600 -> 4
+        else -> 3
     }
 }

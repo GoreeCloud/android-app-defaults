@@ -2,6 +2,7 @@ package com.goreecloud.gallery
 
 import android.graphics.Rect
 import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import android.view.Gravity
 import android.view.View
@@ -40,7 +41,7 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
                 .check(matches(isDisplayed()))
                 .check(matches(isClickable()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
-                .check(matches(hasRefinementTag("control:$description")))
+                .check(matches(hasIconOnlyGlyph()))
         }
     }
 
@@ -99,6 +100,10 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
             assertTrue(
                 "Trash selected destination should use compact inset Glaze material",
                 controls.single { it.isSelected }.background is InsetDrawable,
+            )
+            assertTrue(
+                "Trash navigation should use the same bounded ripple feedback",
+                controls.all { it.foreground is RippleDrawable },
             )
         }
     }
@@ -165,6 +170,19 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
 
     private val PRIMARY_NAVIGATION_LABELS =
         setOf("Photos", "Albums", "Videos", "Trash", "Settings")
+
+    private fun hasIconOnlyGlyph() = object : TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description) {
+            description.appendText("icon-only control with a centered compound drawable")
+        }
+
+        override fun matchesSafely(view: View): Boolean {
+            val control = view as? TextView ?: return false
+            return control.text.isNullOrEmpty() &&
+                control.compoundDrawables[0] != null &&
+                (control.gravity and Gravity.CENTER) == Gravity.CENTER
+        }
+    }
 
     private fun hasMinimumTouchSizeDp(minimumDp: Float) = object : TypeSafeMatcher<View>() {
         override fun describeTo(description: Description) {

@@ -1,6 +1,7 @@
 package com.goreecloud.gallery
 
 import android.app.Activity
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
@@ -12,7 +13,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -30,6 +30,7 @@ class PhotoEditorActivity : Activity() {
     private lateinit var status: TextView
     private lateinit var saveButton: TextView
     private val editControls = mutableListOf<TextView>()
+    private val aspectControls = linkedMapOf<String, TextView>()
 
     private var sourceUri: Uri? = null
     private var sourceDisplayName: String = "Photo"
@@ -128,7 +129,10 @@ class PhotoEditorActivity : Activity() {
         )
         cropOverlay = GalleryCropOverlayView(this).apply {
             visibility = View.INVISIBLE
-            onCropChanged = { editPlan = editPlan.copy(crop = it) }
+            onCropChanged = {
+                editPlan = editPlan.copy(crop = it)
+                updateAspectSelection(null)
+            }
         }
         stage.addView(
             cropOverlay,
@@ -138,7 +142,7 @@ class PhotoEditorActivity : Activity() {
             stage,
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
                 topMargin = dp(76)
-                bottomMargin = dp(158)
+                bottomMargin = dp(184)
             },
         )
 
@@ -153,12 +157,18 @@ class PhotoEditorActivity : Activity() {
             )
             background = roundedSurface(0xe61a1a1d.toInt(), GalleryGlazeContract.SHAPE_ROUNDED_DP)
         }
-        val cancel = editorButton("Cancel", "Cancel editing and keep the original photo") {
+        val cancel = editorIconButton(
+            R.drawable.ic_gallery_close,
+            "Cancel editing and keep the original photo",
+        ) {
             if (!working) finish()
         }
         topBar.addView(
             cancel,
-            LinearLayout.LayoutParams(dp(76), dp(GalleryGlazeContract.GENERAL_TARGET_DP)),
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ),
         )
 
         val titles = LinearLayout(this).apply {
@@ -187,12 +197,18 @@ class PhotoEditorActivity : Activity() {
         }
         topBar.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
 
-        saveButton = editorButton("Save copy", "Save the edited photo as a new copy and keep the original") {
+        saveButton = editorIconButton(
+            R.drawable.ic_gallery_save_copy,
+            "Save the edited photo as a new copy and keep the original",
+        ) {
             saveEditedCopy()
         }
         topBar.addView(
             saveButton,
-            LinearLayout.LayoutParams(dp(92), dp(GalleryGlazeContract.GENERAL_TARGET_DP)),
+            LinearLayout.LayoutParams(
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+            ),
         )
         root.addView(
             topBar,
@@ -222,57 +238,91 @@ class PhotoEditorActivity : Activity() {
             status,
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(42)).apply {
                 gravity = Gravity.BOTTOM
-                bottomMargin = dp(104)
+                bottomMargin = dp(132)
                 marginStart = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 marginEnd = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
             },
         )
 
-        val controls = LinearLayout(this).apply {
+        val transformRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(
-                dp(GalleryGlazeContract.SPACE_CONTROL_DP),
-                dp(GalleryGlazeContract.SPACE_CONTROL_DP),
-                dp(GalleryGlazeContract.SPACE_CONTROL_DP),
-                dp(GalleryGlazeContract.SPACE_CONTROL_DP),
-            )
+            gravity = Gravity.CENTER
         }
-        addControl(controls, "↺ 90°", "Rotate photo 90 degrees left") {
+        addIconControl(
+            transformRow,
+            R.drawable.ic_gallery_rotate_left,
+            "Rotate photo 90 degrees left",
+        ) {
             applyTransform(GalleryPhotoEditPolicy.rotateLeft(editPlan))
         }
-        addControl(controls, "↻ 90°", "Rotate photo 90 degrees right") {
+        addIconControl(
+            transformRow,
+            R.drawable.ic_gallery_rotate_right,
+            "Rotate photo 90 degrees right",
+        ) {
             applyTransform(GalleryPhotoEditPolicy.rotateRight(editPlan))
         }
-        addControl(controls, "Flip", "Flip photo horizontally") {
+        addIconControl(
+            transformRow,
+            R.drawable.ic_gallery_flip,
+            "Flip photo horizontally",
+        ) {
             applyTransform(GalleryPhotoEditPolicy.flipHorizontal(editPlan))
         }
-        addControl(controls, "Original", "Reset crop to the full photo") {
-            setCropPreset(GalleryNormalizedCrop.FULL)
-        }
-        addControl(controls, "1:1", "Crop photo to a centered square") { setAspectPreset(1f) }
-        addControl(controls, "4:3", "Crop photo to a centered four by three rectangle") { setAspectPreset(4f / 3f) }
-        addControl(controls, "16:9", "Crop photo to a centered sixteen by nine rectangle") { setAspectPreset(16f / 9f) }
-        addControl(controls, "Reset", "Reset rotation, flip, and crop") {
+        addIconControl(
+            transformRow,
+            R.drawable.ic_gallery_reset,
+            "Reset rotation, flip, and crop",
+        ) {
             applyTransform(GalleryPhotoEditPolicy.reset())
         }
 
-        val scroll = HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            isFillViewport = false
+        val aspectRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+        addAspectControl(aspectRow, "Original", "Reset crop to the full photo") {
+            setCropPreset(GalleryNormalizedCrop.FULL, "Original")
+        }
+        addAspectControl(aspectRow, "1:1", "Crop photo to a centered square") {
+            setAspectPreset(1f, "1:1")
+        }
+        addAspectControl(aspectRow, "4:3", "Crop photo to a centered four by three rectangle") {
+            setAspectPreset(4f / 3f, "4:3")
+        }
+        addAspectControl(aspectRow, "16:9", "Crop photo to a centered sixteen by nine rectangle") {
+            setAspectPreset(16f / 9f, "16:9")
+        }
+        updateAspectSelection("Original")
+
+        val controls = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(
+                dp(GalleryGlazeContract.SPACE_CONTROL_DP),
+                dp(GalleryGlazeContract.SPACE_HAIRLINE_DP),
+                dp(GalleryGlazeContract.SPACE_CONTROL_DP),
+                dp(GalleryGlazeContract.SPACE_HAIRLINE_DP),
+            )
             background = roundedSurface(0xe61a1a1d.toInt(), GalleryGlazeContract.SHAPE_ROUNDED_DP)
             addView(
-                controls,
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT),
+                transformRow,
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52)),
+            )
+            addView(
+                aspectRow,
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)).apply {
+                    topMargin = dp(GalleryGlazeContract.SPACE_HAIRLINE_DP)
+                },
             )
         }
         root.addView(
-            scroll,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(88)).apply {
+            controls,
+            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(116)).apply {
                 gravity = Gravity.BOTTOM
                 marginStart = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 marginEnd = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
-                bottomMargin = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
+                bottomMargin = dp(GalleryGlazeContract.SPACE_CONTROL_DP)
             },
         )
 
@@ -281,7 +331,25 @@ class PhotoEditorActivity : Activity() {
         setWorking(true, "Loading full-resolution photo…")
     }
 
-    private fun addControl(
+    private fun addIconControl(
+        row: LinearLayout,
+        iconResource: Int,
+        description: String,
+        onClick: () -> Unit,
+    ) {
+        val control = editorIconButton(iconResource, description) {
+            if (!working) onClick()
+        }
+        editControls += control
+        row.addView(
+            control,
+            LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
+                marginEnd = dp(GalleryGlazeContract.SPACE_HAIRLINE_DP)
+            },
+        )
+    }
+
+    private fun addAspectControl(
         row: LinearLayout,
         label: String,
         description: String,
@@ -290,12 +358,13 @@ class PhotoEditorActivity : Activity() {
         val control = editorButton(label, description) {
             if (!working) onClick()
         }.apply {
-            minWidth = dp(72)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
         }
         editControls += control
+        aspectControls[label] = control
         row.addView(
             control,
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(60)).apply {
+            LinearLayout.LayoutParams(0, dp(44), 1f).apply {
                 marginEnd = dp(GalleryGlazeContract.SPACE_HAIRLINE_DP)
             },
         )
@@ -357,6 +426,9 @@ class PhotoEditorActivity : Activity() {
                     preview.setImageBitmap(transformed)
                     cropOverlay.setSourceSize(transformed.width, transformed.height)
                     cropOverlay.setCrop(plan.crop, notify = false)
+                    updateAspectSelection(
+                        if (plan.crop == GalleryNormalizedCrop.FULL) "Original" else null,
+                    )
                     cropOverlay.visibility = View.VISIBLE
                     if (oldPreview != null && oldPreview !== source && oldPreview !== transformed) oldPreview.recycle()
                     setWorking(
@@ -370,17 +442,39 @@ class PhotoEditorActivity : Activity() {
         }
     }
 
-    private fun setAspectPreset(aspect: Float) {
+    private fun setAspectPreset(aspect: Float, label: String) {
         val bitmap = previewBitmap ?: return
-        setCropPreset(GalleryPhotoEditPolicy.centerCropForAspect(bitmap.width, bitmap.height, aspect))
+        setCropPreset(
+            GalleryPhotoEditPolicy.centerCropForAspect(bitmap.width, bitmap.height, aspect),
+            label,
+        )
     }
 
-    private fun setCropPreset(crop: GalleryNormalizedCrop) {
+    private fun setCropPreset(crop: GalleryNormalizedCrop, label: String?) {
         if (working) return
         editPlan = editPlan.copy(crop = crop)
         cropOverlay.setCrop(crop, notify = false)
+        updateAspectSelection(label)
         status.text = "Crop updated. Drag the crop handles or photo area for a custom crop."
-        cropOverlay.announceForAccessibility("Crop updated")
+        cropOverlay.announceForAccessibility(
+            if (label == null) "Crop updated" else "$label crop selected",
+        )
+    }
+
+    private fun updateAspectSelection(selectedLabel: String?) {
+        aspectControls.forEach { (label, control) ->
+            val selected = label == selectedLabel
+            control.isSelected = selected
+            control.setTypeface(control.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
+            control.setTextColor(if (selected) accentColor() else Color.WHITE)
+            control.background = roundedSurface(
+                if (selected) withAlpha(accentColor(), 0.26f) else 0x2effffff,
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                control.stateDescription = if (selected) "Selected" else null
+            }
+        }
     }
 
     private fun saveEditedCopy() {
@@ -465,6 +559,36 @@ class PhotoEditorActivity : Activity() {
         saveButton.alpha = if (saveButton.isEnabled) 1f else 0.38f
     }
 
+    private fun editorIconButton(
+        iconResource: Int,
+        description: String,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        setPadding(
+            dp(GalleryGlazeContract.SPACE_CONTROL_DP),
+            dp(GalleryGlazeContract.SPACE_CONTROL_DP),
+            dp(GalleryGlazeContract.SPACE_CONTROL_DP),
+            dp(GalleryGlazeContract.SPACE_CONTROL_DP),
+        )
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(Color.WHITE)
+        background = roundedSurface(0x2effffff, GalleryGlazeContract.SHAPE_CONTROL_DP)
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            Color.WHITE,
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
+        setOnClickListener { onClick() }
+    }
+
     private fun editorButton(
         label: String,
         description: String,
@@ -487,8 +611,30 @@ class PhotoEditorActivity : Activity() {
         isClickable = true
         isFocusable = true
         contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            Color.WHITE,
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
         setOnClickListener { onClick() }
     }
+
+    private fun accentColor(): Int {
+        val attributes = obtainStyledAttributes(intArrayOf(android.R.attr.colorAccent))
+        return try {
+            attributes.getColor(0, 0xff80cbc4.toInt())
+        } finally {
+            attributes.recycle()
+        }
+    }
+
+    private fun withAlpha(color: Int, alpha: Float): Int = Color.argb(
+        (255 * alpha.coerceIn(0f, 1f)).toInt(),
+        Color.red(color),
+        Color.green(color),
+        Color.blue(color),
+    )
 
     private fun roundedSurface(color: Int, radiusDp: Int): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE

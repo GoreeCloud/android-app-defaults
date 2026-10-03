@@ -2,6 +2,7 @@ package com.goreecloud.gallery
 
 import android.graphics.Rect
 import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import android.os.SystemClock
 import android.view.Gravity
@@ -9,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -65,10 +67,11 @@ class GalleryRenderedAcceptanceTest {
         onView(withContentDescription("Photos, selected"))
             .check(matches(hasSelectedStateDescription()))
 
-        onView(withContentDescription("Gallery media access action"))
+        onView(withContentDescription(containsString("Gallery media access action")))
             .check(matches(isDisplayed()))
             .check(matches(isClickable()))
             .check(matches(hasMinimumTouchSizeDp(48f)))
+            .check(matches(hasLeadingCompoundDrawable()))
     }
 
     @Test
@@ -113,6 +116,21 @@ class GalleryRenderedAcceptanceTest {
             assertTrue(
                 "Selected icons-only navigation should use inset Glaze material",
                 selected.background is InsetDrawable,
+            )
+            val expectedIconPx =
+                (GalleryGlazeContract.NAVIGATION_ICON_DP * activity.resources.displayMetrics.density)
+                    .toInt()
+            assertTrue(
+                "All primary navigation glyphs should render at the shared optical size",
+                controls.all { control ->
+                    val icon = control.compoundDrawables[0] ?: return@all false
+                    kotlin.math.abs(icon.bounds.width() - expectedIconPx) <= 1 &&
+                        kotlin.math.abs(icon.bounds.height() - expectedIconPx) <= 1
+                },
+            )
+            assertTrue(
+                "Each navigation target should expose bounded ripple feedback",
+                controls.all { it.foreground is RippleDrawable },
             )
             assertTrue(
                 "Each icon-only destination should retain a discoverable tooltip",
@@ -182,6 +200,45 @@ class GalleryRenderedAcceptanceTest {
             .check(doesNotExist())
         onView(withText("Password protect photos"))
             .check(doesNotExist())
+        onView(withText("Bottom navigation"))
+            .check(doesNotExist())
+    }
+
+    @Test
+    fun settingsChoicesAndTogglesExposeCompactGlyphStateAffordances() {
+        activateNavigationControl("Settings")
+
+        activityRule.scenario.onActivity { activity ->
+            val root = activity.findViewById<ViewGroup>(android.R.id.content)
+
+            val densityRow = checkNotNull(
+                findByContentDescriptionPrefix(root, "View density."),
+            ) { "View density setting row should be rendered" }
+            assertTrue(
+                "Choice setting rows should show a compact trailing chevron glyph",
+                densityRow.containsTrailingCompoundDrawable(),
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                assertTrue(
+                    "Choice setting rows should expose the current value as state",
+                    !densityRow.stateDescription.isNullOrEmpty(),
+                )
+            }
+
+            val roundedRow = checkNotNull(
+                findByContentDescriptionPrefix(root, "Rounded-square thumbnails."),
+            ) { "Rounded-square thumbnails setting row should be rendered" }
+            assertTrue(
+                "Toggle setting rows should use a vector state indicator instead of On/Off text",
+                roundedRow.containsImageViewDescendant(),
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                assertTrue(
+                    "Toggle setting rows should expose On/Off state semantics",
+                    roundedRow.stateDescription?.toString() in setOf("On", "Off", "Unavailable"),
+                )
+            }
+        }
     }
 
     @Test
@@ -474,6 +531,33 @@ class GalleryRenderedAcceptanceTest {
         }
     }
 
+    private fun findByContentDescriptionPrefix(root: View, prefix: String): View? {
+        if (root.contentDescription?.toString()?.startsWith(prefix) == true) return root
+        val group = root as? ViewGroup ?: return null
+        for (index in 0 until group.childCount) {
+            findByContentDescriptionPrefix(group.getChildAt(index), prefix)?.let { return it }
+        }
+        return null
+    }
+
+    private fun View.containsTrailingCompoundDrawable(): Boolean {
+        if (this is TextView && compoundDrawables[2] != null) return true
+        val group = this as? ViewGroup ?: return false
+        for (index in 0 until group.childCount) {
+            if (group.getChildAt(index).containsTrailingCompoundDrawable()) return true
+        }
+        return false
+    }
+
+    private fun View.containsImageViewDescendant(): Boolean {
+        if (this is ImageView) return true
+        val group = this as? ViewGroup ?: return false
+        for (index in 0 until group.childCount) {
+            if (group.getChildAt(index).containsImageViewDescendant()) return true
+        }
+        return false
+    }
+
     private fun hasSelectedStateDescription() = object : TypeSafeMatcher<View>() {
         override fun describeTo(description: Description) {
             description.appendText("exposes Android selected state description")
@@ -506,6 +590,15 @@ class GalleryRenderedAcceptanceTest {
             val heightDp = view.height / density
             mismatchDescription.appendText("rendered ${widthDp}dp x ${heightDp}dp")
         }
+    }
+
+    private fun hasLeadingCompoundDrawable() = object : TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description) {
+            description.appendText("renders a leading action glyph")
+        }
+
+        override fun matchesSafely(view: View): Boolean =
+            view is TextView && view.compoundDrawables[0] != null
     }
 
     private fun hasCenteredCompoundDrawable() = object : TypeSafeMatcher<View>() {

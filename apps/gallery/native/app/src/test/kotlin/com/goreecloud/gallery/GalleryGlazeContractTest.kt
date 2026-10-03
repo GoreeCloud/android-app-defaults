@@ -97,21 +97,40 @@ class GalleryGlazeContractTest {
     }
 
     @Test
-    fun `navigation capsule preserves current V1_6 baseline and local icon semantics`() {
-        assertEquals(60, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
-        assertEquals(26, GalleryGlazeContract.NAVIGATION_RADIUS_DP)
-        assertEquals(16, GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
-        assertEquals(10, GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
-        assertEquals(4, GalleryGlazeContract.NAVIGATION_ELEVATION_DP)
-        assertEquals(82, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
-        assertEquals(28, GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP)
-        assertEquals(22, GalleryGlazeContract.NAVIGATION_ICON_DP)
-        assertEquals(4, GalleryGlazeContract.NAVIGATION_ITEM_HORIZONTAL_PADDING_DP)
-        assertEquals(1, GalleryGlazeContract.NAVIGATION_ITEM_VERTICAL_PADDING_DP)
-        assertTrue(
-            GalleryGlazeContract.NAVIGATION_ICON_ONLY_SELECTED_HORIZONTAL_INSET_DP >
-                GalleryGlazeContract.NAVIGATION_LABELED_SELECTED_HORIZONTAL_INSET_DP,
-        )
+    fun `video grid protects narrow phones and scales across large screens`() {
+        assertEquals(1, GalleryGlazeContract.videoGridColumns(320))
+        assertEquals(2, GalleryGlazeContract.videoGridColumns(390))
+        assertEquals(3, GalleryGlazeContract.videoGridColumns(600))
+        assertEquals(3, GalleryGlazeContract.videoGridColumns(900))
+        assertEquals(4, GalleryGlazeContract.videoGridColumns(1280))
+        assertFalse(GalleryGlazeContract.videoUsesFeaturedCard(390))
+        assertTrue(GalleryGlazeContract.videoUsesFeaturedCard(600))
+        assertEquals(600, GalleryGlazeContract.VIDEO_FEATURED_MIN_WIDTH_DP)
+        assertEquals(720, GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP)
+    }
+
+    @Test
+    fun `Trash grid favors legible phone thumbnails before scaling wider`() {
+        assertEquals(3, GalleryGlazeContract.trashGridColumns(320))
+        assertEquals(3, GalleryGlazeContract.trashGridColumns(390))
+        assertEquals(4, GalleryGlazeContract.trashGridColumns(600))
+        assertEquals(5, GalleryGlazeContract.trashGridColumns(900))
+        assertEquals(6, GalleryGlazeContract.trashGridColumns(1280))
+    }
+
+    @Test
+    fun `navigation rail is compact glyph-only and gesture-area aware`() {
+        assertEquals(48, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
+        assertEquals(14, GalleryGlazeContract.NAVIGATION_RADIUS_DP)
+        assertEquals(12, GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
+        assertEquals(5, GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
+        assertEquals(1, GalleryGlazeContract.NAVIGATION_ELEVATION_DP)
+        assertEquals(60, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+        assertEquals(14, GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP)
+        assertEquals(21, GalleryGlazeContract.NAVIGATION_ICON_DP)
+        assertEquals(18, GalleryGlazeContract.NAVIGATION_SELECTED_HORIZONTAL_INSET_DP)
+        assertEquals(7, GalleryGlazeContract.NAVIGATION_SELECTED_VERTICAL_INSET_DP)
+        assertTrue(GalleryGlazeContract.NAVIGATION_RADIUS_DP < GalleryGlazeContract.NAVIGATION_HEIGHT_DP / 2)
         assertTrue(
             GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP >=
                 GalleryGlazeContract.NAVIGATION_HEIGHT_DP + GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP,
