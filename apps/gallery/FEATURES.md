@@ -14,7 +14,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 - Bounded MediaStore image/video reads through the compiled Android adapter.
 - Validated media-item and MediaStore-row domain models.
 - Local thumbnails with bounded in-memory caching and no cloud dependency.
-- Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.6-dev` Development line.
+- Direct Photos / Albums / Videos / Trash / Settings navigation in the current `0.8.12-dev` Development candidate through one compact glyph-only bottom rail with equal 48dp destination targets and accessibility destination names.
 - Adaptive Photos timeline grids grouped into Today / Yesterday / calendar-date sections, with sparse dense-mode groups using larger three-column presentation lanes.
 - Mockup-aligned Videos browsing with a featured first video, responsive video cards, play/duration affordances, mockup-aligned **Recently added** wording for newest order, and icon-bearing All / Screen recordings / Camera / Favorites chips that are shown only when backed by the current Android-authorized snapshot.
 - Contextual card overflow actions: video cards expose Share, Add/Remove Favorite, and Details; album cards expose Open, app-local Pin/Unpin to top, Move earlier / Move later when applicable, and Details. Album organization actions change only Gallery's local Collections presentation; destructive media actions remain outside these compact card menus.
@@ -47,7 +47,7 @@ The target is to recover the established GoreeCloud Gallery information architec
 
 ### Settings available in the current Development candidate
 
-The first-class Settings destination is available even before media access is granted. Settings are grouped into Performance, Library, Playback, Privacy & protection, Deletion & recovery, Appearance, Cache, Favorites, and Settings portability.
+The first-class Settings destination is available even before media access is granted. Settings use compact grouped list sections for Performance, Library, Playback, Deletion & recovery, Appearance, Cache, Import & export, and Guidance rather than a separate rounded card for every preference.
 
 The following controls have active behavior in the current Development candidate:
 
@@ -121,6 +121,8 @@ The historical screenshots supplied for the native migration establish the follo
 - Destructive operations must remain explicit and Android-authorized; historical UI is visual/behavioral migration evidence, not authority to bypass current Android safeguards.
 
 ### Navigation model
+
+- Primary navigation is intentionally glyph-only. Visible tab labels are not rendered; content descriptions, state descriptions, and tooltips carry destination identity and selected state.
 
 - The historical product used clear top-level destinations for media, albums, and video-oriented browsing. The current native implementation may modernize exact labels and placement under GLAZE UI V1.6, but it must preserve similarly direct access to the major Gallery domains.
 - Search and contextual actions must be reachable from the relevant browsing surface without forcing users through debug-style filter controls.
