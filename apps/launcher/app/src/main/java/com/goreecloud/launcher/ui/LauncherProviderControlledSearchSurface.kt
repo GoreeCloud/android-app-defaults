@@ -2230,6 +2230,7 @@ private fun LauncherContactQuickAction(
     contentDescription: String,
     onClick: () -> Unit,
 ) {
+    val tint = tint
     Surface(
         onClick = onClick,
         modifier = Modifier
@@ -2250,21 +2251,21 @@ private fun LauncherContactQuickAction(
                 when (type) {
                     LauncherContactQuickActionType.CALL -> {
                         drawLine(
-                            MaterialTheme.colorScheme.primary,
+                            tint,
                             androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.24f),
                             androidx.compose.ui.geometry.Offset(u * 0.70f, u * 0.76f),
                             stroke * 1.5f,
                             cap = cap,
                         )
                         drawLine(
-                            MaterialTheme.colorScheme.primary,
+                            tint,
                             androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.22f),
                             androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.18f),
                             stroke * 1.4f,
                             cap = cap,
                         )
                         drawLine(
-                            MaterialTheme.colorScheme.primary,
+                            tint,
                             androidx.compose.ui.geometry.Offset(u * 0.66f, u * 0.82f),
                             androidx.compose.ui.geometry.Offset(u * 0.80f, u * 0.76f),
                             stroke * 1.4f,
@@ -2273,14 +2274,14 @@ private fun LauncherContactQuickAction(
                     }
                     LauncherContactQuickActionType.MESSAGE -> {
                         drawRoundRect(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = tint,
                             topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.22f),
                             size = androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.50f),
                             cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.15f),
                             style = Stroke(width = stroke),
                         )
                         drawLine(
-                            MaterialTheme.colorScheme.primary,
+                            tint,
                             androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.72f),
                             androidx.compose.ui.geometry.Offset(u * 0.27f, u * 0.84f),
                             stroke,
