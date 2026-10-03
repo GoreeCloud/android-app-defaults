@@ -11,6 +11,7 @@
 - The current-main candidate now consolidates the unified navigation-glyph and icon-first action passes in one directly based branch while retaining the `0.8.10-dev` Development identity and monotonic CI version-code contract.
 - Replaced remaining font/Unicode pseudo-glyph controls with first-party vector artwork for previous/next navigation, video play overlays, media-selection checks, card overflow, and directional affordances.
 - Added bounded press/ripple feedback to first-party viewer, selection, header, Settings, Trash, and editor controls.
+- Extended bounded feedback to inline search close, media-access, album quick-access, and album-card surfaces; header title/subtitle now stay single-line with ellipsis so long album names cannot crowd out primary actions.
 - Photo-editor crop presets now expose an explicit selected visual/accessibility state, beginning with Original and clearing when the crop becomes custom.
 - The first-use setup wizard now uses a compact progress rail plus icon-only Back/Return/Continue/Finish controls, preserving its existing accessibility names and persisted step behavior.
 
