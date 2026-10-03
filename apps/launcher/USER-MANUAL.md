@@ -144,7 +144,7 @@ The current Development Settings experience opens on a searchable category home 
 
 ### Settings categories
 
-The searchable overview groups current controls into **Home screen**, **App drawer**, **Folders**, **Search**, **Look & feel**, **Gestures & inputs**, **Notification badges**, and **System & setup**. The **App drawer** category includes **Hidden apps**, which shows the current hidden count and opens a recovery list with a direct **Show** action for each still-installed hidden identity. Search recognizes category descriptions and detailed-control terms such as grid, Dock, page transition, icon pack, notification access, and Universal Search. Opening a category reveals the existing detailed controls; the overview is not a second preference store.
+The searchable overview groups current controls into **Home screen**, **App drawer**, **Folders**, **Search**, **Look & feel**, **Gestures & inputs**, **Notification badges**, and **System & setup**. The **App drawer** category includes **Hidden apps**, which shows the current hidden count and opens a recovery list with a direct **Show** action for each still-installed hidden identity. Recovery rows identify **User app** versus **Work app** so identical package/component names across profiles remain understandable, and Settings search recognizes hidden/hide/visibility terms. Search recognizes category descriptions and detailed-control terms such as grid, Dock, page transition, icon pack, notification access, and Universal Search. Opening a category reveals the existing detailed controls; the overview is not a second preference store.
 
 ### Home screen
 
