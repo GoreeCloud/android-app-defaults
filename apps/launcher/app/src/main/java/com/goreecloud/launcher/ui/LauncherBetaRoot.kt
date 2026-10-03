@@ -12218,7 +12218,7 @@ private fun AppContextPopup(
                     enabled = canAddToFolder && !layoutLocked,
                 )
                 GlazeLauncherPopupAction(
-                    label = if (hiddenFromLauncher) "Show in app drawer" else "Hide app",
+                    label = if (hiddenFromLauncher) "Show in Apps & Search" else "Hide from Apps & Search",
                     symbol = GlazePopupActionSymbol.VISIBILITY,
                     onClick = onToggleHidden,
                 )
