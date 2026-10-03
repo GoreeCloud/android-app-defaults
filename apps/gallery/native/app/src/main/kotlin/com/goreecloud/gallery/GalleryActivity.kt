@@ -1852,15 +1852,16 @@ class GalleryActivity : Activity() {
     private fun cardOverflowButton(
         description: String,
         onClick: (View) -> Unit,
-    ): TextView = TextView(this).apply {
-        text = "⋮"
-        gravity = Gravity.CENTER
-        setTextColor(secondaryTextColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+    ): ImageView = ImageView(this).apply {
+        setImageResource(R.drawable.ic_gallery_more)
+        setColorFilter(secondaryTextColor())
+        scaleType = ImageView.ScaleType.CENTER_INSIDE
+        setPadding(dp(13), dp(13), dp(13), dp(13))
         background = roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.SHAPE_CONTROL_DP)
         isClickable = true
         isFocusable = true
         contentDescription = description
+        tooltipText = description
         setOnClickListener { onClick(this) }
     }
 
@@ -2443,14 +2444,13 @@ class GalleryActivity : Activity() {
             )
             if (item.mimeType.startsWith("video/")) {
                 addView(
-                    TextView(context).apply {
+                    ImageView(context).apply {
                         tag = VIDEO_PLAY_TAG
                         visibility = if (inSelectionMode) View.GONE else View.VISIBLE
-                        text = "▶"
-                        gravity = Gravity.CENTER
-                        setTextColor(Color.WHITE)
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                        setPadding(dp(2), 0, 0, 0)
+                        setImageResource(R.drawable.ic_gallery_play)
+                        setColorFilter(Color.WHITE)
+                        scaleType = ImageView.ScaleType.CENTER_INSIDE
+                        setPadding(dp(14), dp(14), dp(14), dp(14))
                         background = roundedSurface(0xb3000000.toInt(), 24)
                         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                     },
@@ -2477,14 +2477,12 @@ class GalleryActivity : Activity() {
                 )
             }
             addView(
-                TextView(context).apply {
+                ImageView(context).apply {
                     tag = SELECTION_CHECK_TAG
                     visibility = if (selected) View.VISIBLE else View.GONE
-                    text = "✓"
-                    gravity = Gravity.CENTER
-                    setTextColor(Color.WHITE)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-                    setTypeface(typeface, Typeface.BOLD)
+                    setImageResource(R.drawable.ic_gallery_check_white)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setPadding(dp(5), dp(5), dp(5), dp(5))
                     background = roundedSurface(accentColor(), 12)
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 },
@@ -3363,11 +3361,11 @@ class GalleryActivity : Activity() {
         })
         addView(labels, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         addView(
-            TextView(context).apply {
-                text = "›"
-                gravity = Gravity.CENTER
-                setTextColor(accentColor())
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            ImageView(context).apply {
+                setImageResource(R.drawable.ic_gallery_chevron_right)
+                setColorFilter(accentColor())
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                setPadding(dp(8), dp(12), dp(8), dp(12))
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             },
             LinearLayout.LayoutParams(dp(36), dp(GalleryGlazeContract.GENERAL_TARGET_DP)),
