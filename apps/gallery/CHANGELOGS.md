@@ -1,5 +1,19 @@
 # GoreeCloud Gallery Changelogs
 
+## October 3, 2026 — representative-device density and popup refinement
+
+### Changed
+- Tightened first-use setup geometry and copy, capped dialog width on larger screens, and replaced the step-three text value/chevron with the same vector on/off indicator used by Settings.
+- Reduced repeated no-access messaging: the Photos empty state now tells the user that no media is selected and points back to the explicit Choose media action.
+- Reduced header and Settings trailing-control visual weight while preserving 48dp row/action accessibility targets and state descriptions.
+- Phone Videos no longer promotes the first item into an oversized hero card; the full set uses the adaptive phone grid, while 600dp-and-wider layouts retain a bounded featured card.
+- Replaced the platform-default video More popup with a rounded Glaze overlay using first-party Share, Favorite, and Details glyphs.
+- Trash phone grids now use three larger columns with wider gutters, scaling to four/five/six columns on larger width classes; the Android-managed Trash explanation is also more compact.
+- Advanced the owner-testable Development identity to `0.8.11-dev`; the persistent Development signer and Android media-authority boundaries remain unchanged.
+
+### Boundary
+This pass responds to representative-device visual evidence. It changes presentation density and action chrome only; it does not broaden Android media permission, Trash authority, file mutation, network/account behavior, or release qualification.
+
 ## October 3, 2026 — icon-first action chrome
 
 ### Changed
