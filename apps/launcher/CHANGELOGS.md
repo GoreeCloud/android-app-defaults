@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — add App Lock and owner-device UI polish
+
+Current Development source adds profile-qualified **App Lock** controls under **Launcher settings → Privacy & security** and in the app context menu. Locked apps require Android device authentication before a launch initiated by GoreeCloud Launcher proceeds. Locked membership is device-local, stores only exact profile-qualified Launcher app identities, and remains outside portable preference v1. The boundary is explicit: Launcher does not intercept launches originating from notifications, Android Settings, deep links, another launcher, or another app.
+
+The same source tranche responds to representative-device UI feedback by making the normal Dock genuinely background-free so app icons float directly over the wallpaper, while retaining bounded material only for the explicit Edge style and drag-hover feedback. Launcher Settings receives a dedicated privacy/security category, a vector default-HOME warning glyph, lighter hierarchy, and rounded-line category/action glyphs. Search Sources replaces the rough contact/call marks with optically rounded first-party vectors. The built-in widget picker uses one readable column on phone widths and two only on wide layouts, and setup/Home hints reduce unnecessary card weight while preserving existing interaction floors and semantics.
+
+**Acceptance boundary:** this is Development source behavior. App Lock remains a Launcher-originated launch gate rather than a system-wide application firewall. Representative physical-device authentication behavior, accessibility, large/extra-large text, RTL/localization, phone/tablet/foldable presentation, protected Development signing/update continuity, release qualification, Production Acceptance, Stable, Seal, and Anchor remain separate gates.
+
+
 ## October 3, 2026 — integrate onboarding and Search-source scanability follow-up
 
 Protected PR #224 integrates the bounded setup and source-management follow-up on top of the Hidden Apps runtime line. The startup wizard now uses the same compact segmented control pattern for **Home apps**, Grid, and Dock rather than three larger Home-mode cards; each compact choice keeps a 48 dp minimum and exposes radio-button selected-state semantics, its progress rail follows the semantic accent of the active step, setup copy is shorter, Search-mode cards are slightly tighter, and the compact gesture strip keeps bounded decorative geometry with clearer surface separation while preserving the existing three-step flow and persisted configuration.
