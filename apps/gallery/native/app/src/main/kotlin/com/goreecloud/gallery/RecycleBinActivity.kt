@@ -195,7 +195,7 @@ class RecycleBinActivity : Activity() {
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             },
-            LinearLayout.LayoutParams(dp(40), dp(40)).apply {
+            LinearLayout.LayoutParams(dp(36), dp(36)).apply {
                 marginEnd = dp(8)
             },
         )
@@ -208,7 +208,7 @@ class RecycleBinActivity : Activity() {
             setTextColor(primaryTextColor())
             setTextSize(
                 TypedValue.COMPLEX_UNIT_SP,
-                if (resources.configuration.screenWidthDp < 360) 28f else 32f,
+                if (resources.configuration.screenWidthDp < 360) 27f else 30f,
             )
             setTypeface(typeface, Typeface.BOLD)
             maxLines = 1
@@ -217,7 +217,7 @@ class RecycleBinActivity : Activity() {
         headerSubtitle = TextView(this).apply {
             text = "Android controls Trash retention and expiration"
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
         }
@@ -241,7 +241,7 @@ class RecycleBinActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                topMargin = dp(10)
+                topMargin = dp(8)
                 bottomMargin = dp(2)
             },
         )
@@ -431,10 +431,10 @@ class RecycleBinActivity : Activity() {
 
     private fun renderMediaGrid(items: List<MediaItem>, currentGeneration: Int) {
         val columns = gridColumns()
-        val gap = dp(4)
+        val gap = dp(6)
         val totalGap = gap * (columns - 1)
         val tileSize = ((resources.displayMetrics.widthPixels - dp(horizontalGutterDp() * 2) - totalGap) / columns)
-            .coerceAtLeast(dp(72))
+            .coerceAtLeast(dp(88))
 
         items.chunked(columns).forEachIndexed { rowIndex, rowItems ->
             val row = LinearLayout(this).apply {
@@ -1035,19 +1035,20 @@ class RecycleBinActivity : Activity() {
 
     private fun messageRow(title: String, message: String): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(dp(18), dp(18), dp(18), dp(18))
-        background = roundedSurface(withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.045f), 20)
+        setPadding(dp(14), dp(14), dp(14), dp(14))
+        background = roundedSurface(withAlpha(primaryTextColor(), if (isNightMode()) 0.09f else 0.04f), 18)
         addView(TextView(context).apply {
             text = title
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             setTypeface(typeface, Typeface.BOLD)
         })
         addView(TextView(context).apply {
             text = message
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setPadding(0, dp(5), 0, 0)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.25f)
+            setLineSpacing(0f, 1.05f)
+            setPadding(0, dp(4), 0, 0)
         })
     }
 
@@ -1133,12 +1134,8 @@ class RecycleBinActivity : Activity() {
         else -> 16
     }
 
-    private fun gridColumns(): Int = when {
-        resources.configuration.screenWidthDp >= 840 -> 6
-        resources.configuration.screenWidthDp >= 600 -> 5
-        resources.configuration.screenWidthDp >= 360 -> 4
-        else -> 3
-    }
+    private fun gridColumns(): Int =
+        GalleryGlazeContract.trashGridColumns(resources.configuration.screenWidthDp)
 
     private fun gridCacheKey(contentUri: String): String = "$GRID_CACHE_PREFIX:$contentUri"
     private fun viewerCacheKey(contentUri: String): String = "$VIEWER_CACHE_PREFIX:$contentUri"
