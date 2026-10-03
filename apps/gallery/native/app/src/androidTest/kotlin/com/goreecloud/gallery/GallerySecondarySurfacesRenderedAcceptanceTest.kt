@@ -2,6 +2,7 @@ package com.goreecloud.gallery
 
 import android.graphics.Rect
 import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import android.view.Gravity
 import android.view.View
@@ -99,6 +100,10 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
             assertTrue(
                 "Trash selected destination should use compact inset Glaze material",
                 controls.single { it.isSelected }.background is InsetDrawable,
+            )
+            assertTrue(
+                "Trash navigation should use the same bounded ripple feedback",
+                controls.all { it.foreground is RippleDrawable },
             )
         }
     }
