@@ -257,6 +257,16 @@ The approved direction expands Launcher Universal Search across applications, ap
 
 GoreeCloud Search may later provide optional advanced search, semantic/query-processing, federation, filters/operators, or Web/current-information capabilities. GoreeCloud Index may later provide optional scalable indexing, catalogs, background indexing pipelines, and high-performance retrieval. Neither is required for core Launcher Universal Search.
 
+## App Lock
+
+Launcher Settings includes **Security → App Lock**. App Lock is optional and uses one Launcher-local credential for all locked apps: either a **4–6 digit PIN** or a **pattern containing 4–9 different dots**. Long-press an app on Home or in Apps and choose **Lock app**. When an app is locked, the same contextual action becomes **Unlock app** and requires the current App Lock credential before protection is removed.
+
+Locked apps are challenged when GoreeCloud Launcher tries to open them, including ordinary Home/Apps/folder launches, Launcher gesture targets, Universal Search application results, and Launcher-dispatched application shortcuts. Changing the credential, removing a lock, or turning App Lock off also requires the current credential. After five failed credential attempts, Launcher applies a 30-second local cooldown before another verification attempt.
+
+**Important limitation:** App Lock only blocks launches initiated through GoreeCloud Launcher. It is **not** an Android-wide app lock. Another launcher, Android notifications, deep links, recents, system surfaces, Settings, or another authorized component may still open the application. Launcher does not request Accessibility Service, device-admin, or another elevated Android privilege to imitate system-wide blocking.
+
+The raw PIN or pattern is never stored. Launcher stores a random salt and PBKDF2-HMAC-SHA256 verifier in the app-private App Lock DataStore plus profile-qualified locked-app keys and local throttle state. This App Lock DataStore is outside Launcher’s explicit Android backup/device-transfer allowlist and is not part of the portable Launcher preference/restore format.
+
 ## Appearance and gestures
 
 Launcher settings includes a **Gestures** section for Home-surface assignments. Swipe up, Swipe down, Swipe left, Swipe right, Double-tap, and Tap and hold can each be mapped independently to None, Apps, Launcher Universal Search, Launcher settings, Home editor, Wallpaper, Theme Manager, or a currently launchable app. Defaults preserve Swipe up → Apps, Swipe down → Universal Search, and Tap and hold → Home editor. App targets resolve through Android `LauncherApps`; if a selected app is removed or unavailable in its profile, the gesture fails safely without dispatching an unvalidated intent. Swipe left/right, Double-tap, and Tap and hold apply to empty Home space so long-press drag/reorder and app placement controls remain authoritative.
