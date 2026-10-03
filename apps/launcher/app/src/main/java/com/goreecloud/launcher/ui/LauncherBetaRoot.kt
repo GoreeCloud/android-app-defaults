@@ -10811,6 +10811,42 @@ private fun LauncherAppLockManagerSheet(
                 inputTestTag = "launcher-app-lock-search-input",
             )
 
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+            ) {
+                listOf(false to "All", true to "Locked").forEach { (lockedOnly, label) ->
+                    val selected = showLockedOnly == lockedOnly
+                    Surface(
+                        onClick = { showLockedOnly = lockedOnly },
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                        color = if (selected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.68f)
+                        } else {
+                            Color.Transparent
+                        },
+                        border = BorderStroke(
+                            1.dp,
+                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.46f)
+                            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.68f),
+                        ),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 11.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                label + " · " + if (lockedOnly) lockedCount else apps.size,
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
+                    }
+                }
+            }
+
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
