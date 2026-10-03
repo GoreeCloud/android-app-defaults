@@ -772,29 +772,39 @@ private fun LauncherSearchSuggestionPresentationControl(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.76f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.70f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.065f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 6.dp),
+                .padding(horizontal = 10.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(
-                "Suggestion tabs",
+            Column(
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-            )
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(
+                    "Suggestion tabs",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                )
+                Text(
+                    selected.displayName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                )
+            }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 LauncherSearchSuggestionPresentation.entries.forEach { option ->
@@ -802,7 +812,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                     Surface(
                         onClick = { onSelect(option) },
                         modifier = Modifier
-                            .heightIn(min = 44.dp)
+                            .size(44.dp)
                             .semantics {
                                 contentDescription =
                                     "Search suggestion tabs: " + option.displayName
@@ -811,22 +821,18 @@ private fun LauncherSearchSuggestionPresentationControl(
                         color = if (active) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.46f)
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f)
                         },
                         border = BorderStroke(
                             1.dp,
                             if (active) {
                                 MaterialTheme.colorScheme.primary
                             } else {
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f)
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
                             },
                         ),
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
+                        Box(contentAlignment = Alignment.Center) {
                             LauncherSuggestionPresentationGlyph(
                                 option = option,
                                 tint = if (active) {
@@ -834,17 +840,6 @@ private fun LauncherSearchSuggestionPresentationControl(
                                 } else {
                                     MaterialTheme.colorScheme.onSurfaceVariant
                                 },
-                            )
-                            Text(
-                                option.displayName,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
-                                color = if (active) {
-                                    MaterialTheme.colorScheme.onPrimary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                                maxLines = 1,
                             )
                         }
                     }
@@ -1822,16 +1817,19 @@ private fun LauncherGlazeSearchResult(
                             )
                         }
                     }
-                    Text(
-                        when {
-                            isContact -> "View"
-                            result.action is LauncherCopyTextSearchAction -> "Copy"
-                            else -> "Open"
-                        },
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    Surface(
+                        modifier = Modifier.size(32.dp),
+                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            LauncherSearchResultTrailingGlyph(
+                                result = result,
+                                isContact = isContact,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 }
             }
             if (isContact && number != null) {
@@ -1859,6 +1857,99 @@ private fun LauncherGlazeSearchResult(
                         modifier = Modifier.heightIn(min = 40.dp),
                     ) { Text("Message") }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchResultTrailingGlyph(
+    result: LauncherSearchResult,
+    isContact: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when {
+            result.action is LauncherCopyTextSearchAction -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.30f, u * 0.22f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.50f, u * 0.56f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.10f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.50f, u * 0.56f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+            }
+            isContact -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.16f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.34f),
+                    style = Stroke(width = stroke),
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = 205f,
+                    sweepAngle = 130f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.47f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.48f, u * 0.34f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.62f, u * 0.62f),
+                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.40f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.40f),
+                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.40f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.40f),
+                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.52f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            else -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.72f),
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.28f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.48f, u * 0.28f),
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.28f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.28f),
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.52f),
+                    stroke,
+                    cap = cap,
+                )
             }
         }
     }
@@ -2610,11 +2701,8 @@ private fun LauncherSearchSourceManager(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.84f),
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                    ),
+                    color = Color.Transparent,
+                    border = null,
                     shadowElevation = 0.dp,
                 ) {
                     Column {
@@ -2658,9 +2746,12 @@ private fun LauncherSearchSourceManager(
 
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-                            color = Color.Transparent,
-                            border = null,
+                            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.68f),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+                            ),
                         ) {
                             Column {
                                 options.forEachIndexed { sectionIndex, option ->
@@ -3107,7 +3198,7 @@ private fun compactSourceSummary(
             "Cloud · Optional"
         }
     LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID ->
-        "Web handoff · Optional"
+        "Web · Optional"
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
         "App handoff · Optional"
     else -> when (option.invocationMode) {
