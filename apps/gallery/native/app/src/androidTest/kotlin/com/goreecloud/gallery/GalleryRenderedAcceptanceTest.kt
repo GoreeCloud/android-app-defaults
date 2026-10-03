@@ -66,10 +66,11 @@ class GalleryRenderedAcceptanceTest {
         onView(withContentDescription("Photos, selected"))
             .check(matches(hasSelectedStateDescription()))
 
-        onView(withContentDescription("Gallery media access action"))
+        onView(withContentDescription(containsString("Gallery media access action")))
             .check(matches(isDisplayed()))
             .check(matches(isClickable()))
             .check(matches(hasMinimumTouchSizeDp(48f)))
+            .check(matches(hasLeadingCompoundDrawable()))
     }
 
     @Test
@@ -522,6 +523,15 @@ class GalleryRenderedAcceptanceTest {
             val heightDp = view.height / density
             mismatchDescription.appendText("rendered ${widthDp}dp x ${heightDp}dp")
         }
+    }
+
+    private fun hasLeadingCompoundDrawable() = object : TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description) {
+            description.appendText("renders a leading action glyph")
+        }
+
+        override fun matchesSafely(view: View): Boolean =
+            view is TextView && view.compoundDrawables[0] != null
     }
 
     private fun hasCenteredCompoundDrawable() = object : TypeSafeMatcher<View>() {
