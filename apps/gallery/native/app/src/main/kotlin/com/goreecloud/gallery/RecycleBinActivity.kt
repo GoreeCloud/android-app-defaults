@@ -15,6 +15,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
@@ -205,13 +206,20 @@ class RecycleBinActivity : Activity() {
         headerTitle = TextView(this).apply {
             text = "Trash"
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                if (resources.configuration.screenWidthDp < 360) 28f else 32f,
+            )
             setTypeface(typeface, Typeface.BOLD)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
         }
         headerSubtitle = TextView(this).apply {
             text = "Android controls Trash retention and expiration"
             setTextColor(secondaryTextColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            maxLines = 1
+            ellipsize = TextUtils.TruncateAt.END
         }
         titles.addView(headerTitle)
         titles.addView(headerSubtitle)
@@ -1018,7 +1026,43 @@ class RecycleBinActivity : Activity() {
         })
     }
 
-    private fun emptyState(title: String, message: String): View = messageRow(title, message)
+    private fun emptyState(title: String, message: String): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER
+        setPadding(dp(18), dp(22), dp(18), dp(18))
+        background = roundedSurface(
+            withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.045f),
+            20,
+        )
+        addView(
+            ImageView(context).apply {
+                setImageResource(R.drawable.ic_gallery_nav_trash)
+                setColorFilter(accentColor())
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                setPadding(dp(10), dp(10), dp(10), dp(10))
+                background = roundedSurface(withAlpha(accentColor(), 0.11f), 22)
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            },
+            LinearLayout.LayoutParams(dp(44), dp(44)).apply {
+                bottomMargin = dp(10)
+            },
+        )
+        addView(TextView(context).apply {
+            text = title
+            gravity = Gravity.CENTER
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        addView(TextView(context).apply {
+            text = message
+            gravity = Gravity.CENTER
+            setTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setLineSpacing(0f, 1.08f)
+            setPadding(0, dp(6), 0, 0)
+        })
+    }
 
     private fun roundedSurface(color: Int, radiusDp: Int): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
