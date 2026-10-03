@@ -11,7 +11,7 @@ Use **disposable copied photos and videos** when testing Restore, permanent dele
 ## Opening the local library
 
 1. Launch **GoreeCloud Gallery**.
-2. If media access has not been granted, choose the media-access action and use Android's permission surface to select the access scope you want to provide.
+2. If media access has not been granted, choose the media-access action and use Android's permission surface to select the access scope you want to provide. The no-access Gallery surface intentionally uses one compact permission row rather than a second full-width empty-state card.
 3. Gallery reads only the local MediaStore view allowed by the current Android permission scope.
 4. If Android denies the read or the provider is unavailable, Gallery reports that failure instead of presenting it as an empty library.
 
@@ -23,7 +23,7 @@ While Gallery remains in the foreground, it observes Android MediaStore and auto
 
 The current native Development experience provides direct **Photos**, **Albums**, **Videos**, **Trash**, and **Settings** destinations.
 
-The bottom navigation defaults to **Icons only**. In this mode, each glyph is centered in an equal-width destination slot and the selected destination uses a compact inset Glaze pill. Long-press/hover tooltips expose destination names where Android supports them, and accessibility services retain destination and selected-state semantics in every visual mode. Use **Settings > Appearance > Bottom navigation** to switch to **Text only** or **Icons & text**. Tapping the already-selected destination returns that view to the top.
+The bottom navigation is a fixed **glyph-only** five-destination rail. Photos, Albums, Videos, Trash, and Settings use equal-width 48dp destination slots with centered glyphs, a restrained selected-state accent, and no visible tab labels. Destination names remain available through accessibility descriptions and tooltips. Tapping the already-selected destination returns that view to the top.
 
 - Photos uses an adaptive local timeline grid. Sparse groups use a larger three-column presentation lane, and dense groups may step down one column when that keeps the same row count but produces a visibly fuller final row (for example, 3+3 instead of 4+2).
 - Videos uses a balanced card grid on phones instead of an oversized first-item hero: one column on very narrow devices, two columns on ordinary phones, and a featured first card only from 600dp upward before the wider three/four-column grid. Video identity uses a play glyph; a duration badge appears only when Android supplies a duration. Category chips still appear only from the current Android-authorized snapshot. Card More actions use a rounded Glaze menu with first-party glyphs.
@@ -40,7 +40,7 @@ The viewer now uses compact icon/glyph actions rather than labeled text buttons 
 
 The first-use setup also uses icon-first navigation controls with a visible three-step progress rail. Screen titles and explanatory guidance remain textual; Back, Return, Continue, and Finish are exposed as glyph controls with descriptive accessibility names.
 
-Settings choices show the current value with a compact chevron, while boolean Settings use a visual switch glyph instead of a separate On/Off text pill; TalkBack/state semantics still announce the current value. Empty Photos, Albums, Videos, search results, and Trash states use semantic icon cards for quicker visual recognition.
+Settings groups related rows inside shared section surfaces instead of placing every preference in its own card. Choices show a compact value/chevron, booleans use vector switch glyphs, and TalkBack/state semantics announce current values. Empty Photos, Albums, Videos, search results, and Trash states use lightweight semantic icon treatment without oversized full-width cards.
 
 - Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale.
 - For photos, use the viewer's view-options control for **Fit entire photo**, **Fill viewer**, or **Zoom 2×**. You can also pinch from 1× up to 4×; while zoomed, drag the photo to pan. Item-navigation swipes are disabled while zoomed so a pan does not change photos. Choose **Reset zoom** or navigate to another item to return to baseline zoom.
