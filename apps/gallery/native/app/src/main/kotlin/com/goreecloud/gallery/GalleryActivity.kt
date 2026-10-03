@@ -2256,18 +2256,21 @@ class GalleryActivity : Activity() {
         GalleryVideoFilter.FAVORITES -> R.drawable.ic_gallery_favorite
     }
 
-    private fun albumQuickAccessIcon(album: AlbumPresentation): Int =
+    private fun recognizedAlbumIcon(album: AlbumPresentation): Int? =
         when (GalleryAlbumQuickAccessPolicy.kind(album.name, album.isFavorites)) {
             GalleryAlbumQuickAccessKind.FAVORITES -> R.drawable.ic_gallery_favorite
             GalleryAlbumQuickAccessKind.CAMERA -> R.drawable.ic_gallery_camera
             GalleryAlbumQuickAccessKind.SCREENSHOTS -> R.drawable.ic_gallery_nav_photos
             GalleryAlbumQuickAccessKind.DOWNLOADS -> R.drawable.ic_gallery_download
             GalleryAlbumQuickAccessKind.SCREEN_RECORDINGS -> R.drawable.ic_gallery_screen_recording
-            null -> R.drawable.ic_gallery_nav_albums
+            null -> null
         }
 
+    private fun albumQuickAccessIcon(album: AlbumPresentation): Int =
+        recognizedAlbumIcon(album) ?: R.drawable.ic_gallery_nav_albums
+
     private fun albumBadgeIcon(album: AlbumPresentation): Int =
-        albumQuickAccessIcon(album)
+        recognizedAlbumIcon(album)
             ?: if (album.cover.mimeType.startsWith("video/")) {
                 R.drawable.ic_gallery_nav_videos
             } else {
