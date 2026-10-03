@@ -2783,11 +2783,11 @@ private fun WidgetPickerBuiltInCard(
                             color = previewColor,
                         )
 
-                        WorkspaceWidgetCatalog.ANALOG_CLOCK -> Text(
-                            "◷",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.ANALOG_CLOCK ->
+                            LauncherWidgetPreviewGlyph(
+                                typeId = typeId,
+                                tint = previewColor,
+                            )
 
                         WorkspaceWidgetCatalog.DATE -> Text(
                             now.dayOfMonth.toString(),
@@ -2810,17 +2810,17 @@ private fun WidgetPickerBuiltInCard(
 
                         WorkspaceWidgetCatalog.SEARCH -> LauncherSearchMagnifier(previewColor)
 
-                        WorkspaceWidgetCatalog.QUICK_ACTIONS -> Text(
-                            "•••",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.QUICK_ACTIONS ->
+                            LauncherWidgetPreviewGlyph(
+                                typeId = typeId,
+                                tint = previewColor,
+                            )
 
-                        WorkspaceWidgetCatalog.BATTERY -> Text(
-                            "▰",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.BATTERY ->
+                            LauncherWidgetPreviewGlyph(
+                                typeId = typeId,
+                                tint = previewColor,
+                            )
 
                         WorkspaceWidgetCatalog.LAUNCHER_STATUS -> Text(
                             "GC",
@@ -5272,11 +5272,15 @@ private fun LauncherBuiltInWidget(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        Text(
-                            "⌕",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                LauncherSearchMagnifier(MaterialTheme.colorScheme.primary)
+                            }
+                        }
                         Column(Modifier.weight(1f)) {
                             Text(
                                 "Search GoreeCloud",
@@ -5307,15 +5311,35 @@ private fun LauncherBuiltInWidget(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        GlazeActionChip("Apps", onOpenApps, Modifier.weight(1f))
-                        GlazeActionChip("Search", onOpenSearch, Modifier.weight(1f))
+                        GlazeActionChip(
+                            title = "Apps",
+                            symbol = LauncherQuickActionSymbol.APPS,
+                            onClick = onOpenApps,
+                            modifier = Modifier.weight(1f),
+                        )
+                        GlazeActionChip(
+                            title = "Search",
+                            symbol = LauncherQuickActionSymbol.SEARCH,
+                            onClick = onOpenSearch,
+                            modifier = Modifier.weight(1f),
+                        )
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        GlazeActionChip("Edit Home", onOpenHomeEditor, Modifier.weight(1f))
-                        GlazeActionChip("Settings", onOpenSettings, Modifier.weight(1f))
+                        GlazeActionChip(
+                            title = "Edit Home",
+                            symbol = LauncherQuickActionSymbol.EDIT_HOME,
+                            onClick = onOpenHomeEditor,
+                            modifier = Modifier.weight(1f),
+                        )
+                        GlazeActionChip(
+                            title = "Settings",
+                            symbol = LauncherQuickActionSymbol.SETTINGS,
+                            onClick = onOpenSettings,
+                            modifier = Modifier.weight(1f),
+                        )
                     }
                 }
             }
@@ -5341,10 +5365,10 @@ private fun LauncherBuiltInWidget(
                             color = foreground.copy(alpha = 0.70f),
                         )
                     }
-                    Text(
-                        if (battery.charging) "⚡" else "▰",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                    LauncherBatteryGlyph(
+                        percent = battery.percent,
+                        charging = battery.charging,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -5602,14 +5626,25 @@ private fun HomeQuickActions(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
     ) {
-        GlazeActionChip("Apps", onOpenApps, Modifier.weight(1f))
-        GlazeActionChip("Search", onOpenSearch, Modifier.weight(1f))
+        GlazeActionChip(
+            title = "Apps",
+            symbol = LauncherQuickActionSymbol.APPS,
+            onClick = onOpenApps,
+            modifier = Modifier.weight(1f),
+        )
+        GlazeActionChip(
+            title = "Search",
+            symbol = LauncherQuickActionSymbol.SEARCH,
+            onClick = onOpenSearch,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
 @Composable
 private fun GlazeActionChip(
     title: String,
+    symbol: LauncherQuickActionSymbol,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -5629,35 +5664,269 @@ private fun GlazeActionChip(
     Surface(
         modifier = modifier.heightIn(min = resolvedPresentation.minimumInteractionTarget),
         onClick = onClick,
-        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
         color = when (resolvedPresentation.materialRole) {
             GlazeV16MaterialRole.SOLID -> MaterialTheme.colorScheme.surface
             GlazeV16MaterialRole.RAISED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
-            else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.68f)
+            else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.64f)
         },
         border = BorderStroke(
             1.dp,
             if (solidResolved) {
                 MaterialTheme.colorScheme.outlineVariant
             } else {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
             },
         ),
-        shadowElevation = if (solidResolved) 1.dp else 2.dp,
+        shadowElevation = if (solidResolved) 1.dp else 0.dp,
     ) {
-        Box(
-            modifier = Modifier.padding(
-                horizontal = GlazeMetrics.space3,
-                vertical = GlazeMetrics.space2,
-            ),
-            contentAlignment = Alignment.Center,
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
         ) {
+            Surface(
+                modifier = Modifier.size(28.dp),
+                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    LauncherQuickActionGlyph(
+                        symbol = symbol,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(15.dp),
+                    )
+                }
+            }
             Text(
                 title,
                 style = MaterialTheme.typography.labelMedium,
-                color = foreground.copy(alpha = 0.92f),
+                color = foreground.copy(alpha = 0.94f),
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
+        }
+    }
+}
+
+private enum class LauncherQuickActionSymbol {
+    APPS,
+    SEARCH,
+    EDIT_HOME,
+    SETTINGS,
+}
+
+@Composable
+private fun LauncherQuickActionGlyph(
+    symbol: LauncherQuickActionSymbol,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.09f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                tint,
+                Offset(u * x1, u * y1),
+                Offset(u * x2, u * y2),
+                stroke,
+                cap = cap,
+            )
+        }
+        when (symbol) {
+            LauncherQuickActionSymbol.APPS -> {
+                listOf(
+                    0.16f to 0.16f,
+                    0.57f to 0.16f,
+                    0.16f to 0.57f,
+                    0.57f to 0.57f,
+                ).forEach { (x, y) ->
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = Offset(u * x, u * y),
+                        size = Size(u * 0.27f, u * 0.27f),
+                        cornerRadius = CornerRadius(u * 0.06f),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                    )
+                }
+            }
+            LauncherQuickActionSymbol.SEARCH -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.24f,
+                    center = Offset(u * 0.42f, u * 0.42f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                )
+                line(0.60f, 0.60f, 0.84f, 0.84f)
+            }
+            LauncherQuickActionSymbol.EDIT_HOME -> {
+                line(0.18f, 0.52f, 0.50f, 0.22f)
+                line(0.50f, 0.22f, 0.82f, 0.52f)
+                line(0.28f, 0.46f, 0.28f, 0.82f)
+                line(0.72f, 0.46f, 0.72f, 0.82f)
+                line(0.28f, 0.82f, 0.72f, 0.82f)
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.055f,
+                    center = Offset(u * 0.72f, u * 0.24f),
+                )
+            }
+            LauncherQuickActionSymbol.SETTINGS -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.24f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.07f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                )
+                listOf(
+                    0.50f to 0.12f,
+                    0.50f to 0.88f,
+                    0.12f to 0.50f,
+                    0.88f to 0.50f,
+                ).forEach { (x, y) -> line(0.50f, 0.50f, x, y) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherBatteryGlyph(
+    percent: Int?,
+    charging: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    val contrast = MaterialTheme.colorScheme.surface
+    Canvas(modifier.size(30.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.065f
+        val level = ((percent ?: 55).coerceIn(0, 100) / 100f)
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(u * 0.10f, u * 0.27f),
+            size = Size(u * 0.70f, u * 0.46f),
+            cornerRadius = CornerRadius(u * 0.08f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+        )
+        drawRoundRect(
+            color = tint.copy(alpha = 0.80f),
+            topLeft = Offset(u * 0.15f, u * 0.32f),
+            size = Size(u * 0.60f * level.coerceAtLeast(0.06f), u * 0.36f),
+            cornerRadius = CornerRadius(u * 0.05f),
+        )
+        drawRoundRect(
+            color = tint,
+            topLeft = Offset(u * 0.82f, u * 0.40f),
+            size = Size(u * 0.08f, u * 0.20f),
+            cornerRadius = CornerRadius(u * 0.025f),
+        )
+        if (charging) {
+            val bolt = Path().apply {
+                moveTo(u * 0.52f, u * 0.18f)
+                lineTo(u * 0.37f, u * 0.49f)
+                lineTo(u * 0.51f, u * 0.49f)
+                lineTo(u * 0.43f, u * 0.82f)
+                lineTo(u * 0.67f, u * 0.43f)
+                lineTo(u * 0.54f, u * 0.43f)
+                close()
+            }
+            drawPath(bolt, color = contrast)
+        }
+    }
+}
+
+@Composable
+private fun LauncherHomeOpenGlyph(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        drawLine(tint, Offset(u * 0.28f, u * 0.50f), Offset(u * 0.72f, u * 0.50f), stroke, cap = cap)
+        drawLine(tint, Offset(u * 0.55f, u * 0.32f), Offset(u * 0.72f, u * 0.50f), stroke, cap = cap)
+        drawLine(tint, Offset(u * 0.72f, u * 0.50f), Offset(u * 0.55f, u * 0.68f), stroke, cap = cap)
+    }
+}
+
+@Composable
+private fun LauncherWidgetPreviewGlyph(
+    typeId: String,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(34.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.065f
+        when (typeId) {
+            WorkspaceWidgetCatalog.ANALOG_CLOCK -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.34f,
+                    center = center,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                )
+                drawLine(
+                    tint,
+                    center,
+                    Offset(u * 0.50f, u * 0.29f),
+                    stroke,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                )
+                drawLine(
+                    tint,
+                    center,
+                    Offset(u * 0.68f, u * 0.58f),
+                    stroke,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                )
+            }
+            WorkspaceWidgetCatalog.QUICK_ACTIONS -> {
+                listOf(
+                    0.14f to 0.14f,
+                    0.55f to 0.14f,
+                    0.14f to 0.55f,
+                    0.55f to 0.55f,
+                ).forEach { (x, y) ->
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = Offset(u * x, u * y),
+                        size = Size(u * 0.31f, u * 0.31f),
+                        cornerRadius = CornerRadius(u * 0.08f),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                    )
+                }
+            }
+            WorkspaceWidgetCatalog.BATTERY -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * 0.12f, u * 0.30f),
+                    size = Size(u * 0.66f, u * 0.40f),
+                    cornerRadius = CornerRadius(u * 0.07f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(stroke),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * 0.18f, u * 0.36f),
+                    size = Size(u * 0.38f, u * 0.28f),
+                    cornerRadius = CornerRadius(u * 0.04f),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(u * 0.80f, u * 0.42f),
+                    size = Size(u * 0.08f, u * 0.16f),
+                    cornerRadius = CornerRadius(u * 0.02f),
+                )
+            }
         }
     }
 }
@@ -5667,31 +5936,55 @@ private fun EmptyWorkspaceCard(
     onOpenApps: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
-        color = GlazeAtmosphere.canvasBlack.copy(alpha = 0.20f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+        onClick = onOpenApps,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 54.dp)
+            .semantics {
+                contentDescription = "Open Apps. Hold Home to customize."
+            },
+        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.60f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(GlazeMetrics.space3),
+                .padding(horizontal = 12.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            Surface(
+                modifier = Modifier.size(34.dp),
+                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    LauncherQuickActionGlyph(
+                        symbol = LauncherQuickActionSymbol.APPS,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
             Column(Modifier.weight(1f)) {
                 Text(
-                    "Add apps to Home",
-                    color = Color.White,
+                    "Open Apps",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    "Long-press an app to place it on Home or in the dock.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.74f),
+                    "Hold Home to customize",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            GlazeTextAction("Apps", onOpenApps)
+            LauncherHomeOpenGlyph(
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
