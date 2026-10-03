@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 2, 2026 — compact Search, clean starter Home, and visual onboarding
+
+Protected PR #194 integrates the screenshot-driven density and onboarding tranche. Ordinary Universal Search application and shortcut results are materially denser while Top result remains visually distinct; Search Sources uses compact navigation chrome with Suggestion tabs inside the normal scroll content; list-level provider/status copy is shortened while technical/privacy detail remains expandable; starter provisioning no longer automatically places Calendar or Quick actions widgets; and first-run setup uses a compact progress rail, visual Search/Home choices, concise feature cards, segmented grid/Dock choices, and Learn more for advanced detail.
+
+The clean-Home behavior is scoped to starter provisioning rather than changing the fallback semantics of established user preferences. Reserved historical starter placements may be removed by the narrow starter-repair path, but user-created widget placements are not targeted. Existing HOME-role, Android permission, Search-provider, connected-source opt-in, query-retention, workspace, and drag/drop authority are unchanged.
+
+Exact PR head `ef21e27304071c332ec72b2c1497332c6be2dbf9` passed Mandatory app migration provenance #660, Android Development Foundation #1152, Migrated Android apps CI #686, and Protected promotion #640 before squash merge as `a318fd982d0fa7ba437cca1a2a1fad5fcfe16be3`. Exact-head sidecar artifact `11250649680` contains package `com.goreecloud.launcher.dev`, version `0.1.0-dev`, versionCode `1000686`, and APK SHA-256 `53cf5ae8864b98a61c8fa5309f19096434c9bd4fab652ee85adcb9b381f5c7bd`.
+
+**Acceptance boundary:** Development integration only. Representative-device visual retest, accessibility/large-text/form-factor acceptance, protected Development signing/update continuity, Release Candidate, Production, Stable, Seal, and Anchor remain open.
+
 ## October 2, 2026 — representative-device UI correction after CI-649
 
 Protected PR #192 integrates the first screenshot-driven follow-up after the CI-649 representative-device pass. Launcher-owned Calendar, Weather, and Quick actions Home widgets now use lighter wallpaper-aware Glaze surfaces; Edit Home and New Folder replace visible font/Unicode pseudo-icons with Launcher-owned vector geometry; Edit Home page previews use widget-specific miniature structures instead of generic blue blocks; the App Drawer sort/new-folder/settings artwork and sort popup are visually aligned to the dark Glaze drawer; fixed five-column Drawer labels use bounded single-line ellipsis; and Universal Search Sources keeps the complete registered connected-source catalog visible even when an optional handoff application is unavailable.
@@ -44,7 +54,7 @@ Merged PR #147 integrated this source to authoritative `main` as `d667a65ca565ff
 
 ## October 1, 2026 — App Drawer favorites
 
-Merged PR #144 adds device-local, profile-qualified App Drawer pinning. Application long-press actions can pin/unpin an app in Apps, pinned state is surfaced in the app context status and directly on pinned app tiles/rows, the drawer sort menu includes **Pinned first**, and a ★ control can show pinned apps only on the active User/Work page. Drawer sort selection is persisted locally across surface/process recreation. Pin filtering/sorting remains presentation-only and never mutates Home/Dock/folder placement or cross-profile identity.
+Merged PR #144 adds device-local, profile-qualified App Drawer pinning. Application long-press actions can pin/unpin an app in Apps, pinned state is surfaced in the app context status and directly on pinned app tiles/rows, the drawer sort menu includes **Pinned first**, and a dedicated pin control can show pinned apps only on the active User/Work page. Drawer sort selection is persisted locally across surface/process recreation. Pin filtering/sorting remains presentation-only and never mutates Home/Dock/folder placement or cross-profile identity.
 
 The feature is integrated into authoritative `main` as `d78ef5625ad14ef62c2405fdb697fe37aba81bec` from exact head `f98fd45d7c7dae86790f24ab4c05c13e4f66eb37`. Exact-head provenance, Android Development Foundation, Launcher build/JVM/lint/schema/APK, complete API 36 runtime, transition-performance, migrated-app required gate, and protected promotion all succeeded before merge. Representative-device accessibility/large-text acceptance and broader drawer organization remain open; Launcher remains Development.
 
