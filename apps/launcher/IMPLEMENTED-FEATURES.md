@@ -1,5 +1,14 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — App Lock and owner-feedback presentation tranche
+
+Development source now contains device-local, profile-qualified App Lock membership, a **Privacy & security** settings destination, per-app Lock/Unlock context actions, and Android device-credential gating before Launcher-originated app launches. The implementation stores no PIN, password, biometric material, authentication token, telemetry, or network state. When Android has no secure screen lock or cannot provide an authentication intent, the protected launch fails closed.
+
+Presentation changes in the same tranche make the ordinary Dock background-free, keep Edge/drag feedback bounded, switch phone widget browsing to a readable one-column catalog, reduce setup and hint visual weight, replace the literal default-HOME warning character with a vector glyph, add a dedicated security glyph, round line caps across Launcher-owned settings/context vectors, and refine Search Sources contact/call icon geometry.
+
+**Acceptance boundary:** implemented in Development source only. System-wide app blocking is not claimed; direct launches outside GoreeCloud Launcher are outside this feature's authority. Representative-device security/interaction acceptance, accessibility/reflow/form-factor validation, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
+
+
 ## October 3, 2026 — onboarding and Search-source scanability follow-up
 
 Protected PR #224 integrates compact segmented **Home apps**, Grid, and Dock setup choices with a 48 dp interaction floor and explicit radio-button selected-state semantics; active-step progress accenting; shorter setup and Search-mode presentation; direct **Sources** recovery from unavailable-source Search warnings; Launcher-owned Search-source reorder glyphs; shorter source/folder/provider summaries; bounded fallback-result titles; and end-to-end clear-query recovery coverage. The non-clickable gesture guide remains compact at a 44 dp card height without being treated as an actionable touch target. Search actions, including the Search Sources Back control, retain a 48 dp interaction floor.
