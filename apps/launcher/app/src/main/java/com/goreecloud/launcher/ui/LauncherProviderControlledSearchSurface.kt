@@ -1822,15 +1822,9 @@ private fun LauncherGlazeSearchResult(
                             )
                         }
                     }
-                    Text(
-                        when {
-                            isContact -> "View"
-                            result.action is LauncherCopyTextSearchAction -> "Copy"
-                            else -> "Open"
-                        },
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
+                    LauncherSearchResultTrailingGlyph(
+                        copy = result.action is LauncherCopyTextSearchAction,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
