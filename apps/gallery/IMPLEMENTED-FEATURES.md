@@ -16,6 +16,8 @@ Long destination or album titles are constrained to a single ellipsized header l
 
 Stateful icon controls also expose explicit Android state descriptions where supported. This includes selected media tiles, selected transient choices, active selection actions, and active viewer toggles; the visible state is therefore reinforced beyond color and icon shape.
 
+Media-access controls use contextual glyph-plus-label treatment rather than text-only buttons. The visible label is retained for permission clarity while Choose media, Change access, Refresh, and Try again receive matching first-party visual cues and tooltips.
+
 ## October 3, 2026 — unified bottom-navigation glyph family
 
 The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
