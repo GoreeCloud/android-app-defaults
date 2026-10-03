@@ -10657,6 +10657,32 @@ private fun DrawerPinnedMark(
     }
 }
 
+@Composable
+private fun DrawerLockedMark(
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .width(20.dp)
+            .height(16.dp)
+            .semantics { contentDescription = "App Lock enabled" },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.42f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            GlazePopupActionGlyph(
+                symbol = GlazePopupActionSymbol.LOCK,
+                color = MaterialTheme.colorScheme.primary,
+                iconSize = 10.dp,
+            )
+        }
+    }
+}
+
 @Suppress("DEPRECATION")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
