@@ -712,7 +712,11 @@ class GalleryActivity : Activity() {
             background = roundedSurface(withAlpha(accentColor(), 0.12f), 15)
             isClickable = true
             isFocusable = true
-            contentDescription = "Gallery media access action"
+            setAccessActionPresentation(
+                this,
+                label = "Choose media",
+                iconResource = R.drawable.ic_gallery_nav_photos,
+            )
             GalleryInteractionFeedback.applyBoundedRipple(
                 this,
                 accentColor(),
@@ -729,6 +733,19 @@ class GalleryActivity : Activity() {
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
             )
         }
+    }
+
+    private fun setAccessActionPresentation(
+        control: TextView,
+        label: String,
+        iconResource: Int,
+    ) {
+        control.text = label
+        control.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        control.compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+        control.compoundDrawablePadding = dp(6)
+        control.contentDescription = "Gallery media access action. $label"
+        control.tooltipText = label
     }
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
@@ -1261,7 +1278,11 @@ class GalleryActivity : Activity() {
             status.text = "Choose which photos and videos Gallery can see. Your local media stays on this device."
             action.isEnabled = true
             action.alpha = 1f
-            action.text = "Choose media"
+            setAccessActionPresentation(
+                action,
+                label = "Choose media",
+                iconResource = R.drawable.ic_gallery_nav_photos,
+            )
             action.setOnClickListener { requestReadableMediaAccess() }
             library.removeAllViews()
             library.addView(
@@ -1280,11 +1301,19 @@ class GalleryActivity : Activity() {
         if (GalleryMediaAccessPolicy.isPartial(accessScope)) {
             accessPanel.visibility = View.VISIBLE
             status.text = "${accessScopeLabel(accessScope)}. Gallery only shows the media Android currently authorizes."
-            action.text = "Change access"
+            setAccessActionPresentation(
+                action,
+                label = "Change access",
+                iconResource = R.drawable.ic_gallery_nav_settings,
+            )
             action.setOnClickListener { requestReadableMediaAccess() }
         } else {
             accessPanel.visibility = View.GONE
-            action.text = "Refresh"
+            setAccessActionPresentation(
+                action,
+                label = "Refresh",
+                iconResource = R.drawable.ic_gallery_refresh,
+            )
             action.setOnClickListener { loadLocalLibrary(accessScope) }
         }
         loadLocalLibrary(accessScope)
@@ -1332,7 +1361,11 @@ class GalleryActivity : Activity() {
                             if (result.items.size != 1) append('s')
                             if (result.rejectedRowCount > 0) append(" · ${result.rejectedRowCount} skipped")
                         }
-                        action.text = "Change access"
+                        setAccessActionPresentation(
+                            action,
+                            label = "Change access",
+                            iconResource = R.drawable.ic_gallery_nav_settings,
+                        )
                         action.setOnClickListener { requestReadableMediaAccess() }
                     } else {
                         accessPanel.visibility = View.GONE
@@ -1368,7 +1401,11 @@ class GalleryActivity : Activity() {
             accessPanel.visibility = View.VISIBLE
             action.isEnabled = true
             action.alpha = 1f
-            action.text = "Try again"
+            setAccessActionPresentation(
+                action,
+                label = "Try again",
+                iconResource = R.drawable.ic_gallery_refresh,
+            )
             action.setOnClickListener {
                 val scope = currentMediaAccessScope()
                 if (GalleryMediaAccessPolicy.canRead(scope)) loadLocalLibrary(scope) else requestReadableMediaAccess()
