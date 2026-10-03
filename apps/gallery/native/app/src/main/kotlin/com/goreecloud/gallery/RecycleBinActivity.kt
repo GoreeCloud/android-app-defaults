@@ -476,6 +476,9 @@ class RecycleBinActivity : Activity() {
             GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, 14)
             isSelected = selected
             contentDescription = tileDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                stateDescription = if (selected) "Selected" else null
+            }
             setOnClickListener {
                 if (selectedUris.isNotEmpty()) {
                     toggleSelection(item)
