@@ -200,6 +200,8 @@ class GalleryRenderedAcceptanceTest {
             .check(doesNotExist())
         onView(withText("Password protect photos"))
             .check(doesNotExist())
+        onView(withText("Bottom navigation"))
+            .check(doesNotExist())
     }
 
     @Test
