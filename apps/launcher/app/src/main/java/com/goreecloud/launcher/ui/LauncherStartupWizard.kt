@@ -137,8 +137,8 @@ fun LauncherStartupWizard(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
-            contentAlignment = Alignment.Center,
+                .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
+            contentAlignment = Alignment.TopCenter,
         ) {
             Surface(
                 modifier = Modifier
@@ -567,7 +567,7 @@ private fun WizardMiniFeatureCard(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.heightIn(min = 82.dp),
+        modifier = modifier.heightIn(min = 76.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = accent.copy(alpha = 0.07f),
         border = BorderStroke(1.dp, accent.copy(alpha = 0.14f)),
@@ -603,7 +603,7 @@ private fun WizardSearchModeCard(
     val accent = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 132.dp),
+        modifier = modifier.heightIn(min = 122.dp),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
         color = if (selected) {
             accent.copy(alpha = 0.14f)
@@ -657,7 +657,7 @@ private fun WizardSearchPreview(
     Canvas(
         modifier = modifier
             .fillMaxWidth()
-            .height(58.dp),
+            .height(52.dp),
     ) {
         val w = size.width
         val h = size.height
