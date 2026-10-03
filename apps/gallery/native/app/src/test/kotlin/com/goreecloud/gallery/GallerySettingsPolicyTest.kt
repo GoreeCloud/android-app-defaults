@@ -138,10 +138,15 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
-    fun `sparse dense groups use a three-column presentation lane`() {
+    fun `dense groups prefer balanced rows when density does not gain a row`() {
         assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 1))
         assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 2))
         assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 4))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 5))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 6))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 7))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 8))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 9))
         assertEquals(
             GalleryViewDensity.COMFORTABLE.mediaGridColumns(360),
             GalleryViewDensity.COMFORTABLE.mediaGridColumnsForGroup(360, 1),
