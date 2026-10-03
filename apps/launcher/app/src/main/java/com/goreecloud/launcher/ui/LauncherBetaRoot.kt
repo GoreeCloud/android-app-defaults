@@ -7641,6 +7641,7 @@ private fun DrawerAppsContent(
                                         compact = false,
                                         fixedGridGeometry = true,
                                         pinnedInDrawer = app.workspaceKey() in pinnedAppKeys,
+                                        lockedByLauncher = app.workspaceKey() in lockedAppKeys,
                                         onClick = { onLaunchApp(app) },
                                         onLongClick = { anchor -> onManageApp(app, anchor) },
                                         dragData = if (preferences.layoutLocked) null else {
