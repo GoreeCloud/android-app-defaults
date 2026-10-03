@@ -2220,6 +2220,50 @@ private fun LauncherSourceFolderAction(
 }
 
 @Composable
+private fun LauncherSearchResultTrailingGlyph(
+    copy: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.09f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        if (copy) {
+            drawRoundRect(
+                color = tint,
+                topLeft = androidx.compose.ui.geometry.Offset(u * 0.30f, u * 0.18f),
+                size = androidx.compose.ui.geometry.Size(u * 0.48f, u * 0.58f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                style = Stroke(width = stroke),
+            )
+            drawRoundRect(
+                color = tint.copy(alpha = 0.72f),
+                topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.32f),
+                size = androidx.compose.ui.geometry.Size(u * 0.48f, u * 0.52f),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                style = Stroke(width = stroke),
+            )
+        } else {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.24f),
+                androidx.compose.ui.geometry.Offset(u * 0.64f, u * 0.50f),
+                stroke,
+                cap = cap,
+            )
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * 0.64f, u * 0.50f),
+                androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.76f),
+                stroke,
+                cap = cap,
+            )
+        }
+    }
+}
+
+@Composable
 private fun LauncherBackGlyph(
     tint: Color,
     modifier: Modifier = Modifier,
