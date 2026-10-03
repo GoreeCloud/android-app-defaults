@@ -1,5 +1,9 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — App Lock and UI polish candidate
+
+Development source adds Launcher-managed App Lock, a floating background-free Dock, refined Launcher glyphs, a clearer widget picker, and lighter setup/help surfaces. Validation and representative-device acceptance remain required before release qualification.
+
 ## October 3, 2026 — add App Lock and owner-device UI polish
 
 Current Development source adds profile-qualified **App Lock** controls under **Launcher settings → Privacy & security** and in the app context menu. Locked apps require Android device authentication before a launch initiated by GoreeCloud Launcher proceeds. Locked membership is device-local, stores only exact profile-qualified Launcher app identities, and remains outside portable preference v1. The boundary is explicit: Launcher does not intercept launches originating from notifications, Android Settings, deep links, another launcher, or another app.
