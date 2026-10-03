@@ -6446,6 +6446,7 @@ private fun orderedDrawerVisualEntries(
 private fun LauncherDrawerVisualTile(
     entry: LauncherDrawerVisualEntry,
     allApps: List<LauncherActivityInfo>,
+    lockedAppKeys: Set<String>,
     iconScale: Float,
     showLabel: Boolean,
     compact: Boolean,
@@ -6463,6 +6464,7 @@ private fun LauncherDrawerVisualTile(
             compact = compact,
             fixedGridGeometry = true,
             pinnedInDrawer = entry.pinned,
+            lockedByLauncher = entry.app.workspaceKey() in lockedAppKeys,
             onClick = { onLaunchApp(entry.app) },
             onLongClick = { anchor -> onManageApp(entry.app, anchor) },
             dragData = if (layoutLocked) null else LauncherAppDragData(
