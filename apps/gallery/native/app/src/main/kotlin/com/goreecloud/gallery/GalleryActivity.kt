@@ -4564,7 +4564,7 @@ class GalleryActivity : Activity() {
             0 -> {
                 title = "Your local media library"
                 body =
-                    "Use Photos, Albums, Videos, Trash, and Settings from the bottom navigation. Trash is a separate Android-managed recovery destination, while browsing stays limited to media Android authorizes Gallery to read."
+                    "Use Photos, Albums, Videos, Trash, and Settings from the bottom navigation. It starts in icons-only mode; you can switch to text only or icons with text from Settings > Appearance > Bottom navigation. Trash is a separate Android-managed recovery destination, while browsing stays limited to media Android authorizes Gallery to read."
             }
             1 -> {
                 title = "You control media access"
