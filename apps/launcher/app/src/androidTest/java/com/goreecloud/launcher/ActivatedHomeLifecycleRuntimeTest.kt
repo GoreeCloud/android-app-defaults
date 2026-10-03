@@ -1259,6 +1259,16 @@ class ActivatedHomeLifecycleRuntimeTest {
                         useUnmergedTree = true,
                     )
                     .assertHasClickAction()
+                check(
+                    composeRule
+                        .onAllNodesWithText(
+                            "enabled",
+                            substring = true,
+                            useUnmergedTree = true,
+                        )
+                        .fetchSemanticsNodes()
+                        .isNotEmpty(),
+                ) { "Search Source sections should expose enabled/total counts." }
                 composeRule
                     .onNodeWithContentDescription("Back to Universal Search", useUnmergedTree = true)
                     .assertHasClickAction()
@@ -1275,6 +1285,12 @@ class ActivatedHomeLifecycleRuntimeTest {
                         useUnmergedTree = true,
                     )
                     .performTextInput("theme")
+                composeRule
+                    .onNodeWithContentDescription(
+                        "Clear Universal Search query",
+                        useUnmergedTree = true,
+                    )
+                    .assertHasClickAction()
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
                         .onAllNodesWithTag("launcher-glaze-search-panel", useUnmergedTree = true)
