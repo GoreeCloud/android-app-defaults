@@ -26,6 +26,8 @@ Empty Photos, Albums, Videos, search-result, and Trash surfaces now use raised s
 
 Videos now adapt their follow-on card grid across narrow phones, ordinary phones, tablets, and very wide layouts, while the featured card is capped and centered on large screens. Album quick-access pills always include a first-party glyph. Video tiles no longer substitute the word “VIDEO” when duration is unavailable: the play glyph carries media-type identity and a duration badge appears only when the provider exposes one; Trash mirrors that presentation.
 
+Dense Photos groups also rebalance the column count when a one-column reduction keeps the same number of rows and produces a fuller trailing row. This preserves the configured density while avoiding visually weak arrangements such as four thumbnails followed by only two when a balanced three-by-two presentation fits in the same vertical space.
+
 ## October 3, 2026 — unified bottom-navigation glyph family
 
 The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
