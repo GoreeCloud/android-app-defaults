@@ -1,5 +1,15 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — icon-first action surfaces
+
+Gallery's primary action chrome now follows the owner's icon/glyph preference beyond bottom navigation. The bounded viewer uses icon controls for view mode, slideshow/repeat, Share, Favorite, Edit, Delete, More, and video Play/Pause. Selection mode uses icon-first Share, Favorite, Move, Copy, Delete, and More actions. Android-managed Trash uses the same approach for Refresh, selection actions, and viewer actions.
+
+The first-party photo editor now keeps short crop ratio values as text but renders Cancel/Save, Rotate left/right, Flip, and Reset as glyph controls. This removes the long horizontal text-button strip that previously required scrolling on phones and gives transform controls equal visual weight. Settings action rows use compact glyph affordances for reset, cache clear, import/export, and setup replay while the labeled row remains the accessibility and semantic authority.
+
+Every icon-first control retains an explicit content description, a tooltip where Android supports one, at least a 48dp actionable target, and state-specific semantics. Destructive actions retain separate semantic styling. These changes do not alter Android MediaStore authority, Gallery's permission scope, confirmation paths, local-only Favorites behavior, or the non-destructive save-copy editor model.
+
+Android runtime/rendered tests cover the icon-only photo-editor chrome, safe-area behavior, and Trash Refresh control. The Development package identity for this slice is `0.8.10-dev`.
+
 ## October 3, 2026 — optically centered bottom navigation
 
 Icons-only bottom navigation now centers each 22dp glyph directly inside its equal-width destination slot instead of using a top compound drawable with an empty text line. This removes the vertical lift visible on-device and eliminates the accumulated horizontal skew caused by per-item start margins.
