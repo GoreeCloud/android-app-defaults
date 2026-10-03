@@ -15,7 +15,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = goreeCloudGalleryDevelopmentVersionCode
-        versionName = "0.8.10-dev"
+        versionName = "0.8.11-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
