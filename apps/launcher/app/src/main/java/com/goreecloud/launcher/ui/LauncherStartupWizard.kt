@@ -39,6 +39,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -737,8 +738,17 @@ private fun WizardGestureStrip() {
                 Triple(WizardVisualSymbol.SEARCH, "Search", "Swipe down"),
                 Triple(WizardVisualSymbol.GESTURE, "Edit", "Long-press"),
             ).forEach { (symbol, title, summary) ->
+                val gestureDescription = when (symbol) {
+                    WizardVisualSymbol.APPS -> "Swipe up for Apps"
+                    WizardVisualSymbol.SEARCH -> "Swipe down for Search"
+                    else -> "Hold Home to edit"
+                }
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics {
+                            contentDescription = gestureDescription
+                        },
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
                         GlazeMetrics.radiusPill,
                     ),
