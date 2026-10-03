@@ -832,6 +832,7 @@ fun LauncherBetaRoot(
     var selectedFolderId by rememberSaveable { mutableStateOf<String?>(null) }
     var folderAppPickerId by rememberSaveable { mutableStateOf<String?>(null) }
     var showFolderManager by rememberSaveable { mutableStateOf(false) }
+    var showPinnedAppsManager by rememberSaveable { mutableStateOf(false) }
     var showHiddenAppsManager by rememberSaveable { mutableStateOf(false) }
     var folderManagerAddToHome by rememberSaveable { mutableStateOf(false) }
     val primaryFolderProfileId = remember { Process.myUserHandle().hashCode() }
@@ -1529,6 +1530,8 @@ fun LauncherBetaRoot(
                             folderManagerAddToHome = false
                             showFolderManager = true
                         },
+                        pinnedAppCount = drawerPinnedAppKeys.count(rootAppsByKey::containsKey),
+                        onManagePinnedApps = { showPinnedAppsManager = true },
                         hiddenAppCount = hiddenAppKeys.count(rootAppsByKey::containsKey),
                         onManageHiddenApps = { showHiddenAppsManager = true },
                         onSetHomeGrid = onSetHomeGrid,
@@ -1807,6 +1810,50 @@ fun LauncherBetaRoot(
                 },
             )
         }
+
+    if (showPinnedAppsManager) {
+        val orderedPinnedApps = buildList {
+            val addedKeys = linkedSetOf<String>()
+            drawerPinnedAppOrder.forEach { key ->
+                if (key in drawerPinnedAppKeys) {
+                    rootAppsByKey[key]?.let { app ->
+                        add(app)
+                        addedKeys += key
+                    }
+                }
+            }
+            drawerPinnedAppKeys
+                .asSequence()
+                .filterNot(addedKeys::contains)
+                .mapNotNull(rootAppsByKey::get)
+                .sortedWith(
+                    compareBy<LauncherActivityInfo>(
+                        { app -> app.label.toString().lowercase(Locale.getDefault()) },
+                        { app -> app.workspaceKey() },
+                    ),
+                )
+                .forEach(::add)
+        }
+        LauncherPinnedAppsManagerSheet(
+            pinnedApps = orderedPinnedApps,
+            onMoveEarlier = { app -> onMoveDrawerPinnedApp(app.workspaceKey(), -1) },
+            onMoveLater = { app -> onMoveDrawerPinnedApp(app.workspaceKey(), 1) },
+            onUnpin = { app -> onSetDrawerAppPinned(app.workspaceKey(), false) },
+            onResetOrder = {
+                val alphabeticalOrder = drawerPinnedAppKeys
+                    .mapNotNull(rootAppsByKey::get)
+                    .sortedWith(
+                        compareBy<LauncherActivityInfo>(
+                            { app -> app.label.toString().lowercase(Locale.getDefault()) },
+                            { app -> app.workspaceKey() },
+                        ),
+                    )
+                    .map { app -> app.workspaceKey() }
+                onSetDrawerPinnedAppOrder(alphabeticalOrder)
+            },
+            onDismiss = { showPinnedAppsManager = false },
+        )
+    }
 
     if (showHiddenAppsManager) {
         LauncherHiddenAppsManagerSheet(
@@ -7795,8 +7842,8 @@ private enum class LauncherSettingsCategory(
     ),
     DRAWER(
         "App drawer",
-        "Layout, profiles, hidden apps, density and labels",
-        "apps drawer grid compact list category work profile user profile hidden hide visibility privacy columns rows spacing sort folder header labels count search placement backdrop",
+        "Layout, profiles, pinned/hidden apps, density and labels",
+        "apps drawer grid compact list category work profile user profile pinned pin favorites order reset hidden hide visibility privacy columns rows spacing sort folder header labels count search placement backdrop",
     ),
     FOLDERS(
         "Folders",
@@ -8119,6 +8166,8 @@ private fun LauncherSettingsRootSurface(
     isDefaultHome: Boolean,
     onRequestHomeRole: () -> Unit,
     onManageFolders: () -> Unit,
+    pinnedAppCount: Int,
+    onManagePinnedApps: () -> Unit,
     hiddenAppCount: Int,
     onManageHiddenApps: () -> Unit,
     onSetHomeGrid: (Int, Int) -> Unit,
@@ -8811,6 +8860,13 @@ private fun LauncherSettingsRootSurface(
                     "Show app count",
                     experiencePreferences.showDrawerAppCount,
                     onSetShowDrawerAppCount,
+                )
+                GlazeSettingsAction(
+                    title = "Pinned apps",
+                    summary = "Reorder or unpin App Drawer favorites without changing Home, Dock or folders.",
+                    value = if (pinnedAppCount == 0) "None" else pinnedAppCount.toString(),
+                    onClick = onManagePinnedApps,
+                    modifier = Modifier.testTag("launcher-settings-pinned-apps"),
                 )
                 GlazeSettingsAction(
                     title = "Hidden apps",
@@ -10551,6 +10607,288 @@ private fun LauncherAppListRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+        }
+    }
+}
+
+private enum class LauncherPinnedManagerGlyph {
+    EARLIER,
+    LATER,
+    UNPIN,
+    RESET,
+}
+
+@Composable
+private fun LauncherPinnedManagerAction(
+    glyph: LauncherPinnedManagerGlyph,
+    contentDescription: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    testTag: String,
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(48.dp)
+            .testTag(testTag)
+            .semantics { this.contentDescription = contentDescription },
+    ) {
+        val tint = if (enabled) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.30f)
+        }
+        Canvas(Modifier.size(20.dp)) {
+            val stroke = 1.9.dp.toPx()
+            val u = size.minDimension
+            when (glyph) {
+                LauncherPinnedManagerGlyph.EARLIER,
+                LauncherPinnedManagerGlyph.LATER,
+                -> {
+                    val up = glyph == LauncherPinnedManagerGlyph.EARLIER
+                    val tipY = if (up) u * 0.18f else u * 0.82f
+                    val shoulderY = if (up) u * 0.44f else u * 0.56f
+                    val tailY = if (up) u * 0.82f else u * 0.18f
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.50f, tailY),
+                        end = Offset(u * 0.50f, tipY),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.50f, tipY),
+                        end = Offset(u * 0.28f, shoulderY),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.50f, tipY),
+                        end = Offset(u * 0.72f, shoulderY),
+                        strokeWidth = stroke,
+                    )
+                }
+                LauncherPinnedManagerGlyph.UNPIN -> {
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.27f, u * 0.17f),
+                        end = Offset(u * 0.73f, u * 0.17f),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.73f, u * 0.17f),
+                        end = Offset(u * 0.73f, u * 0.50f),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.38f, u * 0.60f),
+                        end = Offset(u * 0.38f, u * 0.86f),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.14f, u * 0.14f),
+                        end = Offset(u * 0.86f, u * 0.86f),
+                        strokeWidth = stroke,
+                    )
+                }
+                LauncherPinnedManagerGlyph.RESET -> {
+                    drawArc(
+                        color = tint,
+                        startAngle = 35f,
+                        sweepAngle = 285f,
+                        useCenter = false,
+                        topLeft = Offset(u * 0.18f, u * 0.18f),
+                        size = Size(u * 0.64f, u * 0.64f),
+                        style = Stroke(stroke),
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.18f, u * 0.42f),
+                        end = Offset(u * 0.18f, u * 0.18f),
+                        strokeWidth = stroke,
+                    )
+                    drawLine(
+                        color = tint,
+                        start = Offset(u * 0.18f, u * 0.18f),
+                        end = Offset(u * 0.42f, u * 0.18f),
+                        strokeWidth = stroke,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LauncherPinnedAppsManagerSheet(
+    pinnedApps: List<LauncherActivityInfo>,
+    onMoveEarlier: (LauncherActivityInfo) -> Unit,
+    onMoveLater: (LauncherActivityInfo) -> Unit,
+    onUnpin: (LauncherActivityInfo) -> Unit,
+    onResetOrder: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("launcher-pinned-apps-manager"),
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+        tonalElevation = 0.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
+            verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Pinned apps",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "Pinned order changes App Drawer presentation only. Home, Dock and folders stay unchanged.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (pinnedApps.size > 1) {
+                    LauncherPinnedManagerAction(
+                        glyph = LauncherPinnedManagerGlyph.RESET,
+                        contentDescription = "Reset pinned order A–Z",
+                        onClick = onResetOrder,
+                        testTag = "launcher-pinned-apps-reset-order",
+                    )
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) { Text("Done") }
+            }
+
+            if (pinnedApps.isEmpty()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                ) {
+                    Text(
+                        "No pinned apps.",
+                        modifier = Modifier.padding(GlazeMetrics.space3),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 460.dp),
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                ) {
+                    lazyItems(
+                        items = pinnedApps,
+                        key = { app -> app.workspaceKey() },
+                    ) { app ->
+                        val index = pinnedApps.indexOfFirst { candidate ->
+                            candidate.workspaceKey() == app.workspaceKey()
+                        }
+                        val icon = rememberLauncherAppIcon(app)
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("launcher-pinned-app-" + app.workspaceKey()),
+                            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                            border = BorderStroke(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f),
+                            ),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = GlazeMetrics.space3,
+                                        end = GlazeMetrics.space1,
+                                        top = GlazeMetrics.space2,
+                                        bottom = GlazeMetrics.space2,
+                                    ),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                if (icon != null) {
+                                    Image(
+                                        bitmap = icon,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(42.dp).launcherIconMask(),
+                                    )
+                                } else {
+                                    Surface(
+                                        modifier = Modifier.size(42.dp),
+                                        shape = RoundedCornerShape(13.dp),
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                    ) {}
+                                }
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        app.label.toString(),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        (if (app.user == Process.myUserHandle()) "User app" else "Work app") +
+                                            " · " + app.componentName.packageName,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                LauncherPinnedManagerAction(
+                                    glyph = LauncherPinnedManagerGlyph.EARLIER,
+                                    contentDescription = "Move " + app.label + " earlier",
+                                    onClick = { onMoveEarlier(app) },
+                                    enabled = index > 0,
+                                    testTag = "launcher-pinned-app-earlier-" + app.workspaceKey(),
+                                )
+                                LauncherPinnedManagerAction(
+                                    glyph = LauncherPinnedManagerGlyph.LATER,
+                                    contentDescription = "Move " + app.label + " later",
+                                    onClick = { onMoveLater(app) },
+                                    enabled = index >= 0 && index < pinnedApps.lastIndex,
+                                    testTag = "launcher-pinned-app-later-" + app.workspaceKey(),
+                                )
+                                LauncherPinnedManagerAction(
+                                    glyph = LauncherPinnedManagerGlyph.UNPIN,
+                                    contentDescription = "Unpin " + app.label + " from Apps",
+                                    onClick = { onUnpin(app) },
+                                    testTag = "launcher-unpin-pinned-app-" + app.workspaceKey(),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Text(
+                "You can also pin, unpin and move favorites from an app's long-press menu in Apps.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(GlazeMetrics.space2))
         }
     }
 }
