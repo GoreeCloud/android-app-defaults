@@ -1740,24 +1740,31 @@ class GalleryActivity : Activity() {
         ).coerceAtLeast(dp(240))
 
         val featured = items.first()
+        val featuredWidth = availableWidth.coerceAtMost(
+            dp(GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP),
+        )
         library.addView(
             videoCard(
                 item = featured,
                 collectionItems = items,
                 collectionIndex = 0,
                 generation = generation,
-                thumbnailHeight = ((availableWidth * 9f) / 16f).toInt().coerceAtLeast(dp(160)),
+                thumbnailHeight = ((featuredWidth * 9f) / 16f).toInt().coerceAtLeast(dp(160)),
                 featured = true,
             ),
             LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                featuredWidth,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-            ),
+            ).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            },
         )
 
         if (items.size == 1) return
 
-        val columns = if (resources.configuration.screenWidthDp >= 600) 3 else 2
+        val columns = GalleryGlazeContract.videoGridColumns(
+            resources.configuration.screenWidthDp,
+        )
         val gaps = dp(VIDEO_CARD_GAP_DP) * (columns - 1)
         val cardWidth = ((availableWidth - gaps) / columns).coerceAtLeast(dp(136))
         val thumbnailHeight = ((cardWidth * 9f) / 16f).toInt().coerceAtLeast(dp(88))
@@ -2249,14 +2256,14 @@ class GalleryActivity : Activity() {
         GalleryVideoFilter.FAVORITES -> R.drawable.ic_gallery_favorite
     }
 
-    private fun albumQuickAccessIcon(album: AlbumPresentation): Int? =
+    private fun albumQuickAccessIcon(album: AlbumPresentation): Int =
         when (GalleryAlbumQuickAccessPolicy.kind(album.name, album.isFavorites)) {
             GalleryAlbumQuickAccessKind.FAVORITES -> R.drawable.ic_gallery_favorite
             GalleryAlbumQuickAccessKind.CAMERA -> R.drawable.ic_gallery_camera
             GalleryAlbumQuickAccessKind.SCREENSHOTS -> R.drawable.ic_gallery_nav_photos
             GalleryAlbumQuickAccessKind.DOWNLOADS -> R.drawable.ic_gallery_download
             GalleryAlbumQuickAccessKind.SCREEN_RECORDINGS -> R.drawable.ic_gallery_screen_recording
-            null -> null
+            null -> R.drawable.ic_gallery_nav_albums
         }
 
     private fun albumBadgeIcon(album: AlbumPresentation): Int =
@@ -2270,7 +2277,7 @@ class GalleryActivity : Activity() {
     private fun albumQuickAccessChip(
         label: String,
         count: Int,
-        iconRes: Int?,
+        iconRes: Int,
         onClick: () -> Unit,
     ): TextView = TextView(this).apply {
         text = label
@@ -2285,11 +2292,9 @@ class GalleryActivity : Activity() {
             GalleryGlazeSurfaces.Role.RAISED,
             GalleryGlazeContract.SHAPE_CAPSULE_DP,
         )
-        if (iconRes != null) {
-            setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
-            compoundDrawableTintList = ColorStateList.valueOf(primaryTextColor())
-            compoundDrawablePadding = dp(6)
-        }
+        setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(primaryTextColor())
+        compoundDrawablePadding = dp(6)
         isClickable = true
         isFocusable = true
         contentDescription = "$label, ${itemCountLabel(count)}"
@@ -2558,23 +2563,28 @@ class GalleryActivity : Activity() {
                         gravity = Gravity.CENTER
                     },
                 )
-                addView(
-                    TextView(context).apply {
-                        text = formatVideoBadge(item)
-                        setTextColor(Color.WHITE)
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
-                        setTypeface(typeface, Typeface.BOLD)
-                        gravity = Gravity.CENTER
-                        setPadding(dp(7), dp(3), dp(7), dp(3))
-                        background = roundedSurface(0xb3000000.toInt(), 9)
-                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                    },
-                    FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                        gravity = Gravity.END or Gravity.BOTTOM
-                        marginEnd = dp(5)
-                        bottomMargin = dp(5)
-                    },
-                )
+                item.durationMillis?.let { durationMillis ->
+                    addView(
+                        TextView(context).apply {
+                            text = formatDuration(durationMillis)
+                            setTextColor(Color.WHITE)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+                            setTypeface(typeface, Typeface.BOLD)
+                            gravity = Gravity.CENTER
+                            setPadding(dp(7), dp(3), dp(7), dp(3))
+                            background = roundedSurface(0xb3000000.toInt(), 9)
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ).apply {
+                            gravity = Gravity.END or Gravity.BOTTOM
+                            marginEnd = dp(5)
+                            bottomMargin = dp(5)
+                        },
+                    )
+                }
             }
             addView(
                 ImageView(context).apply {
@@ -6255,9 +6265,6 @@ class GalleryActivity : Activity() {
             formatBytes(item.sizeBytes),
         ).joinToString(" · ")
     }
-
-    private fun formatVideoBadge(item: MediaItem): String =
-        item.durationMillis?.let(::formatDuration) ?: "VIDEO"
 
     private fun formatDuration(milliseconds: Long): String {
         val seconds = milliseconds / 1000
