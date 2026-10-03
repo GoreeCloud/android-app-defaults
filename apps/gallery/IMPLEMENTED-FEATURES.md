@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — Android system-gallery integration foundation
+
+Gallery now exposes Android's app-gallery category and a dedicated exported image/video VIEW/REVIEW surface so an operating-system distribution can use `com.goreecloud.gallery` as its system Gallery package instead of only launching Gallery from its icon. The external viewer accepts only explicit `content:` or `file:` image/video URIs supplied by Android, rejects remote schemes and unrelated MIME types, and never enumerates a broader library from an external request.
+
+Secure-review requests add Android's secure-window flag. Image decoding is bounded to the current display scale, video playback stays local to the supplied URI, and failures are handled without expanding storage or network authority. Gallery also declares `ACCESS_MEDIA_LOCATION`, matching Android's system-gallery role permission model while retaining Android-owned media authorization.
+
+This is application-side Development groundwork for GoreeCloud OS Mobile default-role integration. It does not by itself make Gallery the default on arbitrary Android installations, remove another gallery package, or establish representative-device/system-role acceptance.
+
 ## October 3, 2026 — optically centered bottom navigation
 
 Icons-only bottom navigation now centers each 22dp glyph directly inside its equal-width destination slot instead of using a top compound drawable with an empty text line. This removes the vertical lift visible on-device and eliminates the accumulated horizontal skew caused by per-item start margins.
