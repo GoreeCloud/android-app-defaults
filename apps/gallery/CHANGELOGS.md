@@ -20,6 +20,9 @@
 - Settings value rows now pair concise values with chevron glyphs and expose the current value through Android state descriptions; boolean settings use vector on/off switch glyphs rather than text-only On/Off pills.
 - Added specific save-copy and clear-cache glyphs so those actions no longer reuse generic download/reset imagery.
 - Photos/Albums/Videos/search empty states now render as semantic Glaze icon cards, while Trash adds a matching semantic empty-state card and compact-width-safe ellipsized header text.
+- Refined Videos responsiveness: sub-360dp layouts use one compact follow-on card column, phones use two, wider layouts use three, and very wide screens use four; the featured card is capped and centered so it does not become excessively large on tablets/desktops.
+- Every Albums quick-access chip now carries a first-party glyph, using the generic Albums icon when a recognized collection-specific icon is unavailable.
+- Video identity now relies on the play glyph; duration badges render only when MediaStore supplies a duration, avoiding the old text-only “VIDEO” fallback. Trash video tiles receive the same centered play affordance and selection-aware cleanup.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
