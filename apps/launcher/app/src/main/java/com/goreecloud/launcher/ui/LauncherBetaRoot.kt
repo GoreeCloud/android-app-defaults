@@ -7496,6 +7496,7 @@ private fun DrawerAppsContent(
                     LauncherDrawerVisualTile(
                         entry = entry,
                         allApps = apps,
+                        lockedAppKeys = lockedAppKeys,
                         iconScale = preferences.iconScale,
                         showLabel = experiencePreferences.showDrawerLabels,
                         compact = true,
@@ -7528,6 +7529,7 @@ private fun DrawerAppsContent(
                             app = entry.app,
                             iconScale = preferences.iconScale,
                             pinnedInDrawer = entry.pinned,
+                            lockedByLauncher = entry.app.workspaceKey() in lockedAppKeys,
                             onClick = { onLaunchApp(entry.app) },
                             onLongClick = { anchor -> onManageApp(entry.app, anchor) },
                             dragData = if (preferences.layoutLocked) null else LauncherAppDragData(
