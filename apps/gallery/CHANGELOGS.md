@@ -23,6 +23,7 @@
 - Refined Videos responsiveness: sub-360dp layouts use one compact follow-on card column, phones use two, wider layouts use three, and very wide screens use four; the featured card is capped and centered so it does not become excessively large on tablets/desktops.
 - Every Albums quick-access chip now carries a first-party glyph, using the generic Albums icon when a recognized collection-specific icon is unavailable.
 - Video identity now relies on the play glyph; duration badges render only when MediaStore supplies a duration, avoiding the old text-only “VIDEO” fallback. Trash video tiles receive the same centered play affordance and selection-aware cleanup.
+- Dense photo groups now step down one column when doing so keeps the same row count but substantially improves the final-row balance; this turns layouts such as 4+2 into 3+3 without reducing density when another row would be required.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
