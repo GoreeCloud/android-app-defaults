@@ -219,8 +219,8 @@ class RecycleBinActivity : Activity() {
             marginStart = dp(4)
         })
         header.addView(
-            textAction("Refresh", "Refresh Trash") { loadRecycleBin() },
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48)),
+            iconAction(R.drawable.ic_gallery_refresh, "Refresh Trash") { loadRecycleBin() },
+            LinearLayout.LayoutParams(dp(48), dp(48)),
         )
         content.addView(header)
 
@@ -906,6 +906,26 @@ class RecycleBinActivity : Activity() {
         val minutes = seconds / 60
         val remainder = seconds % 60
         return "$minutes:${remainder.toString().padStart(2, '0')}"
+    }
+
+    private fun iconAction(
+        iconResource: Int,
+        description: String,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        minHeight = dp(48)
+        minWidth = dp(48)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+        background = roundedSurface(withAlpha(accentColor(), 0.10f), 18)
+        isClickable = true
+        isFocusable = true
+        contentDescription = description
+        tooltipText = description
+        setOnClickListener { onClick() }
     }
 
     private fun textAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
