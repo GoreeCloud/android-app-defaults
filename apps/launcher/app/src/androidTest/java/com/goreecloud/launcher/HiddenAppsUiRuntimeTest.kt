@@ -1,6 +1,5 @@
 package com.goreecloud.launcher
 
-import android.app.role.RoleManager
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -23,7 +22,6 @@ import com.goreecloud.launcher.core.workspace.db.LauncherDatabaseProvider
 import com.goreecloud.launcher.core.workspace.db.WorkspaceLegacyImportMapper
 import com.goreecloud.launcher.core.workspace.db.WorkspacePagedHomeState
 import com.goreecloud.launcher.core.workspace.db.WorkspaceProductionRuntimeCoordinator
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -41,7 +39,6 @@ class HiddenAppsUiRuntimeTest {
     private lateinit var preferencesRepository: LauncherPreferencesRepository
     private var previousHomeAppMode = LauncherHomeAppMode.NONE
     private var previousHiddenKeys: Set<String> = emptySet()
-    private var addedHomeRole = false
 
     @Before
     fun prepareEstablishedLauncher() = runBlocking {
@@ -92,20 +89,6 @@ class HiddenAppsUiRuntimeTest {
             }
         }
 
-        val roleManager = context.getSystemService(RoleManager::class.java)
-        if (roleManager.isRoleAvailable(RoleManager.ROLE_HOME) &&
-            !roleManager.isRoleHeld(RoleManager.ROLE_HOME)
-        ) {
-            runShellCommand(
-                "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}",
-            )
-            withTimeout(10_000) {
-                while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                    delay(100)
-                }
-            }
-            addedHomeRole = true
-        }
     }
 
     @After
@@ -119,13 +102,6 @@ class HiddenAppsUiRuntimeTest {
             preferencesRepository.setAppHidden(key, true).join()
         }
         preferencesRepository.setHomeAppMode(previousHomeAppMode).join()
-
-        if (addedHomeRole) {
-            val context = InstrumentationRegistry.getInstrumentation().targetContext
-            runShellCommand(
-                "cmd role remove-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}",
-            )
-        }
     }
 
     @Test
@@ -209,12 +185,5 @@ class HiddenAppsUiRuntimeTest {
         }
     }
 
-    private fun runShellCommand(command: String) {
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        instrumentation.uiAutomation.executeShellCommand(command).use { descriptor ->
-            java.io.FileInputStream(descriptor.fileDescriptor).use { input ->
-                input.readBytes()
-            }
-        }
-    }
+
 }
