@@ -158,7 +158,7 @@ fun LauncherStartupWizard(
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 tonalElevation = 0.dp,
-                shadowElevation = 6.dp,
+                shadowElevation = 2.dp,
             ) {
                 Column(
                     modifier = Modifier
