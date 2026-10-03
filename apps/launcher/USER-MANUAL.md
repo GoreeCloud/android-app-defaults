@@ -34,7 +34,11 @@ The ranking store is local and privacy-bounded. It retains only application work
 
 ## App Lock
 
-Use **Launcher settings → Privacy & security → App Lock** to manage locked apps. App Lock applies to launches started from GoreeCloud Launcher.
+Open **Launcher settings → Privacy & security → App Lock** to manage protected apps. The manager can search installed apps and switch between **All** and **Locked** views. Each row identifies Personal or Work context and the package name, and its switch enables or removes App Lock for that exact profile-qualified app identity. You can also long-press an app and choose **Lock app** or **Remove App Lock**. Locked apps are marked with a small lock indicator in Apps.
+
+When GoreeCloud Launcher opens a locked app—or a Launcher app shortcut belonging to a locked app—Android presents the configured device-authentication screen before the launch proceeds. If Android reports that no secure screen lock is configured or cannot provide an authentication flow, Launcher keeps the protected launch closed rather than bypassing App Lock.
+
+App Lock is a **Launcher-originated launch control**, not a system-wide application firewall. Notifications, Android Settings, deep links, other launchers, and other apps can initiate app launches outside GoreeCloud Launcher's authority. Locked membership is stored locally using the exact Launcher workspace identity and is intentionally excluded from portable preference v1 until a separately versioned recovery policy is defined.
 
 ## Home screen
 
