@@ -23,7 +23,7 @@ While Gallery remains in the foreground, it observes Android MediaStore and auto
 
 The current native Development experience provides direct **Photos**, **Albums**, **Videos**, **Trash**, and **Settings** destinations.
 
-The bottom navigation defaults to **Icons only**. Use **Settings > Appearance > Bottom navigation** to switch to **Text only** or **Icons & text**. Destination names remain available to accessibility services in every visual mode. Tapping the already-selected destination returns that view to the top.
+The bottom navigation defaults to **Icons only**. In this mode, each glyph is centered in an equal-width destination slot and the selected destination uses a compact inset Glaze pill. Long-press/hover tooltips expose destination names where Android supports them, and accessibility services retain destination and selected-state semantics in every visual mode. Use **Settings > Appearance > Bottom navigation** to switch to **Text only** or **Icons & text**. Tapping the already-selected destination returns that view to the top.
 
 - Photos uses an adaptive local timeline grid. Dense day groups retain the compact multi-column layout, while sparse one- and two-item groups use a larger three-column presentation lane closer to the current Gallery mockup.
 - Videos uses a featured first card followed by two-column phone cards (three columns on wider layouts), with play affordances, duration badges, title/date metadata, and category chips that appear only when the current Android-authorized snapshot actually contains matching Screen recordings, Camera, or Favorites media.
