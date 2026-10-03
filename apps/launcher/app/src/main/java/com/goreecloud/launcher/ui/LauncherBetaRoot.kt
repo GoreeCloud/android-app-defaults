@@ -10819,7 +10819,13 @@ private fun LauncherAppLockManagerSheet(
                     val selected = showLockedOnly == lockedOnly
                     Surface(
                         onClick = { showLockedOnly = lockedOnly },
-                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 48.dp)
+                            .testTag(
+                                if (lockedOnly) "launcher-app-lock-filter-locked"
+                                else "launcher-app-lock-filter-all",
+                            ),
                         shape = RoundedCornerShape(GlazeMetrics.radiusPill),
                         color = if (selected) {
                             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.68f)
@@ -10849,8 +10855,8 @@ private fun LauncherAppLockManagerSheet(
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+                shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
             ) {
                 Text(
                     "Launcher-only boundary: direct launches from notifications, Android Settings, " +
@@ -10867,6 +10873,23 @@ private fun LauncherAppLockManagerSheet(
                     .heightIn(max = 480.dp),
                 verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
             ) {
+                if (visibleApps.isEmpty()) {
+                    item(key = "app-lock-empty") {
+                        Text(
+                            if (showLockedOnly && query.isBlank()) {
+                                "No apps are locked."
+                            } else {
+                                "No apps match this search."
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = GlazeMetrics.space4),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
                 lazyItems(
                     items = visibleApps,
                     key = { app -> app.workspaceKey() },
@@ -10878,14 +10901,14 @@ private fun LauncherAppLockManagerSheet(
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("launcher-app-lock-" + appKey),
-                        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+                        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.18f),
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
+                                .heightIn(min = 60.dp)
+                                .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space1),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
                         ) {
@@ -10915,6 +10938,7 @@ private fun LauncherAppLockManagerSheet(
                             Switch(
                                 checked = locked,
                                 onCheckedChange = { onSetLocked(app, it) },
+                                modifier = Modifier.testTag("launcher-app-lock-toggle-" + appKey),
                             )
                         }
                     }
