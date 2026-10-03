@@ -12,6 +12,7 @@
 - Replaced remaining font/Unicode pseudo-glyph controls with first-party vector artwork for previous/next navigation, video play overlays, media-selection checks, card overflow, and directional affordances.
 - Added bounded press/ripple feedback to first-party viewer, selection, header, Settings, Trash, and editor controls.
 - Photo-editor crop presets now expose an explicit selected visual/accessibility state, beginning with Original and clearing when the crop becomes custom.
+- The first-use setup wizard now uses a compact progress rail plus icon-only Back/Return/Continue/Finish controls, preserving its existing accessibility names and persisted step behavior.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
