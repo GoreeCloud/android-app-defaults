@@ -9,6 +9,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.database.ContentObserver
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
@@ -17,7 +18,11 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.MediaStore
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.LruCache
 import android.util.Size
@@ -129,6 +134,19 @@ class GalleryActivity : Activity() {
     private var mediaMoveExecutionInProgress = false
     private var mediaCopyExecutionInProgress = false
     private var setupDialog: AlertDialog? = null
+    private val mediaRefreshHandler = Handler(Looper.getMainLooper())
+    private var mediaStoreObserverRegistered = false
+    private var mediaRefreshPending = false
+    private val mediaRefreshRunnable = Runnable { refreshObservedMediaIfReady() }
+    private val mediaStoreObserver = object : ContentObserver(mediaRefreshHandler) {
+        override fun onChange(selfChange: Boolean) {
+            scheduleObservedMediaRefresh()
+        }
+
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            scheduleObservedMediaRefresh()
+        }
+    }
 
     private val inSelectionMode: Boolean
         get() = selectedUris.isNotEmpty() || dragSelectionSession != null
@@ -216,6 +234,17 @@ class GalleryActivity : Activity() {
             )
         }
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        registerMediaStoreObserver()
+    }
+
+    override fun onStop() {
+        mediaRefreshHandler.removeCallbacks(mediaRefreshRunnable)
+        unregisterMediaStoreObserver()
+        super.onStop()
     }
 
     override fun onPause() {
@@ -313,6 +342,8 @@ class GalleryActivity : Activity() {
             stop()
         }
         viewerVideoSurface = null
+        mediaRefreshHandler.removeCallbacks(mediaRefreshRunnable)
+        unregisterMediaStoreObserver()
         thumbnailExecutor.shutdownNow()
         thumbnailCache.evictAll()
         super.onDestroy()
@@ -685,15 +716,21 @@ class GalleryActivity : Activity() {
     }
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
+        val navigationMode = currentUserSettings().navigationDisplayMode
         GalleryDestination.entries.forEachIndexed { index, item ->
             val label = navigationLabel(item)
             val view = TextView(this@GalleryActivity).apply {
-                text = label
+                text = if (navigationMode.showLabel) label else ""
                 gravity = Gravity.CENTER
                 minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-                setCompoundDrawablesWithIntrinsicBounds(0, navigationIcon(item), 0, 0)
-                compoundDrawablePadding = dp(2)
+                setCompoundDrawablesWithIntrinsicBounds(
+                    0,
+                    if (navigationMode.showIcon) navigationIcon(item) else 0,
+                    0,
+                    0,
+                )
+                compoundDrawablePadding = if (navigationMode.showIcon && navigationMode.showLabel) dp(2) else 0
                 isClickable = true
                 isFocusable = true
                 setOnClickListener {
@@ -707,7 +744,10 @@ class GalleryActivity : Activity() {
                         startActivity(Intent(this@GalleryActivity, RecycleBinActivity::class.java))
                         return@setOnClickListener
                     }
-                    if (destination == item && openAlbumId == null && !showingFavorites) return@setOnClickListener
+                    if (destination == item && openAlbumId == null && !showingFavorites) {
+                        libraryScroll.smoothScrollTo(0, 0)
+                        return@setOnClickListener
+                    }
                     clearSelection(render = false)
                     destination = item
                     openAlbumId = null
@@ -774,11 +814,23 @@ class GalleryActivity : Activity() {
 
         selectionActionCapsule.visibility = View.GONE
         navigationCapsule.visibility = View.VISIBLE
+        val navigationMode = currentUserSettings().navigationDisplayMode
         GalleryDestination.entries.forEach { item ->
             val view = navigationItems[item] ?: return@forEach
             val selected = destination == item
             val label = navigationLabel(item)
-            view.setTextColor(if (selected) accentColor() else primaryTextColor())
+            val foreground = if (selected) accentColor() else primaryTextColor()
+            view.text = if (navigationMode.showLabel) label else ""
+            view.setCompoundDrawablesWithIntrinsicBounds(
+                0,
+                if (navigationMode.showIcon) navigationIcon(item) else 0,
+                0,
+                0,
+            )
+            view.compoundDrawablePadding =
+                if (navigationMode.showIcon && navigationMode.showLabel) dp(2) else 0
+            view.compoundDrawableTintList = ColorStateList.valueOf(foreground)
+            view.setTextColor(foreground)
             view.setTypeface(view.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
             view.background = roundedSurface(
                 if (selected) withAlpha(accentColor(), 0.13f) else Color.TRANSPARENT,
@@ -1077,6 +1129,62 @@ class GalleryActivity : Activity() {
             if (destination == GalleryDestination.VIDEOS) View.VISIBLE else View.GONE
     }
 
+    private fun registerMediaStoreObserver() {
+        if (mediaStoreObserverRegistered) return
+        val mediaUris = listOf(
+            MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        )
+        var registered = false
+        mediaUris.forEach { uri ->
+            val success = runCatching {
+                contentResolver.registerContentObserver(uri, true, mediaStoreObserver)
+            }.isSuccess
+            registered = registered || success
+        }
+        mediaStoreObserverRegistered = registered
+    }
+
+    private fun unregisterMediaStoreObserver() {
+        if (!mediaStoreObserverRegistered) return
+        runCatching { contentResolver.unregisterContentObserver(mediaStoreObserver) }
+        mediaStoreObserverRegistered = false
+    }
+
+    private fun scheduleObservedMediaRefresh() {
+        mediaRefreshPending = true
+        mediaRefreshHandler.removeCallbacks(mediaRefreshRunnable)
+        mediaRefreshHandler.postDelayed(mediaRefreshRunnable, MEDIA_REFRESH_DEBOUNCE_MS)
+    }
+
+    private fun refreshObservedMediaIfReady() {
+        if (!mediaRefreshPending) return
+        if (
+            viewerOverlay != null ||
+            pendingMediaMutation != null ||
+            pendingMediaMove != null ||
+            mediaMoveExecutionInProgress ||
+            mediaCopyExecutionInProgress
+        ) {
+            return
+        }
+
+        val accessScope = currentMediaAccessScope()
+        if (!GalleryMediaAccessPolicy.canRead(accessScope)) {
+            mediaRefreshPending = false
+            renderPermissionState()
+            return
+        }
+
+        mediaRefreshPending = false
+        loadLocalLibrary(
+            accessScope = accessScope,
+            showLoading = false,
+            preserveSelection = true,
+        )
+    }
+
     private fun renderPermissionState() {
         if (destination == GalleryDestination.SETTINGS) {
             clearSelection(render = false)
@@ -1125,21 +1233,35 @@ class GalleryActivity : Activity() {
         loadLocalLibrary(accessScope)
     }
 
-    private fun loadLocalLibrary(accessScope: GalleryMediaAccessScope) {
+    private fun loadLocalLibrary(
+        accessScope: GalleryMediaAccessScope,
+        showLoading: Boolean = true,
+        preserveSelection: Boolean = false,
+    ) {
         val generation = ++loadGeneration
-        accessPanel.visibility = View.VISIBLE
-        action.isEnabled = false
-        action.alpha = 0.45f
-        status.text = "${accessScopeLabel(accessScope)} · Loading…"
-        library.removeAllViews()
-        library.addView(messageRow("Loading your library", "Reading the local media Android has authorized."))
+        val previousScrollY = if (::libraryScroll.isInitialized) libraryScroll.scrollY else 0
+        val previousItems = authorizedItems
+        if (showLoading) {
+            accessPanel.visibility = View.VISIBLE
+            action.isEnabled = false
+            action.alpha = 0.45f
+            status.text = "${accessScopeLabel(accessScope)} · Loading…"
+            library.removeAllViews()
+            library.addView(messageRow("Loading your library", "Reading the local media Android has authorized."))
+        }
 
         thread(name = "goreecloud-gallery-mediastore") {
             try {
                 val result = AndroidMediaStoreReader(contentResolver).readLatest(GalleryGlazeContract.MAX_RENDERED_MEDIA_ROWS)
                 runOnUiThread {
                     if (generation != loadGeneration) return@runOnUiThread
-                    clearSelection(render = false)
+                    val libraryChanged = previousItems != result.items
+                    if (preserveSelection) {
+                        val availableUris = result.items.mapTo(hashSetOf()) { it.contentUri }
+                        selectedUris.retainAll(availableUris)
+                    } else {
+                        clearSelection(render = false)
+                    }
                     authorizedItems = result.items
                     action.isEnabled = true
                     action.alpha = 1f
@@ -1158,7 +1280,17 @@ class GalleryActivity : Activity() {
                         accessPanel.visibility = View.GONE
                     }
 
+                    if (!showLoading && destination == GalleryDestination.SETTINGS) {
+                        updateHeader()
+                        return@runOnUiThread
+                    }
+                    if (!showLoading && !libraryChanged) return@runOnUiThread
                     renderCurrentDestination(generation)
+                    if (!showLoading && previousScrollY > 0 && ::libraryScroll.isInitialized) {
+                        libraryScroll.post {
+                            libraryScroll.scrollTo(0, previousScrollY)
+                        }
+                    }
                 }
             } catch (_: SecurityException) {
                 renderLoadFailure(generation, "Android denied the current local media read.")
@@ -1601,7 +1733,8 @@ class GalleryActivity : Activity() {
                     addView(
                         TextView(context).apply {
                             text = mediaDisplayTitle(item)
-                            maxLines = if (featured) 1 else 2
+                            maxLines = 1
+                            ellipsize = TextUtils.TruncateAt.END
                             setTextColor(primaryTextColor())
                             setTextSize(
                                 TypedValue.COMPLEX_UNIT_SP,
@@ -4068,7 +4201,11 @@ class GalleryActivity : Activity() {
         rootFrame.removeView(overlay)
         viewerOverlay = null
         applySystemChrome()
-        renderCurrentDestination()
+        if (mediaRefreshPending) {
+            refreshObservedMediaIfReady()
+        } else {
+            renderCurrentDestination()
+        }
     }
 
     private fun shareAuthorizedItem(item: MediaItem) {
@@ -4261,6 +4398,13 @@ class GalleryActivity : Activity() {
                 subtitle = "Choose a dense media grid or a more spacious grid without changing the underlying library.",
                 value = settings.viewDensity.label,
             ) { showViewDensityDialog() },
+        )
+        library.addView(
+            settingChoiceRow(
+                title = "Bottom navigation",
+                subtitle = "Show destination icons, text labels, or both. Icons-only is the default.",
+                value = settings.navigationDisplayMode.label,
+            ) { showNavigationDisplayModeDialog() },
         )
         library.addView(
             settingChoiceRow(
@@ -4772,6 +4916,100 @@ class GalleryActivity : Activity() {
         )
     }
 
+    private fun showNavigationDisplayModeDialog() {
+        val current = currentUserSettings().navigationDisplayMode
+        var dialog: AlertDialog? = null
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(14))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_OVERLAY_DP,
+            )
+        }
+        panel.addView(TextView(this).apply {
+            text = "Bottom navigation"
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        panel.addView(TextView(this).apply {
+            text = "Choose how the five primary Gallery destinations are shown."
+            setTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            setLineSpacing(0f, 1.06f)
+            setPadding(0, dp(4), 0, dp(14))
+        })
+
+        GalleryNavigationDisplayMode.entries.forEach { mode ->
+            panel.addView(
+                glazeDialogChoiceRow(
+                    title = mode.label,
+                    subtitle = when (mode) {
+                        GalleryNavigationDisplayMode.ICONS_ONLY ->
+                            "Compact glyph-only navigation with accessible destination names"
+                        GalleryNavigationDisplayMode.TEXT_ONLY ->
+                            "Text destination names without visible glyphs"
+                        GalleryNavigationDisplayMode.ICONS_AND_TEXT ->
+                            "Show both destination glyphs and labels"
+                    },
+                    selected = mode == current,
+                ) {
+                    galleryPreferences().edit()
+                        .putString(NAVIGATION_DISPLAY_MODE_KEY, mode.storedValue)
+                        .apply()
+                    renderNavigation()
+                    renderSettingsDestinationOnly()
+                    dialog?.dismiss()
+                },
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    bottomMargin = dp(7)
+                },
+            )
+        }
+
+        panel.addView(TextView(this).apply {
+            text = "Cancel"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setTextColor(accentColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            background = roundedSurface(Color.TRANSPARENT, 16)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Cancel bottom navigation display selection"
+            setOnClickListener { dialog?.dismiss() }
+        })
+
+        dialog = AlertDialog.Builder(this)
+            .setView(panel)
+            .create()
+        dialog?.setOnShowListener {
+            dialog?.window?.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(Color.TRANSPARENT),
+            )
+            dialog?.window?.setDimAmount(0.42f)
+            dialog?.window?.setLayout(
+                resources.displayMetrics.widthPixels - dp(32),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+        }
+        dialog?.show()
+        dialog?.window?.setBackgroundDrawable(
+            android.graphics.drawable.ColorDrawable(Color.TRANSPARENT),
+        )
+        dialog?.window?.setDimAmount(0.42f)
+        dialog?.window?.setLayout(
+            resources.displayMetrics.widthPixels - dp(32),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+    }
+
     private fun showViewDensityDialog() {
         val current = currentUserSettings().viewDensity
         var dialog: AlertDialog? = null
@@ -5241,6 +5479,12 @@ class GalleryActivity : Activity() {
             viewDensity = GalleryViewDensity.fromStored(
                 preferences.getString(VIEW_DENSITY_KEY, GalleryViewDensity.DENSE.storedValue),
             ),
+            navigationDisplayMode = GalleryNavigationDisplayMode.fromStored(
+                preferences.getString(
+                    NAVIGATION_DISPLAY_MODE_KEY,
+                    GalleryNavigationDisplayMode.ICONS_ONLY.storedValue,
+                ),
+            ),
             groupingMode = GalleryGroupingMode.fromStored(
                 preferences.getString(GROUPING_MODE_KEY, GalleryGroupingMode.DAY.storedValue),
             ),
@@ -5365,6 +5609,7 @@ class GalleryActivity : Activity() {
             .put("schemaVersion", GallerySettingsPolicy.EXPORT_SCHEMA_VERSION)
             .put("fileLoadingPriority", settings.fileLoadingPriority.storedValue)
             .put("viewDensity", settings.viewDensity.storedValue)
+            .put("navigationDisplayMode", settings.navigationDisplayMode.storedValue)
             .put("groupingMode", settings.groupingMode.storedValue)
             .put("sortPreference", settings.sortPreference.storedValue)
             .put("pinnedAlbumIds", stringSetJson(settings.pinnedAlbumIds))
@@ -5393,6 +5638,14 @@ class GalleryActivity : Activity() {
         val rawDensity = json.optString("viewDensity", current.viewDensity.storedValue)
         val importedDensity = GalleryViewDensity.entries.firstOrNull { it.storedValue == rawDensity }
             ?: throw IllegalArgumentException("Unsupported view density")
+        val rawNavigationDisplayMode = json.optString(
+            "navigationDisplayMode",
+            current.navigationDisplayMode.storedValue,
+        )
+        val importedNavigationDisplayMode =
+            GalleryNavigationDisplayMode.entries.firstOrNull {
+                it.storedValue == rawNavigationDisplayMode
+            } ?: throw IllegalArgumentException("Unsupported navigation display mode")
         val rawGrouping = json.optString("groupingMode", current.groupingMode.storedValue)
         val importedGrouping = GalleryGroupingMode.entries.firstOrNull { it.storedValue == rawGrouping }
             ?: throw IllegalArgumentException("Unsupported grouping mode")
@@ -5411,6 +5664,7 @@ class GalleryActivity : Activity() {
         galleryPreferences().edit()
             .putString(FILE_LOADING_PRIORITY_KEY, importedPriority.storedValue)
             .putString(VIEW_DENSITY_KEY, importedDensity.storedValue)
+            .putString(NAVIGATION_DISPLAY_MODE_KEY, importedNavigationDisplayMode.storedValue)
             .putString(GROUPING_MODE_KEY, importedGrouping.storedValue)
             .putString(SORT_PREFERENCE_KEY, importedSortPreference.storedValue)
             .putStringSet(
@@ -5463,6 +5717,7 @@ class GalleryActivity : Activity() {
         selectedSort = importedSortPreference.mediaSortOrder
         reconfigureThumbnailExecutor(importedPriority)
         thumbnailCache.evictAll()
+        renderNavigation()
         Toast.makeText(this, "Gallery settings imported", Toast.LENGTH_SHORT).show()
         renderSettingsDestinationOnly()
     }
@@ -6057,6 +6312,7 @@ class GalleryActivity : Activity() {
         const val DRAG_SELECTION_EDGE_DP = 72
         const val DRAG_SELECTION_SCROLL_STEP_DP = 14
         const val THUMBNAIL_CACHE_KIB = 8 * 1024
+        const val MEDIA_REFRESH_DEBOUNCE_MS = 350L
         const val GRID_THUMBNAIL_NAMESPACE = "grid"
         const val ALBUM_THUMBNAIL_NAMESPACE = "album"
         const val VIEWER_THUMBNAIL_NAMESPACE = "viewer"
@@ -6067,6 +6323,7 @@ class GalleryActivity : Activity() {
         const val FAVORITES_KEY = "favorite_content_uris"
         const val FILE_LOADING_PRIORITY_KEY = "file_loading_priority"
         const val VIEW_DENSITY_KEY = "view_density"
+        const val NAVIGATION_DISPLAY_MODE_KEY = "navigation_display_mode"
         const val GROUPING_MODE_KEY = "grouping_mode"
         const val SORT_PREFERENCE_KEY = "sort_preference"
         const val PINNED_ALBUM_IDS_KEY = "pinned_album_ids"
