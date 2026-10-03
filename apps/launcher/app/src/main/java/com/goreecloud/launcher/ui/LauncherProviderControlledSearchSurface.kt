@@ -331,7 +331,7 @@ internal fun LauncherProviderControlledSearchSurface(
                 Surface(
                     onClick = { showSources = false },
                     modifier = Modifier
-                        .size(44.dp)
+                        .size(48.dp)
                         .semantics {
                             contentDescription = "Back to Universal Search"
                         },
