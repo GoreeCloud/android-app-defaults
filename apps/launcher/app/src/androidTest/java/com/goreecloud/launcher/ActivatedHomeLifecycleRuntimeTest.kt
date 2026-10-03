@@ -117,8 +117,8 @@ class ActivatedHomeLifecycleRuntimeTest {
             }
         }
 
-        lifecyclePreferencesRepository.markStarterLayoutApplied()
-        withTimeout(10_000) {
+        lifecyclePreferencesRepository.markStarterLayoutApplied().join()
+        withTimeout(5_000) {
             lifecyclePreferencesRepository.experiencePreferences.first {
                 it.homeAppMode == LauncherHomeAppMode.NONE &&
                     it.startupWizardCompleted &&
