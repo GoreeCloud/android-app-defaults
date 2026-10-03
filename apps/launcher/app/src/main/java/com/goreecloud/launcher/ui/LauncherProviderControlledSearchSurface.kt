@@ -3196,7 +3196,7 @@ private fun LauncherSearchSourceStatusPill(
     ) {
         Text(
             label,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             style = MaterialTheme.typography.labelSmall,
             color = foreground,
             fontWeight = FontWeight.SemiBold,
