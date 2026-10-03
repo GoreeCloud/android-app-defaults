@@ -589,22 +589,44 @@ internal fun LauncherProviderControlledSearchSurface(
                             }
                             grouped.forEach { section ->
                                 item(key = "header:" + section.category.name) {
-                                    Text(
-                                        section.title + " (" +
-                                            (fullSectionCounts[section.category] ?: section.items.size) +
-                                            ")",
+                                    Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .semantics { heading() }
                                             .padding(
                                                 start = GlazeMetrics.space2,
+                                                end = GlazeMetrics.space1,
                                                 top = 6.dp,
                                                 bottom = 2.dp,
                                             ),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.78f),
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            section.title,
+                                            modifier = Modifier.weight(1f),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                                .copy(alpha = 0.78f),
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                            color = MaterialTheme.colorScheme.surfaceVariant
+                                                .copy(alpha = 0.46f),
+                                        ) {
+                                            Text(
+                                                (fullSectionCounts[section.category]
+                                                    ?: section.items.size).toString(),
+                                                modifier = Modifier.padding(
+                                                    horizontal = 7.dp,
+                                                    vertical = 2.dp,
+                                                ),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                        }
+                                    }
                                 }
                                 if (section.category == LauncherSearchCategory.APPLICATION) {
                                     val topApps = section.items
@@ -693,16 +715,40 @@ internal fun LauncherProviderControlledSearchSurface(
                     }
                     if (explicitHandoffs.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                        Text(
-                            "Search online",
-                            modifier = Modifier.padding(
-                                start = GlazeMetrics.space2,
-                                top = GlazeMetrics.space1,
-                            ),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = GlazeMetrics.space2,
+                                    end = GlazeMetrics.space1,
+                                    top = GlazeMetrics.space1,
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Text(
+                                "Search online",
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            ) {
+                                Text(
+                                    "Tap to send",
+                                    modifier = Modifier.padding(
+                                        horizontal = 8.dp,
+                                        vertical = 2.dp,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
                         explicitHandoffs.forEach { provider ->
                             LauncherSearchHandoffRow(
                                 provider = provider,
@@ -713,12 +759,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 },
                             )
                         }
-                        Text(
-                            "Connected queries are sent only after you tap a result.",
-                            modifier = Modifier.padding(horizontal = GlazeMetrics.space2),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.70f),
-                        )
+                        Spacer(Modifier.height(2.dp))
                     }
                 }
             }
@@ -1748,116 +1789,256 @@ private fun LauncherGlazeSearchResult(
             MaterialTheme.colorScheme.onSurface.copy(alpha = if (prominent) 0.07f else 0.05f),
         ),
     ) {
-        Column(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = if (prominent) 8.dp else 2.dp),
+                .heightIn(min = if (prominent) 58.dp else 50.dp),
+            onClick = onActivate,
+            shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+            color = Color.Transparent,
         ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = if (prominent) 56.dp else 48.dp),
-                onClick = onActivate,
-                shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-                color = Color.Transparent,
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = 10.dp,
+                    vertical = if (prominent) 7.dp else 5.dp,
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    if (appIcon != null) {
-                        Image(
-                            bitmap = appIcon,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.size(iconSize).launcherIconMask(),
-                        )
-                    } else if (isContact) {
-                        Surface(
-                            modifier = Modifier.size(iconSize),
-                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    result.title.trim().take(1).uppercase(),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                )
-                            }
+                if (appIcon != null) {
+                    Image(
+                        bitmap = appIcon,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(iconSize).launcherIconMask(),
+                    )
+                } else if (isContact) {
+                    Surface(
+                        modifier = Modifier.size(iconSize),
+                        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                result.title.trim().take(1).uppercase(),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
                         }
-                    } else {
-                        LauncherSearchResultCategoryGlyph(result.category)
                     }
-                    Column(Modifier.weight(1f)) {
+                } else {
+                    LauncherSearchResultCategoryGlyph(result.category)
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        result.title,
+                        style = if (prominent) {
+                            MaterialTheme.typography.titleSmall
+                        } else {
+                            MaterialTheme.typography.bodyMedium
+                        },
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    result.subtitle?.let {
                         Text(
-                            result.title,
-                            style = if (prominent) {
-                                MaterialTheme.typography.titleSmall
-                            } else {
-                                MaterialTheme.typography.bodyMedium
-                            },
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.SemiBold,
+                            it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        result.subtitle?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        sourceLabel?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
                     }
-                    Text(
-                        when {
-                            isContact -> "View"
-                            result.action is LauncherCopyTextSearchAction -> "Copy"
-                            else -> "Open"
+                    sourceLabel?.let {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                if (isContact && number != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LauncherSearchResultActionButton(
+                            kind = LauncherSearchResultActionKind.CALL,
+                            label = "Call " + result.title,
+                            onClick = {
+                                onOpenSearchUri(
+                                    LauncherOpenUriSearchAction(
+                                        Intent.ACTION_DIAL,
+                                        Uri.fromParts("tel", number, null).toString(),
+                                    ),
+                                )
+                            },
+                        )
+                        LauncherSearchResultActionButton(
+                            kind = LauncherSearchResultActionKind.MESSAGE,
+                            label = "Message " + result.title,
+                            onClick = {
+                                onOpenSearchUri(
+                                    LauncherOpenUriSearchAction(
+                                        Intent.ACTION_SENDTO,
+                                        Uri.fromParts("smsto", number, null).toString(),
+                                    ),
+                                )
+                            },
+                        )
+                    }
+                } else {
+                    val kind = if (result.action is LauncherCopyTextSearchAction) {
+                        LauncherSearchResultActionKind.COPY
+                    } else {
+                        LauncherSearchResultActionKind.OPEN
+                    }
+                    LauncherSearchResultActionButton(
+                        kind = kind,
+                        label = when (kind) {
+                            LauncherSearchResultActionKind.COPY -> "Copy " + result.title
+                            else -> "Open " + result.title
                         },
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        onClick = onActivate,
                     )
                 }
             }
-            if (isContact && number != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.OutlinedButton(
-                        onClick = {
-                            onOpenSearchUri(
-                                LauncherOpenUriSearchAction(
-                                    Intent.ACTION_DIAL,
-                                    Uri.fromParts("tel", number, null).toString(),
-                                ),
-                            )
-                        },
-                        modifier = Modifier.heightIn(min = 40.dp),
-                    ) { Text("Call") }
-                    androidx.compose.material3.OutlinedButton(
-                        onClick = {
-                            onOpenSearchUri(
-                                LauncherOpenUriSearchAction(
-                                    Intent.ACTION_SENDTO,
-                                    Uri.fromParts("smsto", number, null).toString(),
-                                ),
-                            )
-                        },
-                        modifier = Modifier.heightIn(min = 40.dp),
-                    ) { Text("Message") }
+        }
+    }
+}
+
+private enum class LauncherSearchResultActionKind {
+    OPEN,
+    COPY,
+    CALL,
+    MESSAGE,
+}
+
+@Composable
+private fun LauncherSearchResultActionButton(
+    kind: LauncherSearchResultActionKind,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(38.dp)
+            .semantics { contentDescription = label },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherSearchResultActionGlyph(
+                kind = kind,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchResultActionGlyph(
+    kind: LauncherSearchResultActionKind,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(18.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when (kind) {
+            LauncherSearchResultActionKind.OPEN -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.50f),
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.50f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.54f, u * 0.30f),
+                    androidx.compose.ui.geometry.Offset(u * 0.74f, u * 0.50f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.74f, u * 0.50f),
+                    androidx.compose.ui.geometry.Offset(u * 0.54f, u * 0.70f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            LauncherSearchResultActionKind.COPY -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.26f, u * 0.18f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.50f, u * 0.54f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.30f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.50f, u * 0.54f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+            }
+            LauncherSearchResultActionKind.CALL -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.27f, u * 0.23f),
+                    androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.76f),
+                    stroke * 1.35f,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.20f, u * 0.22f),
+                    androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.18f),
+                    stroke * 1.2f,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.66f, u * 0.82f),
+                    androidx.compose.ui.geometry.Offset(u * 0.80f, u * 0.76f),
+                    stroke * 1.2f,
+                    cap = cap,
+                )
+            }
+            LauncherSearchResultActionKind.MESSAGE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.20f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.54f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.14f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.74f),
+                    androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.86f),
+                    stroke,
+                    cap = cap,
+                )
+                listOf(0.38f, 0.50f, 0.62f).forEach { x ->
+                    drawCircle(
+                        color = tint,
+                        radius = u * 0.035f,
+                        center = androidx.compose.ui.geometry.Offset(u * x, u * 0.47f),
+                    )
                 }
             }
         }
@@ -2116,6 +2297,108 @@ private fun LauncherBackGlyph(
             stroke,
             cap = cap,
         )
+    }
+}
+
+private enum class LauncherSearchSourceUtilityKind {
+    RESET,
+    ORDER,
+    DONE,
+    EARLIER,
+    LATER,
+}
+
+@Composable
+private fun LauncherSearchSourceUtilityButton(
+    kind: LauncherSearchSourceUtilityKind,
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(38.dp)
+            .semantics { contentDescription = label },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.055f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            LauncherSearchSourceUtilityGlyph(
+                kind = kind,
+                tint = if (enabled) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchSourceUtilityGlyph(
+    kind: LauncherSearchSourceUtilityKind,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(17.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.095f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                tint,
+                androidx.compose.ui.geometry.Offset(u * x1, u * y1),
+                androidx.compose.ui.geometry.Offset(u * x2, u * y2),
+                stroke,
+                cap = cap,
+            )
+        }
+        when (kind) {
+            LauncherSearchSourceUtilityKind.RESET -> {
+                drawArc(
+                    color = tint,
+                    startAngle = 35f,
+                    sweepAngle = 285f,
+                    useCenter = false,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.18f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.64f, u * 0.64f),
+                    style = Stroke(width = stroke, cap = cap),
+                )
+                line(0.26f, 0.22f, 0.19f, 0.40f)
+                line(0.26f, 0.22f, 0.43f, 0.25f)
+            }
+            LauncherSearchSourceUtilityKind.ORDER -> {
+                listOf(0.30f, 0.50f, 0.70f).forEach { y ->
+                    drawCircle(
+                        color = tint,
+                        radius = u * 0.035f,
+                        center = androidx.compose.ui.geometry.Offset(u * 0.22f, u * y),
+                    )
+                    line(0.38f, y, 0.80f, y)
+                }
+            }
+            LauncherSearchSourceUtilityKind.DONE -> {
+                line(0.18f, 0.52f, 0.40f, 0.74f)
+                line(0.40f, 0.74f, 0.82f, 0.28f)
+            }
+            LauncherSearchSourceUtilityKind.EARLIER -> {
+                line(0.50f, 0.80f, 0.50f, 0.24f)
+                line(0.50f, 0.24f, 0.31f, 0.43f)
+                line(0.50f, 0.24f, 0.69f, 0.43f)
+            }
+            LauncherSearchSourceUtilityKind.LATER -> {
+                line(0.50f, 0.20f, 0.50f, 0.76f)
+                line(0.50f, 0.76f, 0.31f, 0.57f)
+                line(0.50f, 0.76f, 0.69f, 0.57f)
+            }
+        }
     }
 }
 
@@ -2564,37 +2847,58 @@ private fun LauncherSearchSourceManager(
                             )
                         }
                     }
-                    Column(Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics {
+                                contentDescription =
+                                    "Private by default. Local sources stay local and connected sources are optional."
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(
                             "Private by default",
+                            modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            if (ready) {
-                                "Local stays local · connected sources are optional."
-                            } else {
-                                "Loading source controls…"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
+                        Surface(
+                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                        ) {
+                            Text(
+                                if (ready) "Local-first" else "Loading",
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     }
-                    TextButton(
-                        onClick = onReset,
+                    LauncherSearchSourceUtilityButton(
+                        kind = LauncherSearchSourceUtilityKind.RESET,
+                        label = "Reset Search Sources",
                         enabled = ready,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) { Text("Reset") }
-                    TextButton(
-                        onClick = { reorderMode = !reorderMode },
+                        onClick = onReset,
+                    )
+                    LauncherSearchSourceUtilityButton(
+                        kind = if (reorderMode) {
+                            LauncherSearchSourceUtilityKind.DONE
+                        } else {
+                            LauncherSearchSourceUtilityKind.ORDER
+                        },
+                        label = if (reorderMode) {
+                            "Finish ordering Search Sources"
+                        } else {
+                            "Order Search Sources"
+                        },
                         enabled = ready && controls.orderedOptions.size > 1,
-                        modifier = Modifier.heightIn(min = 44.dp),
-                    ) {
-                        Text(if (reorderMode) "Done" else "Order")
-                    }
+                        onClick = { reorderMode = !reorderMode },
+                    )
                 }
             }
         }
@@ -2639,20 +2943,32 @@ private fun LauncherSearchSourceManager(
                                     LauncherSearchSectionGlyph(section = section, tint = accent)
                                 }
                             }
-                            Column(Modifier.weight(1f)) {
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
                                 Text(
                                     section.title,
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
-                                Text(
-                                    section.subtitle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                    color = accent.copy(alpha = 0.10f),
+                                ) {
+                                    Text(
+                                        options.size.toString(),
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 2.dp,
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = accent,
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                }
                             }
                         }
 
@@ -2753,7 +3069,7 @@ private fun LauncherSearchSourceManager(
 
                                     if (sectionIndex > 0) {
                                         HorizontalDivider(
-                                            modifier = Modifier.padding(start = 62.dp),
+                                            modifier = Modifier.padding(start = 56.dp),
                                             color = MaterialTheme.colorScheme.onSurface
                                                 .copy(alpha = 0.055f),
                                         )
@@ -2989,7 +3305,12 @@ private fun LauncherSearchSourceManager(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.End,
                                             ) {
-                                                TextButton(
+                                                LauncherSearchSourceUtilityButton(
+                                                    kind =
+                                                        LauncherSearchSourceUtilityKind.EARLIER,
+                                                    label =
+                                                        "Move " + option.displayName + " earlier",
+                                                    enabled = ready && index > 0,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3000,11 +3321,16 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled = ready && index > 0,
-                                                ) {
-                                                    Text("↑  Earlier")
-                                                }
-                                                TextButton(
+                                                )
+                                                LauncherSearchSourceUtilityButton(
+                                                    kind =
+                                                        LauncherSearchSourceUtilityKind.LATER,
+                                                    label =
+                                                        "Move " + option.displayName + " later",
+                                                    enabled =
+                                                        ready &&
+                                                            index in 0 until
+                                                                controls.orderedOptions.lastIndex,
                                                     onClick = {
                                                         onSet(
                                                             LauncherSearchProviderUserControlPolicy
@@ -3015,13 +3341,7 @@ private fun LauncherSearchSourceManager(
                                                                 ),
                                                         )
                                                     },
-                                                    enabled =
-                                                        ready &&
-                                                            index in 0 until
-                                                                controls.orderedOptions.lastIndex,
-                                                ) {
-                                                    Text("↓  Later")
-                                                }
+                                                )
                                             }
                                         }
                                     }
