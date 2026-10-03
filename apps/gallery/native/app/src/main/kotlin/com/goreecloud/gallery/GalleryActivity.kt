@@ -906,14 +906,27 @@ class GalleryActivity : Activity() {
         }
 
         val actions = listOf(
-            selectionAction("Share", selectedItems.isNotEmpty(), "Share selected media") {
+            selectionAction(
+                R.drawable.ic_gallery_share,
+                selectedItems.isNotEmpty(),
+                "Share selected media",
+            ) {
                 shareSelectedItems()
             },
-            selectionAction(favoriteLabel, selectedItems.isNotEmpty(), "$favoriteLabel selected media") {
+            selectionAction(
+                if (favoriteAction == GalleryFavoriteBulkAction.REMOVE) {
+                    R.drawable.ic_gallery_favorite
+                } else {
+                    R.drawable.ic_gallery_favorite_outline
+                },
+                selectedItems.isNotEmpty(),
+                "$favoriteLabel selected media",
+                selected = favoriteAction == GalleryFavoriteBulkAction.REMOVE,
+            ) {
                 applySelectedFavoriteAction()
             },
             selectionAction(
-                "Move",
+                R.drawable.ic_gallery_move,
                 selectedItems.isNotEmpty() &&
                     moveSupported &&
                     (moveDestinations.isNotEmpty() || newFolderParent != null) &&
@@ -924,7 +937,7 @@ class GalleryActivity : Activity() {
                 showMoveDestinationDialog()
             },
             selectionAction(
-                "Copy",
+                R.drawable.ic_gallery_copy,
                 selectedItems.isNotEmpty() &&
                     selectedItems.size <= AndroidMediaCopyRequests.MAX_COPY_ITEMS &&
                     copySupported &&
@@ -937,13 +950,18 @@ class GalleryActivity : Activity() {
                 showCopyDestinationDialog()
             },
             selectionAction(
-                "Delete",
+                R.drawable.ic_gallery_delete,
                 selectedItems.isNotEmpty() && deleteSupported && !mediaCopyExecutionInProgress,
                 deletionDescription,
+                destructive = true,
             ) {
                 requestMediaDeletion(selectedItems)
             },
-            selectionAction("More", currentScope.isNotEmpty(), "More selection actions") {},
+            selectionAction(
+                R.drawable.ic_gallery_more,
+                currentScope.isNotEmpty(),
+                "More selection actions",
+            ) {},
         )
         actions.lastOrNull()?.let { moreAction ->
             moreAction.setOnClickListener {
@@ -995,26 +1013,42 @@ class GalleryActivity : Activity() {
     }
 
     private fun selectionAction(
-        label: String,
+        iconResource: Int,
         enabled: Boolean,
         description: String,
+        selected: Boolean = false,
+        destructive: Boolean = false,
         onClick: () -> Unit,
     ): TextView = TextView(this).apply {
-        text = label
+        text = ""
         gravity = Gravity.CENTER
         minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 10.5f)
-        setTypeface(typeface, Typeface.BOLD)
-        setTextColor(if (enabled) accentColor() else secondaryTextColor())
+        minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+        setPadding(dp(11), dp(11), dp(11), dp(11))
+        val foreground = when {
+            !enabled -> secondaryTextColor()
+            destructive -> 0xffc62828.toInt()
+            selected -> accentColor()
+            else -> accentColor()
+        }
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(foreground)
         background = roundedSurface(
-            if (enabled) withAlpha(accentColor(), 0.10f) else Color.TRANSPARENT,
+            when {
+                !enabled -> Color.TRANSPARENT
+                destructive -> withAlpha(0xffc62828.toInt(), 0.11f)
+                selected -> withAlpha(accentColor(), 0.18f)
+                else -> withAlpha(accentColor(), 0.10f)
+            },
             18,
         )
         isEnabled = enabled
         isClickable = enabled
         isFocusable = enabled
+        isSelected = selected
         alpha = if (enabled) 1f else 0.42f
         contentDescription = description
+        tooltipText = description
         if (enabled) setOnClickListener { onClick() }
     }
 
