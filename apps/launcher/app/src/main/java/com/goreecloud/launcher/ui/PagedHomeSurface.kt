@@ -1198,20 +1198,8 @@ fun HomePageDots(
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    val indicatorBackground = if (usesWallpaperGlass) {
-        Color.Transparent
-    } else {
-        when (presentation.materialRole) {
-            GlazeV16MaterialRole.SOLID -> MaterialTheme.colorScheme.surface
-            GlazeV16MaterialRole.RAISED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
-            else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
-        }
-    }
-    val indicatorOutline = if (usesWallpaperGlass) {
-        Color.Transparent
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
+    val indicatorBackground = Color.Transparent
+    val indicatorOutline = Color.Transparent
 
     Box(modifier = modifier) {
         Surface(
