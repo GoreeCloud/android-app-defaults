@@ -726,33 +726,86 @@ private fun WizardGestureStrip() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.56f),
+        ),
     ) {
         Row(
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
-                Surface(
-                    modifier = Modifier.weight(1f),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                        GlazeMetrics.radiusPill,
-                    ),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-                ) {
-                    Text(
-                        label,
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
+            WizardGestureCue(
+                title = "Apps",
+                summary = "Swipe up",
+                symbol = WizardVisualSymbol.APPS,
+                modifier = Modifier.weight(1f),
+            )
+            WizardGestureCue(
+                title = "Search",
+                summary = "Swipe down",
+                symbol = WizardVisualSymbol.SEARCH,
+                modifier = Modifier.weight(1f),
+            )
+            WizardGestureCue(
+                title = "Edit",
+                summary = "Hold Home",
+                symbol = WizardVisualSymbol.GESTURE,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureCue(
+    title: String,
+    summary: String,
+    symbol: WizardVisualSymbol,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.heightIn(min = 58.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Surface(
+                modifier = Modifier.size(28.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    GlazeMetrics.radiusPill,
+                ),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    WizardVisualGlyph(
+                        symbol = symbol,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(15.dp),
                     )
                 }
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                )
+                Text(
+                    summary,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
             }
         }
     }
@@ -885,7 +938,8 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first when you want them together.",
+                symbol = WizardVisualSymbol.APPS,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -903,11 +957,12 @@ fun LauncherHomeHintCard(
 private fun WizardHintRow(
     title: String,
     summary: String,
+    symbol: WizardVisualSymbol = WizardVisualSymbol.GESTURE,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
@@ -917,11 +972,11 @@ private fun WizardHintRow(
             Surface(
                 modifier = Modifier.size(28.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusPill),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     WizardVisualGlyph(
-                        symbol = WizardVisualSymbol.GESTURE,
+                        symbol = symbol,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
