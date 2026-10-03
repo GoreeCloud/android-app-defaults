@@ -41,6 +41,7 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
                 .check(matches(isClickable()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
                 .check(matches(hasRefinementTag("control:$description")))
+                .check(matches(hasIconOnlyGlyph()))
         }
     }
 
@@ -165,6 +166,19 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
 
     private val PRIMARY_NAVIGATION_LABELS =
         setOf("Photos", "Albums", "Videos", "Trash", "Settings")
+
+    private fun hasIconOnlyGlyph() = object : TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description) {
+            description.appendText("icon-only control with a centered compound drawable")
+        }
+
+        override fun matchesSafely(view: View): Boolean {
+            val control = view as? TextView ?: return false
+            return control.text.isNullOrEmpty() &&
+                control.compoundDrawables[0] != null &&
+                (control.gravity and Gravity.CENTER) == Gravity.CENTER
+        }
+    }
 
     private fun hasMinimumTouchSizeDp(minimumDp: Float) = object : TypeSafeMatcher<View>() {
         override fun describeTo(description: Description) {
