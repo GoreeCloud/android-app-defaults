@@ -1,6 +1,7 @@
 package com.goreecloud.gallery
 
 import android.graphics.Rect
+import android.graphics.drawable.InsetDrawable
 import android.os.Build
 import android.os.SystemClock
 import android.view.Gravity
@@ -58,7 +59,7 @@ class GalleryRenderedAcceptanceTest {
                 .check(matches(isDisplayed()))
                 .check(matches(isClickable()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
-                .check(matches(hasTopCompoundDrawable()))
+                .check(matches(hasCenteredCompoundDrawable()))
         }
 
         onView(withContentDescription("Photos, selected"))
@@ -68,6 +69,56 @@ class GalleryRenderedAcceptanceTest {
             .check(matches(isDisplayed()))
             .check(matches(isClickable()))
             .check(matches(hasMinimumTouchSizeDp(48f)))
+    }
+
+    @Test
+    fun iconOnlyNavigationGlyphsAreCenteredAndSlotsAreEven() {
+        activityRule.scenario.onActivity { activity ->
+            val androidContent = activity.findViewById<ViewGroup>(android.R.id.content)
+            val root = androidContent.getChildAt(0) as FrameLayout
+            val capsule = (0 until root.childCount)
+                .map(root::getChildAt)
+                .filterIsInstance<LinearLayout>()
+                .single(::isPrimaryNavigationCapsule)
+            val controls = (0 until capsule.childCount)
+                .map(capsule::getChildAt)
+                .filterIsInstance<TextView>()
+
+            assertTrue("Expected five primary navigation controls", controls.size == 5)
+            assertTrue("Icons-only controls should not render visible labels", controls.all { it.text.isNullOrEmpty() })
+            assertTrue(
+                "Icons-only controls should place the glyph in the centered compound slot",
+                controls.all { control ->
+                    control.compoundDrawables[0] != null &&
+                        control.compoundDrawables[1] == null &&
+                        (control.gravity and Gravity.CENTER) == Gravity.CENTER &&
+                        !control.includeFontPadding
+                },
+            )
+
+            val widths = controls.map { it.width }
+            assertTrue(
+                "Weighted navigation controls should have equal widths: $widths",
+                widths.maxOrNull()!! - widths.minOrNull()!! <= 1,
+            )
+
+            val centers = controls.map { it.left + (it.width / 2f) }
+            val spacing = centers.zipWithNext { a, b -> b - a }
+            assertTrue(
+                "Navigation glyph slots should be evenly distributed: centers=$centers spacing=$spacing",
+                spacing.maxOrNull()!! - spacing.minOrNull()!! <= 1f,
+            )
+
+            val selected = controls.single { it.isSelected }
+            assertTrue(
+                "Selected icons-only navigation should use inset Glaze material",
+                selected.background is InsetDrawable,
+            )
+            assertTrue(
+                "Each icon-only destination should retain a discoverable tooltip",
+                controls.all { navigationLabel(it) == it.tooltipText?.toString() },
+            )
+        }
     }
 
     @Test
@@ -142,7 +193,7 @@ class GalleryRenderedAcceptanceTest {
             onView(selectedNavigationLabel("Albums"))
                 .check(matches(isDisplayed()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
-                .check(matches(hasTopCompoundDrawable()))
+                .check(matches(hasCenteredCompoundDrawable()))
                 .check(matches(hasSelectedStateDescription()))
 
             activateNavigationControl("Settings")
@@ -150,7 +201,7 @@ class GalleryRenderedAcceptanceTest {
             onView(selectedNavigationLabel("Settings"))
                 .check(matches(isDisplayed()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
-                .check(matches(hasTopCompoundDrawable()))
+                .check(matches(hasCenteredCompoundDrawable()))
                 .check(matches(hasSelectedStateDescription()))
 
             activateNavigationControl("Photos")
@@ -158,7 +209,7 @@ class GalleryRenderedAcceptanceTest {
             onView(selectedNavigationLabel("Photos"))
                 .check(matches(isDisplayed()))
                 .check(matches(hasMinimumTouchSizeDp(48f)))
-                .check(matches(hasTopCompoundDrawable()))
+                .check(matches(hasCenteredCompoundDrawable()))
                 .check(matches(hasSelectedStateDescription()))
         }
     }
@@ -457,12 +508,16 @@ class GalleryRenderedAcceptanceTest {
         }
     }
 
-    private fun hasTopCompoundDrawable() = object : TypeSafeMatcher<View>() {
+    private fun hasCenteredCompoundDrawable() = object : TypeSafeMatcher<View>() {
         override fun describeTo(description: Description) {
-            description.appendText("is a Gallery navigation label with a rendered top icon")
+            description.appendText("is an icons-only Gallery navigation control with a centered glyph")
         }
 
         override fun matchesSafely(view: View): Boolean =
-            view is TextView && view.compoundDrawables[1] != null
+            view is TextView &&
+                view.compoundDrawables[0] != null &&
+                view.compoundDrawables[1] == null &&
+                view.text.isNullOrEmpty() &&
+                (view.gravity and Gravity.CENTER) == Gravity.CENTER
     }
 }

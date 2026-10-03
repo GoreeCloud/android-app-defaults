@@ -1,5 +1,23 @@
 # GoreeCloud Gallery Changelogs
 
+## October 3, 2026 — bottom-navigation optical alignment
+
+### Changed
+- Reworked icons-only navigation so glyphs use a truly centered compound-drawable slot instead of a top drawable paired with an invisible text line.
+- Removed per-destination start margins so all five navigation targets have equal-width, evenly spaced centers.
+- Increased navigation glyphs to a consistent 22dp optical size and tightened the selected Glaze pill with mode-aware insets.
+- Centralized bottom-navigation presentation so Gallery and Android-managed Trash use the same geometry from the first frame.
+- Added destination tooltips for icon-only discoverability while preserving accessibility content/state descriptions.
+- Simplified setup-wizard copy and reduced dialog density without changing permission or privacy boundaries.
+- Advanced the Development identity to `0.8.9-dev`; delivered CI version codes must exceed `2000730`.
+
+### Verification
+- Added unit coverage for icon placement and selected-state geometry policy.
+- Added rendered Android acceptance coverage for icons-only centered glyph placement, equal slot widths, even distribution, inset selected material, and tooltips.
+
+### Boundary
+This pass changes Gallery presentation and onboarding wording only. It does not expand Android media permission scope, filesystem access, network/account authority, mutation authority, or Stable/release status.
+
 ## October 2, 2026 — live library refresh and navigation polish
 
 ### Added

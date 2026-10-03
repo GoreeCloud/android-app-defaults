@@ -269,6 +269,10 @@ class RecycleBinActivity : Activity() {
     }
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
+        val navigationMode = GalleryNavigationDisplayMode.fromStored(
+            getSharedPreferences(GallerySetupPreferences.PREFERENCES_NAME, MODE_PRIVATE)
+                .getString(GalleryNavigationDisplayMode.PREFERENCE_KEY, null),
+        )
         val items = listOf(
             Triple("Photos", R.drawable.ic_gallery_nav_photos, GalleryNavigationContract.PHOTOS),
             Triple("Albums", R.drawable.ic_gallery_nav_albums, GalleryNavigationContract.ALBUMS),
@@ -276,21 +280,19 @@ class RecycleBinActivity : Activity() {
             Triple("Trash", R.drawable.ic_gallery_nav_trash, GalleryNavigationContract.TRASH),
             Triple("Settings", R.drawable.ic_gallery_nav_settings, GalleryNavigationContract.SETTINGS),
         )
-        items.forEachIndexed { index, (label, icon, target) ->
+        items.forEach { (label, icon, target) ->
             val selected = target == GalleryNavigationContract.TRASH
             addView(
                 TextView(this@RecycleBinActivity).apply {
-                    text = label
-                    gravity = Gravity.CENTER
-                    minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, GalleryGlazeContract.NAVIGATION_LABEL_SP)
-                    setTypeface(typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
-                    setTextColor(if (selected) accentColor() else primaryTextColor())
-                    setCompoundDrawablesWithIntrinsicBounds(0, icon, 0, 0)
-                    compoundDrawableTintList = ColorStateList.valueOf(
-                        if (selected) accentColor() else primaryTextColor(),
+                    GalleryNavigationStyling.apply(
+                        activity = this@RecycleBinActivity,
+                        item = this,
+                        label = label,
+                        iconRes = icon,
+                        mode = navigationMode,
+                        selected = selected,
+                        foreground = if (selected) accentColor() else primaryTextColor(),
                     )
-                    compoundDrawablePadding = dp(2)
                     isSelected = selected
                     isClickable = true
                     isFocusable = true
@@ -298,24 +300,13 @@ class RecycleBinActivity : Activity() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         stateDescription = if (selected) "Selected" else null
                     }
-                    background = if (selected) {
-                        GalleryGlazeSurfaces.drawable(
-                            context,
-                            GalleryGlazeSurfaces.Role.CONTROL,
-                            GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP,
-                        )
-                    } else {
-                        roundedSurface(Color.TRANSPARENT, GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP)
-                    }
                     setOnClickListener {
                         if (target != GalleryNavigationContract.TRASH) {
                             openGalleryDestination(target)
                         }
                     }
                 },
-                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply {
-                    if (index > 0) marginStart = dp(2)
-                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f),
             )
         }
     }
