@@ -1822,16 +1822,24 @@ private fun LauncherGlazeSearchResult(
                             )
                         }
                     }
-                    Text(
-                        when {
-                            isContact -> "View"
-                            result.action is LauncherCopyTextSearchAction -> "Copy"
-                            else -> "Open"
-                        },
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    if (prominent) {
+                        Text(
+                            when {
+                                isContact -> "View"
+                                result.action is LauncherCopyTextSearchAction -> "Copy"
+                                else -> "Open"
+                            },
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    } else {
+                        LauncherSearchResultActionGlyph(
+                            isContact = isContact,
+                            isCopy = result.action is LauncherCopyTextSearchAction,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
             if (isContact && number != null) {
@@ -2809,32 +2817,75 @@ private fun LauncherSearchSourceManager(
                                                 )
                                             }
 
-                                            Switch(
-                                                checked =
-                                                    enabled &&
-                                                        permissionGranted &&
-                                                        providerReady,
-                                                onCheckedChange = {
-                                                    onSetEnabled(
-                                                        controls,
-                                                        option.providerId,
-                                                        it,
+                                            if (reorderMode) {
+                                                Row(
+                                                    horizontalArrangement =
+                                                        Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                ) {
+                                                    LauncherSourceMoveControl(
+                                                        direction = -1,
+                                                        sourceName = option.displayName,
+                                                        enabled = ready && index > 0,
+                                                        onClick = {
+                                                            onSet(
+                                                                LauncherSearchProviderUserControlPolicy
+                                                                    .moveProviderBy(
+                                                                        controls,
+                                                                        option.providerId,
+                                                                        -1,
+                                                                    ),
+                                                            )
+                                                        },
                                                     )
-                                                },
-                                                enabled =
-                                                    ready &&
-                                                        driveConnectionAvailable &&
-                                                        connectedHandoffAvailable,
-                                                modifier = Modifier.testTag(
-                                                    "launcher-search-source-" +
-                                                        option.providerId,
-                                                ),
-                                            )
-                                            LauncherSourceDisclosureGlyph(
-                                                expanded = expanded,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    .copy(alpha = 0.72f),
-                                            )
+                                                    LauncherSourceMoveControl(
+                                                        direction = 1,
+                                                        sourceName = option.displayName,
+                                                        enabled =
+                                                            ready &&
+                                                                index in 0 until
+                                                                    controls.orderedOptions.lastIndex,
+                                                        onClick = {
+                                                            onSet(
+                                                                LauncherSearchProviderUserControlPolicy
+                                                                    .moveProviderBy(
+                                                                        controls,
+                                                                        option.providerId,
+                                                                        1,
+                                                                    ),
+                                                            )
+                                                        },
+                                                    )
+                                                }
+                                            } else {
+                                                Switch(
+                                                    checked =
+                                                        enabled &&
+                                                            permissionGranted &&
+                                                            providerReady,
+                                                    onCheckedChange = {
+                                                        onSetEnabled(
+                                                            controls,
+                                                            option.providerId,
+                                                            it,
+                                                        )
+                                                    },
+                                                    enabled =
+                                                        ready &&
+                                                            driveConnectionAvailable &&
+                                                            connectedHandoffAvailable,
+                                                    modifier = Modifier.testTag(
+                                                        "launcher-search-source-" +
+                                                            option.providerId,
+                                                    ),
+                                                )
+                                                LauncherSourceDisclosureGlyph(
+                                                    expanded = expanded,
+                                                    tint = MaterialTheme.colorScheme
+                                                        .onSurfaceVariant
+                                                        .copy(alpha = 0.72f),
+                                                )
+                                            }
                                         }
 
                                         if (
@@ -2984,52 +3035,150 @@ private fun LauncherSearchSourceManager(
                                             }
                                         }
 
-                                        if (reorderMode) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.End,
-                                            ) {
-                                                TextButton(
-                                                    onClick = {
-                                                        onSet(
-                                                            LauncherSearchProviderUserControlPolicy
-                                                                .moveProviderBy(
-                                                                    controls,
-                                                                    option.providerId,
-                                                                    -1,
-                                                                ),
-                                                        )
-                                                    },
-                                                    enabled = ready && index > 0,
-                                                ) {
-                                                    Text("↑  Earlier")
-                                                }
-                                                TextButton(
-                                                    onClick = {
-                                                        onSet(
-                                                            LauncherSearchProviderUserControlPolicy
-                                                                .moveProviderBy(
-                                                                    controls,
-                                                                    option.providerId,
-                                                                    1,
-                                                                ),
-                                                        )
-                                                    },
-                                                    enabled =
-                                                        ready &&
-                                                            index in 0 until
-                                                                controls.orderedOptions.lastIndex,
-                                                ) {
-                                                    Text("↓  Later")
-                                                }
-                                            }
-                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSourceMoveControl(
+    direction: Int,
+    sourceName: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    val label = if (direction < 0) {
+        "Move $sourceName earlier"
+    } else {
+        "Move $sourceName later"
+    }
+    val glyphTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+        alpha = if (enabled) 0.88f else 0.34f,
+    )
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .size(36.dp)
+            .semantics { contentDescription = label },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(
+            alpha = if (enabled) 0.58f else 0.26f,
+        ),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(
+                alpha = if (enabled) 0.07f else 0.03f,
+            ),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.10f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                val tint = glyphTint
+                val tipY = if (direction < 0) u * 0.24f else u * 0.76f
+                val stemEndY = if (direction < 0) u * 0.76f else u * 0.24f
+                val armY = if (direction < 0) u * 0.42f else u * 0.58f
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, stemEndY),
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                    androidx.compose.ui.geometry.Offset(u * 0.30f, armY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, tipY),
+                    androidx.compose.ui.geometry.Offset(u * 0.70f, armY),
+                    stroke,
+                    cap = cap,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherSearchResultActionGlyph(
+    isContact: Boolean,
+    isCopy: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(20.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.085f
+        val cap = androidx.compose.ui.graphics.StrokeCap.Round
+        when {
+            isCopy -> {
+                drawRoundRect(
+                    color = tint.copy(alpha = 0.60f),
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.18f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.48f, u * 0.48f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.34f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.48f, u * 0.48f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+            }
+            isContact -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.22f),
+                    androidx.compose.ui.geometry.Offset(u * 0.64f, u * 0.50f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.64f, u * 0.50f),
+                    androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.78f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            else -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.72f),
+                    androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.44f),
+                    stroke,
+                    cap = cap,
+                )
             }
         }
     }
@@ -3068,9 +3217,9 @@ private enum class LauncherSearchSourceSection(
     val title: String,
     val subtitle: String,
 ) {
-    DEVICE("On-device", "Fast local sources with no network query"),
-    PERSONAL("Your content", "Permission-scoped personal data and selected folders"),
-    CONNECTED("Connected", "External services and reviewed inline adapters"),
+    DEVICE("On-device", "Local · no network"),
+    PERSONAL("Your content", "Permissions · selected folders"),
+    CONNECTED("Connected", "Optional external services"),
 }
 
 private fun sourceSectionFor(

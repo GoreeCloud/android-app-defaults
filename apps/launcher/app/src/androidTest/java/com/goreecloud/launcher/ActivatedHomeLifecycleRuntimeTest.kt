@@ -1248,6 +1248,34 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
                 composeRule
+                    .onNodeWithText("Order", useUnmergedTree = true)
+                    .assertHasClickAction()
+                    .performClick()
+                composeRule
+                    .onNodeWithContentDescription(
+                        "Move Quick answers later",
+                        useUnmergedTree = true,
+                    )
+                    .assertHasClickAction()
+                assertEquals(
+                    0,
+                    composeRule
+                        .onAllNodesWithText("Earlier", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .size,
+                )
+                assertEquals(
+                    0,
+                    composeRule
+                        .onAllNodesWithText("Later", useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .size,
+                )
+                composeRule
+                    .onNodeWithText("Done", useUnmergedTree = true)
+                    .assertHasClickAction()
+                    .performClick()
+                composeRule
                     .onNodeWithContentDescription("Back to Universal Search", useUnmergedTree = true)
                     .assertHasClickAction()
                     .performClick()

@@ -2783,11 +2783,11 @@ private fun WidgetPickerBuiltInCard(
                             color = previewColor,
                         )
 
-                        WorkspaceWidgetCatalog.ANALOG_CLOCK -> Text(
-                            "◷",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.ANALOG_CLOCK ->
+                            LauncherWidgetAnalogClockPreview(
+                                tint = previewColor,
+                                modifier = Modifier.size(38.dp),
+                            )
 
                         WorkspaceWidgetCatalog.DATE -> Text(
                             now.dayOfMonth.toString(),
@@ -2810,17 +2810,18 @@ private fun WidgetPickerBuiltInCard(
 
                         WorkspaceWidgetCatalog.SEARCH -> LauncherSearchMagnifier(previewColor)
 
-                        WorkspaceWidgetCatalog.QUICK_ACTIONS -> Text(
-                            "•••",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.QUICK_ACTIONS ->
+                            LauncherWidgetQuickActionsPreview(
+                                tint = previewColor,
+                                modifier = Modifier.size(width = 54.dp, height = 38.dp),
+                            )
 
-                        WorkspaceWidgetCatalog.BATTERY -> Text(
-                            "▰",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
-                        )
+                        WorkspaceWidgetCatalog.BATTERY ->
+                            LauncherSystemGlyph(
+                                symbol = LauncherSystemGlyphSymbol.BATTERY,
+                                tint = previewColor,
+                                modifier = Modifier.size(34.dp),
+                            )
 
                         WorkspaceWidgetCatalog.LAUNCHER_STATUS -> Text(
                             "GC",
@@ -2852,6 +2853,77 @@ private fun WidgetPickerBuiltInCard(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+    }
+}
+
+@Composable
+private fun LauncherWidgetAnalogClockPreview(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val u = size.minDimension
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val stroke = u * 0.065f
+        drawCircle(
+            color = tint,
+            radius = u * 0.42f,
+            center = center,
+            style = Stroke(width = stroke),
+        )
+        drawLine(
+            color = tint,
+            start = center,
+            end = Offset(center.x, center.y - u * 0.22f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            color = tint,
+            start = center,
+            end = Offset(center.x + u * 0.18f, center.y + u * 0.10f),
+            strokeWidth = stroke * 0.85f,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
+private fun LauncherWidgetQuickActionsPreview(
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val gap = size.minDimension * 0.12f
+        val cellWidth = (size.width - gap * 3f) / 2f
+        val cellHeight = (size.height - gap * 3f) / 2f
+        repeat(2) { row ->
+            repeat(2) { column ->
+                drawRoundRect(
+                    color = if (row == 0 && column == 0) {
+                        tint.copy(alpha = 0.32f)
+                    } else {
+                        tint.copy(alpha = 0.16f)
+                    },
+                    topLeft = Offset(
+                        gap + column * (cellWidth + gap),
+                        gap + row * (cellHeight + gap),
+                    ),
+                    size = androidx.compose.ui.geometry.Size(cellWidth, cellHeight),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                        minOf(cellWidth, cellHeight) * 0.28f,
+                    ),
+                )
+                drawCircle(
+                    color = tint.copy(alpha = 0.88f),
+                    radius = minOf(cellWidth, cellHeight) * 0.11f,
+                    center = Offset(
+                        gap + column * (cellWidth + gap) + cellWidth * 0.50f,
+                        gap + row * (cellHeight + gap) + cellHeight * 0.50f,
+                    ),
+                )
+            }
         }
     }
 }
@@ -5272,9 +5344,7 @@ private fun LauncherBuiltInWidget(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     ) {
-                        Text(
-                            "⌕",
-                            style = MaterialTheme.typography.headlineMedium,
+                        LauncherSearchMagnifier(
                             color = MaterialTheme.colorScheme.primary,
                         )
                         Column(Modifier.weight(1f)) {
@@ -5341,10 +5411,14 @@ private fun LauncherBuiltInWidget(
                             color = foreground.copy(alpha = 0.70f),
                         )
                     }
-                    Text(
-                        if (battery.charging) "⚡" else "▰",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                    LauncherSystemGlyph(
+                        symbol = if (battery.charging) {
+                            LauncherSystemGlyphSymbol.CHARGING
+                        } else {
+                            LauncherSystemGlyphSymbol.BATTERY
+                        },
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp),
                     )
                 }
             }
@@ -5842,50 +5916,40 @@ private fun LauncherUniversalSearchResultRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.64f),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.54f),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
         ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = GlazeMetrics.space3, vertical = 14.dp),
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Surface(
-                modifier = Modifier.size(42.dp),
+                modifier = Modifier.size(36.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        when (result.category) {
-                            LauncherSearchCategory.APPLICATION -> "◫"
-                            LauncherSearchCategory.SHORTCUT -> "↗"
-                            LauncherSearchCategory.CONTACT -> "●"
-                            LauncherSearchCategory.CALL_HISTORY -> "☎"
-                            LauncherSearchCategory.MESSAGE -> "✉"
-                            LauncherSearchCategory.FILE -> "▤"
-                            LauncherSearchCategory.CONNECTED_SOURCE -> "⌕"
-                            LauncherSearchCategory.SETTING -> "⚙"
-                            LauncherSearchCategory.ACTION -> "→"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                    LauncherSearchCategoryVectorGlyph(
+                        category = result.category,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text(
                     result.title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -5893,7 +5957,7 @@ private fun LauncherUniversalSearchResultRow(
                 result.subtitle?.takeIf { it.isNotBlank() }?.let { subtitle ->
                     Text(
                         subtitle,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -5904,6 +5968,7 @@ private fun LauncherUniversalSearchResultRow(
                 categoryLabel,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
             )
         }
     }
@@ -6457,18 +6522,31 @@ private fun AppDrawerSurface(
                                 LauncherDrawerSortOrder.entries.forEach { order ->
                                     DropdownMenuItem(
                                         text = {
-                                            Text(
+                                            val itemColor = if (glass) {
+                                                Color.White.copy(alpha = 0.94f)
+                                            } else {
+                                                MaterialTheme.colorScheme.onSurface
+                                            }
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement =
+                                                    Arrangement.spacedBy(8.dp),
+                                            ) {
                                                 if (order == drawerSortOrder) {
-                                                    "✓ " + order.displayName
+                                                    LauncherSystemGlyph(
+                                                        symbol =
+                                                            LauncherSystemGlyphSymbol.CHECK,
+                                                        tint = itemColor,
+                                                        modifier = Modifier.size(14.dp),
+                                                    )
                                                 } else {
-                                                    order.displayName
-                                                },
-                                                color = if (glass) {
-                                                    Color.White.copy(alpha = 0.94f)
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurface
-                                                },
-                                            )
+                                                    Spacer(Modifier.size(14.dp))
+                                                }
+                                                Text(
+                                                    order.displayName,
+                                                    color = itemColor,
+                                                )
+                                            }
                                         },
                                         onClick = {
                                             onSetSortOrderName(order.name)
@@ -6504,14 +6582,14 @@ private fun AppDrawerSurface(
                                 },
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "★",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = if (showPinnedOnly) {
+                                    LauncherSystemGlyph(
+                                        symbol = LauncherSystemGlyphSymbol.PIN,
+                                        tint = if (showPinnedOnly) {
                                             MaterialTheme.colorScheme.onPrimaryContainer
                                         } else {
                                             drawerSecondaryColor
                                         },
+                                        modifier = Modifier.size(20.dp),
                                     )
                                 }
                             }
@@ -6710,14 +6788,14 @@ private fun DrawerSearchField(
                     color = Color.Transparent,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            "×",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (darkSurface) {
+                        LauncherSystemGlyph(
+                            symbol = LauncherSystemGlyphSymbol.CLEAR,
+                            tint = if (darkSurface) {
                                 Color.White.copy(alpha = 0.78f)
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             },
+                            modifier = Modifier.size(18.dp),
                         )
                     }
                 }
@@ -9991,10 +10069,10 @@ private fun DrawerPinnedMark(
         ),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                "★",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            LauncherSystemGlyph(
+                symbol = LauncherSystemGlyphSymbol.PIN,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(11.dp),
             )
         }
     }
@@ -10517,10 +10595,10 @@ internal fun LauncherFolderContentsSheet(
                                 ),
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        "⋮",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                    LauncherSystemGlyph(
+                                        symbol = LauncherSystemGlyphSymbol.OVERFLOW,
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
                             }
@@ -10814,12 +10892,15 @@ internal fun LauncherFolderContentsSheet(
                                                                     contentAlignment =
                                                                         Alignment.Center,
                                                                 ) {
-                                                                    Text(
-                                                                        "✓",
-                                                                        style = MaterialTheme
-                                                                            .typography.labelMedium,
-                                                                        color = MaterialTheme
-                                                                            .colorScheme.onPrimary,
+                                                                    LauncherSystemGlyph(
+                                                                        symbol =
+                                                                            LauncherSystemGlyphSymbol
+                                                                                .CHECK,
+                                                                        tint =
+                                                                            MaterialTheme.colorScheme
+                                                                                .onPrimary,
+                                                                        modifier =
+                                                                            Modifier.size(12.dp),
                                                                     )
                                                                 }
                                                             }
@@ -11213,7 +11294,7 @@ internal fun LauncherFolderAppPickerSheet(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                if (alreadyAdded) "✓ Added" else "+ Add",
+                                if (alreadyAdded) "Added" else "Add",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (alreadyAdded) {
                                     MaterialTheme.colorScheme.primary
