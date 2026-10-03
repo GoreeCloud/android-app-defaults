@@ -1,5 +1,9 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — App Lock and UI polish
+
+Development source adds App Lock controls, the requested floating Dock treatment, improved glyphs, a clearer phone widget catalog, and lighter setup/help presentation. Broader representative-device acceptance remains open.
+
 ## October 3, 2026 — App Lock and owner-feedback UI tranche
 
 Development source now includes profile-qualified App Lock controls, Android authentication before Launcher-originated launches of selected apps, a Privacy & security settings destination, a background-free floating Dock, refined Launcher-owned glyphs, a one-column phone widget catalog, and lighter setup/help presentation. App Lock state is device-local and does not claim control over launches initiated outside GoreeCloud Launcher.
