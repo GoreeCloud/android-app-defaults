@@ -1,5 +1,21 @@
 # GoreeCloud Gallery Changelogs
 
+## October 3, 2026 — full phone-density and glyph-only navigation redesign
+
+### Changed
+- Replaced the oversized bottom capsule with one shared 48dp-high glyph-only navigation rail across Photos, Albums, Videos, Trash, and Settings.
+- Removed visible primary-navigation labels as a presentation option. Legacy stored mode values remain parseable for compatibility, but the primary rail always renders centered glyphs with accessibility names and tooltips.
+- Replaced the large selected-tab pill with a small inset, low-opacity accent treatment. All five tabs retain identical 48dp slots and use a bounded micro scale/fade transition rather than resizing the selected destination.
+- Reduced navigation side/bottom spacing, corner radius, elevation, reserved content lane, and icon optical size so the rail sits naturally above Android gesture insets.
+- Consolidated the no-media Photos/Albums/Videos state into one compact permission row and removed the redundant second permission card.
+- Rebuilt Settings into grouped sections with shared containers, dividers, compact rows, shorter supporting copy, and aligned chevrons/switch/action glyphs instead of one rounded card per option.
+- Removed the visible Bottom navigation appearance chooser because Gallery primary navigation is now a fixed glyph-only contract.
+- Flattened Trash authority guidance and empty states, reduced header scale, and integrated Refresh as a transparent header glyph instead of a separate filled button.
+- Advanced the owner-testable Development identity to `0.8.12-dev`.
+
+### Boundary
+This is a presentation and interaction-density redesign. Android media permission authority, MediaStore Trash confirmation, local-only browsing, Favorites ownership, and release qualification boundaries are unchanged.
+
 ## October 3, 2026 — system-gallery entry-point candidate
 
 ### Added
