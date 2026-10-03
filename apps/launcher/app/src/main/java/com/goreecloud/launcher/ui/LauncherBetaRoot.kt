@@ -2680,21 +2680,27 @@ private fun WidgetPickerBuiltInCard(
         modifier = modifier.testTag("launcher-widget-built-in-$typeId"),
         onClick = onClick,
         shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.065f),
+        ),
     ) {
-        Column(
-            modifier = Modifier.padding(GlazeMetrics.space3),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Surface(
-                shape = RoundedCornerShape(18.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                modifier = Modifier.size(58.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(72.dp)
+                        .fillMaxSize()
                         .clearAndSetSemantics { },
                     contentAlignment = Alignment.Center,
                 ) {
@@ -2702,7 +2708,7 @@ private fun WidgetPickerBuiltInCard(
                         WorkspaceWidgetCatalog.CALENDAR -> {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(1.dp),
+                                verticalArrangement = Arrangement.spacedBy(0.dp),
                             ) {
                                 Text(
                                     now.format(
@@ -2717,37 +2723,24 @@ private fun WidgetPickerBuiltInCard(
                                 )
                                 Text(
                                     now.dayOfMonth.toString(),
-                                    style = MaterialTheme.typography.headlineMedium,
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Light,
                                     color = previewColor,
                                 )
                             }
                         }
-
                         WorkspaceWidgetCatalog.WEATHER -> {
+                            LauncherWeatherIcon(
+                                kind = LauncherWeatherVisualKind.UNKNOWN,
+                                isDay = true,
+                                color = previewColor,
+                                size = 30.dp,
+                            )
+                        }
+                        WorkspaceWidgetCatalog.GLANCE -> {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                LauncherWeatherIcon(
-                                    kind = LauncherWeatherVisualKind.UNKNOWN,
-                                    isDay = true,
-                                    color = previewColor,
-                                    size = 32.dp,
-                                )
-                                Text(
-                                    "Weather",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = previewColor.copy(alpha = 0.78f),
-                                    fontWeight = FontWeight.SemiBold,
-                                )
-                            }
-                        }
-
-                        WorkspaceWidgetCatalog.GLANCE -> {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(1.dp),
                             ) {
                                 Text(
                                     now.format(
@@ -2756,19 +2749,21 @@ private fun WidgetPickerBuiltInCard(
                                             Locale.getDefault(),
                                         ),
                                     ),
-                                    style = MaterialTheme.typography.titleLarge,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Light,
                                     color = previewColor,
                                 )
-                                LauncherWeatherIcon(
-                                    kind = LauncherWeatherVisualKind.UNKNOWN,
-                                    isDay = true,
-                                    color = previewColor,
-                                    size = 28.dp,
+                                Box(
+                                    modifier = Modifier
+                                        .width(22.dp)
+                                        .height(2.dp)
+                                        .background(
+                                            previewColor.copy(alpha = 0.72f),
+                                            RoundedCornerShape(GlazeMetrics.radiusPill),
+                                        ),
                                 )
                             }
                         }
-
                         WorkspaceWidgetCatalog.CLOCK,
                         WorkspaceWidgetCatalog.COMPACT_CLOCK,
                         -> Text(
@@ -2778,24 +2773,24 @@ private fun WidgetPickerBuiltInCard(
                                     Locale.getDefault(),
                                 ),
                             ),
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Light,
                             color = previewColor,
                         )
-
-                        WorkspaceWidgetCatalog.ANALOG_CLOCK ->
-                            LauncherWidgetPreviewGlyph(
-                                typeId = typeId,
-                                tint = previewColor,
-                            )
-
+                        WorkspaceWidgetCatalog.ANALOG_CLOCK,
+                        WorkspaceWidgetCatalog.QUICK_ACTIONS,
+                        WorkspaceWidgetCatalog.BATTERY,
+                        -> LauncherWidgetPreviewGlyph(
+                            typeId = typeId,
+                            tint = previewColor,
+                            modifier = Modifier.size(30.dp),
+                        )
                         WorkspaceWidgetCatalog.DATE -> Text(
                             now.dayOfMonth.toString(),
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Light,
                             color = previewColor,
                         )
-
                         WorkspaceWidgetCatalog.MONTH -> Text(
                             now.format(
                                 DateTimeFormatter.ofPattern(
@@ -2803,55 +2798,64 @@ private fun WidgetPickerBuiltInCard(
                                     Locale.getDefault(),
                                 ),
                             ).uppercase(),
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = previewColor,
                         )
-
-                        WorkspaceWidgetCatalog.SEARCH -> LauncherSearchMagnifier(previewColor)
-
-                        WorkspaceWidgetCatalog.QUICK_ACTIONS ->
-                            LauncherWidgetPreviewGlyph(
-                                typeId = typeId,
-                                tint = previewColor,
-                            )
-
-                        WorkspaceWidgetCatalog.BATTERY ->
-                            LauncherWidgetPreviewGlyph(
-                                typeId = typeId,
-                                tint = previewColor,
-                            )
-
+                        WorkspaceWidgetCatalog.SEARCH ->
+                            LauncherSearchMagnifier(previewColor)
                         WorkspaceWidgetCatalog.LAUNCHER_STATUS -> Text(
                             "GC",
-                            style = MaterialTheme.typography.headlineMedium,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = previewColor,
                         )
-
-                        else -> Text(
-                            "•",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = previewColor,
+                        else -> Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .background(previewColor, CircleShape),
                         )
                     }
                 }
             }
-            Text(
-                WorkspaceWidgetCatalog.displayName(typeId),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                WorkspaceWidgetCatalog.description(typeId),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                "${span.first} × ${span.second}",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    WorkspaceWidgetCatalog.displayName(typeId),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    WorkspaceWidgetCatalog.description(typeId),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.64f),
+                border = BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                ),
+            ) {
+                Text(
+                    "${span.first} × ${span.second}",
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
