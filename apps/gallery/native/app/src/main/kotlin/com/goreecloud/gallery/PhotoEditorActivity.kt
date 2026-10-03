@@ -548,6 +548,11 @@ class PhotoEditorActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            Color.WHITE,
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
         setOnClickListener { onClick() }
     }
 
@@ -573,6 +578,12 @@ class PhotoEditorActivity : Activity() {
         isClickable = true
         isFocusable = true
         contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            Color.WHITE,
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
         setOnClickListener { onClick() }
     }
 
