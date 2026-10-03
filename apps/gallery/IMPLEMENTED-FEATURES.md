@@ -14,6 +14,8 @@ The setup wizard now uses a compact visual progress rail and icon-first Back/Ret
 
 Long destination or album titles are constrained to a single ellipsized header line, keeping Search/Sort and Back affordances stable at compact widths. Inline search close, media-access actions, album quick-access chips, and album cards now use the same bounded press-feedback contract as the rest of Gallery chrome.
 
+Stateful icon controls also expose explicit Android state descriptions where supported. This includes selected media tiles, selected transient choices, active selection actions, and active viewer toggles; the visible state is therefore reinforced beyond color and icon shape.
+
 ## October 3, 2026 — unified bottom-navigation glyph family
 
 The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
