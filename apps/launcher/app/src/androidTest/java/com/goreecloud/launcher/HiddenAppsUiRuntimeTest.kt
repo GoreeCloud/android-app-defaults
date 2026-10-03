@@ -38,6 +38,8 @@ class HiddenAppsUiRuntimeTest {
     private lateinit var preferencesRepository: LauncherPreferencesRepository
     private var previousHomeAppMode = LauncherHomeAppMode.NONE
     private var previousHiddenKeys: Set<String> = emptySet()
+    private var previousPinnedKeys: Set<String> = emptySet()
+    private var previousPinnedOrder: List<String> = emptyList()
 
     @Before
     fun prepareEstablishedLauncher(): Unit = runBlocking {
@@ -45,10 +47,11 @@ class HiddenAppsUiRuntimeTest {
         preferencesRepository = LauncherPreferencesRepository(context)
         previousHomeAppMode = preferencesRepository.experiencePreferences.first().homeAppMode
         previousHiddenKeys = preferencesRepository.hiddenAppKeys.first()
+        previousPinnedKeys = preferencesRepository.drawerPinnedAppKeys.first()
+        previousPinnedOrder = preferencesRepository.drawerPinnedAppOrder.first()
 
-        previousHiddenKeys.forEach { key ->
-            preferencesRepository.setAppHidden(key, false).join()
-        }
+        preferencesRepository.clearHiddenApps().join()
+        preferencesRepository.clearDrawerPinnedApps().join()
         preferencesRepository.setHomeAppMode(LauncherHomeAppMode.NONE).join()
         preferencesRepository.setHomeHintsDismissed(true).join()
         preferencesRepository.markStartupWizardCompleted().join()
@@ -93,13 +96,15 @@ class HiddenAppsUiRuntimeTest {
     @After
     fun restorePreferencesAndRole() = runBlocking {
         if (!::preferencesRepository.isInitialized) return@runBlocking
-        val currentHiddenKeys = preferencesRepository.hiddenAppKeys.first()
-        currentHiddenKeys.forEach { key ->
-            preferencesRepository.setAppHidden(key, false).join()
-        }
+        preferencesRepository.clearHiddenApps().join()
+        preferencesRepository.clearDrawerPinnedApps().join()
         previousHiddenKeys.forEach { key ->
             preferencesRepository.setAppHidden(key, true).join()
         }
+        previousPinnedKeys.forEach { key ->
+            preferencesRepository.setDrawerAppPinned(key, true).join()
+        }
+        preferencesRepository.setDrawerPinnedAppOrder(previousPinnedOrder).join()
         preferencesRepository.setHomeAppMode(previousHomeAppMode).join()
     }
 
@@ -173,6 +178,83 @@ class HiddenAppsUiRuntimeTest {
                 composeRule
                     .onAllNodesWithTag(
                         "launcher-hidden-apps-manager",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isEmpty()
+            }
+        } finally {
+            scenario.close()
+        }
+    }
+
+    @Test
+    fun settingsExposesPinnedAppsRecoverySurfaceWhenNothingIsPinned() {
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
+        try {
+            composeRule.waitUntil(timeoutMillis = 15_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-home-empty-space-actions",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+
+            composeRule
+                .onNodeWithTag(
+                    "launcher-home-empty-space-actions",
+                    useUnmergedTree = true,
+                )
+                .performSemanticsAction(SemanticsActions.OnLongClick)
+
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-home-editor-fullscreen",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+
+            composeRule
+                .onAllNodesWithText("Settings", useUnmergedTree = true)[0]
+                .performClick()
+
+            composeRule
+                .onNodeWithText("App drawer", useUnmergedTree = true)
+                .performClick()
+
+            composeRule
+                .onNodeWithTag("launcher-settings-pinned-apps", useUnmergedTree = true)
+                .performScrollTo()
+                .performClick()
+
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-pinned-apps-manager",
+                        useUnmergedTree = true,
+                    )
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            composeRule
+                .onNodeWithTag("launcher-pinned-apps-manager", useUnmergedTree = true)
+                .assertIsDisplayed()
+            composeRule
+                .onNodeWithText("No pinned apps.", useUnmergedTree = true)
+                .assertIsDisplayed()
+
+            composeRule
+                .onNodeWithText("Done", useUnmergedTree = true)
+                .performClick()
+            composeRule.waitUntil(timeoutMillis = 10_000) {
+                composeRule
+                    .onAllNodesWithTag(
+                        "launcher-pinned-apps-manager",
                         useUnmergedTree = true,
                     )
                     .fetchSemanticsNodes()

@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — App Drawer pin/visibility management candidate
+
+This Development candidate adds a searchable **Pinned apps** recovery/management entry under Launcher Settings → App drawer alongside the existing Hidden apps manager. Pinned apps are shown in their current presentation order with profile-aware identity context, direct **Unpin** actions, **Reset A–Z**, and atomic **Unpin all** recovery. Hidden apps gain atomic **Show all** recovery. App Drawer Settings search now indexes pin/pinned/unpin/favorites/order/reset terms as well as hidden/visibility terms.
+
+The new bulk operations remove only Launcher-owned device-local pin or hidden-app preference state. They do not uninstall/disable packages, mutate Home/Dock/folder/Room placement, add permissions, widen profile authority, send network data, or change the portable preference v1 contract. Existing app-context **Move pinned earlier/later** remains the precise manual-order control; the Settings manager is a recovery and overview surface.
+
+**Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/unit/lint/build/schema, complete Android 16 runtime, transition-performance, migration provenance, Android Development Foundation, migrated-app required gate, protected promotion, and zero unresolved review threads are required before integration. Representative-device personal/Work/Shelter/private-space behavior, accessibility/large-text/form factors, protected Development signing/update continuity, recovery, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
+
 ## October 3, 2026 — integrate onboarding and Search-source scanability follow-up
 
 Protected PR #224 integrates the bounded setup and source-management follow-up on top of the Hidden Apps runtime line. The startup wizard now uses the same compact segmented control pattern for **Home apps**, Grid, and Dock rather than three larger Home-mode cards; each compact choice keeps a 48 dp minimum and exposes radio-button selected-state semantics, its progress rail follows the semantic accent of the active step, setup copy is shorter, Search-mode cards are slightly tighter, and the compact gesture strip keeps bounded decorative geometry with clearer surface separation while preserving the existing three-step flow and persisted configuration.

@@ -1,5 +1,11 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 3, 2026 — App Drawer pin/visibility management candidate
+
+Current candidate work adds Launcher Settings → App drawer management for already-implemented profile-qualified pin and hidden-app state: a **Pinned apps** overview with direct Unpin, deterministic **Reset A–Z**, and atomic **Unpin all**, plus atomic **Show all** recovery for Hidden apps. The tranche adds no new persistence key, permission, package mutation, Home/Dock/folder/Room mutation, network behavior, or cross-profile authority.
+
+This remains candidate work until fresh exact-head protected validation and integration. It improves recovery/discoverability for existing organization controls but does not complete user-defined categories/tags/collections, richer custom ordering, portable pin/hidden-state policy, or representative-device profile/accessibility acceptance.
+
 ## October 3, 2026 — Hidden apps integrated; acceptance and recovery work remains
 
 Protected PR #223 integrated profile-qualified Hidden Apps persistence, App Drawer/Universal Search suppression, reversible app-context Hide/Show controls, and Launcher Settings recovery on exact head `4ce68c0201cb2779c91c3203e68a8d75fdc07cd6`, merging as `b433104499372248d03cd0fed89fa729b6db1d77` after the complete protected matrix passed. The user-visible source capability is therefore implemented rather than a pending presentation candidate.
