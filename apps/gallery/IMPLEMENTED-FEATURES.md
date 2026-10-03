@@ -1,5 +1,13 @@
 # GoreeCloud Gallery — Implemented Features
 
+## October 3, 2026 — unified bottom-navigation glyph family
+
+The five primary Gallery destinations now share one custom 24×24 outline glyph language rather than mixing filled and outlined symbols with different optical weights. Gallery continues to render them at the shared 22dp optical size, preserving the centered icons-only geometry and equal destination slots from the preceding navigation pass.
+
+Each destination also receives bounded Android ripple feedback without replacing the selected Glaze background, tooltip label, content description, or selected-state semantics. The same assets and shared presentation path cover the main Gallery surface and Android-managed Trash.
+
+Rendered Android acceptance verifies shared glyph bounds and ripple presence, including the Trash navigation path. The change is presentation-only and does not expand permissions, media scope, mutation authority, filesystem access, account/network access, or release qualification.
+
 ## October 3, 2026 — optically centered bottom navigation
 
 Icons-only bottom navigation now centers each 22dp glyph directly inside its equal-width destination slot instead of using a top compound drawable with an empty text line. This removes the vertical lift visible on-device and eliminates the accumulated horizontal skew caused by per-item start margins.
