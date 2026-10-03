@@ -721,6 +721,12 @@ private fun WizardSearchPreview(
     }
 }
 
+private enum class WizardGestureKind {
+    APPS,
+    SEARCH,
+    EDIT,
+}
+
 @Composable
 private fun WizardGestureStrip() {
     Surface(
@@ -732,27 +738,116 @@ private fun WizardGestureStrip() {
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
-                Surface(
-                    modifier = Modifier.weight(1f),
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                        GlazeMetrics.radiusPill,
-                    ),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-                ) {
-                    Text(
-                        label,
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
-                }
+            WizardGestureCue(
+                kind = WizardGestureKind.APPS,
+                label = "Apps",
+                modifier = Modifier.weight(1f),
+            )
+            WizardGestureCue(
+                kind = WizardGestureKind.SEARCH,
+                label = "Search",
+                modifier = Modifier.weight(1f),
+            )
+            WizardGestureCue(
+                kind = WizardGestureKind.EDIT,
+                label = "Edit",
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureCue(
+    kind: WizardGestureKind,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.heightIn(min = 42.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            WizardGestureGlyph(
+                kind = kind,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.size(5.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun WizardGestureGlyph(
+    kind: WizardGestureKind,
+    tint: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier.size(16.dp)) {
+        val u = size.minDimension
+        val stroke = u * 0.10f
+        val cap = StrokeCap.Round
+        when (kind) {
+            WizardGestureKind.APPS,
+            WizardGestureKind.SEARCH,
+            -> {
+                val upward = kind == WizardGestureKind.APPS
+                val tipY = if (upward) 0.18f else 0.82f
+                val tailY = if (upward) 0.82f else 0.18f
+                val armY = if (upward) 0.40f else 0.60f
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, u * tailY),
+                    Offset(u * 0.50f, u * tipY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, u * tipY),
+                    Offset(u * 0.29f, u * armY),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, u * tipY),
+                    Offset(u * 0.71f, u * armY),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            WizardGestureKind.EDIT -> {
+                drawCircle(
+                    color = tint.copy(alpha = 0.18f),
+                    radius = u * 0.32f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.16f,
+                    center = Offset(u * 0.50f, u * 0.50f),
+                    style = Stroke(stroke),
+                )
+                drawLine(
+                    tint,
+                    Offset(u * 0.50f, u * 0.66f),
+                    Offset(u * 0.50f, u * 0.90f),
+                    stroke,
+                    cap = cap,
+                )
             }
         }
     }
@@ -885,7 +980,7 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first or the pinned-only filter when you want them together.",
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
