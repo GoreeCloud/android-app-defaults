@@ -14,6 +14,7 @@
 - Extended bounded feedback to inline search close, media-access, album quick-access, and album-card surfaces; header title/subtitle now stay single-line with ellipsis so long album names cannot crowd out primary actions.
 - Photo-editor crop presets now expose an explicit selected visual/accessibility state, beginning with Original and clearing when the crop becomes custom.
 - The first-use setup wizard now uses a compact progress rail plus icon-only Back/Return/Continue/Finish controls, preserving its existing accessibility names and persisted step behavior.
+- Strengthened Android state semantics for stateful icon controls: selected media tiles, selected dialog choices, selection actions, and active viewer toggles now expose explicit state descriptions where supported.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
