@@ -2647,7 +2647,7 @@ private fun LauncherSearchSourceManager(
                         )
                         Text(
                             if (ready) {
-                                "Local stays local · connected sources are optional."
+                                "Local stays local · connected is opt-in."
                             } else {
                                 "Loading source controls…"
                             },
@@ -2731,7 +2731,7 @@ private fun LauncherSearchSourceManager(
                             LauncherSearchSourceStatusPill(
                                 label = controls.orderedOptions.count { option ->
                                     option in options && controls.isEnabled(option.providerId)
-                                }.toString() + "/" + options.size + " enabled",
+                                }.toString() + "/" + options.size + " on",
                                 isError = false,
                             )
                         }
