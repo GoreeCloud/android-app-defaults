@@ -1,5 +1,9 @@
 # GoreeCloud Gallery — Planned Features and Open Obligations
 
+## October 3, 2026 — GoreeCloud OS Mobile default-gallery acceptance
+
+The current application line now has the bounded Android entry points needed for GoreeCloud OS Mobile to select `com.goreecloud.gallery` as its system Gallery package. Remaining acceptance is distribution- and device-specific: verify the Android `SYSTEM_GALLERY` role on the physical `dre` qualification device, image/video VIEW and REVIEW routing, secure-review behavior, permission grant/denial/revocation, user/profile isolation, and rollback to the prior Lineage gallery path. The OS packaging layer must remain responsible for role/default configuration; the Gallery APK must not silently seize default-app authority when installed on an ordinary Android system.
+
 ## October 2, 2026 — bounded selection overflow candidate
 
 The current capability-expansion candidate exposes **Select all visible / Clear selection** through the existing multi-select More menu without adding another persistent action button. Selection remains bounded to the current Android-authorized and presented media scope through `GallerySelectionPolicy.selectAll`; stale or foreign content URIs cannot be added by this control. Details remains available only for a one-item selection. Focused JVM policy coverage verifies partial, complete, empty, and stale-selection states. No new MediaStore permission, mutation authority, filesystem access, account, network, or cloud authority is added. This remains Development candidate work until exact-head protected validation and integration complete.
