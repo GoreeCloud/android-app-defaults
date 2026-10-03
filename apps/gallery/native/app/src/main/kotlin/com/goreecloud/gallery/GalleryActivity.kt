@@ -718,20 +718,24 @@ class GalleryActivity : Activity() {
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
         val navigationMode = currentUserSettings().navigationDisplayMode
-        GalleryDestination.entries.forEachIndexed { index, item ->
+        GalleryDestination.entries.forEach { item ->
             val label = navigationLabel(item)
+            val selected = destination == item
             val view = TextView(this@GalleryActivity).apply {
-                text = if (navigationMode.showLabel) label else ""
-                gravity = Gravity.CENTER
-                minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-                setCompoundDrawablesWithIntrinsicBounds(
-                    0,
-                    if (navigationMode.showIcon) navigationIcon(item) else 0,
-                    0,
-                    0,
+                GalleryNavigationStyling.apply(
+                    activity = this@GalleryActivity,
+                    item = this,
+                    label = label,
+                    iconRes = navigationIcon(item),
+                    mode = navigationMode,
+                    selected = selected,
+                    foreground = if (selected) accentColor() else primaryTextColor(),
                 )
-                compoundDrawablePadding = if (navigationMode.showIcon && navigationMode.showLabel) dp(2) else 0
+                isSelected = selected
+                contentDescription = "$label${if (selected) ", selected" else ""}"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    stateDescription = if (selected) "Selected" else null
+                }
                 isClickable = true
                 isFocusable = true
                 setOnClickListener {
@@ -762,9 +766,7 @@ class GalleryActivity : Activity() {
             navigationItems[item] = view
             addView(
                 view,
-                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply {
-                    if (index > 0) marginStart = dp(2)
-                },
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f),
             )
         }
     }
@@ -821,21 +823,14 @@ class GalleryActivity : Activity() {
             val selected = destination == item
             val label = navigationLabel(item)
             val foreground = if (selected) accentColor() else primaryTextColor()
-            view.text = if (navigationMode.showLabel) label else ""
-            view.setCompoundDrawablesWithIntrinsicBounds(
-                0,
-                if (navigationMode.showIcon) navigationIcon(item) else 0,
-                0,
-                0,
-            )
-            view.compoundDrawablePadding =
-                if (navigationMode.showIcon && navigationMode.showLabel) dp(2) else 0
-            view.compoundDrawableTintList = ColorStateList.valueOf(foreground)
-            view.setTextColor(foreground)
-            view.setTypeface(view.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
-            view.background = roundedSurface(
-                if (selected) withAlpha(accentColor(), 0.13f) else Color.TRANSPARENT,
-                18,
+            GalleryNavigationStyling.apply(
+                activity = this,
+                item = view,
+                label = label,
+                iconRes = navigationIcon(item),
+                mode = navigationMode,
+                selected = selected,
+                foreground = foreground,
             )
             view.isSelected = selected
             view.contentDescription = "$label${if (selected) ", selected" else ""}"
@@ -4547,7 +4542,7 @@ class GalleryActivity : Activity() {
         panel.addView(TextView(this).apply {
             text = if (replay) "Review Gallery setup" else "Set up Gallery"
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
             setTypeface(typeface, Typeface.BOLD)
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         })
@@ -4555,7 +4550,7 @@ class GalleryActivity : Activity() {
             text = "Step ${step + 1} of ${GallerySetupPreferences.STEP_COUNT}"
             setTextColor(secondaryTextColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
-            setPadding(0, dp(4), 0, dp(16))
+            setPadding(0, dp(4), 0, dp(14))
         })
 
         val title: String
@@ -4564,17 +4559,17 @@ class GalleryActivity : Activity() {
             0 -> {
                 title = "Your local media library"
                 body =
-                    "Use Photos, Albums, Videos, Trash, and Settings from the bottom navigation. It starts in icons-only mode; you can switch to text only or icons with text from Settings > Appearance > Bottom navigation. Trash is a separate Android-managed recovery destination, while browsing stays limited to media Android authorizes Gallery to read."
+                    "Browse Photos, Albums, Videos, Trash, and Settings from the bottom bar. It starts with icons only; change the display in Settings > Appearance > Bottom navigation."
             }
             1 -> {
                 title = "You control media access"
                 body =
-                    "Gallery does not bypass Android media permission. Core browsing stays local, and this Development build does not claim cloud backup, Protected Photos, or other unfinished capabilities are active."
+                    "Gallery only reads media Android grants. Browsing stays local. This Development build does not claim cloud backup or Protected Photos are active."
             }
             else -> {
                 title = "Choose your guidance"
                 body =
-                    "Contextual hints explain useful gestures and actions. You can turn ordinary hints off now or later and re-enable them from Settings."
+                    "Optional tips explain useful gestures and actions. Turn them off now or later in Settings."
             }
         }
 
@@ -4587,8 +4582,8 @@ class GalleryActivity : Activity() {
         panel.addView(TextView(this).apply {
             text = body
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
-            setLineSpacing(0f, 1.08f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setLineSpacing(0f, 1.06f)
             setPadding(0, dp(6), 0, dp(14))
         })
 
@@ -4597,7 +4592,7 @@ class GalleryActivity : Activity() {
             panel.addView(
                 settingBaseRow(
                     title = "Contextual hints",
-                    subtitle = "Optional tips only. Required privacy, permission, destructive-action, error, and system messages stay visible.",
+                    subtitle = "Optional tips only. Privacy, permission, destructive-action, error, and system messages remain visible.",
                     enabled = true,
                     trailing = settingsPill(
                         if (hintsEnabled) "On" else "Off",
