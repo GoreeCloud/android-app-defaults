@@ -1,5 +1,17 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 2, 2026 — density and iconography polish round 2 candidate
+
+This follow-up continues the representative-device polish after protected PR #194. Universal Search ordinary rows now collapse subtitle/source metadata onto one bounded secondary line and replace trailing **Open / Copy / Call / Message** text actions with Launcher-owned vector affordances; contact call/message actions remain explicit 40 dp controls with accessibility descriptions. Search Sources replaces the wide **Reset / Order / Done / Earlier / Later** text controls with compact accessible vector controls and shortens section summaries without changing source authority or provider execution.
+
+The startup wizard and post-setup hint no longer use up/down arrow characters as visual UI. Gesture cues are rendered as dedicated vector diagrams with separate labels and descriptions. Edit Home reduces repetitive page explanation, widens the usable carousel, replaces the oversized Add Page plus character with a vector affordance, and condenses each page footer to one line so previews receive more of the screen.
+
+App Drawer and fallback-search presentation removes additional font-dependent pseudo-icons: the pinned filter/badge use Launcher-owned pin geometry, the selected sort choice uses a vector check affordance, folder selection state uses the same vector check grammar, and the fallback Universal Search row uses category-specific vector artwork instead of symbols such as `⚙`, `▤`, `◫`, stars, and checkmarks. Folder add-state copy is now plain **Add / Added**.
+
+No Android permission, Search provider, query-retention, HOME-role, workspace mutation, network, drag/drop, account, or persistence authority changes in this tranche.
+
+**Acceptance boundary:** unmerged Development candidate. Fresh exact-head Launcher JVM/unit/lint/build/schema, Android 16 runtime, transition-performance, migration provenance, Android Development, and protected-promotion gates are required before integration. Representative-device visual retesting and protected Development signing/update continuity remain open.
+
 ## October 2, 2026 — compact Search, clean starter Home, and visual onboarding candidate
 
 Representative-device CI-661 screenshots and owner feedback exposed a density/first-run tranche that remained outside the previous visual corrections. Universal Search shortcut results still consumed large vertical cards; Search Sources repeated its title in an oversized card and kept the large Suggestion tabs control outside the scrolling source list; fresh starter Home still inherited automatic first-party cards; and onboarding presented several operational concepts as long documentation paragraphs.
