@@ -15,6 +15,7 @@
 - Photo-editor crop presets now expose an explicit selected visual/accessibility state, beginning with Original and clearing when the crop becomes custom.
 - The first-use setup wizard now uses a compact progress rail plus icon-only Back/Return/Continue/Finish controls, preserving its existing accessibility names and persisted step behavior.
 - Strengthened Android state semantics for stateful icon controls: selected media tiles, selected dialog choices, selection actions, and active viewer toggles now expose explicit state descriptions where supported.
+- Media-access actions now pair concise labels with contextual first-party glyphs (choose media, change access, refresh/retry) so high-consequence permission/recovery actions remain explicit without reverting to text-only chrome.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
