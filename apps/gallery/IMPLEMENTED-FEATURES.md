@@ -6,7 +6,9 @@ Gallery now uses compact icon controls for persistent viewer, selection, Trash, 
 
 The change keeps 48dp interaction targets for persistent action chrome, preserves selected/toggled semantics, and gives destructive actions distinct treatment. MediaStore authority, Android permission scope, confirmation behavior, local Favorites, and save-copy semantics are unchanged.
 
-Android runtime/rendered coverage verifies the icon-only photo-editor controls and Trash Refresh affordance. This slice is stacked on the unified navigation-glyph candidate and keeps its `0.8.10-dev` Development identity.
+Android runtime/rendered coverage verifies the icon-only photo-editor controls, selected crop-preset state, and Trash Refresh affordance. The current-main candidate directly consolidates this work with the unified navigation-glyph system and keeps its `0.8.10-dev` Development identity.
+
+Remaining font/Unicode pseudo-glyph controls in the media grid and viewer paths have also been replaced by first-party vectors. Icon controls now receive bounded press feedback, and the photo editor visually identifies the active crop preset while preserving custom-crop behavior.
 
 ## October 3, 2026 — unified bottom-navigation glyph family
 
