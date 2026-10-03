@@ -2219,6 +2219,80 @@ private fun LauncherSourceFolderAction(
     }
 }
 
+private enum class LauncherContactQuickActionType {
+    CALL,
+    MESSAGE,
+}
+
+@Composable
+private fun LauncherContactQuickAction(
+    type: LauncherContactQuickActionType,
+    contentDescription: String,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(40.dp)
+            .semantics { this.contentDescription = contentDescription },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.48f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(18.dp)) {
+                val u = size.minDimension
+                val stroke = u * 0.09f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                when (type) {
+                    LauncherContactQuickActionType.CALL -> {
+                        drawLine(
+                            MaterialTheme.colorScheme.primary,
+                            androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.24f),
+                            androidx.compose.ui.geometry.Offset(u * 0.70f, u * 0.76f),
+                            stroke * 1.5f,
+                            cap = cap,
+                        )
+                        drawLine(
+                            MaterialTheme.colorScheme.primary,
+                            androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.22f),
+                            androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.18f),
+                            stroke * 1.4f,
+                            cap = cap,
+                        )
+                        drawLine(
+                            MaterialTheme.colorScheme.primary,
+                            androidx.compose.ui.geometry.Offset(u * 0.66f, u * 0.82f),
+                            androidx.compose.ui.geometry.Offset(u * 0.80f, u * 0.76f),
+                            stroke * 1.4f,
+                            cap = cap,
+                        )
+                    }
+                    LauncherContactQuickActionType.MESSAGE -> {
+                        drawRoundRect(
+                            color = MaterialTheme.colorScheme.primary,
+                            topLeft = androidx.compose.ui.geometry.Offset(u * 0.14f, u * 0.22f),
+                            size = androidx.compose.ui.geometry.Size(u * 0.72f, u * 0.50f),
+                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.15f),
+                            style = Stroke(width = stroke),
+                        )
+                        drawLine(
+                            MaterialTheme.colorScheme.primary,
+                            androidx.compose.ui.geometry.Offset(u * 0.34f, u * 0.72f),
+                            androidx.compose.ui.geometry.Offset(u * 0.27f, u * 0.84f),
+                            stroke,
+                            cap = cap,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun LauncherSearchResultTrailingGlyph(
     copy: Boolean,
