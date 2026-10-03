@@ -1248,6 +1248,18 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .isNotEmpty()
                 }
                 composeRule
+                    .onNodeWithContentDescription(
+                        "Reset Search source order and enabled defaults",
+                        useUnmergedTree = true,
+                    )
+                    .assertHasClickAction()
+                composeRule
+                    .onNodeWithContentDescription(
+                        "Reorder Search sources",
+                        useUnmergedTree = true,
+                    )
+                    .assertHasClickAction()
+                composeRule
                     .onNodeWithContentDescription("Back to Universal Search", useUnmergedTree = true)
                     .assertHasClickAction()
                     .performClick()
