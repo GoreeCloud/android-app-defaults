@@ -1049,6 +1049,7 @@ class GalleryActivity : Activity() {
         alpha = if (enabled) 1f else 0.42f
         contentDescription = description
         tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(this, foreground, 18)
         if (enabled) setOnClickListener { onClick() }
     }
 
@@ -1862,6 +1863,11 @@ class GalleryActivity : Activity() {
         isFocusable = true
         contentDescription = description
         tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            secondaryTextColor(),
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
         setOnClickListener { onClick(this) }
     }
 
@@ -4888,7 +4894,14 @@ class GalleryActivity : Activity() {
             isFocusable = enabled
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
             contentDescription = "$title. $subtitle"
-            if (enabled) setOnClickListener { onClick() }
+            if (enabled) {
+                GalleryInteractionFeedback.applyBoundedRipple(
+                    this,
+                    accentColor(),
+                    GalleryGlazeContract.SHAPE_CONTAINER_DP,
+                )
+                setOnClickListener { onClick() }
+            }
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -5871,6 +5884,7 @@ class GalleryActivity : Activity() {
         contentDescription = description
         tooltipText = description
         setViewerActionIcon(this, iconResource)
+        GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, 18)
         if (enabled) setOnClickListener { onClick() }
     }
 
@@ -5908,6 +5922,12 @@ class GalleryActivity : Activity() {
         isClickable = true
         isFocusable = true
         contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            primaryTextColor(),
+            GalleryGlazeContract.SHAPE_CONTAINER_DP,
+        )
         setOnClickListener { onClick() }
     }
 
