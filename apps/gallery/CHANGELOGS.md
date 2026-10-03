@@ -16,6 +16,7 @@
 - The first-use setup wizard now uses a compact progress rail plus icon-only Back/Return/Continue/Finish controls, preserving its existing accessibility names and persisted step behavior.
 - Strengthened Android state semantics for stateful icon controls: selected media tiles, selected dialog choices, selection actions, and active viewer toggles now expose explicit state descriptions where supported.
 - Media-access actions now pair concise labels with contextual first-party glyphs (choose media, change access, refresh/retry) so high-consequence permission/recovery actions remain explicit without reverting to text-only chrome.
+- Preserved Glaze control refinement for dynamically labeled media-access actions and explicitly exposed destructive-action state semantics on Trash permanent-delete controls.
 
 ### Verification
 - Extended Android runtime coverage for icon-only photo-editor chrome, safe-area placement, and selected crop-preset state.
