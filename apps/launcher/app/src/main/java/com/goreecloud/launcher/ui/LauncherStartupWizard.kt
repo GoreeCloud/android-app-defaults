@@ -723,35 +723,63 @@ private fun WizardSearchPreview(
 
 @Composable
 private fun WizardGestureStrip() {
+    val cues = listOf(
+        Triple(WizardVisualSymbol.APPS, "Apps", "Swipe up"),
+        Triple(WizardVisualSymbol.SEARCH, "Search", "Swipe down"),
+        Triple(WizardVisualSymbol.GESTURE, "Edit", "Hold Home"),
+    )
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusLarge),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.26f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.60f),
+        ),
     ) {
         Row(
             modifier = Modifier.padding(6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            listOf(
-                "↑  Apps",
-                "↓  Search",
-                "Hold  Edit",
-            ).forEach { label ->
+            cues.forEach { (symbol, title, gesture) ->
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 58.dp),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                        GlazeMetrics.radiusPill,
+                        GlazeMetrics.radiusMedium,
                     ),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                 ) {
-                    Text(
-                        label,
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 7.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    ) {
+                        WizardVisualGlyph(
+                            symbol = symbol,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(1.dp),
+                        ) {
+                            Text(
+                                title,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                            )
+                            Text(
+                                gesture,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -878,14 +906,17 @@ fun LauncherHomeHintCard(
             WizardHintRow(
                 title = "Place precisely",
                 summary = "Hold an app, widget, or folder and drag it to a Home cell or Dock position.",
+                symbol = WizardVisualSymbol.GESTURE,
             )
             WizardHintRow(
                 title = "Move across pages",
                 summary = "Keep holding at a page edge to switch pages, then release on the target.",
+                symbol = WizardVisualSymbol.HOME,
             )
             WizardHintRow(
                 title = "Keep Apps tidy",
-                summary = "Pin important apps, then use Pinned first or the ★ filter when you want them together.",
+                summary = "Pin important apps, then use Pinned first when you want them together.",
+                symbol = WizardVisualSymbol.APPS,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -903,11 +934,16 @@ fun LauncherHomeHintCard(
 private fun WizardHintRow(
     title: String,
     summary: String,
+    symbol: WizardVisualSymbol = WizardVisualSymbol.GESTURE,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusMedium),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.30f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+        ),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
@@ -915,13 +951,15 @@ private fun WizardHintRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Surface(
-                modifier = Modifier.size(28.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(GlazeMetrics.radiusPill),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                modifier = Modifier.size(30.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                    GlazeMetrics.radiusMedium,
+                ),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.11f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     WizardVisualGlyph(
-                        symbol = WizardVisualSymbol.GESTURE,
+                        symbol = symbol,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp),
                     )
@@ -940,6 +978,8 @@ private fun WizardHintRow(
                     summary,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
         }
