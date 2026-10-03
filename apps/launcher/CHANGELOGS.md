@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — selective Search Sources and onboarding density restack candidate
+
+This follow-up is restacked directly on the current PR #216 Launcher polish head instead of inheriting the stale, diverged PR #217 ancestry. It preserves #216 wherever the old branch conflicted and carries only non-overlapping improvements: source-attention states now provide a direct **Sources** recovery action; Search Sources uses shorter privacy/source/folder summaries, compact earlier/later vector glyphs, tighter status pills, and one-line fallback titles; and the first-run wizard reuses the compact segmented-choice control for Home-app behavior, shortens setup copy, and gives the progress rail a step-aware semantic accent.
+
+Android runtime coverage also explicitly clears a non-empty Universal Search query, verifies the clear action disappears, verifies suggestions return, and then resumes the existing query/result assertion. Existing provider execution, permission, connected-source opt-in, query-retention, network, Room workspace, HOME-role, and drag/drop authority are unchanged.
+
+**Acceptance boundary:** stacked Development candidate on PR #216. Fresh exact-head Launcher JVM/unit/lint/build/schema, complete Android 16 runtime, transition-performance, migration provenance, Android Development, migrated-app required gate, and protected-promotion checks are required. Representative-device visual/accessibility/large-text/form-factor acceptance, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
+
 ## October 3, 2026 — follow-up density, glyph, and starter-cleanup candidate
 
 This Development candidate continues the CI-661/PR #194 representative-device polish without widening Launcher authority. Universal Search now exposes an inline clear-query glyph while text is present and gives a no-result state a direct Search Sources recovery action. Search Sources replaces its Reset/Order text buttons with accessible Launcher-owned glyph actions, reports enabled/total counts by section, and moves the Files folder-picker action into the Files row instead of spending another line below it. Ordinary Search rows replace the trailing Open/Copy text affordance with a small vector action glyph, and Contact Call/Message actions move into the same result row so contact results no longer grow a second action row.
