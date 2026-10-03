@@ -243,6 +243,7 @@ class GalleryActivity : Activity() {
 
     override fun onStop() {
         mediaRefreshHandler.removeCallbacks(mediaRefreshRunnable)
+        mediaRefreshPending = false
         unregisterMediaStoreObserver()
         super.onStop()
     }
@@ -1241,6 +1242,7 @@ class GalleryActivity : Activity() {
         preserveSelection: Boolean = false,
     ) {
         val generation = ++loadGeneration
+        if (showLoading) mediaRefreshPending = false
         val previousScrollY = if (::libraryScroll.isInitialized) libraryScroll.scrollY else 0
         val previousItems = authorizedItems
         if (showLoading) {
