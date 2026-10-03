@@ -1,5 +1,6 @@
 package com.goreecloud.gallery
 
+import android.widget.ImageView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -7,6 +8,7 @@ import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
+import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -38,7 +40,10 @@ class GalleryFirstUseRuntimeTest {
 
         ActivityScenario.launch(GalleryActivity::class.java).use { scenario ->
             onView(withText("Set up Gallery")).inRoot(isDialog()).check(matches(isDisplayed()))
-            onView(withContentDescription("Continue Gallery setup")).inRoot(isDialog()).perform(click())
+            onView(withContentDescription("Continue Gallery setup"))
+                .inRoot(isDialog())
+                .check(matches(isAssignableFrom(ImageView::class.java)))
+                .perform(click())
             onView(withText("You control media access")).inRoot(isDialog()).check(matches(isDisplayed()))
 
             scenario.recreate()
