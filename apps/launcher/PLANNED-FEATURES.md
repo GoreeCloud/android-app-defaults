@@ -40,7 +40,7 @@ Still open after runtime-gate integration: representative/default-HOME multi-pag
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
 **Migration state:** **Mandatory monorepo consolidation is complete. The standalone repository is no longer an active development target; historical entries remain provenance only.**  
-**Current authoritative main:** `06c4be22844c8f97e9c3fdee7757629ab11ccdb9` after protected PR #224 integration on top of Hidden Apps PR #223; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override newer verified current-state checkpoints.  
+**Current repository main:** `60912ef51825b2f3d63d46a9e0a77e673480ef3f`; the latest Launcher source-bearing main integration remains `06c4be22844c8f97e9c3fdee7757629ab11ccdb9` from PR #224. PR #231 remains a Development candidate; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override newer verified current-state checkpoints.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Purpose
