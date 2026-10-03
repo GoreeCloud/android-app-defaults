@@ -3236,7 +3236,7 @@ private fun compactSourceSummary(
     fileSearchRoots: List<Uri>,
 ): String = when (option.providerId) {
     LauncherFilesSearchProvider.PROVIDER_ID -> when (fileSearchRoots.size) {
-        0 -> "Folders · None selected"
+        0 -> "No folder selected"
         1 -> "Folders · 1 selected"
         else -> "Folders · " + fileSearchRoots.size + " selected"
     }
