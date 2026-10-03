@@ -149,6 +149,25 @@ class PhotoEditorSystemBarsRuntimeTest {
                             textControl.compoundDrawables[0] != null,
                         )
                     }
+
+                    val originalCrop = findByContentDescription(
+                        root,
+                        "Reset crop to the full photo",
+                    )
+                    val squareCrop = findByContentDescription(
+                        root,
+                        "Crop photo to a centered square",
+                    )
+                    assertNotNull("Photo editor Original crop preset must be rendered", originalCrop)
+                    assertNotNull("Photo editor 1:1 crop preset must be rendered", squareCrop)
+                    assertTrue(
+                        "Photo editor should visibly expose Original as the initial crop preset",
+                        checkNotNull(originalCrop).isSelected,
+                    )
+                    assertTrue(
+                        "Photo editor should keep non-selected crop presets visually distinct",
+                        !checkNotNull(squareCrop).isSelected,
+                    )
                 }
             }
         } finally {
