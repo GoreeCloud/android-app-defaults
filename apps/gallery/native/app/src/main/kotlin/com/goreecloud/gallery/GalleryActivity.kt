@@ -1161,11 +1161,13 @@ class GalleryActivity : Activity() {
     private fun refreshObservedMediaIfReady() {
         if (!mediaRefreshPending) return
         if (
-            viewerOverlay != null ||
-            pendingMediaMutation != null ||
-            pendingMediaMove != null ||
-            mediaMoveExecutionInProgress ||
-            mediaCopyExecutionInProgress
+            GalleryLiveRefreshPolicy.shouldDefer(
+                viewerOpen = viewerOverlay != null,
+                mediaMutationPending = pendingMediaMutation != null,
+                mediaMovePending = pendingMediaMove != null,
+                mediaMoveExecutionInProgress = mediaMoveExecutionInProgress,
+                mediaCopyExecutionInProgress = mediaCopyExecutionInProgress,
+            )
         ) {
             return
         }
