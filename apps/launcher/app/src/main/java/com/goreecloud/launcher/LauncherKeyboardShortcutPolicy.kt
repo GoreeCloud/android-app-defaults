@@ -17,6 +17,7 @@ object LauncherKeyboardShortcutPolicy {
     ): Boolean {
         if (keyCode == KeyEvent.KEYCODE_SEARCH) return true
         if (altPressed) return false
-        return keyCode == KeyEvent.KEYCODE_K && (ctrlPressed || metaPressed)
+        return (keyCode == KeyEvent.KEYCODE_K || keyCode == KeyEvent.KEYCODE_F) &&
+            (ctrlPressed || metaPressed)
     }
 }
