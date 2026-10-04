@@ -10,6 +10,7 @@ class GalleryViewerMoreMenuPolicyTest {
         val state = GalleryViewerMoreMenuPolicy.state(
             currentContentUri = "content://media/external/images/media/7",
             currentAlbumId = "camera",
+            currentMimeType = "image/jpeg",
             authorizedContentUris = setOf("content://media/external/images/media/7"),
             authorizedAlbumIds = setOf("camera"),
             favoriteContentUris = emptySet(),
@@ -47,6 +48,7 @@ class GalleryViewerMoreMenuPolicyTest {
         val state = GalleryViewerMoreMenuPolicy.state(
             currentContentUri = "content://media/external/images/media/7",
             currentAlbumId = "camera",
+            currentMimeType = "image/jpeg",
             authorizedContentUris = setOf("content://media/external/images/media/8"),
             authorizedAlbumIds = setOf("camera"),
             favoriteContentUris = emptySet(),
@@ -61,6 +63,7 @@ class GalleryViewerMoreMenuPolicyTest {
             GalleryViewerMoreMenuPolicy.state(
                 currentContentUri = "content://media/external/images/media/7",
                 currentAlbumId = "old-camera",
+                currentMimeType = "image/jpeg",
                 authorizedContentUris = setOf("content://media/external/images/media/7"),
                 authorizedAlbumIds = setOf("camera"),
                 favoriteContentUris = emptySet(),
@@ -70,10 +73,46 @@ class GalleryViewerMoreMenuPolicyTest {
             GalleryViewerMoreMenuPolicy.state(
                 currentContentUri = "content://media/external/images/media/7",
                 currentAlbumId = "",
+                currentMimeType = "image/jpeg",
                 authorizedContentUris = setOf("content://media/external/images/media/7"),
                 authorizedAlbumIds = setOf(""),
                 favoriteContentUris = emptySet(),
             ).canOpenContainingAlbum,
         )
     }
+
+    @Test
+    fun setAsIsAvailableOnlyForAuthorizedImages() {
+        assertTrue(
+            GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = "content://media/external/images/media/7",
+                currentAlbumId = "camera",
+                currentMimeType = "image/jpeg",
+                authorizedContentUris = setOf("content://media/external/images/media/7"),
+                authorizedAlbumIds = setOf("camera"),
+                favoriteContentUris = emptySet(),
+            ).canSetAsPhoto,
+        )
+        assertFalse(
+            GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = "content://media/external/video/media/9",
+                currentAlbumId = "camera",
+                currentMimeType = "video/mp4",
+                authorizedContentUris = setOf("content://media/external/video/media/9"),
+                authorizedAlbumIds = setOf("camera"),
+                favoriteContentUris = emptySet(),
+            ).canSetAsPhoto,
+        )
+        assertFalse(
+            GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = "content://media/external/images/media/7",
+                currentAlbumId = "camera",
+                currentMimeType = "image/jpeg",
+                authorizedContentUris = emptySet(),
+                authorizedAlbumIds = setOf("camera"),
+                favoriteContentUris = emptySet(),
+            ).canSetAsPhoto,
+        )
+    }
+
 }
