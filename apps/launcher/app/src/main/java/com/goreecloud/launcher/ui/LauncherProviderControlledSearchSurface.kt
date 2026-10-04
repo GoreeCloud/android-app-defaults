@@ -1812,6 +1812,85 @@ private fun LauncherShortcutActionGlyph(
                     cap = cap,
                 )
             }
+            "list" in normalized || "check" in normalized -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.18f, u * 0.16f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.64f, u * 0.68f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
+                    style = Stroke(width = stroke),
+                )
+                listOf(0.34f, 0.50f, 0.66f).forEach { y ->
+                    drawCircle(
+                        color = tint,
+                        radius = u * 0.035f,
+                        center = androidx.compose.ui.geometry.Offset(u * 0.32f, u * y),
+                    )
+                    drawLine(
+                        tint,
+                        androidx.compose.ui.geometry.Offset(u * 0.43f, u * y),
+                        androidx.compose.ui.geometry.Offset(u * 0.70f, u * y),
+                        stroke,
+                        cap = cap,
+                    )
+                }
+            }
+            "draw" in normalized || "sketch" in normalized -> {
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.76f),
+                    androidx.compose.ui.geometry.Offset(u * 0.70f, u * 0.28f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.62f, u * 0.20f),
+                    androidx.compose.ui.geometry.Offset(u * 0.78f, u * 0.36f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.20f, u * 0.80f),
+                    androidx.compose.ui.geometry.Offset(u * 0.38f, u * 0.76f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            "search" in normalized || "find" in normalized -> {
+                drawCircle(
+                    color = tint,
+                    radius = u * 0.24f,
+                    center = androidx.compose.ui.geometry.Offset(u * 0.42f, u * 0.42f),
+                    style = Stroke(width = stroke),
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.60f, u * 0.60f),
+                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.84f),
+                    stroke,
+                    cap = cap,
+                )
+            }
+            "note" in normalized || "text" in normalized -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.14f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.56f, u * 0.72f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.07f),
+                    style = Stroke(width = stroke),
+                )
+                listOf(0.38f, 0.52f, 0.66f).forEach { y ->
+                    drawLine(
+                        tint,
+                        androidx.compose.ui.geometry.Offset(u * 0.34f, u * y),
+                        androidx.compose.ui.geometry.Offset(u * 0.66f, u * y),
+                        stroke,
+                        cap = cap,
+                    )
+                }
+            }
             "template" in normalized || "document" in normalized || "new" in normalized -> {
                 drawRoundRect(
                     color = tint,
@@ -1836,16 +1915,33 @@ private fun LauncherShortcutActionGlyph(
                 )
             }
             else -> {
-                drawCircle(
+                // Generic Android app shortcut: use an action/launch arrow rather than a
+                // misleading Search magnifier when the shortcut label has no known semantic.
+                drawRoundRect(
                     color = tint,
-                    radius = u * 0.25f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.43f, u * 0.43f),
+                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.30f),
+                    size = androidx.compose.ui.geometry.Size(u * 0.52f, u * 0.52f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * 0.08f),
                     style = Stroke(width = stroke),
                 )
                 drawLine(
                     tint,
-                    androidx.compose.ui.geometry.Offset(u * 0.61f, u * 0.61f),
-                    androidx.compose.ui.geometry.Offset(u * 0.84f, u * 0.84f),
+                    androidx.compose.ui.geometry.Offset(u * 0.44f, u * 0.56f),
+                    androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.58f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.18f),
+                    stroke,
+                    cap = cap,
+                )
+                drawLine(
+                    tint,
+                    androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.18f),
+                    androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.42f),
                     stroke,
                     cap = cap,
                 )
