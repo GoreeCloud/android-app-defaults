@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -178,6 +179,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var workspaceRuntimeCoordinator: WorkspaceProductionRuntimeCoordinator
     private val defaultHomeState = MutableStateFlow(false)
     private val homeResetSequence = MutableStateFlow(0L)
+    private val searchShortcutSequence = MutableStateFlow(0L)
     private val searchProviderPreferencesState =
         MutableStateFlow<LauncherSearchProviderPreferenceDecodeResult?>(null)
     private val portableRestoreRecoveryResult =
@@ -336,6 +338,22 @@ class MainActivity : ComponentActivity() {
         refreshHomeRoleState()
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (
+            event.repeatCount == 0 &&
+            LauncherKeyboardShortcutPolicy.opensUniversalSearch(
+                keyCode = keyCode,
+                ctrlPressed = event.isCtrlPressed,
+                metaPressed = event.isMetaPressed,
+                altPressed = event.isAltPressed,
+            )
+        ) {
+            searchShortcutSequence.value = searchShortcutSequence.value + 1L
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -401,6 +419,7 @@ class MainActivity : ComponentActivity() {
                 -> true
             }
             val portableRestoreRecovery by portableRestoreRecoveryResult.collectAsStateWithLifecycle()
+            val searchShortcutSequenceValue by searchShortcutSequence.collectAsStateWithLifecycle()
 
             if (!LauncherPortableRestoreStartupGate.allowsMutations(portableRestoreRecovery)) {
                 LaunchedEffect(darkTheme) {
@@ -544,6 +563,17 @@ class MainActivity : ComponentActivity() {
             val primarySurfaceMode = runCatching {
                 LauncherSurfaceMode.valueOf(primarySurfaceModeName)
             }.getOrDefault(LauncherSurfaceMode.HOME)
+            LaunchedEffect(searchShortcutSequenceValue) {
+                if (
+                    searchShortcutSequenceValue > 0L &&
+                    experiencePreferences.startupWizardCompleted &&
+                    !homeEditorVisible &&
+                    !showHomePageManager
+                ) {
+                    selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                    primarySurfaceModeName = LauncherSurfaceMode.SEARCH.name
+                }
+            }
             val useDarkSystemBarIcons = launcherUsesDarkSystemBarIcons(
                 surfaceMode = primarySurfaceMode,
                 startupWizardCompleted = experiencePreferences.startupWizardCompleted,
