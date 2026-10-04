@@ -21,7 +21,7 @@ GOVERNED_QUALIFICATION_ANCHOR = "7c4ded83d7a8725165bb6a55dfb175667cc9589e"
 
 
 def fail(message: str) -> None:
-    raise SystemExit(f"GLAZE UI V1.6 Launcher source mapping failed: {message}")
+    raise SystemExit(f"Launcher Glaze authority/mapping boundary failed: {message}")
 
 
 def read(path: Path, label: str) -> str:
@@ -118,7 +118,7 @@ def main() -> None:
         require(catalog, marker, "Theme Manager catalog")
 
     for marker in (
-        "Status: **Development source mapping integrated / application acceptance pending**",
+        "Status: **Development source mapping integrated / V1.7 migration and application acceptance pending**",
         f"Exact V1.6 implementation source authority: `{IMPLEMENTED_SOURCE_REVISION}`",
         "sourceMigrationRequired()",
         "consumerAcceptanceRequired()",
@@ -144,7 +144,7 @@ def main() -> None:
         '  glaze_ui_required: "1.7.0"',
         "glaze-ui==1.7.0",
         "conformance:\n  status: nonconformant",
-        "consumer acceptance remains blocked",
+        "fresh V1.7 contract re-pinning",
     ):
         require(platform, marker, "Platform Contract manifest")
 
