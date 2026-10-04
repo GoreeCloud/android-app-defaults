@@ -4083,6 +4083,10 @@ class GalleryActivity : Activity() {
                     }
                     true
                 }
+                GalleryViewerKeyboardAction.TOGGLE_FAVORITE -> {
+                    favorite.performClick()
+                    true
+                }
                 GalleryViewerKeyboardAction.CLOSE -> {
                     closeAuthorizedViewer()
                     true
