@@ -2,6 +2,7 @@
 
 ## October 3, 2026 — stabilization authority checkpoint
 
+- Current shared design-system authority is Glaze V1.7 / `1.7.0` at release integration `1a5756daed2294155be2e9972b24f580f6222b7b`. V1.7.0 inherits accepted V1.6.0 runtime behavior; Keyboard's V1.2 optical substrate plus bounded V1.6 presentation layer remain migration provenance, not V1.7 acceptance.
 - Canonical source authority is `GoreeCloud/android-app-defaults` under `apps/keyboard/`; the standalone `GoreeCloud/keyboard` repository is legacy provenance pending governed retirement.
 - Authoritative monorepo `main` is `9ef430a32b165c43e3720a9e1010044dfcc26e9e` at this checkpoint. The Keyboard package on that tree is `0.1.22-dev`, with lifecycle `Weave`, deployment state `development`, and qualification state `in-progress`.
 - Keyboard remains nonconformant. Representative physical-device IME, accessibility, host-application compatibility, multilingual/RTL, privacy/security, recovery, performance/power, protected signing, Seal, production-acceptance, and Anchor gates remain open.
@@ -16,7 +17,7 @@
 - Repository lifecycle remains Development / nonconformant and is not Stable or production accepted.
 - Current source authority is `GoreeCloud/android-app-defaults` under `apps/keyboard/`; the standalone repository is historical provenance only.
 - The implemented native Android optical presentation remains a historical repository-local GLAZE UI V1.2 / `1.2.0` mapping at reviewed source `f285b9145e27e6e7027b075c37299d101945c272`.
-- Current Official Stable GLAZE UI consumer authority is V1.6 / `1.6.0` at exact release source `a7180679ea851389e0f3004515f9a25f420e716d`. Accepted PR #73 adds a bounded Android V1.6 presentation-context layer over the inherited V1.2 optical substrate; complete V1.6 runtime migration and downstream acceptance remain open.
+- Current shared consumer authority is Glaze V1.7 / `1.7.0` at release integration `1a5756daed2294155be2e9972b24f580f6222b7b`. V1.7.0 inherits accepted V1.6.0 runtime behavior. Accepted PR #73's bounded V1.6 presentation-context layer over the inherited V1.2 optical substrate remains implementation provenance; fresh V1.7 migration and downstream acceptance remain open.
 - Platform Contract 0.4 and the nine Integral Platform Systems are the current machine-readable governance model. GoreeCloud Policy and GoreeCloud Observability are explicitly applicable-blocked rather than omitted.
 - Typed text, composing/editor context, clipboard contents, learned input, suggestions, emoji search queries, credentials, and other sensitive input data remain outside the current one-field portable preference format and are not granted new observation authority by platform-contract or presentation work.
 
