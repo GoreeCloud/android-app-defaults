@@ -3215,8 +3215,7 @@ private fun HomeEditorSurface(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding()
+            .safeDrawingPadding()
             .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
     ) {
