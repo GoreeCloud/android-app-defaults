@@ -15,7 +15,7 @@ GoreeCloud Gallery is a GoreeCloud-maintained Android fork. Every Gallery-contro
 - Stable runtime entrypoint: `js/glaze-v1.6.0.mjs`
 - Known-good shared rollback baseline: **1.5.1**
 - Native implementation model: Android platform-native semantic mapping rather than copied web CSS
-- Current first-party native source baseline: **V1.6**
+- Current first-party native implementation mapping: **V1.6**; current shared consumer authority: **Glaze V1.7 / 1.7.0**
 - Historical transitional implementation line: `gc.16`
 - Permanent Glaze UI exceptions: **none approved**
 
@@ -27,7 +27,7 @@ The application ID is `com.goreecloud.gallery`. GoreeCloud-owned branding, packa
 
 ## Native semantic mapping
 
-Gallery maps the Official Stable Glaze UI 1.6 contract into Android resources and platform conventions. The mapping is semantic and presentation-only: it preserves roles, hierarchy, interaction intent, accessibility boundaries, and authority separation without requiring Android to reproduce browser-only effects or allowing Glaze presentation to manufacture permission, authorization, privacy/security truth, or consequential execution.
+Gallery's current native implementation maps the accepted Glaze UI 1.6 contract into Android resources and platform conventions. Current shared consumer authority is Glaze V1.7 / 1.7.0, whose bounded runtime intentionally inherits V1.6.0 behavior; Gallery still requires a fresh V1.7 contract re-pin and downstream acceptance. The mapping is semantic and presentation-only: it preserves roles, hierarchy, interaction intent, accessibility boundaries, and authority separation without requiring Android to reproduce browser-only effects or allowing Glaze presentation to manufacture permission, authorization, privacy/security truth, or consequential execution.
 
 The `gc.11` foundation establishes native resources for Canvas and Canvas Accent colors, Surface and muted-surface roles, primary and secondary accents, semantic text/status roles, spacing, rounded geometry, 44dp minimum and 48dp comfortable actionable targets, 90/160/220/320ms motion semantics, light/dark palettes, and Compact-first Settings composition.
 
