@@ -151,4 +151,19 @@ class LauncherKeyboardShortcutPolicyTest {
         )
     }
 
+
+    @Test
+    fun modifiedTCanOpenThemeManager() {
+        assertEquals(
+            LauncherKeyboardNavigationAction.THEME_MANAGER,
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_T,
+                ctrlPressed = true,
+                metaPressed = false,
+                shiftPressed = true,
+                altPressed = false,
+            ),
+        )
+    }
+
 }
