@@ -4187,11 +4187,15 @@ class GalleryActivity : Activity() {
                 currentAlbumId = item.albumId,
                 authorizedContentUris = authorizedItems.mapTo(linkedSetOf()) { it.contentUri },
                 authorizedAlbumIds = authorizedItems.mapNotNullTo(linkedSetOf()) { it.albumId },
+                favoriteContentUris = favoriteUris,
             )
             PopupMenu(this, more).apply {
                 menu.add(0, 1, 0, "Details")
                 if (menuState.canOpenContainingAlbum) {
                     menu.add(0, 2, 1, "Open containing album")
+                }
+                if (menuState.canOpenFavorites) {
+                    menu.add(0, 3, 2, "Open Favorites")
                 }
                 setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
@@ -4203,6 +4207,13 @@ class GalleryActivity : Activity() {
                             destination = GalleryDestination.ALBUMS
                             showingFavorites = false
                             openAlbumId = item.albumId
+                            closeAuthorizedViewer()
+                            true
+                        }
+                        3 -> {
+                            destination = GalleryDestination.ALBUMS
+                            showingFavorites = true
+                            openAlbumId = null
                             closeAuthorizedViewer()
                             true
                         }
