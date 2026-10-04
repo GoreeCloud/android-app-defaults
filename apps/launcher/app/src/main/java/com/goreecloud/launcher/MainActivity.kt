@@ -180,6 +180,7 @@ class MainActivity : ComponentActivity() {
     private val defaultHomeState = MutableStateFlow(false)
     private val homeResetSequence = MutableStateFlow(0L)
     private val searchShortcutSequence = MutableStateFlow(0L)
+    private val searchShortcutEnabled = MutableStateFlow(false)
     private val searchProviderPreferencesState =
         MutableStateFlow<LauncherSearchProviderPreferenceDecodeResult?>(null)
     private val portableRestoreRecoveryResult =
@@ -341,6 +342,7 @@ class MainActivity : ComponentActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (
             event.repeatCount == 0 &&
+            searchShortcutEnabled.value &&
             LauncherKeyboardShortcutPolicy.opensUniversalSearch(
                 keyCode = keyCode,
                 ctrlPressed = event.isCtrlPressed,
@@ -420,8 +422,15 @@ class MainActivity : ComponentActivity() {
             }
             val portableRestoreRecovery by portableRestoreRecoveryResult.collectAsStateWithLifecycle()
             val searchShortcutSequenceValue by searchShortcutSequence.collectAsStateWithLifecycle()
+            val portableRestoreAllowsMutations =
+                LauncherPortableRestoreStartupGate.allowsMutations(portableRestoreRecovery)
+            LaunchedEffect(portableRestoreAllowsMutations) {
+                if (!portableRestoreAllowsMutations) {
+                    searchShortcutEnabled.value = false
+                }
+            }
 
-            if (!LauncherPortableRestoreStartupGate.allowsMutations(portableRestoreRecovery)) {
+            if (!portableRestoreAllowsMutations) {
                 LaunchedEffect(darkTheme) {
                     setSystemBarIconAppearance(useDarkIcons = !darkTheme)
                 }
@@ -563,13 +572,15 @@ class MainActivity : ComponentActivity() {
             val primarySurfaceMode = runCatching {
                 LauncherSurfaceMode.valueOf(primarySurfaceModeName)
             }.getOrDefault(LauncherSurfaceMode.HOME)
-            LaunchedEffect(searchShortcutSequenceValue) {
-                if (
-                    searchShortcutSequenceValue > 0L &&
-                    experiencePreferences.startupWizardCompleted &&
+            val canOpenSearchFromHardwareShortcut =
+                experiencePreferences.startupWizardCompleted &&
                     !homeEditorVisible &&
                     !showHomePageManager
-                ) {
+            LaunchedEffect(canOpenSearchFromHardwareShortcut) {
+                searchShortcutEnabled.value = canOpenSearchFromHardwareShortcut
+            }
+            LaunchedEffect(searchShortcutSequenceValue) {
+                if (searchShortcutSequenceValue > 0L && canOpenSearchFromHardwareShortcut) {
                     selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
                     primarySurfaceModeName = LauncherSurfaceMode.SEARCH.name
                 }
