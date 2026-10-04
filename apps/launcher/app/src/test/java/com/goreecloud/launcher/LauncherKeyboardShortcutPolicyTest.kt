@@ -1,7 +1,9 @@
 package com.goreecloud.launcher
 
 import android.view.KeyEvent
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -77,4 +79,61 @@ class LauncherKeyboardShortcutPolicyTest {
             ),
         )
     }
+
+    @Test
+    fun modifiedNavigationShortcutsMapToExistingLauncherSurfaces() {
+        assertEquals(
+            LauncherKeyboardNavigationAction.HOME,
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_H,
+                ctrlPressed = true,
+                metaPressed = false,
+                shiftPressed = true,
+                altPressed = false,
+            ),
+        )
+        assertEquals(
+            LauncherKeyboardNavigationAction.APPS,
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_A,
+                ctrlPressed = false,
+                metaPressed = true,
+                shiftPressed = true,
+                altPressed = false,
+            ),
+        )
+        assertEquals(
+            LauncherKeyboardNavigationAction.SETTINGS,
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_COMMA,
+                ctrlPressed = true,
+                metaPressed = false,
+                shiftPressed = false,
+                altPressed = false,
+            ),
+        )
+    }
+
+    @Test
+    fun navigationShortcutsRejectMissingModifiersAndAltChords() {
+        assertNull(
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_A,
+                ctrlPressed = false,
+                metaPressed = false,
+                shiftPressed = true,
+                altPressed = false,
+            ),
+        )
+        assertNull(
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_COMMA,
+                ctrlPressed = true,
+                metaPressed = false,
+                shiftPressed = false,
+                altPressed = true,
+            ),
+        )
+    }
+
 }
