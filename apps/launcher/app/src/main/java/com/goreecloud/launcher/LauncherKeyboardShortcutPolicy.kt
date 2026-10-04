@@ -39,6 +39,15 @@ object LauncherKeyboardShortcutPolicy {
         shiftPressed: Boolean,
         altPressed: Boolean,
     ): LauncherKeyboardNavigationAction? {
+        if (
+            keyCode == KeyEvent.KEYCODE_ESCAPE &&
+            !ctrlPressed &&
+            !metaPressed &&
+            !shiftPressed &&
+            !altPressed
+        ) {
+            return LauncherKeyboardNavigationAction.HOME
+        }
         if (altPressed || (!ctrlPressed && !metaPressed)) return null
         return when {
             shiftPressed && keyCode == KeyEvent.KEYCODE_H ->
