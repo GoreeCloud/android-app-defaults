@@ -6,6 +6,7 @@ enum class GalleryViewerKeyboardAction {
     PREVIOUS,
     NEXT,
     TOGGLE_PLAYBACK,
+    TOGGLE_FAVORITE,
     CLOSE,
 }
 
@@ -27,6 +28,7 @@ object GalleryViewerKeyboardPolicy {
             KeyEvent.KEYCODE_SPACE,
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
             -> GalleryViewerKeyboardAction.TOGGLE_PLAYBACK
+            KeyEvent.KEYCODE_F -> GalleryViewerKeyboardAction.TOGGLE_FAVORITE
             KeyEvent.KEYCODE_ESCAPE -> GalleryViewerKeyboardAction.CLOSE
             else -> null
         }
