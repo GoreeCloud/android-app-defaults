@@ -1555,6 +1555,8 @@ private fun LauncherGlazeShortcutPanel(
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
 ) {
     val icon = if (app != null) rememberLauncherAppIcon(app) else null
+    var expanded by remember(packageName, shortcuts) { mutableStateOf(false) }
+    val visibleShortcuts = if (expanded) shortcuts else shortcuts.take(2)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -1593,16 +1595,82 @@ private fun LauncherGlazeShortcutPanel(
             )
             Row(
                 modifier = Modifier
-                    .widthIn(max = 184.dp)
+                    .widthIn(max = if (expanded) 184.dp else 148.dp)
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                shortcuts.forEach { shortcut ->
+                visibleShortcuts.forEach { shortcut ->
                     LauncherShortcutActionButton(
                         result = shortcut,
                         onLaunchShortcut = onLaunchShortcut,
                     )
+                }
+                if (shortcuts.size > 2) {
+                    LauncherShortcutOverflowButton(
+                        expanded = expanded,
+                        hiddenCount = (shortcuts.size - 2).coerceAtLeast(0),
+                        onClick = { expanded = !expanded },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LauncherShortcutOverflowButton(
+    expanded: Boolean,
+    hiddenCount: Int,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .size(48.dp)
+            .semantics {
+                contentDescription = if (expanded) {
+                    "Show fewer app shortcuts"
+                } else {
+                    "Show " + hiddenCount + " more app shortcuts"
+                }
+            },
+        shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.065f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Canvas(Modifier.size(20.dp)) {
+                val u = size.minDimension
+                val tint = MaterialTheme.colorScheme.primary
+                val stroke = u * 0.09f
+                val cap = androidx.compose.ui.graphics.StrokeCap.Round
+                if (expanded) {
+                    drawLine(
+                        tint,
+                        androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.62f),
+                        androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.36f),
+                        stroke,
+                        cap = cap,
+                    )
+                    drawLine(
+                        tint,
+                        androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.36f),
+                        androidx.compose.ui.geometry.Offset(u * 0.76f, u * 0.62f),
+                        stroke,
+                        cap = cap,
+                    )
+                } else {
+                    listOf(0.25f, 0.50f, 0.75f).forEach { x ->
+                        drawCircle(
+                            color = tint,
+                            radius = u * 0.07f,
+                            center = androidx.compose.ui.geometry.Offset(u * x, u * 0.50f),
+                        )
+                    }
                 }
             }
         }
