@@ -27,6 +27,7 @@ class GalleryViewerMoreMenuPolicyTest {
             GalleryViewerMoreMenuPolicy.state(
                 currentContentUri = uri,
                 currentAlbumId = "camera",
+                currentMimeType = "image/jpeg",
                 authorizedContentUris = setOf(uri),
                 authorizedAlbumIds = setOf("camera"),
                 favoriteContentUris = setOf(uri),
@@ -36,6 +37,7 @@ class GalleryViewerMoreMenuPolicyTest {
             GalleryViewerMoreMenuPolicy.state(
                 currentContentUri = uri,
                 currentAlbumId = "camera",
+                currentMimeType = "image/jpeg",
                 authorizedContentUris = emptySet(),
                 authorizedAlbumIds = setOf("camera"),
                 favoriteContentUris = setOf(uri),
