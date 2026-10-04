@@ -7,11 +7,11 @@ import org.junit.Test
 
 class GlazeKeyboardV16PresentationPolicyTest {
     @Test
-    fun pinsCurrentStableAuthorityWithoutRelabelingInheritedOptics() {
-        assertEquals("1.6.0", GlazeKeyboardV16PresentationPolicy.StableVersion)
+    fun pinsV16ImplementationMappingWithoutRelabelingInheritedOptics() {
+        assertEquals("1.6.0", GlazeKeyboardV16PresentationPolicy.MappedVersion)
         assertEquals(
             "a7180679ea851389e0f3004515f9a25f420e716d",
-            GlazeKeyboardV16PresentationPolicy.StableSourceRevision,
+            GlazeKeyboardV16PresentationPolicy.MappedSourceRevision,
         )
         assertEquals("1.2.0", GlazeKeyboardV16PresentationPolicy.InheritedOpticalVersion)
         assertEquals(

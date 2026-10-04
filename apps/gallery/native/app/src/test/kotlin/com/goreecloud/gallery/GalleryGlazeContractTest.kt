@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 
 class GalleryGlazeContractTest {
     @Test
-    fun `native shell pins exact current Stable Glaze V1_6 authority`() {
+    fun `native shell retains exact accepted Glaze V1_6 implementation mapping`() {
         assertEquals("1.6.0", GalleryGlazeContract.VERSION)
         assertEquals(
             "a7180679ea851389e0f3004515f9a25f420e716d",

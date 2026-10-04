@@ -24,7 +24,7 @@ The shell renders local metadata only and introduces no network permission, clou
 
 ## Current Glaze source contract
 
-The original shell milestone predates the current Gallery design-system authority. The current native Development line maps to **GLAZE UI V1.6 / 1.6.0**, the Official Anchor shared release. The canonical implementation repository is `GoreeCloud/glaze`; Glaze V1.7 remains Development and is not a consumer baseline for Gallery.
+The original shell milestone predates the current Gallery design-system authority. The current native Development line retains a **GLAZE UI V1.6 / 1.6.0** implementation mapping. The canonical design-system repository is `GoreeCloud/glaze`; current shared consumer authority is **Glaze V1.7 / 1.7.0**, established at `1a5756daed2294155be2e9972b24f580f6222b7b`. Because V1.7.0 intentionally inherits the accepted V1.6.0 runtime, the existing mapping is retained as implementation provenance, but Gallery remains migration-required until fresh V1.7 consumer acceptance is established.
 
 The repository-local contract currently enforces:
 

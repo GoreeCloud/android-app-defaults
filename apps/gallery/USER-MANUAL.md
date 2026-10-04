@@ -170,7 +170,7 @@ Protected Photos/password protection is not simulated with insecure app-local cr
 
 ## Current design-system authority
 
-The current shared authority identifies **GLAZE UI V1.6 / 1.6.0** as Official Stable, with accepted release source `a7180679ea851389e0f3004515f9a25f420e716d`. Gallery's first-party native source contract pins that authority, while complete rendered, accessibility, adaptive-device, Human Visual Excellence, and production conformance remain separate acceptance gates.
+The current shared authority is **Glaze V1.7 / 1.7.0** (Anchor / Stable compatibility), established by release integration `1a5756daed2294155be2e9972b24f580f6222b7b` from qualification anchor `7c4ded83d7a8725165bb6a55dfb175667cc9589e`. V1.7.0 intentionally inherits the accepted V1.6.0 runtime. Gallery still implements its bounded V1.6 native semantic mapping, so fresh V1.7 contract adoption plus rendered, accessibility, adaptive-device, Human Visual Excellence, and production acceptance remain separate gates.
 
 ## Local browsing controls
 
