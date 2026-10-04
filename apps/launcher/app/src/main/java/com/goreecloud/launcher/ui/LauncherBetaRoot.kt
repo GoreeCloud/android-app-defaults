@@ -3242,12 +3242,12 @@ private fun HomeEditorSurface(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            TextButton(
+            LauncherHeaderGlyphAction(
+                contentDescription = "Done editing Home",
+                symbol = GlazePopupActionSymbol.CHECK,
                 onClick = onDone,
-                modifier = Modifier.heightIn(min = 48.dp),
-            ) {
-                Text("Done")
-            }
+                modifier = Modifier.testTag("launcher-home-editor-done"),
+            )
         }
 
         HomeEditorPageOverview(
@@ -3413,14 +3413,14 @@ private fun HomeEditorPageOverview(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            "+",
-                            style = MaterialTheme.typography.displaySmall,
+                        GlazePopupActionGlyph(
+                            symbol = GlazePopupActionSymbol.ADD,
                             color = if (layoutLocked) {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             } else {
                                 MaterialTheme.colorScheme.primary
                             },
+                            iconSize = 34.dp,
                         )
                         Text(
                             "Add Page",
@@ -3517,17 +3517,14 @@ private fun HomeEditorPageOverview(
                             )
                         }
                         if (canDelete) {
-                            TextButton(
+                            HomeEditorDeleteGlyphAction(
+                                contentDescription = "Delete empty " +
+                                    (if (primary) "Home page" else "page " + (index + 1)),
                                 onClick = { pendingDeletePageId = page.pageId },
-                                modifier = Modifier.heightIn(min = 48.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                            ) {
-                                Text(
-                                    "Delete",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            }
+                                modifier = Modifier.testTag(
+                                    "launcher-home-editor-delete-page-" + page.pageId,
+                                ),
+                            )
                         } else if (primary) {
                             Text(
                                 "Protected",
@@ -3592,6 +3589,34 @@ private fun HomeEditorPreviewIcon(app: LauncherActivityInfo) {
             shape = RoundedCornerShape(10.dp),
             color = Color.White.copy(alpha = 0.14f),
         ) {}
+    }
+}
+
+@Composable
+private fun HomeEditorDeleteGlyphAction(
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier
+            .size(48.dp)
+            .semantics { this.contentDescription = contentDescription },
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.52f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.error.copy(alpha = 0.16f),
+        ),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            GlazePopupActionGlyph(
+                symbol = GlazePopupActionSymbol.DELETE,
+                color = MaterialTheme.colorScheme.error,
+                iconSize = 19.dp,
+            )
+        }
     }
 }
 
@@ -12804,6 +12829,7 @@ private enum class GlazePopupActionSymbol {
     DOCK,
     WIDGET,
     ADD,
+    DELETE,
     SHORTCUT,
     PIN,
     FOLDER,
@@ -12871,6 +12897,19 @@ private fun GlazePopupActionGlyph(
             GlazePopupActionSymbol.ADD -> {
                 segment(.18f, .50f, .82f, .50f)
                 segment(.50f, .18f, .50f, .82f)
+            }
+            GlazePopupActionSymbol.DELETE -> {
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(u * .28f, u * .34f),
+                    size = Size(u * .44f, u * .48f),
+                    cornerRadius = CornerRadius(u * .06f),
+                    style = Stroke(w),
+                )
+                segment(.22f, .28f, .78f, .28f)
+                segment(.38f, .20f, .62f, .20f)
+                segment(.40f, .42f, .40f, .70f)
+                segment(.60f, .42f, .60f, .70f)
             }
             GlazePopupActionSymbol.SHORTCUT -> {
                 segment(.24f, .76f, .76f, .24f)
