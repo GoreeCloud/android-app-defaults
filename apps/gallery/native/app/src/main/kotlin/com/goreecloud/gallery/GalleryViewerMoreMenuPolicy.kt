@@ -3,6 +3,7 @@ package com.goreecloud.gallery
 data class GalleryViewerMoreMenuState(
     val canOpenContainingAlbum: Boolean,
     val canOpenFavorites: Boolean,
+    val canSetAsPhoto: Boolean,
 )
 
 /**
@@ -15,6 +16,7 @@ object GalleryViewerMoreMenuPolicy {
     fun state(
         currentContentUri: String,
         currentAlbumId: String?,
+        currentMimeType: String,
         authorizedContentUris: Set<String>,
         authorizedAlbumIds: Set<String>,
         favoriteContentUris: Set<String>,
@@ -26,6 +28,7 @@ object GalleryViewerMoreMenuPolicy {
         return GalleryViewerMoreMenuState(
             canOpenContainingAlbum = contentAuthorized && albumAuthorized,
             canOpenFavorites = contentAuthorized && currentContentUri in favoriteContentUris,
+            canSetAsPhoto = contentAuthorized && currentMimeType.startsWith("image/"),
         )
     }
 }
