@@ -89,6 +89,7 @@ fun ThemeManagerSurface(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                val doneGlyphColor = MaterialTheme.colorScheme.onSurface
                 Surface(
                     onClick = onBack,
                     modifier = Modifier
@@ -106,14 +107,14 @@ fun ThemeManagerSurface(
                             val stroke = size.minDimension * 0.11f
                             val cap = androidx.compose.ui.graphics.StrokeCap.Round
                             drawLine(
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = doneGlyphColor,
                                 start = Offset(size.width * 0.18f, size.height * 0.54f),
                                 end = Offset(size.width * 0.42f, size.height * 0.76f),
                                 strokeWidth = stroke,
                                 cap = cap,
                             )
                             drawLine(
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = doneGlyphColor,
                                 start = Offset(size.width * 0.42f, size.height * 0.76f),
                                 end = Offset(size.width * 0.84f, size.height * 0.25f),
                                 strokeWidth = stroke,
