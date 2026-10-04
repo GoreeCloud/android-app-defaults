@@ -2597,8 +2597,7 @@ private fun LauncherWidgetPickerSheet(
         modifier = Modifier
             .fillMaxSize()
             .testTag("launcher-widget-picker-sheet")
-            .statusBarsPadding()
-            .navigationBarsPadding()
+            .safeDrawingPadding()
             .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
