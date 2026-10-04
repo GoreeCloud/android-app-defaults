@@ -28,6 +28,7 @@ import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -129,6 +130,7 @@ class GalleryActivity : Activity() {
     private var viewerOverlay: View? = null
     private var viewerVideoSurface: GalleryVideoPlayerSurface? = null
     private var viewerSlideshowStop: (() -> Unit)? = null
+    private var viewerKeyboardAction: ((GalleryViewerKeyboardAction) -> Boolean)? = null
     private var pendingMediaMutation: AndroidMediaMutationPendingState? = null
     private var pendingMediaMove: AndroidMediaMovePendingState? = null
     private var mediaMoveExecutionInProgress = false
@@ -175,6 +177,21 @@ class GalleryActivity : Activity() {
                 }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.repeatCount == 0 && viewerOverlay != null) {
+            val action = GalleryViewerKeyboardPolicy.actionFor(
+                keyCode = keyCode,
+                ctrlPressed = event.isCtrlPressed,
+                metaPressed = event.isMetaPressed,
+                altPressed = event.isAltPressed,
+            )
+            if (action != null && viewerKeyboardAction?.invoke(action) == true) {
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -4040,6 +4057,39 @@ class GalleryActivity : Activity() {
             }
         }
 
+        viewerKeyboardAction = { action ->
+            when (action) {
+                GalleryViewerKeyboardAction.PREVIOUS -> {
+                    if (!previous.isEnabled) {
+                        false
+                    } else {
+                        previous.performClick()
+                        true
+                    }
+                }
+                GalleryViewerKeyboardAction.NEXT -> {
+                    if (!next.isEnabled) {
+                        false
+                    } else {
+                        next.performClick()
+                        true
+                    }
+                }
+                GalleryViewerKeyboardAction.TOGGLE_PLAYBACK -> {
+                    if (videoSurface.visibility == View.VISIBLE && playbackToggle.visibility == View.VISIBLE) {
+                        playbackToggle.performClick()
+                    } else {
+                        slideshow.performClick()
+                    }
+                    true
+                }
+                GalleryViewerKeyboardAction.CLOSE -> {
+                    closeAuthorizedViewer()
+                    true
+                }
+            }
+        }
+
         val scaleGestureDetector = ScaleGestureDetector(
             this,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -4238,6 +4288,7 @@ class GalleryActivity : Activity() {
     private fun closeAuthorizedViewer() {
         viewerSlideshowStop?.invoke()
         viewerSlideshowStop = null
+        viewerKeyboardAction = null
         val overlay = viewerOverlay ?: return
         viewerVideoSurface?.apply {
             onPlaybackError = null
