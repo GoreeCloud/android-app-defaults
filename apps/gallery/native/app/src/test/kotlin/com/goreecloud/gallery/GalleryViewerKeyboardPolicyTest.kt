@@ -61,4 +61,26 @@ class GalleryViewerKeyboardPolicyTest {
             ),
         )
     }
+
+    @Test
+    fun fTogglesFavoriteOnlyWithoutModifiers() {
+        assertEquals(
+            GalleryViewerKeyboardAction.TOGGLE_FAVORITE,
+            GalleryViewerKeyboardPolicy.actionFor(
+                KeyEvent.KEYCODE_F,
+                ctrlPressed = false,
+                metaPressed = false,
+                altPressed = false,
+            ),
+        )
+        assertNull(
+            GalleryViewerKeyboardPolicy.actionFor(
+                KeyEvent.KEYCODE_F,
+                ctrlPressed = true,
+                metaPressed = false,
+                altPressed = false,
+            ),
+        )
+    }
+
 }
