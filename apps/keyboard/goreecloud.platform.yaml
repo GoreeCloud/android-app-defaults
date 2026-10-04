@@ -85,7 +85,7 @@ platform_systems:
     notes: A one-field portable preference format, category-only local export/apply seams, explicit user-controlled Storage Access Framework transfer, import preview/Apply, export review/freeze, and minimized reviewed-export lifecycle restoration exist, but complete approved backup/restore scope, clean-target recovery, automatic continuity, and accepted Everkeep integration do not.
   glaze_ui:
     result: applicable-migration-required
-    version: "1.6.0"
+    version: "1.7.0"
     evidence:
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardTokens.kt
       - android/app/src/main/kotlin/com/goreecloud/keyboard/GlazeKeyboardAtmosphere.kt
@@ -97,7 +97,7 @@ platform_systems:
       - android/app/src/test/kotlin/com/goreecloud/keyboard/GlazeKeyboardV16PresentationPolicyTest.kt
       - scripts/check_glaze_motion_evaluation.py
       - docs/glaze-ui-adoption.md
-    notes: The current Official Stable authority is V1.6 / 1.6.0 at exact release source a7180679ea851389e0f3004515f9a25f420e716d. This Weave-stage implementation includes a bounded V1.6 Android presentation-context layer that consumes platform font scale, animator enablement, and touch-exploration state, and applies the touch-assistance interaction floor to alternate-character targets. Keyboard's optical substrate still maps historical V1.2 / 1.2.0 source semantics at f285b9145e27e6e7027b075c37299d101945c272, so Keyboard remains applicable-migration-required. This partial source adoption does not establish whole-keyboard V1.6 migration or downstream conformance. Full optical/component migration plus rendered, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain required.
+    notes: Current shared authority is Glaze V1.7 / 1.7.0 at release integration 1a5756daed2294155be2e9972b24f580f6222b7b (qualification anchor 7c4ded83d7a8725165bb6a55dfb175667cc9589e). V1.7.0 intentionally inherits accepted V1.6.0 runtime behavior. This Weave-stage implementation includes a bounded V1.6 Android presentation-context layer over a historical V1.2 / 1.2.0 optical substrate at f285b9145e27e6e7027b075c37299d101945c272, so Keyboard remains applicable-migration-required. The inherited V1.6 layer is implementation provenance only; fresh V1.7 contract adoption plus full optical/component migration, rendered, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain required.
   mesh:
     result: applicable-blocked
     version: null
@@ -168,10 +168,10 @@ external_dependencies:
 
 compatibility:
   platform_contract: "2.0"
-  glaze_ui_required: "1.6.0"
+  glaze_ui_required: "1.7.0"
   requires:
     - goreecloud-platform-contract==2.0
-    - glaze-ui==1.6.0
+    - glaze-ui==1.7.0
     - android-api>=26
   provides:
     - goreecloud-keyboard-preferences/1
@@ -202,7 +202,7 @@ conformance:
     - docs/development/portable-preference-import-preview.md
     - docs/development/portable-preference-export-review.md
   blockers:
-    - Keyboard now contains a bounded GLAZE UI V1.6 Android presentation-context layer at current Stable source a7180679ea851389e0f3004515f9a25f420e716d, but the optical substrate still implements historical V1.2 / 1.2.0 semantics at f285b9145e27e6e7027b075c37299d101945c272. Complete V1.6 optical/component migration and fresh whole-keyboard rendered, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete.
+    - Keyboard contains a bounded V1.6 Android presentation-context layer and historical V1.2 optical substrate while current shared authority is Glaze V1.7 / 1.7.0. V1.7 inherits accepted V1.6 runtime behavior, but fresh V1.7 contract adoption, complete optical/component migration, and whole-keyboard rendered, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete.
     - Privacy Shield integration and acceptance are not established for this highly sensitive input surface. The 0.1.22 Draft candidate adds Keyboard-side per-app clipboard policy, opt-in encrypted local history, expiration, pin/delete, and Paste Once, but no privileged Secure Paste Broker or system-wide cross-application clipboard enforcement exists.
     - Wardveil Security integration and acceptance are not established.
     - Everkeep integration plus approved product backup and clean-target restore acceptance remain incomplete; explicit user file transfer is only one-field portability.
