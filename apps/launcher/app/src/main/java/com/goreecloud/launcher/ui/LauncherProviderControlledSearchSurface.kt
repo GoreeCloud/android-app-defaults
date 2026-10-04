@@ -815,23 +815,22 @@ private fun LauncherSearchSuggestionPresentationControl(
             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.065f),
         ),
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
                 "Suggestion tabs",
-                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
             )
             Row(
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 LauncherSearchSuggestionPresentation.entries.forEach { option ->
@@ -839,6 +838,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                     Surface(
                         onClick = { onSelect(option) },
                         modifier = Modifier
+                            .weight(1f)
                             .heightIn(min = 48.dp)
                             .semantics {
                                 contentDescription =
@@ -860,9 +860,11 @@ private fun LauncherSearchSuggestionPresentationControl(
                         ),
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.Center,
                         ) {
                             LauncherSuggestionPresentationGlyph(
                                 option = option,
@@ -872,6 +874,7 @@ private fun LauncherSearchSuggestionPresentationControl(
                                     MaterialTheme.colorScheme.onSurfaceVariant
                                 },
                             )
+                            Spacer(Modifier.size(4.dp))
                             Text(
                                 option.displayName,
                                 style = MaterialTheme.typography.labelSmall,
