@@ -26,8 +26,8 @@ object GlazeCurrentAuthority {
         !currentConsumerConformanceEstablished
 
     /**
-     * Compatibility helper retained for callers/tests that ask whether current-Stable Glaze work
-     * remains. Source migration may be complete while application acceptance is still required.
+     * Compatibility helper retained for callers/tests that ask whether current-authority Glaze work
+     * remains. Runtime behavior may be inherited while contract migration and application acceptance remain required.
      */
     fun migrationRequired(): Boolean =
         sourceMigrationRequired() || consumerAcceptanceRequired()
