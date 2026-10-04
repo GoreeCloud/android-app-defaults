@@ -180,6 +180,8 @@ class MainActivity : ComponentActivity() {
     private val defaultHomeState = MutableStateFlow(false)
     private val homeResetSequence = MutableStateFlow(0L)
     private val searchShortcutSequence = MutableStateFlow(0L)
+    private val keyboardNavigationRequest =
+        MutableStateFlow(LauncherKeyboardShortcutRequest())
     private val searchShortcutEnabled = MutableStateFlow(false)
     private val searchProviderPreferencesState =
         MutableStateFlow<LauncherSearchProviderPreferenceDecodeResult?>(null)
@@ -340,18 +342,33 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (
-            event.repeatCount == 0 &&
-            searchShortcutEnabled.value &&
-            LauncherKeyboardShortcutPolicy.opensUniversalSearch(
+        if (event.repeatCount == 0 && searchShortcutEnabled.value) {
+            if (
+                LauncherKeyboardShortcutPolicy.opensUniversalSearch(
+                    keyCode = keyCode,
+                    ctrlPressed = event.isCtrlPressed,
+                    metaPressed = event.isMetaPressed,
+                    altPressed = event.isAltPressed,
+                )
+            ) {
+                searchShortcutSequence.value = searchShortcutSequence.value + 1L
+                return true
+            }
+
+            val navigationAction = LauncherKeyboardShortcutPolicy.navigationAction(
                 keyCode = keyCode,
                 ctrlPressed = event.isCtrlPressed,
                 metaPressed = event.isMetaPressed,
+                shiftPressed = event.isShiftPressed,
                 altPressed = event.isAltPressed,
             )
-        ) {
-            searchShortcutSequence.value = searchShortcutSequence.value + 1L
-            return true
+            if (navigationAction != null) {
+                keyboardNavigationRequest.value = LauncherKeyboardShortcutRequest(
+                    sequence = keyboardNavigationRequest.value.sequence + 1L,
+                    action = navigationAction,
+                )
+                return true
+            }
         }
         return super.onKeyDown(keyCode, event)
     }
@@ -422,6 +439,8 @@ class MainActivity : ComponentActivity() {
             }
             val portableRestoreRecovery by portableRestoreRecoveryResult.collectAsStateWithLifecycle()
             val searchShortcutSequenceValue by searchShortcutSequence.collectAsStateWithLifecycle()
+            val keyboardNavigationRequestValue by
+                keyboardNavigationRequest.collectAsStateWithLifecycle()
             val portableRestoreAllowsMutations =
                 LauncherPortableRestoreStartupGate.allowsMutations(portableRestoreRecovery)
             LaunchedEffect(portableRestoreAllowsMutations) {
@@ -583,6 +602,20 @@ class MainActivity : ComponentActivity() {
                 if (searchShortcutSequenceValue > 0L && canOpenSearchFromHardwareShortcut) {
                     selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
                     primarySurfaceModeName = LauncherSurfaceMode.SEARCH.name
+                }
+            }
+            LaunchedEffect(keyboardNavigationRequestValue) {
+                if (
+                    keyboardNavigationRequestValue.sequence > 0L &&
+                    canOpenSearchFromHardwareShortcut
+                ) {
+                    selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                    primarySurfaceModeName = when (keyboardNavigationRequestValue.action) {
+                        LauncherKeyboardNavigationAction.HOME -> LauncherSurfaceMode.HOME.name
+                        LauncherKeyboardNavigationAction.APPS -> LauncherSurfaceMode.DRAWER.name
+                        LauncherKeyboardNavigationAction.SETTINGS -> LauncherSurfaceMode.SETTINGS.name
+                        null -> primarySurfaceModeName
+                    }
                 }
             }
             val useDarkSystemBarIcons = launcherUsesDarkSystemBarIcons(
