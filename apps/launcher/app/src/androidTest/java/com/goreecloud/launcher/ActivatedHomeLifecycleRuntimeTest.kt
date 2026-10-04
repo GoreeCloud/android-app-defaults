@@ -629,7 +629,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
                 check(
                     composeRule
-                        .onAllNodesWithText("Delete", useUnmergedTree = true)
+                        .onAllNodesWithTag(
+                            "launcher-home-editor-delete-page-" + secondaryPageId,
+                            useUnmergedTree = true,
+                        )
                         .fetchSemanticsNodes()
                         .isNotEmpty(),
                 ) { "Empty secondary pages should expose direct guarded deletion in Edit Home." }
