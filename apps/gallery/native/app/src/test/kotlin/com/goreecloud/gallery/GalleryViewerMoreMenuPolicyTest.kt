@@ -12,7 +12,7 @@ class GalleryViewerMoreMenuPolicyTest {
             currentAlbumId = "camera",
             authorizedContentUris = setOf("content://media/external/images/media/7"),
             authorizedAlbumIds = setOf("camera"),
-        favoriteContentUris = emptySet(),
+            favoriteContentUris = emptySet(),
         )
 
         assertTrue(state.canOpenContainingAlbum)
@@ -49,7 +49,7 @@ class GalleryViewerMoreMenuPolicyTest {
             currentAlbumId = "camera",
             authorizedContentUris = setOf("content://media/external/images/media/8"),
             authorizedAlbumIds = setOf("camera"),
-        favoriteContentUris = emptySet(),
+            favoriteContentUris = emptySet(),
         )
 
         assertFalse(state.canOpenContainingAlbum)
@@ -63,7 +63,7 @@ class GalleryViewerMoreMenuPolicyTest {
                 currentAlbumId = "old-camera",
                 authorizedContentUris = setOf("content://media/external/images/media/7"),
                 authorizedAlbumIds = setOf("camera"),
-            favoriteContentUris = emptySet(),
+                favoriteContentUris = emptySet(),
             ).canOpenContainingAlbum,
         )
         assertFalse(
@@ -72,7 +72,7 @@ class GalleryViewerMoreMenuPolicyTest {
                 currentAlbumId = "",
                 authorizedContentUris = setOf("content://media/external/images/media/7"),
                 authorizedAlbumIds = setOf(""),
-            favoriteContentUris = emptySet(),
+                favoriteContentUris = emptySet(),
             ).canOpenContainingAlbum,
         )
     }
