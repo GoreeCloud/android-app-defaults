@@ -528,7 +528,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                         up()
                     }
                 waitForDisplayedTag("launcher-home-editor-fullscreen")
-                composeRule.onNodeWithText("Done", useUnmergedTree = true).performClick()
+                composeRule.onNodeWithTag("launcher-home-editor-done", useUnmergedTree = true).performClick()
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
                         .onAllNodesWithTag(
@@ -1713,7 +1713,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .onNodeWithTag("launcher-home-editor-fullscreen", useUnmergedTree = true)
                     .assertIsDisplayed()
                 composeRule
-                    .onNodeWithText("Done", useUnmergedTree = true)
+                    .onNodeWithTag("launcher-home-editor-done", useUnmergedTree = true)
                     .assertIsDisplayed()
                 check(
                     composeRule
@@ -1751,7 +1751,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                 // still settling can race Compose SlotTable disposal and turn test teardown into a
                 // process crash that is unrelated to the behavior under assertion.
                 composeRule
-                    .onNodeWithText("Done", useUnmergedTree = true)
+                    .onNodeWithTag("launcher-home-editor-done", useUnmergedTree = true)
                     .performClick()
                 composeRule.waitUntil(timeoutMillis = 10_000) {
                     composeRule
@@ -2152,7 +2152,7 @@ class ActivatedHomeLifecycleRuntimeTest {
                     .onNodeWithTag("launcher-home-editor-fullscreen", useUnmergedTree = true)
                     .assertIsDisplayed()
                 composeRule
-                    .onNodeWithText("Done", useUnmergedTree = true)
+                    .onNodeWithTag("launcher-home-editor-done", useUnmergedTree = true)
                     .assertIsDisplayed()
                 check(
                     composeRule
@@ -2251,7 +2251,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         if (editorVisible) {
             runCatching {
                 composeRule
-                    .onNodeWithText("Done", useUnmergedTree = true)
+                    .onNodeWithTag("launcher-home-editor-done", useUnmergedTree = true)
                     .performClick()
             }
             composeRule.waitUntil(timeoutMillis = 10_000) {
