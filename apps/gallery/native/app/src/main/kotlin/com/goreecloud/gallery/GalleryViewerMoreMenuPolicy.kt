@@ -13,14 +13,14 @@ data class GalleryViewerMoreMenuState(
 object GalleryViewerMoreMenuPolicy {
     fun state(
         currentContentUri: String,
-        currentAlbumId: String,
+        currentAlbumId: String?,
         authorizedContentUris: Set<String>,
         authorizedAlbumIds: Set<String>,
     ): GalleryViewerMoreMenuState {
         val contentAuthorized =
             currentContentUri.isNotBlank() && currentContentUri in authorizedContentUris
         val albumAuthorized =
-            currentAlbumId.isNotBlank() && currentAlbumId in authorizedAlbumIds
+            currentAlbumId?.takeIf { it.isNotBlank() }?.let(authorizedAlbumIds::contains) == true
         return GalleryViewerMoreMenuState(
             canOpenContainingAlbum = contentAuthorized && albumAuthorized,
         )
