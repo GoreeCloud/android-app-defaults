@@ -4185,6 +4185,7 @@ class GalleryActivity : Activity() {
             val menuState = GalleryViewerMoreMenuPolicy.state(
                 currentContentUri = item.contentUri,
                 currentAlbumId = item.albumId,
+                currentMimeType = item.mimeType,
                 authorizedContentUris = authorizedItems.mapTo(linkedSetOf()) { it.contentUri },
                 authorizedAlbumIds = authorizedItems.mapNotNullTo(linkedSetOf()) { it.albumId },
                 favoriteContentUris = favoriteUris,
@@ -4196,6 +4197,9 @@ class GalleryActivity : Activity() {
                 }
                 if (menuState.canOpenFavorites) {
                     menu.add(0, 3, 2, "Open Favorites")
+                }
+                if (menuState.canSetAsPhoto) {
+                    menu.add(0, 4, 3, "Set photo as…")
                 }
                 setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {
@@ -4215,6 +4219,10 @@ class GalleryActivity : Activity() {
                             showingFavorites = true
                             openAlbumId = null
                             closeAuthorizedViewer()
+                            true
+                        }
+                        4 -> {
+                            handOffAuthorizedPhotoForSetAs(item)
                             true
                         }
                         else -> false
@@ -4243,6 +4251,33 @@ class GalleryActivity : Activity() {
             refreshObservedMediaIfReady()
         } else {
             renderCurrentDestination()
+        }
+    }
+
+    private fun handOffAuthorizedPhotoForSetAs(item: MediaItem) {
+        if (
+            !item.mimeType.startsWith("image/") ||
+            !GalleryMediaAccessPolicy.canRead(currentMediaAccessScope()) ||
+            authorizedItems.none { it.contentUri == item.contentUri }
+        ) {
+            Toast.makeText(this, "This photo is no longer authorized.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = Uri.parse(item.contentUri)
+        if (uri.scheme != "content" || uri.authority != "media") {
+            Toast.makeText(this, "Gallery refused an unsupported photo source.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val setAsIntent = Intent(Intent.ACTION_ATTACH_DATA).apply {
+            setDataAndType(uri, item.mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(setAsIntent, "Set photo as"))
+        } catch (_: RuntimeException) {
+            Toast.makeText(this, "No compatible Set as destination is available.", Toast.LENGTH_SHORT).show()
         }
     }
 
