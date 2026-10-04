@@ -1,5 +1,12 @@
 # GoreeCloud Keyboard — Development Notes
 
+## October 3, 2026 — stabilization authority checkpoint
+
+- Canonical source authority is `GoreeCloud/android-app-defaults` under `apps/keyboard/`; the standalone `GoreeCloud/keyboard` repository is legacy provenance pending governed retirement.
+- Authoritative monorepo `main` is `9ef430a32b165c43e3720a9e1010044dfcc26e9e` at this checkpoint. The Keyboard package on that tree is `0.1.22-dev`, with lifecycle `Weave`, deployment state `development`, and qualification state `in-progress`.
+- Keyboard remains nonconformant. Representative physical-device IME, accessibility, host-application compatibility, multilingual/RTL, privacy/security, recovery, performance/power, protected signing, Seal, production-acceptance, and Anchor gates remain open.
+- Candidate-only Keyboard work remains outside this exact-main stabilization baseline until protected integration succeeds.
+
 ## Current stabilization context
 
 - Authoritative `main` is `2dd42a70b2ca74e55fe3b3fcb3fca0547e06316a`, the merge of PR #77, **Honor Touch Assistance across Keyboard runtime sizing**.
@@ -7,7 +14,7 @@
 - The accepted sizing behavior applies the 56 dp Touch Assistance interaction floor to the suggestion strip and alternate popup and requests a 308 dp preferred four-row keyboard height when touch exploration is active, subject to Android/system parent constraints.
 - Draft PR #78 is a separate candidate that attempts to preserve the 56 dp floor under constrained total IME height by compressing row gaps first. It is not authoritative current behavior unless accepted through the normal integration workflow.
 - Repository lifecycle remains Development / nonconformant and is not Stable or production accepted.
-- Current repository identity is `GoreeCloud/keyboard`.
+- Current source authority is `GoreeCloud/android-app-defaults` under `apps/keyboard/`; the standalone repository is historical provenance only.
 - The implemented native Android optical presentation remains a historical repository-local GLAZE UI V1.2 / `1.2.0` mapping at reviewed source `f285b9145e27e6e7027b075c37299d101945c272`.
 - Current Official Stable GLAZE UI consumer authority is V1.6 / `1.6.0` at exact release source `a7180679ea851389e0f3004515f9a25f420e716d`. Accepted PR #73 adds a bounded Android V1.6 presentation-context layer over the inherited V1.2 optical substrate; complete V1.6 runtime migration and downstream acceptance remain open.
 - Platform Contract 0.4 and the nine Integral Platform Systems are the current machine-readable governance model. GoreeCloud Policy and GoreeCloud Observability are explicitly applicable-blocked rather than omitted.
@@ -29,7 +36,7 @@
 - Approved Everkeep backup/clean-target recovery scope without silently persisting typed or usage-derived history.
 - Accepted Manager, Mesh, Identity, Policy, and Observability integrations where architecturally applicable.
 - Representative physical-device typing, IME ergonomics, latency, host-application compatibility, TalkBack/Switch Access, phone/tablet/foldable, and power/thermal acceptance.
-- Production signing, distribution, release approval, Release Candidate qualification, and Stable qualification.
+- Production signing, distribution, release approval, Seal qualification, production acceptance, and Anchor qualification.
 
 ## Maintenance boundary
 
