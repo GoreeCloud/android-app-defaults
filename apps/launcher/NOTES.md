@@ -2,6 +2,7 @@
 
 ## October 3, 2026 — stabilization authority checkpoint
 
+- Current shared design-system authority is Glaze V1.7 / `1.7.0` at release integration `1a5756daed2294155be2e9972b24f580f6222b7b`; the bounded V1.7 runtime inherits accepted V1.6.0 behavior. Launcher's integrated V1.6 presentation policy remains implementation provenance, while fresh V1.7 consumer re-pinning and acceptance are open.
 - Canonical source authority is `GoreeCloud/android-app-defaults` under `apps/launcher/`; the standalone `GoreeCloud/launcher` repository is legacy provenance pending governed retirement.
 - Authoritative monorepo `main` is `9ef430a32b165c43e3720a9e1010044dfcc26e9e`, integrating PR #234's screenshot-driven inset, icon-mask, Search, widget-gallery, Home-editor, and App Lock runtime corrections into the Development line.
 - Launcher remains production-unaccepted and nonconformant. Representative physical-device, accessibility, recovery, platform-system, protected-signing/update, performance/power, Seal, production-acceptance, and Anchor gates remain open.
