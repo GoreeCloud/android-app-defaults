@@ -614,6 +614,8 @@ class MainActivity : ComponentActivity() {
                         LauncherKeyboardNavigationAction.HOME -> LauncherSurfaceMode.HOME.name
                         LauncherKeyboardNavigationAction.APPS -> LauncherSurfaceMode.DRAWER.name
                         LauncherKeyboardNavigationAction.SETTINGS -> LauncherSurfaceMode.SETTINGS.name
+                        LauncherKeyboardNavigationAction.THEME_MANAGER ->
+                            LauncherSurfaceMode.THEME_MANAGER.name
                         null -> primarySurfaceModeName
                     }
                 }
