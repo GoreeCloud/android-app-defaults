@@ -4,7 +4,7 @@ component:
   type: application
   id: goreecloud-launcher
   product_name: GoreeCloud Launcher
-  repository: GoreeCloud/launcher
+  repository: GoreeCloud/android-app-defaults
 
 lifecycle: development
 version: "0.1.0-dev"
@@ -199,4 +199,4 @@ conformance:
     - GoreeCloud Observability health, metrics, events, diagnostics, performance/power, dependency-health, provenance/freshness, alerting, collection-gap, and representative-device runtime acceptance are not established.
     - Product-wide export and import scope remains incomplete beyond the bounded workspace-placement and explicit-preference formats.
     - Signed representative-device HOME-role, lifecycle, accessibility, restore, rollback, upgrade, and release-candidate acceptance remain outstanding.
-    - Production signing, distribution, deployment, release approval, and Stable qualification remain outstanding.
+    - Production signing, distribution, deployment, release approval, Seal qualification, production acceptance, and Anchor qualification remain outstanding.
