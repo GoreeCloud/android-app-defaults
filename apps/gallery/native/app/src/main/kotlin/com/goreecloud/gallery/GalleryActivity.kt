@@ -4182,7 +4182,35 @@ class GalleryActivity : Activity() {
         }
         more.setOnClickListener {
             val item = items.getOrNull(currentIndex) ?: return@setOnClickListener
-            showItemDetails(item)
+            val menuState = GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = item.contentUri,
+                currentAlbumId = item.albumId,
+                authorizedContentUris = authorizedItems.mapTo(linkedSetOf()) { it.contentUri },
+                authorizedAlbumIds = authorizedItems.mapTo(linkedSetOf()) { it.albumId },
+            )
+            PopupMenu(this, more).apply {
+                menu.add(0, 1, 0, "Details")
+                if (menuState.canOpenContainingAlbum) {
+                    menu.add(0, 2, 1, "Open containing album")
+                }
+                setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.itemId) {
+                        1 -> {
+                            showItemDetails(item)
+                            true
+                        }
+                        2 -> {
+                            destination = GalleryDestination.ALBUMS
+                            showingFavorites = false
+                            openAlbumId = item.albumId
+                            closeAuthorizedViewer()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                show()
+            }
         }
 
         renderCurrentItem()
