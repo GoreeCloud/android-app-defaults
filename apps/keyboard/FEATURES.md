@@ -51,7 +51,7 @@
 
 ## Development / acceptance work still required
 
-- Complete optical/material/component migration and rendered/native consumer acceptance against current Official Stable GLAZE UI V1.6 across all keyboard and settings surfaces; the V1.2 optical substrate remains historical Development implementation evidence only.
+- Complete optical/material/component migration and rendered/native consumer acceptance against current Glaze V1.7 / 1.7.0 shared authority across all keyboard and settings surfaces; the V1.2 optical substrate remains historical Development implementation evidence only.
 - Reduced Transparency / solid fallback, Reduced Motion, Increased Contrast, forced-colors/native equivalents, 200% text/reflow, complete Touch Assistance behavior, RTL/localization, and Deep Dark runtime policy where applicable.
 - Representative physical-device IME acceptance across supported Android/editor combinations.
 - Complete TalkBack, Switch Access, Voice Access where claimed, and other assistive-input acceptance.
