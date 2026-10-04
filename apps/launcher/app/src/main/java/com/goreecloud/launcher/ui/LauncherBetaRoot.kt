@@ -10233,12 +10233,17 @@ private fun GlazeSearchCapsule(
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        "•••",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                    )
+                    val overflowTint = MaterialTheme.colorScheme.primary
+                    Canvas(Modifier.size(18.dp)) {
+                        val radius = size.minDimension * 0.075f
+                        listOf(0.25f, 0.50f, 0.75f).forEach { x ->
+                            drawCircle(
+                                color = overflowTint,
+                                radius = radius,
+                                center = Offset(size.width * x, size.height * 0.50f),
+                            )
+                        }
+                    }
                 }
             }
         }
