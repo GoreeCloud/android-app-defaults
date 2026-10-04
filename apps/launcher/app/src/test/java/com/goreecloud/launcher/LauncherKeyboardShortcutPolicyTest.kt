@@ -1,9 +1,9 @@
 package com.goreecloud.launcher
 
 import android.view.KeyEvent
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class LauncherKeyboardShortcutPolicyTest {
     @Test
