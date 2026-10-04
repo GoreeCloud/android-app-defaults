@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Implemented Features
 
+## October 3, 2026 — inset, icon-mask, Search, and widget-gallery correction candidate
+
+Development source now keeps the Launcher widget gallery below status-bar safe drawing, above navigation/IME insets, uses an icon-led Android widget-picker handoff, and replaces the installed-widget **Add** text pill with a Launcher-owned plus glyph. The shared app-icon mask renderer now places a shape-matched backing plane behind clipped artwork so the default **Rounded square** presentation remains visible for OEM/Android bitmaps that already contain circular transparent masking; Home, Dock, App Drawer, Search, folders, widget-provider rows, hidden apps, and App Lock surfaces share this path.
+
+Universal Search shortcut groups now default to two direct shortcut glyphs plus an explicit overflow control, with expansion retaining access to the complete shortcut set. Search Sources rows now reserve one consistent trailing toggle/disclosure width across On-device, Your content, and Connected sections; Files setup stays in the detail panel instead of widening only that compact row.
+
+**Acceptance boundary:** implemented on stacked Development PR #233, not authoritative main. Fresh exact-head protected validation and representative-device visual/inset/icon/accessibility acceptance remain required.
+
 ## October 3, 2026 — restacked Theme and Home-page glyph-control candidate
 
 Development source now replaces Theme Manager's text completion action and the current Home-page carousel's **Add page**, **Done**, **Move earlier**, **Move later**, and **Delete empty page** controls with Launcher-owned semantic vector actions. Every compact control keeps a 48 dp target and an explicit accessibility description. Existing page selection, layout lock, primary-page protection, empty-page deletion guard, Room workspace mutation, App Lock, provider, permission, and gesture authority remain unchanged.
