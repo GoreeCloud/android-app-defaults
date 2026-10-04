@@ -4186,7 +4186,7 @@ class GalleryActivity : Activity() {
                 currentContentUri = item.contentUri,
                 currentAlbumId = item.albumId,
                 authorizedContentUris = authorizedItems.mapTo(linkedSetOf()) { it.contentUri },
-                authorizedAlbumIds = authorizedItems.mapTo(linkedSetOf()) { it.albumId },
+                authorizedAlbumIds = authorizedItems.mapNotNullTo(linkedSetOf()) { it.albumId },
             )
             PopupMenu(this, more).apply {
                 menu.add(0, 1, 0, "Details")
