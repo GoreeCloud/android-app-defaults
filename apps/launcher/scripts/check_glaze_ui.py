@@ -13,8 +13,11 @@ ADOPTION = ROOT / "docs/glaze-ui-adoption.md"
 DEVELOPMENT = ROOT / "docs/development/saveable-theme-manager-settings-composition.md"
 PLATFORM = ROOT / "goreecloud.platform.yaml"
 
-TARGET_VERSION = "1.6.0"
-SOURCE_REVISION = "a7180679ea851389e0f3004515f9a25f420e716d"
+IMPLEMENTED_VERSION = "1.6.0"
+IMPLEMENTED_SOURCE_REVISION = "a7180679ea851389e0f3004515f9a25f420e716d"
+GOVERNED_VERSION = "1.7.0"
+GOVERNED_RELEASE_INTEGRATION = "1a5756daed2294155be2e9972b24f580f6222b7b"
+GOVERNED_QUALIFICATION_ANCHOR = "7c4ded83d7a8725165bb6a55dfb175667cc9589e"
 
 
 def fail(message: str) -> None:
@@ -45,8 +48,8 @@ def main() -> None:
     platform = read(PLATFORM, "Platform Contract manifest")
 
     for marker in (
-        f'const val targetVersion = "{TARGET_VERSION}"',
-        f'const val sourceRevision = "{SOURCE_REVISION}"',
+        f'const val targetVersion = "{IMPLEMENTED_VERSION}"',
+        f'const val sourceRevision = "{IMPLEMENTED_SOURCE_REVISION}"',
         "val inheritedCoarseTargetFloor: Dp = 44.dp",
         "val inheritedPointerCompactFloor: Dp = 32.dp",
         "val minimumTarget: Dp = 48.dp",
@@ -57,8 +60,11 @@ def main() -> None:
         require(metrics, marker, "GlazeMetrics")
 
     for marker in (
-        f'const val currentRequiredVersion = "{TARGET_VERSION}"',
-        f'const val currentStableSourceRevision = "{SOURCE_REVISION}"',
+        f'const val currentRequiredVersion = "{GOVERNED_VERSION}"',
+        f'const val currentReleaseIntegrationRevision = "{GOVERNED_RELEASE_INTEGRATION}"',
+        f'const val currentQualificationAnchor = "{GOVERNED_QUALIFICATION_ANCHOR}"',
+        f'const val inheritedAcceptedRuntimeVersion = "{IMPLEMENTED_VERSION}"',
+        f'const val inheritedAcceptedRuntimeSourceRevision = "{IMPLEMENTED_SOURCE_REVISION}"',
         "fun sourceMigrationRequired(): Boolean",
         "fun consumerAcceptanceRequired(): Boolean",
         "const val currentConsumerConformanceEstablished = false",
@@ -66,8 +72,8 @@ def main() -> None:
         require(authority, marker, "GlazeCurrentAuthority")
 
     for marker in (
-        f'const val stableVersion = "{TARGET_VERSION}"',
-        f'const val stableSourceRevision = "{SOURCE_REVISION}"',
+        f'const val stableVersion = "{IMPLEMENTED_VERSION}"',
+        f'const val stableSourceRevision = "{IMPLEMENTED_SOURCE_REVISION}"',
         "GlazeV16MaterialRole.FUNCTIONAL_GLASS",
         "GlazeV16MaterialRole.CLEAR_GLASS",
         "GlazeV16MaterialRole.SOLID",
@@ -113,7 +119,7 @@ def main() -> None:
 
     for marker in (
         "Status: **Development source mapping integrated / application acceptance pending**",
-        f"Exact Stable release source authority: `{SOURCE_REVISION}`",
+        f"Exact V1.6 implementation source authority: `{IMPLEMENTED_SOURCE_REVISION}`",
         "sourceMigrationRequired()",
         "consumerAcceptanceRequired()",
         "44 px-equivalent coarse target floor",
@@ -124,7 +130,7 @@ def main() -> None:
 
     for marker in (
         "Status: Development — GLAZE UI V1.6 source mapping integrated",
-        SOURCE_REVISION,
+        IMPLEMENTED_SOURCE_REVISION,
         "Reduced Transparency can force glass to solid",
         "System, Light, Dark, and Deep Dark are reachable",
     ):
@@ -132,11 +138,11 @@ def main() -> None:
 
     for marker in (
         'schema_version: "0.4"',
-        '  glaze_ui:\n    result: applicable-blocked\n    version: "1.6.0"',
+        '  glaze_ui:\n    result: applicable-migration-required\n    version: "1.7.0"',
         "GlazeV16PresentationPolicy.kt",
         "GlazeV16PresentationPolicyTest.kt",
-        '  glaze_ui_required: "1.6.0"',
-        "glaze-ui==1.6.0",
+        '  glaze_ui_required: "1.7.0"',
+        "glaze-ui==1.7.0",
         "conformance:\n  status: nonconformant",
         "consumer acceptance remains blocked",
     ):
@@ -154,8 +160,8 @@ def main() -> None:
             fail(f"{label} retains stale active marker `{stale}`")
 
     print(
-        "GLAZE UI V1.6 Launcher source mapping passed: exact Stable provenance, "
-        "presentation-only policy, current Platform Contract target, and fail-closed "
+        "Launcher Glaze boundary passed: V1.6 implementation provenance, V1.7 shared authority, "
+        "presentation-only policy, migration-required Platform Contract target, and fail-closed "
         "application-acceptance boundary are synchronized."
     )
 
