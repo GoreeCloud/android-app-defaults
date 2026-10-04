@@ -1,5 +1,12 @@
 # GoreeCloud Gallery — Development Notes
 
+## October 3, 2026 — stabilization authority checkpoint
+
+- Canonical source authority is `GoreeCloud/android-app-defaults` under `apps/gallery/`; retired standalone repositories are provenance only.
+- Authoritative monorepo `main` is `9ef430a32b165c43e3720a9e1010044dfcc26e9e` at this checkpoint. The integrated Gallery Development package on that tree is `0.8.9-dev`.
+- Gallery remains nonconformant and production-unaccepted. Seal and Anchor qualification remain blocked on the representative-device, accessibility, recovery, platform-system, signing, release, and production-acceptance gates below.
+- Unmerged Gallery feature/UI candidates remain separate Development work and do not alter this stabilization baseline until protected integration succeeds.
+
 ## Current stabilization context
 
 - Repository lifecycle remains Development / nonconformant. Authoritative `main` is not Release Candidate, production accepted, or Stable.
@@ -16,7 +23,7 @@
 - Complete representative physical-device/OEM/profile testing for media move/copy/trash/recovery, viewer orientation/playback, icon and safe-area behavior, navigation, accessibility, performance, and Human Visual Excellence.
 - Establish accepted Manager, Privacy Shield, Wardveil Security, Everkeep, Mesh, Identity, Policy, and Observability runtime integration evidence where architecturally applicable.
 - Configure and recover protected long-lived release signing only through the governed release process.
-- Complete upgrade/rollback, recovery, release provenance, Release Candidate, Production Acceptance, and Stable qualification.
+- Complete upgrade/rollback, recovery, release provenance, Seal qualification, Production Acceptance, and Anchor qualification.
 
 ## Safety and privacy boundary
 
