@@ -12,9 +12,34 @@ class GalleryViewerMoreMenuPolicyTest {
             currentAlbumId = "camera",
             authorizedContentUris = setOf("content://media/external/images/media/7"),
             authorizedAlbumIds = setOf("camera"),
+        favoriteContentUris = emptySet(),
         )
 
         assertTrue(state.canOpenContainingAlbum)
+    }
+
+    @Test
+    fun favoriteItemCanOpenFavoritesOnlyWhileStillAuthorized() {
+        val uri = "content://media/external/images/media/7"
+
+        assertTrue(
+            GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = uri,
+                currentAlbumId = "camera",
+                authorizedContentUris = setOf(uri),
+                authorizedAlbumIds = setOf("camera"),
+                favoriteContentUris = setOf(uri),
+            ).canOpenFavorites,
+        )
+        assertFalse(
+            GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = uri,
+                currentAlbumId = "camera",
+                authorizedContentUris = emptySet(),
+                authorizedAlbumIds = setOf("camera"),
+                favoriteContentUris = setOf(uri),
+            ).canOpenFavorites,
+        )
     }
 
     @Test
@@ -24,6 +49,7 @@ class GalleryViewerMoreMenuPolicyTest {
             currentAlbumId = "camera",
             authorizedContentUris = setOf("content://media/external/images/media/8"),
             authorizedAlbumIds = setOf("camera"),
+        favoriteContentUris = emptySet(),
         )
 
         assertFalse(state.canOpenContainingAlbum)
@@ -37,6 +63,7 @@ class GalleryViewerMoreMenuPolicyTest {
                 currentAlbumId = "old-camera",
                 authorizedContentUris = setOf("content://media/external/images/media/7"),
                 authorizedAlbumIds = setOf("camera"),
+            favoriteContentUris = emptySet(),
             ).canOpenContainingAlbum,
         )
         assertFalse(
@@ -45,6 +72,7 @@ class GalleryViewerMoreMenuPolicyTest {
                 currentAlbumId = "",
                 authorizedContentUris = setOf("content://media/external/images/media/7"),
                 authorizedAlbumIds = setOf(""),
+            favoriteContentUris = emptySet(),
             ).canOpenContainingAlbum,
         )
     }
