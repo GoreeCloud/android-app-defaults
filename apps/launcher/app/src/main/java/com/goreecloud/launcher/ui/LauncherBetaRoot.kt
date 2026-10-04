@@ -2595,9 +2595,11 @@ private fun LauncherWidgetPickerSheet(
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .testTag("launcher-widget-picker-sheet")
+            .statusBarsPadding()
             .navigationBarsPadding()
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space3),
         verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
@@ -2711,11 +2713,54 @@ private fun LauncherWidgetPickerSheet(
             }
         }
 
-        OutlinedButton(
+        Surface(
             onClick = onPickAndroidWidget,
             modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.065f),
+            ),
         ) {
-            Text("Open Android widget picker")
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+            ) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        GlazePopupActionGlyph(
+                            symbol = GlazePopupActionSymbol.WIDGET,
+                            color = MaterialTheme.colorScheme.primary,
+                            iconSize = 20.dp,
+                        )
+                    }
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Android widget picker",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        "Browse every widget exposed by Android",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                LauncherHomeOpenGlyph(
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
         }
         Text(
             "Android may still show a system authorization or configuration screen after you choose a third-party widget.",
@@ -2987,16 +3032,23 @@ private fun InstalledWidgetPickerRow(
                 )
             }
             Surface(
-                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                modifier = Modifier
+                    .size(44.dp)
+                    .semantics { contentDescription = "Add " + descriptor.label + " widget" },
+                shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                border = BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                ),
             ) {
-                Text(
-                    "Add",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    GlazePopupActionGlyph(
+                        symbol = GlazePopupActionSymbol.ADD,
+                        color = MaterialTheme.colorScheme.primary,
+                        iconSize = 18.dp,
+                    )
+                }
             }
         }
     }
@@ -12751,6 +12803,7 @@ private enum class GlazePopupActionSymbol {
     HOME,
     DOCK,
     WIDGET,
+    ADD,
     SHORTCUT,
     PIN,
     FOLDER,
@@ -12814,6 +12867,10 @@ private fun GlazePopupActionGlyph(
                 segment(.30f, .34f, .70f, .34f)
                 segment(.30f, .50f, .58f, .50f)
                 segment(.30f, .66f, .48f, .66f)
+            }
+            GlazePopupActionSymbol.ADD -> {
+                segment(.18f, .50f, .82f, .50f)
+                segment(.50f, .18f, .50f, .82f)
             }
             GlazePopupActionSymbol.SHORTCUT -> {
                 segment(.24f, .76f, .76f, .24f)
