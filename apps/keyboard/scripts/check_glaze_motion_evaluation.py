@@ -128,7 +128,7 @@ def main() -> None:
             "  qualification_state: in-progress",
             "  next_gate: seal",
             "  id: goreecloud-keyboard",
-            "  repository: GoreeCloud/keyboard",
+            "  repository: GoreeCloud/android-app-defaults",
             f'  glaze_ui:\n    result: applicable-migration-required\n    version: "{GOVERNED_GLAZE_BASELINE}"',
             "  policy:\n    result: applicable-blocked",
             "  observability:\n    result: applicable-blocked",
