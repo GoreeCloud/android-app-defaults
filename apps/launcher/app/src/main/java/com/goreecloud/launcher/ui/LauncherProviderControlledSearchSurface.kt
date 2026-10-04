@@ -3164,42 +3164,41 @@ private fun LauncherSearchSourceManager(
                                                 )
                                             }
 
-                                            if (
-                                                option.providerId ==
-                                                    LauncherFilesSearchProvider.PROVIDER_ID &&
-                                                fileSearchRoots.isEmpty()
+                                            Row(
+                                                modifier = Modifier.widthIn(
+                                                    min = 88.dp,
+                                                    max = 88.dp,
+                                                ),
+                                                horizontalArrangement = Arrangement.End,
+                                                verticalAlignment = Alignment.CenterVertically,
                                             ) {
-                                                LauncherSourceFolderAction(
-                                                    enabled = ready,
-                                                    onClick = onChooseFileSearchRoot,
+                                                Switch(
+                                                    checked =
+                                                        enabled &&
+                                                            permissionGranted &&
+                                                            providerReady,
+                                                    onCheckedChange = {
+                                                        onSetEnabled(
+                                                            controls,
+                                                            option.providerId,
+                                                            it,
+                                                        )
+                                                    },
+                                                    enabled =
+                                                        ready &&
+                                                            driveConnectionAvailable &&
+                                                            connectedHandoffAvailable,
+                                                    modifier = Modifier.testTag(
+                                                        "launcher-search-source-" +
+                                                            option.providerId,
+                                                    ),
+                                                )
+                                                LauncherSourceDisclosureGlyph(
+                                                    expanded = expanded,
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        .copy(alpha = 0.72f),
                                                 )
                                             }
-                                            Switch(
-                                                checked =
-                                                    enabled &&
-                                                        permissionGranted &&
-                                                        providerReady,
-                                                onCheckedChange = {
-                                                    onSetEnabled(
-                                                        controls,
-                                                        option.providerId,
-                                                        it,
-                                                    )
-                                                },
-                                                enabled =
-                                                    ready &&
-                                                        driveConnectionAvailable &&
-                                                        connectedHandoffAvailable,
-                                                modifier = Modifier.testTag(
-                                                    "launcher-search-source-" +
-                                                        option.providerId,
-                                                ),
-                                            )
-                                            LauncherSourceDisclosureGlyph(
-                                                expanded = expanded,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    .copy(alpha = 0.72f),
-                                            )
                                         }
 
                                         if (expanded) {
