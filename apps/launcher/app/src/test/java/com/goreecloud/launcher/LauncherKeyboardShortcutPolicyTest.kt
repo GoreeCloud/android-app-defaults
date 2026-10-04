@@ -39,6 +39,26 @@ class LauncherKeyboardShortcutPolicyTest {
     }
 
     @Test
+    fun controlOrMetaFAlsoOpensUniversalSearch() {
+        assertTrue(
+            LauncherKeyboardShortcutPolicy.opensUniversalSearch(
+                keyCode = KeyEvent.KEYCODE_F,
+                ctrlPressed = true,
+                metaPressed = false,
+                altPressed = false,
+            ),
+        )
+        assertTrue(
+            LauncherKeyboardShortcutPolicy.opensUniversalSearch(
+                keyCode = KeyEvent.KEYCODE_F,
+                ctrlPressed = false,
+                metaPressed = true,
+                altPressed = false,
+            ),
+        )
+    }
+
+    @Test
     fun ordinaryOrAltModifiedKIsNotCaptured() {
         assertFalse(
             LauncherKeyboardShortcutPolicy.opensUniversalSearch(
