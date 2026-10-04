@@ -6,7 +6,7 @@ GoreeCloud Gallery is an original GoreeCloud-owned native Android application wh
 
 Historical GoreeCloud Gallery screenshots, prior Gallery behavior, repository history, and applicable Samsung Gallery interaction references are migration and visual-comparison inputs. They are not authorization to copy Samsung proprietary source code, assets, trademarks, or implementation details.
 
-The target is to recover the established GoreeCloud Gallery information architecture, browsing model, album behavior, viewer interactions, contextual actions, organization patterns, and first-party feature breadth, then revamp GoreeCloud-controlled presentation under the official **GLAZE UI V1.6** authority. Gallery-specific production visual/accessibility acceptance remains separate from source adoption.
+The target is to recover the established GoreeCloud Gallery information architecture, browsing model, album behavior, viewer interactions, contextual actions, organization patterns, and first-party feature breadth, then revamp GoreeCloud-controlled presentation under the current **Glaze V1.7 / 1.7.0** shared authority. V1.7 inherits the accepted V1.6 runtime, so the existing V1.6 native mapping remains useful implementation provenance; Gallery-specific V1.7 contract adoption and production visual/accessibility acceptance remain separate.
 
 ## Implemented in the first-party Development line
 
