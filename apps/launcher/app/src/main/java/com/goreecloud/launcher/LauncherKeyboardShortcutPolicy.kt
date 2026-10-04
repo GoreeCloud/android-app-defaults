@@ -12,6 +12,7 @@ enum class LauncherKeyboardNavigationAction {
     HOME,
     APPS,
     SETTINGS,
+    THEME_MANAGER,
 }
 
 data class LauncherKeyboardShortcutRequest(
@@ -56,6 +57,8 @@ object LauncherKeyboardShortcutPolicy {
                 LauncherKeyboardNavigationAction.APPS
             !shiftPressed && keyCode == KeyEvent.KEYCODE_COMMA ->
                 LauncherKeyboardNavigationAction.SETTINGS
+            shiftPressed && keyCode == KeyEvent.KEYCODE_T ->
+                LauncherKeyboardNavigationAction.THEME_MANAGER
             else -> null
         }
     }
