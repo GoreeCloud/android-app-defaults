@@ -22,7 +22,7 @@ class GlazeCurrentAuthorityTest {
     }
 
     @Test
-    fun `V1_6 source migration can be complete while consumer acceptance remains open`() {
+    fun `V1_6 implementation requires V1_7 contract migration and consumer acceptance`() {
         assertEquals("1.6.0", GlazeCurrentAuthority.implementedBaselineVersion)
         assertEquals(
             "a7180679ea851389e0f3004515f9a25f420e716d",
