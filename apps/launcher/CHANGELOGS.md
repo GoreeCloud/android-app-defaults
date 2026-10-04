@@ -1,5 +1,15 @@
 # GoreeCloud Launcher — Changelogs
 
+## October 3, 2026 — representative-device inset, icon-mask, Search, and widget-gallery corrections
+
+The current Development continuation directly addresses the latest owner screenshots. The Launcher widget gallery now owns the full screen safely below the status bar, above the navigation bar, and above the IME instead of letting the title/search content bleed into system status icons. Its installed-widget add affordance is now a compact first-party plus glyph, and the Android system-widget handoff is an icon-led Glaze action row rather than a generic outlined button.
+
+Rounded square remains the default Launcher icon-shape preference, but the renderer now also supplies a shaped backing plane before clipping. This makes the selected Launcher mask visually authoritative even when an OEM or Android launcher bitmap arrives with a circular adaptive mask already baked into transparent pixels. The same shared mask path is used by Home, Dock, App Drawer, Search, folders, widget-provider artwork, hidden/App Lock rows, and other Launcher app-icon surfaces.
+
+Universal Search now keeps ordinary app-shortcut rows compact by showing two direct actions plus an explicit overflow glyph; expanding the rail preserves access to every shortcut instead of allowing a fourth action to be partially clipped at the edge. Search Sources compact rows now use one fixed trailing toggle/disclosure column, while Files setup remains available in the expanded details, removing the one-row alignment exception visible in the owner screenshots.
+
+**Acceptance boundary:** these changes remain on the stacked PR #233 Development candidate. Fresh exact-head build/JVM/lint/schema, Android 16 runtime, transition-performance, migration provenance, Android Development Foundation, migrated-app required-gate, and protected-promotion evidence remain required. Representative physical-device visual, icon-mask, status-bar/inset, accessibility, large-text, RTL, phone/tablet/foldable, and protected Development signing/update acceptance remain open.
+
 ## October 3, 2026 — restacked Theme and Home-page glyph-control follow-up
 
 The current stacked Development follow-up replaces remaining text-heavy page-management chrome on the newer Home-page carousel rather than carrying the superseded earlier layout forward. Theme Manager now uses a 48 dp semantic completion glyph instead of a text **Done** control. Home page management uses Launcher-owned 48 dp glyph controls for **Add page**, **Done**, **Move earlier**, **Move later**, and **Delete empty page**, while preserving the existing page carousel, layout-lock behavior, empty-page guard, primary-Home protection, Room mutation authority, and page-selection behavior.
