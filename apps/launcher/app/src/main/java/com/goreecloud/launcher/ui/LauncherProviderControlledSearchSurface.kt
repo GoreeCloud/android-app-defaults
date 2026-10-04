@@ -1624,6 +1624,7 @@ private fun LauncherShortcutOverflowButton(
     hiddenCount: Int,
     onClick: () -> Unit,
 ) {
+    val tint = MaterialTheme.colorScheme.primary
     Surface(
         onClick = onClick,
         modifier = Modifier
@@ -1645,7 +1646,6 @@ private fun LauncherShortcutOverflowButton(
         Box(contentAlignment = Alignment.Center) {
             Canvas(Modifier.size(20.dp)) {
                 val u = size.minDimension
-                val tint = MaterialTheme.colorScheme.primary
                 val stroke = u * 0.09f
                 val cap = androidx.compose.ui.graphics.StrokeCap.Round
                 if (expanded) {
