@@ -2,6 +2,7 @@ package com.goreecloud.gallery
 
 data class GalleryViewerMoreMenuState(
     val canOpenContainingAlbum: Boolean,
+    val canOpenFavorites: Boolean,
 )
 
 /**
@@ -16,6 +17,7 @@ object GalleryViewerMoreMenuPolicy {
         currentAlbumId: String?,
         authorizedContentUris: Set<String>,
         authorizedAlbumIds: Set<String>,
+        favoriteContentUris: Set<String>,
     ): GalleryViewerMoreMenuState {
         val contentAuthorized =
             currentContentUri.isNotBlank() && currentContentUri in authorizedContentUris
@@ -23,6 +25,7 @@ object GalleryViewerMoreMenuPolicy {
             currentAlbumId?.takeIf { it.isNotBlank() }?.let(authorizedAlbumIds::contains) == true
         return GalleryViewerMoreMenuState(
             canOpenContainingAlbum = contentAuthorized && albumAuthorized,
+            canOpenFavorites = contentAuthorized && currentContentUri in favoriteContentUris,
         )
     }
 }
