@@ -53,13 +53,13 @@ platform_systems:
     notes: Gallery has local settings and Favorites portability plus Android-authorized Trash and Restore behavior, but accepted Everkeep integration and complete Gallery-owned recovery acceptance are not established.
   glaze_ui:
     result: applicable-migration-required
-    version: "1.6.0"
+    version: "1.7.0"
     evidence:
       - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryGlazeContract.kt
       - native/app/src/test/kotlin/com/goreecloud/gallery/GalleryGlazeContractTest.kt
       - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryGlazeSurfaces.kt
       - docs/GLAZE-UI.md
-    notes: Current integration work pins Official Stable GLAZE UI V1.6 / 1.6.0 to accepted release source a7180679ea851389e0f3004515f9a25f420e716d and qualification anchor c7509c79256b04b0aa67cb9dd0737d7588e0ae4a while preserving Gallery-local native adapter values as non-authoritative implementation details. Whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete, so Gallery remains applicable-migration-required.
+    notes: Current shared authority is Glaze V1.7 / 1.7.0, released by integration 1a5756daed2294155be2e9972b24f580f6222b7b from qualification anchor 7c4ded83d7a8725165bb6a55dfb175667cc9589e. V1.7.0 intentionally inherits the accepted V1.6.0 runtime; Gallery's existing V1.6 native semantic mapping at a7180679ea851389e0f3004515f9a25f420e716d therefore remains implementation provenance, not V1.7 consumer acceptance. Fresh whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete, so Gallery remains applicable-migration-required.
   mesh:
     result: applicable-blocked
     version: null
@@ -124,10 +124,10 @@ external_dependencies:
 
 compatibility:
   platform_contract: "0.4"
-  glaze_ui_required: "1.6.0"
+  glaze_ui_required: "1.7.0"
   requires:
     - goreecloud-platform-contract==0.4
-    - glaze-ui==1.6.0
+    - glaze-ui==1.7.0
     - android-api>=29
   provides: []
 
@@ -156,7 +156,7 @@ conformance:
     - docs/GLAZE-UI.md
     - docs/development/media-move.md
   blockers:
-    - Gallery now carries the bounded GLAZE UI V1.6 / 1.6.0 authority baseline, but complete downstream consumer migration and whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete.\n    - Android-authorized existing-folder Move and same-source New Folder Move are Development candidates; representative-device cancellation, photo/video/mixed selection, new-folder naming/collision behavior, permission/scope change, Activity recreation, refresh, OEM/profile, accessibility, and provider-failure acceptance remains incomplete. Copy remains separately gated.
+    - Gallery retains a bounded V1.6 native semantic implementation mapping while current shared authority is Glaze V1.7 / 1.7.0. V1.7 inherits the accepted V1.6 runtime, but Gallery has not completed a fresh V1.7 contract re-pin and whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance.\n    - Android-authorized existing-folder Move and same-source New Folder Move are Development candidates; representative-device cancellation, photo/video/mixed selection, new-folder naming/collision behavior, permission/scope change, Activity recreation, refresh, OEM/profile, accessibility, and provider-failure acceptance remains incomplete. Copy remains separately gated.
     - Privacy Shield integration and acceptance are not established.
     - Wardveil Security integration and acceptance are not established.
     - Everkeep integration and complete Gallery-owned backup and recovery acceptance are not established.
