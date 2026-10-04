@@ -4,7 +4,7 @@ component:
   type: application
   id: goreecloud-keyboard
   product_name: GoreeCloud Keyboard
-  repository: GoreeCloud/keyboard
+  repository: GoreeCloud/android-app-defaults
 
 lifecycle: weave
 lifecycle_metadata:
