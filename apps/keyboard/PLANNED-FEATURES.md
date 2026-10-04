@@ -19,9 +19,9 @@ Draft PR #97 now makes voluntary setup replay semantically explicit: replay uses
 Draft PR #97 now also fails closed on audible keypress feedback in sensitive/password editors and exposes the current Clipboard per-app policy as a real Android selected state rather than a color-only cue. Runtime coverage verifies the selected Allow / Ask / Paste only / Block chip semantics. Exact candidate head `98dfc186ba87d10874842b4fcaf7eded091de47c` passed Platform Contract and Android CI; physical-device/OEM/editor, TalkBack/Switch Access, and the broader Privacy Shield/Wardveil gates remain open.
 
 **Record type:** Repository planned/open feature inventory  
-**Repository:** `GoreeCloud/keyboard`  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/keyboard/`)  
 **Lifecycle:** Weave / nonconformant; deployment state: development  
-**Repository version:** `0.1.20-dev` Draft candidate; authoritative `main` remains separately governed.  
+**Repository version:** `0.1.22-dev` on authoritative `main`; later candidate work remains separately governed.  
 **Migration state:** Complete on authoritative `main`; PR #79 merged as `6071bf3b7fddf36ddaa172b7ca858948f95ae6d1`, exact-main Android CI #264 passed, and the mapped legacy Drive roadmap/changelog sources were permanently retired and independently verified absent on September 22, 2026.  
 **Evidence baseline:** repository-native governance accepted on `main` at `6071bf3b7fddf36ddaa172b7ca858948f95ae6d1`; current runtime-bearing capability baseline is `64d5ed5b600e247630accceaa3f5ba8be26b3143` (PR #93), with exact-main Android CI #294 / run `36196662346` passed.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance v1.0.
