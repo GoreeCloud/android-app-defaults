@@ -136,4 +136,19 @@ class LauncherKeyboardShortcutPolicyTest {
         )
     }
 
+
+    @Test
+    fun unmodifiedEscapeReturnsToHome() {
+        assertEquals(
+            LauncherKeyboardNavigationAction.HOME,
+            LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = KeyEvent.KEYCODE_ESCAPE,
+                ctrlPressed = false,
+                metaPressed = false,
+                shiftPressed = false,
+                altPressed = false,
+            ),
+        )
+    }
+
 }
