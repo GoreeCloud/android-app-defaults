@@ -44,7 +44,7 @@ This changes presentation geometry only. Clipboard read authority, Ask/Allow/Pas
 - Preserves independent haptic preference behavior and makes no production privacy/security acceptance claim.
 
 **Record type:** Authoritative repository changelog index and current change history  
-**Repository:** `GoreeCloud/keyboard`  
+**Repository:** `GoreeCloud/android-app-defaults` (`apps/keyboard/`)  
 **Lifecycle:** Weave / nonconformant; deployment state: development  
 **Migration state:** Complete on authoritative `main`; PR #79 merged as `6071bf3b7fddf36ddaa172b7ca858948f95ae6d1`, exact-main Android CI #264 passed, and the mapped legacy Drive roadmap/changelog sources were permanently retired and independently verified absent on September 22, 2026.  
 **Current governance baseline:** `6071bf3b7fddf36ddaa172b7ca858948f95ae6d1` (PR #79).  
