@@ -28,6 +28,7 @@ import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -129,6 +130,7 @@ class GalleryActivity : Activity() {
     private var viewerOverlay: View? = null
     private var viewerVideoSurface: GalleryVideoPlayerSurface? = null
     private var viewerSlideshowStop: (() -> Unit)? = null
+    private var viewerKeyboardAction: ((GalleryViewerKeyboardAction) -> Boolean)? = null
     private var pendingMediaMutation: AndroidMediaMutationPendingState? = null
     private var pendingMediaMove: AndroidMediaMovePendingState? = null
     private var mediaMoveExecutionInProgress = false
@@ -175,6 +177,21 @@ class GalleryActivity : Activity() {
                 }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.repeatCount == 0 && viewerOverlay != null) {
+            val action = GalleryViewerKeyboardPolicy.actionFor(
+                keyCode = keyCode,
+                ctrlPressed = event.isCtrlPressed,
+                metaPressed = event.isMetaPressed,
+                altPressed = event.isAltPressed,
+            )
+            if (action != null && viewerKeyboardAction?.invoke(action) == true) {
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -4040,6 +4057,43 @@ class GalleryActivity : Activity() {
             }
         }
 
+        viewerKeyboardAction = { action ->
+            when (action) {
+                GalleryViewerKeyboardAction.PREVIOUS -> {
+                    if (!previous.isEnabled) {
+                        false
+                    } else {
+                        previous.performClick()
+                        true
+                    }
+                }
+                GalleryViewerKeyboardAction.NEXT -> {
+                    if (!next.isEnabled) {
+                        false
+                    } else {
+                        next.performClick()
+                        true
+                    }
+                }
+                GalleryViewerKeyboardAction.TOGGLE_PLAYBACK -> {
+                    if (videoSurface.visibility == View.VISIBLE && playbackToggle.visibility == View.VISIBLE) {
+                        playbackToggle.performClick()
+                    } else {
+                        slideshow.performClick()
+                    }
+                    true
+                }
+                GalleryViewerKeyboardAction.TOGGLE_FAVORITE -> {
+                    favorite.performClick()
+                    true
+                }
+                GalleryViewerKeyboardAction.CLOSE -> {
+                    closeAuthorizedViewer()
+                    true
+                }
+            }
+        }
+
         val scaleGestureDetector = ScaleGestureDetector(
             this,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -4182,7 +4236,54 @@ class GalleryActivity : Activity() {
         }
         more.setOnClickListener {
             val item = items.getOrNull(currentIndex) ?: return@setOnClickListener
-            showItemDetails(item)
+            val menuState = GalleryViewerMoreMenuPolicy.state(
+                currentContentUri = item.contentUri,
+                currentAlbumId = item.albumId,
+                currentMimeType = item.mimeType,
+                authorizedContentUris = authorizedItems.mapTo(linkedSetOf()) { it.contentUri },
+                authorizedAlbumIds = authorizedItems.mapNotNullTo(linkedSetOf()) { it.albumId },
+                favoriteContentUris = favoriteUris,
+            )
+            PopupMenu(this, more).apply {
+                menu.add(0, 1, 0, "Details")
+                if (menuState.canOpenContainingAlbum) {
+                    menu.add(0, 2, 1, "Open containing album")
+                }
+                if (menuState.canOpenFavorites) {
+                    menu.add(0, 3, 2, "Open Favorites")
+                }
+                if (menuState.canSetAsPhoto) {
+                    menu.add(0, 4, 3, "Set photo as…")
+                }
+                setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.itemId) {
+                        1 -> {
+                            showItemDetails(item)
+                            true
+                        }
+                        2 -> {
+                            destination = GalleryDestination.ALBUMS
+                            showingFavorites = false
+                            openAlbumId = item.albumId
+                            closeAuthorizedViewer()
+                            true
+                        }
+                        3 -> {
+                            destination = GalleryDestination.ALBUMS
+                            showingFavorites = true
+                            openAlbumId = null
+                            closeAuthorizedViewer()
+                            true
+                        }
+                        4 -> {
+                            handOffAuthorizedPhotoForSetAs(item)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                show()
+            }
         }
 
         renderCurrentItem()
@@ -4191,6 +4292,7 @@ class GalleryActivity : Activity() {
     private fun closeAuthorizedViewer() {
         viewerSlideshowStop?.invoke()
         viewerSlideshowStop = null
+        viewerKeyboardAction = null
         val overlay = viewerOverlay ?: return
         viewerVideoSurface?.apply {
             onPlaybackError = null
@@ -4204,6 +4306,33 @@ class GalleryActivity : Activity() {
             refreshObservedMediaIfReady()
         } else {
             renderCurrentDestination()
+        }
+    }
+
+    private fun handOffAuthorizedPhotoForSetAs(item: MediaItem) {
+        if (
+            !item.mimeType.startsWith("image/") ||
+            !GalleryMediaAccessPolicy.canRead(currentMediaAccessScope()) ||
+            authorizedItems.none { it.contentUri == item.contentUri }
+        ) {
+            Toast.makeText(this, "This photo is no longer authorized.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = Uri.parse(item.contentUri)
+        if (uri.scheme != "content" || uri.authority != "media") {
+            Toast.makeText(this, "Gallery refused an unsupported photo source.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val setAsIntent = Intent(Intent.ACTION_ATTACH_DATA).apply {
+            setDataAndType(uri, item.mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(setAsIntent, "Set photo as"))
+        } catch (_: RuntimeException) {
+            Toast.makeText(this, "No compatible Set as destination is available.", Toast.LENGTH_SHORT).show()
         }
     }
 

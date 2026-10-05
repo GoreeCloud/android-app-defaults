@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -178,6 +179,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var workspaceRuntimeCoordinator: WorkspaceProductionRuntimeCoordinator
     private val defaultHomeState = MutableStateFlow(false)
     private val homeResetSequence = MutableStateFlow(0L)
+    private val searchShortcutSequence = MutableStateFlow(0L)
+    private val keyboardNavigationRequest =
+        MutableStateFlow(LauncherKeyboardShortcutRequest())
+    private val searchShortcutEnabled = MutableStateFlow(false)
     private val searchProviderPreferencesState =
         MutableStateFlow<LauncherSearchProviderPreferenceDecodeResult?>(null)
     private val portableRestoreRecoveryResult =
@@ -336,6 +341,38 @@ class MainActivity : ComponentActivity() {
         refreshHomeRoleState()
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.repeatCount == 0 && searchShortcutEnabled.value) {
+            if (
+                LauncherKeyboardShortcutPolicy.opensUniversalSearch(
+                    keyCode = keyCode,
+                    ctrlPressed = event.isCtrlPressed,
+                    metaPressed = event.isMetaPressed,
+                    altPressed = event.isAltPressed,
+                )
+            ) {
+                searchShortcutSequence.value = searchShortcutSequence.value + 1L
+                return true
+            }
+
+            val navigationAction = LauncherKeyboardShortcutPolicy.navigationAction(
+                keyCode = keyCode,
+                ctrlPressed = event.isCtrlPressed,
+                metaPressed = event.isMetaPressed,
+                shiftPressed = event.isShiftPressed,
+                altPressed = event.isAltPressed,
+            )
+            if (navigationAction != null) {
+                keyboardNavigationRequest.value = LauncherKeyboardShortcutRequest(
+                    sequence = keyboardNavigationRequest.value.sequence + 1L,
+                    action = navigationAction,
+                )
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -401,8 +438,18 @@ class MainActivity : ComponentActivity() {
                 -> true
             }
             val portableRestoreRecovery by portableRestoreRecoveryResult.collectAsStateWithLifecycle()
+            val searchShortcutSequenceValue by searchShortcutSequence.collectAsStateWithLifecycle()
+            val keyboardNavigationRequestValue by
+                keyboardNavigationRequest.collectAsStateWithLifecycle()
+            val portableRestoreAllowsMutations =
+                LauncherPortableRestoreStartupGate.allowsMutations(portableRestoreRecovery)
+            LaunchedEffect(portableRestoreAllowsMutations) {
+                if (!portableRestoreAllowsMutations) {
+                    searchShortcutEnabled.value = false
+                }
+            }
 
-            if (!LauncherPortableRestoreStartupGate.allowsMutations(portableRestoreRecovery)) {
+            if (!portableRestoreAllowsMutations) {
                 LaunchedEffect(darkTheme) {
                     setSystemBarIconAppearance(useDarkIcons = !darkTheme)
                 }
@@ -547,6 +594,35 @@ class MainActivity : ComponentActivity() {
             val primarySurfaceMode = runCatching {
                 LauncherSurfaceMode.valueOf(primarySurfaceModeName)
             }.getOrDefault(LauncherSurfaceMode.HOME)
+            val canOpenSearchFromHardwareShortcut =
+                experiencePreferences.startupWizardCompleted &&
+                    !homeEditorVisible &&
+                    !showHomePageManager
+            LaunchedEffect(canOpenSearchFromHardwareShortcut) {
+                searchShortcutEnabled.value = canOpenSearchFromHardwareShortcut
+            }
+            LaunchedEffect(searchShortcutSequenceValue) {
+                if (searchShortcutSequenceValue > 0L && canOpenSearchFromHardwareShortcut) {
+                    selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                    primarySurfaceModeName = LauncherSurfaceMode.SEARCH.name
+                }
+            }
+            LaunchedEffect(keyboardNavigationRequestValue) {
+                if (
+                    keyboardNavigationRequestValue.sequence > 0L &&
+                    canOpenSearchFromHardwareShortcut
+                ) {
+                    selectedHomePageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                    primarySurfaceModeName = when (keyboardNavigationRequestValue.action) {
+                        LauncherKeyboardNavigationAction.HOME -> LauncherSurfaceMode.HOME.name
+                        LauncherKeyboardNavigationAction.APPS -> LauncherSurfaceMode.DRAWER.name
+                        LauncherKeyboardNavigationAction.SETTINGS -> LauncherSurfaceMode.SETTINGS.name
+                        LauncherKeyboardNavigationAction.THEME_MANAGER ->
+                            LauncherSurfaceMode.THEME_MANAGER.name
+                        null -> primarySurfaceModeName
+                    }
+                }
+            }
             val useDarkSystemBarIcons = launcherUsesDarkSystemBarIcons(
                 surfaceMode = primarySurfaceMode,
                 startupWizardCompleted = experiencePreferences.startupWizardCompleted,
