@@ -2,7 +2,7 @@
 
 ## October 4/5, 2026 — App Drawer organization and discovery continuation
 
-Development PR #241 carries user-created App Drawer tabs with profile-qualified membership plus category-mode folder grouping. A stacked Development continuation adds profile-aware **Recently installed** ordering and an A-Z List alphabetical jump index. Remaining App Drawer scope includes representative-device acceptance; portable backup/restore policy for tabs and other Drawer organization; **recently updated** views with profile-correct metadata authority; richer user-defined category/tag/collection organization; deterministic smart folders; broader fast-navigation behavior outside the A-Z List path; deeper keyboard/D-pad focus behavior; and complete accessibility, performance/power, signing/update, recovery, and release qualification.
+Protected PR #241 integrated user-created App Drawer tabs with profile-qualified membership plus category-mode folder grouping, and protected PR #243 integrated profile-aware **Recently installed** ordering plus the A-Z List alphabetical jump index through main `66c0778e6c0b0b386d1865ec76b539c4774c5da1`. Development PR #244 now carries optional local Suggested, bounded New, and primary-user Updated discovery views. Remaining App Drawer scope includes representative-device acceptance; portable backup/restore policy for tabs and other Drawer organization; Work/managed-profile **recently updated** metadata with profile-correct authority; richer user-defined category/tag/collection organization; deterministic Smart Folders; broader fast-navigation behavior outside the A-Z List path; deeper keyboard/D-pad focus behavior; and complete accessibility, performance/power, signing/update, recovery, and release qualification.
 
 Smart folders and usage-derived discovery must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable. A new installation must not fabricate usage history.
 
@@ -13,9 +13,9 @@ Protected PRs #239 and #240 integrated adaptive Dock paging/search/labels/materi
 
 ## October 3, 2026 — App Lock acceptance and portability remain
 
-The active Development candidate contains Launcher-managed App Lock for exact profile-qualified app identities, including searchable **All / Locked** management, app-context controls, locked-state indicators in Apps, setup discoverability, and Android-authenticated Launcher-originated app/shortcut launches.
+Protected PR #234 integrated Launcher-managed App Lock for exact profile-qualified app identities, including searchable **All / Locked** management, app-context controls, locked-state indicators in Apps, setup discoverability, and Android-authenticated Launcher-originated app/shortcut launches.
 
-Remaining work is acceptance and portability: complete the current exact-head protected validation matrix; verify successful, cancelled, and unavailable authentication on representative physical devices; exercise personal/Work/Shelter/private-space lifecycle and same-package isolation; validate TalkBack/Switch Access, hardware keyboard, large/extra-large text, RTL/localization, phone/tablet/foldable layouts, contrast and reduced-motion/transparency behavior; provision and verify protected Development signing/update continuity; and define a separately versioned portable-state policy before locked membership is ever exported. Launches initiated outside GoreeCloud Launcher remain outside this feature's authority, and any future system-wide protection requires an Android-authorized mechanism appropriate to that scope.
+Remaining work is acceptance and portability: verify successful, cancelled, and unavailable authentication on representative physical devices; exercise personal/Work/Shelter/private-space lifecycle and same-package isolation; validate TalkBack/Switch Access, hardware keyboard, large/extra-large text, RTL/localization, phone/tablet/foldable layouts, contrast and reduced-motion/transparency behavior; provision and verify protected Development signing/update continuity; and define a separately versioned portable-state policy before locked membership is ever exported. Launches initiated outside GoreeCloud Launcher remain outside this feature's authority, and any future system-wide protection requires an Android-authorized mechanism appropriate to that scope.
 
 ## October 3, 2026 — Hidden apps integrated; acceptance and recovery work remains
 
@@ -51,7 +51,7 @@ Still open after runtime-gate integration: representative/default-HOME multi-pag
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
 **Migration state:** **Mandatory monorepo consolidation is complete. The standalone repository is no longer an active development target; historical entries remain provenance only.**  
-**Current repository main:** `60912ef51825b2f3d63d46a9e0a77e673480ef3f`; the latest Launcher source-bearing main integration remains `06c4be22844c8f97e9c3fdee7757629ab11ccdb9` from PR #224. PR #231 remains a Development candidate; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override newer verified current-state checkpoints.  
+**Current repository main:** `66c0778e6c0b0b386d1865ec76b539c4774c5da1`, protected PR #243. PR #244 is the active App Drawer discovery Development candidate; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override newer verified current-state checkpoints.
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Purpose

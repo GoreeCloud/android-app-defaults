@@ -24,7 +24,7 @@ The Drawer supports or is required to support:
 - Alphabetical, reverse alphabetical, local most-recent, local most-frequent, and pinned-first ordering.
 - Fast application search.
 
-Current Development source implements Grid, Compact, List, Category, persisted presentation settings, sort controls, local app search, page/scroll navigation, stable grid geometry, and profile pages. The stacked recency/navigation candidate adds a profile-aware **Recently installed** sort using Android `LauncherActivityInfo.firstInstallTime` and a 48 dp alphabetical jump index for the ordinary A-Z List view.
+Current protected Development main implements Grid, Compact, List, Category, persisted presentation settings, sort controls, local app search, page/scroll navigation, stable grid geometry, profile pages, profile-aware **Recently installed** ordering using Android `LauncherActivityInfo.firstInstallTime`, and a 48 dp alphabetical jump index for the ordinary A-Z List view. Development PR #244 extends that line with bounded local discovery views as described below.
 
 ## Universal Search relationship
 
@@ -44,7 +44,7 @@ Future category work may add richer local classification when the source is tran
 
 Users can create named App Drawer tabs for collections such as Work, Games, Media, or Development.
 
-Current Development candidate behavior:
+Current protected Development behavior:
 
 - Up to eight device-local custom tabs.
 - Bounded names.
@@ -84,11 +84,13 @@ The Drawer separates User Apps and Work Apps when applicable. Organizational sta
 
 ## Suggestions and local ordering
 
-Local Most recent and Most frequent ordering use Launcher-local launch history only. Launcher does not request Android Usage Access for these sorts.
+Local Most recent and Most frequent ordering use Launcher-local launch history only. Launcher does not request Android Usage Access for these sorts. Protected PR #243 also integrated profile-qualified **Recently installed** ordering and a 48 dp A-Z List jump index.
 
-Future suggestions or smart groups must remain local-first, truthful, explainable, user-controllable, and free from sponsored or affiliate ranking.
+Development PR #244 adds compact **All / Suggested / New / Updated** discovery views below the Drawer organization tabs. Suggested is separately user-controlled under App Drawer settings and defaults off. When enabled, it uses only the Launcher's bounded device-local recent ordering and aggregate launch counts. If no truthful Launcher-local activity exists yet, the view uses deterministic alphabetical fallback and says so rather than inventing prior usage.
 
-A fresh installation must not fabricate prior usage.
+**New** includes applications whose profile-qualified Launcher activity install time is within the bounded 30-day window. **Updated** uses local PackageManager timestamps only for the current Android user. The Updated view is not offered on Work/managed-profile pages until Launcher has profile-correct update timestamp authority; it must fail closed rather than reuse Personal-profile metadata.
+
+Smart groups must remain local-first, truthful, explainable, user-controllable, and free from sponsored or affiliate ranking. Deterministic Smart Folders remain planned.
 
 ## Direct placement
 
@@ -130,7 +132,7 @@ The Drawer must support:
 - Non-gesture alternatives for important organization actions.
 - Phone/tablet/foldable compositions.
 
-Current Development candidate tab controls expose selected-state semantics and explicit create/edit actions. Representative-device accessibility acceptance remains open.
+Current Development tab controls expose selected-state semantics and explicit create/edit actions. PR #244 discovery controls keep the 48 dp Launcher-owned interaction floor and selected-state semantics. Representative-device accessibility acceptance remains open.
 
 ## Privacy and commercial neutrality
 

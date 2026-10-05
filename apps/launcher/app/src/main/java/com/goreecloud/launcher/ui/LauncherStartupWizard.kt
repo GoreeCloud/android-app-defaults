@@ -938,7 +938,7 @@ fun LauncherHomeHintCard(
             )
             WizardHintRow(
                 title = "Organize Apps",
-                summary = "Use pins for quick priority, or create App Drawer tabs and folders for your own collections.",
+                summary = "Use pins, tabs, folders, and optional local discovery views to organize Apps without changing what is installed.",
                 symbol = WizardVisualSymbol.APPS,
             )
             Row(

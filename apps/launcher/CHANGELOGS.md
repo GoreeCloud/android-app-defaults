@@ -1,10 +1,21 @@
+## October 5, 2026 — local App Drawer discovery views candidate
+
+- Added compact **All / Suggested / New / Updated** discovery views below the App Drawer organization tabs so discovery remains close to the inventory without crowding the primary header.
+- Added an explicit **Local suggested apps** setting, disabled by default. Suggested uses only Launcher-local bounded recent ordering and aggregate launch counts; when no truthful local activity exists, it uses a deterministic alphabetical fallback instead of inventing usage.
+- Added **New** as a bounded 30-day recently-installed view using Android Launcher activity install time.
+- Added **Updated** as a bounded 30-day recently-updated view for the primary Android user. Work/managed-profile update recency intentionally remains unavailable until Launcher has profile-correct update timestamp authority.
+- Kept custom tabs, the existing pinned-only control, categories, folders, Hidden Apps, App Lock, local search, and Home/Dock placement independent. Folder entries are hidden while an app-only discovery filter is active.
+- Added deterministic policy tests, preference default/persistence coverage, and profile-safe PackageManager update metadata loading.
+
+**Status:** Development PR #244 candidate. Local privacy/manifest/identity/Glaze/Room guards and whitespace checks pass where available; exact-head protected build/JVM/lint/schema, Android 16 runtime, transition-performance, provenance, Foundation, required-gate, and protected-promotion evidence remain required after the final candidate head is published.
+
 ## October 4/5, 2026 — Recently installed ordering and A-Z List jump candidate
 
 - Added **Recently installed** App Drawer ordering using Android `LauncherActivityInfo.firstInstallTime`; no Android Usage Access, fabricated usage history, network source, or package-global profile collapse is introduced.
 - Added a 48 dp alphabetical jump index in ordinary A-Z List layout, hidden while searching or using non-alphabetical sorts.
 - Added deterministic sorting and alphabet-index JVM coverage.
 
-**Status:** stacked Development candidate based on PR #241. Fresh exact-head protected validation and representative-device accessibility/performance acceptance remain required. Recently updated metadata remains planned.
+**Integration evidence:** PR #243 exact head `54490234fa303d30b18ca7707126f531c32ac996` passed Mandatory app migration provenance #998, Android Development Foundation #1490, Migrated Android apps CI #1024 after a bounded emulator-harness retry, and Protected promotion #978 before squash merge as authoritative main `66c0778e6c0b0b386d1865ec76b539c4774c5da1`. The initial runtime attempt timed out after the emulator/adb harness became unavailable and did not establish a product-code defect. Representative-device accessibility/performance acceptance remains open.
 
 ## October 4/5, 2026 — user-created App Drawer tabs and grouped folders candidate
 
@@ -16,7 +27,7 @@
 - Added versioned tab encoding plus codec and DataStore lifecycle tests.
 - Added `docs/app-drawer.md` as the Mandatory repository-native App Drawer product/implementation record.
 
-**Status:** Development PR #241. Local privacy/manifest/Glaze/Room guards and whitespace checks pass; exact-head protected build/JVM/lint/runtime and representative-device acceptance remain pending.
+**Integration evidence:** PR #241 exact head `f32ef37642628fe2ce120adb8f8502185de2dbf1` passed Mandatory app migration provenance #995, Android Development Foundation #1487, Migrated Android apps CI #1021, and Protected promotion #975 before squash merge as main `525a0b95cf64551129c4d3609c514ffdb57ad380`. Representative-device App Drawer organization/accessibility acceptance remains open.
 
 ## October 4, 2026 — adaptive paged Home Dock integration and drag-handoff continuation
 

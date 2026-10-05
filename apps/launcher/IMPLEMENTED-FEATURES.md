@@ -1,8 +1,16 @@
+## October 5, 2026 — local App Drawer discovery views candidate
+
+Development PR #244 adds compact **All / Suggested / New / Updated** views beneath App Drawer organization tabs. Suggested is explicitly user-controlled and disabled by default; it uses only Launcher-local bounded recent ordering and aggregate launch counts, with a deterministic alphabetical fallback when no truthful local activity exists. New uses profile-qualified Android Launcher activity install time. Updated uses current-user PackageManager timestamps and is intentionally available only on User Apps until profile-correct managed-profile update metadata exists.
+
+The discovery views do not expand Android permissions, account/network authority, package visibility, telemetry, advertising, sponsored placement, affiliate ranking, Home/Dock placement, hidden-state, App Lock, Search-provider, or folder authority. Folder entries remain available in All and normal Category presentation but are omitted from app-only discovery filters.
+
+**Acceptance boundary:** Development PR #244 candidate only. Exact-head protected build/JVM/lint/runtime evidence and representative-device accessibility, keyboard/D-pad, large text, RTL/localization, profile, large-library performance/power, signing/update continuity, and release acceptance remain required.
+
 ## October 4/5, 2026 — Recently installed sort and alphabetical jump candidate
 
 The stacked App Drawer continuation adds **Recently installed** ordering using Android `LauncherActivityInfo.firstInstallTime`, preserving exact Launcher app/profile identity while avoiding Android Usage Access or a fabricated usage model. In ordinary A-Z **List** layout, Launcher also exposes a horizontally scrollable 48 dp alphabetical jump index that moves directly to the first item in each visible bucket; the control is hidden during search and non-alphabetical sorts.
 
-**Acceptance boundary:** stacked Development candidate only. Fresh exact-head protected build/JVM/lint/runtime validation plus representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL/localization, and large-library performance acceptance remain required. Recently updated metadata remains separately planned.
+**Integration evidence:** protected PR #243 exact head `54490234fa303d30b18ca7707126f531c32ac996` passed provenance #998, Foundation #1490, Migrated Android apps CI #1024 after the bounded emulator-harness retry, and Protected promotion #978 before squash merge as main `66c0778e6c0b0b386d1865ec76b539c4774c5da1`. Representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL/localization, and large-library performance acceptance remain open.
 
 ## October 4/5, 2026 — user-created App Drawer tabs and category-folder grouping candidate
 
@@ -10,7 +18,7 @@ The current Development candidate adds bounded device-local custom App Drawer ta
 
 Category mode now keeps application categories meaningful when Drawer folders exist. Folders render as a dedicated **Folders** group followed by the existing deterministic application categories instead of flattening the entire view back to one undifferentiated grid.
 
-The candidate adds versioned tab encoding, bounded names/membership, DataStore lifecycle coverage, and codec tests. **Acceptance boundary:** Development PR #241. Exact-head protected CI/runtime evidence and representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL, phone/tablet/foldable, profile, drag-placement, visual, performance/power, signing/update continuity, and release acceptance remain open.
+The integrated line adds versioned tab encoding, bounded names/membership, DataStore lifecycle coverage, and codec tests. **Integration evidence:** PR #241 exact head `f32ef37642628fe2ce120adb8f8502185de2dbf1` passed provenance #995, Foundation #1487, Migrated Android apps CI #1021, and Protected promotion #975 before squash merge as `525a0b95cf64551129c4d3609c514ffdb57ad380`. Representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL, phone/tablet/foldable, profile, drag-placement, visual, performance/power, signing/update continuity, and release acceptance remain open.
 
 ## October 4, 2026 — adaptive paged Dock integration and drag-handoff continuation
 
