@@ -81,3 +81,69 @@ internal fun launcherDockLoopBoundaryTarget(
         else -> null
     }
 }
+
+internal enum class LauncherDockDragPageDirection {
+    PREVIOUS,
+    NEXT,
+}
+
+/**
+ * Returns the Dock page handoff direction for an active drag that has dwelled inside the
+ * configured left/right edge band. The decision is purely geometric so UI code can delay and
+ * animate independently while this policy stays deterministic and testable.
+ */
+internal fun launcherDockDragPageDirection(
+    dragX: Float,
+    dragY: Float,
+    surfaceLeftPx: Float,
+    surfaceTopPx: Float,
+    surfaceRightPx: Float,
+    surfaceBottomPx: Float,
+    edgeThresholdPx: Float,
+    previousPageAvailable: Boolean,
+    nextPageAvailable: Boolean,
+): LauncherDockDragPageDirection? {
+    if (
+        !dragX.isFinite() ||
+        !dragY.isFinite() ||
+        !surfaceLeftPx.isFinite() ||
+        !surfaceTopPx.isFinite() ||
+        !surfaceRightPx.isFinite() ||
+        !surfaceBottomPx.isFinite() ||
+        !edgeThresholdPx.isFinite() ||
+        surfaceRightPx <= surfaceLeftPx ||
+        surfaceBottomPx <= surfaceTopPx ||
+        edgeThresholdPx <= 0f ||
+        dragX < surfaceLeftPx ||
+        dragX > surfaceRightPx ||
+        dragY < surfaceTopPx ||
+        dragY > surfaceBottomPx
+    ) {
+        return null
+    }
+
+    val safeThreshold = edgeThresholdPx.coerceAtMost(
+        (surfaceRightPx - surfaceLeftPx) / 2f,
+    )
+    return when {
+        previousPageAvailable && dragX <= surfaceLeftPx + safeThreshold ->
+            LauncherDockDragPageDirection.PREVIOUS
+        nextPageAvailable && dragX >= surfaceRightPx - safeThreshold ->
+            LauncherDockDragPageDirection.NEXT
+        else -> null
+    }
+}
+
+/**
+ * Returns the first non-source key on the following logical Dock page. The UI can publish that
+ * key as a synthetic right-edge insertion boundary so dropping after the last visible icon keeps
+ * the flat persisted Dock order correct instead of accidentally moving the item to the global end.
+ */
+internal fun launcherDockNextPageInsertionKey(
+    pageKeys: List<List<String>>,
+    logicalCurrentPage: Int,
+    sourceKey: String?,
+): String? =
+    pageKeys
+        .getOrNull(logicalCurrentPage + 1)
+        ?.firstOrNull { key -> key != sourceKey }
