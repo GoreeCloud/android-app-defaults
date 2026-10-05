@@ -10527,6 +10527,7 @@ internal fun GlazeDock(
     }
     val dockForeground = MaterialTheme.colorScheme.onSurface
     var measuredBounds by remember { mutableStateOf<Rect?>(null) }
+    var pagerBounds by remember { mutableStateOf<Rect?>(null) }
     val dockHovered = activeDrag != null &&
         dragPoint?.let { point -> measuredBounds?.contains(point) } == true
     // Clear may float directly on wallpaper in the normal case, but reduced-transparency or
