@@ -81,3 +81,60 @@ internal fun launcherDockLoopBoundaryTarget(
         else -> null
     }
 }
+
+
+internal enum class LauncherDockDragPageDirection {
+    PREVIOUS,
+    NEXT,
+}
+
+internal fun launcherDockDragPageDirection(
+    dragX: Float,
+    dragY: Float,
+    surfaceLeftPx: Float,
+    surfaceTopPx: Float,
+    surfaceRightPx: Float,
+    surfaceBottomPx: Float,
+    edgeThresholdPx: Float,
+    previousPageAvailable: Boolean,
+    nextPageAvailable: Boolean,
+): LauncherDockDragPageDirection? {
+    if (
+        !dragX.isFinite() ||
+        !dragY.isFinite() ||
+        !surfaceLeftPx.isFinite() ||
+        !surfaceTopPx.isFinite() ||
+        !surfaceRightPx.isFinite() ||
+        !surfaceBottomPx.isFinite() ||
+        !edgeThresholdPx.isFinite() ||
+        surfaceRightPx <= surfaceLeftPx ||
+        surfaceBottomPx <= surfaceTopPx ||
+        edgeThresholdPx <= 0f ||
+        dragX < surfaceLeftPx ||
+        dragX > surfaceRightPx ||
+        dragY < surfaceTopPx ||
+        dragY > surfaceBottomPx
+    ) {
+        return null
+    }
+
+    val safeThreshold = edgeThresholdPx.coerceAtMost(
+        (surfaceRightPx - surfaceLeftPx) / 2f,
+    )
+    return when {
+        previousPageAvailable && dragX <= surfaceLeftPx + safeThreshold ->
+            LauncherDockDragPageDirection.PREVIOUS
+        nextPageAvailable && dragX >= surfaceRightPx - safeThreshold ->
+            LauncherDockDragPageDirection.NEXT
+        else -> null
+    }
+}
+
+internal fun launcherDockNextPageInsertionKey(
+    pageKeys: List<List<String>>,
+    logicalCurrentPage: Int,
+    sourceKey: String?,
+): String? =
+    pageKeys
+        .getOrNull(logicalCurrentPage + 1)
+        ?.firstOrNull { key -> key != sourceKey }
