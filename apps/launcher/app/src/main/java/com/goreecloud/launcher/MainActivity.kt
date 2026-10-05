@@ -798,6 +798,7 @@ class MainActivity : ComponentActivity() {
                     LocalLauncherIconAppearance provides LauncherIconAppearance(
                         shape = experiencePreferences.iconShape,
                         iconPackPackage = experiencePreferences.iconPackPackage,
+                        fillMode = visualPreferences.iconFillMode,
                     ),
                 ) {
                 if (!experiencePreferences.startupWizardCompleted) {
