@@ -122,6 +122,7 @@ import com.goreecloud.launcher.core.launcher.LauncherAppVisibilityPolicy
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearchHomeMode
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
+import com.goreecloud.launcher.core.launcher.LauncherDockDragPageDirection
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.launcherDockInitialVirtualPage
 import com.goreecloud.launcher.core.launcher.launcherDockLogicalPage
