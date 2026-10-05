@@ -9871,16 +9871,6 @@ private fun LauncherSettingsRootSurface(
                             ?.let { onSetDrawerSortOrderName(it.name) }
                     },
                 )
-                SettingSwitch(
-                    "Suggested apps",
-                    experiencePreferences.showDrawerSuggestions,
-                    onSetShowDrawerSuggestions,
-                )
-                Text(
-                    "Suggestions use only Launcher-local launch history. They are off by default and do not require Android Usage Access or remote profiling.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
                 Text(
                     "Header actions",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
