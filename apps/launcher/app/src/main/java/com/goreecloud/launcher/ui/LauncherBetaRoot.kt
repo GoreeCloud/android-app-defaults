@@ -7025,10 +7025,13 @@ private fun AppDrawerSurface(
         showPinnedOnly,
         selectedDrawerTab?.id,
         selectedDrawerTab?.memberKeys,
+        selectedDiscoveryFilter,
+        selectedDiscoveryKeys,
         primaryProfileId,
     ) {
         val matchingApps = selectedPage.items.count { app ->
-            (selectedDrawerTab == null || app.workspaceKey() in selectedDrawerTab.memberKeys) &&
+            app.workspaceKey() in selectedDiscoveryKeys &&
+                (selectedDrawerTab == null || app.workspaceKey() in selectedDrawerTab.memberKeys) &&
                 (!showPinnedOnly || app.workspaceKey() in pinnedAppKeys) &&
                 LauncherLocalAppSearch.matches(
                     label = app.label.toString(),
@@ -7036,7 +7039,11 @@ private fun AppDrawerSurface(
                     rawQuery = drawerQuery,
                 )
         }
-        val matchingFolders = if (showPinnedOnly || selectedDrawerTab != null) 0 else folders.count { folder ->
+        val matchingFolders = if (
+            showPinnedOnly ||
+            selectedDrawerTab != null ||
+            selectedDiscoveryFilter != LauncherDrawerDiscoveryFilter.ALL
+        ) 0 else folders.count { folder ->
             selectedPageProfileIds.any { profileId ->
                 LauncherFolderProfilePolicy.belongsToProfile(
                     folder = folder,
@@ -7282,7 +7289,11 @@ private fun AppDrawerSurface(
                         }
                         if (pinnedAppKeys.isNotEmpty()) {
                             Surface(
-                                onClick = { showPinnedOnly = !showPinnedOnly },
+                                onClick = {
+                                    showPinnedOnly = !showPinnedOnly
+                                    selectedDiscoveryFilterName =
+                                        LauncherDrawerDiscoveryFilter.ALL.name
+                                },
                                 modifier = Modifier
                                     .size(48.dp)
                                     .testTag("launcher-drawer-pinned-only")
@@ -7374,6 +7385,28 @@ private fun AppDrawerSurface(
                     onEditTab = { tabId -> editingDrawerTabId = tabId },
                     secondaryColor = drawerSecondaryColor,
                 )
+                if (drawerQuery.isBlank()) {
+                    Spacer(Modifier.height(GlazeMetrics.space1))
+                    LauncherDrawerDiscoveryFiltersRow(
+                        selectedFilter = selectedDiscoveryFilter,
+                        filters = availableDiscoveryFilters,
+                        secondaryColor = drawerSecondaryColor,
+                        chooseFilter = { filter ->
+                            selectedDiscoveryFilterName = filter.name
+                            showPinnedOnly = false
+                        },
+                    )
+                    if (
+                        selectedDiscoveryFilter == LauncherDrawerDiscoveryFilter.SUGGESTED &&
+                        !selectedHasTruthfulUsage
+                    ) {
+                        Text(
+                            "No local launch history yet · alphabetical fallback",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = drawerSecondaryColor,
+                        )
+                    }
+                }
                 Spacer(Modifier.height(GlazeMetrics.space2))
                 HorizontalPager(
                     state = profilePager,
@@ -7384,8 +7417,20 @@ private fun AppDrawerSurface(
                     key = { index -> profilePages[index].kind.name },
                 ) { index ->
                     val page = profilePages[index]
+                    val pageDiscoveryKeys = remember(
+                        page.items,
+                        selectedDiscoveryFilter,
+                        pinnedAppKeys,
+                        recentAppKeys,
+                        localLaunchCounts,
+                        drawerFreshnessByPackage,
+                        drawerNowMillis,
+                    ) {
+                        discoveryKeysFor(page.items)
+                    }
                     val pageApps = remember(
                         page.items,
+                        pageDiscoveryKeys,
                         drawerQuery,
                         pinnedAppKeys,
                         showPinnedOnly,
@@ -7393,7 +7438,8 @@ private fun AppDrawerSurface(
                         selectedDrawerTab?.memberKeys,
                     ) {
                         page.items.filter { app ->
-                            (selectedDrawerTab == null || app.workspaceKey() in selectedDrawerTab.memberKeys) &&
+                            app.workspaceKey() in pageDiscoveryKeys &&
+                                (selectedDrawerTab == null || app.workspaceKey() in selectedDrawerTab.memberKeys) &&
                                 (!showPinnedOnly || app.workspaceKey() in pinnedAppKeys) &&
                                 (
                                     drawerQuery.isBlank() ||
@@ -7420,7 +7466,11 @@ private fun AppDrawerSurface(
                         selectedDrawerTab?.id,
                         primaryProfileId,
                     ) {
-                        if (showPinnedOnly || selectedDrawerTab != null) {
+                        if (
+                            showPinnedOnly ||
+                            selectedDrawerTab != null ||
+                            selectedDiscoveryFilter != LauncherDrawerDiscoveryFilter.ALL
+                        ) {
                             emptyList()
                         } else folders.filter { folder ->
                             pageProfileIds.any { profileId ->
@@ -7449,6 +7499,12 @@ private fun AppDrawerSurface(
                                             page.kind.displayName + "."
                                     showPinnedOnly ->
                                         "No pinned apps in " + page.kind.displayName + "."
+                                    selectedDiscoveryFilter == LauncherDrawerDiscoveryFilter.SUGGESTED ->
+                                        "No suggested apps are available in " + page.kind.displayName + "."
+                                    selectedDiscoveryFilter == LauncherDrawerDiscoveryFilter.NEW ->
+                                        "No recently installed apps in " + page.kind.displayName + "."
+                                    selectedDiscoveryFilter == LauncherDrawerDiscoveryFilter.UPDATED ->
+                                        "No recently updated apps are available in User Apps."
                                     else ->
                                         "No apps are available in " + page.kind.displayName + "."
                                 },
