@@ -719,7 +719,6 @@ fun LauncherBetaRoot(
     workspace: WorkspaceState,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
-    drawerSortOrderName: String?,
     experiencePreferences: LauncherExperiencePreferences,
     homePageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
     recentAppKeys: List<String>,
