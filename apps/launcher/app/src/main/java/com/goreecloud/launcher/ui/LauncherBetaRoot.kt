@@ -733,6 +733,7 @@ fun LauncherBetaRoot(
     drawerPinnedAppOrder: List<String>,
     drawerSortOrderName: String?,
     drawerTabs: List<LauncherDrawerTab>,
+    drawerSmartFolderExclusions: Map<LauncherDrawerSmartFolderKind, Set<String>>,
     searchProviderPreferences: com.goreecloud.launcher.core.launcher.LauncherSearchProviderPreferenceDecodeResult?,
     fileSearchRoots: List<Uri>,
     homePageCount: Int,
@@ -801,6 +802,8 @@ fun LauncherBetaRoot(
     onRenameDrawerTab: (String, String) -> Unit,
     onDeleteDrawerTab: (String) -> Unit,
     onSetDrawerTabMembership: (String, String, Boolean) -> Unit,
+    onSetDrawerSmartFolderExcluded: (LauncherDrawerSmartFolderKind, String, Boolean) -> Unit,
+    onClearDrawerSmartFolderExclusions: (LauncherDrawerSmartFolderKind) -> Unit,
     onRequestUninstall: (LauncherActivityInfo) -> Unit,
     themeMode: GlazeThemeMode,
     onSetThemeMode: (GlazeThemeMode) -> Unit,
@@ -1544,6 +1547,7 @@ fun LauncherBetaRoot(
                 lockedAppKeys = lockedAppKeys,
                 sortOrderName = drawerSortOrderName,
                 drawerTabs = drawerTabs,
+                smartFolderExclusions = drawerSmartFolderExclusions,
                 preferences = preferences,
                 drawerLayoutMode = drawerLayoutMode,
                 experiencePreferences = experiencePreferences,
@@ -1565,6 +1569,8 @@ fun LauncherBetaRoot(
                 onCreateDrawerTab = onCreateDrawerTab,
                 onRenameDrawerTab = onRenameDrawerTab,
                 onDeleteDrawerTab = onDeleteDrawerTab,
+                onSetSmartFolderExcluded = onSetDrawerSmartFolderExcluded,
+                onClearSmartFolderExclusions = onClearDrawerSmartFolderExclusions,
                 onHome = {
                     drawerSearchRequested = false
                     surfaceModeName = LauncherSurfaceMode.HOME.name
@@ -6727,6 +6733,8 @@ private fun LauncherDrawerSmartFolderSheet(
     apps: List<LauncherActivityInfo>,
     lockedAppKeys: Set<String>,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
+    onExcludeApp: (LauncherActivityInfo) -> Unit,
+    onRestoreExclusions: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
@@ -6759,53 +6767,105 @@ private fun LauncherDrawerSmartFolderSheet(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                if (folder.excludedCount > 0) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            "${folder.excludedCount} excluded by you",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        TextButton(onClick = onRestoreExclusions) {
+                            Text("Restore")
+                        }
+                    }
+                }
                 Spacer(Modifier.height(GlazeMetrics.space1))
+                if (apps.isEmpty()) {
+                    Text(
+                        "All current matches are excluded. Restore exclusions to show them again.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 apps.forEach { app ->
                     val icon = rememberLauncherAppIcon(app)
-                    Surface(
-                        onClick = { onLaunchApp(app) },
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(min = 52.dp)
-                            .semantics {
-                                contentDescription = buildString {
-                                    append(app.label.toString())
-                                    if (app.workspaceKey() in lockedAppKeys) append(", App Lock")
-                                }
-                            },
-                        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
-                        color = Color.Transparent,
+                            .heightIn(min = 52.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
                     ) {
-                        Row(
+                        Surface(
+                            onClick = { onLaunchApp(app) },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = GlazeMetrics.space2, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                                .weight(1f)
+                                .heightIn(min = 52.dp)
+                                .semantics {
+                                    contentDescription = buildString {
+                                        append(app.label.toString())
+                                        if (app.workspaceKey() in lockedAppKeys) append(", App Lock")
+                                    }
+                                },
+                            shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+                            color = Color.Transparent,
                         ) {
-                            if (icon != null) {
-                                Image(
-                                    bitmap = icon,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.size(36.dp).launcherIconMask(),
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = GlazeMetrics.space2, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                            ) {
+                                if (icon != null) {
+                                    Image(
+                                        bitmap = icon,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(36.dp).launcherIconMask(),
+                                    )
+                                } else {
+                                    Spacer(Modifier.size(36.dp))
+                                }
+                                Text(
+                                    app.label.toString(),
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                 )
-                            } else {
-                                Spacer(Modifier.size(36.dp))
+                                if (app.workspaceKey() in lockedAppKeys) {
+                                    GlazePopupActionGlyph(
+                                        symbol = GlazePopupActionSymbol.LOCK,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        iconSize = 17.dp,
+                                    )
+                                }
                             }
-                            Text(
-                                app.label.toString(),
-                                modifier = Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodyLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            if (app.workspaceKey() in lockedAppKeys) {
-                                GlazePopupActionGlyph(
-                                    symbol = GlazePopupActionSymbol.LOCK,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    iconSize = 17.dp,
-                                )
+                        }
+                        if (folder.kind != LauncherDrawerSmartFolderKind.PINNED) {
+                            Surface(
+                                onClick = { onExcludeApp(app) },
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .semantics {
+                                        contentDescription =
+                                            "Exclude ${app.label} from ${folder.name} smart folder"
+                                    },
+                                shape = CircleShape,
+                                color = Color.Transparent,
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    GlazePopupActionGlyph(
+                                        symbol = GlazePopupActionSymbol.EXCLUDE,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        iconSize = 18.dp,
+                                    )
+                                }
                             }
                         }
                     }
@@ -6993,6 +7053,7 @@ private fun AppDrawerSurface(
     lockedAppKeys: Set<String>,
     sortOrderName: String?,
     drawerTabs: List<LauncherDrawerTab>,
+    smartFolderExclusions: Map<LauncherDrawerSmartFolderKind, Set<String>>,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
@@ -7006,6 +7067,8 @@ private fun AppDrawerSurface(
     onCreateDrawerTab: (String) -> Unit,
     onRenameDrawerTab: (String, String) -> Unit,
     onDeleteDrawerTab: (String) -> Unit,
+    onSetSmartFolderExcluded: (LauncherDrawerSmartFolderKind, String, Boolean) -> Unit,
+    onClearSmartFolderExclusions: (LauncherDrawerSmartFolderKind) -> Unit,
     onHome: () -> Unit,
 ) {
     var drawerQuery by rememberSaveable { mutableStateOf("") }
@@ -7099,6 +7162,7 @@ private fun AppDrawerSurface(
         drawerFreshnessByAppKey,
         drawerFreshnessNowMillis,
         experiencePreferences.useLocalUsageForSuggestions,
+        smartFolderExclusions,
     ) {
         val availableKeys = selectedPage.items.mapTo(linkedSetOf()) { app -> app.workspaceKey() }
         LauncherDrawerSmartFolderPolicy.build(
@@ -7112,6 +7176,7 @@ private fun AppDrawerSurface(
             freshnessByKey = drawerFreshnessByAppKey,
             nowMillis = drawerFreshnessNowMillis,
             includeSuggested = experiencePreferences.useLocalUsageForSuggestions,
+            excludedKeysByKind = smartFolderExclusions,
         )
     }
     val selectedSmartFolder = remember(
@@ -7697,6 +7762,7 @@ private fun AppDrawerSurface(
                                     freshnessByKey = drawerFreshnessByAppKey,
                                     nowMillis = drawerFreshnessNowMillis,
                                     includeSuggested = experiencePreferences.useLocalUsageForSuggestions,
+                                    excludedKeysByKind = smartFolderExclusions,
                                 )
                             } else {
                                 emptyList()
@@ -7733,6 +7799,16 @@ private fun AppDrawerSurface(
             onLaunchApp = { app ->
                 selectedSmartFolderKindName = null
                 onLaunchApp(app)
+            },
+            onExcludeApp = { app ->
+                onSetSmartFolderExcluded(
+                    smartFolder.kind,
+                    app.workspaceKey(),
+                    true,
+                )
+            },
+            onRestoreExclusions = {
+                onClearSmartFolderExclusions(smartFolder.kind)
             },
             onDismiss = { selectedSmartFolderKindName = null },
         )
@@ -14011,6 +14087,7 @@ private enum class GlazePopupActionSymbol {
     INFO,
     LOCK,
     VISIBILITY,
+    EXCLUDE,
     UNINSTALL,
 }
 
@@ -14222,6 +14299,15 @@ private fun GlazePopupActionGlyph(
                     center = Offset(u * .50f, u * .50f),
                     style = Stroke(w),
                 )
+            }
+            GlazePopupActionSymbol.EXCLUDE -> {
+                drawCircle(
+                    color = color,
+                    radius = u * .34f,
+                    center = Offset(u * .50f, u * .50f),
+                    style = Stroke(w),
+                )
+                segment(.31f, .50f, .69f, .50f)
             }
             GlazePopupActionSymbol.UNINSTALL -> {
                 segment(.24f, .24f, .76f, .76f)

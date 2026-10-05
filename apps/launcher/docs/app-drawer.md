@@ -64,13 +64,11 @@ Drawer folders are supported as organizational entries and remain distinct from 
 
 Folder behavior must preserve profile boundaries, explicit user membership, predictable ordering, Glaze folder presentation, accessible open/manage behavior, and compatibility with Home/Dock placement rules.
 
-Smart folders remain future work unless explicitly backed by deterministic local rules and clear user control.
-
 ## Smart folders
 
-Smart folders provide dynamic App Drawer collections without mutating manual folders, tabs, Home, or Dock placement. The current Development candidate derives bounded local-only **Pinned**, optional **Suggested**, **New**, and **Updated** smart folders from explicit pins, Launcher-local launch signals, and Android freshness metadata already used by Drawer discovery. Empty smart folders are omitted. Suggested smart-folder membership respects the existing Suggested apps control; when truthful usage does not exist, its membership uses the same deterministic A-Z fallback rather than fabricating behavior.
+Smart folders provide dynamic App Drawer collections without mutating manual folders, tabs, Home, or Dock placement. Protected PR #249 integrated bounded local-only **Pinned**, optional **Suggested**, **New**, and **Updated** smart folders from explicit pins, Launcher-local launch signals, and Android freshness metadata already used by Drawer discovery. Suggested smart-folder membership respects the existing Suggested apps control; when truthful usage does not exist, its membership uses the same deterministic A-Z fallback rather than fabricating behavior.
 
-Smart folders are read-only dynamic views in this tranche. Manual override/exclusion rules, custom rule composition, persisted smart-folder ordering/naming, and portable recovery remain planned. Profile identity remains bounded by the currently selected Drawer profile, and unavailable non-primary update metadata continues to fail closed rather than borrowing another profile's state.
+The active Development continuation adds per-application exclusions for **Suggested**, **New**, and **Updated**. Exclusions are keyed by exact profile-qualified Launcher app identity, affect only the selected smart-folder kind, remain device-local, and can be cleared with an explicit **Restore** action. A smart folder remains recoverable even when every current candidate is excluded. **Pinned** remains controlled by the existing explicit pin/unpin authority instead of a second exclusion mechanism. Custom rule composition, persisted smart-folder ordering/naming, and portable recovery remain planned. Profile identity remains bounded by the currently selected Drawer profile, and unavailable non-primary update metadata continues to fail closed rather than borrowing another profile's state.
 
 ## Hidden applications
 
@@ -102,7 +100,7 @@ The current Development continuation adds a compact discovery row:
 
 For non-primary profiles, first-install time continues to come from profile-qualified LauncherActivityInfo. Android's public LauncherApps surface does not expose profile-qualified last-update time, so **Updated** currently fails closed for Work and other non-primary profiles instead of borrowing primary-user metadata for a same-package app. Primary-profile update time comes from PackageManager.
 
-Full Smart Folders remain future work. Any later rule-based folder membership must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable.
+Integrated Smart Folders remain local-first, transparent, explainable, user-controllable, and non-sponsored. The active Development continuation adds reversible per-app exclusions; richer user-authored rule composition and portable recovery remain separately gated.
 
 A fresh installation must not fabricate prior usage.
 

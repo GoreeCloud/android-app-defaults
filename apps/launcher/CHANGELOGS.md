@@ -52,11 +52,13 @@ Automated coverage includes the deterministic drawer-layout cycle and Android ru
 
 # GoreeCloud Launcher — Changelogs
 
-## October 5, 2026 — local Smart Folder candidate
+## October 5, 2026 — Smart Folder integration and manual exclusion continuation
 
-The active App Drawer continuation adds transparent local Smart Folder views for explicit pins, local suggestions, recently installed apps, and recently updated apps. Membership reuses existing profile-qualified inventory and discovery metadata, remains read-only in this tranche, omits empty collections, and does not introduce new permissions, network access, remote analytics, sponsored ranking, package mutation, or a second organization authority.
+Protected PR #249 integrated transparent local Smart Folder views for explicit pins, local suggestions, recently installed apps, and recently updated apps. Exact head `03b0303816637bc2e5d422cb48e4e7055e9bfd65` passed Mandatory app migration provenance #1014, Android Development Foundation #1506, Migrated Android apps CI #1040, and Protected promotion #994 before squash merge as `9b8398960c32cd1a08a161c28cd4b21b623a9904`.
 
-**Acceptance boundary:** Development candidate only. Exact-head protected source/build/runtime evidence and representative-device interaction/accessibility/profile acceptance are still required.
+The active Development continuation adds reversible per-app exclusions for **Suggested**, **New**, and **Updated** Smart Folders. Exclusions use exact profile-qualified Launcher identities, are scoped to one Smart Folder kind, remain device-local, and expose a **Restore** recovery action. Fully excluded collections remain recoverable instead of disappearing. **Pinned** continues to use explicit pin/unpin state rather than a second exclusion authority. No Android permission, network access, remote analytics, sponsored ranking, package mutation, Home/Dock placement, manual-folder membership, hidden-app state, or App Lock authority changes.
+
+**Acceptance boundary:** the exclusion continuation is Development candidate source until its own exact-head protected source/build/runtime evidence and guarded integration succeed. Representative-device interaction, TalkBack/Switch Access, keyboard/D-pad, large-text, profile, form-factor, and performance/power acceptance remain open.
 
 ## October 3, 2026 — representative-device inset, icon-mask, Search, and widget-gallery corrections
 

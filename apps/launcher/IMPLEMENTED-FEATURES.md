@@ -36,11 +36,13 @@ Apps now has a direct accessible layout quick-switch in its header. It cycles Gr
 
 # GoreeCloud Launcher — Implemented Features
 
-## October 5, 2026 — local Smart Folder candidate
+## October 5, 2026 — local Smart Folder integration and override continuation
 
-Development source now contains bounded, profile-scoped App Drawer Smart Folder presentation for **Pinned**, optional **Suggested**, **New**, and **Updated** collections. Membership is computed locally from explicit Drawer pins, existing Launcher-local suggestion signals, and the existing install/update freshness metadata. Empty dynamic collections are omitted, Suggested remains user-controllable and deterministic on first use, and the views do not alter manual folders, custom tabs, Home/Dock placement, package state, hidden state, or App Lock.
+Protected PR #249 integrated bounded, profile-scoped App Drawer Smart Folder presentation for **Pinned**, optional **Suggested**, **New**, and **Updated** collections. Membership is computed locally from explicit Drawer pins, existing Launcher-local suggestion signals, and existing install/update freshness metadata. Suggested remains user-controllable and deterministic on first use, and the views do not alter manual folders, custom tabs, Home/Dock placement, package state, hidden state, or App Lock.
 
-**Acceptance boundary:** candidate source only until exact-head protected validation and guarded integration. Representative-device profile correctness, TalkBack/Switch Access, keyboard/D-pad, large-text, RTL, form-factor, performance/power, and manual override/exclusion behavior remain open.
+Exact head `03b0303816637bc2e5d422cb48e4e7055e9bfd65` passed Mandatory app migration provenance #1014, Android Development Foundation #1506, Migrated Android apps CI #1040, and Protected promotion #994 before expected-head-protected squash merge as `9b8398960c32cd1a08a161c28cd4b21b623a9904`.
+
+The active Development continuation adds reversible, profile-qualified per-app exclusions for **Suggested**, **New**, and **Updated**, plus a bounded Restore path that keeps fully excluded dynamic collections recoverable. **Pinned** continues to use explicit pin/unpin membership instead of a parallel exclusion rule. **Acceptance boundary:** the exclusion continuation still requires its own exact-head protected validation and guarded integration. Representative-device profile correctness, TalkBack/Switch Access, keyboard/D-pad, large-text, RTL, form-factor, performance/power, and richer rule-composition acceptance remain open.
 
 ## October 3, 2026 — inset, icon-mask, Search, and widget-gallery correction candidate
 
