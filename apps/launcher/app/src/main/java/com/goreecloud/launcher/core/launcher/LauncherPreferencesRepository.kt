@@ -189,11 +189,23 @@ enum class LauncherHomeAppMode(
 enum class LauncherDockStyle(val storageValue: String) {
     GLASS("glass"),
     CLEAR("clear"),
+    SOLID("solid"),
+    RAISED("raised"),
     EDGE("edge");
 
     companion object {
         fun fromStorage(value: String?): LauncherDockStyle =
             entries.firstOrNull { it.storageValue == value } ?: GLASS
+    }
+}
+
+enum class LauncherDockNavigation(val storageValue: String) {
+    SCROLL("scroll"),
+    PAGES("pages");
+
+    companion object {
+        fun fromStorage(value: String?): LauncherDockNavigation =
+            entries.firstOrNull { it.storageValue == value } ?: SCROLL
     }
 }
 
@@ -306,6 +318,11 @@ data class LauncherExperiencePreferences(
     val homeSearchStyle: LauncherHomeSearchStyle = LauncherHomeSearchStyle.GLASS,
     val homeSpacing: LauncherHomeSpacing = LauncherHomeSpacing.BALANCED,
     val dockStyle: LauncherDockStyle = LauncherDockStyle.GLASS,
+    val dockNavigation: LauncherDockNavigation = LauncherDockNavigation.SCROLL,
+    val dockPageSize: Int = 5,
+    val dockLoopPages: Boolean = false,
+    val showDockLabels: Boolean = false,
+    val showDockSearch: Boolean = false,
     val wallpaperShade: LauncherWallpaperShade = LauncherWallpaperShade.SOFT,
     val iconShape: LauncherIconShape = LauncherIconShape.ROUNDED_SQUARE,
     val iconPackPackage: String? = null,
@@ -382,6 +399,11 @@ class LauncherPreferencesRepository(
         val homeSearchStyle = stringPreferencesKey("home_search_style")
         val homeSpacing = stringPreferencesKey("home_spacing")
         val dockStyle = stringPreferencesKey("dock_style")
+        val dockNavigation = stringPreferencesKey("dock_navigation_v1")
+        val dockPageSize = intPreferencesKey("dock_page_size_v1")
+        val dockLoopPages = booleanPreferencesKey("dock_loop_pages_v1")
+        val showDockLabels = booleanPreferencesKey("show_dock_labels_v1")
+        val showDockSearch = booleanPreferencesKey("show_dock_search_v1")
         val wallpaperShade = stringPreferencesKey("wallpaper_shade")
         val iconShape = stringPreferencesKey("icon_shape")
         val iconPackPackage = stringPreferencesKey("icon_pack_package")
@@ -536,6 +558,11 @@ class LauncherPreferencesRepository(
                 homeSearchStyle = LauncherHomeSearchStyle.fromStorage(values[Keys.homeSearchStyle]),
                 homeSpacing = LauncherHomeSpacing.fromStorage(values[Keys.homeSpacing]),
                 dockStyle = LauncherDockStyle.fromStorage(values[Keys.dockStyle]),
+                dockNavigation = LauncherDockNavigation.fromStorage(values[Keys.dockNavigation]),
+                dockPageSize = (values[Keys.dockPageSize] ?: 5).coerceIn(3, 5),
+                dockLoopPages = values[Keys.dockLoopPages] ?: false,
+                showDockLabels = values[Keys.showDockLabels] ?: false,
+                showDockSearch = values[Keys.showDockSearch] ?: false,
                 wallpaperShade = LauncherWallpaperShade.fromStorage(values[Keys.wallpaperShade]),
                 iconShape = LauncherIconShape.fromStorage(values[Keys.iconShape]),
                 iconPackPackage = values[Keys.iconPackPackage]?.takeIf { it.isNotBlank() },
@@ -803,6 +830,36 @@ class LauncherPreferencesRepository(
             dataStore.edit { values ->
                 values[Keys.dockStyle] = style.storageValue
             }
+        }
+    }
+
+    fun setDockNavigation(navigation: LauncherDockNavigation) {
+        scope.launch {
+            dataStore.edit { values -> values[Keys.dockNavigation] = navigation.storageValue }
+        }
+    }
+
+    fun setDockPageSize(size: Int) {
+        scope.launch {
+            dataStore.edit { values -> values[Keys.dockPageSize] = size.coerceIn(3, 5) }
+        }
+    }
+
+    fun setDockLoopPages(loop: Boolean) {
+        scope.launch {
+            dataStore.edit { values -> values[Keys.dockLoopPages] = loop }
+        }
+    }
+
+    fun setShowDockLabels(show: Boolean) {
+        scope.launch {
+            dataStore.edit { values -> values[Keys.showDockLabels] = show }
+        }
+    }
+
+    fun setShowDockSearch(show: Boolean) {
+        scope.launch {
+            dataStore.edit { values -> values[Keys.showDockSearch] = show }
         }
     }
 
