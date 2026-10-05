@@ -19,7 +19,7 @@ internal fun LauncherDockDragPageHandoff(
     pagerState: PagerState,
     previousPageAvailable: Boolean,
     nextPageAvailable: Boolean,
-) {
+): LauncherDockDragPageDirection? {
     val edgeThresholdPx = with(LocalDensity.current) { 48.dp.toPx() }
     val direction = if (activeDrag != null && dragPoint != null && pagerBounds != null) {
         launcherDockDragPageDirection(
@@ -58,4 +58,5 @@ internal fun LauncherDockDragPageHandoff(
             pagerState.animateScrollToPage(target)
         }
     }
+    return direction
 }
