@@ -71,7 +71,7 @@ Current Development controls include:
 
 Suggested apps use only truthful Launcher-local launch history. Launcher requests no Android Usage Access for this feature. With no valid local history, the fallback is deterministic A–Z rather than fabricated personalization.
 
-Smart folders and richer user-authored category rules remain planned until deterministic local rules, transparent explanations, manual override, persistence, and recovery are implemented and accepted.
+Current Development source includes bounded local Smart Folder views for Pinned, optional Suggested, New, and Updated. They are read-only dynamic views and do not mutate manual folders, tabs, Home, Dock, hidden state, App Lock, or package state. Suggested Smart Folder membership follows the same App Drawer Suggested apps control. Manual override/exclusion rules, richer user-authored category rules, portable recovery, and representative-device acceptance remain open.
 
 ## Dock
 
