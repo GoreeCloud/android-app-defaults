@@ -1707,6 +1707,16 @@ fun LauncherBetaRoot(
                     selectedApp = null
                     selectedAppAnchor = null
                 },
+                onMoveDockEarlier = {
+                    onMoveDock(app, WorkspaceMoveDirection.EARLIER)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
+                onMoveDockLater = {
+                    onMoveDock(app, WorkspaceMoveDirection.LATER)
+                    selectedApp = null
+                    selectedAppAnchor = null
+                },
                 onResetDrawerPinnedOrder = {
                     val alphabeticalOrder = drawerPinnedAppKeys
                         .mapNotNull { key ->
