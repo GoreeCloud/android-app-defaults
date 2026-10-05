@@ -10655,11 +10655,21 @@ internal fun GlazeDock(
                     loop = loopingDockPages,
                 )
             }
-            LaunchedEffect(visibleKeys) {
+            LaunchedEffect(visibleKeys, nextPageInsertionKey, measuredBounds) {
+                val retainedKeys = visibleKeys + listOfNotNull(nextPageInsertionKey)
                 dockItemBounds.keys
-                    .filterNot(visibleKeys::contains)
+                    .filterNot(retainedKeys::contains)
                     .toList()
                     .forEach(dockItemBounds::remove)
+                val dock = measuredBounds
+                if (nextPageInsertionKey != null && dock != null) {
+                    dockItemBounds[nextPageInsertionKey] = Rect(
+                        dock.right + 1f,
+                        dock.top,
+                        dock.right + 2f,
+                        dock.bottom,
+                    )
+                }
             }
 
             val slotSize = (
