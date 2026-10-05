@@ -417,6 +417,27 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun drawerSuggestionPreferenceIsExplicitAndPersistent() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("drawer-suggestions.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+        try {
+            assertFalse(repository.experiencePreferences.first().showDrawerSuggestions)
+            repository.setShowDrawerSuggestions(true)
+            assertEquals(
+                true,
+                repository.experiencePreferences.first { it.showDrawerSuggestions }
+                    .showDrawerSuggestions,
+            )
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun experienceDefaultsFavorLauncherLikeHomeWithoutDashboardActions() {
         val defaults = LauncherExperiencePreferences()
 
@@ -441,6 +462,7 @@ class LauncherPreferencesTest {
         assertEquals(LauncherDrawerEntryMode.BROWSE, defaults.drawerEntryMode)
         assertEquals(LauncherDrawerSpacing.STANDARD, defaults.drawerSpacing)
         assertEquals(5, defaults.drawerPageRows)
+        assertFalse(defaults.showDrawerSuggestions)
         assertEquals(LauncherHomeGlanceAlignment.LEFT, defaults.homeGlanceAlignment)
         assertEquals(LauncherHomeSearchPlacement.BOTTOM, defaults.homeSearchPlacement)
         assertEquals(LauncherHomeSearchStyle.GLASS, defaults.homeSearchStyle)

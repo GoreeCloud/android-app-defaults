@@ -7464,6 +7464,7 @@ private fun AppDrawerSurface(
                         drawerQuery,
                         showPinnedOnly,
                         selectedDrawerTab?.id,
+                        selectedDiscoveryFilter,
                         primaryProfileId,
                     ) {
                         if (
