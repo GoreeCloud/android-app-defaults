@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -22,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 internal const val LAUNCHER_ICON_DECODE_SIZE_PX = 144
@@ -29,6 +33,10 @@ internal const val LAUNCHER_ICON_CACHE_MAX_KIB = 12 * 1024
 internal const val LAUNCHER_ICON_STALE_CACHE_MAX_KIB = 4 * 1024
 internal const val LAUNCHER_ICON_PRELOAD_COUNT = 128
 internal const val LAUNCHER_ICON_PRELOAD_PARALLELISM = 3
+internal const val LAUNCHER_ADAPTIVE_FOREGROUND_OVERSCAN_FRACTION = 0.14f
+internal const val LAUNCHER_LEGACY_ICON_NORMALIZE_THRESHOLD = 0.84f
+internal const val LAUNCHER_LEGACY_ICON_TARGET_FRACTION = 0.90f
+internal const val LAUNCHER_LEGACY_ICON_MAX_SCALE = 1.24f
 
 internal data class LauncherIconCacheKey(
     val user: UserHandle,
@@ -58,27 +66,103 @@ internal fun <T> firstSuccessfulIconLoad(vararg loaders: () -> T?): T? {
     return null
 }
 
+internal fun launcherLegacyIconNormalizationScale(
+    contentWidth: Int,
+    contentHeight: Int,
+    canvasSize: Int,
+): Float {
+    if (contentWidth <= 0 || contentHeight <= 0 || canvasSize <= 0) return 1f
+    val occupiedFraction = max(contentWidth, contentHeight).toFloat() / canvasSize.toFloat()
+    if (occupiedFraction >= LAUNCHER_LEGACY_ICON_NORMALIZE_THRESHOLD) return 1f
+    return (LAUNCHER_LEGACY_ICON_TARGET_FRACTION / occupiedFraction)
+        .coerceIn(1f, LAUNCHER_LEGACY_ICON_MAX_SCALE)
+}
+
+private fun renderLauncherDrawableSquare(
+    drawable: Drawable,
+    sizePx: Int,
+): Bitmap {
+    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val copy = drawable.constantState?.newDrawable()?.mutate() ?: drawable.mutate()
+    val previousBounds = Rect(copy.bounds)
+    copy.setBounds(0, 0, sizePx, sizePx)
+    copy.draw(canvas)
+    copy.bounds = previousBounds
+    return bitmap
+}
+
+private fun launcherAlphaBounds(bitmap: Bitmap): Rect? {
+    var left = bitmap.width
+    var top = bitmap.height
+    var right = -1
+    var bottom = -1
+
+    for (y in 0 until bitmap.height) {
+        for (x in 0 until bitmap.width) {
+            if ((bitmap.getPixel(x, y) ushr 24) > 8) {
+                if (x < left) left = x
+                if (x > right) right = x
+                if (y < top) top = y
+                if (y > bottom) bottom = y
+            }
+        }
+    }
+
+    return if (right < left || bottom < top) null else Rect(left, top, right + 1, bottom + 1)
+}
+
+private fun normalizeLauncherLegacyIcon(bitmap: Bitmap): Bitmap {
+    val bounds = launcherAlphaBounds(bitmap) ?: return bitmap
+    val scale = launcherLegacyIconNormalizationScale(
+        contentWidth = bounds.width(),
+        contentHeight = bounds.height(),
+        canvasSize = bitmap.width.coerceAtMost(bitmap.height),
+    )
+    if (scale <= 1.001f) return bitmap
+
+    val destinationWidth = (bounds.width() * scale).coerceAtMost(bitmap.width.toFloat())
+    val destinationHeight = (bounds.height() * scale).coerceAtMost(bitmap.height.toFloat())
+    val left = (bitmap.width - destinationWidth) / 2f
+    val top = (bitmap.height - destinationHeight) / 2f
+    val normalized = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+    Canvas(normalized).drawBitmap(
+        bitmap,
+        bounds,
+        RectF(left, top, left + destinationWidth, top + destinationHeight),
+        Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
+    )
+    return normalized
+}
+
 /**
- * Flattens an Android adaptive icon into a square full-bleed bitmap before Launcher applies the
- * user-selected mask. This avoids carrying Android/OEM's baked mask into transparent corners.
+ * Flattens adaptive icon layers without Android's preselected mask and normalizes unusually padded
+ * legacy artwork before Launcher applies the user-selected shape. The selected Launcher mask owns
+ * the final silhouette across Home, Dock, Apps, Search and folder previews.
  */
 internal fun renderLauncherMaskReadyBitmap(
     drawable: Drawable,
     sizePx: Int,
 ): Bitmap? {
     if (sizePx <= 0) return null
-    val adaptive = drawable as? AdaptiveIconDrawable ?: return null
+    val adaptive = drawable as? AdaptiveIconDrawable
+    if (adaptive == null) {
+        return normalizeLauncherLegacyIcon(renderLauncherDrawableSquare(drawable, sizePx))
+    }
+
     val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
 
     fun Drawable.render(left: Int, top: Int, right: Int, bottom: Int) {
         val copy = constantState?.newDrawable()?.mutate() ?: mutate()
+        val previousBounds = Rect(copy.bounds)
         copy.setBounds(left, top, right, bottom)
         copy.draw(canvas)
+        copy.bounds = previousBounds
     }
 
     adaptive.background.render(0, 0, sizePx, sizePx)
-    val overscan = (sizePx * 0.08f).roundToInt()
+    val overscan = (sizePx * LAUNCHER_ADAPTIVE_FOREGROUND_OVERSCAN_FRACTION).roundToInt()
     adaptive.foreground.render(-overscan, -overscan, sizePx + overscan, sizePx + overscan)
     return bitmap
 }
