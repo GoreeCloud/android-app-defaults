@@ -1,6 +1,6 @@
 package com.goreecloud.launcher.core.launcher
 
-internal enum class LauncherDrawerSmartFolderKind(
+enum class LauncherDrawerSmartFolderKind(
     val displayName: String,
     val explanation: String,
 ) {
