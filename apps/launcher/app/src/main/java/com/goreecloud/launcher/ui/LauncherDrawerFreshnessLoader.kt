@@ -5,8 +5,8 @@ import android.content.pm.LauncherActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Process
-import android.os.UserHandle
 import com.goreecloud.launcher.core.launcher.LauncherAppFreshness
+import com.goreecloud.launcher.core.workspace.workspaceKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -18,9 +18,10 @@ private data class LauncherProfilePackageKey(
 /**
  * Loads package freshness without borrowing primary-user metadata for a different Android profile.
  *
- * LauncherActivityInfo remains the profile-qualified source for first-install time. Update time is
- * read from a profile-scoped Context when Android permits that access; otherwise it fails closed to
- * the first-install timestamp so "New" remains truthful while "Updated" does not fabricate a hit.
+ * LauncherActivityInfo remains the profile-qualified source for first-install time. Android's
+ * public launcher surface does not expose a profile-qualified last-update timestamp. Primary-profile
+ * update time therefore comes from PackageManager, while other profiles fail closed to first install
+ * so "New" stays truthful and "Updated" never borrows a same-package primary-profile timestamp.
  */
 internal suspend fun loadLauncherDrawerFreshness(
     context: Context,
@@ -40,15 +41,15 @@ internal suspend fun loadLauncherDrawerFreshness(
             )
 
             val packageTimes = packageCache.getOrPut(cacheKey) {
-                val profileContext = when {
-                    app.user == primaryUser -> appContext
-                    else -> runCatching {
-                        appContext.createContextAsUser(app.user, 0)
-                    }.getOrNull()
-                }
-                profileContext?.let { scopedContext ->
+                if (app.user != primaryUser) {
+                    // Public LauncherApps exposes exact profile identity and first-install time,
+                    // but it does not expose a profile-qualified last-update timestamp. Do not
+                    // borrow the primary profile's PackageManager result for a same-package Work
+                    // or managed-profile app; fail closed until Android exposes an authorized path.
+                    null
+                } else {
                     launcherPackageTimes(
-                        packageManager = scopedContext.packageManager,
+                        packageManager = appContext.packageManager,
                         packageName = packageName,
                     )
                 }

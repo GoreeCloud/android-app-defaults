@@ -3,7 +3,7 @@
 - Added a compact **All / Pinned / Suggested / New / Updated** discovery row below App Drawer tabs.
 - Kept **Suggested** entirely device-local using truthful Launcher recent/frequent launch signals; a fresh install with no history receives deterministic A-Z fallback ordering rather than simulated personalization.
 - Kept **New** keyed by exact profile-qualified Launcher activity identity and Android first-install time.
-- Added profile-scoped Android package metadata for **Updated** where available; metadata access fails closed for profiles Android does not expose rather than borrowing primary-user timestamps.
+- Added authoritative primary-profile Android package metadata for **Updated**; non-primary profiles fail closed because the public launcher API does not expose a profile-qualified last-update timestamp, so same-package primary-user metadata is never borrowed.
 - Added **Recently updated** sort order with stable alphabetical fallback.
 - Removed the redundant pinned-only header button because Pinned is now part of the discoverability row.
 - Preserved custom tabs, User/Work separation, local Apps search, Hidden Apps/App Lock authority, Drawer-to-Home/Dock placement, no-new-permission behavior, and the no-sponsored/no-remote-analytics boundary.

@@ -94,7 +94,7 @@ The current Development continuation adds a compact discovery row:
 - **New** — applications whose profile-qualified first-install timestamp is within the bounded freshness window.
 - **Updated** — applications with a materially later package update timestamp than first install, when Android exposes package metadata for that profile.
 
-For non-primary profiles, first-install time continues to come from profile-qualified LauncherActivityInfo. Last-update time is read only from a profile-scoped Android context when available. If that authority is unavailable, **Updated** fails closed instead of borrowing primary-user metadata for a same-package Work or managed-profile app.
+For non-primary profiles, first-install time continues to come from profile-qualified LauncherActivityInfo. Android's public LauncherApps surface does not expose profile-qualified last-update time, so **Updated** currently fails closed for Work and other non-primary profiles instead of borrowing primary-user metadata for a same-package app. Primary-profile update time comes from PackageManager.
 
 Full Smart Folders remain future work. Any later rule-based folder membership must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable.
 
