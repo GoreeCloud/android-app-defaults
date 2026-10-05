@@ -1,6 +1,7 @@
 package com.goreecloud.launcher
 
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -156,6 +157,10 @@ class HiddenAppsUiRuntimeTest {
             composeRule
                 .onNodeWithText("App Drawer", useUnmergedTree = true)
                 .performClick()
+
+            composeRule
+                .onAllNodesWithText("Suggested apps", useUnmergedTree = true)
+                .assertCountEquals(1)
 
             composeRule
                 .onNodeWithTag("launcher-settings-hidden-apps", useUnmergedTree = true)
