@@ -10528,6 +10528,7 @@ internal fun GlazeDock(
     }
     val dockForeground = MaterialTheme.colorScheme.onSurface
     var measuredBounds by remember { mutableStateOf<Rect?>(null) }
+    var pagerBounds by remember { mutableStateOf<Rect?>(null) }
     val dockHovered = activeDrag != null &&
         dragPoint?.let { point -> measuredBounds?.contains(point) } == true
     // Clear may float directly on wallpaper in the normal case, but reduced-transparency or
@@ -10644,11 +10645,40 @@ internal fun GlazeDock(
             )
             val visibleApps = dockPages.getOrElse(logicalCurrentPage) { emptyList() }
             val visibleKeys = remember(visibleApps) { visibleApps.map { it.workspaceKey() }.toSet() }
-            LaunchedEffect(visibleKeys) {
+            val dockPageKeys = remember(dockPages) {
+                dockPages.map { page -> page.map { app -> app.workspaceKey() } }
+            }
+            val nextPageInsertionKey = remember(
+                activeDrag?.appKey,
+                dockPageKeys,
+                logicalCurrentPage,
+            ) {
+                if (activeDrag == null) {
+                    null
+                } else {
+                    launcherDockNextPageInsertionKey(
+                        pageKeys = dockPageKeys,
+                        logicalCurrentPage = logicalCurrentPage,
+                        sourceKey = activeDrag.appKey,
+                    )
+                }
+            }
+            LaunchedEffect(visibleKeys, nextPageInsertionKey, measuredBounds) {
+                val retainedKeys = visibleKeys + listOfNotNull(nextPageInsertionKey)
                 dockItemBounds.keys
-                    .filterNot(visibleKeys::contains)
+                    .filterNot(retainedKeys::contains)
                     .toList()
                     .forEach(dockItemBounds::remove)
+
+                val dock = measuredBounds
+                if (nextPageInsertionKey != null && dock != null) {
+                    dockItemBounds[nextPageInsertionKey] = Rect(
+                        left = dock.right + 1f,
+                        top = dock.top,
+                        right = dock.right + 2f,
+                        bottom = dock.bottom,
+                    )
+                }
             }
 
             val slotSize = (
@@ -10661,6 +10691,55 @@ internal fun GlazeDock(
             val previousDockPageAvailable = loopingDockPages || logicalCurrentPage > 0
             val nextDockPageAvailable =
                 loopingDockPages || logicalCurrentPage < dockPages.lastIndex
+            val dragEdgeThresholdPx = with(LocalDensity.current) { 48.dp.toPx() }
+            val dragPageDirection = if (activeDrag != null) {
+                val point = dragPoint
+                val bounds = pagerBounds
+                if (point != null && bounds != null) {
+                    launcherDockDragPageDirection(
+                        dragX = point.x,
+                        dragY = point.y,
+                        surfaceLeftPx = bounds.left,
+                        surfaceTopPx = bounds.top,
+                        surfaceRightPx = bounds.right,
+                        surfaceBottomPx = bounds.bottom,
+                        edgeThresholdPx = dragEdgeThresholdPx,
+                        previousPageAvailable = previousDockPageAvailable,
+                        nextPageAvailable = nextDockPageAvailable,
+                    )
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+
+            LaunchedEffect(
+                activeDrag?.appKey,
+                dragPageDirection,
+                pagerState.currentPage,
+                pagerState.isScrollInProgress,
+                pagerPageCount,
+            ) {
+                if (
+                    activeDrag != null &&
+                    dragPageDirection != null &&
+                    !pagerState.isScrollInProgress
+                ) {
+                    delay(450)
+                    val delta = when (dragPageDirection) {
+                        LauncherDockDragPageDirection.PREVIOUS -> -1
+                        LauncherDockDragPageDirection.NEXT -> 1
+                    }
+                    val target = (pagerState.currentPage + delta).coerceIn(
+                        0,
+                        pagerPageCount - 1,
+                    )
+                    if (target != pagerState.currentPage) {
+                        pagerState.animateScrollToPage(target)
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier
@@ -10673,6 +10752,7 @@ internal fun GlazeDock(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .onGloballyPositioned { pagerBounds = it.boundsInRoot() }
                         .semantics {
                             stateDescription =
                                 "Dock page ${logicalCurrentPage + 1} of ${dockPages.size}"
