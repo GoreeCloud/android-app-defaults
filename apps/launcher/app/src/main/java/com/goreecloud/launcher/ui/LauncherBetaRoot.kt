@@ -13364,6 +13364,10 @@ private fun GlazePopupActionGlyph(
                 segment(.68f, .18f, .34f, .50f)
                 segment(.34f, .50f, .68f, .82f)
             }
+            GlazePopupActionSymbol.FORWARD -> {
+                segment(.32f, .18f, .66f, .50f)
+                segment(.66f, .50f, .32f, .82f)
+            }
             GlazePopupActionSymbol.CLOSE -> {
                 segment(.24f, .24f, .76f, .76f)
                 segment(.76f, .24f, .24f, .76f)
