@@ -24,7 +24,7 @@ The Drawer supports or is required to support:
 - Alphabetical, reverse alphabetical, local most-recent, local most-frequent, and pinned-first ordering.
 - Fast application search.
 
-Current Development source implements Grid, Compact, List, Category, persisted presentation settings, sort controls, local app search, page/scroll navigation, stable grid geometry, and profile pages. Protected PR #243 integrated profile-aware **Recently installed** ordering using Android LauncherActivityInfo first-install time plus a 48 dp alphabetical jump index for the ordinary A-Z List view. The current Development continuation adds **Recently updated** ordering and a compact discovery-filter row for **All / Pinned / Suggested / New / Updated**.
+Current Development source implements Grid, Compact, List, Category, persisted presentation settings, sort controls, local app search, page/scroll navigation, stable grid geometry, and profile pages. Protected PR #243 integrated profile-aware **Recently installed** ordering using Android LauncherActivityInfo first-install time plus a 48 dp alphabetical jump index for the ordinary A-Z List view. Protected PR #245 integrated **Recently updated** ordering and the compact discovery-filter row for **All / Pinned / Suggested / New / Updated**. The current Settings architecture candidate makes **Suggested** explicitly opt-in and disabled by default while leaving Pinned/New/Updated available without usage-derived ranking.
 
 ## Universal Search relationship
 
@@ -90,7 +90,7 @@ The current Development continuation adds a compact discovery row:
 
 - **All** — the current profile/tab inventory.
 - **Pinned** — exact profile-qualified Launcher pins.
-- **Suggested** — bounded local ordering from Launcher-local recent/frequent use; when no truthful usage exists, the fallback is deterministic A-Z rather than fabricated personalization.
+- **Suggested** — explicit opt-in; bounded local ordering from Launcher-local recent/frequent use; when no truthful usage exists, the fallback is deterministic A-Z rather than fabricated personalization. Disabling the setting removes the Suggested discovery filter and returns an active Suggested view to All.
 - **New** — applications whose profile-qualified first-install timestamp is within the bounded freshness window.
 - **Updated** — applications with a materially later package update timestamp than first install, when Android exposes package metadata for that profile.
 
