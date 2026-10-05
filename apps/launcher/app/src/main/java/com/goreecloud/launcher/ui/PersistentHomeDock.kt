@@ -19,12 +19,19 @@ internal fun PersistentHomeDock(
     iconScale: Float,
     style: LauncherDockStyle,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
+    pageSize: Int = 5,
+    showLabels: Boolean = false,
+    showSearch: Boolean = false,
+    onOpenSearch: () -> Unit = {},
 ) {
     val itemBounds = remember(apps) { mutableMapOf<String, Rect>() }
     GlazeDock(
         apps = apps,
         iconScale = iconScale,
         style = style,
+        pageSize = pageSize,
+        showLabels = showLabels,
+        showSearch = showSearch,
         layoutLocked = true,
         editMode = false,
         activeDrag = null,
@@ -37,6 +44,7 @@ internal fun PersistentHomeDock(
         onCancelLocalDrag = {},
         onLaunchApp = onLaunchApp,
         onManageApp = { _, _ -> },
+        onOpenSearch = onOpenSearch,
         onSwipeUp = {},
         onSwipeDown = {},
     )

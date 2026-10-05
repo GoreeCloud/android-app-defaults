@@ -1547,6 +1547,9 @@ class MainActivity : ComponentActivity() {
                             onSetHomeSearchStyle = launcherPreferencesRepository::setHomeSearchStyle,
                             onSetHomeSpacing = launcherPreferencesRepository::setHomeSpacing,
                             onSetDockStyle = launcherPreferencesRepository::setDockStyle,
+                            onSetDockPageSize = launcherPreferencesRepository::setDockPageSize,
+                            onSetShowDockLabels = launcherPreferencesRepository::setShowDockLabels,
+                            onSetShowDockSearch = launcherPreferencesRepository::setShowDockSearch,
                             onSetWallpaperShade = launcherPreferencesRepository::setWallpaperShade,
                             onSetGestureAction = { gesture, action ->
                                 launcherPreferencesRepository.setGestureAction(gesture, action)

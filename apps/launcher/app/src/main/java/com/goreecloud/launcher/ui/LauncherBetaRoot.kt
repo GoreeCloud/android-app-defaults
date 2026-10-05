@@ -121,6 +121,7 @@ import com.goreecloud.launcher.core.launcher.LauncherUniversalSearchHomeMode
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
+import com.goreecloud.launcher.core.launcher.launcherDockPagePlan
 import com.goreecloud.launcher.core.launcher.LauncherDrawerBackdrop
 import com.goreecloud.launcher.core.launcher.LauncherDrawerEntryMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerHeaderPresentation
@@ -283,6 +284,8 @@ internal fun launcherDockMaterialRole(
     LauncherDockStyle.CLEAR -> GlazeV16MaterialRole.CLEAR_GLASS
     LauncherDockStyle.GLASS,
     LauncherDockStyle.EDGE -> GlazeV16MaterialRole.FUNCTIONAL_GLASS
+    LauncherDockStyle.SOLID -> GlazeV16MaterialRole.SOLID
+    LauncherDockStyle.RAISED -> GlazeV16MaterialRole.RAISED
 }
 
 internal fun launcherHomeSearchHeightDp(
@@ -649,6 +652,9 @@ internal fun EditableHomeDock(
     apps: List<LauncherActivityInfo>,
     iconScale: Float,
     style: LauncherDockStyle,
+    pageSize: Int,
+    showLabels: Boolean,
+    showSearch: Boolean,
     layoutLocked: Boolean,
     editMode: Boolean,
     activeDrag: LauncherAppDragData?,
@@ -661,6 +667,7 @@ internal fun EditableHomeDock(
     onCancelLocalDrag: () -> Unit,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
+    onOpenSearch: () -> Unit,
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
 ) {
@@ -668,6 +675,9 @@ internal fun EditableHomeDock(
         apps = apps,
         iconScale = iconScale,
         style = style,
+        pageSize = pageSize,
+        showLabels = showLabels,
+        showSearch = showSearch,
         layoutLocked = layoutLocked,
         editMode = editMode,
         activeDrag = activeDrag,
@@ -680,6 +690,7 @@ internal fun EditableHomeDock(
         onCancelLocalDrag = onCancelLocalDrag,
         onLaunchApp = onLaunchApp,
         onManageApp = onManageApp,
+        onOpenSearch = onOpenSearch,
         onSwipeUp = onSwipeUp,
         onSwipeDown = onSwipeDown,
     )
@@ -814,6 +825,9 @@ fun LauncherBetaRoot(
     onSetHomeSearchStyle: (LauncherHomeSearchStyle) -> Unit,
     onSetHomeSpacing: (LauncherHomeSpacing) -> Unit,
     onSetDockStyle: (LauncherDockStyle) -> Unit,
+    onSetDockPageSize: (Int) -> Unit,
+    onSetShowDockLabels: (Boolean) -> Unit,
+    onSetShowDockSearch: (Boolean) -> Unit,
     onSetWallpaperShade: (LauncherWallpaperShade) -> Unit,
     onSetGestureAction: (LauncherHomeGesture, LauncherGestureAction) -> Unit,
     onOpenWallpaperPicker: () -> Unit,
@@ -1353,6 +1367,9 @@ fun LauncherBetaRoot(
                             apps = rootDockApps,
                             iconScale = preferences.iconScale,
                             style = experiencePreferences.dockStyle,
+                            pageSize = experiencePreferences.dockPageSize,
+                            showLabels = experiencePreferences.showDockLabels,
+                            showSearch = experiencePreferences.showDockSearch,
                             layoutLocked = preferences.layoutLocked,
                             editMode = homeEditMode,
                             activeDrag = activeDrag,
@@ -1370,6 +1387,10 @@ fun LauncherBetaRoot(
                                 selectedApp = app
                                 selectedAppAnchor = anchor
                                 selectedAppContextOrigin = LauncherAppContextOrigin.DOCK
+                            },
+                            onOpenSearch = {
+                                drawerSearchRequested = false
+                                surfaceModeName = LauncherSurfaceMode.SEARCH.name
                             },
                             onSwipeUp = {
                                 dispatchLauncherHomeGestureAction(
@@ -1571,6 +1592,9 @@ fun LauncherBetaRoot(
                         onSetHomeSearchStyle = onSetHomeSearchStyle,
                         onSetHomeSpacing = onSetHomeSpacing,
                         onSetDockStyle = onSetDockStyle,
+                        onSetDockPageSize = onSetDockPageSize,
+                        onSetShowDockLabels = onSetShowDockLabels,
+                        onSetShowDockSearch = onSetShowDockSearch,
                         onSetWallpaperShade = onSetWallpaperShade,
                         onSetGestureAction = onSetGestureAction,
                         onOpenThemeManager = onOpenThemeManager,
@@ -2452,6 +2476,9 @@ private fun HomeSurface(
                     apps = dockApps,
                     iconScale = preferences.iconScale,
                     style = experiencePreferences.dockStyle,
+                    pageSize = experiencePreferences.dockPageSize,
+                    showLabels = experiencePreferences.showDockLabels,
+                    showSearch = experiencePreferences.showDockSearch,
                     layoutLocked = preferences.layoutLocked,
                     editMode = editMode,
                     activeDrag = activeDrag,
@@ -2466,6 +2493,7 @@ private fun HomeSurface(
                     onManageApp = { app, anchor ->
                         onManageApp(app, anchor, LauncherAppContextOrigin.DOCK)
                     },
+                    onOpenSearch = openSearch,
                     onSwipeUp = {
                         executeGestureAction(experiencePreferences.swipeUpAction)
                     },
@@ -7939,7 +7967,7 @@ private enum class LauncherSettingsCategory(
     HOME(
         "Home screen",
         "Grid, Glance, pages, Dock and Home behavior",
-        "grid glance clock date weather dock pages page transition labels automatic apps lock layout hints spacing quick actions",
+        "grid glance clock date weather dock pages page transition labels automatic apps lock layout hints spacing quick actions dock labels dock search items per page capacity glaze clear solid raised edge",
     ),
     DRAWER(
         "App drawer",
@@ -8383,6 +8411,9 @@ private fun LauncherSettingsRootSurface(
     onSetHomeSearchStyle: (LauncherHomeSearchStyle) -> Unit,
     onSetHomeSpacing: (LauncherHomeSpacing) -> Unit,
     onSetDockStyle: (LauncherDockStyle) -> Unit,
+    onSetDockPageSize: (Int) -> Unit,
+    onSetShowDockLabels: (Boolean) -> Unit,
+    onSetShowDockSearch: (Boolean) -> Unit,
     onSetWallpaperShade: (LauncherWallpaperShade) -> Unit,
     onSetGestureAction: (LauncherHomeGesture, LauncherGestureAction) -> Unit,
     onOpenThemeManager: () -> Unit,
@@ -8748,7 +8779,7 @@ private fun LauncherSettingsRootSurface(
 
             SettingsSection(
                 "Dock",
-                "Bottom-row apps and material",
+                "Persistent favorites, pages and material",
                 visible = selectedSettingsCategory == LauncherSettingsCategory.HOME,
             ) {
                 Text(
@@ -8757,16 +8788,20 @@ private fun LauncherSettingsRootSurface(
                     style = MaterialTheme.typography.bodySmall,
                 )
                 ChoiceRow(
-                    choices = listOf("Floating", "Minimal", "Edge"),
+                    choices = listOf("Glaze", "Clear", "Solid", "Raised", "Edge"),
                     selected = when (experiencePreferences.dockStyle) {
-                        LauncherDockStyle.GLASS -> "Floating"
-                        LauncherDockStyle.CLEAR -> "Minimal"
+                        LauncherDockStyle.GLASS -> "Glaze"
+                        LauncherDockStyle.CLEAR -> "Clear"
+                        LauncherDockStyle.SOLID -> "Solid"
+                        LauncherDockStyle.RAISED -> "Raised"
                         LauncherDockStyle.EDGE -> "Edge"
                     },
                     onChoice = {
                         onSetDockStyle(
                             when (it) {
-                                "Minimal" -> LauncherDockStyle.CLEAR
+                                "Clear" -> LauncherDockStyle.CLEAR
+                                "Solid" -> LauncherDockStyle.SOLID
+                                "Raised" -> LauncherDockStyle.RAISED
                                 "Edge" -> LauncherDockStyle.EDGE
                                 else -> LauncherDockStyle.GLASS
                             },
@@ -8774,12 +8809,33 @@ private fun LauncherSettingsRootSurface(
                     },
                 )
                 Text(
-                    "Floating and Minimal keep app icons directly on the wallpaper without a Dock background.",
+                    "Glaze, Solid, Raised, Edge and background-free Clear treatments follow accessibility and reduced-transparency presentation policy.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                SettingsReadOnlyRow("Capacity", "Adaptive · horizontal overflow")
-                SettingsReadOnlyRow("Edit", "Long-press an app")
+                Text(
+                    "Items per page",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                ChoiceRow(
+                    choices = listOf("4", "5", "6", "7"),
+                    selected = experiencePreferences.dockPageSize.toString(),
+                    onChoice = { value -> value.toIntOrNull()?.let(onSetDockPageSize) },
+                )
+                SettingSwitch(
+                    "Dock labels",
+                    experiencePreferences.showDockLabels,
+                    onSetShowDockLabels,
+                )
+                SettingSwitch(
+                    "Universal Search in Dock",
+                    experiencePreferences.showDockSearch,
+                    onSetShowDockSearch,
+                )
+                SettingsReadOnlyRow("Capacity", "Multiple pages · 48 dp minimum targets")
+                SettingsReadOnlyRow("Navigate", "Swipe the Dock independently of Home pages")
+                SettingsReadOnlyRow("Edit", "Long-press or drag an app")
             }
 
             SettingsSection(
@@ -10383,11 +10439,15 @@ internal fun GlazeAppSearchField(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun GlazeDock(
     apps: List<LauncherActivityInfo>,
     iconScale: Float,
     style: LauncherDockStyle,
+    pageSize: Int,
+    showLabels: Boolean,
+    showSearch: Boolean,
     layoutLocked: Boolean,
     editMode: Boolean,
     activeDrag: LauncherAppDragData?,
@@ -10400,6 +10460,7 @@ internal fun GlazeDock(
     onCancelLocalDrag: () -> Unit,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
+    onOpenSearch: () -> Unit,
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
 ) {
@@ -10438,6 +10499,7 @@ internal fun GlazeDock(
     var measuredBounds by remember { mutableStateOf<Rect?>(null) }
     val dockHovered = activeDrag != null &&
         dragPoint?.let { point -> measuredBounds?.contains(point) } == true
+    val dockHasSurface = style != LauncherDockStyle.CLEAR
     val border = when {
         dockHovered -> BorderStroke(
             2.dp,
@@ -10447,6 +10509,7 @@ internal fun GlazeDock(
                 Color.White.copy(alpha = 0.58f)
             },
         )
+        style == LauncherDockStyle.CLEAR -> null
         resolvedPresentation.materialRole == GlazeV16MaterialRole.CLEAR_GLASS -> null
         solidResolved -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         else -> BorderStroke(
@@ -10456,7 +10519,6 @@ internal fun GlazeDock(
             ),
         )
     }
-    val dockScrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier
@@ -10468,94 +10530,184 @@ internal fun GlazeDock(
                 onDockBoundsChanged(bounds)
             },
         shape = shape,
-        color = if (style == LauncherDockStyle.EDGE || dockHovered) color else Color.Transparent,
-        border = if (style == LauncherDockStyle.EDGE || dockHovered) border else null,
-        // The normal Dock is intentionally background-free: icons float directly on wallpaper.
-        // A bounded surface appears only for the explicit Edge style or active drag feedback.
-        shadowElevation = if (style == LauncherDockStyle.EDGE || dockHovered) {
-            when (resolvedPresentation.materialRole) {
-                GlazeV16MaterialRole.SOLID -> 1.dp
-                GlazeV16MaterialRole.RAISED -> 2.dp
-                else -> 0.dp
-            }
-        } else {
-            0.dp
+        color = if (dockHasSurface || dockHovered) color else Color.Transparent,
+        border = if (dockHasSurface || dockHovered) border else null,
+        shadowElevation = when {
+            style == LauncherDockStyle.RAISED -> 3.dp
+            style == LauncherDockStyle.SOLID -> 1.dp
+            dockHovered && resolvedPresentation.materialRole == GlazeV16MaterialRole.RAISED -> 2.dp
+            else -> 0.dp
         },
     ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(if (style == LauncherDockStyle.EDGE) 80.dp else 76.dp),
+                .height(
+                    when {
+                        showLabels -> 98.dp
+                        style == LauncherDockStyle.EDGE -> 88.dp
+                        else -> 84.dp
+                    },
+                ),
         ) {
             val minimumSlot = resolvedPresentation.minimumInteractionTarget
             val preferredSlot = if (minimumSlot > 60.dp) minimumSlot else 60.dp
             val horizontalPadding = GlazeMetrics.space3
-            val availableWidth = (maxWidth - horizontalPadding * 2).coerceAtLeast(minimumSlot)
-            val fittedSlot = if (apps.isEmpty()) {
-                preferredSlot
-            } else {
-                (availableWidth / apps.size.toFloat()).coerceIn(minimumSlot, preferredSlot)
+            val searchReservation = if (showSearch) minimumSlot + GlazeMetrics.space1 else 0.dp
+            val availableAppWidth = (
+                maxWidth - horizontalPadding * 2 - searchReservation
+            ).coerceAtLeast(minimumSlot)
+            val pagePlan = launcherDockPagePlan(
+                itemCount = apps.size,
+                configuredPageSize = pageSize,
+                availableAppWidthDp = availableAppWidth.value,
+                minimumInteractionTargetDp = minimumSlot.value,
+            )
+            val dockPages = remember(apps, pagePlan.effectivePageSize) {
+                if (apps.isEmpty()) {
+                    listOf(emptyList<LauncherActivityInfo>())
+                } else {
+                    apps.chunked(pagePlan.effectivePageSize)
+                }
             }
-            val scrolls = apps.isNotEmpty() &&
-                minimumSlot * apps.size.toFloat() > availableWidth
-            val slotSize = if (scrolls) minimumSlot else fittedSlot
+            val pagerState = rememberPagerState(pageCount = { dockPages.size })
+            LaunchedEffect(dockPages.size) {
+                if (pagerState.currentPage > dockPages.lastIndex) {
+                    pagerState.scrollToPage(dockPages.lastIndex.coerceAtLeast(0))
+                }
+            }
+            val visibleApps = dockPages.getOrElse(pagerState.currentPage) { emptyList() }
+            val visibleKeys = remember(visibleApps) { visibleApps.map { it.workspaceKey() }.toSet() }
+            LaunchedEffect(visibleKeys) {
+                dockItemBounds.keys
+                    .filterNot(visibleKeys::contains)
+                    .toList()
+                    .forEach(dockItemBounds::remove)
+            }
+
+            val slotSize = (
+                availableAppWidth / pagePlan.effectivePageSize.toFloat()
+            ).coerceIn(minimumSlot, preferredSlot)
             val adaptiveIconScale = (
                 iconScale * (slotSize.value / preferredSlot.value)
             ).coerceIn(0.85f, 1.15f)
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .then(
-                        if (scrolls) Modifier.horizontalScroll(dockScrollState) else Modifier,
-                    )
+                    .fillMaxSize()
                     .padding(horizontal = horizontalPadding),
-                horizontalArrangement = if (scrolls) {
-                    Arrangement.spacedBy(GlazeMetrics.space1)
-                } else {
-                    Arrangement.SpaceEvenly
-                },
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (apps.isEmpty() && activeDrag != null) {
-                    Text(
-                        "Drop in Dock",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = dockForeground.copy(alpha = 0.76f),
-                    )
-                } else {
-                    apps.forEach { app ->
-                        val appKey = app.workspaceKey()
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .semantics {
+                            stateDescription =
+                                "Dock page ${pagerState.currentPage + 1} of ${dockPages.size}"
+                        },
+                    userScrollEnabled = activeDrag == null && dockPages.size > 1,
+                ) { pageIndex ->
+                    val pageApps = dockPages[pageIndex]
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (pageApps.isEmpty() && activeDrag != null) {
+                            Text(
+                                "Drop in Dock",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = dockForeground.copy(alpha = 0.76f),
+                            )
+                        } else {
+                            pageApps.forEach { app ->
+                                val appKey = app.workspaceKey()
+                                Box(
+                                    modifier = Modifier
+                                        .size(slotSize)
+                                        .onGloballyPositioned {
+                                            if (pageIndex == pagerState.currentPage) {
+                                                dockItemBounds[appKey] = it.boundsInRoot()
+                                            }
+                                        },
+                                ) {
+                                    HomeFavoriteTile(
+                                        app = app,
+                                        displayLabel = app.label.toString(),
+                                        iconScale = adaptiveIconScale,
+                                        showLabel = showLabels,
+                                        layoutLocked = layoutLocked,
+                                        editMode = editMode,
+                                        dragData = if (layoutLocked) null else LauncherAppDragData(
+                                            appKey = appKey,
+                                            origin = LauncherAppDragOrigin.DOCK,
+                                        ),
+                                        onBeginLocalDrag = onBeginLocalDrag,
+                                        onUpdateLocalDrag = onUpdateLocalDrag,
+                                        onEndLocalDrag = onEndLocalDrag,
+                                        onCancelLocalDrag = onCancelLocalDrag,
+                                        onLaunchApp = onLaunchApp,
+                                        onManageApp = onManageApp,
+                                        onSwipeUp = onSwipeUp,
+                                        onSwipeDown = onSwipeDown,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (showSearch) {
+                    Spacer(Modifier.width(GlazeMetrics.space1))
+                    Surface(
+                        modifier = Modifier
+                            .size(minimumSlot)
+                            .testTag("launcher-dock-search")
+                            .semantics { contentDescription = "Universal Search" }
+                            .clickable(onClick = onOpenSearch),
+                        shape = CircleShape,
+                        color = if (style == LauncherDockStyle.CLEAR) {
+                            Color.Transparent
+                        } else {
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.30f)
+                        },
+                        border = if (style == LauncherDockStyle.CLEAR) null else BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                        ),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            LauncherSearchMagnifier(dockForeground)
+                        }
+                    }
+                }
+            }
+
+            if (dockPages.size > 1) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 3.dp)
+                        .testTag("launcher-dock-page-indicator"),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    repeat(dockPages.size) { index ->
+                        val selected = index == pagerState.currentPage
                         Box(
                             modifier = Modifier
-                                .size(slotSize)
-                                .onGloballyPositioned {
-                                    dockItemBounds[appKey] = it.boundsInRoot()
-                                },
-                        ) {
-                            HomeFavoriteTile(
-                                app = app,
-                                displayLabel = app.label.toString(),
-                                iconScale = adaptiveIconScale,
-                                showLabel = false,
-                                layoutLocked = layoutLocked,
-                                editMode = editMode,
-                                dragData = if (layoutLocked) null else LauncherAppDragData(
-                                    appKey = appKey,
-                                    origin = LauncherAppDragOrigin.DOCK,
+                                .size(
+                                    width = if (selected) 12.dp else 5.dp,
+                                    height = 5.dp,
+                                )
+                                .background(
+                                    dockForeground.copy(alpha = if (selected) 0.82f else 0.34f),
+                                    CircleShape,
                                 ),
-                                onBeginLocalDrag = onBeginLocalDrag,
-                                onUpdateLocalDrag = onUpdateLocalDrag,
-                                onEndLocalDrag = onEndLocalDrag,
-                                onCancelLocalDrag = onCancelLocalDrag,
-                                onLaunchApp = onLaunchApp,
-                                onManageApp = onManageApp,
-                                onSwipeUp = onSwipeUp,
-                                onSwipeDown = onSwipeDown,
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        }
+                        )
                     }
                 }
             }
