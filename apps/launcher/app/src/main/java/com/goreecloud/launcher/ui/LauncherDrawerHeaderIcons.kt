@@ -167,36 +167,29 @@ internal fun LauncherDrawerSettingsIcon(
     modifier: Modifier = Modifier,
 ) {
     Canvas(modifier = modifier.size(24.dp)) {
-        val stroke = 2.15.dp.toPx()
-        val center = Offset(size.width / 2f, size.height / 2f)
-        drawCircle(
-            color = color,
-            radius = size.minDimension * 0.26f,
-            center = center,
-            style = Stroke(width = stroke),
-        )
-        drawCircle(
-            color = color,
-            radius = size.minDimension * 0.085f,
-            center = center,
-            style = Stroke(width = stroke),
-        )
-        repeat(8) { index ->
-            val angle = Math.toRadians(index * 45.0)
-            val inner = size.minDimension * 0.255f
-            val outer = size.minDimension * 0.41f
+        val stroke = 2.05.dp.toPx()
+        val cap = StrokeCap.Round
+        val outline = Stroke(width = stroke)
+
+        listOf(0.30f, 0.50f, 0.70f).forEach { y ->
             drawLine(
                 color = color,
-                start = Offset(
-                    center.x + (kotlin.math.cos(angle) * inner).toFloat(),
-                    center.y + (kotlin.math.sin(angle) * inner).toFloat(),
-                ),
-                end = Offset(
-                    center.x + (kotlin.math.cos(angle) * outer).toFloat(),
-                    center.y + (kotlin.math.sin(angle) * outer).toFloat(),
-                ),
+                start = Offset(size.width * 0.16f, size.height * y),
+                end = Offset(size.width * 0.84f, size.height * y),
                 strokeWidth = stroke,
-                cap = StrokeCap.Round,
+                cap = cap,
+            )
+        }
+        listOf(
+            0.36f to 0.30f,
+            0.64f to 0.50f,
+            0.45f to 0.70f,
+        ).forEach { (x, y) ->
+            drawCircle(
+                color = color,
+                radius = size.minDimension * 0.07f,
+                center = Offset(size.width * x, size.height * y),
+                style = outline,
             )
         }
     }
