@@ -98,13 +98,27 @@ private fun drawDrawableSquare(
 }
 
 private fun alphaBounds(bitmap: Bitmap): Rect? {
-    var left = bitmap.width
-    var top = bitmap.height
+    val width = bitmap.width
+    val height = bitmap.height
+    val pixels = IntArray(width * height)
+    bitmap.getPixels(
+        pixels,
+        0,
+        width,
+        0,
+        0,
+        width,
+        height,
+    )
+
+    var left = width
+    var top = height
     var right = -1
     var bottom = -1
-    for (y in 0 until bitmap.height) {
-        for (x in 0 until bitmap.width) {
-            if ((bitmap.getPixel(x, y) ushr 24) > 8) {
+    for (y in 0 until height) {
+        val rowOffset = y * width
+        for (x in 0 until width) {
+            if ((pixels[rowOffset + x] ushr 24) > 8) {
                 if (x < left) left = x
                 if (x > right) right = x
                 if (y < top) top = y
