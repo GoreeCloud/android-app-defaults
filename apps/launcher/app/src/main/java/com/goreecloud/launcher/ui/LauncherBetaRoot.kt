@@ -127,6 +127,7 @@ import com.goreecloud.launcher.core.launcher.LauncherDockStyle
 import com.goreecloud.launcher.core.launcher.launcherDockInitialVirtualPage
 import com.goreecloud.launcher.core.launcher.launcherDockLogicalPage
 import com.goreecloud.launcher.core.launcher.launcherDockLoopBoundaryTarget
+import com.goreecloud.launcher.core.launcher.launcherDockNextPageInsertionKey
 import com.goreecloud.launcher.core.launcher.launcherDockPagePlan
 import com.goreecloud.launcher.core.launcher.launcherDockVirtualPageCount
 import com.goreecloud.launcher.core.launcher.LauncherDrawerBackdrop
