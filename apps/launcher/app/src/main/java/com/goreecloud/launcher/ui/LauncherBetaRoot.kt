@@ -719,6 +719,7 @@ fun LauncherBetaRoot(
     workspace: WorkspaceState,
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
+    drawerSortOrderName: String?,
     experiencePreferences: LauncherExperiencePreferences,
     homePageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
     recentAppKeys: List<String>,
@@ -804,6 +805,7 @@ fun LauncherBetaRoot(
     onSetHomeGrid: (Int, Int) -> Unit,
     onSetDrawerColumns: (Int) -> Unit,
     onSetDrawerLayoutMode: (LauncherDrawerLayoutMode) -> Unit,
+    onSetDrawerSortOrderName: (String?) -> Unit,
     onSetShowLabels: (Boolean) -> Unit,
     onSetIconScale: (Float) -> Unit,
     onSetIconShape: (LauncherIconShape) -> Unit,
@@ -9542,6 +9544,37 @@ private fun LauncherSettingsRootSurface(
                             },
                         )
                     },
+                )
+                Text(
+                    "Sorting",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                val settingsDrawerSortOrder = remember(drawerSortOrderName) {
+                    runCatching {
+                        drawerSortOrderName
+                            ?.let(LauncherDrawerSortOrder::valueOf)
+                            ?: LauncherDrawerSortOrder.ALPHABETICAL
+                    }.getOrDefault(LauncherDrawerSortOrder.ALPHABETICAL)
+                }
+                ChoiceRow(
+                    choices = LauncherDrawerSortOrder.entries.map { it.displayName },
+                    selected = settingsDrawerSortOrder.displayName,
+                    onChoice = { choice ->
+                        LauncherDrawerSortOrder.entries
+                            .firstOrNull { it.displayName == choice }
+                            ?.let { onSetDrawerSortOrderName(it.name) }
+                    },
+                )
+                SettingSwitch(
+                    "Suggested apps",
+                    experiencePreferences.showDrawerSuggestions,
+                    onSetShowDrawerSuggestions,
+                )
+                Text(
+                    "Suggestions use only Launcher-local launch history. They are off by default and do not require Android Usage Access or remote profiling.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     "Header actions",
