@@ -98,6 +98,52 @@ class LauncherPreferencesTest {
     }
 
     @Test
+    fun drawerTabOrderingPersistsWithoutChangingMembership() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("drawer-tab-order.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            repository.createDrawerTab("Work").join()
+            repository.createDrawerTab("Media").join()
+            repository.createDrawerTab("Games").join()
+
+            var tabs = repository.drawerTabs.first { it.size == 3 }
+            val media = tabs.single { it.name == "Media" }
+            repository.setDrawerTabMembership(
+                tabId = media.id,
+                appKey = "0:com.example.media/.Main",
+                enabled = true,
+            ).join()
+
+            repository.moveDrawerTab(
+                tabId = media.id,
+                direction = LauncherDrawerTabMoveDirection.EARLIER,
+            ).join()
+
+            tabs = repository.drawerTabs.first {
+                it.size == 3 && it.first().id == media.id
+            }
+            assertEquals(listOf("Media", "Work", "Games"), tabs.map { it.name })
+            assertEquals(setOf("0:com.example.media/.Main"), tabs.first().memberKeys)
+
+            repository.moveDrawerTab(
+                tabId = media.id,
+                direction = LauncherDrawerTabMoveDirection.LATER,
+            ).join()
+            tabs = repository.drawerTabs.first {
+                it.size == 3 && it[1].id == media.id
+            }
+            assertEquals(listOf("Work", "Media", "Games"), tabs.map { it.name })
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun repositoryFallbackKeepsEstablishedHomeCardClock() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
