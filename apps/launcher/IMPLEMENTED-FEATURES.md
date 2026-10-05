@@ -1,3 +1,9 @@
+## October 4, 2026 — Dock active-drag page handoff candidate
+
+The stacked Dock continuation adds deterministic edge-dwell page switching while an application drag is active. A drag must remain inside the valid left or right Dock edge band before Launcher advances the pager, so ordinary drag movement does not compete with page navigation. The candidate also exposes the first non-source item on the following logical page as a synthetic insertion boundary during the drag, preserving the authoritative flat Dock order when the user drops after the last icon on the visible page.
+
+**Acceptance boundary:** Development source candidate only. Fresh exact-head protected build/JVM/lint/runtime validation and representative-device drag timing, cancellation, loop-edge, accessibility, large-text, phone/tablet/foldable, and performance acceptance remain required.
+
 ## October 4, 2026 — adaptive paged Dock candidate
 
 Draft PR #239 adds adaptive Dock pages over the existing ordered, unbounded application Dock. The candidate preserves the resolved interaction floor by reducing effective per-page density before shrinking touch targets, exposes preferred 4/5/6/7 items-per-page density, adds independent horizontal Dock paging with compact logical-page semantics, explicit Previous/Next accessibility actions, deterministic opt-in wraparound, optional Dock labels, and an optional direct Launcher Universal Search affordance that remains renderable even with an otherwise empty Dock. Dock material choices expand to Glaze, Clear, Solid, Raised, and Edge while continuing to use the existing Glaze presentation-policy fallback boundary.
