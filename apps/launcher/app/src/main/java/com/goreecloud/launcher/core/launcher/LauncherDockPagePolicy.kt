@@ -134,7 +134,14 @@ internal fun launcherDockNextPageInsertionKey(
     pageKeys: List<List<String>>,
     logicalCurrentPage: Int,
     sourceKey: String?,
-): String? =
-    pageKeys
-        .getOrNull(logicalCurrentPage + 1)
-        ?.firstOrNull { key -> key != sourceKey }
+    loop: Boolean = false,
+): String? {
+    if (pageKeys.isEmpty()) return null
+    val current = logicalCurrentPage.coerceIn(0, pageKeys.lastIndex)
+    val nextIndex = when {
+        current < pageKeys.lastIndex -> current + 1
+        loop && pageKeys.size > 1 -> 0
+        else -> return null
+    }
+    return pageKeys[nextIndex].firstOrNull { key -> key != sourceKey }
+}
