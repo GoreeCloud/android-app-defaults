@@ -126,9 +126,9 @@ GoreeCloud Policy and GoreeCloud Observability are applicable under the current 
 
 ## GLAZE UI / Design Center
 
-Current Official Stable GoreeCloud design-system authority is GLAZE UI V1.6 / `1.6.0` at exact release source `a7180679ea851389e0f3004515f9a25f420e716d`. This repository still implements a historical V1.2 / `1.2.0` optical/material foundation at reviewed source `f285b9145e27e6e7027b075c37299d101945c272`; that implementation is Development evidence only and is not relabeled as a completed V1.6 migration or consumer acceptance.
+Current GoreeCloud design-system authority is Glaze V1.7 / `1.7.0` at release integration `1a5756daed2294155be2e9972b24f580f6222b7b`; V1.7.0 intentionally inherits accepted V1.6.0 runtime behavior. This repository still implements a historical V1.2 / `1.2.0` optical/material foundation at reviewed source `f285b9145e27e6e7027b075c37299d101945c272` plus a bounded V1.6 presentation-context layer. Those are Development implementation evidence only and are not relabeled as completed V1.7 migration or consumer acceptance.
 
-Accepted PR #73 adds a bounded V1.6 presentation-context layer over that substrate. The current Keyboard surface uses the existing 56 dp Touch Assistance interaction floor consistently for candidate and alternate targets and requests 320 dp ordinary / 364 dp Touch Assistance preferred height for the five-row letters layout. These changes are partial current-Stable migration progress, not whole-consumer V1.6 acceptance.
+Accepted PR #73 adds a bounded V1.6 presentation-context layer over that substrate. The current Keyboard surface uses the existing 56 dp Touch Assistance interaction floor consistently for candidate and alternate targets and requests 320 dp ordinary / 364 dp Touch Assistance preferred height for the five-row letters layout. These changes are inherited implementation progress, not whole-consumer V1.7 acceptance.
 
 The historical V1.2 material rule is **Neutral glass is the material. Color is an accent.** `KeyboardView` consumes neutral V1.2 base-glass surfaces for Light/Dark runtime rendering. Deep Dark is source-defined but not automatically selected from ordinary Android dark mode. The source also records historical V1.2 state calibration for pressed/selected/focus behavior without representing that source map as current V1.6 conformance.
 

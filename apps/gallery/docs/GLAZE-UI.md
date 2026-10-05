@@ -206,7 +206,7 @@ A surface is not considered Glaze UI compliant merely because its background col
 
 ## Accessibility and resilience contract
 
-Visual quality does not override accessibility. Stable-release review must include, where applicable, TalkBack identification, meaningful labels for icon-only controls, practical touch-target sizing, readable contrast, large-font and increased-display-size behavior, usable focus order, reduced-motion behavior, and safe solid-surface presentation when advanced effects are unavailable or inappropriate.
+Visual quality does not override accessibility. Anchor / Production Acceptance review must include, where applicable, TalkBack identification, meaningful labels for icon-only controls, practical touch-target sizing, readable contrast, large-font and increased-display-size behavior, usable focus order, reduced-motion behavior, and safe solid-surface presentation when advanced effects are unavailable or inappropriate.
 
 The gc.11 Settings treatment, gc.12 browsing actions, gc.14 media-viewer controls, and gc.15 dialog controls use 48dp comfortable interactive targets. The gc.13 search empty state, gc.14 viewer overlay, and gc.15 dialogs use solid semantic surfaces rather than depending on translucency for readability. gc.16 keeps those dialog surfaces content-sized while preserving scrollability for large-font or constrained-height cases. Any Glaze UI treatment that materially weakens accessibility must be revised even if it matches the preferred aesthetic.
 
@@ -248,9 +248,9 @@ No permanent Glaze UI exception is approved for GoreeCloud Gallery at this time.
 
 If a future material constraint prevents compliance, the exception record must identify the affected surface or behavior, the requirement that cannot be met, the reason, user-visible impact, compensating or approved alternative, owner, review condition, and condition for removal. Convenience, schedule pressure, upstream defaults, or unfinished redesign work are not production exceptions.
 
-## Stable-release boundary
+## Anchor / production-acceptance boundary
 
-Glaze UI compliance is a blocking Stable-release requirement. Stable promotion requires both automated conformance evidence and the applicable real-device visual/accessibility acceptance in `docs/STABLE-RELEASE-CHECKLIST.md`.
+Glaze conformance is a blocking Anchor / Production Acceptance requirement. Promotion requires both automated conformance evidence and the applicable real-device visual/accessibility acceptance in `docs/STABLE-RELEASE-CHECKLIST.md`.
 
 A green build, successful APK assembly, or successful signing workflow alone does not establish Glaze UI production readiness.
 

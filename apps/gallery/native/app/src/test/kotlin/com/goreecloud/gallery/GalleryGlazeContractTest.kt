@@ -11,6 +11,10 @@ class GalleryGlazeContractTest {
         assertEquals("1.7.0", GalleryGlazeContract.VERSION)
         assertEquals("Glaze V1.7", GalleryGlazeContract.PRODUCT_LABEL)
         assertEquals(
+            "1a5756daed2294155be2e9972b24f580f6222b7b",
+            GalleryGlazeContract.SHARED_RELEASE_INTEGRATION,
+        )
+        assertEquals(
             "7c4ded83d7a8725165bb6a55dfb175667cc9589e",
             GalleryGlazeContract.SOURCE_QUALIFICATION_ANCHOR,
         )

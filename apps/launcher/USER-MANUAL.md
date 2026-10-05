@@ -32,6 +32,14 @@ Recent/most-used suggestions are presentation-only. They fill otherwise-empty Ho
 
 The ranking store is local and privacy-bounded. It retains only application workspace keys, aggregate Launcher launch counts, and a bounded recency ordering. It does not request Android Usage Access or retain launch timestamps, dwell time, Search queries, or network telemetry for this feature.
 
+## App Lock
+
+Open **Launcher settings → Privacy & security → App Lock** to manage protected apps. The manager can search installed apps and switch between **All** and **Locked** views. Each row identifies Personal or Work context and the package name, and its switch enables or removes App Lock for that exact profile-qualified app identity. You can also long-press an app and choose **Lock app** or **Remove App Lock**. Locked apps are marked with a small lock indicator in Apps.
+
+When GoreeCloud Launcher opens a locked app—or a Launcher app shortcut belonging to a locked app—Android presents the configured device-authentication screen before the launch proceeds. If Android reports that no secure screen lock is configured or cannot provide an authentication flow, Launcher keeps the protected launch closed rather than bypassing App Lock.
+
+App Lock is a **Launcher-originated launch control**, not a system-wide application firewall. Notifications, Android Settings, deep links, other launchers, and other apps can initiate app launches outside GoreeCloud Launcher's authority. Locked membership is stored locally using the exact Launcher workspace identity and is intentionally excluded from portable preference v1 until a separately versioned recovery policy is defined.
+
 ## Home screen
 
 The primary Home experience is a launcher-style surface. Android renders the device wallpaper behind the launcher window, and Home presents the persisted application grid and Dock over that surface without requesting wallpaper-storage privileges.
@@ -45,7 +53,7 @@ The primary Home experience is a launcher-style surface. Android renders the dev
 - Long-press empty Home space to enter **Edit Home**, then use its **Settings** action to change supported Home, Apps, icon, label, appearance, layout-lock, and Launcher Universal Search preferences. Pressing Android **Home** while Edit Home is open exits the editor and returns to the ordinary primary Home surface. You can also open the same Launcher Settings surface from the gear at the top of **Apps**.
 - Swipe one finger downward through the unobstructed Home gesture zone to open Launcher Universal Search by default. This assignment can be changed under **Launcher settings → Gestures**.
 - The first-run setup can seed the five-item Dock from common app roles when available. Automatic Home apps are controlled separately by the selected No automatic apps / 10 most recent apps / 10 most used apps mode.
-- Five apps remain the first-run Dock default, not a capacity limit. You can add more apps; the Dock tightens item presentation while preserving at least a 48 dp touch slot, then scrolls horizontally when more items are present than fit safely at once.
+- Five apps remain the first-run Dock default, not a capacity limit. In the current Development candidate you can add substantially more apps and organize them across horizontally swipeable Dock pages. Launcher preserves the resolved 48 dp interaction floor by paging earlier instead of shrinking touch targets below that floor. Under **Launcher settings → Home screen → Dock**, you can choose a preferred 4, 5, 6, or 7 items per page, optionally loop from the last Dock page back to the first, show Dock labels, expose a direct Universal Search button, and choose Glaze, Clear, Solid, Raised, or Edge presentation. The Search button can keep the Dock available even when no app placements are present. Narrow layouts may display fewer apps per page than the preference so interaction targets remain safe.
 
 The launcher discovers launchable activities through Android `LauncherApps` across available profiles. The manifest uses a scoped `MAIN` + `LAUNCHER` package-visibility query without requesting broad `QUERY_ALL_PACKAGES` access; core search no longer requires the legacy GoreeCloud Index search-action query.
 
@@ -53,7 +61,7 @@ The primary Home page remains the protected HOME rank-zero page. Under terminal 
 
 ### Built-in Launcher hints
 
-After startup, Launcher can show a short dismissible Home hint using the same compact visual language as onboarding: a gesture strip for **Apps**, **Search**, and **Edit Home**, followed by three short cues for precise placement, cross-page movement, and keeping pinned apps easy to reach. The hint remains instructional only; it does not change placement, provider, or gesture authority.
+After startup, Launcher can show a short dismissible Home hint using the same compact visual language as onboarding: a gesture strip for **Apps**, **Search**, and **Edit Home**, followed by four short cues for precise placement, cross-page movement, independent Dock-page navigation, and keeping pinned apps easy to reach. The hint remains instructional only; it does not change placement, provider, or gesture authority.
 
 You can disable hints during startup, dismiss the Home hint with **Got it**, and later turn **Launcher hints** back on from Launcher Settings. Use **Review Launcher setup → Open** to replay the three-step first-use guidance without clearing the Home layout, Search, appearance, or hint choices. Hint and setup-progress state stay local and are not telemetry.
 
@@ -136,11 +144,35 @@ Use the **Search apps** field to search the installed-application inventory loca
 
 Long-press an app to open the compact Glaze context menu. A stationary hold opens that menu; keep holding and move to drag the app directly toward Home or the Dock when the layout is unlocked. The same context surface provides Home/Remove, Dock/Undock, app-specific Widgets when available, App info, folder assignment, supported app shortcuts, **Hide from Apps & Search / Show in Apps & Search**, and **Uninstall**. Hiding affects only the exact profile-qualified app identity in Apps and Universal Search; it does not disable or uninstall the package, and existing Home, Dock, folder, widget, or Room placement remains unchanged. There is no second **More options** placement dialog. **Remove** only removes or suppresses the Home icon; it does not uninstall the application. **Uninstall** delegates to Android's system confirmation, and Launcher never silently removes packages. Placement-changing actions are disabled while the Home layout is locked.
 
-The App Drawer sort control provides **A–Z**, **Z–A**, **Most recent**, **Most frequent**, and **Pinned first**. Long-press an app in Apps to **Pin in Apps / Unpin in Apps**. Pinned apps can be moved earlier or later in their manual pinned order, and when more than one app is pinned the same context menu exposes **Reset pinned order A–Z**. The pin control in the Apps header can temporarily show pinned apps only for the active User/Work page. Pin membership and ordering are profile-qualified, device-local presentation state; they do not move Home, Dock, or folder placements. The two usage-based sorts use only the Launcher's local privacy-bounded launch history described above; they do not request Android Usage Access. User Apps and Work Apps remain separate profile views.
+The App Drawer sort control provides **A–Z**, **Z–A**, **Most recent**, **Recently installed**, **Recently updated**, **Most frequent**, and **Pinned first**. **Recently installed** uses exact Launcher activity/profile first-install time rather than usage history. **Recently updated** uses Android PackageManager update metadata for the primary profile. Work and other non-primary profiles currently fail closed because Android's public launcher API does not expose a profile-qualified last-update timestamp. In ordinary **A–Z + List** presentation, a 48 dp alphabetical jump index provides direct navigation to visible letter buckets. Long-press an app in Apps to **Pin in Apps / Unpin in Apps**. Pinned apps can be moved earlier or later in their manual pinned order, and when more than one app is pinned the same context menu exposes **Reset pinned order A–Z**. Pin membership and ordering are profile-qualified, device-local presentation state; they do not move Home, Dock, or folder placements. The usage-based sorts use only the Launcher's local privacy-bounded launch history described above; they do not request Android Usage Access. User Apps and Work Apps remain separate profile views.
+
+### Discovery filters
+
+Below the custom App Drawer tabs, the Development discovery row provides **All**, **Pinned**, **Suggested**, **New**, and **Updated**:
+
+- **All** shows the current profile/tab inventory.
+- **Pinned** shows exact profile-qualified Launcher pins.
+- **Suggested** uses only Launcher-local recent/frequent launch signals. When there is no truthful usage history, Launcher explicitly uses a deterministic A-Z fallback instead of pretending to know your preferences.
+- **New** shows applications inside the bounded freshness window using profile-qualified first-install timestamps.
+- **Updated** shows applications with a materially later Android package update timestamp when profile-correct metadata is available.
+
+These controls filter Launcher presentation only. They do not install, disable, uninstall, hide, lock, or move applications. For a Work or managed profile where Android does not expose package update metadata to Launcher, **Updated** returns no fabricated match rather than borrowing primary-profile metadata.
+
+### Custom App Drawer tabs
+
+Apps includes an **All** tab and supports up to eight device-local custom tabs. Use the **+** tab action to create one. Select a custom tab to filter the current User/Work profile page to that collection, and use the adjacent edit action to rename or delete the selected custom tab.
+
+To add or remove an application from custom tabs, long-press the application and choose **App drawer tabs**, then toggle the applicable collections. One application can belong to more than one custom tab. Membership uses the exact Android-profile-qualified Launcher identity, so the same package in User and Work profiles is not silently treated as one object.
+
+Custom tabs are organization only. Changing tab membership does not install/uninstall an app, move or remove a Home/Dock placement, change folder membership, hide an app, or enable App Lock. Tab state currently remains device-local and is not yet included in the strict portable-v1 recovery format.
+
+### Categories and App Drawer folders
+
+Choose **Category** layout to group applications by deterministic Launcher/Android category metadata. If App Drawer folders exist, they remain available under a dedicated **Folders** group while application categories continue below it; folders no longer force Category mode back to one flat grid. Drawer folders and custom tabs are independent organization mechanisms.
 
 ## Launcher settings
 
-The current Development Settings experience opens on a searchable category home and persists supported choices locally. It is available from **Edit Home → Settings** and from the gear at the top of **Apps**. If GoreeCloud Launcher is not the active HOME application, the overview shows a direct default-Home status/action banner near the top.
+The current Development Settings experience opens on a searchable category home and persists supported choices locally. It is available from **Edit Home → Settings**. The Apps header stays focused on application discovery and organization rather than exposing Launcher-wide Settings there. If GoreeCloud Launcher is not the active HOME application, the overview shows a direct default-Home status/action banner near the top.
 
 ### Settings categories
 
@@ -162,7 +194,13 @@ Choose **Permanent on Home** or **Gesture only**. Permanent mode keeps the Searc
 
 You can choose 4, 5, or 6 columns for the Apps grid.
 
+### Apps layout quick switch
+
+The Apps header includes a Layout quick action. Tap it to cycle Grid → Compact → List → Category → Grid without opening Settings. The selected layout uses the same persisted preference as Launcher settings → App drawer → Layout, so changing it in either place stays synchronized.
+
 ### Icons and labels
+
+Masked adaptive app icons are rendered from their Android background and foreground layers before Launcher applies the selected shape. This lets the icon background fill rounded-square, squircle, circle, and teardrop masks cleanly instead of showing a second baked mask inside the selected shape.
 
 You can choose Small, Medium, or Large icon presentation and turn app labels on or off. These settings apply to the rebuilt primary surface and are also used by the current secondary-page presentation where applicable.
 
@@ -170,7 +208,7 @@ A full Theme Manager, third-party icon-pack selection, icon masking, and richer 
 
 ### Appearance
 
-The launcher supports persisted **System**, **Light**, and **Dark** appearance selection. Launcher retains evidence-backed Glaze UI Adoption Candidate mapping. The current repository mapping target is GLAZE UI V1.6 / 1.6.0 at the accepted source revision recorded by Launcher; complete rendered/native/accessibility/device acceptance remains separately gated.
+The launcher supports persisted **System**, **Light**, and **Dark** appearance selection. Launcher retains evidence-backed Glaze UI Adoption Candidate mapping. The current shared target is Glaze V1.7 / 1.7.0. Launcher still carries its accepted V1.6 implementation mapping, which V1.7 inherits at runtime, but fresh V1.7 contract adoption plus rendered/native/accessibility/device acceptance remain separately gated.
 
 ## Multi-page Home navigation
 
@@ -237,7 +275,7 @@ Naming a platform system does not mean every integration is currently implemente
 
 ## Current limitations
 
-Still incomplete or separately gated include mature cross-page drag/drop editing; primary↔secondary spatial movement; folders and smart folders; pinned/dynamic shortcut placement beyond current Search support; advanced widget resizing/stacking and portable widget rebinding/recovery; complete Theme Manager/icon-pack/masking behavior; additional gesture types and registered-command/provider targets beyond the initial configurable Home-gesture set; broader Launcher Universal Search providers for device/GoreeCloud/third-party content; optional GoreeCloud Search/Index provider-backend integration; fully polished Glaze UI Universal Search presentation and complete Launcher Glaze UI 2.1 acceptance; layout-lock coverage for future placeable item types plus representative-device five-second-hold acceptance; production visual-identity acceptance; full Glaze Theme Engine behavior; versioned backup/restore; cross-device continuity; complete platform-system integration acceptance; Android OS process-death/schema-upgrade recovery acceptance; representative physical-device default-HOME acceptance; signed release packaging; and Stable qualification.
+Still incomplete or separately gated include mature cross-page drag/drop editing; primary↔secondary spatial movement; Smart Folders and richer automated Drawer organization; recently installed/updated Drawer views and fast alphabetical jump navigation; portable backup/recovery for custom Drawer tabs and newer organization state; pinned/dynamic shortcut placement beyond current Search support; advanced widget resizing/stacking and portable widget rebinding/recovery; complete Theme Manager/icon-pack/masking behavior; additional gesture types and registered-command/provider targets beyond the initial configurable Home-gesture set; broader Launcher Universal Search providers for device/GoreeCloud/third-party content; optional GoreeCloud Search/Index provider-backend integration; fully polished Glaze UI Universal Search presentation and complete Launcher Glaze consumer acceptance; layout-lock coverage for future placeable item types plus representative-device five-second-hold acceptance; production visual-identity acceptance; full Glaze Theme Engine behavior; versioned backup/restore; cross-device continuity; complete platform-system integration acceptance; Android OS process-death/schema-upgrade recovery acceptance; representative physical-device default-HOME acceptance; signed release packaging; and Stable qualification.
 
 # Approved future product direction — not currently available
 
@@ -245,11 +283,11 @@ The long-term Launcher product scope is substantially broader than the current D
 
 ## Home and organization
 
-Future Launcher releases are intended to support deeply customizable Home pages and grids, margins/padding, folders, shortcuts, widgets, multiple dock pages, page indicators, wallpaper behavior, precise placement, lock enforcement across all supported placeable item types, overlapping supported elements, and adaptive layouts for different form factors.
+Future Launcher releases are intended to deepen customizable Home pages and grids, margins/padding, Dock folders and other non-app Dock item types, shortcuts, widgets, richer page indicators, wallpaper behavior, precise placement, lock enforcement across all supported placeable item types, overlapping supported elements, and adaptive layouts for different form factors. Multiple application Dock pages are already present in the current Development candidate and are not listed here as future-only scope.
 
 ## Application drawer
 
-The intended Apps/application-drawer experience includes folders/tabs, categories, smart groups, suggested/recent/frequent applications, hiding, richer visual customization, and context-sensitive ordering in addition to the current local Apps filter.
+The current Development line already includes folders, deterministic categories, custom tabs, hidden apps, pinning, local recent/frequent ordering, Recently installed ordering, A-Z List jump navigation, and configurable layouts. The active continuation adds Recently updated ordering plus All/Pinned/Suggested/New/Updated discovery filters with local-only truthful suggestion ranking. Future App Drawer work deepens Smart Folders with transparent editable rules, richer user-defined tags/collections, broader fast navigation outside the A-Z List path, portable organization backup/recovery, and representative-device accessibility/profile/performance acceptance.
 
 ## Launcher Universal Search, GoreeCloud Search, and GoreeCloud Index
 

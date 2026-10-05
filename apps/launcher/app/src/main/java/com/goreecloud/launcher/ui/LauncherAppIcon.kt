@@ -95,11 +95,11 @@ internal fun rememberLauncherAppIcon(app: LauncherActivityInfo): ImageBitmap? {
 @Composable
 internal fun Modifier.launcherIconMask(): Modifier {
     val shape = LocalLauncherIconAppearance.current.shape
-    return if (shape == LauncherIconShape.ORIGINAL) {
-        this
-    } else {
-        clip(shape.toLauncherComposeShape())
-    }
+    if (shape == LauncherIconShape.ORIGINAL) return this
+
+    // Adaptive icons are flattened to a mask-ready full-bleed bitmap in LauncherAppIconCache.
+    // The UI mask therefore clips artwork without painting a visible gray backing plate.
+    return clip(shape.toLauncherComposeShape())
 }
 
 internal fun LauncherIconShape.toLauncherComposeShape(): Shape = when (this) {

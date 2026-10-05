@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 private val Context.launcherPreferencesStore by preferencesDataStore(name = "launcher_preferences")
 
@@ -189,6 +190,8 @@ enum class LauncherHomeAppMode(
 enum class LauncherDockStyle(val storageValue: String) {
     GLASS("glass"),
     CLEAR("clear"),
+    SOLID("solid"),
+    RAISED("raised"),
     EDGE("edge");
 
     companion object {
@@ -306,6 +309,10 @@ data class LauncherExperiencePreferences(
     val homeSearchStyle: LauncherHomeSearchStyle = LauncherHomeSearchStyle.GLASS,
     val homeSpacing: LauncherHomeSpacing = LauncherHomeSpacing.BALANCED,
     val dockStyle: LauncherDockStyle = LauncherDockStyle.GLASS,
+    val dockPageSize: Int = 5,
+    val dockLoopPages: Boolean = false,
+    val showDockLabels: Boolean = false,
+    val showDockSearch: Boolean = false,
     val wallpaperShade: LauncherWallpaperShade = LauncherWallpaperShade.SOFT,
     val iconShape: LauncherIconShape = LauncherIconShape.ROUNDED_SQUARE,
     val iconPackPackage: String? = null,
@@ -382,6 +389,10 @@ class LauncherPreferencesRepository(
         val homeSearchStyle = stringPreferencesKey("home_search_style")
         val homeSpacing = stringPreferencesKey("home_spacing")
         val dockStyle = stringPreferencesKey("dock_style")
+        val dockPageSize = intPreferencesKey("dock_page_size_v1")
+        val dockLoopPages = booleanPreferencesKey("dock_loop_pages_v1")
+        val showDockLabels = booleanPreferencesKey("show_dock_labels_v1")
+        val showDockSearch = booleanPreferencesKey("show_dock_search_v1")
         val wallpaperShade = stringPreferencesKey("wallpaper_shade")
         val iconShape = stringPreferencesKey("icon_shape")
         val iconPackPackage = stringPreferencesKey("icon_pack_package")
@@ -402,9 +413,11 @@ class LauncherPreferencesRepository(
         val homeLabelOverrides = stringPreferencesKey("home_label_overrides_v1")
         val hiddenHomeSuggestionKeys = stringSetPreferencesKey("hidden_home_suggestion_keys_v1")
         val hiddenAppKeys = stringSetPreferencesKey("hidden_app_keys_v1")
+        val lockedAppKeys = stringSetPreferencesKey("locked_app_keys_v1")
         val drawerPinnedAppKeys = stringSetPreferencesKey("drawer_pinned_app_keys_v1")
         val drawerPinnedAppOrder = stringPreferencesKey("drawer_pinned_app_order_v1")
         val drawerSortOrderName = stringPreferencesKey("drawer_sort_order_name_v1")
+        val drawerTabs = stringPreferencesKey("drawer_tabs_v1")
         val portableRestoreJournal = stringPreferencesKey("portable_restore_journal_v1")
     }
 
@@ -458,6 +471,10 @@ class LauncherPreferencesRepository(
                     .orEmpty()
                     .filterNot(String::isBlank)
                     .toSet(),
+                lockedKeys = values[Keys.lockedAppKeys]
+                    .orEmpty()
+                    .filterNot(String::isBlank)
+                    .toSet(),
             )
         }
         .distinctUntilChanged()
@@ -479,11 +496,31 @@ class LauncherPreferencesRepository(
         .distinctUntilChanged()
 
     /**
+     * Launcher App Lock membership keyed by exact profile-qualified app identity.
+     *
+     * This state is device-local and intentionally excluded from portable preference v1. Launcher
+     * uses Android authentication only when a launch originates inside Launcher; it does not claim
+     * authority over notifications, Settings, other launchers, deep links, or another app.
+     */
+    val lockedAppKeys: Flow<Set<String>> = drawerPinnedState
+        .map { it.lockedKeys }
+        .distinctUntilChanged()
+
+    /**
      * Persisted Drawer sort selection. The UI owns the concrete sort enum so core preferences store
      * only its stable name and let the UI fail closed to A–Z when an unknown value is encountered.
      */
     val drawerSortOrderName: Flow<String?> = dataStore.data
         .map { values -> values[Keys.drawerSortOrderName]?.takeIf(String::isNotBlank) }
+        .distinctUntilChanged()
+
+    /**
+     * User-created App Drawer tabs. Membership keys are exact profile-qualified Launcher app
+     * identities, so the same package installed in User and Work profiles can be organized
+     * independently. This remains device-local presentation state and is outside portable v1.
+     */
+    val drawerTabs: Flow<List<LauncherDrawerTab>> = dataStore.data
+        .map { values -> LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs]) }
         .distinctUntilChanged()
 
     /**
@@ -520,6 +557,10 @@ class LauncherPreferencesRepository(
                 homeSearchStyle = LauncherHomeSearchStyle.fromStorage(values[Keys.homeSearchStyle]),
                 homeSpacing = LauncherHomeSpacing.fromStorage(values[Keys.homeSpacing]),
                 dockStyle = LauncherDockStyle.fromStorage(values[Keys.dockStyle]),
+                dockPageSize = (values[Keys.dockPageSize] ?: 5).coerceIn(4, 7),
+                dockLoopPages = values[Keys.dockLoopPages] ?: false,
+                showDockLabels = values[Keys.showDockLabels] ?: false,
+                showDockSearch = values[Keys.showDockSearch] ?: false,
                 wallpaperShade = LauncherWallpaperShade.fromStorage(values[Keys.wallpaperShade]),
                 iconShape = LauncherIconShape.fromStorage(values[Keys.iconShape]),
                 iconPackPackage = values[Keys.iconPackPackage]?.takeIf { it.isNotBlank() },
@@ -790,6 +831,38 @@ class LauncherPreferencesRepository(
         }
     }
 
+    fun setDockPageSize(size: Int) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.dockPageSize] = size.coerceIn(4, 7)
+            }
+        }
+    }
+
+    fun setDockLoopPages(loop: Boolean) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.dockLoopPages] = loop
+            }
+        }
+    }
+
+    fun setShowDockLabels(show: Boolean) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.showDockLabels] = show
+            }
+        }
+    }
+
+    fun setShowDockSearch(show: Boolean) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.showDockSearch] = show
+            }
+        }
+    }
+
     fun setWallpaperShade(shade: LauncherWallpaperShade) {
         scope.launch {
             dataStore.edit { values ->
@@ -953,6 +1026,23 @@ class LauncherPreferencesRepository(
         }
     }
 
+    fun setAppLocked(appKey: String, locked: Boolean): Job = scope.launch {
+        if (appKey.isBlank()) return@launch
+        dataStore.edit { values ->
+            val updated = values[Keys.lockedAppKeys].orEmpty().toMutableSet()
+            if (locked) {
+                updated += appKey
+            } else {
+                updated -= appKey
+            }
+            if (updated.isEmpty()) {
+                values.remove(Keys.lockedAppKeys)
+            } else {
+                values[Keys.lockedAppKeys] = updated
+            }
+        }
+    }
+
     fun setDrawerAppPinned(appKey: String, pinned: Boolean): Job = scope.launch {
         if (appKey.isBlank()) return@launch
         dataStore.edit { values ->
@@ -1009,6 +1099,71 @@ class LauncherPreferencesRepository(
                 pinnedKeys = pinnedKeys,
             )
             values[Keys.drawerPinnedAppOrder] = LauncherDrawerPinnedOrder.encode(reconciled)
+        }
+    }
+
+    fun createDrawerTab(name: String): Job {
+        val normalizedName = LauncherDrawerTabsCodec.sanitizeName(name)
+        if (normalizedName.isBlank()) return scope.launch { }
+        val tabId = "tab-" + UUID.randomUUID().toString()
+        return scope.launch {
+            dataStore.edit { values ->
+                val current = LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs])
+                if (current.size >= LauncherDrawerTabsCodec.MAX_TABS) return@edit
+                values[Keys.drawerTabs] = LauncherDrawerTabsCodec.encode(
+                    current + LauncherDrawerTab(
+                        id = tabId,
+                        name = normalizedName,
+                        memberKeys = emptySet(),
+                    ),
+                )
+            }
+        }
+    }
+
+    fun renameDrawerTab(tabId: String, name: String): Job {
+        val normalizedName = LauncherDrawerTabsCodec.sanitizeName(name)
+        if (tabId.isBlank() || normalizedName.isBlank()) return scope.launch { }
+        return scope.launch {
+            dataStore.edit { values ->
+                val updated = LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs]).map { tab ->
+                    if (tab.id == tabId) tab.copy(name = normalizedName) else tab
+                }
+                values[Keys.drawerTabs] = LauncherDrawerTabsCodec.encode(updated)
+            }
+        }
+    }
+
+    fun deleteDrawerTab(tabId: String): Job {
+        if (tabId.isBlank()) return scope.launch { }
+        return scope.launch {
+            dataStore.edit { values ->
+                val updated = LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs])
+                    .filterNot { it.id == tabId }
+                values[Keys.drawerTabs] = LauncherDrawerTabsCodec.encode(updated)
+            }
+        }
+    }
+
+    fun setDrawerTabMembership(
+        tabId: String,
+        appKey: String,
+        enabled: Boolean,
+    ): Job {
+        if (tabId.isBlank() || appKey.isBlank()) return scope.launch { }
+        return scope.launch {
+            dataStore.edit { values ->
+                val updated = LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs]).map { tab ->
+                    if (tab.id != tabId) {
+                        tab
+                    } else {
+                        val members = tab.memberKeys.toMutableSet()
+                        if (enabled) members += appKey else members -= appKey
+                        tab.copy(memberKeys = members)
+                    }
+                }
+                values[Keys.drawerTabs] = LauncherDrawerTabsCodec.encode(updated)
+            }
         }
     }
 

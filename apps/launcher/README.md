@@ -56,7 +56,7 @@ Current Development source includes:
 - a separate **Apps** surface with local label/package filtering and launching;
 - a separate scrollable **Launcher Settings** surface;
 - locally persisted Home grid presets, Apps-grid columns, app-label visibility, icon-size preference, System / Light / Dark appearance, Home layout-lock state, and Launcher Universal Search Home-entry mode;
-- ordered persisted Home Favorites, authoritative primary-Home grid coordinates after guarded spatial activation, and a five-item Dock;
+- ordered persisted Home Favorites, authoritative primary-Home grid coordinates after guarded spatial activation, and an expandable paged Dock whose five-app starter is not a capacity limit;
 - long-press placement management with accessible earlier/later controls and direct primary-Home drag placement into occupied or empty configured cells;
 - a persisted **Lock Home screen layout** policy that blocks current Favorite, Dock, secondary-app, Home-page create/delete/reorder, and secondary spatial mutation callbacks while leaving app launching and page selection available;
 - a visible locked-state Home control that can unlock the layout after an intentional five-second hold with progress feedback, while the Settings switch remains the deterministic accessible unlock path;
@@ -138,7 +138,7 @@ Search history, recency/frequency signals, provider controls, contextual ranking
 
 ## Glaze UI boundary
 
-Authoritative Launcher source now maps to **GLAZE UI V1.6 / 1.6.0** at exact Stable release source `a7180679ea851389e0f3004515f9a25f420e716d`. The mapping consumes inherited Stable layout/material/state authorities and adds first-party Compose policy for V1.6 material simplification, Reduced Motion, Reduced Transparency, performance-cost reduction, focus visibility, large-text density yielding, and conservative interaction targets. Retained Launcher pigments, atmosphere, radii, and 20/40 dp composition conveniences remain explicitly application-owned rather than being mislabeled as canonical V1.6 tokens. Historical Glaze Motion evaluation remains Experimental/test-only.
+Launcher retains a **GLAZE UI V1.6 / 1.6.0** implementation mapping at `a7180679ea851389e0f3004515f9a25f420e716d`. Current shared consumer authority is **Glaze V1.7 / 1.7.0** at release integration `1a5756daed2294155be2e9972b24f580f6222b7b`; V1.7.0 intentionally inherits accepted V1.6.0 runtime behavior. The existing mapping therefore remains useful implementation provenance, but Launcher is migration-required until it is freshly rebound and accepted as a V1.7 consumer. Retained Launcher pigments, atmosphere, radii, and 20/40 dp composition conveniences remain application-owned. Historical Glaze Motion evaluation remains Experimental/test-only.
 
 This does **not** make Launcher V1.6-conformant, `aligned-current-stable`, or production-eligible. Caller/platform accessibility and performance inputs still require authoritative runtime wiring, and complete component/state coverage, rendered accessibility, localization/RTL, responsive phone/tablet/foldable behavior, representative physical-device validation, performance/power acceptance, rollback, Human Visual Excellence, platform-system acceptance, signing, and release approval remain separate evidence requirements.
 

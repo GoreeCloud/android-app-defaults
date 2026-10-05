@@ -1,4 +1,68 @@
+## October 5, 2026 — App Drawer local discovery and update-recency candidate
+
+The current Development continuation adds a compact **All / Pinned / Suggested / New / Updated** discovery row below App Drawer tabs. **Suggested** uses only Launcher-local recent/frequent launch signals and falls back deterministically to A-Z on a true first install rather than fabricating history. **New** uses the exact profile-qualified Android launcher activity first-install timestamp. **Updated** uses Android PackageManager update metadata for the primary profile only; Work and other non-primary profiles fail closed because the public launcher API does not expose profile-qualified last-update time, preventing same-package primary-user timestamps from being borrowed.
+
+The same candidate adds **Recently updated** sort order, keeps discovery filters composable with custom tabs, User/Work profile pages and local Apps search, moves Pinned into the same explicit filter family instead of a competing header control, and preserves the 48 dp Launcher interaction floor.
+
+**Acceptance boundary:** Development candidate only. Fresh exact-head protected build/JVM/lint/runtime validation plus representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL/localization, Work/managed-profile metadata behavior, and large-library performance/power acceptance remain required.
+
+## October 4/5, 2026 — Recently installed sort and alphabetical jump integration
+
+Protected PR #243 integrated **Recently installed** ordering using Android `LauncherActivityInfo.firstInstallTime`, preserving exact Launcher app/profile identity while avoiding Android Usage Access or a fabricated usage model. Ordinary A-Z **List** layout also exposes a horizontally scrollable 48 dp alphabetical jump index that moves directly to the first item in each visible bucket; the control is hidden during search and non-alphabetical sorts.
+
+Exact head `54490234fa303d30b18ca7707126f531c32ac996` passed Mandatory app migration provenance #998, Android Development Foundation #1490, Migrated Android apps CI #1024, and Protected promotion #978 before expected-head-protected squash merge as `66c0778e6c0b0b386d1865ec76b539c4774c5da1`. **Acceptance boundary:** Development integration only; representative-device accessibility, form-factor, large-library performance/power, profile lifecycle, signing/update continuity, and release gates remain open.
+
+## October 4/5, 2026 — user-created App Drawer tabs and category-folder grouping candidate
+
+The current Development candidate adds bounded device-local custom App Drawer tabs. Users can create, rename, select, and delete up to eight tabs; exact profile-qualified app identities can belong to one or more tabs through the stationary app context surface. The App Drawer keeps an accessible **All** tab, explicit create/edit controls with a 48 dp interaction floor, and selected-state semantics. Custom tabs filter presentation only and do not alter Android installation, Home placement, Dock placement, folders, hidden state, App Lock, or profile authority.
+
+Category mode now keeps application categories meaningful when Drawer folders exist. Folders render as a dedicated **Folders** group followed by the existing deterministic application categories instead of flattening the entire view back to one undifferentiated grid.
+
+The candidate adds versioned tab encoding, bounded names/membership, DataStore lifecycle coverage, and codec tests. **Acceptance boundary:** Development PR #241. Exact-head protected CI/runtime evidence and representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL, phone/tablet/foldable, profile, drag-placement, visual, performance/power, signing/update continuity, and release acceptance remain open.
+
+## October 4, 2026 — adaptive paged Dock integration and drag-handoff continuation
+
+Protected PR #239 integrated adaptive Dock pages over the existing ordered, unbounded application Dock as main `168e5d04e9fd713444748306f450dc9031e87fc9` from exact validated head `92d8ed137c00baba671c311c95cad396a336319c`. The candidate preserves the resolved interaction floor by reducing effective per-page density before shrinking touch targets, exposes preferred 4/5/6/7 items-per-page density, adds independent horizontal Dock paging with compact logical-page semantics, explicit Previous/Next accessibility actions, deterministic opt-in wraparound, optional Dock labels, and an optional direct Launcher Universal Search affordance that remains renderable even with an otherwise empty Dock. Dock material choices expand to Glaze, Clear, Solid, Raised, and Edge while continuing to use the existing Glaze presentation-policy fallback boundary.
+
+The candidate does not change Android permissions, package/profile authority, Search-provider execution, workspace schema, or network behavior. Existing Home↔Dock placement, direct reordering, layout lock, profile-qualified identities, icon normalization, and local persistence remain authoritative.
+
+PR #239 exact head passed provenance #979, Android Development Foundation #1471, Migrated Android apps CI #1005, and Protected promotion #959 before merge. Protected PR #240 then integrated active-drag edge-dwell page handoff, loop-aware cross-page insertion boundaries, the compact edge affordance, and non-gesture Move earlier / Move later Dock ordering as current main `05303f2813742a1437d26886ca3f3b5a85836395` from exact validated head `bb6fe0d748f361b3d5141be87fa81cab902238ea`; provenance #992, Foundation #1484, Migrated Android apps CI #1018, and Protected promotion #972 passed before merge. **Acceptance boundary:** Development integration only. Dock folders, portable backup/recovery expansion, representative-device accessibility/form-factor/performance acceptance, protected Development signing/update continuity, and release gates remain open.
+
+## October 4, 2026 — icon-mask and Apps header polish
+
+Development source now provides mask-ready adaptive-icon rendering: adaptive background and foreground layers are flattened before the user-selected Launcher shape is applied, avoiding the nested-mask/gray-corner effect seen on representative-device screenshots. Masked app artwork uses crop presentation across Home, Apps, Search, widget-provider, hidden-app, and App Lock surfaces that share the Launcher icon pipeline.
+
+Apps now has a direct accessible layout quick-switch in its header. It cycles Grid, Compact, List, and Category using the existing persisted layout authority, keeps the 48 dp interaction floor in icon mode, and exposes current layout through accessibility state description. Drawer Sort/Layout/New folder/Settings glyphs share a consistent vector stroke/optical grammar, and Universal Search suggestion-tab glyphs have matching semantic cleanup.
+
 # GoreeCloud Launcher — Implemented Features
+
+## October 5, 2026 — local Smart Folder candidate
+
+Development source now contains bounded, profile-scoped App Drawer Smart Folder presentation for **Pinned**, optional **Suggested**, **New**, and **Updated** collections. Membership is computed locally from explicit Drawer pins, existing Launcher-local suggestion signals, and the existing install/update freshness metadata. Empty dynamic collections are omitted, Suggested remains user-controllable and deterministic on first use, and the views do not alter manual folders, custom tabs, Home/Dock placement, package state, hidden state, or App Lock.
+
+**Acceptance boundary:** candidate source only until exact-head protected validation and guarded integration. Representative-device profile correctness, TalkBack/Switch Access, keyboard/D-pad, large-text, RTL, form-factor, performance/power, and manual override/exclusion behavior remain open.
+
+## October 3, 2026 — inset, icon-mask, Search, and widget-gallery correction candidate
+
+Development source now keeps the Launcher widget gallery, full-screen Home editor, and Universal Search inside Android safe-drawing insets so status bars, navigation regions, and display cutouts cannot overlap their primary controls; keyboard-sensitive surfaces additionally retain IME padding. The widget gallery uses an icon-led Android widget-picker handoff and replaces the installed-widget **Add** text pill with a Launcher-owned plus glyph. The Home search capsule likewise uses a first-party vector overflow glyph instead of a font-based ellipsis so its alignment is independent of font metrics. The full-screen Home editor also uses first-party check, add, and trash glyphs for completion, Add Page artwork, and empty-page deletion instead of text-only/literal-symbol controls, while keeping explicit semantics and a stable completion test tag. The shared app-icon mask renderer now places a shape-matched backing plane behind clipped artwork so the default **Rounded square** presentation remains visible for OEM/Android bitmaps that already contain circular transparent masking; Home, Dock, App Drawer, Search, folders, widget-provider rows, hidden apps, and App Lock surfaces share this path.
+
+Universal Search shortcut groups now default to two direct shortcut glyphs plus an explicit overflow control, with expansion retaining access to the complete shortcut set. Voice, camera, image, checklist, drawing, search, note, and document-style shortcut labels map to distinct first-party glyphs, while unknown shortcut labels use a neutral launch/action glyph rather than a repeated Search symbol. Search Sources rows now reserve one consistent trailing toggle/disclosure width across On-device, Your content, and Connected sections; Files setup stays in the detail panel instead of widening only that compact row. The **Icons / Words / Both** presentation selector uses three equal-width 48 dp segments below its section label for stable phone-width alignment.
+
+**Acceptance boundary:** implemented on stacked Development PR #233, not authoritative main. Fresh exact-head protected validation and representative-device visual/inset/icon/accessibility acceptance remain required.
+
+## October 3, 2026 — restacked Theme and Home-page glyph-control candidate
+
+Development source now replaces Theme Manager's text completion action and the current Home-page carousel's **Add page**, **Done**, **Move earlier**, **Move later**, and **Delete empty page** controls with Launcher-owned semantic vector actions. Every compact control keeps a 48 dp target and an explicit accessibility description. Existing page selection, layout lock, primary-page protection, empty-page deletion guard, Room workspace mutation, App Lock, provider, permission, and gesture authority remain unchanged.
+
+**Acceptance boundary:** implemented on a stacked Development candidate, not authoritative main. Fresh exact-head validation and representative-device accessibility/reflow/form-factor acceptance remain required before integration or any stronger lifecycle claim.
+
+## October 3, 2026 — App Lock and owner-feedback UI candidate
+
+Development source now contains device-local, profile-qualified **App Lock** membership, a **Privacy & security** settings destination, app-context Lock/Unlock actions, and Android device-authentication gating for Launcher-originated app and app-shortcut launches. The App Lock manager includes app search, **All / Locked** filtering, per-app switches, Personal/Work plus package context, and empty-state handling. Apps grid, compact, list, and category views expose a small Launcher-owned lock mark and accessible locked-state semantics. Startup setup also surfaces App Lock directly.
+
+The same Development source makes the ordinary Dock background-free, keeps material behind only the intentional Edge/drag-feedback states, removes the wallpaper-backed pill around Home page dots, uses a readable single-column built-in widget catalog on phone widths, reduces setup/help visual weight, replaces the Apps search text close mark with a vector glyph, and refines Settings/Search-source vector geometry. App Lock stores no PIN, password, biometric material, authentication token, telemetry, or network state; Android remains the authentication authority.
+
+**Acceptance boundary:** implemented in the active Development candidate, not yet integrated into authoritative main. App Lock does not claim system-wide blocking: launches that originate outside GoreeCloud Launcher remain outside this feature's authority. Current-head protected validation, representative-device security/interaction acceptance, accessibility/reflow/form-factor validation, protected Development signing/update continuity, Release Candidate, Production Acceptance, Stable, Seal, and Anchor remain open.
 
 ## October 3, 2026 — onboarding and Search-source scanability follow-up
 

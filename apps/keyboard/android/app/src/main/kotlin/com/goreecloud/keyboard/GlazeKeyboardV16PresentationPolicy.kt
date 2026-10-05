@@ -41,8 +41,8 @@ internal object GlazeKeyboardV16AndroidPresentationContext {
 }
 
 internal object GlazeKeyboardV16PresentationPolicy {
-    const val StableVersion = "1.6.0"
-    const val StableSourceRevision = "a7180679ea851389e0f3004515f9a25f420e716d"
+    const val MappedVersion = "1.6.0"
+    const val MappedSourceRevision = "a7180679ea851389e0f3004515f9a25f420e716d"
 
     // The current Keyboard substrate remains the proven V1.2 implementation until a separately
     // accepted optical migration replaces it.

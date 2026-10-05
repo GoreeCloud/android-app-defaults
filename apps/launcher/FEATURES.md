@@ -24,7 +24,7 @@ Current source includes:
 - Persisted Small/Medium/Large icon presentation and app-label visibility.
 - Persisted System / Light / Dark appearance selection.
 - Persisted Home layout-lock state and Launcher Universal Search Home-entry mode. The strict v1 persistence/backup wire key remains `index_home_mode` only for backward compatibility.
-- Locally persisted Favorites and a bounded five-item Dock.
+- Locally persisted Favorites and an ordered Dock whose five-item first-run starter is not a capacity limit; the current Development candidate pages larger app collections while preserving the resolved minimum interaction target.
 - Long-press app placement management with accessible earlier/later controls, plus direct primary-Home long-press drag placement into occupied or empty configured grid cells.
 - Current layout-lock gating for implemented Favorite, Dock, primary/secondary spatial, and Home-page mutation callbacks while ordinary app launching and page selection remain usable.
 - A five-second locked-state Home hold control with progressive feedback, with the Launcher Settings switch retained as the deterministic non-gesture unlock path.
@@ -132,16 +132,36 @@ The following capability inventory is the approved Launcher product direction. T
 
 ## Application Drawer
 
-- Swipe-up application drawer.
-- Alphabetically organized application library.
-- Independent/custom application-drawer grids.
-- Application-drawer folders and tabs.
-- Automatic categorization, intelligent groups, and smart folders.
-- Suggested, frequently used, recently installed, and recently used applications.
-- Application-drawer search.
-- Hide applications from the drawer.
-- Custom drawer organization, backgrounds, transparency, and vertical scrolling.
-- Context-sensitive application ordering.
+Required App Drawer direction is local-first, profile-aware, offline-capable application discovery and organization rather than a flat package list.
+
+Current Development source includes:
+
+- Swipe-up Apps surface with local installed-application search.
+- Grid, Compact, List, and Category layouts.
+- Configurable columns, spacing, labels, icon presentation, background, and scroll/page navigation.
+- User Apps and Work Apps profile-separated inventory.
+- App Drawer folders with profile-aware membership.
+- User-created custom tabs with exact profile-qualified app membership.
+- A persistent **All** tab plus bounded create, rename, delete, select, and per-app tab assignment.
+- Deterministic application categories; folders remain grouped under **Folders** in Category mode.
+- A–Z, Z–A, Launcher-local Most recent, profile-aware Recently installed, profile-aware Recently updated, Launcher-local Most frequent, and Pinned first sorting.
+- Compact **All / Pinned / Suggested / New / Updated** discovery filters; Suggested uses only Launcher-local signals and a deterministic A-Z first-use fallback.
+- A 48 dp alphabetical jump index in ordinary A-Z List presentation.
+- Device-local App Drawer pins and manual pinned ordering.
+- Profile-qualified Hidden Apps and Launcher App Lock states.
+- Stationary app context actions for Home/Dock placement, folders, tabs, shortcuts, widgets, App info, visibility, lock, and Android-confirmed uninstall.
+- Direct App Drawer → Home and App Drawer → Dock placement while Home layout is unlocked.
+- Glaze presentation, reduced-transparency policy fallback, fixed icon/label geometry, and Launcher-owned accessibility semantics.
+
+Still planned or acceptance-gated:
+
+- Broader fast alphabetical navigation beyond the implemented A-Z List jump index.
+- Representative-device validation of profile-scoped **Updated** metadata, especially managed/Work-profile contexts where Android may intentionally deny package timestamp access.
+- Deterministic Smart Folders and richer user-defined category/tag collections.
+- Portable backup/restore policy for custom Drawer organization.
+- Representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL/localization, phone/tablet/foldable, profile-lifecycle, performance/power, signing/update-continuity, and release acceptance.
+
+No sponsored, advertising, affiliate, or paid placement is permitted in App Drawer presentation or ranking.
 
 ## Launcher Universal Search with optional GoreeCloud Search and GoreeCloud Index
 
@@ -267,10 +287,12 @@ The following capability inventory is the approved Launcher product direction. T
 
 ## Dock
 
-- Custom dock size and adjustable application count.
-- Multiple dock pages and scrolling.
-- Dock background, transparency, and padding customization.
-- Search placement within the dock.
+- Five-app starter configuration without treating five items as a capacity limit.
+- Custom Dock page density and adjustable application count.
+- Multiple Dock pages with horizontal navigation independent from Home pages and an optional disabled-by-default loop mode.
+- Accessibility-floor-aware adaptive paging before target-size compression.
+- Clear, Glaze, Solid, Raised, Edge, transparency, and future padding customization.
+- Optional labels and Launcher Universal Search placement within the Dock.
 - Dock widgets.
 - Optional dock removal.
 - Suggested/context-aware dock applications.

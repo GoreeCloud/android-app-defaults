@@ -15,6 +15,89 @@ import org.junit.rules.TemporaryFolder
 
 class LauncherPreferencesTest {
     @Test
+    fun dockPresentationPreferencesPersistAndClampDensity() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("dock-presentation.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            var experience = repository.experiencePreferences.first()
+            assertEquals(LauncherDockStyle.GLASS, experience.dockStyle)
+            assertEquals(5, experience.dockPageSize)
+            assertFalse(experience.dockLoopPages)
+            assertFalse(experience.showDockLabels)
+            assertFalse(experience.showDockSearch)
+
+            repository.setDockStyle(LauncherDockStyle.RAISED)
+            repository.setDockPageSize(99)
+            repository.setDockLoopPages(true)
+            repository.setShowDockLabels(true)
+            repository.setShowDockSearch(true)
+
+            experience = repository.experiencePreferences.first {
+                it.dockStyle == LauncherDockStyle.RAISED &&
+                    it.dockPageSize == 7 &&
+                    it.dockLoopPages &&
+                    it.showDockLabels &&
+                    it.showDockSearch
+            }
+            assertEquals(7, experience.dockPageSize)
+            assertEquals(true, experience.dockLoopPages)
+
+            repository.setDockPageSize(1)
+            experience = repository.experiencePreferences.first { it.dockPageSize == 4 }
+            assertEquals(4, experience.dockPageSize)
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
+    fun drawerTabsPersistProfileQualifiedMembershipAndLifecycle() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("drawer-tabs.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            repository.createDrawerTab("  Work tools  ").join()
+            var tabs = repository.drawerTabs.first { it.size == 1 }
+            val tab = tabs.single()
+            assertEquals("Work tools", tab.name)
+            assertEquals(emptySet<String>(), tab.memberKeys)
+
+            repository.setDrawerTabMembership(
+                tabId = tab.id,
+                appKey = "user:10/com.example/.Main",
+                enabled = true,
+            ).join()
+            tabs = repository.drawerTabs.first {
+                "user:10/com.example/.Main" in it.single().memberKeys
+            }
+            assertEquals(
+                setOf("user:10/com.example/.Main"),
+                tabs.single().memberKeys,
+            )
+
+            repository.renameDrawerTab(tab.id, "Development").join()
+            assertEquals(
+                "Development",
+                repository.drawerTabs.first { it.single().name == "Development" }.single().name,
+            )
+
+            repository.deleteDrawerTab(tab.id).join()
+            assertEquals(emptyList<LauncherDrawerTab>(), repository.drawerTabs.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
     fun repositoryFallbackKeepsEstablishedHomeCardClock() = runBlocking {
         val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         val dataStore = PreferenceDataStoreFactory.create(
@@ -100,6 +183,33 @@ class LauncherPreferencesTest {
 
             repository.setAppHidden(work, false).join()
             assertEquals(emptySet<String>(), repository.hiddenAppKeys.first())
+        } finally {
+            dataStoreScope.cancel()
+        }
+    }
+
+    @Test
+    fun appLockPersistsByExactProfileQualifiedIdentity() = runBlocking {
+        val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        val dataStore = PreferenceDataStoreFactory.create(
+            scope = dataStoreScope,
+            produceFile = { temporaryFolder.newFile("app-lock.preferences_pb") },
+        )
+        val repository = LauncherPreferencesRepository(dataStore)
+
+        try {
+            val personal = "0:com.example/.Main"
+            val work = "10:com.example/.Main"
+
+            repository.setAppLocked(personal, true).join()
+            repository.setAppLocked(work, true).join()
+            assertEquals(setOf(personal, work), repository.lockedAppKeys.first())
+
+            repository.setAppLocked(personal, false).join()
+            assertEquals(setOf(work), repository.lockedAppKeys.first())
+
+            repository.setAppLocked(work, false).join()
+            assertEquals(emptySet<String>(), repository.lockedAppKeys.first())
         } finally {
             dataStoreScope.cancel()
         }

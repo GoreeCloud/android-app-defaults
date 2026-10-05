@@ -7,7 +7,7 @@ component:
   repository: GoreeCloud/android-app-defaults
 
 lifecycle: development
-version: "0.8.6-dev"
+version: "0.9.0-dev"
 
 supported_platforms:
   - android
@@ -145,7 +145,7 @@ conformance:
     - SECURITY.md
     - USER-MANUAL.md
     - FEATURES.md
-    - FEATURE-ROADMAP.md
+    - PLANNED-FEATURES.md
     - native/app/src/main/AndroidManifest.xml
     - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryGlazeContract.kt
     - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryGlazeSurfaces.kt
@@ -167,4 +167,4 @@ conformance:
     - GoreeCloud Policy runtime evaluation, enforcement-coordination, explanation, freshness, exception, and evidence integration/acceptance are not established.
     - GoreeCloud Observability health, metrics, diagnostics, performance, dependency-health, provenance/freshness, alerting, collection-gap, and representative-device runtime acceptance are not established.
     - Representative physical-device/OEM/profile photo-editor, accessibility, orientation, media-permission, and destructive-operation edge-case acceptance remains incomplete.
-    - Production signing, distribution, release approval, Release Candidate qualification, and Stable qualification remain outstanding.
+    - Production signing, distribution, release approval, Seal qualification, Production Acceptance, and Anchor qualification remain outstanding.

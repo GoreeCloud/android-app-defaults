@@ -11,6 +11,7 @@ package com.goreecloud.gallery
 object GalleryGlazeContract {
     const val VERSION = "1.7.0"
     const val PRODUCT_LABEL = "Glaze V1.7"
+    const val SHARED_RELEASE_INTEGRATION = "1a5756daed2294155be2e9972b24f580f6222b7b"
     const val SOURCE_QUALIFICATION_ANCHOR = "7c4ded83d7a8725165bb6a55dfb175667cc9589e"
     const val STABLE_RUNTIME_ENTRYPOINT = "js/glaze-v1.7.0.mjs"
     const val INHERITED_RUNTIME_ENTRYPOINT = "js/glaze-v1.6.0.mjs"

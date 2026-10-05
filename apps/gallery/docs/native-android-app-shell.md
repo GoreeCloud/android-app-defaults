@@ -56,4 +56,4 @@ Everkeep remains authoritative for applicable recovery, preservation, portabilit
 
 ## Acceptance boundary
 
-This milestone is Development source and build validation only. It does not establish runtime permission behavior on a representative device, MediaStore behavior across supported OEMs/profiles, full selected-media reselection acceptance, rendered Glaze UI acceptance, accessibility acceptance, thumbnail performance, media mutations, release signing, upgrade/recovery evidence, production platform-system acceptance, release, or Stable qualification.
+This milestone is Development source and build validation only. It does not establish runtime permission behavior on a representative device, MediaStore behavior across supported OEMs/profiles, full selected-media reselection acceptance, rendered Glaze acceptance, accessibility acceptance, thumbnail performance, media mutations, release signing, upgrade/recovery evidence, production platform-system acceptance, Seal qualification, Production Acceptance, or Anchor qualification.

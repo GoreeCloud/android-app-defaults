@@ -1,21 +1,55 @@
 package com.goreecloud.launcher.ui
 
+import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerSpacing
 import java.text.Normalizer
 import java.util.Locale
 
-/**
- * Treat apps and folders as peers in the app drawer. Sorting must remain stable regardless
- * of a provider's item-list order or the work profile's separate application enumeration.
- * Canonically equivalent Unicode labels must sort together, like the installed-app inventory.
- * Only presentation order changes: folder membership and persisted Home positions are untouched.
- */
 internal enum class LauncherDrawerSortOrder(val displayName: String) {
     ALPHABETICAL("A–Z"),
     REVERSE_ALPHABETICAL("Z–A"),
     MOST_RECENT("Most recent"),
+    RECENTLY_INSTALLED("Recently installed"),
+    RECENTLY_UPDATED("Recently updated"),
     MOST_FREQUENT("Most frequent"),
     PINNED_FIRST("Pinned first"),
+}
+
+internal fun nextLauncherDrawerLayoutMode(
+    current: LauncherDrawerLayoutMode,
+): LauncherDrawerLayoutMode = when (current) {
+    LauncherDrawerLayoutMode.GRID -> LauncherDrawerLayoutMode.COMPACT
+    LauncherDrawerLayoutMode.COMPACT -> LauncherDrawerLayoutMode.LIST
+    LauncherDrawerLayoutMode.LIST -> LauncherDrawerLayoutMode.CATEGORY
+    LauncherDrawerLayoutMode.CATEGORY -> LauncherDrawerLayoutMode.GRID
+}
+
+internal fun launcherDrawerAlphabetBucket(label: String): String {
+    val decomposed = Normalizer.normalize(label.trim(), Normalizer.Form.NFD)
+    val base = decomposed.firstOrNull { character ->
+        Character.getType(character) !in setOf(
+            Character.NON_SPACING_MARK.toInt(),
+            Character.COMBINING_SPACING_MARK.toInt(),
+            Character.ENCLOSING_MARK.toInt(),
+        )
+    } ?: return "#"
+    return if (base.isLetter()) {
+        base.uppercaseChar().toString()
+    } else {
+        "#"
+    }
+}
+
+internal fun <T> launcherDrawerAlphabetTargets(
+    entries: List<T>,
+    label: (T) -> String,
+): List<Pair<String, Int>> {
+    val firstIndexByBucket = linkedMapOf<String, Int>()
+    entries.forEachIndexed { index, entry ->
+        val bucket = launcherDrawerAlphabetBucket(label(entry))
+        firstIndexByBucket.putIfAbsent(bucket, index)
+    }
+    return firstIndexByBucket.entries.map { (bucket, index) -> bucket to index }
 }
 
 internal object LauncherDrawerSortingPolicy {
@@ -25,6 +59,8 @@ internal object LauncherDrawerSortingPolicy {
         key: (T) -> String,
         sortOrder: LauncherDrawerSortOrder = LauncherDrawerSortOrder.ALPHABETICAL,
         recentRank: (T) -> Int? = { null },
+        installTimeMillis: (T) -> Long? = { null },
+        updateTimeMillis: (T) -> Long? = { null },
         frequency: (T) -> Long? = { null },
         pinned: (T) -> Boolean = { false },
         pinnedRank: (T) -> Int? = { null },
@@ -47,6 +83,34 @@ internal object LauncherDrawerSortingPolicy {
                         leftRank.compareTo(rightRank)
                     leftRank != null && rightRank == null -> -1
                     leftRank == null && rightRank != null -> 1
+                    labelOrder != 0 -> labelOrder
+                    else -> keyOrder
+                }
+            }
+            LauncherDrawerSortOrder.RECENTLY_INSTALLED -> {
+                val leftInstallTime = installTimeMillis(left)
+                val rightInstallTime = installTimeMillis(right)
+                when {
+                    leftInstallTime != null &&
+                        rightInstallTime != null &&
+                        leftInstallTime != rightInstallTime ->
+                        rightInstallTime.compareTo(leftInstallTime)
+                    leftInstallTime != null && rightInstallTime == null -> -1
+                    leftInstallTime == null && rightInstallTime != null -> 1
+                    labelOrder != 0 -> labelOrder
+                    else -> keyOrder
+                }
+            }
+            LauncherDrawerSortOrder.RECENTLY_UPDATED -> {
+                val leftUpdateTime = updateTimeMillis(left)
+                val rightUpdateTime = updateTimeMillis(right)
+                when {
+                    leftUpdateTime != null &&
+                        rightUpdateTime != null &&
+                        leftUpdateTime != rightUpdateTime ->
+                        rightUpdateTime.compareTo(leftUpdateTime)
+                    leftUpdateTime != null && rightUpdateTime == null -> -1
+                    leftUpdateTime == null && rightUpdateTime != null -> 1
                     labelOrder != 0 -> labelOrder
                     else -> keyOrder
                 }
@@ -85,8 +149,6 @@ internal object LauncherDrawerSortingPolicy {
         Normalizer.normalize(value, Normalizer.Form.NFC).lowercase(Locale.ROOT)
 }
 
-
-/** Fixed cell geometry for a uniform app-drawer grid. */
 internal data class LauncherDrawerGridGeometry(
     val tileHeightDp: Int,
     val iconSlotHeightDp: Int,
@@ -118,16 +180,12 @@ internal object LauncherDrawerGridPolicy {
         return LauncherDrawerGridGeometry(
             tileHeightDp = tileHeight,
             iconSlotHeightDp = ICON_SLOT_HEIGHT_DP,
-            labelSlotHeightDp = if (compact) COMPACT_LABEL_SLOT_HEIGHT_DP else GRID_LABEL_SLOT_HEIGHT_DP,
+            labelSlotHeightDp =
+                if (compact) COMPACT_LABEL_SLOT_HEIGHT_DP else GRID_LABEL_SLOT_HEIGHT_DP,
         )
     }
 }
 
-
-/**
- * Drawer page indicators keep a restrained visual dot while preserving the Glaze interaction
- * floor. The visual size is never used as the touch target.
- */
 internal object LauncherDrawerPageIndicatorPolicy {
     const val TOUCH_TARGET_DP = 48
     const val SELECTED_VISUAL_DP = 8

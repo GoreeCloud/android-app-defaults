@@ -917,10 +917,12 @@ Home Screen
 - Application contextual shortcuts
 - Resizable widgets
 - Searchable widget picker
-- Favorite-application dock
-- Customizable dock layouts
-- Multiple dock pages
-- Scrollable dock
+- Favorite-application Dock with a five-app starter configuration that is not a capacity limit
+- Customizable Dock page density, labels, materials, and optional Launcher Universal Search affordance
+- Multiple Dock pages with horizontal navigation independent from Home-page navigation and an optional disabled-by-default looping mode
+- Accessibility-floor-aware adaptive Dock layout that pages before shrinking interaction targets below the resolved minimum
+- Application and folder/shortcut/action Dock expansion according to the authoritative workspace model; non-app Dock persistence remains planned until separately verified
+- Detailed Dock requirements and implementation boundaries are maintained in `docs/home-dock.md`
 - Home-screen page scrolling
 - Optional infinite page scrolling
 - Wallpaper scrolling
@@ -2349,3 +2351,18 @@ Acceptance boundary. This closes the secondary-page render/persistence mismatch 
 - [CHANGELOGS.md](CHANGELOGS.md) — release/change-oriented chronology.
 - [FEATURES.md](FEATURES.md) — detailed approved target capability inventory.
 - [LICENSE](LICENSE) — repository license.
+
+
+## Drive Section 68 — Home Dock and App Drawer owner requirements — October 4/5, 2026
+
+Requirement level: Mandatory product direction.
+
+Current authoritative Development main is `66c0778e6c0b0b386d1865ec76b539c4774c5da1`. Protected PRs #239 and #240 integrated the expandable Home Dock foundation and active-drag cross-page handoff. The Dock begins from the familiar five-app starter selection but is not capacity-limited to five applications. Current Development supports adaptive page density, independent horizontal Dock pages, optional looping, optional labels, direct Universal Search, Glaze/Clear/Solid/Raised/Edge presentation, Home↔Dock/direct Drawer placement, profile-qualified app identities, layout lock, and 48 dp minimum Launcher-owned interaction targets. Dock folders/non-app Dock item persistence, portable backup/recovery expansion, and representative-device/release acceptance remain open.
+
+The App Drawer is required to remain a local-first, offline-capable, profile-aware application library and action surface. Protected PR #241 integrated bounded device-local user-created tabs with exact profile-qualified membership and kept Category application grouping active when Drawer folders exist by assigning folders to a dedicated Folders group. Protected PR #243 integrated profile-aware Recently installed ordering and a 48 dp A-Z List jump index. Current integrated Development also provides Grid/Compact/List/Category layouts, profile pages, local installed-app filtering, A–Z/Z–A/local recent/local frequency/Pinned-first ordering, profile-qualified pins, hidden apps, App Lock, folders, shortcuts/widgets/context actions, and direct Drawer→Home/Dock placement. The active Development continuation adds Recently updated ordering plus All/Pinned/Suggested/New/Updated discovery filters with truthful local-only suggestion ranking; primary-profile update time comes from Android PackageManager while non-primary Updated discovery fails closed until Android exposes profile-qualified last-update metadata to Launcher.
+
+Launcher-wide Settings must not occupy persistent App Drawer header chrome. The Drawer header remains focused on application organization/search; detailed Launcher configuration remains in Edit Home → Settings. Universal Search remains the broader Launcher-owned resource/action surface and connected sources remain explicit opt-in.
+
+No Drawer or Dock capability may introduce sponsored placement, affiliate ranking, behavioral advertising, required remote analytics, or a mandatory GoreeCloud account. Smart folders with transparent editable rules, richer categories/tags/collections, broader fast navigation outside the implemented A-Z List path, portable custom-organization recovery, representative-device profile-metadata validation, and accessibility/performance/signing/release acceptance remain separately gated.
+
+Exact-head automated validation is necessary but does not establish Production Acceptance, Stable, Seal, or Anchor.

@@ -1,5 +1,22 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 4/5, 2026 — App Drawer organization and discovery continuation
+
+Protected PR #241 integrated user-created App Drawer tabs with profile-qualified membership plus category-mode folder grouping. Protected PR #243 then integrated profile-aware **Recently installed** ordering and an A-Z List alphabetical jump index. The current Development continuation adds **Recently updated** ordering plus **All / Pinned / Suggested / New / Updated** discovery filters with local-only suggestion ranking and fail-closed profile-scoped update metadata. Remaining App Drawer scope includes representative-device acceptance; portable backup/restore policy for tabs and newer discovery preferences/state; richer user-defined category/tag/collection organization; deterministic smart folders with transparent editable rules (bounded local Pinned/Suggested/New/Updated dynamic views are now a Development candidate; manual override/exclusion rules remain open); broader fast-navigation behavior outside the A-Z List path; deeper keyboard/D-pad focus behavior; and complete accessibility, performance/power, signing/update, recovery, and release qualification.
+
+Smart folders and usage-derived discovery must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable. A new installation must not fabricate usage history.
+
+## October 4, 2026 — remaining Home Dock expansion
+
+Protected PRs #239 and #240 integrated adaptive Dock paging/search/labels/material choices and active-drag cross-page handoff through current main `05303f2813742a1437d26886ca3f3b5a85836395`. Remaining Dock work includes persistent Dock folders and other non-app item types; deeper padding/edge-position controls; contextual/suggested Dock content; Dock widgets; versioned portable backup/restore of page/folder semantics; and full representative-device accessibility/profile/form-factor/performance/power/recovery/signing/release acceptance.
+
+
+## October 3, 2026 — App Lock acceptance and portability remain
+
+The active Development candidate contains Launcher-managed App Lock for exact profile-qualified app identities, including searchable **All / Locked** management, app-context controls, locked-state indicators in Apps, setup discoverability, and Android-authenticated Launcher-originated app/shortcut launches.
+
+Remaining work is acceptance and portability: complete the current exact-head protected validation matrix; verify successful, cancelled, and unavailable authentication on representative physical devices; exercise personal/Work/Shelter/private-space lifecycle and same-package isolation; validate TalkBack/Switch Access, hardware keyboard, large/extra-large text, RTL/localization, phone/tablet/foldable layouts, contrast and reduced-motion/transparency behavior; provision and verify protected Development signing/update continuity; and define a separately versioned portable-state policy before locked membership is ever exported. Launches initiated outside GoreeCloud Launcher remain outside this feature's authority, and any future system-wide protection requires an Android-authorized mechanism appropriate to that scope.
+
 ## October 3, 2026 — Hidden apps integrated; acceptance and recovery work remains
 
 Protected PR #223 integrated profile-qualified Hidden Apps persistence, App Drawer/Universal Search suppression, reversible app-context Hide/Show controls, and Launcher Settings recovery on exact head `4ce68c0201cb2779c91c3203e68a8d75fdc07cd6`, merging as `b433104499372248d03cd0fed89fa729b6db1d77` after the complete protected matrix passed. The user-visible source capability is therefore implemented rather than a pending presentation candidate.
@@ -34,7 +51,7 @@ Still open after runtime-gate integration: representative/default-HOME multi-pag
 **Repository:** `GoreeCloud/android-app-defaults` (`apps/launcher/`)  
 **Lifecycle:** Development  
 **Migration state:** **Mandatory monorepo consolidation is complete. The standalone repository is no longer an active development target; historical entries remain provenance only.**  
-**Current authoritative main:** `06c4be22844c8f97e9c3fdee7757629ab11ccdb9` after protected PR #224 integration on top of Hidden Apps PR #223; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override newer verified current-state checkpoints.  
+**Current repository main:** `60912ef51825b2f3d63d46a9e0a77e673480ef3f`; the latest Launcher source-bearing main integration remains `06c4be22844c8f97e9c3fdee7757629ab11ccdb9` from PR #224. PR #231 remains a Development candidate; Launcher remains Development. Historical candidate sections below remain dated provenance and do not override newer verified current-state checkpoints.  
 **Governing standard:** Standard — Repository Feature Tracking and Changelog Governance, version 1.0, effective September 22, 2026.
 
 ## Purpose
@@ -119,7 +136,7 @@ Issue #80 remains open for representative-device first-use/resume and refreshed-
 ### Presentation and accessibility
 
 - Complete Theme Manager behavior, icon-pack discovery/application, icon masking/normalization, wallpaper-derived palettes, expression controls, and broader gesture bindings.
-- Complete Launcher-specific GLAZE UI V1.6 rendered/accessibility/adaptive/performance/power/rollback/Human Visual Excellence acceptance.
+- Complete Launcher-specific Glaze V1.7 / 1.7.0 contract re-pin plus rendered/accessibility/adaptive/performance/power/rollback/Human Visual Excellence acceptance; retain V1.6 as inherited runtime/implementation provenance only.
 - Validate keyboard, D-pad, Switch Access, TalkBack, large text, RTL/localization, reduced motion/transparency, contrast, and touch-target behavior across Home, Search, Apps, Settings, and editing surfaces.
 
 ### Portability, platform integration, and release
