@@ -10645,6 +10645,16 @@ internal fun GlazeDock(
             val visibleApps = dockPages.getOrElse(logicalCurrentPage) { emptyList() }
             val visibleKeys = remember(visibleApps) { visibleApps.map { it.workspaceKey() }.toSet() }
             val dockPageKeys = remember(dockPages) { dockPages.map { page -> page.map { it.workspaceKey() } } }
+            val nextPageInsertionKey = if (activeDrag == null) {
+                null
+            } else {
+                launcherDockNextPageInsertionKey(
+                    dockPageKeys,
+                    logicalCurrentPage,
+                    activeDrag.appKey,
+                    loop = loopingDockPages,
+                )
+            }
             LaunchedEffect(visibleKeys) {
                 dockItemBounds.keys
                     .filterNot(visibleKeys::contains)
