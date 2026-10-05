@@ -1636,6 +1636,7 @@ fun LauncherBetaRoot(
         selectedAppAnchor?.let { anchor ->
             val appKey = app.workspaceKey()
             val pinnedIndex = drawerPinnedAppOrder.indexOf(appKey)
+            val dockIndex = workspace.dockKeys.indexOf(appKey)
             AppContextPopup(
                 app = app,
                 anchor = anchor,
