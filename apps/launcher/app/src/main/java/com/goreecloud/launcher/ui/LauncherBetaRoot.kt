@@ -12911,6 +12911,8 @@ private fun AppContextPopup(
     onToggleDrawerPinned: () -> Unit,
     onMoveDrawerPinnedEarlier: () -> Unit,
     onMoveDrawerPinnedLater: () -> Unit,
+    onMoveDockEarlier: () -> Unit,
+    onMoveDockLater: () -> Unit,
     onResetDrawerPinnedOrder: () -> Unit,
     onToggleHidden: () -> Unit,
     onToggleLocked: () -> Unit,
