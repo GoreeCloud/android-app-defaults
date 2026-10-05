@@ -10816,6 +10816,25 @@ internal fun GlazeDock(
                 }
             }
 
+            if (activeDrag != null && dragPageDirection != null) {
+                val previous = dragPageDirection == LauncherDockDragPageDirection.PREVIOUS
+                Box(
+                    modifier = Modifier
+                        .align(if (previous) Alignment.CenterStart else Alignment.CenterEnd)
+                        .padding(
+                            start = if (previous) horizontalPadding else 0.dp,
+                            end = if (previous) 0.dp else horizontalPadding + searchReservation,
+                        )
+                        .width(5.dp)
+                        .height(34.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.72f),
+                            CircleShape,
+                        )
+                        .testTag("launcher-dock-drag-page-edge"),
+                )
+            }
+
             if (dockPages.size > 1) {
                 Row(
                     modifier = Modifier
