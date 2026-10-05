@@ -842,6 +842,7 @@ fun LauncherBetaRoot(
     onSetDrawerSpacing: (LauncherDrawerSpacing) -> Unit,
     onSetDrawerPageRows: (Int) -> Unit,
     onSetShowDrawerAppCount: (Boolean) -> Unit,
+    onSetShowDrawerSuggestions: (Boolean) -> Unit,
     onSetHomeGlanceAlignment: (LauncherHomeGlanceAlignment) -> Unit,
     onSetHomeSearchPlacement: (LauncherHomeSearchPlacement) -> Unit,
     onSetHomeSearchStyle: (LauncherHomeSearchStyle) -> Unit,
@@ -1616,6 +1617,7 @@ fun LauncherBetaRoot(
                         onSetDrawerSpacing = onSetDrawerSpacing,
                         onSetDrawerPageRows = onSetDrawerPageRows,
                         onSetShowDrawerAppCount = onSetShowDrawerAppCount,
+                        onSetShowDrawerSuggestions = onSetShowDrawerSuggestions,
                         onSetHomeGlanceAlignment = onSetHomeGlanceAlignment,
                         onSetHomeSearchPlacement = onSetHomeSearchPlacement,
                         onSetHomeSearchStyle = onSetHomeSearchStyle,
@@ -7303,9 +7305,21 @@ private fun AppDrawerSurface(
                     secondaryColor = drawerSecondaryColor,
                 )
                 Spacer(Modifier.height(GlazeMetrics.space1))
+                LaunchedEffect(
+                    experiencePreferences.showDrawerSuggestions,
+                    discoveryFilter,
+                ) {
+                    if (
+                        !experiencePreferences.showDrawerSuggestions &&
+                        discoveryFilter == LauncherDrawerDiscoveryFilter.SUGGESTED
+                    ) {
+                        discoveryFilterName = LauncherDrawerDiscoveryFilter.ALL.name
+                    }
+                }
                 LauncherDrawerDiscoveryFiltersRow(
                     selectedFilter = discoveryFilter,
                     pinnedAvailable = pinnedAppKeys.isNotEmpty(),
+                    suggestionsEnabled = experiencePreferences.showDrawerSuggestions,
                     secondaryColor = drawerSecondaryColor,
                     chooseFilter = { filter -> discoveryFilterName = filter.name },
                 )
@@ -8937,6 +8951,7 @@ private fun LauncherSettingsRootSurface(
     onSetDrawerSpacing: (LauncherDrawerSpacing) -> Unit,
     onSetDrawerPageRows: (Int) -> Unit,
     onSetShowDrawerAppCount: (Boolean) -> Unit,
+    onSetShowDrawerSuggestions: (Boolean) -> Unit,
     onSetHomeGlanceAlignment: (LauncherHomeGlanceAlignment) -> Unit,
     onSetHomeSearchPlacement: (LauncherHomeSearchPlacement) -> Unit,
     onSetHomeSearchStyle: (LauncherHomeSearchStyle) -> Unit,
