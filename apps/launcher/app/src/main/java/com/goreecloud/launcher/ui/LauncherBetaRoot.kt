@@ -13114,6 +13114,10 @@ private fun AppContextPopup(
                         )
                     }
                 }
+                if (contextOrigin == LauncherAppContextOrigin.DOCK) {
+                    GlazeLauncherPopupAction(label = "Move earlier in Dock", symbol = GlazePopupActionSymbol.BACK, onClick = onMoveDockEarlier, enabled = canMoveDockEarlier && !layoutLocked)
+                    GlazeLauncherPopupAction(label = "Move later in Dock", symbol = GlazePopupActionSymbol.FORWARD, onClick = onMoveDockLater, enabled = canMoveDockLater && !layoutLocked)
+                }
                 GlazeLauncherPopupAction(
                     label = "Add to folder",
                     symbol = GlazePopupActionSymbol.FOLDER,
