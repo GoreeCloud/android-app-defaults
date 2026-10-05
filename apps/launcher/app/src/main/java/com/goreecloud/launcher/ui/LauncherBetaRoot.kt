@@ -2122,11 +2122,17 @@ private fun HomeSurface(
         }
     }
     LaunchedEffect(homeSearchSurface, hasMovableSearch, primaryHomePage) {
-        when {
-            homeSearchSurface == LauncherHomeSearchSurface.MOVABLE && !hasMovableSearch ->
+        when (
+            launcherManagedSearchReconciliationAction(
+                surface = homeSearchSurface,
+                hasAnyMovableSearch = hasMovableSearch,
+            )
+        ) {
+            LauncherManagedSearchReconciliationAction.ENSURE_PRESENT ->
                 onSetManagedHomeSearchEnabled(true)
-            homeSearchSurface != LauncherHomeSearchSurface.MOVABLE ->
+            LauncherManagedSearchReconciliationAction.REMOVE_MANAGED ->
                 onSetManagedHomeSearchEnabled(false)
+            LauncherManagedSearchReconciliationAction.NONE -> Unit
         }
     }
     val showFixedSearchAtTop = homeSearchSurface == LauncherHomeSearchSurface.FIXED_TOP
