@@ -1,11 +1,12 @@
 package com.goreecloud.launcher.ui
 
 import android.content.pm.LauncherActivityInfo
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
@@ -17,9 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import com.goreecloud.launcher.core.launcher.LauncherAppIconCache
+import com.goreecloud.launcher.core.launcher.LauncherIconFillMode
 import com.goreecloud.launcher.core.launcher.LauncherIconPackRepository
 import com.goreecloud.launcher.core.launcher.LauncherIconShape
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +33,7 @@ import kotlinx.coroutines.withContext
 internal data class LauncherIconAppearance(
     val shape: LauncherIconShape = LauncherIconShape.ROUNDED_SQUARE,
     val iconPackPackage: String? = null,
+    val fillMode: LauncherIconFillMode = LauncherIconFillMode.BALANCED,
 )
 
 internal val LocalLauncherIconAppearance = compositionLocalOf {
@@ -94,17 +99,56 @@ internal fun rememberLauncherAppIcon(app: LauncherActivityInfo): ImageBitmap? {
     return icon
 }
 
+/**
+ * Applies only the selected geometric mask.
+ *
+ * The previous implementation painted a generic surface-colored plane behind Android artwork.
+ * That made already-masked icons look like a small icon sitting inside a second gray mask. Adaptive
+ * icon backgrounds are now reconstructed by [LauncherAppIconCache], so this layer stays neutral.
+ */
 @Composable
 internal fun Modifier.launcherIconMask(): Modifier {
     val shape = LocalLauncherIconAppearance.current.shape
     if (shape == LauncherIconShape.ORIGINAL) return this
+    return clip(shape.toLauncherComposeShape())
+}
 
-    val composeShape = shape.toLauncherComposeShape()
-    // Android/OEM launcher artwork may already arrive with a circular adaptive-icon mask baked
-    // into transparent pixels. A shaped backing plane makes the selected Launcher mask visible
-    // and consistent even for those icons, while the clip still constrains square artwork.
-    val backing = MaterialTheme.colorScheme.surface.copy(alpha = 0.42f)
-    return background(backing, composeShape).clip(composeShape)
+/**
+ * Shared app-artwork renderer for Home, Dock, Apps, Search and folder/provider surfaces.
+ *
+ * Masked icons get bounded optical expansion so app artwork reaches the selected mask without
+ * aggressively cropping legacy logo-only artwork. Users can choose Fit, Balanced or Fill. Original
+ * shape bypasses both clipping and optical expansion.
+ */
+@Composable
+internal fun LauncherAppIconImage(
+    bitmap: ImageBitmap,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit,
+) {
+    val appearance = LocalLauncherIconAppearance.current
+    val masked = appearance.shape != LauncherIconShape.ORIGINAL
+    val artworkScale = if (masked) appearance.fillMode.artworkScale else 1f
+    val containerModifier = if (masked) {
+        modifier.clip(appearance.shape.toLauncherComposeShape())
+    } else {
+        modifier
+    }
+
+    Box(modifier = containerModifier) {
+        Image(
+            bitmap = bitmap,
+            contentDescription = contentDescription,
+            contentScale = contentScale,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = artworkScale
+                    scaleY = artworkScale
+                },
+        )
+    }
 }
 
 internal fun LauncherIconShape.toLauncherComposeShape(): Shape = when (this) {
