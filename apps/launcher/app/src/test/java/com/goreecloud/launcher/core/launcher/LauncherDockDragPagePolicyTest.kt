@@ -35,5 +35,7 @@ class LauncherDockDragPagePolicyTest {
         assertEquals("e", launcherDockNextPageInsertionKey(pages, 0, "d"))
         assertEquals("g", launcherDockNextPageInsertionKey(pages, 1, "e"))
         assertEquals(null, launcherDockNextPageInsertionKey(pages, 2, "g"))
+        assertEquals("a", launcherDockNextPageInsertionKey(pages, 2, "g", loop = true))
+        assertEquals("b", launcherDockNextPageInsertionKey(pages, 2, "a", loop = true))
     }
 }
