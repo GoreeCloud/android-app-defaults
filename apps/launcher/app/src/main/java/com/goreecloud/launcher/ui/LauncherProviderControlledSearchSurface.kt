@@ -2799,194 +2799,145 @@ private fun LauncherLocalSearchSourceGlyph(
         val u = size.minDimension
         val stroke = u * 0.075f
         val round = androidx.compose.ui.graphics.StrokeCap.Round
+        val outline = Stroke(
+            width = stroke,
+            cap = round,
+            join = androidx.compose.ui.graphics.StrokeJoin.Round,
+        )
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float, width: Float = stroke) {
+            drawLine(
+                color = tint,
+                start = androidx.compose.ui.geometry.Offset(u * x1, u * y1),
+                end = androidx.compose.ui.geometry.Offset(u * x2, u * y2),
+                strokeWidth = width,
+                cap = round,
+            )
+        }
+
         when (providerId) {
             LauncherQuickAnswersSearchProvider.PROVIDER_ID -> {
-                drawLine(
-                    tint,
-                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.12f),
-                    androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.88f),
-                    stroke,
-                    cap = round,
-                )
-                drawLine(
-                    tint,
-                    androidx.compose.ui.geometry.Offset(u * 0.12f, u * 0.50f),
-                    androidx.compose.ui.geometry.Offset(u * 0.88f, u * 0.50f),
-                    stroke,
-                    cap = round,
-                )
-                drawLine(
-                    tint,
-                    androidx.compose.ui.geometry.Offset(u * 0.25f, u * 0.25f),
-                    androidx.compose.ui.geometry.Offset(u * 0.75f, u * 0.75f),
-                    stroke * 0.70f,
-                    cap = round,
-                )
-                drawLine(
-                    tint,
-                    androidx.compose.ui.geometry.Offset(u * 0.75f, u * 0.25f),
-                    androidx.compose.ui.geometry.Offset(u * 0.25f, u * 0.75f),
-                    stroke * 0.70f,
-                    cap = round,
-                )
+                // Four-ray sparkle with a secondary glint: recognizable at compact source-row size
+                // without the heavy asterisk appearance of eight full crossing strokes.
+                line(.50f, .14f, .50f, .86f)
+                line(.14f, .50f, .86f, .50f)
+                line(.27f, .27f, .37f, .37f, stroke * .72f)
+                line(.63f, .63f, .73f, .73f, stroke * .72f)
             }
             LauncherCoreActionsSearchProvider.PROVIDER_ID -> {
-                val rocket = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(u * 0.26f, u * 0.70f)
-                    lineTo(u * 0.42f, u * 0.30f)
-                    lineTo(u * 0.78f, u * 0.16f)
-                    lineTo(u * 0.68f, u * 0.54f)
-                    lineTo(u * 0.30f, u * 0.76f)
-                    close()
-                }
-                drawPath(rocket, color = tint, style = Stroke(width = stroke))
-                drawCircle(
+                // Small command/launch arrow rather than a decorative rocket.
+                drawRoundRect(
                     color = tint,
-                    radius = u * 0.055f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.59f, u * 0.37f),
+                    topLeft = androidx.compose.ui.geometry.Offset(u * .18f, u * .24f),
+                    size = androidx.compose.ui.geometry.Size(u * .44f, u * .52f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .09f),
+                    style = outline,
                 )
+                line(.43f, .57f, .80f, .20f)
+                line(.59f, .20f, .80f, .20f)
+                line(.80f, .20f, .80f, .41f)
             }
             LauncherInstalledAppsSearchProvider.PROVIDER_ID -> {
                 listOf(
-                    0.18f to 0.18f,
-                    0.56f to 0.18f,
-                    0.18f to 0.56f,
-                    0.56f to 0.56f,
+                    .18f to .18f,
+                    .56f to .18f,
+                    .18f to .56f,
+                    .56f to .56f,
                 ).forEach { (x, y) ->
                     drawRoundRect(
                         color = tint,
                         topLeft = androidx.compose.ui.geometry.Offset(u * x, u * y),
-                        size = androidx.compose.ui.geometry.Size(u * 0.26f, u * 0.26f),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                            u * 0.06f,
-                            u * 0.06f,
-                        ),
+                        size = androidx.compose.ui.geometry.Size(u * .26f, u * .26f),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .06f),
+                        style = outline,
                     )
                 }
             }
             LauncherShortcutsSearchProvider.PROVIDER_ID -> {
-                drawCircle(
-                    color = tint,
-                    radius = u * 0.20f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.38f, u * 0.50f),
-                    style = Stroke(width = stroke),
-                )
-                drawCircle(
-                    color = tint,
-                    radius = u * 0.20f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.62f, u * 0.50f),
-                    style = Stroke(width = stroke),
-                )
-                drawLine(
-                    color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.44f, u * 0.50f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.56f, u * 0.50f),
-                    strokeWidth = stroke,
-                    cap = round,
-                )
+                val left = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * .46f, u * .33f)
+                    cubicTo(u * .36f, u * .23f, u * .20f, u * .25f, u * .15f, u * .38f)
+                    cubicTo(u * .10f, u * .51f, u * .17f, u * .65f, u * .30f, u * .68f)
+                    cubicTo(u * .39f, u * .70f, u * .46f, u * .65f, u * .52f, u * .58f)
+                }
+                val right = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(u * .48f, u * .42f)
+                    cubicTo(u * .54f, u * .35f, u * .61f, u * .30f, u * .70f, u * .32f)
+                    cubicTo(u * .83f, u * .35f, u * .90f, u * .49f, u * .85f, u * .62f)
+                    cubicTo(u * .80f, u * .75f, u * .64f, u * .77f, u * .54f, u * .67f)
+                }
+                drawPath(left, color = tint, style = outline)
+                drawPath(right, color = tint, style = outline)
+                line(.38f, .56f, .62f, .44f)
             }
             LauncherContactsSearchProvider.PROVIDER_ID -> {
                 drawCircle(
                     color = tint,
-                    radius = u * 0.14f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.33f),
-                    style = Stroke(width = stroke),
+                    radius = u * .14f,
+                    center = androidx.compose.ui.geometry.Offset(u * .50f, u * .33f),
+                    style = outline,
                 )
                 drawArc(
                     color = tint,
-                    startAngle = 200f,
-                    sweepAngle = 140f,
+                    startAngle = 205f,
+                    sweepAngle = 130f,
                     useCenter = false,
-                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.22f, u * 0.50f),
-                    size = androidx.compose.ui.geometry.Size(u * 0.56f, u * 0.34f),
-                    style = Stroke(
-                        width = stroke,
-                        cap = round,
-                    ),
+                    topLeft = androidx.compose.ui.geometry.Offset(u * .22f, u * .49f),
+                    size = androidx.compose.ui.geometry.Size(u * .56f, u * .34f),
+                    style = outline,
                 )
             }
             LauncherCallHistorySearchProvider.PROVIDER_ID -> {
                 val handset = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(u * 0.28f, u * 0.19f)
-                    cubicTo(
-                        u * 0.18f, u * 0.31f,
-                        u * 0.27f, u * 0.58f,
-                        u * 0.46f, u * 0.73f,
-                    )
-                    cubicTo(
-                        u * 0.61f, u * 0.85f,
-                        u * 0.78f, u * 0.84f,
-                        u * 0.82f, u * 0.70f,
-                    )
+                    moveTo(u * .30f, u * .18f)
+                    cubicTo(u * .21f, u * .30f, u * .28f, u * .55f, u * .46f, u * .71f)
+                    cubicTo(u * .61f, u * .84f, u * .76f, u * .84f, u * .82f, u * .71f)
                 }
-                drawPath(
-                    path = handset,
-                    color = tint,
-                    style = Stroke(
-                        width = stroke * 1.22f,
-                        cap = round,
-                        join = androidx.compose.ui.graphics.StrokeJoin.Round,
-                    ),
-                )
-                drawLine(
-                    color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.24f, u * 0.18f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.35f, u * 0.25f),
-                    strokeWidth = stroke * 1.40f,
-                    cap = round,
-                )
-                drawLine(
-                    color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.72f, u * 0.69f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.82f, u * 0.76f),
-                    strokeWidth = stroke * 1.40f,
-                    cap = round,
-                )
+                drawPath(handset, color = tint, style = outline)
+                line(.27f, .18f, .37f, .25f, stroke * 1.25f)
+                line(.72f, .69f, .82f, .76f, stroke * 1.25f)
             }
             LauncherMessagesSearchProvider.PROVIDER_ID -> {
                 drawRoundRect(
                     color = tint,
-                    topLeft = androidx.compose.ui.geometry.Offset(u * 0.16f, u * 0.22f),
-                    size = androidx.compose.ui.geometry.Size(u * 0.68f, u * 0.48f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                        u * 0.15f,
-                        u * 0.15f,
-                    ),
-                    style = Stroke(width = stroke),
+                    topLeft = androidx.compose.ui.geometry.Offset(u * .15f, u * .21f),
+                    size = androidx.compose.ui.geometry.Size(u * .70f, u * .50f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .14f),
+                    style = outline,
                 )
-                drawLine(
-                    color = tint,
-                    start = androidx.compose.ui.geometry.Offset(u * 0.36f, u * 0.70f),
-                    end = androidx.compose.ui.geometry.Offset(u * 0.28f, u * 0.84f),
-                    strokeWidth = stroke,
-                    cap = round,
-                )
-                listOf(0.36f, 0.50f, 0.64f).forEach { x ->
+                line(.36f, .71f, .27f, .84f)
+                listOf(.36f, .50f, .64f).forEach { x ->
                     drawCircle(
                         color = tint,
-                        radius = u * 0.035f,
-                        center = androidx.compose.ui.geometry.Offset(u * x, u * 0.46f),
+                        radius = u * .03f,
+                        center = androidx.compose.ui.geometry.Offset(u * x, u * .46f),
                     )
                 }
             }
             LauncherFilesSearchProvider.PROVIDER_ID -> {
                 val folder = androidx.compose.ui.graphics.Path().apply {
-                    moveTo(u * 0.14f, u * 0.30f)
-                    lineTo(u * 0.40f, u * 0.30f)
-                    lineTo(u * 0.48f, u * 0.40f)
-                    lineTo(u * 0.86f, u * 0.40f)
-                    lineTo(u * 0.82f, u * 0.76f)
-                    lineTo(u * 0.14f, u * 0.76f)
+                    moveTo(u * .13f, u * .31f)
+                    lineTo(u * .38f, u * .31f)
+                    lineTo(u * .47f, u * .22f)
+                    lineTo(u * .64f, u * .22f)
+                    lineTo(u * .70f, u * .31f)
+                    lineTo(u * .87f, u * .31f)
+                    lineTo(u * .87f, u * .79f)
+                    lineTo(u * .13f, u * .79f)
                     close()
                 }
-                drawPath(folder, color = tint, style = Stroke(width = stroke))
+                drawPath(folder, color = tint, style = outline)
             }
             else -> {
                 drawCircle(
                     color = tint,
-                    radius = u * 0.20f,
-                    center = androidx.compose.ui.geometry.Offset(u * 0.50f, u * 0.50f),
-                    style = Stroke(width = stroke),
+                    radius = u * .25f,
+                    center = androidx.compose.ui.geometry.Offset(u * .50f, u * .50f),
+                    style = outline,
+                )
+                drawCircle(
+                    color = tint,
+                    radius = u * .035f,
+                    center = androidx.compose.ui.geometry.Offset(u * .50f, u * .50f),
                 )
             }
         }

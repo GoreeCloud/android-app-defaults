@@ -3,10 +3,19 @@ package com.goreecloud.launcher.core.launcher
 import android.content.ComponentName
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.UserHandle
 import android.util.LruCache
 import androidx.core.graphics.drawable.toBitmap
+import kotlin.math.max
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +32,10 @@ internal const val LAUNCHER_ICON_CACHE_MAX_KIB = 12 * 1024
 internal const val LAUNCHER_ICON_STALE_CACHE_MAX_KIB = 4 * 1024
 internal const val LAUNCHER_ICON_PRELOAD_COUNT = 128
 internal const val LAUNCHER_ICON_PRELOAD_PARALLELISM = 3
+internal const val LAUNCHER_ADAPTIVE_FOREGROUND_OVERSCAN_FRACTION = 0.14f
+internal const val LAUNCHER_LEGACY_ICON_NORMALIZE_THRESHOLD = 0.84f
+internal const val LAUNCHER_LEGACY_ICON_TARGET_FRACTION = 0.90f
+internal const val LAUNCHER_LEGACY_ICON_MAX_SCALE = 1.24f
 
 internal data class LauncherIconCacheKey(
     val user: UserHandle,
@@ -50,6 +63,131 @@ internal fun <T> firstSuccessfulIconLoad(vararg loaders: () -> T?): T? {
         if (value != null) return value
     }
     return null
+}
+
+internal fun launcherLegacyIconNormalizationScale(
+    contentWidth: Int,
+    contentHeight: Int,
+    canvasSize: Int,
+): Float {
+    if (contentWidth <= 0 || contentHeight <= 0 || canvasSize <= 0) return 1f
+    val occupiedFraction = max(contentWidth, contentHeight).toFloat() / canvasSize.toFloat()
+    if (occupiedFraction >= LAUNCHER_LEGACY_ICON_NORMALIZE_THRESHOLD) return 1f
+    return (LAUNCHER_LEGACY_ICON_TARGET_FRACTION / occupiedFraction)
+        .coerceIn(1f, LAUNCHER_LEGACY_ICON_MAX_SCALE)
+}
+
+private fun renderDrawableSquare(
+    drawable: Drawable,
+    sizePx: Int,
+): Bitmap {
+    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val copy = drawable.mutate()
+    val previous = Rect(copy.bounds)
+    copy.setBounds(0, 0, sizePx, sizePx)
+    copy.draw(canvas)
+    copy.bounds = previous
+    return bitmap
+}
+
+private fun renderAdaptiveIconSquare(
+    drawable: AdaptiveIconDrawable,
+    sizePx: Int,
+): Bitmap {
+    val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+
+    drawable.background?.mutate()?.let { background ->
+        val previous = Rect(background.bounds)
+        background.setBounds(0, 0, sizePx, sizePx)
+        background.draw(canvas)
+        background.bounds = previous
+    }
+
+    drawable.foreground?.mutate()?.let { foreground ->
+        // Android adaptive foreground layers intentionally include a large safe zone because the
+        // platform may apply many masks. Launcher owns the selected mask, so render the layer with
+        // bounded overscan and let Compose perform the final user-selected clip.
+        val overscan = (sizePx * LAUNCHER_ADAPTIVE_FOREGROUND_OVERSCAN_FRACTION).toInt()
+        val previous = Rect(foreground.bounds)
+        foreground.setBounds(-overscan, -overscan, sizePx + overscan, sizePx + overscan)
+        foreground.draw(canvas)
+        foreground.bounds = previous
+    }
+
+    return bitmap
+}
+
+private fun alphaBounds(bitmap: Bitmap): Rect? {
+    var left = bitmap.width
+    var top = bitmap.height
+    var right = -1
+    var bottom = -1
+
+    for (y in 0 until bitmap.height) {
+        for (x in 0 until bitmap.width) {
+            if ((bitmap.getPixel(x, y) ushr 24) > 8) {
+                if (x < left) left = x
+                if (x > right) right = x
+                if (y < top) top = y
+                if (y > bottom) bottom = y
+            }
+        }
+    }
+
+    return if (right < left || bottom < top) null else Rect(left, top, right + 1, bottom + 1)
+}
+
+private fun normalizeLegacyIconBitmap(bitmap: Bitmap): Bitmap {
+    val bounds = alphaBounds(bitmap) ?: return bitmap
+    val scale = launcherLegacyIconNormalizationScale(
+        contentWidth = bounds.width(),
+        contentHeight = bounds.height(),
+        canvasSize = bitmap.width.coerceAtMost(bitmap.height),
+    )
+    if (scale <= 1.001f) return bitmap
+
+    val destinationWidth = (bounds.width() * scale).coerceAtMost(bitmap.width.toFloat())
+    val destinationHeight = (bounds.height() * scale).coerceAtMost(bitmap.height.toFloat())
+    val left = (bitmap.width - destinationWidth) / 2f
+    val top = (bitmap.height - destinationHeight) / 2f
+    val normalized = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+    Canvas(normalized).drawBitmap(
+        bitmap,
+        bounds,
+        RectF(left, top, left + destinationWidth, top + destinationHeight),
+        Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
+    )
+    return normalized
+}
+
+private fun renderLauncherIconBitmap(
+    drawable: Drawable,
+    sizePx: Int,
+): Bitmap =
+    if (drawable is AdaptiveIconDrawable) {
+        renderAdaptiveIconSquare(drawable, sizePx)
+    } else {
+        normalizeLegacyIconBitmap(renderDrawableSquare(drawable, sizePx))
+    }
+
+private fun renderLauncherIconBitmap(
+    drawable: Drawable,
+    packageManager: PackageManager?,
+    user: UserHandle,
+    sizePx: Int,
+): Bitmap {
+    val normalized = renderLauncherIconBitmap(drawable, sizePx)
+    if (packageManager == null) return normalized
+
+    val badged = packageManager.getUserBadgedIcon(
+        BitmapDrawable(Resources.getSystem(), normalized),
+        user,
+    )
+    // Badging is applied only after normalization so Android cannot bake its default adaptive mask
+    // into the base app artwork before Launcher applies the selected shape.
+    return renderDrawableSquare(badged, sizePx)
 }
 
 internal class LauncherIconSingleFlightLoader<K : Any, V>(
@@ -230,32 +368,25 @@ internal object LauncherAppIconCache {
             } else {
                 val decoded = firstSuccessfulIconLoad(
                     {
-                        app.getBadgedIcon(0).toBitmap(
-                            width = LAUNCHER_ICON_DECODE_SIZE_PX,
-                            height = LAUNCHER_ICON_DECODE_SIZE_PX,
-                        )
-                    },
-                    {
-                        // Some OEM/activity resources intermittently fail through the badged path.
-                        // Re-badge the activity icon when PackageManager is available so work or
-                        // secondary-profile identity is preserved on this fallback as well.
-                        app.getIcon(0).let { drawable ->
-                            packageManager?.getUserBadgedIcon(drawable, app.user) ?: drawable
-                        }.toBitmap(
-                            width = LAUNCHER_ICON_DECODE_SIZE_PX,
-                            height = LAUNCHER_ICON_DECODE_SIZE_PX,
+                        // Prefer the unbadged source so adaptive foreground/background layers can
+                        // be flattened without Android's system mask. Launcher then applies its
+                        // selected mask consistently across Home, Dock, Apps, Search, and folders.
+                        renderLauncherIconBitmap(
+                            drawable = app.getIcon(0),
+                            packageManager = packageManager,
+                            user = app.user,
+                            sizePx = LAUNCHER_ICON_DECODE_SIZE_PX,
                         )
                     },
                     {
                         // PackageManager can still expose the activity resource when the direct
                         // LauncherActivityInfo resource path is temporarily unavailable.
                         packageManager?.let { manager ->
-                            manager.getUserBadgedIcon(
-                                manager.getActivityIcon(app.componentName),
-                                app.user,
-                            ).toBitmap(
-                                width = LAUNCHER_ICON_DECODE_SIZE_PX,
-                                height = LAUNCHER_ICON_DECODE_SIZE_PX,
+                            renderLauncherIconBitmap(
+                                drawable = manager.getActivityIcon(app.componentName),
+                                packageManager = manager,
+                                user = app.user,
+                                sizePx = LAUNCHER_ICON_DECODE_SIZE_PX,
                             )
                         }
                     },
@@ -263,25 +394,32 @@ internal object LauncherAppIconCache {
                         // A small number of vendor launch activities expose a broken activity icon
                         // while their application icon remains valid.
                         packageManager?.let { manager ->
-                            manager.getUserBadgedIcon(
-                                app.applicationInfo.loadIcon(manager),
-                                app.user,
-                            ).toBitmap(
-                                width = LAUNCHER_ICON_DECODE_SIZE_PX,
-                                height = LAUNCHER_ICON_DECODE_SIZE_PX,
+                            renderLauncherIconBitmap(
+                                drawable = app.applicationInfo.loadIcon(manager),
+                                packageManager = manager,
+                                user = app.user,
+                                sizePx = LAUNCHER_ICON_DECODE_SIZE_PX,
                             )
                         }
+                    },
+                    {
+                        // Retain Android's already-badged bitmap only as a late compatibility
+                        // fallback. It may already contain an OEM/system mask and therefore should
+                        // never outrank the mask-neutral paths above.
+                        app.getBadgedIcon(0).toBitmap(
+                            width = LAUNCHER_ICON_DECODE_SIZE_PX,
+                            height = LAUNCHER_ICON_DECODE_SIZE_PX,
+                        )
                     },
                     {
                         // Final Android-owned fail-soft presentation fallback. This prevents a
                         // blank drawer slot when every app-owned icon resource is unreadable.
                         packageManager?.let { manager ->
-                            manager.getUserBadgedIcon(
-                                manager.defaultActivityIcon,
-                                app.user,
-                            ).toBitmap(
-                                width = LAUNCHER_ICON_DECODE_SIZE_PX,
-                                height = LAUNCHER_ICON_DECODE_SIZE_PX,
+                            renderLauncherIconBitmap(
+                                drawable = manager.defaultActivityIcon,
+                                packageManager = manager,
+                                user = app.user,
+                                sizePx = LAUNCHER_ICON_DECODE_SIZE_PX,
                             )
                         }
                     },

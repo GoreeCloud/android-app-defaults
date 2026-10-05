@@ -7925,7 +7925,7 @@ private enum class LauncherSettingsCategory(
     LOOK_AND_FEEL(
         "Look & feel",
         "Icons, wallpaper treatment and Glaze theme",
-        "icons icon pack shape size appearance glaze theme wallpaper shade light dark deep dark",
+        "icons icon pack shape mask fill normalization preview reset size appearance glaze theme wallpaper shade light dark deep dark",
     ),
     GESTURES(
         "Gestures & inputs",
@@ -7955,203 +7955,161 @@ private fun LauncherSettingsCategoryIcon(
     color: Color,
 ) {
     Canvas(Modifier.size(26.dp)) {
-        val stroke = 2.dp.toPx()
+        val u = size.minDimension
+        val stroke = 1.9.dp.toPx()
+        val outline = Stroke(
+            width = stroke,
+            cap = StrokeCap.Round,
+            join = androidx.compose.ui.graphics.StrokeJoin.Round,
+        )
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                color = color,
+                start = Offset(u * x1, u * y1),
+                end = Offset(u * x2, u * y2),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round,
+            )
+        }
+
         when (category) {
             LauncherSettingsCategory.HOME -> {
-                drawLine(
-                    color = color,
-                    start = Offset(size.width * 0.16f, size.height * 0.48f),
-                    end = Offset(size.width * 0.50f, size.height * 0.18f),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                )
-                drawLine(
-                    color = color,
-                    start = Offset(size.width * 0.50f, size.height * 0.18f),
-                    end = Offset(size.width * 0.84f, size.height * 0.48f),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                )
+                val roof = Path().apply {
+                    moveTo(u * .16f, u * .46f)
+                    lineTo(u * .50f, u * .17f)
+                    lineTo(u * .84f, u * .46f)
+                }
+                drawPath(roof, color, style = outline)
                 drawRoundRect(
                     color = color,
-                    topLeft = Offset(size.width * 0.25f, size.height * 0.44f),
-                    size = androidx.compose.ui.geometry.Size(
-                        size.width * 0.50f,
-                        size.height * 0.38f,
-                    ),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                        size.minDimension * 0.08f,
-                    ),
-                    style = Stroke(stroke),
+                    topLeft = Offset(u * .26f, u * .42f),
+                    size = Size(u * .48f, u * .39f),
+                    cornerRadius = CornerRadius(u * .07f),
+                    style = outline,
                 )
             }
             LauncherSettingsCategory.DRAWER -> {
-                repeat(3) { row ->
-                    repeat(3) { column ->
-                        drawCircle(
-                            color = color,
-                            radius = size.minDimension * 0.075f,
-                            center = Offset(
-                                size.width * (0.27f + (column * 0.23f)),
-                                size.height * (0.27f + (row * 0.23f)),
-                            ),
-                        )
-                    }
+                listOf(
+                    .22f to .22f,
+                    .56f to .22f,
+                    .22f to .56f,
+                    .56f to .56f,
+                ).forEach { (x, y) ->
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(u * x, u * y),
+                        size = Size(u * .22f, u * .22f),
+                        cornerRadius = CornerRadius(u * .055f),
+                        style = outline,
+                    )
                 }
             }
             LauncherSettingsCategory.FOLDERS -> {
-                drawRoundRect(
-                    color = color,
-                    topLeft = Offset(size.width * 0.14f, size.height * 0.31f),
-                    size = androidx.compose.ui.geometry.Size(
-                        size.width * 0.72f,
-                        size.height * 0.49f,
-                    ),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                        size.minDimension * 0.09f,
-                    ),
-                    style = Stroke(stroke),
-                )
-                drawLine(
-                    color = color,
-                    start = Offset(size.width * 0.19f, size.height * 0.31f),
-                    end = Offset(size.width * 0.42f, size.height * 0.31f),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                )
+                val folder = Path().apply {
+                    moveTo(u * .13f, u * .31f)
+                    lineTo(u * .38f, u * .31f)
+                    lineTo(u * .47f, u * .22f)
+                    lineTo(u * .64f, u * .22f)
+                    lineTo(u * .70f, u * .31f)
+                    lineTo(u * .87f, u * .31f)
+                    lineTo(u * .87f, u * .79f)
+                    lineTo(u * .13f, u * .79f)
+                    close()
+                }
+                drawPath(folder, color, style = outline)
             }
             LauncherSettingsCategory.SEARCH -> {
                 drawCircle(
                     color = color,
-                    radius = size.minDimension * 0.27f,
-                    center = Offset(size.width * 0.43f, size.height * 0.42f),
-                    style = Stroke(stroke),
+                    radius = u * .255f,
+                    center = Offset(u * .42f, u * .42f),
+                    style = outline,
                 )
-                drawLine(
-                    color = color,
-                    start = Offset(size.width * 0.62f, size.height * 0.62f),
-                    end = Offset(size.width * 0.83f, size.height * 0.83f),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                )
+                line(.61f, .61f, .83f, .83f)
             }
             LauncherSettingsCategory.LOOK_AND_FEEL -> {
+                drawOval(
+                    color = color,
+                    topLeft = Offset(u * .15f, u * .20f),
+                    size = Size(u * .70f, u * .60f),
+                    style = outline,
+                )
+                drawCircle(color, radius = u * .055f, center = Offset(u * .34f, u * .39f))
+                drawCircle(color, radius = u * .055f, center = Offset(u * .53f, u * .33f))
+                drawCircle(color, radius = u * .055f, center = Offset(u * .66f, u * .49f))
                 drawCircle(
                     color = color,
-                    radius = size.minDimension * 0.32f,
-                    center = Offset(size.width * 0.48f, size.height * 0.50f),
-                    style = Stroke(stroke),
+                    radius = u * .08f,
+                    center = Offset(u * .43f, u * .62f),
+                    style = outline,
                 )
-                listOf(
-                    Offset(size.width * 0.36f, size.height * 0.37f),
-                    Offset(size.width * 0.58f, size.height * 0.34f),
-                    Offset(size.width * 0.35f, size.height * 0.59f),
-                ).forEach { point ->
-                    drawCircle(color = color, radius = size.minDimension * 0.055f, center = point)
-                }
             }
             LauncherSettingsCategory.GESTURES -> {
-                drawCircle(
-                    color = color,
-                    radius = size.minDimension * 0.10f,
-                    center = Offset(size.width * 0.30f, size.height * 0.33f),
-                    style = Stroke(stroke),
-                )
-                drawCircle(
-                    color = color,
-                    radius = size.minDimension * 0.10f,
-                    center = Offset(size.width * 0.70f, size.height * 0.67f),
-                    style = Stroke(stroke),
-                )
-                drawLine(
-                    color = color,
-                    start = Offset(size.width * 0.38f, size.height * 0.41f),
-                    end = Offset(size.width * 0.62f, size.height * 0.59f),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                )
+                // One clear swipe direction plus two motion trails reads more reliably than
+                // abstract connected dots at small sizes.
+                line(.24f, .72f, .66f, .30f)
+                line(.66f, .30f, .66f, .49f)
+                line(.66f, .30f, .47f, .30f)
+                line(.18f, .54f, .35f, .54f)
+                line(.14f, .70f, .30f, .70f)
             }
             LauncherSettingsCategory.BADGES -> {
+                val bell = Path().apply {
+                    moveTo(u * .28f, u * .66f)
+                    quadraticBezierTo(u * .34f, u * .58f, u * .34f, u * .46f)
+                    quadraticBezierTo(u * .34f, u * .27f, u * .50f, u * .24f)
+                    quadraticBezierTo(u * .66f, u * .27f, u * .66f, u * .46f)
+                    quadraticBezierTo(u * .66f, u * .58f, u * .72f, u * .66f)
+                    lineTo(u * .28f, u * .66f)
+                }
+                drawPath(bell, color, style = outline)
+                line(.43f, .76f, .57f, .76f)
                 drawCircle(
                     color = color,
-                    radius = size.minDimension * 0.32f,
-                    center = Offset(size.width * 0.45f, size.height * 0.53f),
-                    style = Stroke(stroke),
-                )
-                drawCircle(
-                    color = color,
-                    radius = size.minDimension * 0.10f,
-                    center = Offset(size.width * 0.73f, size.height * 0.27f),
+                    radius = u * .095f,
+                    center = Offset(u * .73f, u * .27f),
                 )
             }
             LauncherSettingsCategory.SECURITY -> {
-                val p = Path().apply {
-                    moveTo(size.width * 0.50f, size.height * 0.12f)
-                    lineTo(size.width * 0.80f, size.height * 0.24f)
-                    lineTo(size.width * 0.76f, size.height * 0.58f)
-                    quadraticBezierTo(
-                        size.width * 0.70f,
-                        size.height * 0.78f,
-                        size.width * 0.50f,
-                        size.height * 0.88f,
-                    )
-                    quadraticBezierTo(
-                        size.width * 0.30f,
-                        size.height * 0.78f,
-                        size.width * 0.24f,
-                        size.height * 0.58f,
-                    )
-                    lineTo(size.width * 0.20f, size.height * 0.24f)
+                val shield = Path().apply {
+                    moveTo(u * .50f, u * .12f)
+                    lineTo(u * .78f, u * .23f)
+                    lineTo(u * .74f, u * .58f)
+                    quadraticBezierTo(u * .69f, u * .77f, u * .50f, u * .87f)
+                    quadraticBezierTo(u * .31f, u * .77f, u * .26f, u * .58f)
+                    lineTo(u * .22f, u * .23f)
                     close()
                 }
-                drawPath(p, color = color, style = Stroke(stroke))
-                drawRoundRect(
+                drawPath(shield, color, style = outline)
+                drawCircle(
                     color = color,
-                    topLeft = Offset(size.width * 0.38f, size.height * 0.46f),
-                    size = Size(size.width * 0.24f, size.height * 0.20f),
-                    cornerRadius = CornerRadius(size.minDimension * 0.04f),
-                    style = Stroke(stroke),
+                    radius = u * .055f,
+                    center = Offset(u * .50f, u * .48f),
                 )
-                drawArc(
-                    color = color,
-                    startAngle = 180f,
-                    sweepAngle = 180f,
-                    useCenter = false,
-                    topLeft = Offset(size.width * 0.40f, size.height * 0.32f),
-                    size = Size(size.width * 0.20f, size.height * 0.24f),
-                    style = Stroke(stroke),
-                )
+                line(.50f, .54f, .50f, .66f)
             }
             LauncherSettingsCategory.SYSTEM -> {
+                line(.18f, .30f, .82f, .30f)
+                line(.18f, .50f, .82f, .50f)
+                line(.18f, .70f, .82f, .70f)
                 drawCircle(
                     color = color,
-                    radius = size.minDimension * 0.27f,
-                    center = Offset(size.width / 2f, size.height / 2f),
-                    style = Stroke(stroke),
+                    radius = u * .075f,
+                    center = Offset(u * .37f, u * .30f),
+                    style = outline,
                 )
                 drawCircle(
                     color = color,
-                    radius = size.minDimension * 0.07f,
-                    center = Offset(size.width / 2f, size.height / 2f),
+                    radius = u * .075f,
+                    center = Offset(u * .63f, u * .50f),
+                    style = outline,
                 )
-                repeat(4) { index ->
-                    val horizontal = index % 2 == 0
-                    drawLine(
-                        color = color,
-                        start = if (horizontal) {
-                            Offset(size.width * 0.12f, size.height * 0.50f)
-                        } else {
-                            Offset(size.width * 0.50f, size.height * 0.12f)
-                        },
-                        end = if (horizontal) {
-                            Offset(size.width * 0.88f, size.height * 0.50f)
-                        } else {
-                            Offset(size.width * 0.50f, size.height * 0.88f)
-                        },
-                        strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                    )
-                }
+                drawCircle(
+                    color = color,
+                    radius = u * .075f,
+                    center = Offset(u * .45f, u * .70f),
+                    style = outline,
+                )
             }
         }
     }
@@ -9150,6 +9108,15 @@ private fun LauncherSettingsRootSurface(
                 "Shape, size and icon packs",
                 visible = selectedSettingsCategory == LauncherSettingsCategory.LOOK_AND_FEEL,
             ) {
+                LauncherIconPreviewStrip(
+                    apps = apps,
+                    iconScale = preferences.iconScale,
+                    onReset = {
+                        onSetIconShape(LauncherIconShape.ROUNDED_SQUARE)
+                        onSetIconScale(1f)
+                        onSetIconPackPackage(null)
+                    },
+                )
                 Text(
                     "Icon shape",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -9198,7 +9165,7 @@ private fun LauncherSettingsRootSurface(
                     onClick = { showIconPackPicker = true },
                 )
                 Text(
-                    "Rounded square is the default. Original leaves Android-provided icon artwork unmasked.",
+                    "Shaped modes normalize adaptive icon layers to fill the selected mask. Original preserves Android-provided geometry.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -9724,6 +9691,91 @@ private fun SettingsReadOnlyRow(title: String, value: String) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun LauncherIconPreviewStrip(
+    apps: List<LauncherActivityInfo>,
+    iconScale: Float,
+    onReset: () -> Unit,
+) {
+    val previewApps = remember(apps) {
+        apps.sortedBy { it.label.toString().lowercase(Locale.getDefault()) }.take(4)
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("launcher-settings-icon-preview"),
+        shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = GlazeMetrics.space3, vertical = GlazeMetrics.space2),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space3),
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    "Live icon preview",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    "Current mask, size and icon pack",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (previewApps.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.padding(top = 7.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        previewApps.forEach { app ->
+                            val icon = rememberLauncherAppIcon(app)
+                            Box(
+                                modifier = Modifier.size(40.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (icon != null) {
+                                    Image(
+                                        bitmap = icon,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier
+                                            .size((36f * iconScale.coerceIn(0.85f, 1.15f)).dp)
+                                            .launcherIconMask(),
+                                    )
+                                } else {
+                                    Surface(
+                                        modifier = Modifier
+                                            .size((36f * iconScale.coerceIn(0.85f, 1.15f)).dp)
+                                            .launcherIconMask(),
+                                        color = MaterialTheme.colorScheme.surface,
+                                    ) {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            LauncherHeaderGlyphAction(
+                contentDescription = "Reset icon appearance",
+                symbol = GlazePopupActionSymbol.RESET,
+                onClick = onReset,
+            )
+        }
     }
 }
 
@@ -12846,6 +12898,7 @@ private enum class GlazePopupActionSymbol {
     LOCK,
     VISIBILITY,
     UNINSTALL,
+    RESET,
 }
 
 /** Decorative vector geometry; labels remain the accessible action description. */
@@ -12857,8 +12910,13 @@ private fun GlazePopupActionGlyph(
 ) {
     Canvas(Modifier.size(iconSize)) {
         val u = size.minDimension
-        val w = 1.8.dp.toPx()
-        fun segment(x1: Float, y1: Float, x2: Float, y2: Float) {
+        val w = 1.85.dp.toPx()
+        val outline = Stroke(
+            width = w,
+            cap = StrokeCap.Round,
+            join = androidx.compose.ui.graphics.StrokeJoin.Round,
+        )
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
             drawLine(
                 color,
                 Offset(x1 * u, y1 * u),
@@ -12867,195 +12925,211 @@ private fun GlazePopupActionGlyph(
                 cap = StrokeCap.Round,
             )
         }
+
         when (symbol) {
             GlazePopupActionSymbol.HOME -> {
-                segment(.14f, .45f, .50f, .14f)
-                segment(.50f, .14f, .86f, .45f)
-                segment(.24f, .38f, .24f, .86f)
-                segment(.76f, .38f, .76f, .86f)
-                segment(.24f, .86f, .76f, .86f)
-                segment(.45f, .86f, .45f, .62f)
-                segment(.45f, .62f, .58f, .62f)
-                segment(.58f, .62f, .58f, .86f)
+                val roof = Path().apply {
+                    moveTo(u * .15f, u * .46f)
+                    lineTo(u * .50f, u * .16f)
+                    lineTo(u * .85f, u * .46f)
+                }
+                drawPath(roof, color, style = outline)
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(u * .25f, u * .42f),
+                    size = Size(u * .50f, u * .40f),
+                    cornerRadius = CornerRadius(u * .07f),
+                    style = outline,
+                )
             }
             GlazePopupActionSymbol.DOCK -> {
-                segment(.14f, .78f, .86f, .78f)
-                segment(.20f, .22f, .20f, .56f)
-                segment(.20f, .56f, .80f, .56f)
-                segment(.80f, .56f, .80f, .22f)
-                segment(.20f, .22f, .80f, .22f)
+                line(.15f, .78f, .85f, .78f)
+                listOf(.29f, .50f, .71f).forEach { x ->
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(u * (x - .075f), u * .40f),
+                        size = Size(u * .15f, u * .15f),
+                        cornerRadius = CornerRadius(u * .04f),
+                        style = outline,
+                    )
+                }
             }
             GlazePopupActionSymbol.WIDGET -> {
                 drawRoundRect(
                     color = color,
-                    topLeft = Offset(u * .13f, u * .16f),
-                    size = androidx.compose.ui.geometry.Size(u * .74f, u * .68f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .11f),
-                    style = Stroke(w),
+                    topLeft = Offset(u * .14f, u * .17f),
+                    size = Size(u * .72f, u * .66f),
+                    cornerRadius = CornerRadius(u * .11f),
+                    style = outline,
                 )
-                segment(.30f, .34f, .70f, .34f)
-                segment(.30f, .50f, .58f, .50f)
-                segment(.30f, .66f, .48f, .66f)
+                line(.30f, .35f, .70f, .35f)
+                line(.30f, .50f, .58f, .50f)
+                line(.30f, .65f, .48f, .65f)
             }
             GlazePopupActionSymbol.ADD -> {
-                segment(.18f, .50f, .82f, .50f)
-                segment(.50f, .18f, .50f, .82f)
+                line(.20f, .50f, .80f, .50f)
+                line(.50f, .20f, .50f, .80f)
             }
             GlazePopupActionSymbol.DELETE -> {
                 drawRoundRect(
                     color = color,
-                    topLeft = Offset(u * .28f, u * .34f),
-                    size = Size(u * .44f, u * .48f),
-                    cornerRadius = CornerRadius(u * .06f),
-                    style = Stroke(w),
+                    topLeft = Offset(u * .29f, u * .34f),
+                    size = Size(u * .42f, u * .47f),
+                    cornerRadius = CornerRadius(u * .055f),
+                    style = outline,
                 )
-                segment(.22f, .28f, .78f, .28f)
-                segment(.38f, .20f, .62f, .20f)
-                segment(.40f, .42f, .40f, .70f)
-                segment(.60f, .42f, .60f, .70f)
+                line(.22f, .28f, .78f, .28f)
+                line(.39f, .20f, .61f, .20f)
+                line(.42f, .43f, .42f, .69f)
+                line(.58f, .43f, .58f, .69f)
             }
             GlazePopupActionSymbol.SHORTCUT -> {
-                segment(.24f, .76f, .76f, .24f)
-                segment(.48f, .24f, .76f, .24f)
-                segment(.76f, .24f, .76f, .52f)
-                segment(.24f, .44f, .24f, .76f)
-                segment(.24f, .76f, .56f, .76f)
+                line(.24f, .76f, .76f, .24f)
+                line(.50f, .24f, .76f, .24f)
+                line(.76f, .24f, .76f, .50f)
+                line(.24f, .46f, .24f, .76f)
+                line(.24f, .76f, .54f, .76f)
             }
             GlazePopupActionSymbol.PIN -> {
-                segment(.28f, .14f, .72f, .14f)
-                segment(.72f, .14f, .72f, .48f)
-                segment(.72f, .48f, .60f, .58f)
-                segment(.60f, .58f, .60f, .86f)
-                segment(.40f, .86f, .40f, .58f)
-                segment(.40f, .58f, .28f, .48f)
-                segment(.28f, .48f, .28f, .14f)
+                val pin = Path().apply {
+                    moveTo(u * .32f, u * .20f)
+                    lineTo(u * .68f, u * .20f)
+                    lineTo(u * .62f, u * .45f)
+                    lineTo(u * .70f, u * .55f)
+                    lineTo(u * .55f, u * .55f)
+                    lineTo(u * .50f, u * .83f)
+                    lineTo(u * .45f, u * .55f)
+                    lineTo(u * .30f, u * .55f)
+                    lineTo(u * .38f, u * .45f)
+                    close()
+                }
+                drawPath(pin, color, style = outline)
             }
             GlazePopupActionSymbol.FOLDER -> {
-                segment(.10f, .25f, .43f, .25f)
-                segment(.43f, .25f, .51f, .36f)
-                segment(.51f, .36f, .89f, .36f)
-                segment(.89f, .36f, .89f, .80f)
-                segment(.89f, .80f, .10f, .80f)
-                segment(.10f, .80f, .10f, .25f)
+                val folder = Path().apply {
+                    moveTo(u * .13f, u * .31f)
+                    lineTo(u * .39f, u * .31f)
+                    lineTo(u * .47f, u * .22f)
+                    lineTo(u * .64f, u * .22f)
+                    lineTo(u * .70f, u * .31f)
+                    lineTo(u * .87f, u * .31f)
+                    lineTo(u * .87f, u * .79f)
+                    lineTo(u * .13f, u * .79f)
+                    close()
+                }
+                drawPath(folder, color, style = outline)
             }
             GlazePopupActionSymbol.WALLPAPER -> {
                 drawRoundRect(
                     color = color,
                     topLeft = Offset(u * .14f, u * .18f),
-                    size = androidx.compose.ui.geometry.Size(u * .72f, u * .64f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .10f),
-                    style = Stroke(w),
+                    size = Size(u * .72f, u * .64f),
+                    cornerRadius = CornerRadius(u * .10f),
+                    style = outline,
                 )
                 drawCircle(
                     color = color,
-                    radius = u * .08f,
-                    center = Offset(u * .34f, u * .38f),
-                    style = Stroke(w),
+                    radius = u * .075f,
+                    center = Offset(u * .34f, u * .37f),
+                    style = outline,
                 )
-                segment(.20f, .72f, .42f, .52f)
-                segment(.42f, .52f, .55f, .63f)
-                segment(.55f, .63f, .70f, .46f)
-                segment(.70f, .46f, .82f, .58f)
+                line(.20f, .72f, .42f, .52f)
+                line(.42f, .52f, .55f, .63f)
+                line(.55f, .63f, .70f, .46f)
+                line(.70f, .46f, .82f, .58f)
             }
             GlazePopupActionSymbol.APPS -> {
                 listOf(
-                    .23f to .23f,
-                    .61f to .23f,
-                    .23f to .61f,
-                    .61f to .61f,
+                    .22f to .22f,
+                    .56f to .22f,
+                    .22f to .56f,
+                    .56f to .56f,
                 ).forEach { (x, y) ->
                     drawRoundRect(
                         color = color,
                         topLeft = Offset(u * x, u * y),
-                        size = androidx.compose.ui.geometry.Size(u * .18f, u * .18f),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(u * .04f),
-                        style = Stroke(w),
+                        size = Size(u * .22f, u * .22f),
+                        cornerRadius = CornerRadius(u * .055f),
+                        style = outline,
                     )
                 }
             }
             GlazePopupActionSymbol.SETTINGS -> {
-                drawCircle(
-                    color = color,
-                    radius = u * .24f,
-                    center = Offset(u * .50f, u * .50f),
-                    style = Stroke(w),
-                )
-                drawCircle(
-                    color = color,
-                    radius = u * .07f,
-                    center = Offset(u * .50f, u * .50f),
-                    style = Stroke(w),
-                )
-                listOf(
-                    .50f to .12f,
-                    .50f to .88f,
-                    .12f to .50f,
-                    .88f to .50f,
-                    .23f to .23f,
-                    .77f to .77f,
-                    .77f to .23f,
-                    .23f to .77f,
-                ).forEach { (x, y) ->
-                    segment(.50f, .50f, x, y)
-                }
+                line(.18f, .30f, .82f, .30f)
+                line(.18f, .50f, .82f, .50f)
+                line(.18f, .70f, .82f, .70f)
+                drawCircle(color, u * .07f, Offset(u * .36f, u * .30f), style = outline)
+                drawCircle(color, u * .07f, Offset(u * .64f, u * .50f), style = outline)
+                drawCircle(color, u * .07f, Offset(u * .45f, u * .70f), style = outline)
             }
             GlazePopupActionSymbol.CHECK -> {
-                segment(.18f, .52f, .40f, .72f)
-                segment(.40f, .72f, .82f, .28f)
+                line(.18f, .52f, .40f, .72f)
+                line(.40f, .72f, .82f, .28f)
             }
             GlazePopupActionSymbol.BACK -> {
-                segment(.68f, .18f, .34f, .50f)
-                segment(.34f, .50f, .68f, .82f)
+                line(.68f, .18f, .34f, .50f)
+                line(.34f, .50f, .68f, .82f)
             }
             GlazePopupActionSymbol.CLOSE -> {
-                segment(.24f, .24f, .76f, .76f)
-                segment(.76f, .24f, .24f, .76f)
+                line(.25f, .25f, .75f, .75f)
+                line(.75f, .25f, .25f, .75f)
             }
             GlazePopupActionSymbol.INFO -> {
-                drawCircle(color, radius = u * .36f, center = Offset(u * .5f, u * .5f), style = Stroke(w))
-                drawCircle(color, radius = w * .65f, center = Offset(u * .5f, u * .33f))
-                segment(.50f, .47f, .50f, .70f)
+                drawCircle(color, radius = u * .35f, center = Offset(u * .5f, u * .5f), style = outline)
+                drawCircle(color, radius = u * .035f, center = Offset(u * .5f, u * .34f))
+                line(.50f, .48f, .50f, .68f)
             }
             GlazePopupActionSymbol.LOCK -> {
                 drawRoundRect(
                     color = color,
-                    topLeft = Offset(u * .24f, u * .43f),
-                    size = Size(u * .52f, u * .40f),
-                    cornerRadius = CornerRadius(u * .08f),
-                    style = Stroke(w),
+                    topLeft = Offset(u * .25f, u * .43f),
+                    size = Size(u * .50f, u * .39f),
+                    cornerRadius = CornerRadius(u * .075f),
+                    style = outline,
                 )
                 drawArc(
                     color = color,
                     startAngle = 180f,
                     sweepAngle = 180f,
                     useCenter = false,
-                    topLeft = Offset(u * .31f, u * .16f),
-                    size = Size(u * .38f, u * .48f),
-                    style = Stroke(w),
-                )
-                drawCircle(
-                    color = color,
-                    radius = u * .035f,
-                    center = Offset(u * .50f, u * .61f),
+                    topLeft = Offset(u * .32f, u * .17f),
+                    size = Size(u * .36f, u * .46f),
+                    style = outline,
                 )
             }
             GlazePopupActionSymbol.VISIBILITY -> {
-                drawOval(
-                    color = color,
-                    topLeft = Offset(u * .14f, u * .30f),
-                    size = androidx.compose.ui.geometry.Size(u * .72f, u * .40f),
-                    style = Stroke(w),
-                )
-                drawCircle(
-                    color = color,
-                    radius = u * .10f,
-                    center = Offset(u * .50f, u * .50f),
-                    style = Stroke(w),
-                )
+                val eye = Path().apply {
+                    moveTo(u * .14f, u * .50f)
+                    quadraticBezierTo(u * .30f, u * .29f, u * .50f, u * .29f)
+                    quadraticBezierTo(u * .70f, u * .29f, u * .86f, u * .50f)
+                    quadraticBezierTo(u * .70f, u * .71f, u * .50f, u * .71f)
+                    quadraticBezierTo(u * .30f, u * .71f, u * .14f, u * .50f)
+                }
+                drawPath(eye, color, style = outline)
+                drawCircle(color, radius = u * .10f, center = Offset(u * .50f, u * .50f), style = outline)
             }
             GlazePopupActionSymbol.UNINSTALL -> {
-                segment(.24f, .24f, .76f, .76f)
-                segment(.76f, .24f, .24f, .76f)
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(u * .20f, u * .20f),
+                    size = Size(u * .60f, u * .60f),
+                    cornerRadius = CornerRadius(u * .11f),
+                    style = outline,
+                )
+                line(.34f, .50f, .66f, .50f)
+            }
+            GlazePopupActionSymbol.RESET -> {
+                drawArc(
+                    color = color,
+                    startAngle = 40f,
+                    sweepAngle = 285f,
+                    useCenter = false,
+                    topLeft = Offset(u * .19f, u * .19f),
+                    size = Size(u * .62f, u * .62f),
+                    style = outline,
+                )
+                line(.23f, .22f, .23f, .43f)
+                line(.23f, .22f, .43f, .22f)
             }
         }
     }
