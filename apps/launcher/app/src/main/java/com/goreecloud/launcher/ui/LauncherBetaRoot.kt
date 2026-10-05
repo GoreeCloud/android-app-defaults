@@ -7115,7 +7115,7 @@ private fun AppDrawerSurface(
             },
             freshnessByKey = drawerFreshnessByAppKey,
             nowMillis = drawerFreshnessNowMillis,
-            includeSuggested = experiencePreferences.useLocalUsageForSuggestions,
+            includeSuggested = experiencePreferences.showDrawerSuggestions,
         )
     }
     val selectedSmartFolder = remember(
@@ -7712,7 +7712,7 @@ private fun AppDrawerSurface(
                                     },
                                     freshnessByKey = drawerFreshnessByAppKey,
                                     nowMillis = drawerFreshnessNowMillis,
-                                    includeSuggested = experiencePreferences.useLocalUsageForSuggestions,
+                                    includeSuggested = experiencePreferences.showDrawerSuggestions,
                                 )
                             } else {
                                 emptyList()
