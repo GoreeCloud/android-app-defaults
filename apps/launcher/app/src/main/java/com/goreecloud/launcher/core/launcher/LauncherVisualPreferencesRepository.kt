@@ -47,11 +47,27 @@ enum class LauncherDrawerHeaderPresentation(
     }
 }
 
+enum class LauncherIconFillMode(
+    val storageValue: String,
+    val displayName: String,
+    val artworkScale: Float,
+) {
+    FIT("fit", "Fit", 1.00f),
+    BALANCED("balanced", "Balanced", 1.055f),
+    FILL("fill", "Fill", 1.11f);
+
+    companion object {
+        fun fromStorage(value: String?): LauncherIconFillMode =
+            entries.firstOrNull { it.storageValue == value } ?: BALANCED
+    }
+}
+
 data class LauncherVisualPreferences(
     val starterDockSize: Int = 5,
     val homePageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
     val drawerHeaderPresentation: LauncherDrawerHeaderPresentation =
         LauncherDrawerHeaderPresentation.ICONS,
+    val iconFillMode: LauncherIconFillMode = LauncherIconFillMode.BALANCED,
 )
 
 class LauncherVisualPreferencesRepository(
@@ -63,6 +79,7 @@ class LauncherVisualPreferencesRepository(
         val starterDockSize = intPreferencesKey("starter_dock_size_v1")
         val homePageTransition = stringPreferencesKey("home_page_transition_v1")
         val drawerHeaderPresentation = stringPreferencesKey("drawer_header_presentation_v1")
+        val iconFillMode = stringPreferencesKey("icon_fill_mode_v1")
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -77,6 +94,7 @@ class LauncherVisualPreferencesRepository(
                     LauncherDrawerHeaderPresentation.fromStorage(
                         values[Keys.drawerHeaderPresentation],
                     ),
+                iconFillMode = LauncherIconFillMode.fromStorage(values[Keys.iconFillMode]),
             )
         }
         .distinctUntilChanged()
@@ -99,6 +117,14 @@ class LauncherVisualPreferencesRepository(
         scope.launch {
             dataStore.edit { values ->
                 values[Keys.drawerHeaderPresentation] = presentation.storageValue
+            }
+        }
+    }
+
+    fun setIconFillMode(mode: LauncherIconFillMode) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.iconFillMode] = mode.storageValue
             }
         }
     }
