@@ -1,3 +1,13 @@
+## October 5, 2026 — legacy/adaptive icon optical-fill refinement candidate
+
+- Extended the shared Launcher icon rasterizer so padded legacy artwork is optically enlarged only when its visible alpha bounds occupy less than 84% of the decode canvas, targets 90% fill, and is capped at 1.24× to avoid destructive cropping.
+- Increased adaptive foreground overscan through the same mask-ready pipeline so adaptive artwork fills the selected Launcher shape without reintroducing Android/OEM mask geometry.
+- Replaced per-pixel bitmap reads in legacy alpha-bound detection with one bounded bulk pixel read plus an in-memory scan, reducing decode/preload JNI overhead without changing icon identity or cache authority.
+- Added focused JVM coverage for threshold, target-fill, invalid-geometry, and maximum-scale behavior plus Android runtime coverage proving padded legacy artwork expands while transparent corners stay transparent.
+- Preserved profile badging, icon-pack fallback, package/profile invalidation, stale-while-revalidate caching, single-flight loading, bounded memory, local-only operation, and the no-new-permission/no-network boundary.
+
+**Status:** Development candidate only. Fresh exact-head protected validation and representative-device OEM/profile icon-mask visual acceptance remain required.
+
 ## October 5, 2026 — local App Drawer discovery and update-recency candidate
 
 - Added a compact **All / Pinned / Suggested / New / Updated** discovery row below App Drawer tabs.
