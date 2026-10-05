@@ -130,7 +130,10 @@ import com.goreecloud.launcher.core.launcher.launcherDockLoopBoundaryTarget
 import com.goreecloud.launcher.core.launcher.launcherDockNextPageInsertionKey
 import com.goreecloud.launcher.core.launcher.launcherDockPagePlan
 import com.goreecloud.launcher.core.launcher.launcherDockVirtualPageCount
+import com.goreecloud.launcher.core.launcher.LauncherAppFreshness
 import com.goreecloud.launcher.core.launcher.LauncherDrawerBackdrop
+import com.goreecloud.launcher.core.launcher.LauncherDrawerDiscoveryFilter
+import com.goreecloud.launcher.core.launcher.LauncherDrawerDiscoveryPolicy
 import com.goreecloud.launcher.core.launcher.LauncherDrawerEntryMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerHeaderPresentation
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
@@ -1613,6 +1616,7 @@ fun LauncherBetaRoot(
                         onSetDrawerSpacing = onSetDrawerSpacing,
                         onSetDrawerPageRows = onSetDrawerPageRows,
                         onSetShowDrawerAppCount = onSetShowDrawerAppCount,
+                        onSetShowDrawerSuggestions = onSetShowDrawerSuggestions,
                         onSetHomeGlanceAlignment = onSetHomeGlanceAlignment,
                         onSetHomeSearchPlacement = onSetHomeSearchPlacement,
                         onSetHomeSearchStyle = onSetHomeSearchStyle,
@@ -6813,6 +6817,12 @@ private fun AppDrawerSurface(
     }.getOrDefault(LauncherDrawerSortOrder.ALPHABETICAL)
     var showDrawerSortMenu by remember { mutableStateOf(false) }
     var showPinnedOnly by rememberSaveable { mutableStateOf(false) }
+    var selectedDiscoveryFilterName by rememberSaveable {
+        mutableStateOf(LauncherDrawerDiscoveryFilter.ALL.name)
+    }
+    val selectedDiscoveryFilter = runCatching {
+        LauncherDrawerDiscoveryFilter.valueOf(selectedDiscoveryFilterName)
+    }.getOrDefault(LauncherDrawerDiscoveryFilter.ALL)
     var selectedDrawerTabId by rememberSaveable { mutableStateOf<String?>(null) }
     var showCreateDrawerTabDialog by rememberSaveable { mutableStateOf(false) }
     var editingDrawerTabId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -6868,6 +6878,23 @@ private fun AppDrawerSurface(
         selectedProfileName = selectedPage.kind.name
     }
     val drawerContext = LocalContext.current.applicationContext
+    val primaryDrawerPackageNames = remember(apps, primaryUser) {
+        apps.asSequence()
+            .filter { app -> app.user == primaryUser }
+            .map { app -> app.componentName.packageName }
+            .distinct()
+            .sorted()
+            .toList()
+    }
+    var drawerFreshnessByPackage by remember {
+        mutableStateOf<Map<String, LauncherAppFreshness>>(emptyMap())
+    }
+    LaunchedEffect(primaryDrawerPackageNames) {
+        drawerFreshnessByPackage = loadLauncherDrawerFreshness(
+            packageManager = drawerContext.packageManager,
+            packageNames = primaryDrawerPackageNames,
+        )
+    }
     val drawerVisualPreferencesRepository = remember(drawerContext) {
         LauncherVisualPreferencesRepository(drawerContext)
     }
@@ -6913,6 +6940,76 @@ private fun AppDrawerSurface(
         experiencePreferences.drawerSearchPlacement != LauncherDrawerSearchPlacement.OFF
     val searchAtTop =
         experiencePreferences.drawerSearchPlacement == LauncherDrawerSearchPlacement.TOP
+    val drawerNowMillis = remember { System.currentTimeMillis() }
+    val availableDiscoveryFilters = remember(
+        selectedPage.kind,
+        experiencePreferences.showDrawerSuggestions,
+    ) {
+        buildList {
+            add(LauncherDrawerDiscoveryFilter.ALL)
+            if (experiencePreferences.showDrawerSuggestions) {
+                add(LauncherDrawerDiscoveryFilter.SUGGESTED)
+            }
+            add(LauncherDrawerDiscoveryFilter.NEW)
+            if (selectedPage.kind == LauncherDrawerProfileKind.USER) {
+                add(LauncherDrawerDiscoveryFilter.UPDATED)
+            }
+        }
+    }
+    LaunchedEffect(availableDiscoveryFilters) {
+        if (selectedDiscoveryFilter !in availableDiscoveryFilters) {
+            selectedDiscoveryFilterName = LauncherDrawerDiscoveryFilter.ALL.name
+        }
+    }
+    fun discoveryKeysFor(pageApps: List<LauncherActivityInfo>): Set<String> {
+        val availableKeys = pageApps.mapTo(linkedSetOf()) { app -> app.workspaceKey() }
+        val labels = pageApps.associate { app -> app.workspaceKey() to app.label.toString() }
+        val installTimes = pageApps.mapNotNull { app ->
+            app.firstInstallTime.takeIf { timestamp -> timestamp > 0L }
+                ?.let { timestamp -> app.workspaceKey() to timestamp }
+        }.toMap()
+        val freshness = pageApps.mapNotNull { app ->
+            launcherDrawerFreshnessForApp(
+                appUser = app.user,
+                primaryUser = primaryUser,
+                packageName = app.componentName.packageName,
+                freshnessByPackage = drawerFreshnessByPackage,
+            )?.let { value -> app.workspaceKey() to value }
+        }.toMap()
+        return LauncherDrawerDiscoveryPolicy.filterKeys(
+            filter = selectedDiscoveryFilter,
+            availableKeys = availableKeys,
+            pinnedKeys = pinnedAppKeys,
+            recentAppKeys = recentAppKeys,
+            launchCounts = localLaunchCounts,
+            labelByKey = labels,
+            installTimeByKey = installTimes,
+            freshnessByKey = freshness,
+            nowMillis = drawerNowMillis,
+        )
+    }
+    val selectedDiscoveryKeys = remember(
+        selectedPage.items,
+        selectedDiscoveryFilter,
+        pinnedAppKeys,
+        recentAppKeys,
+        localLaunchCounts,
+        drawerFreshnessByPackage,
+        drawerNowMillis,
+    ) {
+        discoveryKeysFor(selectedPage.items)
+    }
+    val selectedHasTruthfulUsage = remember(
+        selectedPage.items,
+        recentAppKeys,
+        localLaunchCounts,
+    ) {
+        LauncherDrawerDiscoveryPolicy.hasTruthfulUsage(
+            availableKeys = selectedPage.items.mapTo(linkedSetOf()) { app -> app.workspaceKey() },
+            recentAppKeys = recentAppKeys,
+            launchCounts = localLaunchCounts,
+        )
+    }
 
     LaunchedEffect(searchEnabled) {
         if (!searchEnabled && drawerQuery.isNotEmpty()) {
@@ -9553,6 +9650,11 @@ private fun LauncherSettingsRootSurface(
                     "Show app count",
                     experiencePreferences.showDrawerAppCount,
                     onSetShowDrawerAppCount,
+                )
+                SettingSwitch(
+                    "Local suggested apps",
+                    experiencePreferences.showDrawerSuggestions,
+                    onSetShowDrawerSuggestions,
                 )
                 GlazeSettingsAction(
                     title = "Hidden apps",
