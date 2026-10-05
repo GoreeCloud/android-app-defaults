@@ -383,8 +383,11 @@ internal fun primaryHomeShouldRenderDock(
     contentOnly: Boolean,
     dockAppCount: Int,
     activeDrag: Boolean,
+    persistentAffordance: Boolean = false,
     dockHostedExternally: Boolean = false,
-): Boolean = !contentOnly && !dockHostedExternally && (dockAppCount > 0 || activeDrag)
+): Boolean = !contentOnly &&
+    !dockHostedExternally &&
+    (dockAppCount > 0 || activeDrag || persistentAffordance)
 
 internal fun primaryHomeShouldOwnBottomInset(
     contentOnly: Boolean,
@@ -653,6 +656,7 @@ internal fun EditableHomeDock(
     iconScale: Float,
     style: LauncherDockStyle,
     pageSize: Int,
+    loopPages: Boolean,
     showLabels: Boolean,
     showSearch: Boolean,
     layoutLocked: Boolean,
@@ -676,6 +680,7 @@ internal fun EditableHomeDock(
         iconScale = iconScale,
         style = style,
         pageSize = pageSize,
+        loopPages = loopPages,
         showLabels = showLabels,
         showSearch = showSearch,
         layoutLocked = layoutLocked,
@@ -826,6 +831,7 @@ fun LauncherBetaRoot(
     onSetHomeSpacing: (LauncherHomeSpacing) -> Unit,
     onSetDockStyle: (LauncherDockStyle) -> Unit,
     onSetDockPageSize: (Int) -> Unit,
+    onSetDockLoopPages: (Boolean) -> Unit,
     onSetShowDockLabels: (Boolean) -> Unit,
     onSetShowDockSearch: (Boolean) -> Unit,
     onSetWallpaperShade: (LauncherWallpaperShade) -> Unit,
@@ -1362,12 +1368,17 @@ fun LauncherBetaRoot(
                         }
                     }
 
-                    if (rootDockApps.isNotEmpty() || activeDrag != null) {
+                    if (
+                        rootDockApps.isNotEmpty() ||
+                        activeDrag != null ||
+                        experiencePreferences.showDockSearch
+                    ) {
                         EditableHomeDock(
                             apps = rootDockApps,
                             iconScale = preferences.iconScale,
                             style = experiencePreferences.dockStyle,
                             pageSize = experiencePreferences.dockPageSize,
+                            loopPages = experiencePreferences.dockLoopPages,
                             showLabels = experiencePreferences.showDockLabels,
                             showSearch = experiencePreferences.showDockSearch,
                             layoutLocked = preferences.layoutLocked,
@@ -1593,6 +1604,7 @@ fun LauncherBetaRoot(
                         onSetHomeSpacing = onSetHomeSpacing,
                         onSetDockStyle = onSetDockStyle,
                         onSetDockPageSize = onSetDockPageSize,
+                        onSetDockLoopPages = onSetDockLoopPages,
                         onSetShowDockLabels = onSetShowDockLabels,
                         onSetShowDockSearch = onSetShowDockSearch,
                         onSetWallpaperShade = onSetWallpaperShade,
@@ -2469,6 +2481,7 @@ private fun HomeSurface(
                     contentOnly = contentOnly,
                     dockAppCount = dockApps.size,
                     activeDrag = activeDrag != null,
+                    persistentAffordance = experiencePreferences.showDockSearch,
                     dockHostedExternally = dockHostedExternally,
                 )
             ) {
@@ -2477,6 +2490,7 @@ private fun HomeSurface(
                     iconScale = preferences.iconScale,
                     style = experiencePreferences.dockStyle,
                     pageSize = experiencePreferences.dockPageSize,
+                    loopPages = experiencePreferences.dockLoopPages,
                     showLabels = experiencePreferences.showDockLabels,
                     showSearch = experiencePreferences.showDockSearch,
                     layoutLocked = preferences.layoutLocked,
@@ -3981,7 +3995,6 @@ private fun HomeFavoritesGrid(
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
     modifier: Modifier = Modifier,
-    labelColor: Color = Color.White,
 ) {
     val gridSpacing = when (spacing) {
         LauncherHomeSpacing.COMPACT -> 2.dp
@@ -5597,6 +5610,7 @@ private fun HomeFavoriteTile(
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
     modifier: Modifier = Modifier,
+    labelColor: Color = Color.White,
 ) {
     val icon = rememberLauncherAppIcon(app)
     val iconSize = (50f * iconScale.coerceIn(0.85f, 1.15f)).dp
@@ -8413,6 +8427,7 @@ private fun LauncherSettingsRootSurface(
     onSetHomeSpacing: (LauncherHomeSpacing) -> Unit,
     onSetDockStyle: (LauncherDockStyle) -> Unit,
     onSetDockPageSize: (Int) -> Unit,
+    onSetDockLoopPages: (Boolean) -> Unit,
     onSetShowDockLabels: (Boolean) -> Unit,
     onSetShowDockSearch: (Boolean) -> Unit,
     onSetWallpaperShade: (LauncherWallpaperShade) -> Unit,
@@ -8823,6 +8838,11 @@ private fun LauncherSettingsRootSurface(
                     choices = listOf("4", "5", "6", "7"),
                     selected = experiencePreferences.dockPageSize.toString(),
                     onChoice = { value -> value.toIntOrNull()?.let(onSetDockPageSize) },
+                )
+                SettingSwitch(
+                    "Loop Dock pages",
+                    experiencePreferences.dockLoopPages,
+                    onSetDockLoopPages,
                 )
                 SettingSwitch(
                     "Dock labels",
@@ -10447,6 +10467,7 @@ internal fun GlazeDock(
     iconScale: Float,
     style: LauncherDockStyle,
     pageSize: Int,
+    loopPages: Boolean,
     showLabels: Boolean,
     showSearch: Boolean,
     layoutLocked: Boolean,
@@ -10553,7 +10574,7 @@ internal fun GlazeDock(
                     },
                 ),
         ) {
-            val minimumSlot = resolvedPresentation.minimumInteractionTarget
+            val minimumSlot = resolvedPresentation.minimumInteractionTarget.coerceAtLeast(48.dp)
             val preferredSlot = if (minimumSlot > 60.dp) minimumSlot else 60.dp
             val horizontalPadding = GlazeMetrics.space3
             val searchReservation = if (showSearch) minimumSlot + GlazeMetrics.space1 else 0.dp
@@ -10573,13 +10594,36 @@ internal fun GlazeDock(
                     apps.chunked(pagePlan.effectivePageSize)
                 }
             }
-            val pagerState = rememberPagerState(pageCount = { dockPages.size })
-            LaunchedEffect(dockPages.size) {
-                if (pagerState.currentPage > dockPages.lastIndex) {
-                    pagerState.scrollToPage(dockPages.lastIndex.coerceAtLeast(0))
+            val loopingDockPages = loopPages && dockPages.size > 1
+            val pagerPageCount = if (loopingDockPages) dockPages.size + 2 else dockPages.size
+            val pagerState = rememberPagerState(
+                initialPage = if (loopingDockPages) 1 else 0,
+                pageCount = { pagerPageCount },
+            )
+            fun logicalDockPage(virtualPage: Int): Int = when {
+                !loopingDockPages -> virtualPage.coerceIn(0, dockPages.lastIndex)
+                virtualPage <= 0 -> dockPages.lastIndex
+                virtualPage >= pagerPageCount - 1 -> 0
+                else -> virtualPage - 1
+            }
+            LaunchedEffect(loopingDockPages, dockPages.size) {
+                pagerState.scrollToPage(if (loopingDockPages) 1 else 0)
+            }
+            LaunchedEffect(
+                pagerState.currentPage,
+                pagerState.isScrollInProgress,
+                loopingDockPages,
+                dockPages.size,
+            ) {
+                if (loopingDockPages && !pagerState.isScrollInProgress) {
+                    when (pagerState.currentPage) {
+                        0 -> pagerState.scrollToPage(dockPages.size)
+                        pagerPageCount - 1 -> pagerState.scrollToPage(1)
+                    }
                 }
             }
-            val visibleApps = dockPages.getOrElse(pagerState.currentPage) { emptyList() }
+            val logicalCurrentPage = logicalDockPage(pagerState.currentPage)
+            val visibleApps = dockPages.getOrElse(logicalCurrentPage) { emptyList() }
             val visibleKeys = remember(visibleApps) { visibleApps.map { it.workspaceKey() }.toSet() }
             LaunchedEffect(visibleKeys) {
                 dockItemBounds.keys
@@ -10608,11 +10652,11 @@ internal fun GlazeDock(
                         .fillMaxHeight()
                         .semantics {
                             stateDescription =
-                                "Dock page ${pagerState.currentPage + 1} of ${dockPages.size}"
+                                "Dock page ${logicalCurrentPage + 1} of ${dockPages.size}"
                         },
                     userScrollEnabled = activeDrag == null && dockPages.size > 1,
                 ) { pageIndex ->
-                    val pageApps = dockPages[pageIndex]
+                    val pageApps = dockPages[logicalDockPage(pageIndex)]
                     Row(
                         modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -10702,7 +10746,7 @@ internal fun GlazeDock(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     repeat(dockPages.size) { index ->
-                        val selected = index == pagerState.currentPage
+                        val selected = index == logicalCurrentPage
                         Box(
                             modifier = Modifier
                                 .size(
