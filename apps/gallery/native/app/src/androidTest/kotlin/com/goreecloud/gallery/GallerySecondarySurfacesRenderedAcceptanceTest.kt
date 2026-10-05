@@ -195,12 +195,4 @@ class GallerySecondarySurfacesRenderedAcceptanceTest {
         }
     }
 
-    private fun hasRefinementTag(expected: String) = object : TypeSafeMatcher<View>() {
-        override fun describeTo(description: Description) {
-            description.appendText("has Gallery Glaze refinement tag $expected")
-        }
-
-        override fun matchesSafely(view: View): Boolean =
-            view.getTag(R.id.gallery_ui_refinement_tag) == expected
-    }
 }

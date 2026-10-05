@@ -1,5 +1,24 @@
 # GoreeCloud Gallery Changelogs
 
+## October 5, 2026 — Gallery 0.9 ground-up presentation rebuild
+
+### Changed
+- Advanced the owner-testable Development identity to `0.9.0-dev` for the new design generation.
+- Replaced GalleryActivity's post-render styling dependency with a first-party `GalleryDesignSystem` that owns adaptive metrics, typography, semantic surfaces, icon-button treatment, selection material, Settings grouping, and shared presentation primitives at construction time.
+- Migrated the consumer design-system contract from the old V1.6 identity to the bounded **Glaze V1.7 / 1.7.0** consumer anchor at qualification source `7c4ded83d7a8725165bb6a55dfb175667cc9589e`. Gallery inherits the accepted V1.6 runtime and explicitly excludes retained dev.47 / Section 48 Development behavior.
+- Rebuilt the main shell around Compact / Medium / Expanded width classes, width-aware gutters and media gaps, a bounded 1440dp content canvas, and larger phone media tiles. Settings groups and full-screen viewer/editor chrome use bounded centered 760dp lanes on sufficiently wide layouts so controls and copy stay readable without stretching across the display.
+- Standardized Compact/Medium layouts on a 56dp glyph-only bottom dock and Expanded layouts on a 64dp left rail with the same five destinations. Both Gallery and Trash reserve the correct viewport lane, while selection mode reclaims the rail lane and reserves the bottom bulk-action dock.
+- Reworked header typography, search chrome, media-access guidance, selection surfaces, grouped Settings rows, light/dark surface tokens, and divider hierarchy so Gallery reads as one coherent product instead of separately patched screens.
+- Removed the `GalleryUiRefinement` global-layout mutation layer and its private tag resources entirely. Main Gallery, Trash, viewer, and photo editor now own first-party styling directly at construction time.
+- Preserved Android MediaStore permission, Trash/Delete/Restore, Move/Copy, Favorites, local-only browsing, and privacy authority boundaries while rebuilding presentation.
+
+### Verification
+- Added/updated contract tests for Glaze V1.7 identity, bounded Development exclusions, adaptive width classes, media-grid sizing, view-density behavior, navigation geometry, and touch-target invariants.
+- The local CI-equivalent Android verification lane uses JDK 17, Gradle 8.14.3, Android API 36, unit tests, lint, and debug assembly. Exact final-candidate results are recorded separately from this changelog entry.
+
+### Boundary
+This redesign is Development evidence, not Stable or production qualification. Representative-device rendered acceptance, TalkBack/switch/large-text review, reduced-motion/transparency behavior, tablet/foldable visual review, OEM/profile behavior, performance/power acceptance, signing/distribution, and production approval remain separate gates.
+
 ## October 3, 2026 — full phone-density and glyph-only navigation redesign
 
 ### Changed

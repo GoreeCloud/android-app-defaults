@@ -264,7 +264,7 @@ This record describes capabilities present in the current first-party GoreeCloud
 
 ### Presentation and repository controls
 
-- GLAZE UI V1.6 source mapping for the current Development line, without claiming Gallery-specific acceptance.
+- Glaze V1.7 / 1.7.0 source mapping for the current Development line, without claiming Gallery-specific acceptance.
 - Repository validation, security/source checks, Android build/lint/test evidence, and release-engineering documentation retained in the repository.
 
 ## Implemented-but-not-accepted boundaries
@@ -275,7 +275,7 @@ The following foundations exist but remain acceptance-gated and therefore also a
 - Android-authorized Move UI/authorization/execution pending representative physical-device/OEM/profile, cancellation/approval, provider-failure, permission-revocation, and post-move acceptance.
 - First-party photo editing pending representative-device, accessibility, large-image/memory, save/recovery, and broader editing acceptance.
 - Multi-select and bulk actions pending broader device/accessibility acceptance.
-- GLAZE UI V1.6 source adoption pending full Gallery rendered/accessibility/adaptive-layout/performance/HVE acceptance.
+- Glaze V1.7 source adoption pending full Gallery rendered/accessibility/adaptive-layout/performance/HVE acceptance.
 - Release-engineering foundations without completed production signing, recovery, Release Candidate, or Stable qualification.
 
 ## Maintenance rule

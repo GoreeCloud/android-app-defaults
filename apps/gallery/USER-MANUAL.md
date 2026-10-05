@@ -179,7 +179,7 @@ Protected Photos/password protection is not simulated with insecure app-local cr
 
 ## Current design-system authority
 
-The current shared authority identifies **GLAZE UI V1.6 / 1.6.0** as Official Stable, with accepted release source `a7180679ea851389e0f3004515f9a25f420e716d`. Gallery's first-party native source contract pins that authority, while complete rendered, accessibility, adaptive-device, Human Visual Excellence, and production conformance remain separate acceptance gates.
+The current shared authority identifies **Glaze V1.7 / 1.7.0** as the consumer-eligible anchor. Gallery pins qualification source `7c4ded83d7a8725165bb6a55dfb175667cc9589e`; V1.7.0 inherits the accepted V1.6.0 runtime from release source `a7180679ea851389e0f3004515f9a25f420e716d`. Gallery does not consume the unfinished V1.7.1 / retained dev.47 behavior. Complete rendered, accessibility, adaptive-device, Human Visual Excellence, and production conformance remain separate acceptance gates.
 
 ## Local browsing controls
 
@@ -189,7 +189,7 @@ Gallery keeps browsing controls local to the device. **Sort** in the media heade
 
 The native restoration still includes more work than the earlier rough "11 features" estimate implied. Distinct remaining capability areas include full physical Recycle Bin acceptance; full-resolution image viewing and physical orientation acceptance; native video playback plus autoplay/loop behavior; representative-device/accessibility/performance acceptance for the implemented animated GIF thumbnail path; approved photo/video editing; approved metadata editing; representative-device acceptance and refinement of the implemented Move and preserve-original Copy paths; broader selection tools where appropriate; album creation, rename, provider-backed organization beyond the implemented local manual ordering, and richer album actions; richer grouping/timeline modes; additional view-density/layout controls; slideshow and other established local presentation actions; broader contextual/overflow actions; broader export/share workflows where required; secure Private/Protected Photos; fuller hidden/sensitive-media policy; automatic empty-folder cleanup; and any additional established first-party Gallery capability verified by historical GoreeCloud Gallery evidence.
 
-Separate release gates include GLAZE UI V1.6 application acceptance, accessibility/adaptive/OEM/profile testing, Privacy Shield/Wardveil/Everkeep/Identity/Mesh integration where applicable, long-lived signing, upgrade/recovery validation, production approval, and Stable qualification.
+Separate release gates include Glaze V1.7 application acceptance, accessibility/adaptive/OEM/profile testing, Privacy Shield/Wardveil/Everkeep/Identity/Mesh integration where applicable, long-lived signing, upgrade/recovery validation, production approval, and Stable qualification.
 
 ## Troubleshooting
 

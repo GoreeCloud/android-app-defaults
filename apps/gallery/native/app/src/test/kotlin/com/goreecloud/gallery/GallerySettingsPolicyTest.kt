@@ -137,17 +137,17 @@ class GallerySettingsPolicyTest {
 
     @Test
     fun `dense groups prefer balanced rows when density does not gain a row`() {
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 1))
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 2))
-        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 4))
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 5))
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 6))
-        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 7))
-        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 8))
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 9))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 1))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 2))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 4))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 5))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 6))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 7))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 8))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 9))
         assertEquals(
-            GalleryViewDensity.COMFORTABLE.mediaGridColumns(360),
-            GalleryViewDensity.COMFORTABLE.mediaGridColumnsForGroup(360, 1),
+            GalleryViewDensity.COMFORTABLE.mediaGridColumns(430),
+            GalleryViewDensity.COMFORTABLE.mediaGridColumnsForGroup(430, 1),
         )
     }
 

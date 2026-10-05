@@ -7,18 +7,22 @@ import kotlin.test.assertTrue
 
 class GalleryGlazeContractTest {
     @Test
-    fun `native shell pins exact current Stable Glaze V1_6 authority`() {
-        assertEquals("1.6.0", GalleryGlazeContract.VERSION)
+    fun `native shell pins bounded current Glaze V1_7 anchor`() {
+        assertEquals("1.7.0", GalleryGlazeContract.VERSION)
+        assertEquals("Glaze V1.7", GalleryGlazeContract.PRODUCT_LABEL)
         assertEquals(
-            "a7180679ea851389e0f3004515f9a25f420e716d",
-            GalleryGlazeContract.ACCEPTED_RELEASE_SOURCE,
-        )
-        assertEquals(
-            "c7509c79256b04b0aa67cb9dd0737d7588e0ae4a",
+            "7c4ded83d7a8725165bb6a55dfb175667cc9589e",
             GalleryGlazeContract.SOURCE_QUALIFICATION_ANCHOR,
         )
-        assertEquals("js/glaze-v1.6.0.mjs", GalleryGlazeContract.STABLE_RUNTIME_ENTRYPOINT)
-        assertEquals("1.5.1", GalleryGlazeContract.ROLLBACK_BASELINE)
+        assertEquals("js/glaze-v1.7.0.mjs", GalleryGlazeContract.STABLE_RUNTIME_ENTRYPOINT)
+        assertEquals("js/glaze-v1.6.0.mjs", GalleryGlazeContract.INHERITED_RUNTIME_ENTRYPOINT)
+        assertEquals(
+            "a7180679ea851389e0f3004515f9a25f420e716d",
+            GalleryGlazeContract.INHERITED_ACCEPTED_RELEASE_SOURCE,
+        )
+        assertEquals("1.6.0", GalleryGlazeContract.ROLLBACK_BASELINE)
+        assertFalse(GalleryGlazeContract.RETAINED_DEVELOPMENT_SOURCE_INCLUDED)
+        assertFalse(GalleryGlazeContract.SECTION_48_INCLUDED)
     }
 
     @Test
@@ -31,7 +35,7 @@ class GalleryGlazeContractTest {
     }
 
     @Test
-    fun `Gallery local optical adapter remains bounded and accessibility safe`() {
+    fun `Gallery optical adapter remains bounded and accessibility safe`() {
         assertTrue(GalleryGlazeContract.OPTICAL_CONTENT_AWARE_FROST_ENABLED)
         assertTrue(GalleryGlazeContract.OPTICAL_SEMANTIC_BLUR_PROTECTION_ENABLED)
         assertTrue(GalleryGlazeContract.OPTICAL_REDUCED_TRANSPARENCY_FALLBACK_REQUIRED)
@@ -41,76 +45,44 @@ class GalleryGlazeContractTest {
     }
 
     @Test
-    fun `Gallery local spatial adapter stays internally consistent`() {
-        assertEquals(2, GalleryGlazeContract.SPACE_MICRO_DP)
-        assertEquals(4, GalleryGlazeContract.SPACE_HAIRLINE_DP)
-        assertEquals(8, GalleryGlazeContract.SPACE_CONTROL_DP)
-        assertEquals(12, GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
-        assertEquals(16, GalleryGlazeContract.SPACE_STANDARD_CLUSTER_DP)
-        assertEquals(24, GalleryGlazeContract.SPACE_CONTENT_DP)
-        assertEquals(32, GalleryGlazeContract.SPACE_SECTION_DP)
-        assertEquals(48, GalleryGlazeContract.SPACE_REGION_DP)
-    }
-
-    @Test
-    fun `Gallery local shape and motion adapters remain bounded`() {
-        assertEquals(10, GalleryGlazeContract.SHAPE_QUIET_DP)
-        assertEquals(12, GalleryGlazeContract.SHAPE_CONTROL_DP)
-        assertEquals(20, GalleryGlazeContract.SHAPE_CONTAINER_DP)
-        assertEquals(24, GalleryGlazeContract.SHAPE_ROUNDED_DP)
-        assertEquals(28, GalleryGlazeContract.SHAPE_OVERLAY_DP)
-        assertEquals(999, GalleryGlazeContract.SHAPE_CAPSULE_DP)
-        assertEquals(160L, GalleryGlazeContract.MOTION_MICRO_MS)
-        assertEquals(240L, GalleryGlazeContract.MOTION_STANDARD_MS)
-        assertEquals(360L, GalleryGlazeContract.MOTION_CONNECTED_MS)
-        assertEquals(480L, GalleryGlazeContract.MOTION_SPATIAL_MS)
-        assertEquals(180L, GalleryGlazeContract.MOTION_REDUCED_STANDARD_MS)
-        assertEquals(0L, GalleryGlazeContract.MOTION_MINIMAL_MS)
-    }
-
-    @Test
-    fun `adaptive gutters follow the current Stable compact through large screen hierarchy`() {
-        assertEquals(16, GalleryGlazeContract.horizontalGutterDp(390))
-        assertEquals(24, GalleryGlazeContract.horizontalGutterDp(820))
+    fun `adaptive layout exposes compact medium and expanded classes`() {
+        assertEquals(GalleryGlazeContract.WidthClass.COMPACT, GalleryGlazeContract.widthClass(390))
+        assertEquals(GalleryGlazeContract.WidthClass.MEDIUM, GalleryGlazeContract.widthClass(700))
+        assertEquals(GalleryGlazeContract.WidthClass.EXPANDED, GalleryGlazeContract.widthClass(900))
+        assertEquals(12, GalleryGlazeContract.horizontalGutterDp(390))
+        assertEquals(24, GalleryGlazeContract.horizontalGutterDp(700))
         assertEquals(32, GalleryGlazeContract.horizontalGutterDp(900))
-        assertEquals(48, GalleryGlazeContract.horizontalGutterDp(1280))
+        assertTrue(GalleryGlazeContract.CONTENT_MAX_WIDTH_DP >= 1200)
+        assertTrue(GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP <= GalleryGlazeContract.CONTENT_MAX_WIDTH_DP)
     }
 
     @Test
-    fun `photo grid is media dense on phones and adapts across wider classes`() {
+    fun `photo grid favors larger phone thumbnails and scales wider`() {
         assertEquals(3, GalleryGlazeContract.gridColumns(320))
-        assertEquals(4, GalleryGlazeContract.gridColumns(360))
-        assertEquals(4, GalleryGlazeContract.gridColumns(390))
-        assertEquals(5, GalleryGlazeContract.gridColumns(820))
+        assertEquals(3, GalleryGlazeContract.gridColumns(390))
+        assertEquals(4, GalleryGlazeContract.gridColumns(430))
+        assertEquals(5, GalleryGlazeContract.gridColumns(700))
         assertEquals(6, GalleryGlazeContract.gridColumns(900))
-        assertEquals(7, GalleryGlazeContract.gridColumns(1280))
-        assertTrue(GalleryGlazeContract.MIN_GRID_TILE_DP >= 78)
+        assertEquals(8, GalleryGlazeContract.gridColumns(1400))
+        assertTrue(GalleryGlazeContract.MIN_GRID_TILE_DP >= 92)
     }
 
     @Test
-    fun `album grid stays more spacious than the media timeline`() {
+    fun `album and video grids retain hierarchy across width classes`() {
         assertEquals(2, GalleryGlazeContract.albumGridColumns(390))
-        assertEquals(3, GalleryGlazeContract.albumGridColumns(820))
+        assertEquals(3, GalleryGlazeContract.albumGridColumns(700))
         assertEquals(4, GalleryGlazeContract.albumGridColumns(900))
         assertEquals(5, GalleryGlazeContract.albumGridColumns(1280))
-        assertTrue(GalleryGlazeContract.MIN_ALBUM_TILE_DP > GalleryGlazeContract.MIN_GRID_TILE_DP)
-    }
-
-    @Test
-    fun `video grid protects narrow phones and scales across large screens`() {
-        assertEquals(1, GalleryGlazeContract.videoGridColumns(320))
         assertEquals(2, GalleryGlazeContract.videoGridColumns(390))
-        assertEquals(3, GalleryGlazeContract.videoGridColumns(600))
+        assertEquals(2, GalleryGlazeContract.videoGridColumns(700))
         assertEquals(3, GalleryGlazeContract.videoGridColumns(900))
         assertEquals(4, GalleryGlazeContract.videoGridColumns(1280))
-        assertFalse(GalleryGlazeContract.videoUsesFeaturedCard(390))
-        assertTrue(GalleryGlazeContract.videoUsesFeaturedCard(600))
-        assertEquals(600, GalleryGlazeContract.VIDEO_FEATURED_MIN_WIDTH_DP)
-        assertEquals(720, GalleryGlazeContract.MAX_FEATURED_VIDEO_WIDTH_DP)
+        assertFalse(GalleryGlazeContract.videoUsesFeaturedCard(700))
+        assertTrue(GalleryGlazeContract.videoUsesFeaturedCard(720))
     }
 
     @Test
-    fun `Trash grid favors legible phone thumbnails before scaling wider`() {
+    fun `Trash grid remains legible on phones before scaling wider`() {
         assertEquals(3, GalleryGlazeContract.trashGridColumns(320))
         assertEquals(3, GalleryGlazeContract.trashGridColumns(390))
         assertEquals(4, GalleryGlazeContract.trashGridColumns(600))
@@ -119,29 +91,35 @@ class GalleryGlazeContractTest {
     }
 
     @Test
-    fun `navigation rail is compact glyph-only and gesture-area aware`() {
-        assertEquals(48, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
-        assertEquals(14, GalleryGlazeContract.NAVIGATION_RADIUS_DP)
-        assertEquals(12, GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
-        assertEquals(5, GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
-        assertEquals(1, GalleryGlazeContract.NAVIGATION_ELEVATION_DP)
-        assertEquals(60, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
-        assertEquals(14, GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP)
-        assertEquals(21, GalleryGlazeContract.NAVIGATION_ICON_DP)
-        assertEquals(18, GalleryGlazeContract.NAVIGATION_SELECTED_HORIZONTAL_INSET_DP)
-        assertEquals(7, GalleryGlazeContract.NAVIGATION_SELECTED_VERTICAL_INSET_DP)
-        assertTrue(GalleryGlazeContract.NAVIGATION_RADIUS_DP < GalleryGlazeContract.NAVIGATION_HEIGHT_DP / 2)
+    fun `adaptive navigation stays glyph first touch safe and gesture aware`() {
+        assertEquals(56, GalleryGlazeContract.NAVIGATION_HEIGHT_DP)
+        assertEquals(18, GalleryGlazeContract.NAVIGATION_RADIUS_DP)
+        assertEquals(10, GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
+        assertEquals(8, GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
+        assertEquals(72, GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+        assertEquals(22, GalleryGlazeContract.NAVIGATION_ICON_DP)
+        assertEquals(64, GalleryGlazeContract.NAVIGATION_RAIL_WIDTH_DP)
+        assertEquals(52, GalleryGlazeContract.NAVIGATION_RAIL_ITEM_HEIGHT_DP)
+        assertTrue(GalleryGlazeContract.NAVIGATION_HEIGHT_DP >= GalleryGlazeContract.GENERAL_TARGET_DP)
+        assertTrue(GalleryGlazeContract.NAVIGATION_RAIL_ITEM_HEIGHT_DP >= GalleryGlazeContract.GENERAL_TARGET_DP)
         assertTrue(
             GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP >=
                 GalleryGlazeContract.NAVIGATION_HEIGHT_DP + GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP,
         )
-        assertTrue(GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP < GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+        assertFalse(GalleryGlazeContract.usesNavigationRail(700))
+        assertTrue(GalleryGlazeContract.usesNavigationRail(900))
+        assertEquals(88, GalleryGlazeContract.navigationRailLaneDp(900))
+        assertEquals(0, GalleryGlazeContract.navigationRailLaneDp(700))
         assertTrue(GalleryGlazeContract.MaterialRole.entries.contains(GalleryGlazeContract.MaterialRole.CANVAS))
-        assertTrue(GalleryGlazeContract.MaterialRole.entries.contains(GalleryGlazeContract.MaterialRole.FUNCTIONAL_GLASS))
+        assertTrue(
+            GalleryGlazeContract.MaterialRole.entries.contains(
+                GalleryGlazeContract.MaterialRole.FUNCTIONAL_GLASS,
+            ),
+        )
     }
 
     @Test
-    fun `rendered local library stays bounded`() {
+    fun `rendered local library remains bounded`() {
         assertEquals(100, GalleryGlazeContract.MAX_RENDERED_MEDIA_ROWS)
     }
 }

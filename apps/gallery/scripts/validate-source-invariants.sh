@@ -9,6 +9,78 @@ fail() {
   exit 1
 }
 
+# The migrated monorepo's authoritative implementation is the first-party native app under
+# apps/gallery/native. Preserve the historical gc.17 reconstruction checks below when explicit
+# source directories are supplied (or when materialized upstream trees are present), but validate
+# the active native source contract by default in the monorepo.
+if [ "$#" -eq 0 ] && [ ! -d "$GALLERY_DIR" ] && [ ! -d "$COMMONS_DIR" ]; then
+  APP_ROOT="native/app"
+  KOTLIN_ROOT="$APP_ROOT/src/main/kotlin/com/goreecloud/gallery"
+  RES_ROOT="$APP_ROOT/src/main/res"
+
+  required_native_files=(
+    "$KOTLIN_ROOT/GalleryActivity.kt"
+    "$KOTLIN_ROOT/GalleryApplication.kt"
+    "$KOTLIN_ROOT/GalleryDesignSystem.kt"
+    "$KOTLIN_ROOT/GalleryGlazeContract.kt"
+    "$KOTLIN_ROOT/RecycleBinActivity.kt"
+    "$KOTLIN_ROOT/PhotoEditorActivity.kt"
+    "$RES_ROOT/values/colors.xml"
+    "$RES_ROOT/values-night/colors.xml"
+    "$APP_ROOT/build.gradle.kts"
+  )
+  for path in "${required_native_files[@]}"; do
+    [ -s "$path" ] || fail "required native source is missing or empty: $path"
+  done
+
+  grep -Fq 'versionName = "0.9.0-dev"' "$APP_ROOT/build.gradle.kts" ||
+    fail 'native Development identity is not 0.9.0-dev'
+  grep -Fq 'const val VERSION = "1.7.0"' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'native Glaze contract is not pinned to 1.7.0'
+  grep -Fq '7c4ded83d7a8725165bb6a55dfb175667cc9589e' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'native Glaze qualification anchor is missing'
+  grep -Fq 'const val RETAINED_DEVELOPMENT_SOURCE_INCLUDED = false' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'retained Glaze Development behavior is not explicitly excluded'
+  grep -Fq 'const val SECTION_48_INCLUDED = false' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'Glaze Section 48 Development behavior is not explicitly excluded'
+
+  grep -Fq 'const val CONTENT_MAX_WIDTH_DP = 1440' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'native media content maximum width is missing'
+  grep -Fq 'const val SETTINGS_MAX_WIDTH_DP = 760' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'native Settings/content reading-width cap is missing'
+  grep -Fq 'const val NAVIGATION_RAIL_WIDTH_DP = 64' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'Expanded navigation rail width contract is missing'
+  grep -Fq 'fun usesNavigationRail(widthDp: Int): Boolean' "$KOTLIN_ROOT/GalleryGlazeContract.kt" ||
+    fail 'adaptive navigation rail resolver is missing'
+  grep -Fq 'GalleryGlazeContract.usesNavigationRail' "$KOTLIN_ROOT/GalleryActivity.kt" ||
+    fail 'main Gallery does not consume adaptive rail policy'
+  grep -Fq 'GalleryGlazeContract.usesNavigationRail' "$KOTLIN_ROOT/RecycleBinActivity.kt" ||
+    fail 'Trash does not consume adaptive rail policy'
+
+  grep -Fq 'object GalleryDesignSystem' "$KOTLIN_ROOT/GalleryDesignSystem.kt" ||
+    fail 'shared Gallery 0.9 design system is missing'
+  for consumer in GalleryActivity.kt RecycleBinActivity.kt PhotoEditorActivity.kt; do
+    grep -Fq 'GalleryDesignSystem' "$KOTLIN_ROOT/$consumer" ||
+      fail "$consumer does not consume the shared Gallery design system"
+  done
+
+  [ ! -e "$KOTLIN_ROOT/GalleryUiRefinement.kt" ] ||
+    fail 'legacy post-render GalleryUiRefinement source must not be active in 0.9'
+  [ ! -e "$RES_ROOT/values/ids.xml" ] ||
+    fail 'legacy refinement tag resources must not be active in 0.9'
+  ! grep -R -Fq 'GalleryUiRefinement' "$APP_ROOT/src/main" ||
+    fail 'application source still references the removed refinement layer'
+  ! grep -R -Fq 'gallery_ui_refinement_tag' "$APP_ROOT/src" ||
+    fail 'legacy refinement tag references remain in active source'
+
+  if grep -Fq 'android.permission.INTERNET' "$APP_ROOT/src/main/AndroidManifest.xml"; then
+    fail 'Gallery native app unexpectedly requests network permission'
+  fi
+
+  printf 'GoreeCloud Gallery 0.9 native source invariants passed.\n'
+  exit 0
+fi
+
 [ -d "$GALLERY_DIR" ] || fail "Gallery source directory not found: $GALLERY_DIR"
 [ -d "$COMMONS_DIR" ] || fail "Commons source directory not found: $COMMONS_DIR"
 

@@ -40,16 +40,14 @@ class GalleryApplication : Application(), Application.ActivityLifecycleCallbacks
 
     override fun onActivityDestroyed(activity: Activity) {
         recycleBinScopes.remove(activity)
-        GalleryUiRefinement.uninstall(activity)
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
 
     override fun onActivityStarted(activity: Activity) {
-        // Install after Activity.onCreate() has completed so the main root hierarchy is available,
-        // but before the resumed frame is presented to the user.
+        // Gallery 0.9 activities own their first-party presentation directly. Lifecycle setup keeps
+        // only system-bar integration here; no global-layout styling mutation runs after rendering.
         GallerySystemBars.install(activity)
-        GalleryUiRefinement.install(activity)
     }
 
     override fun onActivityPaused(activity: Activity) = Unit

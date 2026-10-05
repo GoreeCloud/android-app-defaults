@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -110,6 +109,12 @@ class PhotoEditorActivity : Activity() {
     }
 
     private fun buildSurface() {
+        val editorPanelWidth = if (resources.configuration.screenWidthDp >= GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP + 24) {
+            dp(GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP)
+        } else {
+            ViewGroup.LayoutParams.MATCH_PARENT
+        }
+
         root = FrameLayout(this).apply {
             setBackgroundColor(Color.BLACK)
         }
@@ -155,7 +160,11 @@ class PhotoEditorActivity : Activity() {
                 dp(GalleryGlazeContract.SPACE_CONTROL_DP),
                 dp(GalleryGlazeContract.SPACE_CONTROL_DP),
             )
-            background = roundedSurface(0xe61a1a1d.toInt(), GalleryGlazeContract.SHAPE_ROUNDED_DP)
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
         }
         val cancel = editorIconButton(
             R.drawable.ic_gallery_close,
@@ -212,8 +221,8 @@ class PhotoEditorActivity : Activity() {
         )
         root.addView(
             topBar,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(64)).apply {
-                gravity = Gravity.TOP
+            FrameLayout.LayoutParams(editorPanelWidth, dp(68)).apply {
+                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
                 marginStart = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 marginEnd = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 topMargin = dp(GalleryGlazeContract.SPACE_CONTROL_DP)
@@ -236,9 +245,9 @@ class PhotoEditorActivity : Activity() {
         }
         root.addView(
             status,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(42)).apply {
-                gravity = Gravity.BOTTOM
-                bottomMargin = dp(132)
+            FrameLayout.LayoutParams(editorPanelWidth, dp(44)).apply {
+                gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+                bottomMargin = dp(136)
                 marginStart = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 marginEnd = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
             },
@@ -304,7 +313,11 @@ class PhotoEditorActivity : Activity() {
                 dp(GalleryGlazeContract.SPACE_CONTROL_DP),
                 dp(GalleryGlazeContract.SPACE_HAIRLINE_DP),
             )
-            background = roundedSurface(0xe61a1a1d.toInt(), GalleryGlazeContract.SHAPE_ROUNDED_DP)
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
             addView(
                 transformRow,
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52)),
@@ -318,8 +331,8 @@ class PhotoEditorActivity : Activity() {
         }
         root.addView(
             controls,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(116)).apply {
-                gravity = Gravity.BOTTOM
+            FrameLayout.LayoutParams(editorPanelWidth, dp(120)).apply {
+                gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                 marginStart = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 marginEnd = dp(GalleryGlazeContract.SPACE_COMPACT_CLUSTER_DP)
                 bottomMargin = dp(GalleryGlazeContract.SPACE_CONTROL_DP)
@@ -467,9 +480,10 @@ class PhotoEditorActivity : Activity() {
             control.isSelected = selected
             control.setTypeface(control.typeface, if (selected) Typeface.BOLD else Typeface.NORMAL)
             control.setTextColor(if (selected) accentColor() else Color.WHITE)
-            control.background = roundedSurface(
-                if (selected) withAlpha(accentColor(), 0.26f) else 0x2effffff,
-                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            control.background = GalleryDesignSystem.mediaIconBackground(
+                context = control.context,
+                foreground = if (selected) accentColor() else Color.WHITE,
+                selected = selected,
             )
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                 control.stateDescription = if (selected) "Selected" else null
@@ -576,7 +590,7 @@ class PhotoEditorActivity : Activity() {
         )
         setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
         compoundDrawableTintList = ColorStateList.valueOf(Color.WHITE)
-        background = roundedSurface(0x2effffff, GalleryGlazeContract.SHAPE_CONTROL_DP)
+        background = GalleryDesignSystem.mediaIconBackground(context)
         isClickable = true
         isFocusable = true
         contentDescription = description
@@ -607,7 +621,7 @@ class PhotoEditorActivity : Activity() {
         setTextColor(Color.WHITE)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
         setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(0x2effffff, GalleryGlazeContract.SHAPE_CONTROL_DP)
+        background = GalleryDesignSystem.mediaIconBackground(context)
         isClickable = true
         isFocusable = true
         contentDescription = description
@@ -627,19 +641,6 @@ class PhotoEditorActivity : Activity() {
         } finally {
             attributes.recycle()
         }
-    }
-
-    private fun withAlpha(color: Int, alpha: Float): Int = Color.argb(
-        (255 * alpha.coerceIn(0f, 1f)).toInt(),
-        Color.red(color),
-        Color.green(color),
-        Color.blue(color),
-    )
-
-    private fun roundedSurface(color: Int, radiusDp: Int): GradientDrawable = GradientDrawable().apply {
-        shape = GradientDrawable.RECTANGLE
-        setColor(color)
-        cornerRadius = dp(radiusDp).toFloat()
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()

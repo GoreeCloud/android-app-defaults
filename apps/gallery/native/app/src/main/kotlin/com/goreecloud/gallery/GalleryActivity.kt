@@ -99,6 +99,7 @@ class GalleryActivity : Activity() {
     private lateinit var action: TextView
     private lateinit var library: LinearLayout
     private lateinit var libraryScroll: ScrollView
+    private var settingsContentTarget: LinearLayout? = null
     private lateinit var navigationCapsule: LinearLayout
     private lateinit var selectionActionCapsule: LinearLayout
 
@@ -375,18 +376,17 @@ class GalleryActivity : Activity() {
             setBackgroundColor(canvasColor())
         }
 
-        val contentHorizontalGutter = dp(
-            GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp),
-        )
-        val contentTopPadding = dp(10)
+        val designMetrics = GalleryDesignSystem.metrics(this)
+        val contentHorizontalGutter = dp(designMetrics.horizontalGutterDp)
+        val contentTopPadding = dp(designMetrics.topPaddingDp)
         val contentBottomPadding = dp(GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP)
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(
-                dp(GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp)),
-                dp(10),
-                dp(GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp)),
-                dp(GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP),
+                contentHorizontalGutter,
+                contentTopPadding,
+                contentHorizontalGutter,
+                contentBottomPadding,
             )
             setBackgroundColor(canvasColor())
         }
@@ -397,32 +397,52 @@ class GalleryActivity : Activity() {
 
         library = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(6), 0, 0)
+            setPadding(0, dp(4), 0, 0)
         }
         content.addView(
             library,
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
         )
 
+        val contentHost = FrameLayout(this).apply {
+            val availableWidthDp = resources.configuration.screenWidthDp
+            val widthPx = if (availableWidthDp > GalleryGlazeContract.CONTENT_MAX_WIDTH_DP) {
+                dp(GalleryGlazeContract.CONTENT_MAX_WIDTH_DP)
+            } else {
+                ViewGroup.LayoutParams.MATCH_PARENT
+            }
+            addView(
+                content,
+                FrameLayout.LayoutParams(widthPx, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                },
+            )
+        }
         libraryScroll = ScrollView(this).apply {
             isFillViewport = true
             clipToPadding = false
             addView(
-                content,
+                contentHost,
                 ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
             )
         }
+        val widthDp = resources.configuration.screenWidthDp
+        val usesNavigationRail = GalleryGlazeContract.usesNavigationRail(widthDp)
         rootFrame.addView(
             libraryScroll,
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
-                bottomMargin = dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+                if (usesNavigationRail) {
+                    marginStart = dp(GalleryGlazeContract.navigationRailLaneDp(widthDp))
+                } else {
+                    bottomMargin = dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+                }
             },
         )
 
         navigationCapsule = buildNavigationCapsule()
         rootFrame.addView(
             navigationCapsule,
-            bottomCapsuleLayoutParams(),
+            navigationCapsuleLayoutParams(),
         )
 
         selectionActionCapsule = buildSelectionActionCapsule().apply {
@@ -483,16 +503,60 @@ class GalleryActivity : Activity() {
         updateHeader()
     }
 
-    private fun bottomCapsuleLayoutParams(): FrameLayout.LayoutParams =
-        FrameLayout.LayoutParams(
+    private fun navigationCapsuleLayoutParams(): FrameLayout.LayoutParams {
+        val widthDp = resources.configuration.screenWidthDp
+        if (GalleryGlazeContract.usesNavigationRail(widthDp)) {
+            return FrameLayout.LayoutParams(
+                dp(GalleryGlazeContract.NAVIGATION_RAIL_WIDTH_DP),
+                dp(
+                    (GalleryGlazeContract.NAVIGATION_RAIL_ITEM_HEIGHT_DP * GalleryDestination.entries.size) +
+                        8,
+                ),
+            ).apply {
+                gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                marginStart = dp(GalleryGlazeContract.NAVIGATION_RAIL_SIDE_MARGIN_DP)
+            }
+        }
+        return bottomCapsuleLayoutParams()
+    }
+
+    private fun bottomCapsuleLayoutParams(): FrameLayout.LayoutParams {
+        val metrics = GalleryDesignSystem.metrics(this)
+        return FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            dp(GalleryGlazeContract.NAVIGATION_HEIGHT_DP),
+            dp(metrics.navigationHeightDp),
         ).apply {
             gravity = Gravity.BOTTOM
-            marginStart = dp(GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
-            marginEnd = dp(GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
-            bottomMargin = dp(GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
+            marginStart = dp(metrics.navigationSideMarginDp)
+            marginEnd = dp(metrics.navigationSideMarginDp)
+            bottomMargin = dp(metrics.navigationBottomMarginDp)
         }
+    }
+
+    private fun updateLibraryViewportForChrome() {
+        if (!::libraryScroll.isInitialized) return
+        val params = libraryScroll.layoutParams as? FrameLayout.LayoutParams ?: return
+        val widthDp = resources.configuration.screenWidthDp
+        val usesRail = GalleryGlazeContract.usesNavigationRail(widthDp)
+        val desiredStartMargin = if (usesRail && !inSelectionMode) {
+            dp(GalleryGlazeContract.navigationRailLaneDp(widthDp))
+        } else {
+            0
+        }
+        val desiredBottomMargin = if (!usesRail || inSelectionMode) {
+            dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+        } else {
+            0
+        }
+        if (
+            params.marginStart != desiredStartMargin ||
+            params.bottomMargin != desiredBottomMargin
+        ) {
+            params.marginStart = desiredStartMargin
+            params.bottomMargin = desiredBottomMargin
+            libraryScroll.layoutParams = params
+        }
+    }
 
     private fun buildHeader(): View {
         val primaryTextColor = primaryTextColor()
@@ -501,7 +565,7 @@ class GalleryActivity : Activity() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, dp(3), 0, 0)
+            setPadding(0, dp(4), 0, dp(2))
         }
 
         brandMark = ImageView(this).apply {
@@ -511,8 +575,8 @@ class GalleryActivity : Activity() {
         }
         row.addView(
             brandMark,
-            LinearLayout.LayoutParams(dp(32), dp(32)).apply {
-                marginEnd = dp(8)
+            LinearLayout.LayoutParams(dp(28), dp(28)).apply {
+                marginEnd = dp(10)
             },
         )
 
@@ -540,22 +604,14 @@ class GalleryActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
         }
         headerTitle = TextView(this).apply {
-            setTextColor(primaryTextColor)
-            setTextSize(
-                TypedValue.COMPLEX_UNIT_SP,
-                if (resources.configuration.screenWidthDp < 360) 25f else 27f,
-            )
-            setTypeface(typeface, Typeface.BOLD)
-            maxLines = 1
+            GalleryDesignSystem.applyTitle(this, primaryTextColor)
             ellipsize = TextUtils.TruncateAt.END
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
         headerSubtitle = TextView(this).apply {
-            setTextColor(secondaryTextColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            maxLines = 1
+            GalleryDesignSystem.applySubtitle(this, secondaryTextColor)
             ellipsize = TextUtils.TruncateAt.END
-            setPadding(0, dp(1), 0, 0)
+            setPadding(0, dp(2), 0, 0)
         }
         titles.addView(headerTitle)
         titles.addView(headerSubtitle)
@@ -614,12 +670,13 @@ class GalleryActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             visibility = View.GONE
-            setPadding(dp(14), dp(2), dp(4), dp(2))
+            setPadding(dp(14), dp(4), dp(4), dp(4))
             background = GalleryGlazeSurfaces.drawable(
                 context,
-                GalleryGlazeSurfaces.Role.CONTROL,
+                GalleryGlazeSurfaces.Role.RAISED,
                 GalleryGlazeContract.SHAPE_CONTAINER_DP,
             )
+            elevation = 0f
         }
 
         searchField = EditText(this).apply {
@@ -672,7 +729,7 @@ class GalleryActivity : Activity() {
 
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(8), 0, 0)
+            setPadding(0, dp(10), 0, dp(2))
             addView(
                 searchContainer,
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
@@ -685,18 +742,13 @@ class GalleryActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             visibility = View.GONE
-            setPadding(dp(10), dp(4), dp(4), dp(4))
-            background = GalleryGlazeSurfaces.drawable(
-                context,
-                GalleryGlazeSurfaces.Role.RAISED,
-                GalleryGlazeContract.SHAPE_CONTROL_DP,
-            )
+            setPadding(dp(12), dp(5), dp(4), dp(5))
+            background = GalleryDesignSystem.emptyStateSurface(context)
+            elevation = 0f
         }
 
         status = TextView(this).apply {
-            setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.75f)
-            setLineSpacing(0f, 1.03f)
+            GalleryDesignSystem.applySupportingText(this, secondaryTextColor())
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
         accessPanel.addView(
@@ -713,7 +765,11 @@ class GalleryActivity : Activity() {
             setTextColor(accentColor())
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             setTypeface(typeface, Typeface.BOLD)
-            background = roundedSurface(withAlpha(accentColor(), 0.08f), 10)
+            background = GalleryDesignSystem.iconButtonBackground(
+                context,
+                accentColor(),
+                selected = true,
+            )
             isClickable = true
             isFocusable = true
             setAccessActionPresentation(
@@ -727,7 +783,7 @@ class GalleryActivity : Activity() {
 
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(6), 0, 0)
+            setPadding(0, dp(8), 0, dp(2))
             addView(
                 accessPanel,
                 LinearLayout.LayoutParams(
@@ -753,6 +809,8 @@ class GalleryActivity : Activity() {
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
         val navigationMode = GalleryNavigationDisplayMode.ICONS_ONLY
+        val usesRail = GalleryGlazeContract.usesNavigationRail(resources.configuration.screenWidthDp)
+        orientation = if (usesRail) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
         GalleryDestination.entries.forEach { item ->
             val label = navigationLabel(item)
             val selected = destination == item
@@ -801,7 +859,14 @@ class GalleryActivity : Activity() {
             navigationItems[item] = view
             addView(
                 view,
-                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f),
+                if (usesRail) {
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        dp(GalleryGlazeContract.NAVIGATION_RAIL_ITEM_HEIGHT_DP),
+                    )
+                } else {
+                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
+                },
             )
         }
     }
@@ -827,7 +892,7 @@ class GalleryActivity : Activity() {
     private fun bottomCapsuleSurface(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        setPadding(0, 0, 0, 0)
+        setPadding(dp(4), dp(4), dp(4), dp(4))
         background = GalleryGlazeSurfaces.drawable(
             context,
             GalleryGlazeSurfaces.Role.CHROME,
@@ -839,6 +904,7 @@ class GalleryActivity : Activity() {
 
     private fun renderNavigation() {
         if (!::navigationCapsule.isInitialized || !::selectionActionCapsule.isInitialized) return
+        updateLibraryViewportForChrome()
         if (viewerOverlay != null) {
             navigationCapsule.visibility = View.GONE
             selectionActionCapsule.visibility = View.GONE
@@ -1434,7 +1500,9 @@ class GalleryActivity : Activity() {
         updateHeader()
         renderNavigation()
         renderedMediaTiles.clear()
+        settingsContentTarget = null
         library.removeAllViews()
+        library.setPadding(0, dp(4), 0, 0)
 
         if (destination == GalleryDestination.SETTINGS) {
             clearSelection(render = false)
@@ -2534,14 +2602,21 @@ class GalleryActivity : Activity() {
         generation: Int,
         parent: LinearLayout,
     ) {
+        val widthDp = resources.configuration.screenWidthDp
         val columns = currentUserSettings().viewDensity.mediaGridColumnsForGroup(
-            resources.configuration.screenWidthDp,
+            widthDp,
             groupItems.size,
         )
-        val gutterPx = dp(GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp))
-        val gaps = dp(GRID_GAP_DP) * (columns - 1)
+        val gutterPx = dp(GalleryGlazeContract.horizontalGutterDp(widthDp))
+        val gapPx = dp(GalleryGlazeContract.mediaGapDp(widthDp))
+        val gaps = gapPx * (columns - 1)
+        val railLanePx = dp(GalleryGlazeContract.navigationRailLaneDp(widthDp))
+        val contentWidthPx = minOf(
+            (resources.displayMetrics.widthPixels - railLanePx).coerceAtLeast(0),
+            dp(GalleryGlazeContract.CONTENT_MAX_WIDTH_DP),
+        )
         val tileSize = (
-            (resources.displayMetrics.widthPixels - (gutterPx * 2) - gaps) / columns
+            (contentWidthPx - (gutterPx * 2) - gaps) / columns
         ).coerceAtLeast(dp(GalleryGlazeContract.MIN_GRID_TILE_DP))
         val collectionIndexes = collectionItems.withIndex().associate { it.value.contentUri to it.index }
 
@@ -2555,7 +2630,7 @@ class GalleryActivity : Activity() {
                 row.addView(
                     mediaTile(item, collectionItems, collectionIndex, generation),
                     LinearLayout.LayoutParams(0, tileSize, 1f).apply {
-                        if (columnIndex > 0) marginStart = dp(GRID_GAP_DP)
+                        if (columnIndex > 0) marginStart = gapPx
                     },
                 )
             }
@@ -2563,14 +2638,14 @@ class GalleryActivity : Activity() {
                 row.addView(
                     Space(this),
                     LinearLayout.LayoutParams(0, tileSize, 1f).apply {
-                        if (rowItems.isNotEmpty() || spacerIndex > 0) marginStart = dp(GRID_GAP_DP)
+                        if (rowItems.isNotEmpty() || spacerIndex > 0) marginStart = gapPx
                     },
                 )
             }
             parent.addView(
                 row,
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, tileSize).apply {
-                    if (rowIndex > 0) topMargin = dp(GRID_GAP_DP)
+                    if (rowIndex > 0) topMargin = gapPx
                 },
             )
         }
@@ -3790,6 +3865,11 @@ class GalleryActivity : Activity() {
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
         viewerOverlay = overlay
+        val viewerChromeWidth = if (resources.configuration.screenWidthDp >= GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP + 20) {
+            dp(GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP)
+        } else {
+            ViewGroup.LayoutParams.MATCH_PARENT
+        }
         rootFrame.addView(
             overlay,
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
@@ -3831,7 +3911,11 @@ class GalleryActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(10), dp(8), dp(10), dp(8))
-            background = roundedSurface(0xd9141416.toInt(), 22)
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
         }
         val viewerBack = viewerIconAction(
             R.drawable.ic_gallery_back,
@@ -3897,8 +3981,8 @@ class GalleryActivity : Activity() {
         )
         overlay.addView(
             topBar,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(64)).apply {
-                gravity = Gravity.TOP
+            FrameLayout.LayoutParams(viewerChromeWidth, dp(68)).apply {
+                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
                 marginStart = dp(10)
                 marginEnd = dp(10)
                 topMargin = dp(6)
@@ -3934,7 +4018,11 @@ class GalleryActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             setPadding(dp(6), dp(6), dp(6), dp(6))
-            background = roundedSurface(0xe8141416.toInt(), 24)
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
         }
 
         val share = viewerIconAction(R.drawable.ic_gallery_share, true, "Share this media") {}
@@ -3968,8 +4056,8 @@ class GalleryActivity : Activity() {
         }
         overlay.addView(
             bottomBar,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(72)).apply {
-                gravity = Gravity.BOTTOM
+            FrameLayout.LayoutParams(viewerChromeWidth, dp(72)).apply {
+                gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                 marginStart = dp(10)
                 marginEnd = dp(10)
                 bottomMargin = dp(16)
@@ -4600,6 +4688,27 @@ class GalleryActivity : Activity() {
 
     private fun renderSettings() {
         val settings = currentUserSettings()
+        val screenWidthDp = resources.configuration.screenWidthDp
+        val settingsAvailableWidthDp = (
+            screenWidthDp -
+                GalleryGlazeContract.navigationRailLaneDp(screenWidthDp) -
+                (GalleryGlazeContract.horizontalGutterDp(screenWidthDp) * 2)
+        ).coerceAtLeast(0)
+        val settingsWidth = if (settingsAvailableWidthDp > GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP) {
+            dp(GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP)
+        } else {
+            ViewGroup.LayoutParams.MATCH_PARENT
+        }
+        settingsContentTarget = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }.also { target ->
+            library.addView(
+                target,
+                LinearLayout.LayoutParams(settingsWidth, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    gravity = Gravity.CENTER_HORIZONTAL
+                },
+            )
+        }
 
         addSettingsSection(
             "Performance",
@@ -4830,8 +4939,11 @@ class GalleryActivity : Activity() {
         when (step) {
             0 -> {
                 title = "Your local media library"
-                body =
+                body = if (GalleryGlazeContract.usesNavigationRail(resources.configuration.screenWidthDp)) {
+                    "Use the five glyphs in the left navigation rail for Photos, Albums, Videos, Trash, and Settings. Destination names remain available to accessibility services and tooltips."
+                } else {
                     "Use the five glyphs at the bottom for Photos, Albums, Videos, Trash, and Settings. Destination names remain available to accessibility services and tooltips."
+                }
             }
             1 -> {
                 title = "You control media access"
@@ -5038,18 +5150,16 @@ class GalleryActivity : Activity() {
     }
 
     private fun addSettingsSection(title: String, vararg rows: View) {
-        library.addView(settingsSectionHeader(title))
-        library.addView(settingsGroup(rows.toList()))
+        val target = settingsContentTarget ?: library
+        target.addView(settingsSectionHeader(title))
+        target.addView(settingsGroup(rows.toList()))
     }
 
     private fun settingsGroup(rows: List<View>): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        background = GalleryGlazeSurfaces.drawable(
-            context,
-            GalleryGlazeSurfaces.Role.RAISED,
-            GalleryGlazeContract.SHAPE_CONTROL_DP,
-        )
+        background = GalleryDesignSystem.settingGroupSurface(context)
         clipToOutline = true
+        elevation = 0f
 
         rows.forEachIndexed { index, row ->
             addView(
@@ -5062,12 +5172,7 @@ class GalleryActivity : Activity() {
             if (index < rows.lastIndex) {
                 addView(
                     View(context).apply {
-                        setBackgroundColor(
-                            withAlpha(
-                                primaryTextColor(),
-                                if (isNightMode()) 0.12f else 0.07f,
-                            ),
-                        )
+                        setBackgroundColor(getColor(R.color.gallery_divider))
                         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                     },
                     LinearLayout.LayoutParams(
@@ -5084,10 +5189,8 @@ class GalleryActivity : Activity() {
 
     private fun settingsSectionHeader(label: String): TextView = TextView(this).apply {
         text = label
-        setTextColor(primaryTextColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.5f)
-        setTypeface(typeface, Typeface.BOLD)
-        setPadding(dp(2), dp(12), 0, dp(4))
+        GalleryDesignSystem.applySectionLabel(this, primaryTextColor())
+        setPadding(dp(2), dp(18), 0, dp(7))
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 
@@ -5150,8 +5253,8 @@ class GalleryActivity : Activity() {
     ): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
-        minimumHeight = dp(52)
-        setPadding(dp(12), dp(6), dp(8), dp(6))
+        minimumHeight = dp(58)
+        setPadding(dp(14), dp(8), dp(10), dp(8))
         background = null
         alpha = if (enabled) 1f else 0.55f
 
@@ -5162,14 +5265,14 @@ class GalleryActivity : Activity() {
         labels.addView(TextView(context).apply {
             text = title
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13.25f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             setTypeface(typeface, Typeface.BOLD)
         })
         labels.addView(TextView(context).apply {
             text = subtitle
             setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10.75f)
-            setLineSpacing(0f, 1.02f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f)
+            setLineSpacing(0f, 1.06f)
             setPadding(0, dp(1), dp(6), 0)
         })
         addView(labels, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
@@ -6078,7 +6181,7 @@ class GalleryActivity : Activity() {
         minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
         minWidth = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
         setPadding(dp(12), dp(12), dp(12), dp(12))
-        background = roundedSurface(0x26ffffff, 18)
+        background = GalleryDesignSystem.mediaIconBackground(context)
         isEnabled = enabled
         isClickable = enabled
         isFocusable = enabled
@@ -6099,11 +6202,11 @@ class GalleryActivity : Activity() {
         control.compoundDrawableTintList = ColorStateList.valueOf(
             if (selected) accentColor() else Color.WHITE,
         )
-        control.background = if (selected) {
-            roundedSurface(withAlpha(accentColor(), 0.24f), 18)
-        } else {
-            roundedSurface(0x26ffffff, 18)
-        }
+        control.background = GalleryDesignSystem.mediaIconBackground(
+            context = control.context,
+            foreground = if (selected) accentColor() else Color.WHITE,
+            selected = selected,
+        )
         control.isSelected = selected
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             control.stateDescription = if (selected) "Active" else null
@@ -6119,13 +6222,7 @@ class GalleryActivity : Activity() {
         setColorFilter(primaryTextColor())
         setPadding(dp(13), dp(13), dp(13), dp(13))
         scaleType = ImageView.ScaleType.CENTER_INSIDE
-        background = GalleryGlazeSurfaces.drawable(
-            context,
-            GalleryGlazeSurfaces.Role.CONTROL,
-            GalleryGlazeContract.SHAPE_CONTAINER_DP,
-        )
-        isClickable = true
-        isFocusable = true
+        GalleryDesignSystem.applyIconButton(this, primaryTextColor())
         contentDescription = description
         tooltipText = description
         GalleryInteractionFeedback.applyBoundedRipple(
