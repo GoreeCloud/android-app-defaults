@@ -1559,10 +1559,6 @@ fun LauncherBetaRoot(
                 onCreateDrawerTab = onCreateDrawerTab,
                 onRenameDrawerTab = onRenameDrawerTab,
                 onDeleteDrawerTab = onDeleteDrawerTab,
-                onOpenSettings = {
-                    drawerSearchRequested = false
-                    surfaceModeName = LauncherSurfaceMode.SETTINGS.name
-                },
                 onHome = {
                     drawerSearchRequested = false
                     surfaceModeName = LauncherSurfaceMode.HOME.name
@@ -6803,7 +6799,6 @@ private fun AppDrawerSurface(
     onCreateDrawerTab: (String) -> Unit,
     onRenameDrawerTab: (String, String) -> Unit,
     onDeleteDrawerTab: (String) -> Unit,
-    onOpenSettings: () -> Unit,
     onHome: () -> Unit,
 ) {
     var drawerQuery by rememberSaveable { mutableStateOf("") }
@@ -7246,18 +7241,6 @@ private fun AppDrawerSurface(
                                 }
                             }
                         }
-                        Surface(
-                            onClick = onOpenSettings,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .semantics { contentDescription = "Launcher settings" },
-                            shape = CircleShape,
-                            color = Color.Transparent,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                LauncherDrawerSettingsIcon(color = drawerSecondaryColor)
-                            }
-                        }
                     }
                 }
                 if (profilePages.size > 1) {
@@ -7550,7 +7533,7 @@ private fun DrawerCustomTabsRow(
                 color = Color.Transparent,
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    LauncherDrawerSettingsIcon(
+                    LauncherDrawerEditIcon(
                         color = secondaryColor,
                         modifier = Modifier.size(21.dp),
                     )
@@ -7604,6 +7587,46 @@ private fun DrawerTabChip(
 }
 
 @Composable
+private fun LauncherDrawerEditIcon(
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val u = size.minDimension
+        val stroke = 1.9.dp.toPx()
+        val cap = StrokeCap.Round
+        drawLine(
+            color = color,
+            start = Offset(u * .27f, u * .73f),
+            end = Offset(u * .70f, u * .30f),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        drawLine(
+            color = color,
+            start = Offset(u * .63f, u * .23f),
+            end = Offset(u * .77f, u * .37f),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        drawLine(
+            color = color,
+            start = Offset(u * .27f, u * .73f),
+            end = Offset(u * .23f, u * .78f),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+        drawLine(
+            color = color,
+            start = Offset(u * .23f, u * .78f),
+            end = Offset(u * .36f, u * .75f),
+            strokeWidth = stroke,
+            cap = cap,
+        )
+    }
+}
+
+@Composable
 private fun DrawerTabNameDialog(
     title: String,
     initialName: String,
@@ -7613,7 +7636,7 @@ private fun DrawerTabNameDialog(
     onDelete: (() -> Unit)? = null,
 ) {
     var name by remember(initialName) { mutableStateOf(initialName) }
-    val normalized = name.trim().replace(Regex("\s+"), " ").take(32)
+    val normalized = name.trim().replace(Regex("\\s+"), " ").take(32)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
