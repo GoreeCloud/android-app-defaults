@@ -85,6 +85,12 @@ Draft PR #239 implements the first adaptive paged-Dock tranche on authoritative 
 
 This checkpoint is Development source only until exact-head protected build/JVM/lint/schema, Android 16 runtime, transition-performance, migration-provenance, Foundation, required-gate, and protected-promotion evidence succeeds. Representative-device visual/accessibility/form-factor acceptance also remains open.
 
+### Stacked drag-handoff continuation
+
+The stacked `launcher/dock-drag-handoff` candidate adds deterministic edge-hover page switching during an active Dock drag. Launcher keeps ordinary Dock paging disabled while a drag owns input, then switches pages only after the pointer remains inside a valid left/right Dock edge band. The same tranche publishes a synthetic next-page insertion boundary during the drag so a drop after the last visible icon preserves the authoritative flat Dock order instead of accidentally moving the item to the global end.
+
+This remains Development candidate behavior until its own exact-head protected validation completes. Representative-device dwell timing, visual feedback, drag cancellation, loop-boundary behavior, large-text/form-factor behavior, and accessibility acceptance remain open.
+
 ## Remaining Dock work
 
-Dock folders and other non-app Dock item persistence; direct cross-page drag handoff while a drag is active; deeper Dock padding/edge-position controls; context-aware or suggested Dock content; Dock widgets; versioned portable backup/restore expansion; and complete representative-device accessibility, profile, performance/power, recovery, protected Development signing/update continuity, and release qualification remain planned or gated.
+Dock folders and other non-app Dock item persistence; deeper Dock padding/edge-position controls; context-aware or suggested Dock content; Dock widgets; versioned portable backup/restore expansion; and complete representative-device accessibility, profile, performance/power, recovery, protected Development signing/update continuity, and release qualification remain planned or gated.
