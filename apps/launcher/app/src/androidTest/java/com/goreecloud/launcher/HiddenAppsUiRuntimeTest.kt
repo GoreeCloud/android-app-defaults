@@ -154,7 +154,7 @@ class HiddenAppsUiRuntimeTest {
                 .onNodeWithText("Launcher settings", useUnmergedTree = true)
                 .assertIsDisplayed()
             composeRule
-                .onNodeWithText("App drawer", useUnmergedTree = true)
+                .onNodeWithText("App Drawer", useUnmergedTree = true)
                 .performClick()
 
             composeRule
@@ -231,7 +231,7 @@ class HiddenAppsUiRuntimeTest {
                 .performClick()
 
             composeRule
-                .onNodeWithText("Privacy & security", useUnmergedTree = true)
+                .onNodeWithText("Privacy & Permissions", useUnmergedTree = true)
                 .performScrollTo()
                 .performClick()
 
