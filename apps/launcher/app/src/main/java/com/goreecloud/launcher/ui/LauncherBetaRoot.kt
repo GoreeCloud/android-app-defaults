@@ -13197,6 +13197,7 @@ private enum class GlazePopupActionSymbol {
     SETTINGS,
     CHECK,
     BACK,
+    FORWARD,
     CLOSE,
     INFO,
     LOCK,
