@@ -5305,7 +5305,20 @@ class GalleryActivity : Activity() {
                 accentColor(),
                 GalleryGlazeContract.SHAPE_CONTROL_DP,
             )
-            setOnClickListener { onClick() }
+            val invokeRowAction = View.OnClickListener { onClick() }
+            setOnClickListener(invokeRowAction)
+            labels.apply {
+                isClickable = true
+                isFocusable = false
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                setOnClickListener(invokeRowAction)
+            }
+            trailing.apply {
+                isClickable = true
+                isFocusable = false
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                setOnClickListener(invokeRowAction)
+            }
         }
     }
 
