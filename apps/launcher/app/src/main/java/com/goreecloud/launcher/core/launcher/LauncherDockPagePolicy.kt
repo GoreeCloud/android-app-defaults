@@ -39,3 +39,45 @@ internal fun launcherDockPagePlan(
         pageCount = pages,
     )
 }
+
+internal fun launcherDockVirtualPageCount(
+    logicalPageCount: Int,
+    loop: Boolean,
+): Int {
+    val count = logicalPageCount.coerceAtLeast(1)
+    return if (loop && count > 1) count + 2 else count
+}
+
+internal fun launcherDockInitialVirtualPage(
+    logicalPageCount: Int,
+    loop: Boolean,
+): Int = if (loop && logicalPageCount > 1) 1 else 0
+
+internal fun launcherDockLogicalPage(
+    virtualPage: Int,
+    logicalPageCount: Int,
+    loop: Boolean,
+): Int {
+    val count = logicalPageCount.coerceAtLeast(1)
+    if (!loop || count == 1) return virtualPage.coerceIn(0, count - 1)
+    val virtualCount = count + 2
+    return when {
+        virtualPage <= 0 -> count - 1
+        virtualPage >= virtualCount - 1 -> 0
+        else -> virtualPage - 1
+    }
+}
+
+internal fun launcherDockLoopBoundaryTarget(
+    virtualPage: Int,
+    logicalPageCount: Int,
+    loop: Boolean,
+): Int? {
+    val count = logicalPageCount.coerceAtLeast(1)
+    if (!loop || count <= 1) return null
+    return when {
+        virtualPage <= 0 -> count
+        virtualPage >= count + 1 -> 1
+        else -> null
+    }
+}

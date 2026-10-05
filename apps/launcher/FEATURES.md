@@ -269,7 +269,7 @@ The following capability inventory is the approved Launcher product direction. T
 
 - Five-app starter configuration without treating five items as a capacity limit.
 - Custom Dock page density and adjustable application count.
-- Multiple Dock pages with horizontal navigation independent from Home pages.
+- Multiple Dock pages with horizontal navigation independent from Home pages and an optional disabled-by-default loop mode.
 - Accessibility-floor-aware adaptive paging before target-size compression.
 - Clear, Glaze, Solid, Raised, Edge, transparency, and future padding customization.
 - Optional labels and Launcher Universal Search placement within the Dock.

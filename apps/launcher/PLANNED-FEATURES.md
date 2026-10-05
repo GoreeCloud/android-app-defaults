@@ -2,7 +2,7 @@
 
 ## October 4, 2026 — remaining Home Dock expansion
 
-The adaptive application paging/search/label/material tranche is now represented by Development PR #239. Remaining Dock work includes persistent Dock folders and other non-app item types; optional predictable page looping; active-drag page handoff; deeper padding/edge-position controls; contextual/suggested Dock content; Dock widgets; versioned portable backup/restore of page/folder semantics; and full representative-device accessibility/profile/form-factor/performance/power/recovery/signing/release acceptance.
+The adaptive application paging/search/label/material tranche is now represented by Development PR #239. Remaining Dock work includes persistent Dock folders and other non-app item types; active-drag page handoff; deeper padding/edge-position controls; contextual/suggested Dock content; Dock widgets; versioned portable backup/restore of page/folder semantics; and full representative-device accessibility/profile/form-factor/performance/power/recovery/signing/release acceptance.
 
 
 ## October 3, 2026 — App Lock acceptance and portability remain

@@ -1,10 +1,10 @@
 ## October 4, 2026 — adaptive paged Dock candidate
 
-Draft PR #239 adds adaptive Dock pages over the existing ordered, unbounded application Dock. The candidate preserves the resolved interaction floor by reducing effective per-page density before shrinking touch targets, exposes preferred 4/5/6/7 items-per-page density, adds independent horizontal Dock paging with compact page position semantics, optional Dock labels, and an optional direct Launcher Universal Search affordance. Dock material choices expand to Glaze, Clear, Solid, Raised, and Edge while continuing to use the existing Glaze presentation-policy fallback boundary.
+Draft PR #239 adds adaptive Dock pages over the existing ordered, unbounded application Dock. The candidate preserves the resolved interaction floor by reducing effective per-page density before shrinking touch targets, exposes preferred 4/5/6/7 items-per-page density, adds independent horizontal Dock paging with compact page position semantics, an opt-in loop-pages mode, optional Dock labels, and an optional direct Launcher Universal Search affordance that remains renderable even with an otherwise empty Dock. Dock material choices expand to Glaze, Clear, Solid, Raised, and Edge while continuing to use the existing Glaze presentation-policy fallback boundary.
 
 The candidate does not change Android permissions, package/profile authority, Search-provider execution, workspace schema, or network behavior. Existing Home↔Dock placement, direct reordering, layout lock, profile-qualified identities, icon normalization, and local persistence remain authoritative.
 
-**Acceptance boundary:** Development source candidate only. Exact-head protected CI/runtime evidence and representative-device Dock visual/interaction/accessibility acceptance remain required. Dock folders, page looping, cross-page active-drag handoff, portable backup/recovery expansion, protected Development signing/update continuity, and release gates remain open.
+**Acceptance boundary:** Development source candidate only. Exact-head protected CI/runtime evidence and representative-device Dock visual/interaction/accessibility acceptance remain required. Dock folders, cross-page active-drag handoff, portable backup/recovery expansion, protected Development signing/update continuity, and release gates remain open.
 
 ## October 4, 2026 — icon-mask and Apps header polish
 

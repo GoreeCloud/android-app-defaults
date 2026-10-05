@@ -90,8 +90,10 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
@@ -121,7 +123,11 @@ import com.goreecloud.launcher.core.launcher.LauncherUniversalSearchHomeMode
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherLaunchShortcutSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherDockStyle
+import com.goreecloud.launcher.core.launcher.launcherDockInitialVirtualPage
+import com.goreecloud.launcher.core.launcher.launcherDockLogicalPage
+import com.goreecloud.launcher.core.launcher.launcherDockLoopBoundaryTarget
 import com.goreecloud.launcher.core.launcher.launcherDockPagePlan
+import com.goreecloud.launcher.core.launcher.launcherDockVirtualPageCount
 import com.goreecloud.launcher.core.launcher.LauncherDrawerBackdrop
 import com.goreecloud.launcher.core.launcher.LauncherDrawerEntryMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerHeaderPresentation
@@ -7982,7 +7988,7 @@ private enum class LauncherSettingsCategory(
     HOME(
         "Home screen",
         "Grid, Glance, pages, Dock and Home behavior",
-        "grid glance clock date weather dock pages page transition labels automatic apps lock layout hints spacing quick actions dock labels dock search items per page capacity glaze clear solid raised edge",
+        "grid glance clock date weather dock pages page transition labels automatic apps lock layout hints spacing quick actions dock labels dock search items per page capacity loop looping glaze clear solid raised edge",
     ),
     DRAWER(
         "App drawer",
@@ -10595,19 +10601,24 @@ internal fun GlazeDock(
                 }
             }
             val loopingDockPages = loopPages && dockPages.size > 1
-            val pagerPageCount = if (loopingDockPages) dockPages.size + 2 else dockPages.size
+            val pagerPageCount = launcherDockVirtualPageCount(
+                logicalPageCount = dockPages.size,
+                loop = loopingDockPages,
+            )
             val pagerState = rememberPagerState(
-                initialPage = if (loopingDockPages) 1 else 0,
+                initialPage = launcherDockInitialVirtualPage(
+                    logicalPageCount = dockPages.size,
+                    loop = loopingDockPages,
+                ),
                 pageCount = { pagerPageCount },
             )
-            fun logicalDockPage(virtualPage: Int): Int = when {
-                !loopingDockPages -> virtualPage.coerceIn(0, dockPages.lastIndex)
-                virtualPage <= 0 -> dockPages.lastIndex
-                virtualPage >= pagerPageCount - 1 -> 0
-                else -> virtualPage - 1
-            }
             LaunchedEffect(loopingDockPages, dockPages.size) {
-                pagerState.scrollToPage(if (loopingDockPages) 1 else 0)
+                pagerState.scrollToPage(
+                    launcherDockInitialVirtualPage(
+                        logicalPageCount = dockPages.size,
+                        loop = loopingDockPages,
+                    ),
+                )
             }
             LaunchedEffect(
                 pagerState.currentPage,
@@ -10615,14 +10626,19 @@ internal fun GlazeDock(
                 loopingDockPages,
                 dockPages.size,
             ) {
-                if (loopingDockPages && !pagerState.isScrollInProgress) {
-                    when (pagerState.currentPage) {
-                        0 -> pagerState.scrollToPage(dockPages.size)
-                        pagerPageCount - 1 -> pagerState.scrollToPage(1)
-                    }
+                if (!pagerState.isScrollInProgress) {
+                    launcherDockLoopBoundaryTarget(
+                        virtualPage = pagerState.currentPage,
+                        logicalPageCount = dockPages.size,
+                        loop = loopingDockPages,
+                    )?.let { pagerState.scrollToPage(it) }
                 }
             }
-            val logicalCurrentPage = logicalDockPage(pagerState.currentPage)
+            val logicalCurrentPage = launcherDockLogicalPage(
+                virtualPage = pagerState.currentPage,
+                logicalPageCount = dockPages.size,
+                loop = loopingDockPages,
+            )
             val visibleApps = dockPages.getOrElse(logicalCurrentPage) { emptyList() }
             val visibleKeys = remember(visibleApps) { visibleApps.map { it.workspaceKey() }.toSet() }
             LaunchedEffect(visibleKeys) {
@@ -10638,6 +10654,10 @@ internal fun GlazeDock(
             val adaptiveIconScale = (
                 iconScale * (slotSize.value / preferredSlot.value)
             ).coerceIn(0.85f, 1.15f)
+            val dockPagerScope = rememberCoroutineScope()
+            val previousDockPageAvailable = loopingDockPages || logicalCurrentPage > 0
+            val nextDockPageAvailable =
+                loopingDockPages || logicalCurrentPage < dockPages.lastIndex
 
             Row(
                 modifier = Modifier
@@ -10653,10 +10673,44 @@ internal fun GlazeDock(
                         .semantics {
                             stateDescription =
                                 "Dock page ${logicalCurrentPage + 1} of ${dockPages.size}"
+                            customActions = buildList {
+                                if (previousDockPageAvailable) {
+                                    add(
+                                        CustomAccessibilityAction("Previous Dock page") {
+                                            dockPagerScope.launch {
+                                                pagerState.animateScrollToPage(
+                                                    (pagerState.currentPage - 1).coerceAtLeast(0),
+                                                )
+                                            }
+                                            true
+                                        },
+                                    )
+                                }
+                                if (nextDockPageAvailable) {
+                                    add(
+                                        CustomAccessibilityAction("Next Dock page") {
+                                            dockPagerScope.launch {
+                                                pagerState.animateScrollToPage(
+                                                    (pagerState.currentPage + 1).coerceAtMost(
+                                                        pagerPageCount - 1,
+                                                    ),
+                                                )
+                                            }
+                                            true
+                                        },
+                                    )
+                                }
+                            }
                         },
                     userScrollEnabled = activeDrag == null && dockPages.size > 1,
                 ) { pageIndex ->
-                    val pageApps = dockPages[logicalDockPage(pageIndex)]
+                    val pageApps = dockPages[
+                        launcherDockLogicalPage(
+                            virtualPage = pageIndex,
+                            logicalPageCount = dockPages.size,
+                            loop = loopingDockPages,
+                        )
+                    ]
                     Row(
                         modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.SpaceEvenly,

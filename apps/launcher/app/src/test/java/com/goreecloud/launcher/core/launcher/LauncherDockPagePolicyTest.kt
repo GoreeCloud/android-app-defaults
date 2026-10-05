@@ -48,4 +48,40 @@ class LauncherDockPagePolicyTest {
         assertEquals(4, launcherDockPagePlan(1, 1, 500f, 48f).configuredPageSize)
         assertEquals(7, launcherDockPagePlan(1, 99, 500f, 48f).configuredPageSize)
     }
+
+    @Test
+    fun loopingAddsSentinelPagesWithoutChangingLogicalOrder() {
+        assertEquals(5, launcherDockVirtualPageCount(logicalPageCount = 3, loop = true))
+        assertEquals(1, launcherDockInitialVirtualPage(logicalPageCount = 3, loop = true))
+        assertEquals(2, launcherDockLogicalPage(virtualPage = 0, logicalPageCount = 3, loop = true))
+        assertEquals(0, launcherDockLogicalPage(virtualPage = 1, logicalPageCount = 3, loop = true))
+        assertEquals(2, launcherDockLogicalPage(virtualPage = 3, logicalPageCount = 3, loop = true))
+        assertEquals(0, launcherDockLogicalPage(virtualPage = 4, logicalPageCount = 3, loop = true))
+    }
+
+    @Test
+    fun loopingBoundaryTargetsJumpToEquivalentRealPages() {
+        assertEquals(3, launcherDockLoopBoundaryTarget(virtualPage = 0, logicalPageCount = 3, loop = true))
+        assertEquals(1, launcherDockLoopBoundaryTarget(virtualPage = 4, logicalPageCount = 3, loop = true))
+        assertEquals(null, launcherDockLoopBoundaryTarget(virtualPage = 2, logicalPageCount = 3, loop = true))
+        assertEquals(null, launcherDockLoopBoundaryTarget(virtualPage = 0, logicalPageCount = 3, loop = false))
+    }
+    @Test
+    fun loopingAddsSentinelPagesAndMapsEdges() {
+        assertEquals(5, launcherDockVirtualPageCount(3, true))
+        assertEquals(1, launcherDockInitialVirtualPage(3, true))
+        assertEquals(2, launcherDockLogicalPage(0, 3, true))
+        assertEquals(0, launcherDockLogicalPage(4, 3, true))
+        assertEquals(3, launcherDockLoopBoundaryTarget(0, 3, true))
+        assertEquals(1, launcherDockLoopBoundaryTarget(4, 3, true))
+    }
+
+    @Test
+    fun loopingStaysInactiveForSinglePage() {
+        assertEquals(1, launcherDockVirtualPageCount(1, true))
+        assertEquals(0, launcherDockInitialVirtualPage(1, true))
+        assertEquals(0, launcherDockLogicalPage(0, 1, true))
+        assertEquals(null, launcherDockLoopBoundaryTarget(0, 1, true))
+    }
+
 }

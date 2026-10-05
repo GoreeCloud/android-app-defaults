@@ -18,7 +18,7 @@ The Dock must support more items than fit safely in one row. It must preserve th
 
 Multiple Dock pages are an approved capability. Dock-page navigation is independent from Home-page navigation. A typical organization may use separate Everyday, Productivity, and Media pages while retaining one ordered, persistent Dock collection.
 
-The user may choose a preferred items-per-page density. Device width, orientation, display posture, accessibility scale, and resolved minimum target size can reduce the effective number of visible slots so the interaction floor remains intact. Optional page looping remains a separately gated capability and must be predictable and accessible when implemented.
+The user may choose a preferred items-per-page density. Device width, orientation, display posture, accessibility scale, and resolved minimum target size can reduce the effective number of visible slots so the interaction floor remains intact. Optional page looping is user-controlled in the current Development candidate. It uses bounded virtual edge pages and returns immediately to the equivalent logical edge page after a completed swipe so the visible page order remains predictable.
 
 ## Applications, folders, shortcuts, and actions
 
@@ -75,9 +75,10 @@ Draft PR #239 implements the first adaptive paged-Dock tranche on authoritative 
 - unbounded ordered application Dock remains the workspace authority;
 - preferred 4/5/6/7 items-per-page density with automatic earlier paging when the interaction floor would be violated;
 - horizontally swipeable Dock pages independent from Home pages;
+- optional looping across the first/last Dock page, disabled by default;
 - compact page indicators and page accessibility state;
 - optional Dock labels;
-- optional direct Universal Search affordance;
+- optional direct Universal Search affordance that can keep the Dock visible even when it contains no app placements;
 - Clear, Glaze, Solid, Raised, and Edge material choices;
 - existing Home↔Dock drag/reorder, layout-lock, icon-mask, profile, and local persistence paths are retained;
 - focused page-planning and preference tests are included.
@@ -86,4 +87,4 @@ This checkpoint is Development source only until exact-head protected build/JVM/
 
 ## Remaining Dock work
 
-Dock folders and other non-app Dock item persistence; optional page looping; direct cross-page drag handoff while a drag is active; deeper Dock padding/edge-position controls; context-aware or suggested Dock content; Dock widgets; versioned portable backup/restore expansion; and complete representative-device accessibility, profile, performance/power, recovery, protected Development signing/update continuity, and release qualification remain planned or gated.
+Dock folders and other non-app Dock item persistence; direct cross-page drag handoff while a drag is active; deeper Dock padding/edge-position controls; context-aware or suggested Dock content; Dock widgets; versioned portable backup/restore expansion; and complete representative-device accessibility, profile, performance/power, recovery, protected Development signing/update continuity, and release qualification remain planned or gated.

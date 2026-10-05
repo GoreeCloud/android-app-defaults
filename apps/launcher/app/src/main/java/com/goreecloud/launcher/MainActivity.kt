@@ -1548,6 +1548,7 @@ class MainActivity : ComponentActivity() {
                             onSetHomeSpacing = launcherPreferencesRepository::setHomeSpacing,
                             onSetDockStyle = launcherPreferencesRepository::setDockStyle,
                             onSetDockPageSize = launcherPreferencesRepository::setDockPageSize,
+                            onSetDockLoopPages = launcherPreferencesRepository::setDockLoopPages,
                             onSetShowDockLabels = launcherPreferencesRepository::setShowDockLabels,
                             onSetShowDockSearch = launcherPreferencesRepository::setShowDockSearch,
                             onSetWallpaperShade = launcherPreferencesRepository::setWallpaperShade,

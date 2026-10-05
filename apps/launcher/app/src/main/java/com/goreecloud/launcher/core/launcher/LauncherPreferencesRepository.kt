@@ -309,6 +309,7 @@ data class LauncherExperiencePreferences(
     val homeSpacing: LauncherHomeSpacing = LauncherHomeSpacing.BALANCED,
     val dockStyle: LauncherDockStyle = LauncherDockStyle.GLASS,
     val dockPageSize: Int = 5,
+    val dockLoopPages: Boolean = false,
     val showDockLabels: Boolean = false,
     val showDockSearch: Boolean = false,
     val wallpaperShade: LauncherWallpaperShade = LauncherWallpaperShade.SOFT,
@@ -388,6 +389,7 @@ class LauncherPreferencesRepository(
         val homeSpacing = stringPreferencesKey("home_spacing")
         val dockStyle = stringPreferencesKey("dock_style")
         val dockPageSize = intPreferencesKey("dock_page_size_v1")
+        val dockLoopPages = booleanPreferencesKey("dock_loop_pages_v1")
         val showDockLabels = booleanPreferencesKey("show_dock_labels_v1")
         val showDockSearch = booleanPreferencesKey("show_dock_search_v1")
         val wallpaperShade = stringPreferencesKey("wallpaper_shade")
@@ -545,6 +547,7 @@ class LauncherPreferencesRepository(
                 homeSpacing = LauncherHomeSpacing.fromStorage(values[Keys.homeSpacing]),
                 dockStyle = LauncherDockStyle.fromStorage(values[Keys.dockStyle]),
                 dockPageSize = (values[Keys.dockPageSize] ?: 5).coerceIn(4, 7),
+                dockLoopPages = values[Keys.dockLoopPages] ?: false,
                 showDockLabels = values[Keys.showDockLabels] ?: false,
                 showDockSearch = values[Keys.showDockSearch] ?: false,
                 wallpaperShade = LauncherWallpaperShade.fromStorage(values[Keys.wallpaperShade]),
@@ -821,6 +824,14 @@ class LauncherPreferencesRepository(
         scope.launch {
             dataStore.edit { values ->
                 values[Keys.dockPageSize] = size.coerceIn(4, 7)
+            }
+        }
+    }
+
+    fun setDockLoopPages(loop: Boolean) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.dockLoopPages] = loop
             }
         }
     }
