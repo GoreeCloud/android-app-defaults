@@ -1134,6 +1134,26 @@ class LauncherPreferencesRepository(
         }
     }
 
+    fun moveDrawerTab(
+        tabId: String,
+        direction: LauncherDrawerTabMoveDirection,
+    ): Job {
+        if (tabId.isBlank()) return scope.launch { }
+        return scope.launch {
+            dataStore.edit { values ->
+                val current = LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs])
+                val updated = moveLauncherDrawerTab(
+                    tabs = current,
+                    tabId = tabId,
+                    direction = direction,
+                )
+                if (updated != current) {
+                    values[Keys.drawerTabs] = LauncherDrawerTabsCodec.encode(updated)
+                }
+            }
+        }
+    }
+
     fun deleteDrawerTab(tabId: String): Job {
         if (tabId.isBlank()) return scope.launch { }
         return scope.launch {
