@@ -3981,6 +3981,7 @@ private fun HomeFavoritesGrid(
     onSwipeUp: () -> Unit,
     onSwipeDown: () -> Unit,
     modifier: Modifier = Modifier,
+    labelColor: Color = Color.White,
 ) {
     val gridSpacing = when (spacing) {
         LauncherHomeSpacing.COMPACT -> 2.dp
@@ -5774,7 +5775,7 @@ private fun HomeFavoriteTile(
                             blurRadius = 5f,
                         ),
                     ),
-                    color = Color.White,
+                    color = labelColor,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -10499,7 +10500,9 @@ internal fun GlazeDock(
     var measuredBounds by remember { mutableStateOf<Rect?>(null) }
     val dockHovered = activeDrag != null &&
         dragPoint?.let { point -> measuredBounds?.contains(point) } == true
-    val dockHasSurface = style != LauncherDockStyle.CLEAR
+    // Clear may float directly on wallpaper in the normal case, but reduced-transparency or
+    // other accessibility policy can resolve it to a solid/raised material. Honor that fallback.
+    val dockHasSurface = style != LauncherDockStyle.CLEAR || solidResolved
     val border = when {
         dockHovered -> BorderStroke(
             2.dp,
@@ -10544,7 +10547,7 @@ internal fun GlazeDock(
                 .fillMaxWidth()
                 .height(
                     when {
-                        showLabels -> 98.dp
+                        showLabels -> 104.dp
                         style == LauncherDockStyle.EDGE -> 88.dp
                         else -> 84.dp
                     },
@@ -10624,9 +10627,11 @@ internal fun GlazeDock(
                         } else {
                             pageApps.forEach { app ->
                                 val appKey = app.workspaceKey()
+                                val tileHeight = if (showLabels) slotSize + 22.dp else slotSize
                                 Box(
                                     modifier = Modifier
-                                        .size(slotSize)
+                                        .width(slotSize)
+                                        .height(tileHeight)
                                         .onGloballyPositioned {
                                             if (pageIndex == pagerState.currentPage) {
                                                 dockItemBounds[appKey] = it.boundsInRoot()
@@ -10653,6 +10658,7 @@ internal fun GlazeDock(
                                         onSwipeUp = onSwipeUp,
                                         onSwipeDown = onSwipeDown,
                                         modifier = Modifier.fillMaxSize(),
+                                        labelColor = dockForeground,
                                     )
                                 }
                             }
@@ -10669,12 +10675,12 @@ internal fun GlazeDock(
                             .semantics { contentDescription = "Universal Search" }
                             .clickable(onClick = onOpenSearch),
                         shape = CircleShape,
-                        color = if (style == LauncherDockStyle.CLEAR) {
+                        color = if (style == LauncherDockStyle.CLEAR && !solidResolved) {
                             Color.Transparent
                         } else {
                             MaterialTheme.colorScheme.surface.copy(alpha = 0.30f)
                         },
-                        border = if (style == LauncherDockStyle.CLEAR) null else BorderStroke(
+                        border = if (style == LauncherDockStyle.CLEAR && !solidResolved) null else BorderStroke(
                             1.dp,
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                         ),
