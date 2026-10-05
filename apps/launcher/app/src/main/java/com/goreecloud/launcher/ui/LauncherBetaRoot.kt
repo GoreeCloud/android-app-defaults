@@ -12899,6 +12899,8 @@ private fun AppContextPopup(
     canMoveDrawerPinnedEarlier: Boolean,
     canMoveDrawerPinnedLater: Boolean,
     canResetDrawerPinnedOrder: Boolean,
+    canMoveDockEarlier: Boolean,
+    canMoveDockLater: Boolean,
     hiddenFromLauncher: Boolean,
     lockedByLauncher: Boolean,
     availableAndroidWidgets: List<LauncherWidgetProviderDescriptor>,
