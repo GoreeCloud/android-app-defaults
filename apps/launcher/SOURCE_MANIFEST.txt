@@ -263,6 +263,7 @@ docs/development/transition-performance.md
 docs/development/workspace-portable-snapshot.md
 docs/glaze-motion-evaluation.md
 docs/glaze-ui-adoption.md
+docs/home-dock.md
 docs/post-cutover-startup-recovery.md
 docs/primary-home-grid-migration-planning.md
 docs/product-identity.md
