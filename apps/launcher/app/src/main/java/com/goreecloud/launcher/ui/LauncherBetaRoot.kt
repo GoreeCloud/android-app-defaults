@@ -10682,6 +10682,7 @@ internal fun GlazeDock(
             val previousDockPageAvailable = loopingDockPages || logicalCurrentPage > 0
             val nextDockPageAvailable =
                 loopingDockPages || logicalCurrentPage < dockPages.lastIndex
+            val dragPageDirection = LauncherDockDragPageHandoff(activeDrag, dragPoint, pagerBounds, pagerState, previousDockPageAvailable, nextDockPageAvailable)
 
             Row(
                 modifier = Modifier
