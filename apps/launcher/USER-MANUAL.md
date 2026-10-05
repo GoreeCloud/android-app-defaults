@@ -61,7 +61,7 @@ The primary Home page remains the protected HOME rank-zero page. Under terminal 
 
 ### Built-in Launcher hints
 
-After startup, Launcher can show a short dismissible Home hint using the same compact visual language as onboarding: a gesture strip for **Apps**, **Search**, and **Edit Home**, followed by three short cues for precise placement, cross-page movement, and keeping pinned apps easy to reach. The hint remains instructional only; it does not change placement, provider, or gesture authority.
+After startup, Launcher can show a short dismissible Home hint using the same compact visual language as onboarding: a gesture strip for **Apps**, **Search**, and **Edit Home**, followed by four short cues for precise placement, cross-page movement, independent Dock-page navigation, and keeping pinned apps easy to reach. The hint remains instructional only; it does not change placement, provider, or gesture authority.
 
 You can disable hints during startup, dismiss the Home hint with **Got it**, and later turn **Launcher hints** back on from Launcher Settings. Use **Review Launcher setup → Open** to replay the three-step first-use guidance without clearing the Home layout, Search, appearance, or hint choices. Hint and setup-progress state stay local and are not telemetry.
 
@@ -259,7 +259,7 @@ The long-term Launcher product scope is substantially broader than the current D
 
 ## Home and organization
 
-Future Launcher releases are intended to support deeply customizable Home pages and grids, margins/padding, folders, shortcuts, widgets, multiple dock pages, page indicators, wallpaper behavior, precise placement, lock enforcement across all supported placeable item types, overlapping supported elements, and adaptive layouts for different form factors.
+Future Launcher releases are intended to deepen customizable Home pages and grids, margins/padding, Dock folders and other non-app Dock item types, shortcuts, widgets, richer page indicators, wallpaper behavior, precise placement, lock enforcement across all supported placeable item types, overlapping supported elements, and adaptive layouts for different form factors. Multiple application Dock pages are already present in the current Development candidate and are not listed here as future-only scope.
 
 ## Application drawer
 
