@@ -44,7 +44,7 @@ Future category work may add richer local classification when the source is tran
 
 Users can create named App Drawer tabs for collections such as Work, Games, Media, or Development.
 
-Current Development candidate behavior:
+Current Development behavior:
 
 - Up to eight device-local custom tabs.
 - Bounded names.
@@ -64,11 +64,11 @@ Drawer folders are supported as organizational entries and remain distinct from 
 
 Folder behavior must preserve profile boundaries, explicit user membership, predictable ordering, Glaze folder presentation, accessible open/manage behavior, and compatibility with Home/Dock placement rules.
 
-Smart folders remain future work unless explicitly backed by deterministic local rules and clear user control.
+Current Development includes the bounded local Smart Folder views described below; richer editable rule-based folders remain gated by deterministic local rules and clear user control.
 
 ## Smart folders
 
-Smart folders provide dynamic App Drawer collections without mutating manual folders, tabs, Home, or Dock placement. The current Development candidate derives bounded local-only **Pinned**, optional **Suggested**, **New**, and **Updated** smart folders from explicit pins, Launcher-local launch signals, and Android freshness metadata already used by Drawer discovery. Empty smart folders are omitted. Suggested smart-folder membership respects the existing Suggested apps control; when truthful usage does not exist, its membership uses the same deterministic A-Z fallback rather than fabricating behavior.
+Smart folders provide dynamic App Drawer collections without mutating manual folders, tabs, Home, or Dock placement. Current Development derives bounded local-only **Pinned**, optional **Suggested**, **New**, and **Updated** smart folders from explicit pins, Launcher-local launch signals, and Android freshness metadata already used by Drawer discovery. Empty smart folders are omitted. Suggested smart-folder membership respects the existing Suggested apps control; when truthful usage does not exist, its membership uses the same deterministic A-Z fallback rather than fabricating behavior.
 
 Smart folders are read-only dynamic views in this tranche. Manual override/exclusion rules, custom rule composition, persisted smart-folder ordering/naming, and portable recovery remain planned. Profile identity remains bounded by the currently selected Drawer profile, and unavailable non-primary update metadata continues to fail closed rather than borrowing another profile's state.
 
@@ -92,7 +92,7 @@ The Drawer separates User Apps and Work Apps when applicable. Organizational sta
 
 Local **Most recent** and **Most frequent** ordering use Launcher-local launch history only. Launcher does not request Android Usage Access for these sorts.
 
-The current Development continuation adds a compact discovery row:
+Current Development includes a compact discovery row:
 
 - **All** — the current profile/tab inventory.
 - **Pinned** — exact profile-qualified Launcher pins.
@@ -102,7 +102,7 @@ The current Development continuation adds a compact discovery row:
 
 For non-primary profiles, first-install time continues to come from profile-qualified LauncherActivityInfo. Android's public LauncherApps surface does not expose profile-qualified last-update time, so **Updated** currently fails closed for Work and other non-primary profiles instead of borrowing primary-user metadata for a same-package app. Primary-profile update time comes from PackageManager.
 
-Full Smart Folders remain future work. Any later rule-based folder membership must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable.
+The bounded **Pinned / Suggested / New / Updated** Smart Folder views above are implemented Development behavior. Richer editable rule-based membership remains future work and must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable.
 
 A fresh installation must not fabricate prior usage.
 
