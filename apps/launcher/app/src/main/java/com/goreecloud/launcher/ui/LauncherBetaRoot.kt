@@ -7098,7 +7098,7 @@ private fun AppDrawerSurface(
         localLaunchCounts,
         drawerFreshnessByAppKey,
         drawerFreshnessNowMillis,
-        experiencePreferences.showDrawerSuggestions,
+        experiencePreferences.useLocalUsageForSuggestions,
     ) {
         val availableKeys = selectedPage.items.mapTo(linkedSetOf()) { app -> app.workspaceKey() }
         LauncherDrawerSmartFolderPolicy.build(
@@ -7111,7 +7111,7 @@ private fun AppDrawerSurface(
             },
             freshnessByKey = drawerFreshnessByAppKey,
             nowMillis = drawerFreshnessNowMillis,
-            includeSuggested = experiencePreferences.showDrawerSuggestions,
+            includeSuggested = experiencePreferences.useLocalUsageForSuggestions,
         )
     }
     val selectedSmartFolder = remember(
@@ -7696,7 +7696,7 @@ private fun AppDrawerSurface(
                                     },
                                     freshnessByKey = drawerFreshnessByAppKey,
                                     nowMillis = drawerFreshnessNowMillis,
-                                    includeSuggested = experiencePreferences.showDrawerSuggestions,
+                                    includeSuggested = experiencePreferences.useLocalUsageForSuggestions,
                                 )
                             } else {
                                 emptyList()
