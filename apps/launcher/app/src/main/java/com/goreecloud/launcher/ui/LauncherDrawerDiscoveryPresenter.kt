@@ -28,7 +28,7 @@ internal fun LauncherDrawerDiscoveryFiltersRow(
                 onClick = { chooseFilter(filter) },
                 modifier = Modifier.heightIn(min = 48.dp),
             ) {
-                Text(if (selectedFilter == filter) "• " + filter.displayName else filter.displayName)
+                Text(if (selectedFilter == filter) filter.displayName.uppercase() else filter.displayName)
             }
         }
     }
