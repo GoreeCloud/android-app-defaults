@@ -4985,7 +4985,7 @@ class GalleryActivity : Activity() {
                     stateDescriptionText = if (hintsEnabled) "On" else "Off",
                 ) {
                     setupPreferences.setContextualHintsEnabled(!hintsEnabled)
-                    showSetupWizard(replay = replay, requestedStep = step)
+                    transitionSetupWizard(replay = replay, requestedStep = step)
                 },
             )
         }
@@ -5004,7 +5004,7 @@ class GalleryActivity : Activity() {
                     emphasized = false,
                 ) {
                     if (!replay) setupPreferences.setOnboardingStep(step - 1)
-                    showSetupWizard(replay = replay, requestedStep = step - 1)
+                    transitionSetupWizard(replay = replay, requestedStep = step - 1)
                 },
                 LinearLayout.LayoutParams(
                     dp(GalleryGlazeContract.GENERAL_TARGET_DP),
@@ -5048,7 +5048,7 @@ class GalleryActivity : Activity() {
                     renderCurrentDestination()
                 } else {
                     if (!replay) setupPreferences.setOnboardingStep(step + 1)
-                    showSetupWizard(replay = replay, requestedStep = step + 1)
+                    transitionSetupWizard(replay = replay, requestedStep = step + 1)
                 }
             },
             LinearLayout.LayoutParams(
@@ -5084,6 +5084,20 @@ class GalleryActivity : Activity() {
                 }
                 dialog.show()
             }
+    }
+
+    private fun transitionSetupWizard(
+        replay: Boolean,
+        requestedStep: Int,
+    ) {
+        val currentDialog = setupDialog
+        setupDialog = null
+        currentDialog?.dismiss()
+        rootFrame.post {
+            if (!isFinishing && !isDestroyed) {
+                showSetupWizard(replay = replay, requestedStep = requestedStep)
+            }
+        }
     }
 
     private fun dialogDismissAction(
