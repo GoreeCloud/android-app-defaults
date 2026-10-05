@@ -66,4 +66,61 @@ class LauncherDrawerTabsTest {
         assertEquals("First", decoded.single().name)
         assertEquals(setOf("a"), decoded.single().memberKeys)
     }
+    @Test
+    fun moveEarlierAndLaterPreserveTabContents() {
+        val tabs = listOf(
+            LauncherDrawerTab("one", "One", setOf("user:0/a/.Main")),
+            LauncherDrawerTab("two", "Two", setOf("user:0/b/.Main")),
+            LauncherDrawerTab("three", "Three", setOf("user:0/c/.Main")),
+        )
+
+        val earlier = moveLauncherDrawerTab(
+            tabs = tabs,
+            tabId = "two",
+            direction = LauncherDrawerTabMoveDirection.EARLIER,
+        )
+        assertEquals(listOf("two", "one", "three"), earlier.map { it.id })
+        assertEquals(setOf("user:0/b/.Main"), earlier.first().memberKeys)
+
+        val later = moveLauncherDrawerTab(
+            tabs = earlier,
+            tabId = "two",
+            direction = LauncherDrawerTabMoveDirection.LATER,
+        )
+        assertEquals(tabs, later)
+    }
+
+    @Test
+    fun moveAtBoundaryOrUnknownIdFailsClosed() {
+        val tabs = listOf(
+            LauncherDrawerTab("one", "One", emptySet()),
+            LauncherDrawerTab("two", "Two", emptySet()),
+        )
+
+        assertEquals(
+            tabs,
+            moveLauncherDrawerTab(
+                tabs,
+                "one",
+                LauncherDrawerTabMoveDirection.EARLIER,
+            ),
+        )
+        assertEquals(
+            tabs,
+            moveLauncherDrawerTab(
+                tabs,
+                "two",
+                LauncherDrawerTabMoveDirection.LATER,
+            ),
+        )
+        assertEquals(
+            tabs,
+            moveLauncherDrawerTab(
+                tabs,
+                "missing",
+                LauncherDrawerTabMoveDirection.EARLIER,
+            ),
+        )
+    }
+
 }
