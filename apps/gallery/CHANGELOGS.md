@@ -14,7 +14,7 @@
 
 ### Verification
 - Added/updated contract tests for Glaze V1.7 identity, bounded Development exclusions, adaptive width classes, media-grid sizing, view-density behavior, navigation geometry, and touch-target invariants.
-- The local CI-equivalent Android verification lane uses JDK 17, Gradle 8.14.3, Android API 36, unit tests, lint, and debug assembly. The monorepo Gallery APK transport identity gate now expects the 0.9.0-dev candidate instead of the superseded 0.8.12-dev identity. Exact final-candidate results are recorded separately from this changelog entry.
+- The local CI-equivalent Android verification lane uses JDK 17, Gradle 8.14.3, Android API 36, unit tests, lint, and debug assembly. The monorepo Gallery APK transport identity gate now expects the 0.9.0-dev candidate instead of the superseded 0.8.12-dev identity. The first-use runtime harness now marks setup explicitly incomplete so instrumentation update timestamps cannot suppress the setup dialog, and the protected promotion gate now requires Gallery Android 16 runtime instrumentation in addition to the native build lane. Exact final-candidate results are recorded separately from this changelog entry.
 
 ### Boundary
 This redesign is Development evidence, not Stable or production qualification. Representative-device rendered acceptance, TalkBack/switch/large-text review, reduced-motion/transparency behavior, tablet/foldable visual review, OEM/profile behavior, performance/power acceptance, signing/distribution, and production approval remain separate gates.

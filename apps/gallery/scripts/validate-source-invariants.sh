@@ -77,6 +77,13 @@ if [ "$#" -eq 0 ] && [ ! -d "$GALLERY_DIR" ] && [ ! -d "$COMMONS_DIR" ]; then
     fail 'Gallery native app unexpectedly requests network permission'
   fi
 
+  MONOREPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+  if [ -n "$MONOREPO_ROOT" ] && [ -f "$MONOREPO_ROOT/.github/workflows/protected-promotion-gate.yml" ]; then
+    grep -Fq '"Gallery Android 16 runtime instrumentation",' \
+      "$MONOREPO_ROOT/.github/workflows/protected-promotion-gate.yml" ||
+      fail 'protected promotion gate does not require Gallery Android 16 runtime instrumentation'
+  fi
+
   printf 'GoreeCloud Gallery 0.9 native source invariants passed.\n'
   exit 0
 fi

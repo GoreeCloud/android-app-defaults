@@ -31,7 +31,10 @@ class GalleryFirstUseRuntimeTest {
         )
         assertTrue(
             raw.edit()
-                .remove(GallerySetupPreferences.ONBOARDING_COMPLETE_KEY)
+                // Explicitly request the incomplete-setup state. Removing this key would invoke
+                // production upgrade detection, and instrumentation installs may legitimately
+                // report lastUpdateTime > firstInstallTime even on an otherwise clean emulator.
+                .putBoolean(GallerySetupPreferences.ONBOARDING_COMPLETE_KEY, false)
                 .remove(GallerySetupPreferences.ONBOARDING_STEP_KEY)
                 .remove(GallerySetupPreferences.CONTEXTUAL_HINTS_ENABLED_KEY)
                 .remove(GallerySetupPreferences.DISMISSED_CONTEXTUAL_HINTS_KEY)
