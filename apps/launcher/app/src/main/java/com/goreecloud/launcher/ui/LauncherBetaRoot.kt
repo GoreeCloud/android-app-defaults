@@ -10695,6 +10695,7 @@ internal fun GlazeDock(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .onGloballyPositioned { pagerBounds = it.boundsInRoot() }
                         .semantics {
                             stateDescription =
                                 "Dock page ${logicalCurrentPage + 1} of ${dockPages.size}"
