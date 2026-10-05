@@ -1653,6 +1653,12 @@ fun LauncherBetaRoot(
                 canResetDrawerPinnedOrder =
                     selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
                         drawerPinnedAppKeys.size > 1,
+                canMoveDockEarlier =
+                    selectedAppContextOrigin == LauncherAppContextOrigin.DOCK && dockIndex > 0,
+                canMoveDockLater =
+                    selectedAppContextOrigin == LauncherAppContextOrigin.DOCK &&
+                        dockIndex >= 0 &&
+                        dockIndex < workspace.dockKeys.lastIndex,
                 hiddenFromLauncher = appKey in hiddenAppKeys,
                 lockedByLauncher = appKey in lockedAppKeys,
                 availableAndroidWidgets = availableAndroidWidgets,
