@@ -9,6 +9,30 @@ data class LauncherDrawerTab(
     val memberKeys: Set<String>,
 )
 
+internal enum class LauncherDrawerTabMoveDirection {
+    EARLIER,
+    LATER,
+}
+
+internal fun moveLauncherDrawerTab(
+    tabs: List<LauncherDrawerTab>,
+    tabId: String,
+    direction: LauncherDrawerTabMoveDirection,
+): List<LauncherDrawerTab> {
+    val index = tabs.indexOfFirst { it.id == tabId }
+    if (index < 0) return tabs
+    val target = when (direction) {
+        LauncherDrawerTabMoveDirection.EARLIER -> index - 1
+        LauncherDrawerTabMoveDirection.LATER -> index + 1
+    }
+    if (target !in tabs.indices) return tabs
+
+    return tabs.toMutableList().apply {
+        val moved = removeAt(index)
+        add(target, moved)
+    }
+}
+
 internal object LauncherDrawerTabsCodec {
     private const val VERSION = "v1"
     const val MAX_TABS = 8
