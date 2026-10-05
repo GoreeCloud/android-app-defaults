@@ -1,5 +1,13 @@
 # GoreeCloud Launcher — Planned Features
 
+## October 4, 2026 — expanded Home Dock scope
+
+Requirement level: Mandatory product direction.
+
+The Home Dock is planned as a persistent personal favorites surface rather than a fixed five-app row. Current scope includes expandable capacity, horizontal overflow, optional Dock pages, independent Dock navigation, app and folder placement, direct Home/Dock/App Drawer drag-and-drop, 48 dp minimum interaction targets, normalized icon geometry, optional labels and notification badges, profile-aware identities, layout-lock protection, Launcher Universal Search access, Glaze/clear/solid/raised/edge presentation, accessibility, local-first persistence, and backup/restore compatibility.
+
+The familiar Phone, Messages, Email/Mail, Browser, and Camera selection remains the starter configuration only; it is not a capacity limit. Dock-page assignment, Dock folders, accessible cross-page movement, representative-device adaptive layout, and continuity acceptance remain open until implemented and verified.
+
 ## October 3, 2026 — App Lock acceptance and portability remain
 
 The active Development candidate contains Launcher-managed App Lock for exact profile-qualified app identities, including searchable **All / Locked** management, app-context controls, locked-state indicators in Apps, setup discoverability, and Android-authenticated Launcher-originated app/shortcut launches.
