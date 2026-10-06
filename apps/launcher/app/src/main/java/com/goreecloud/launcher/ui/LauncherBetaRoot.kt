@@ -1437,7 +1437,7 @@ fun LauncherBetaRoot(
                                 .padding(bottom = 2.dp),
                         ) {
                             EditableHomeDock(
-                            apps = rootDockApps,
+                                apps = rootDockApps,
                             iconScale = preferences.iconScale,
                             style = experiencePreferences.dockStyle,
                             pageSize = experiencePreferences.dockPageSize,
@@ -1466,64 +1466,16 @@ fun LauncherBetaRoot(
                                 drawerSearchRequested = false
                                 surfaceModeName = LauncherSurfaceMode.SEARCH.name
                             },
-                            onSwipeUp = {
-                                dispatchLauncherHomeGestureAction(
-                                    action = experiencePreferences.swipeUpAction,
-                                    appsByKey = rootAppsByKey,
-                                    onOpenApps = {
-                                        drawerSearchRequested =
-                                            experiencePreferences.drawerSearchPlacement !=
-                                                LauncherDrawerSearchPlacement.OFF &&
-                                                experiencePreferences.drawerEntryMode ==
-                                                LauncherDrawerEntryMode.SEARCH_FIRST
-                                        surfaceModeName = LauncherSurfaceMode.DRAWER.name
-                                    },
-                                    onOpenSearch = {
-                                        drawerSearchRequested = false
-                                        surfaceModeName = LauncherSurfaceMode.SEARCH.name
-                                    },
-                                    onOpenHomeEditor = {
-                                        if (selectedSecondaryPage != null) {
-                                            onSelectHomePage(WorkspaceLegacyImportMapper.HOME_PAGE_ID)
-                                        }
-                                        homeEditorRequestSequence += 1L
-                                    },
-                                    onOpenWallpaperPicker = onOpenWallpaperPicker,
-                                    onOpenThemeManager = {
-                                        surfaceModeName = LauncherSurfaceMode.THEME_MANAGER.name
-                                    },
-                                    onLaunchApp = onLaunchApp,
-                                )
-                            },
-                            onSwipeDown = {
-                                dispatchLauncherHomeGestureAction(
-                                    action = experiencePreferences.swipeDownAction,
-                                    appsByKey = rootAppsByKey,
-                                    onOpenApps = {
-                                        drawerSearchRequested =
-                                            experiencePreferences.drawerSearchPlacement !=
-                                                LauncherDrawerSearchPlacement.OFF &&
-                                                experiencePreferences.drawerEntryMode ==
-                                                LauncherDrawerEntryMode.SEARCH_FIRST
-                                        surfaceModeName = LauncherSurfaceMode.DRAWER.name
-                                    },
-                                    onOpenSearch = {
-                                        drawerSearchRequested = false
-                                        surfaceModeName = LauncherSurfaceMode.SEARCH.name
-                                    },
-                                    onOpenHomeEditor = {
-                                        if (selectedSecondaryPage != null) {
-                                            onSelectHomePage(WorkspaceLegacyImportMapper.HOME_PAGE_ID)
-                                        }
-                                        homeEditorRequestSequence += 1L
-                                    },
-                                    onOpenWallpaperPicker = onOpenWallpaperPicker,
-                                    onOpenThemeManager = {
-                                        surfaceModeName = LauncherSurfaceMode.THEME_MANAGER.name
-                                    },
-                                    onLaunchApp = onLaunchApp,
-                                )
-                            },
+                                onSwipeUp = {
+                                    dispatchPagerBoundaryGesture(
+                                        experiencePreferences.swipeUpAction,
+                                    )
+                                },
+                                onSwipeDown = {
+                                    dispatchPagerBoundaryGesture(
+                                        experiencePreferences.swipeDownAction,
+                                    )
+                                },
                             )
                         }
                     }
