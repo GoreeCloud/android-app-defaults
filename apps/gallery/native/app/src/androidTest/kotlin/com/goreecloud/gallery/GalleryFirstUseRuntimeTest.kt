@@ -1,5 +1,6 @@
 package com.goreecloud.gallery
 
+import android.os.SystemClock
 import android.widget.ImageView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -47,14 +48,14 @@ class GalleryFirstUseRuntimeTest {
                 .inRoot(isDialog())
                 .check(matches(isAssignableFrom(ImageView::class.java)))
                 .perform(click())
-            onView(withText("You control media access")).inRoot(isDialog()).check(matches(isDisplayed()))
+            waitForDialogText("You control media access")
 
             scenario.recreate()
+            waitForDialogText("You control media access")
             onView(withText("Set up Gallery")).inRoot(isDialog()).check(matches(isDisplayed()))
-            onView(withText("You control media access")).inRoot(isDialog()).check(matches(isDisplayed()))
 
             onView(withContentDescription("Continue Gallery setup")).inRoot(isDialog()).perform(click())
-            onView(withText("Choose your guidance")).inRoot(isDialog()).check(matches(isDisplayed()))
+            waitForDialogText("Choose your guidance")
             onView(withContentDescription(containsString("Contextual hints."))).inRoot(isDialog()).perform(click())
             onView(withContentDescription("Finish Gallery setup")).inRoot(isDialog()).perform(click())
 
@@ -83,5 +84,35 @@ class GalleryFirstUseRuntimeTest {
             onView(withContentDescription("Return to Gallery")).inRoot(isDialog()).perform(click())
             onView(withText("Review Gallery setup")).check(doesNotExist())
         }
+    }
+
+    private fun waitForDialogText(
+        expected: String,
+        timeoutMillis: Long = 3_000L,
+    ) {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val deadline = SystemClock.uptimeMillis() + timeoutMillis
+        var lastFailure: Throwable? = null
+
+        while (SystemClock.uptimeMillis() < deadline) {
+            try {
+                onView(withText(expected))
+                    .inRoot(isDialog())
+                    .check(matches(isDisplayed()))
+                return
+            } catch (failure: AssertionError) {
+                lastFailure = failure
+            } catch (failure: RuntimeException) {
+                lastFailure = failure
+            }
+
+            instrumentation.waitForIdleSync()
+            SystemClock.sleep(100)
+        }
+
+        throw AssertionError(
+            "Timed out waiting for Gallery setup dialog text: $expected",
+            lastFailure,
+        )
     }
 }
