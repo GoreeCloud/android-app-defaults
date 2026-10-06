@@ -321,8 +321,8 @@ internal fun LauncherProviderControlledSearchSurface(
         complete = true
     }
 
-    // Search remains a light floating overlay above the Launcher wallpaper. Current connected
-    // providers stay tap-only; future reviewed remote-inline providers require explicit opt-in.
+    // Search remains a light floating overlay above the Launcher wallpaper. Remote-inline
+    // providers remain explicit opt-in sources and never receive typed queries while disabled.
     Column(
         modifier = Modifier.fillMaxSize()
             .safeDrawingPadding()
@@ -3501,6 +3501,7 @@ private fun sourceSectionFor(
     LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID,
     -> LauncherSearchSourceSection.CONNECTED
 
     else -> LauncherSearchSourceSection.DEVICE
@@ -3529,6 +3530,7 @@ private fun compactSourceSummary(
     LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID,
     -> if (LauncherConnectedSearchCredentialStore.isConfigured(context, option.providerId)) {
         "AI · Connected"
     } else {
@@ -3570,6 +3572,7 @@ private fun connectedSourceDetail(
     LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID,
     -> if (LauncherConnectedSearchCredentialStore.isConfigured(context, option.providerId)) {
         "Inline answers are opt-in. While this source is enabled, Launcher sends the typed query " +
             "to this provider using the API key stored in Android Keystore-backed, no-backup app " +
