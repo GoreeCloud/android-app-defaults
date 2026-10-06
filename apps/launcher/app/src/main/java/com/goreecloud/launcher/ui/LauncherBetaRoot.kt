@@ -7190,7 +7190,7 @@ private fun AppDrawerSurface(
         localLaunchCounts,
         drawerFreshnessByAppKey,
         drawerFreshnessNowMillis,
-        experiencePreferences.useLocalUsageForSuggestions,
+        experiencePreferences.showDrawerSuggestions,
         smartFolderExclusions,
     ) {
         val availableKeys = selectedPage.items.mapTo(linkedSetOf()) { app -> app.workspaceKey() }
