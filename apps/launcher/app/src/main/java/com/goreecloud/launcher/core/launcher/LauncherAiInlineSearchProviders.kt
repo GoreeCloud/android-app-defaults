@@ -276,6 +276,7 @@ internal class LauncherOpenAiResponsesTransport :
     override fun buildRequest(rawQuery: String): JSONObject =
         JSONObject()
             .put("model", "chat-latest")
+            .put("instructions", "Answer the Launcher Universal Search query directly and concisely. Return plain text only.")
             .put("input", rawQuery)
             .put("max_output_tokens", 160)
             .put("store", false)
@@ -338,6 +339,7 @@ internal class LauncherPerplexityAgentTransport :
     override fun buildRequest(rawQuery: String): JSONObject =
         JSONObject()
             .put("preset", "fast")
+            .put("instructions", "Answer the Launcher Universal Search query directly and concisely. Return plain text only.")
             .put("input", rawQuery)
 
     override fun applyAuthentication(
