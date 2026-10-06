@@ -1897,6 +1897,7 @@ class GalleryActivity : Activity() {
         val isPinned = albumId != null && albumId in settings.pinnedAlbumIds
         val renameSource = if (
             albumId != null &&
+            AndroidMediaMoveRequests.isSupported() &&
             !GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())
         ) {
             GalleryAlbumRenamePolicy.sourceForAlbum(authorizedItems, albumId)
@@ -1950,6 +1951,14 @@ class GalleryActivity : Activity() {
 
     private fun showAlbumRenameDialog(album: AlbumPresentation) {
         val albumId = album.id ?: return
+        if (!AndroidMediaMoveRequests.isSupported()) {
+            Toast.makeText(
+                this,
+                "Album rename requires Android 11 or newer in this Development build.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
         if (GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())) {
             Toast.makeText(
                 this,
