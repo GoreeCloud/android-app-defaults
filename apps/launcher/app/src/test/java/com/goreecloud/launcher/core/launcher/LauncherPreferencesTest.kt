@@ -131,6 +131,15 @@ class LauncherPreferencesTest {
             )
             assertEquals(null, repository.drawerPosition.first())
 
+            repository.setDrawerPosition(
+                LauncherDrawerPosition(
+                    contextKey = "WORK|LIST|SCROLL|ALPHABETICAL|ALL||5|5",
+                    itemIndex = 9,
+                    itemScrollOffset = 13,
+                ),
+            )
+            assertEquals(null, repository.drawerPosition.first())
+
             repository.setRememberDrawerPosition(true)
             assertEquals(
                 true,
