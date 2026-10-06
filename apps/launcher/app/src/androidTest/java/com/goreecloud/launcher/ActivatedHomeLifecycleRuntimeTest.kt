@@ -2411,45 +2411,47 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
-        // RoleManager can transiently report this package as HOME while a preceding test's
-        // remove-role-holder transition is still settling back to Quickstep. Reassert the
-        // desired holder idempotently before each HOME-dependent case, then let the caller's
-        // pre-test ownership snapshot decide whether teardown removes it.
-        dispatchShellCommandSilenced(
-            "cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        mutateHomeRoleAndAwait(
+            roleManager = roleManager,
+            packageName = packageName,
+            shouldBeHeld = true,
         )
-        withTimeout(10_000) {
-            while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
-            }
-        }
     }
 
     private suspend fun removeHomeRoleAndAwait(
         roleManager: RoleManager,
         packageName: String,
     ) {
-        dispatchShellCommandSilenced(
-            "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        mutateHomeRoleAndAwait(
+            roleManager = roleManager,
+            packageName = packageName,
+            shouldBeHeld = false,
         )
-        withTimeout(10_000) {
-            while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
-            }
-        }
     }
 
-    private fun dispatchShellCommandSilenced(command: String) {
-        // UiAutomation shell execution is asynchronous. Do not wait for EOF on role mutations:
-        // Android can keep that pipe open while the role service settles. Redirect command output
-        // away from the instrumentation pipe, close our read descriptor immediately, and let the
-        // bounded RoleManager polling above remain the authority for mutation completion. Unlike
-        // the old trailing '&' workaround, this does not create a second detached shell job that
-        // can race the next test's add/remove operation.
-        InstrumentationRegistry.getInstrumentation()
+    private suspend fun mutateHomeRoleAndAwait(
+        roleManager: RoleManager,
+        packageName: String,
+        shouldBeHeld: Boolean,
+    ) {
+        val operation = if (shouldBeHeld) "add-role-holder" else "remove-role-holder"
+        // UiAutomation shell execution is asynchronous. Keep the command descriptor alive while
+        // RoleManager is the bounded authority for mutation completion; closing it immediately can
+        // cancel the command before Android commits the HOME-role transition.
+        val descriptor = InstrumentationRegistry.getInstrumentation()
             .uiAutomation
-            .executeShellCommand("($command) >/dev/null 2>&1")
-            .close()
+            .executeShellCommand(
+                "cmd role $operation ${RoleManager.ROLE_HOME} $packageName >/dev/null 2>&1",
+            )
+        try {
+            withTimeout(10_000) {
+                while (roleManager.isRoleHeld(RoleManager.ROLE_HOME) != shouldBeHeld) {
+                    delay(100)
+                }
+            }
+        } finally {
+            descriptor.close()
+        }
     }
 
     private fun runShellCommand(command: String) {
