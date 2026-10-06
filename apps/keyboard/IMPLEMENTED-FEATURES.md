@@ -1,5 +1,9 @@
 # GoreeCloud Keyboard — Implemented Features
 
+## October 6, 2026 — adaptive constrained-height row gaps
+
+Development candidate source now computes inter-row spacing from the actual key-row area instead of always reserving the full fixed gap. When host height is constrained, whitespace compresses before key rows fall below the active Glaze interaction floor, including Touch Assistance. The policy is presentation-only and preserves the existing suggestion, toolbar, one-handed, touch/accessibility, editor, clipboard, learning, and network authority boundaries. Exact-head protected validation is still required before integration.
+
 ## October 2, 2026 — English (US) and Arabic subtype foundation
 
 Protected PR #185 integrated a first-party Arabic IME subtype alongside English (US). Android's explicitly selected IME subtype is the sole language authority. Arabic selection renders Arabic letter rows, Arabic-Indic digits, RTL language metadata, an Arabic spacebar label, and no case-shift key. English-only local correction, prediction, swipe-dictionary decoding, and learning capture fail closed while Arabic is active instead of applying English models to Arabic input.

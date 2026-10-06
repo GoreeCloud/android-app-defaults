@@ -1,5 +1,16 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 6, 2026 — adaptive constrained-height row-gap candidate
+
+- Replaced unconditional fixed inter-row gap reservation with a bounded adaptive gap policy driven by the actual vertical area available to key rows.
+- Under constrained IME height, row whitespace compresses toward zero before keys surrender space that can preserve the active Glaze interaction floor, including Touch Assistance.
+- Toolbar, suggestion strip, system-inset, one-handed geometry, and editor authority remain owned by the existing rendered Keyboard surface.
+- Added focused JVM coverage for Touch Assistance compression, ordinary maximum spacing, and degenerate geometry.
+- No typed-content, learning, clipboard, network, account, telemetry, or synchronization authority is added.
+
+This remains a Development candidate pending exact-head CI plus representative-device constrained-height, landscape, large-text, TalkBack/Switch Access, OEM/editor-host, and one-handed coexistence acceptance.
+
+
 ## October 5/6, 2026 — one-handed side-switch continuation
 
 - Added a 48 dp side-switch control inside the otherwise reserved one-handed gutter whenever Left or Right mode is active.
