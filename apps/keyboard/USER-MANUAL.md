@@ -178,7 +178,8 @@ In this Development candidate, **Settings → One-handed layout** offers **Off**
 - **Left** brings the keys toward the left edge and leaves extra space on the right.
 - **Right** brings the keys toward the right edge and leaves extra space on the left.
 - The suggestion strip and utility toolbar stay full width so predictions, Clipboard, Emoji, and Settings remain in stable positions.
-- The same rendered key bounds are used for tapping, accessibility targets, long-press alternates, and local swipe geometry.
+- While **Left** or **Right** is active, the empty opposite-side gutter contains a 48 dp arrow control that moves the key rows to the other edge without opening Settings. The control is hidden when there is not enough room to preserve the interaction floor.
+- The same rendered key bounds are used for tapping, accessibility targets, long-press alternates, the side-switch control, and local swipe geometry.
 
 The preference is device-local and is not included in the current narrow portable-preference export. Representative-device reachability, RTL/Arabic, accessibility, orientation, tablet/foldable, and release acceptance remain open.
 
