@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -62,6 +63,7 @@ class LauncherVisualPreferencesRepository(
 
     private object Keys {
         val starterDockSize = intPreferencesKey("starter_dock_size_v1")
+        val drawerAlphabetIndex = booleanPreferencesKey("drawer_alphabet_index_v1")
         val homePageTransition = stringPreferencesKey("home_page_transition_v1")
         val drawerHeaderPresentation = stringPreferencesKey("drawer_header_presentation_v1")
     }
