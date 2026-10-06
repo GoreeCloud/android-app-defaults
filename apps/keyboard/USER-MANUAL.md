@@ -26,6 +26,7 @@ The keyboard opens in its **letters** layer.
 - Tap **⌫** to delete the preceding text unit supported by the current deletion model.
 - Tap the direct **,** and **.** keys for common punctuation.
 - Tap the **English (US)** spacebar to insert a space.
+- In eligible ordinary text fields, drag horizontally from the Space key to move the text cursor without reading surrounding editor text. Cursor dragging is disabled when **Spacebar cursor control** is off, in sensitive/password editors, in the Emoji layer, and while Android touch exploration is active. Vertical or ambiguous drags fail closed rather than becoming cursor movement.
 - Tap **↵** to send the Android Enter key action to the active editor.
 
 Backspace and Enter use first-party vector-style icons rather than generic text glyphs in the current Development candidate. Tap Backspace for one immediate deletion, or hold it to continue deleting at a controlled repeat rate until you lift your finger; dragging off the key cancels the repeat.
