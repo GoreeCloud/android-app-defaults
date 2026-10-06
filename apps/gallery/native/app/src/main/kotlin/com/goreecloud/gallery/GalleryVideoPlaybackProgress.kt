@@ -27,6 +27,18 @@ data class GalleryVideoPlaybackProgress private constructor(
     fun seek(requestedMillis: Long): GalleryVideoPlaybackProgress =
         copy(positionMillis = seekTarget(requestedMillis))
 
+    fun relativeSeekTarget(deltaMillis: Long): Long {
+        val requested = try {
+            Math.addExact(positionMillis, deltaMillis)
+        } catch (_: ArithmeticException) {
+            if (deltaMillis < 0) 0L else Long.MAX_VALUE
+        }
+        return seekTarget(requested.coerceAtLeast(0L))
+    }
+
+    fun seekBy(deltaMillis: Long): GalleryVideoPlaybackProgress =
+        copy(positionMillis = relativeSeekTarget(deltaMillis))
+
     fun observe(
         observedPositionMillis: Long,
         observedDurationMillis: Long? = null,
