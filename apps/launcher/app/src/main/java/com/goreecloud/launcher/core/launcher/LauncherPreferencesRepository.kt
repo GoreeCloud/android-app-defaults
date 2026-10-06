@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 
 private val Context.launcherPreferencesStore by preferencesDataStore(name = "launcher_preferences")
 
@@ -471,6 +472,7 @@ class LauncherPreferencesRepository(
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val drawerPositionWriteEpoch = AtomicLong(0L)
     val defaults = LauncherPreferences()
 
     val preferences: Flow<LauncherPreferences> = dataStore.data
@@ -838,8 +840,9 @@ class LauncherPreferencesRepository(
         }
     }
 
-    fun setRememberDrawerPosition(enabled: Boolean) {
-        scope.launch {
+    fun setRememberDrawerPosition(enabled: Boolean): Job {
+        drawerPositionWriteEpoch.incrementAndGet()
+        return scope.launch {
             dataStore.edit { values ->
                 values[Keys.rememberDrawerPosition] = enabled
                 if (!enabled) {
@@ -849,18 +852,21 @@ class LauncherPreferencesRepository(
         }
     }
 
-    fun setDrawerPosition(position: LauncherDrawerPosition?) {
-        scope.launch {
+    fun setDrawerPosition(position: LauncherDrawerPosition?): Job {
+        val writeEpoch = drawerPositionWriteEpoch.get()
+        return scope.launch {
             dataStore.edit { values ->
                 val rememberPosition = values[Keys.rememberDrawerPosition] ?: true
                 val normalized = position?.sanitized()
-                if (!rememberPosition || normalized == null) {
-                    clearDrawerPosition(values)
-                } else {
-                    values[Keys.drawerPositionContext] = normalized.contextKey
-                    values[Keys.drawerPositionItemIndex] = normalized.itemIndex
-                    values[Keys.drawerPositionItemOffset] = normalized.itemScrollOffset
-                    values[Keys.drawerPositionPage] = normalized.page
+                when {
+                    !rememberPosition || normalized == null -> clearDrawerPosition(values)
+                    writeEpoch != drawerPositionWriteEpoch.get() -> Unit
+                    else -> {
+                        values[Keys.drawerPositionContext] = normalized.contextKey
+                        values[Keys.drawerPositionItemIndex] = normalized.itemIndex
+                        values[Keys.drawerPositionItemOffset] = normalized.itemScrollOffset
+                        values[Keys.drawerPositionPage] = normalized.page
+                    }
                 }
             }
         }
