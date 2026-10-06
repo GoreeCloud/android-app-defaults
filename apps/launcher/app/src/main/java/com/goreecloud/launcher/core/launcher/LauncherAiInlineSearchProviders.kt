@@ -339,6 +339,49 @@ internal class LauncherPerplexityAgentTransport :
     }
 }
 
+internal class LauncherGeminiGenerateContentTransport :
+    LauncherBoundedJsonHttpTransport(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+    ) {
+    override fun buildRequest(rawQuery: String): JSONObject =
+        JSONObject()
+            .put(
+                "contents",
+                JSONArray().put(
+                    JSONObject()
+                        .put("role", "user")
+                        .put(
+                            "parts",
+                            JSONArray().put(JSONObject().put("text", rawQuery)),
+                        ),
+                ),
+            )
+            .put(
+                "generationConfig",
+                JSONObject().put("maxOutputTokens", 256),
+            )
+
+    override fun applyAuthentication(
+        connection: HttpURLConnection,
+        credential: String,
+    ) {
+        connection.setRequestProperty("x-goog-api-key", credential)
+    }
+
+    override fun parseAnswer(body: JSONObject): String {
+        val candidate = body.optJSONArray("candidates")?.optJSONObject(0) ?: return ""
+        val parts = candidate.optJSONObject("content")?.optJSONArray("parts") ?: return ""
+        return buildString {
+            for (index in 0 until parts.length()) {
+                val text = parts.optJSONObject(index)?.optString("text").orEmpty().trim()
+                if (text.isBlank()) continue
+                if (isNotEmpty()) append(' ')
+                append(text)
+            }
+        }
+    }
+}
+
 internal fun parseResponseStyleOutputText(body: JSONObject): String {
     val output = body.optJSONArray("output") ?: return ""
     return buildString {
