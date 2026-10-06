@@ -1,5 +1,17 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 6, 2026 — spacebar cursor sensitive-editor guard candidate
+
+- Centralized cursor-control eligibility behind a fail-closed policy using only the existing device setting, editor sensitivity classification, Keyboard layer, and Android touch-exploration state.
+- Sensitive/password editors now disable Spacebar cursor dragging even when the device setting is enabled; ordinary Space taps remain on the normal key path.
+- Added a second eligibility check immediately before bounded DPAD cursor emission so a mid-gesture editor/presentation transition cannot widen authority.
+- Emoji-layer and touch-exploration suppression remain unchanged.
+- The change reads no surrounding editor text, clipboard content, app identity, or network data and adds no persistence, telemetry, permission, or synchronization authority.
+- Added focused JVM coverage for ordinary, disabled-setting, sensitive-editor, Emoji-layer, and touch-exploration eligibility.
+
+This remains a Development acceptance/hardening candidate pending exact-head protected CI and representative physical-device editor/OEM, RTL/BiDi, accessibility, and latency acceptance.
+
+
 ## October 6, 2026 — adaptive constrained-height row-gap candidate
 
 - Replaced unconditional fixed inter-row gap reservation with a bounded adaptive gap policy driven by the actual vertical area available to key rows.
