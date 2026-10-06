@@ -42,11 +42,11 @@ The first-use setup also uses icon-first navigation controls with a visible thre
 
 Settings groups related rows inside shared section surfaces instead of placing every preference in its own card. Choices show a compact value/chevron, booleans use vector switch glyphs, and TalkBack/state semantics announce current values. Empty Photos, Albums, Videos, search results, and Trash states use lightweight semantic icon treatment without oversized full-width cards.
 
-- Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale.
+- Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale. On hardware keyboards, Left/PageUp goes to the previous item, Right/PageDown goes to the next item, Space or media play/pause controls video/slideshow playback, F toggles Favorite, and Escape closes the viewer. Ctrl/Command/Alt-modified chords are not claimed by this candidate.
 - For photos, use the viewer's view-options control for **Fit entire photo**, **Fill viewer**, or **Zoom 2×**. You can also pinch from 1× up to 4×; while zoomed, drag the photo to pan. Item-navigation swipes are disabled while zoomed so a pan does not change photos. Choose **Reset zoom** or navigate to another item to return to baseline zoom.
 - Share hands the current content URI to Android with a read-only URI grant.
 - Favorite/Unfavorite changes Gallery's device-local Favorites state.
-- More displays available media details.
+- More always keeps Details and, when backed by the current Android-authorized snapshot, may also offer **Open containing album**, **Open Favorites**, or image-only **Set photo as…**. Album/Favorites actions are rechecked when tapped; Set photo as hands only a still-authorized `content://media` image URI to Android with a read grant.
 - Delete on Android 11+ routes through Android's system-owned Trash or permanent-delete confirmation according to the current setting.
 - Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled. In the editor, Cancel/Save, Rotate left/right, Flip, and Reset are icon controls, while **Original**, **1:1**, **4:3**, and **16:9** remain short textual crop presets because the ratio is the value being chosen.
 - The slideshow control changes between slideshow and pause glyphs while retaining an accessibility label; repeat uses a selected state instead of adding a text checkmark. The photo-only slideshow uses the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.

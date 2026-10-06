@@ -28,6 +28,7 @@ import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -132,6 +133,7 @@ class GalleryActivity : Activity() {
     private var viewerOverlay: View? = null
     private var viewerVideoSurface: GalleryVideoPlayerSurface? = null
     private var viewerSlideshowStop: (() -> Unit)? = null
+    private var viewerKeyboardAction: ((GalleryViewerKeyboardAction) -> Boolean)? = null
     private var pendingMediaMutation: AndroidMediaMutationPendingState? = null
     private var pendingMediaMove: AndroidMediaMovePendingState? = null
     private var pendingMediaMovePurpose = MediaMovePurpose.MOVE
@@ -193,6 +195,21 @@ class GalleryActivity : Activity() {
                 }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.repeatCount == 0 && viewerOverlay != null) {
+            val action = GalleryViewerKeyboardPolicy.actionFor(
+                keyCode = keyCode,
+                ctrlPressed = event.isCtrlPressed,
+                metaPressed = event.isMetaPressed,
+                altPressed = event.isAltPressed,
+            )
+            if (action != null && viewerKeyboardAction?.invoke(action) == true) {
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -4071,6 +4088,7 @@ class GalleryActivity : Activity() {
             stop()
         }
         viewerVideoSurface = null
+        viewerKeyboardAction = null
         viewerOverlay?.let { rootFrame.removeView(it) }
         viewerOverlay = null
         clearSelection(render = false)
@@ -4105,6 +4123,7 @@ class GalleryActivity : Activity() {
         clearSelection(render = false)
         viewerSlideshowStop?.invoke()
         viewerSlideshowStop = null
+        viewerKeyboardAction = null
         viewerOverlay?.let { rootFrame.removeView(it) }
         navigationCapsule.visibility = View.GONE
         selectionActionCapsule.visibility = View.GONE
@@ -4668,6 +4687,39 @@ class GalleryActivity : Activity() {
             }
         }
 
+        viewerKeyboardAction = { action ->
+            when (action) {
+                GalleryViewerKeyboardAction.PREVIOUS -> {
+                    if (!previous.isEnabled) false else {
+                        previous.performClick()
+                        true
+                    }
+                }
+                GalleryViewerKeyboardAction.NEXT -> {
+                    if (!next.isEnabled) false else {
+                        next.performClick()
+                        true
+                    }
+                }
+                GalleryViewerKeyboardAction.TOGGLE_PLAYBACK -> {
+                    if (videoSurface.visibility == View.VISIBLE && playbackToggle.visibility == View.VISIBLE) {
+                        playbackToggle.performClick()
+                    } else {
+                        slideshow.performClick()
+                    }
+                    true
+                }
+                GalleryViewerKeyboardAction.TOGGLE_FAVORITE -> {
+                    favorite.performClick()
+                    true
+                }
+                GalleryViewerKeyboardAction.CLOSE -> {
+                    closeAuthorizedViewer()
+                    true
+                }
+            }
+        }
+
         val scaleGestureDetector = ScaleGestureDetector(
             this,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -4810,15 +4862,115 @@ class GalleryActivity : Activity() {
         }
         more.setOnClickListener {
             val item = items.getOrNull(currentIndex) ?: return@setOnClickListener
-            showItemDetails(item)
+            showViewerMoreMenu(more, item)
         }
 
         renderCurrentItem()
     }
 
+    private fun showViewerMoreMenu(anchor: View, item: MediaItem) {
+        val menuState = GalleryViewerMoreMenuPolicy.state(
+            currentContentUri = item.contentUri,
+            currentAlbumId = item.albumId,
+            currentMimeType = item.mimeType,
+            authorizedContentUris = authorizedItems.mapTo(linkedSetOf()) { it.contentUri },
+            authorizedAlbumIds = authorizedItems.mapNotNullTo(linkedSetOf()) { it.albumId },
+            favoriteContentUris = favoriteUris,
+        )
+
+        lateinit var popup: PopupWindow
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(8), dp(8), dp(8), dp(8))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_CONTAINER_DP,
+            )
+            clipToOutline = true
+            elevation = dp(8).toFloat()
+        }
+
+        fun addAction(iconResource: Int, label: String, action: () -> Unit) {
+            panel.addView(
+                videoOverflowActionRow(iconResource, label) {
+                    popup.dismiss()
+                    action()
+                },
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dp(GalleryGlazeContract.GENERAL_TARGET_DP),
+                ),
+            )
+        }
+
+        addAction(R.drawable.ic_gallery_info, "Details") {
+            showItemDetails(item)
+        }
+        if (menuState.canOpenContainingAlbum) {
+            addAction(R.drawable.ic_gallery_nav_albums, "Open containing album") {
+                val albumId = item.albumId
+                val contentStillAuthorized = authorizedItems.any { it.contentUri == item.contentUri }
+                val albumStillAuthorized = !albumId.isNullOrBlank() && authorizedItems.any { it.albumId == albumId }
+                if (!contentStillAuthorized || !albumStillAuthorized) {
+                    Toast.makeText(this, "This album is no longer available in the authorized library.", Toast.LENGTH_SHORT).show()
+                } else {
+                    destination = GalleryDestination.ALBUMS
+                    showingFavorites = false
+                    openAlbumId = albumId
+                    closeAuthorizedViewer()
+                }
+            }
+        }
+        if (menuState.canOpenFavorites) {
+            addAction(R.drawable.ic_gallery_favorite, "Open Favorites") {
+                val stillAuthorized = authorizedItems.any { it.contentUri == item.contentUri }
+                if (!stillAuthorized || item.contentUri !in favoriteUris) {
+                    Toast.makeText(this, "This item is no longer available in Favorites.", Toast.LENGTH_SHORT).show()
+                } else {
+                    destination = GalleryDestination.ALBUMS
+                    showingFavorites = true
+                    openAlbumId = null
+                    closeAuthorizedViewer()
+                }
+            }
+        }
+        if (menuState.canSetAsPhoto) {
+            addAction(R.drawable.ic_gallery_nav_photos, "Set photo as…") {
+                handOffAuthorizedPhotoForSetAs(item)
+            }
+        }
+
+        val popupWidth = dp(244)
+        val estimatedHeight = dp(panel.childCount * GalleryGlazeContract.GENERAL_TARGET_DP + 16)
+        popup = PopupWindow(
+            panel,
+            popupWidth,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            true,
+        ).apply {
+            isOutsideTouchable = true
+            isFocusable = true
+            elevation = dp(8).toFloat()
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+        }
+
+        val location = IntArray(2)
+        anchor.getLocationOnScreen(location)
+        val screenWidth = resources.displayMetrics.widthPixels
+        val screenHeight = resources.displayMetrics.heightPixels
+        val popupX = (location[0] + anchor.width - popupWidth)
+            .coerceIn(dp(8), (screenWidth - popupWidth - dp(8)).coerceAtLeast(dp(8)))
+        val maximumY = (screenHeight - estimatedHeight - dp(12)).coerceAtLeast(dp(8))
+        val popupY = (location[1] + anchor.height - estimatedHeight)
+            .coerceIn(dp(8), maximumY)
+        popup.showAtLocation(anchor, Gravity.TOP or Gravity.START, popupX, popupY)
+    }
+
     private fun closeAuthorizedViewer() {
         viewerSlideshowStop?.invoke()
         viewerSlideshowStop = null
+        viewerKeyboardAction = null
         val overlay = viewerOverlay ?: return
         viewerVideoSurface?.apply {
             onPlaybackError = null
@@ -4832,6 +4984,33 @@ class GalleryActivity : Activity() {
             refreshObservedMediaIfReady()
         } else {
             renderCurrentDestination()
+        }
+    }
+
+    private fun handOffAuthorizedPhotoForSetAs(item: MediaItem) {
+        if (
+            !item.mimeType.startsWith("image/") ||
+            !GalleryMediaAccessPolicy.canRead(currentMediaAccessScope()) ||
+            authorizedItems.none { it.contentUri == item.contentUri }
+        ) {
+            Toast.makeText(this, "This photo is no longer authorized.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val uri = Uri.parse(item.contentUri)
+        if (uri.scheme != "content" || uri.authority != "media") {
+            Toast.makeText(this, "Gallery refused an unsupported photo source.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val setAsIntent = Intent(Intent.ACTION_ATTACH_DATA).apply {
+            setDataAndType(uri, item.mimeType)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(Intent.createChooser(setAsIntent, "Set photo as"))
+        } catch (_: RuntimeException) {
+            Toast.makeText(this, "No compatible Set as destination is available.", Toast.LENGTH_SHORT).show()
         }
     }
 
