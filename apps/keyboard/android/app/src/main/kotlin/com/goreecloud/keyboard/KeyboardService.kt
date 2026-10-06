@@ -620,7 +620,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
     }
 
-    override fun onOneHandedModeChange(mode: KeyboardOneHandedMode) {
+    override fun onOneHandedSideChange(moveToRight: Boolean) {
+        val mode =
+            if (moveToRight) KeyboardOneHandedMode.RIGHT else KeyboardOneHandedMode.LEFT
         settingsStore.setOneHandedMode(mode)
         typingSettings = typingSettings.copy(oneHandedMode = mode)
         keyboardView?.setOneHandedMode(mode)
