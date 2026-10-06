@@ -146,6 +146,7 @@ Current Development source includes:
 - Deterministic application categories; folders remain grouped under **Folders** in Category mode.
 - A–Z, Z–A, Launcher-local Most recent, profile-aware Recently installed, profile-aware Recently updated, Launcher-local Most frequent, and Pinned first sorting.
 - Compact **All / Pinned / Suggested / New / Updated** discovery filters; Suggested uses only Launcher-local signals and a deterministic A-Z first-use fallback.
+- Local **Pinned / Suggested / New / Updated** Smart Folders in Category mode; the active Development continuation adds reversible profile-qualified exclusions for Suggested/New/Updated with explicit Restore recovery.
 - A 48 dp alphabetical jump index in ordinary A-Z List presentation.
 - Device-local App Drawer pins and manual pinned ordering.
 - Profile-qualified Hidden Apps and Launcher App Lock states.
@@ -157,7 +158,7 @@ Still planned or acceptance-gated:
 
 - Broader fast alphabetical navigation beyond the implemented A-Z List jump index.
 - Representative-device validation of profile-scoped **Updated** metadata, especially managed/Work-profile contexts where Android may intentionally deny package timestamp access.
-- Deterministic Smart Folders and richer user-defined category/tag collections.
+- User-authored Smart Folder rule composition/ordering/naming and richer user-defined category/tag collections.
 - Portable backup/restore policy for custom Drawer organization.
 - Representative-device TalkBack/Switch Access, keyboard/D-pad, large text, RTL/localization, phone/tablet/foldable, profile-lifecycle, performance/power, signing/update-continuity, and release acceptance.
 
