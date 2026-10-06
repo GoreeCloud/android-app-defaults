@@ -56,6 +56,22 @@ class LauncherDrawerViewportPolicyTest {
     }
 
     @Test
+    fun rememberedPositionProfileKindParsesOnlyKnownProfiles() {
+        assertTrue(
+            launcherDrawerPositionProfileKind(
+                "WORK|GRID|SCROLL|ALPHABETICAL|ALL||5|5",
+            ) == LauncherDrawerProfileKind.WORK,
+        )
+        assertTrue(
+            launcherDrawerPositionProfileKind(
+                "USER|LIST|SCROLL|ALPHABETICAL|ALL||5|5",
+            ) == LauncherDrawerProfileKind.USER,
+        )
+        assertTrue(launcherDrawerPositionProfileKind("UNKNOWN|GRID") == null)
+        assertTrue(launcherDrawerPositionProfileKind(null) == null)
+    }
+
+    @Test
     fun stableRowsNeverDropEntries() {
         val input = (1..76).toList()
         val rows = launcherDrawerStableRows(input, columns = 5)
