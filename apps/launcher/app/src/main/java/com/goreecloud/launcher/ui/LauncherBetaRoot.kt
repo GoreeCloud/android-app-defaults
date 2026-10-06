@@ -8294,6 +8294,21 @@ internal fun launcherDrawerPositionProfileKind(
     ?.substringBefore('|')
     ?.let { raw -> runCatching { LauncherDrawerProfileKind.valueOf(raw) }.getOrNull() }
 
+internal fun launcherDrawerCategoryLazyItemCount(
+    categoryAppCounts: List<Int>,
+    folderCount: Int,
+    smartFolderCount: Int,
+    columns: Int,
+): Int {
+    val columnCount = columns.coerceAtLeast(1)
+    fun sectionItemCount(itemCount: Int): Int =
+        if (itemCount <= 0) 0 else 1 + ((itemCount + columnCount - 1) / columnCount)
+
+    return sectionItemCount(smartFolderCount) +
+        sectionItemCount(folderCount) +
+        categoryAppCounts.sumOf(::sectionItemCount)
+}
+
 internal fun launcherDrawerPositionContextKey(
     profileKind: LauncherDrawerProfileKind,
     layoutMode: LauncherDrawerLayoutMode,
@@ -8786,9 +8801,22 @@ private fun DrawerAppsContent(
                         ),
                     )
             }
+            val categoryItemCount = remember(
+                categoryGroups,
+                folders.size,
+                smartFolders.size,
+                preferences.drawerColumns,
+            ) {
+                launcherDrawerCategoryLazyItemCount(
+                    categoryAppCounts = categoryGroups.map { (_, categoryApps) -> categoryApps.size },
+                    folderCount = folders.size,
+                    smartFolderCount = smartFolders.size,
+                    columns = preferences.drawerColumns,
+                )
+            }
             val listState = rememberLazyListState(
                 initialFirstVisibleItemIndex = restoredPosition?.itemIndex
-                    ?.coerceIn(0, categoryGroups.size.coerceAtLeast(1) - 1)
+                    ?.coerceIn(0, categoryItemCount.coerceAtLeast(1) - 1)
                     ?: 0,
                 initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
             )
@@ -8797,11 +8825,9 @@ private fun DrawerAppsContent(
                 positionContextKey,
                 query,
                 restoredPosition,
-                categoryGroups.size,
-                smartFolders.isNotEmpty(),
+                categoryItemCount,
             ) {
-                val maxIndex = (categoryGroups.size + if (smartFolders.isNotEmpty()) 1 else 0)
-                    .coerceAtLeast(1) - 1
+                val maxIndex = categoryItemCount.coerceAtLeast(1) - 1
                 val targetIndex = restoredPosition?.itemIndex?.coerceIn(0, maxIndex) ?: 0
                 listState.scrollToItem(
                     targetIndex,
