@@ -609,6 +609,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 ) {
                                     LauncherGlazeSearchResult(
                                         result = topResult,
+                                        allApps = apps,
                                         sourceLabel =
                                             LauncherGlazeSearchGroups.connectedSourceLabel(
                                                 result = topResult,
@@ -728,6 +729,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                     ) { result ->
                                         LauncherGlazeSearchResult(
                                             result = result,
+                                            allApps = apps,
                                             sourceLabel = LauncherGlazeSearchGroups.connectedSourceLabel(
                                                 result = result,
                                                 providerControls = controls,
@@ -1978,99 +1980,184 @@ private fun LauncherGlazeSearchResult(
     sourceLabel: String?,
     onActivate: () -> Unit,
     onOpenSearchUri: (LauncherOpenUriSearchAction) -> Unit,
+    allApps: List<LauncherActivityInfo> = emptyList(),
     prominent: Boolean = false,
 ) {
     val isContact = result.category == LauncherSearchCategory.CONTACT
+    val isInlineAiAnswer =
+        result.category == LauncherSearchCategory.CONNECTED_SOURCE &&
+            result.action is LauncherCopyTextSearchAction &&
+            LauncherConnectedSearchProviderRegistry.isCredentialInlineProvider(result.providerId)
     val appAction = result.action as? LaunchApplicationSearchAction
     val appIcon = if (appAction != null) rememberLauncherAppIcon(appAction.app) else null
+    val sourcePackage = remember(result.providerId, isInlineAiAnswer) {
+        if (isInlineAiAnswer) {
+            LauncherConnectedSearchProviderRegistry.iconPackageNameFor(result.providerId)
+        } else {
+            null
+        }
+    }
+    val sourceApp = remember(allApps, sourcePackage) {
+        sourcePackage?.let { packageName ->
+            allApps.firstOrNull { app -> app.componentName.packageName == packageName }
+        }
+    }
+    val sourceIcon = sourceApp?.let { rememberLauncherAppIcon(it) }
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
-    val iconSize = if (prominent) 42.dp else 34.dp
+    val iconSize = when {
+        isInlineAiAnswer -> 40.dp
+        prominent -> 42.dp
+        else -> 34.dp
+    }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(
-            if (prominent) GlazeMetrics.radiusLarge else GlazeMetrics.radiusMedium,
+            if (prominent || isInlineAiAnswer) GlazeMetrics.radiusLarge
+            else GlazeMetrics.radiusMedium,
         ),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = if (prominent) 0.68f else 0.50f),
+        color = MaterialTheme.colorScheme.surface.copy(
+            alpha = when {
+                isInlineAiAnswer -> 0.72f
+                prominent -> 0.68f
+                else -> 0.50f
+            },
+        ),
         border = BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.onSurface.copy(alpha = if (prominent) 0.07f else 0.05f),
+            MaterialTheme.colorScheme.onSurface.copy(
+                alpha = if (prominent || isInlineAiAnswer) 0.08f else 0.05f,
+            ),
         ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = if (prominent) 8.dp else 2.dp),
+                .padding(
+                    horizontal = if (isInlineAiAnswer) 12.dp else 10.dp,
+                    vertical = if (isInlineAiAnswer) 8.dp else if (prominent) 8.dp else 2.dp,
+                ),
         ) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = if (prominent) 56.dp else 48.dp),
+                    .heightIn(min = if (isInlineAiAnswer) 84.dp else if (prominent) 56.dp else 48.dp),
                 onClick = onActivate,
                 shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
                 color = Color.Transparent,
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = if (isInlineAiAnswer) Alignment.Top else Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    if (appIcon != null) {
-                        Image(
-                            bitmap = appIcon,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(iconSize).launcherIconMask(),
-                        )
-                    } else if (isContact) {
-                        Surface(
-                            modifier = Modifier.size(iconSize),
-                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
+                    when {
+                        appIcon != null -> {
+                            Image(
+                                bitmap = appIcon,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.size(iconSize).launcherIconMask(),
+                            )
+                        }
+                        isInlineAiAnswer && sourceIcon != null -> {
+                            Image(
+                                bitmap = sourceIcon,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.size(iconSize).launcherIconMask(),
+                            )
+                        }
+                        isInlineAiAnswer -> {
+                            Surface(
+                                modifier = Modifier.size(iconSize),
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    LauncherConnectedProviderFallbackGlyph(
+                                        providerId = result.providerId,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
+                            }
+                        }
+                        isContact -> {
+                            Surface(
+                                modifier = Modifier.size(iconSize),
+                                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        result.title.trim().take(1).uppercase(),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    )
+                                }
+                            }
+                        }
+                        else -> LauncherSearchResultCategoryGlyph(result.category)
+                    }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(if (isInlineAiAnswer) 5.dp else 1.dp),
+                    ) {
+                        if (isInlineAiAnswer) {
+                            Text(
+                                sourceLabel
+                                    ?: LauncherSearchProviderUserControlPolicy.displayNameFor(result.providerId),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                result.title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 8,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                "AI answer · Tap to copy",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            Text(
+                                result.title,
+                                style = if (prominent) {
+                                    MaterialTheme.typography.titleSmall
+                                } else {
+                                    MaterialTheme.typography.bodyMedium
+                                },
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            result.subtitle?.let {
                                 Text(
-                                    result.title.trim().take(1).uppercase(),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            sourceLabel?.let {
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                             }
                         }
-                    } else {
-                        LauncherSearchResultCategoryGlyph(result.category)
                     }
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            result.title,
-                            style = if (prominent) {
-                                MaterialTheme.typography.titleSmall
-                            } else {
-                                MaterialTheme.typography.bodyMedium
-                            },
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                        result.subtitle?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        sourceLabel?.let {
-                            Text(
-                                it,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                    if (isContact && number != null) {
+                    if (!isInlineAiAnswer && isContact && number != null) {
                         LauncherContactQuickAction(
                             type = LauncherContactQuickActionType.CALL,
                             contentDescription = "Call " + result.title,
@@ -2105,7 +2192,6 @@ private fun LauncherGlazeSearchResult(
         }
     }
 }
-
 @Composable
 private fun LauncherSearchResultCategoryGlyph(
     category: LauncherSearchCategory,
