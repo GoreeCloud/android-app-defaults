@@ -1,5 +1,16 @@
 # GoreeCloud Gallery Changelogs
 
+## October 6, 2026 — double-tap viewer zoom candidate
+
+- Added photo-only double-tap zoom through the existing bounded viewer transform: baseline double-tap enters the established 2× accessible preset and a second double-tap resets to 1×.
+- Double-tap stops an active slideshow, clears pan offset, reuses the same 1×–4× zoom policy and transform state as pinch/pan/view-options controls, and announces the resulting zoom state for accessibility.
+- Updated the viewer's photo accessibility guidance to disclose double-tap alongside pinch, pan, and explicit view options.
+- Added pure policy coverage for baseline, already-zoomed, maximum, and invalid scale input.
+
+### Boundary
+This is presentation-only. It does not increase decode resolution, MediaStore scope, storage/mutation authority, or network/cloud access. The viewer remains bounded to its existing viewport decode and 2048px long-edge ceiling; navigation swipes remain suppressed while zoomed.
+
+
 ## October 6, 2026 — bounded viewer context and hardware-control candidate
 
 ### Added
