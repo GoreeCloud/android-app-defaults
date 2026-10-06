@@ -2,7 +2,7 @@
 
 - Added **Remember position** under App Drawer settings, defaulting on for ordinary Launcher use.
 - When enabled, compatible Grid/Compact/List/Category scroll state and paged Drawer page/within-page position are restored approximately when Apps reopens.
-- Position restoration is context-bound to profile, layout, navigation mode, sort order, discovery filter, custom tab, column count and rows-per-page so changed presentation does not reuse stale coordinates.
+- Position restoration is context-bound to profile, layout, navigation mode, sort order, discovery filter, custom tab, column count and rows-per-page so changed presentation does not reuse stale coordinates; the remembered User/Work profile is restored when still present, and only the visible profile can persist the final viewport.
 - Temporary Search results reset to their starting position while preserving the prior ordinary-browse viewport for a later return.
 - Disabling the setting immediately clears stored viewport state and subsequent Drawer opens start from the beginning.
 - The remembered location is device-local presentation state and remains outside the portable preference/backup contract; no new permission, network access, telemetry or cross-profile authority is introduced.
