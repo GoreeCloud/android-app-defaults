@@ -20,6 +20,34 @@ class GalleryVideoPlaybackProgressTest {
     }
 
     @Test
+    fun `relative seeks clamp at video boundaries`() {
+        val progress = GalleryVideoPlaybackProgress
+            .initial(videoPlan(durationMillis = 30_000))
+            .observe(observedPositionMillis = 5_000)
+
+        assertEquals(0, progress.relativeSeekTarget(-10_000))
+        assertEquals(15_000, progress.relativeSeekTarget(10_000))
+        assertEquals(0, progress.seekBy(-10_000).positionMillis)
+        assertEquals(15_000, progress.seekBy(10_000).positionMillis)
+
+        val nearEnd = progress.observe(observedPositionMillis = 27_000)
+        assertEquals(30_000, nearEnd.relativeSeekTarget(10_000))
+    }
+
+    @Test
+    fun `relative seeks saturate safely on long overflow`() {
+        val progress = GalleryVideoPlaybackProgress
+            .initial(videoPlan(durationMillis = null))
+            .observe(observedPositionMillis = 5_000)
+
+        assertEquals(0, progress.relativeSeekTarget(Long.MIN_VALUE))
+        assertEquals(
+            GalleryVideoPlaybackProgress.MAX_PLATFORM_SEEK_MILLIS,
+            progress.relativeSeekTarget(Long.MAX_VALUE),
+        )
+    }
+
+    @Test
     fun `unknown duration can adopt observed duration`() {
         var progress = GalleryVideoPlaybackProgress.initial(videoPlan(durationMillis = null))
         progress = progress.observe(observedPositionMillis = 2_000, observedDurationMillis = 8_000)
