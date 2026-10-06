@@ -48,6 +48,7 @@
 - The 0.1.22 crash-recovery candidate keeps Android attached to a stable KeyboardInputSurfaceHost while Keyboard, Clipboard, and edit surfaces swap inside that host. This addresses the representative-device failure where the Keyboard could disappear after auxiliary Clipboard-surface use.
 - Clipboard payloads are excluded from backup, portable preferences, language learning, suggestion/prediction context, synchronization, telemetry, and network paths. Privileged system-wide Secure Paste enforcement remains unimplemented.
 - Unit, build, governance, and Android emulator validation paths cover registration, privacy lifecycle, Unicode deletion, suggestion authority, emoji search, portable preference boundaries, Glaze UI mapping/context, accessibility, setup completion state, stable IME surface restoration, Clipboard history/edit rules, smart-content detection, and native interaction.
+- The current one-handed Development candidate adds device-local Off / Left / Right key-row presentation while retaining one authoritative rendered geometry for touch, accessibility, alternates, and swipe decoding; suggestions and toolbar remain full width and no input-observation authority is added.
 
 ## Development / acceptance work still required
 
@@ -72,7 +73,7 @@
 - User-controlled personalization and learned-language features where separately approved.
 - Privileged GoreeCloud Secure Paste Broker integration and system-wide cross-application enforcement beyond the implemented 0.1.22 Draft Keyboard-side clipboard controls.
 - Optional voice input/adapters where platform, privacy, and security policies permit.
-- One-handed, split, tablet, foldable, and posture-aware keyboard experiences.
+- Broader one-handed acceptance plus split, floating, tablet, foldable, and posture-aware keyboard experiences.
 - Richer emoji, symbol, kaomoji, and specialized input discovery.
 - GoreeCloud Quill writing assistance beyond the current local suggestion boundary.
 - Governed synchronization, backup/recovery, and portability where explicitly implemented.
