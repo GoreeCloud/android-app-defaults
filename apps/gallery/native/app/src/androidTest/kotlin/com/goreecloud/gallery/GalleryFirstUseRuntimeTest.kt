@@ -1,9 +1,12 @@
 package com.goreecloud.gallery
 
 import android.os.SystemClock
+import android.view.View
 import android.widget.ImageView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
@@ -16,6 +19,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.hamcrest.CoreMatchers.containsString
+import org.hamcrest.Matcher
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -47,17 +51,17 @@ class GalleryFirstUseRuntimeTest {
             onView(withContentDescription("Continue Gallery setup"))
                 .inRoot(isDialog())
                 .check(matches(isAssignableFrom(ImageView::class.java)))
-                .perform(click())
+                .perform(directClick())
             waitForDialogText("You control media access")
 
             scenario.recreate()
             waitForDialogText("You control media access")
             onView(withText("Set up Gallery")).inRoot(isDialog()).check(matches(isDisplayed()))
 
-            onView(withContentDescription("Continue Gallery setup")).inRoot(isDialog()).perform(click())
+            onView(withContentDescription("Continue Gallery setup")).inRoot(isDialog()).perform(directClick())
             waitForDialogText("Choose your guidance")
-            onView(withContentDescription(containsString("Contextual hints."))).inRoot(isDialog()).perform(click())
-            onView(withContentDescription("Finish Gallery setup")).inRoot(isDialog()).perform(click())
+            onView(withContentDescription(containsString("Contextual hints."))).inRoot(isDialog()).perform(directClick())
+            onView(withContentDescription("Finish Gallery setup")).inRoot(isDialog()).perform(directClick())
 
             val preferences = GallerySetupPreferences(context)
             assertFalse(preferences.shouldShowSetup())
@@ -78,11 +82,25 @@ class GalleryFirstUseRuntimeTest {
 
             scenario.recreate()
             onView(withText("Set up Gallery")).check(doesNotExist())
-            onView(withContentDescription("Settings")).perform(click())
+            onView(withContentDescription("Settings")).perform(directClick())
             onView(withText("Replay setup")).perform(scrollTo(), click())
             waitForDialogText("Review Gallery setup")
-            onView(withContentDescription("Return to Gallery")).inRoot(isDialog()).perform(click())
+            onView(withContentDescription("Return to Gallery")).inRoot(isDialog()).perform(directClick())
             onView(withText("Review Gallery setup")).check(doesNotExist())
+        }
+    }
+
+    private fun directClick(): ViewAction = object : ViewAction {
+        override fun getConstraints(): Matcher<View> = isDisplayed()
+
+        override fun getDescription(): String = "invoke View.performClick() for rendered setup control"
+
+        override fun perform(uiController: UiController, view: View) {
+            assertTrue(
+                "Expected rendered Gallery setup control to handle performClick()",
+                view.performClick(),
+            )
+            uiController.loopMainThreadUntilIdle()
         }
     }
 
