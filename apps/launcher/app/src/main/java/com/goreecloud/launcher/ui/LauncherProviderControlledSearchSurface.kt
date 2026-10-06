@@ -100,6 +100,8 @@ import com.goreecloud.launcher.core.launcher.LauncherManageSearchSourceAction
 import com.goreecloud.launcher.core.launcher.LauncherOpenUriSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherRuntimeSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherQuickAnswersSearchProvider
+import com.goreecloud.launcher.core.launcher.LauncherRemoteInlineSearchDispatchPolicy
+import com.goreecloud.launcher.core.launcher.LauncherOptInRemoteInlineSearchProvider
 import com.goreecloud.launcher.core.launcher.LauncherInstalledAppsSearchProvider
 import com.goreecloud.launcher.core.launcher.LauncherCoreActionsSearchProvider
 import com.goreecloud.launcher.core.launcher.LauncherShortcutsSearchProvider
@@ -128,6 +130,7 @@ import com.goreecloud.launcher.ui.theme.GlazeV16MaterialRole
 import com.goreecloud.launcher.ui.theme.GlazeV16PresentationPolicy
 import com.goreecloud.launcher.ui.theme.LocalGlazeV16PresentationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 internal fun launcherDriveInlineConnectionAvailable(
@@ -285,6 +288,12 @@ internal fun LauncherProviderControlledSearchSurface(
         if (searchProviderPreferences == null) emptyList()
         else LauncherSearchProviderUserControlPolicy.automaticProviders(catalog, controls)
     }
+    val immediateProviders = remember(providers) {
+        providers.filterNot { provider -> provider is LauncherOptInRemoteInlineSearchProvider }
+    }
+    val remoteInlineProviders = remember(providers) {
+        providers.filterIsInstance<LauncherOptInRemoteInlineSearchProvider>()
+    }
     var results by remember(providers, query) {
         mutableStateOf<List<LauncherSearchResult>>(emptyList())
     }
@@ -313,10 +322,30 @@ internal fun LauncherProviderControlledSearchSurface(
             return@LaunchedEffect
         }
         complete = false
-        results = LauncherUniversalSearch.searchAsync(
+        val immediateResults = LauncherUniversalSearch.searchAsync(
             rawQuery = query,
-            providers = providers,
+            providers = immediateProviders,
             policy = LauncherSearchExecutionPolicy.cancellationOnly(),
+        )
+        results = immediateResults
+
+        if (
+            remoteInlineProviders.isEmpty() ||
+            !LauncherRemoteInlineSearchDispatchPolicy.isEligible(query)
+        ) {
+            complete = true
+            return@LaunchedEffect
+        }
+
+        delay(LauncherRemoteInlineSearchDispatchPolicy.SETTLE_DELAY_MILLIS)
+        val remoteResults = LauncherUniversalSearch.searchAsync(
+            rawQuery = query,
+            providers = remoteInlineProviders,
+            policy = LauncherSearchExecutionPolicy.cancellationOnly(),
+        )
+        results = LauncherUniversalSearch.combineResults(
+            immediateResults,
+            remoteResults,
         )
         complete = true
     }
