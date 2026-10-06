@@ -1,5 +1,10 @@
 # GoreeCloud Gallery — Planned Features and Open Obligations
 
+## October 6, 2026 — viewer context and hardware-control acceptance candidate
+
+The current candidate extends the authorized viewer with bounded album/Favorites navigation, image-only Set photo as handoff, and hardware navigation/playback/Favorite/close controls. Exact-head protected build/runtime validation plus representative physical keyboard/D-pad, TalkBack/Switch Access, OEM chooser/Set-as behavior, partial-access revocation, and viewer lifecycle acceptance remain required before integration or broader maturity claims.
+
+
 ## October 3, 2026 — GoreeCloud OS Mobile default-gallery acceptance
 
 The current application line now has the bounded Android entry points needed for GoreeCloud OS Mobile to select `com.goreecloud.gallery` as its system Gallery package. Remaining acceptance is distribution- and device-specific: verify the Android `SYSTEM_GALLERY` role on the physical `dre` qualification device, image/video VIEW and REVIEW routing, secure-review behavior, permission grant/denial/revocation, user/profile isolation, and rollback to the prior Lineage gallery path. The OS packaging layer must remain responsible for role/default configuration; the Gallery APK must not silently seize default-app authority when installed on an ordinary Android system.
