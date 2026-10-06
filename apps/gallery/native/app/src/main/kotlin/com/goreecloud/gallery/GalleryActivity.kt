@@ -28,6 +28,7 @@ import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.GestureDetector
 import android.view.KeyEvent
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -4492,8 +4493,8 @@ class GalleryActivity : Activity() {
             preview.tag = viewerCacheKey
             preview.contentDescription = if (item.mimeType.startsWith("image/")) {
                 "Viewer for ${item.displayName}. Swipe left or right to navigate. " +
-                    "Pinch to zoom up to 400 percent and drag to pan while zoomed. " +
-                    "Use the view-options control for Fit, Fill, and 2 times zoom."
+                    "Double-tap for 2 times zoom or reset, pinch to zoom up to 400 percent, " +
+                    "and drag to pan while zoomed. Use view options for Fit, Fill, and zoom."
             } else {
                 "Viewer for ${item.displayName}. Swipe left or right to navigate the current collection."
             }
@@ -4746,6 +4747,31 @@ class GalleryActivity : Activity() {
             },
         )
 
+        val tapGestureDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(event: MotionEvent): Boolean = true
+
+                override fun onDoubleTap(event: MotionEvent): Boolean {
+                    if (!currentItemSupportsZoom()) return false
+                    stopSlideshow()
+                    viewerZoomScale =
+                        GalleryViewerZoomPolicy.scaleAfterDoubleTap(viewerZoomScale)
+                    viewerPanX = 0f
+                    viewerPanY = 0f
+                    applyViewerTransform()
+                    announceForAccessibility(
+                        if (GalleryViewerZoomPolicy.isZoomed(viewerZoomScale)) {
+                            "Viewer zoom 200 percent"
+                        } else {
+                            "Viewer zoom reset"
+                        },
+                    )
+                    return true
+                }
+            },
+        )
+
         var swipeStartX = 0f
         var swipeStartY = 0f
         var panLastRawX = 0f
@@ -4753,6 +4779,7 @@ class GalleryActivity : Activity() {
         var gestureHadMultiplePointers = false
         preview.setOnTouchListener { _, event ->
             if (currentItemSupportsZoom()) {
+                tapGestureDetector.onTouchEvent(event)
                 scaleGestureDetector.onTouchEvent(event)
             }
             when (event.actionMasked) {
