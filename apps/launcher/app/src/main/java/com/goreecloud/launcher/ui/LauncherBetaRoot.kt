@@ -5884,6 +5884,12 @@ private fun HomeFavoriteTile(
                             }
                         }
                     }
+                    LauncherAppProfileBadge(
+                        app = app,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (-4).dp),
+                    )
                     LauncherAppBadgeMark(
                         app,
                         modifier = launcherBadgePositionModifier(),
@@ -12339,6 +12345,13 @@ private fun LauncherAppListRow(
                     }
                 }
             }
+            LauncherAppProfileBadge(
+                app = app,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 4.dp, y = (-3).dp),
+                compact = true,
+            )
             if (pinnedInDrawer) {
                 DrawerPinnedMark(
                     modifier = Modifier.align(Alignment.TopStart),
