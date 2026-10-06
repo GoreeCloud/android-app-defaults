@@ -1948,6 +1948,176 @@ class GalleryActivity : Activity() {
         }
     }
 
+    private fun showAlbumRenameDialog(album: AlbumPresentation) {
+        val albumId = album.id ?: return
+        if (GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())) {
+            Toast.makeText(
+                this,
+                "Album rename requires full local photo and video access.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
+
+        val source = GalleryAlbumRenamePolicy.sourceForAlbum(
+            currentScope = visibleAuthorizedItems(),
+            albumId = albumId,
+        )?.takeIf { it.contentUris.size <= AndroidMediaMutationRequests.MAX_MUTATION_ITEMS }
+        if (source == null) {
+            Toast.makeText(
+                this,
+                "This album cannot be safely renamed from the current media snapshot.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
+
+        var dialog: AlertDialog? = null
+        val nameField = EditText(this).apply {
+            hint = "Album name"
+            setSingleLine(true)
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(primaryTextColor())
+            setHintTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.CONTROL,
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            contentDescription = "New album name"
+            setText(source.currentName)
+            setSelection(text.length)
+        }
+        val renameAction = TextView(this).apply {
+            text = "Rename"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(accentColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            background = roundedSurface(withAlpha(accentColor(), 0.12f), GalleryGlazeContract.SHAPE_CONTROL_DP)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Rename album"
+        }
+        val cancelAction = TextView(this).apply {
+            text = "Cancel"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            setBackgroundColor(Color.TRANSPARENT)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Cancel album rename"
+            setOnClickListener { dialog?.dismiss() }
+        }
+
+        renameAction.setOnClickListener {
+            val currentScope = visibleAuthorizedItems()
+            val destination = try {
+                GalleryAlbumRenamePolicy.destinationForAlbum(
+                    currentScope = currentScope,
+                    albumId = albumId,
+                    rawName = nameField.text?.toString().orEmpty(),
+                )
+            } catch (error: IllegalArgumentException) {
+                nameField.error = error.message ?: "Choose a valid album name"
+                nameField.requestFocus()
+                return@setOnClickListener
+            }
+            if (destination.source.contentUris.size > AndroidMediaMutationRequests.MAX_MUTATION_ITEMS) {
+                nameField.error =
+                    "Album rename is limited to ${AndroidMediaMutationRequests.MAX_MUTATION_ITEMS} items at a time"
+                nameField.requestFocus()
+                return@setOnClickListener
+            }
+
+            val byUri = currentScope.associateBy { it.contentUri }
+            val items = destination.source.contentUris.mapNotNull(byUri::get)
+            if (items.size != destination.source.contentUris.size) {
+                Toast.makeText(
+                    this,
+                    "The album changed before rename could start.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                dialog?.dismiss()
+                return@setOnClickListener
+            }
+
+            dialog?.dismiss()
+            requestMediaMove(
+                items = items,
+                destinationRelativePath = destination.destinationRelativePath,
+                purpose = MediaMovePurpose.ALBUM_RENAME,
+                displayName = destination.newName,
+            )
+        }
+
+        val actions = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            setPadding(0, dp(14), 0, 0)
+            addView(cancelAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
+                marginEnd = dp(6)
+            })
+            addView(renameAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f))
+        }
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(18))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_OVERLAY_DP,
+            )
+            addView(TextView(context).apply {
+                text = "Rename album"
+                setTextColor(primaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+                setTypeface(typeface, Typeface.BOLD)
+            })
+            addView(TextView(context).apply {
+                text =
+                    "Rename ${source.currentName} on this storage volume. Android will ask for write approval before Gallery moves ${itemCountLabel(source.contentUris.size)} to the renamed folder."
+                setTextColor(secondaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+                setLineSpacing(0f, 1.06f)
+                setPadding(0, dp(4), 0, dp(14))
+            })
+            addView(nameField, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52)))
+            addView(actions)
+        }
+
+        dialog = AlertDialog.Builder(this).setView(panel).create()
+        dialog?.setOnShowListener {
+            dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+            dialog?.window?.setDimAmount(0.42f)
+            dialog?.window?.setLayout(
+                resources.displayMetrics.widthPixels - dp(32),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+            nameField.requestFocus()
+            nameField.post {
+                (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
+                    ?.showSoftInput(nameField, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+        dialog?.show()
+        dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setDimAmount(0.42f)
+        dialog?.window?.setLayout(
+            resources.displayMetrics.widthPixels - dp(32),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
+    }
+
     private fun setAlbumPinned(album: AlbumPresentation, pinned: Boolean) {
         val albumId = album.id ?: return
         val availableAlbumIds = visibleAuthorizedItems().buildAlbumCatalog().map { it.id }.toSet()
