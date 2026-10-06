@@ -6931,6 +6931,7 @@ private fun StableDrawerVerticalGrid(
     alphabetJumpRequest: Pair<Int, Int>? = null,
     restoredPosition: LauncherDrawerPosition? = null,
     positionContextKey: String,
+    positionEnabled: Boolean,
     onPositionChanged: (LauncherDrawerPosition) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -6946,14 +6947,21 @@ private fun StableDrawerVerticalGrid(
             initial = restoredPosition?.itemScrollOffset ?: 0,
         )
         val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
-        DisposableEffect(positionContextKey, scrollState) {
+        LaunchedEffect(positionContextKey, positionEnabled, restoredPosition) {
+            scrollState.scrollTo(
+                if (positionEnabled) restoredPosition?.itemScrollOffset ?: 0 else 0,
+            )
+        }
+        DisposableEffect(positionContextKey, positionEnabled, scrollState) {
             onDispose {
-                currentOnPositionChanged(
-                    LauncherDrawerPosition(
-                        contextKey = positionContextKey,
-                        itemScrollOffset = scrollState.value,
-                    ),
-                )
+                if (positionEnabled) {
+                    currentOnPositionChanged(
+                        LauncherDrawerPosition(
+                            contextKey = positionContextKey,
+                            itemScrollOffset = scrollState.value,
+                        ),
+                    )
+                }
             }
         }
         val rowStridePx = with(LocalDensity.current) { (tileHeight + spacing).roundToPx() }
@@ -7011,15 +7019,28 @@ private fun StableDrawerVerticalGrid(
             initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
         )
         val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
-        DisposableEffect(positionContextKey, listState) {
+        LaunchedEffect(positionContextKey, positionEnabled, restoredPosition, rows.size) {
+            val targetIndex = if (positionEnabled) {
+                restoredPosition?.itemIndex
+                    ?.coerceIn(0, (rows.size - 1).coerceAtLeast(0))
+                    ?: 0
+            } else {
+                0
+            }
+            val targetOffset = if (positionEnabled) restoredPosition?.itemScrollOffset ?: 0 else 0
+            listState.scrollToItem(targetIndex, targetOffset)
+        }
+        DisposableEffect(positionContextKey, positionEnabled, listState) {
             onDispose {
-                currentOnPositionChanged(
-                    LauncherDrawerPosition(
-                        contextKey = positionContextKey,
-                        itemIndex = listState.firstVisibleItemIndex,
-                        itemScrollOffset = listState.firstVisibleItemScrollOffset,
-                    ),
-                )
+                if (positionEnabled) {
+                    currentOnPositionChanged(
+                        LauncherDrawerPosition(
+                            contextKey = positionContextKey,
+                            itemIndex = listState.firstVisibleItemIndex,
+                            itemScrollOffset = listState.firstVisibleItemScrollOffset,
+                        ),
+                    )
+                }
             }
         }
         LaunchedEffect(alphabetJumpRequest, columnCount) {
@@ -8442,9 +8463,6 @@ private fun DrawerAppsContent(
                 SideEffect {
                     pageGridStates[page] = gridState
                 }
-                DisposableEffect(page) {
-                    onDispose { pageGridStates.remove(page) }
-                }
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(preferences.drawerColumns),
                     state = gridState,
@@ -8554,6 +8572,7 @@ private fun DrawerAppsContent(
                     alphabetJumpRequest = alphabetJumpRequest,
                     restoredPosition = restoredPosition,
                     positionContextKey = positionContextKey,
+                    positionEnabled = query.isBlank(),
                     onPositionChanged = onPositionChanged,
                     modifier = Modifier.weight(1f),
                 )
@@ -8567,6 +8586,15 @@ private fun DrawerAppsContent(
                 initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
             )
             val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+            LaunchedEffect(positionContextKey, query, restoredPosition, entries.size) {
+                val targetIndex = restoredPosition?.itemIndex
+                    ?.coerceIn(0, (entries.size - 1).coerceAtLeast(0))
+                    ?: 0
+                gridState.scrollToItem(
+                    targetIndex,
+                    restoredPosition?.itemScrollOffset ?: 0,
+                )
+            }
             DisposableEffect(positionContextKey, query, gridState) {
                 onDispose {
                     if (query.isBlank()) {
@@ -8646,6 +8674,15 @@ private fun DrawerAppsContent(
                 initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
             )
             val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+            LaunchedEffect(positionContextKey, query, restoredPosition, entries.size) {
+                val targetIndex = restoredPosition?.itemIndex
+                    ?.coerceIn(0, (entries.size - 1).coerceAtLeast(0))
+                    ?: 0
+                listState.scrollToItem(
+                    targetIndex,
+                    restoredPosition?.itemScrollOffset ?: 0,
+                )
+            }
             DisposableEffect(positionContextKey, query, listState) {
                 onDispose {
                     if (query.isBlank()) {
@@ -8743,6 +8780,21 @@ private fun DrawerAppsContent(
                 initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
             )
             val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+            LaunchedEffect(
+                positionContextKey,
+                query,
+                restoredPosition,
+                categoryGroups.size,
+                smartFolders.isNotEmpty(),
+            ) {
+                val maxIndex = (categoryGroups.size + if (smartFolders.isNotEmpty()) 1 else 0)
+                    .coerceAtLeast(1) - 1
+                val targetIndex = restoredPosition?.itemIndex?.coerceIn(0, maxIndex) ?: 0
+                listState.scrollToItem(
+                    targetIndex,
+                    restoredPosition?.itemScrollOffset ?: 0,
+                )
+            }
             DisposableEffect(positionContextKey, query, listState) {
                 onDispose {
                     if (query.isBlank()) {
