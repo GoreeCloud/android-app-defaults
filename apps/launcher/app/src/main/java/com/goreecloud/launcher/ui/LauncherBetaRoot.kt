@@ -7153,8 +7153,13 @@ private fun AppDrawerSurface(
             userOf = { app -> app.user },
         )
     }
+    val rememberedProfileKind = remember(rememberedPosition?.contextKey, profilePages) {
+        launcherDrawerPositionProfileKind(rememberedPosition?.contextKey)
+            ?.takeIf { remembered -> profilePages.any { it.kind == remembered } }
+            ?: LauncherDrawerProfileKind.USER
+    }
     var selectedProfileName by rememberSaveable {
-        mutableStateOf(LauncherDrawerProfileKind.USER.name)
+        mutableStateOf(rememberedProfileKind.name)
     }
     val profilePager = rememberPagerState(
         initialPage = profilePages.indexOfFirst { it.kind.name == selectedProfileName }
@@ -7824,6 +7829,7 @@ private fun AppDrawerSurface(
                             sortOrder = drawerSortOrder,
                             positionContextKey = positionContextKey,
                             rememberedPosition = rememberedPosition,
+                            positionCaptureEnabled = index == profilePager.currentPage,
                             onPositionChanged = onDrawerPositionChanged,
                             smartFolders = if (
                                 drawerQuery.isBlank() &&
@@ -8282,6 +8288,12 @@ private fun DrawerProfileTabs(
     }
 }
 
+internal fun launcherDrawerPositionProfileKind(
+    contextKey: String?,
+): LauncherDrawerProfileKind? = contextKey
+    ?.substringBefore('|')
+    ?.let { raw -> runCatching { LauncherDrawerProfileKind.valueOf(raw) }.getOrNull() }
+
 internal fun launcherDrawerPositionContextKey(
     profileKind: LauncherDrawerProfileKind,
     layoutMode: LauncherDrawerLayoutMode,
@@ -8321,6 +8333,7 @@ private fun DrawerAppsContent(
     smartFolders: List<LauncherDrawerSmartFolder>,
     positionContextKey: String,
     rememberedPosition: LauncherDrawerPosition?,
+    positionCaptureEnabled: Boolean,
     onPositionChanged: (LauncherDrawerPosition) -> Unit,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
@@ -8420,9 +8433,9 @@ private fun DrawerAppsContent(
                 pagerState.scrollToPage(targetPage)
             }
         }
-        DisposableEffect(positionContextKey, query, pagerState) {
+        DisposableEffect(positionContextKey, query, positionCaptureEnabled, pagerState) {
             onDispose {
-                if (query.isBlank()) {
+                if (query.isBlank() && positionCaptureEnabled) {
                     val currentGrid = pageGridStates[pagerState.currentPage]
                     currentOnPositionChanged(
                         LauncherDrawerPosition(
@@ -8572,7 +8585,7 @@ private fun DrawerAppsContent(
                     alphabetJumpRequest = alphabetJumpRequest,
                     restoredPosition = restoredPosition,
                     positionContextKey = positionContextKey,
-                    positionEnabled = query.isBlank(),
+                    positionEnabled = query.isBlank() && positionCaptureEnabled,
                     onPositionChanged = onPositionChanged,
                     modifier = Modifier.weight(1f),
                 )
@@ -8595,9 +8608,9 @@ private fun DrawerAppsContent(
                     restoredPosition?.itemScrollOffset ?: 0,
                 )
             }
-            DisposableEffect(positionContextKey, query, gridState) {
+            DisposableEffect(positionContextKey, query, positionCaptureEnabled, gridState) {
                 onDispose {
-                    if (query.isBlank()) {
+                    if (query.isBlank() && positionCaptureEnabled) {
                         currentOnPositionChanged(
                             LauncherDrawerPosition(
                                 contextKey = positionContextKey,
@@ -8683,9 +8696,9 @@ private fun DrawerAppsContent(
                     restoredPosition?.itemScrollOffset ?: 0,
                 )
             }
-            DisposableEffect(positionContextKey, query, listState) {
+            DisposableEffect(positionContextKey, query, positionCaptureEnabled, listState) {
                 onDispose {
-                    if (query.isBlank()) {
+                    if (query.isBlank() && positionCaptureEnabled) {
                         currentOnPositionChanged(
                             LauncherDrawerPosition(
                                 contextKey = positionContextKey,
@@ -8795,9 +8808,9 @@ private fun DrawerAppsContent(
                     restoredPosition?.itemScrollOffset ?: 0,
                 )
             }
-            DisposableEffect(positionContextKey, query, listState) {
+            DisposableEffect(positionContextKey, query, positionCaptureEnabled, listState) {
                 onDispose {
-                    if (query.isBlank()) {
+                    if (query.isBlank() && positionCaptureEnabled) {
                         currentOnPositionChanged(
                             LauncherDrawerPosition(
                                 contextKey = positionContextKey,
