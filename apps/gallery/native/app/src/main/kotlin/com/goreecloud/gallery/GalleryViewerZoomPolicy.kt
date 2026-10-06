@@ -23,6 +23,10 @@ object GalleryViewerZoomPolicy {
     fun isZoomed(scale: Float): Boolean =
         scale.isFinite() && scale > MIN_SCALE + ZOOM_EPSILON
 
+    fun scaleAfterDoubleTap(currentScale: Float): Float =
+        if (isZoomed(currentScale)) MIN_SCALE else ACCESSIBLE_PRESET_SCALE
+
+
     fun boundedTranslation(
         viewportWidth: Int,
         viewportHeight: Int,
