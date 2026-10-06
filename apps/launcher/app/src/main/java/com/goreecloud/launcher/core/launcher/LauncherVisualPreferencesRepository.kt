@@ -49,6 +49,7 @@ enum class LauncherDrawerHeaderPresentation(
 
 data class LauncherVisualPreferences(
     val starterDockSize: Int = 5,
+    val showDrawerAlphabetIndex: Boolean = false,
     val homePageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
     val drawerHeaderPresentation: LauncherDrawerHeaderPresentation =
         LauncherDrawerHeaderPresentation.ICONS,
