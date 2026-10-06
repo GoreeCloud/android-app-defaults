@@ -7313,6 +7313,7 @@ class GalleryActivity : Activity() {
         const val VIDEO_CARD_GAP_DP = 10
         const val VIEWER_THUMBNAIL_DP = 720
         const val VIEWER_SWIPE_DISTANCE_DP = 56
+        const val VIDEO_SEEK_INTERVAL_MILLIS = 10_000L
         const val DRAG_SELECTION_EDGE_DP = 72
         const val DRAG_SELECTION_SCROLL_STEP_DP = 14
         const val THUMBNAIL_CACHE_KIB = 8 * 1024
