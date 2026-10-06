@@ -1878,6 +1878,7 @@ class GalleryActivity : Activity() {
                     }
                     GalleryCardOverflowAction.DETAILS -> showItemDetails(item)
                     GalleryCardOverflowAction.OPEN,
+                    GalleryCardOverflowAction.RENAME,
                     GalleryCardOverflowAction.PIN_TO_TOP,
                     GalleryCardOverflowAction.UNPIN_FROM_TOP,
                     GalleryCardOverflowAction.MOVE_EARLIER,
@@ -1894,6 +1895,15 @@ class GalleryActivity : Activity() {
         val albumId = album.id
         val settings = currentUserSettings()
         val isPinned = albumId != null && albumId in settings.pinnedAlbumIds
+        val renameSource = if (
+            albumId != null &&
+            !GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())
+        ) {
+            GalleryAlbumRenamePolicy.sourceForAlbum(visibleAuthorizedItems(), albumId)
+                ?.takeIf { it.contentUris.size <= AndroidMediaMutationRequests.MAX_MUTATION_ITEMS }
+        } else {
+            null
+        }
         val availability = if (albumId == null) {
             GalleryAlbumMoveAvailability(canMoveEarlier = false, canMoveLater = false)
         } else {
@@ -1909,6 +1919,7 @@ class GalleryActivity : Activity() {
             canPin = albumId != null,
             canMoveEarlier = availability.canMoveEarlier,
             canMoveLater = availability.canMoveLater,
+            canRename = renameSource != null,
         )
         val byId = actions.associateBy { action -> action.ordinal + 1 }
         PopupMenu(this, anchor).apply {
@@ -1918,6 +1929,7 @@ class GalleryActivity : Activity() {
             setOnMenuItemClickListener { menuItem ->
                 when (byId[menuItem.itemId]) {
                     GalleryCardOverflowAction.OPEN -> openAlbumPresentation(album)
+                    GalleryCardOverflowAction.RENAME -> showAlbumRenameDialog(album)
                     GalleryCardOverflowAction.PIN_TO_TOP -> setAlbumPinned(album, pinned = true)
                     GalleryCardOverflowAction.UNPIN_FROM_TOP -> setAlbumPinned(album, pinned = false)
                     GalleryCardOverflowAction.MOVE_EARLIER ->
