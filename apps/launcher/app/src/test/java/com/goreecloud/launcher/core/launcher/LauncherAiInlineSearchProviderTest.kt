@@ -108,6 +108,27 @@ class LauncherAiInlineSearchProviderTest {
     }
 
     @Test
+    fun fatalProviderErrorIsNotConvertedIntoRecoveryResult() = runBlocking {
+        val provider = LauncherAiInlineSearchProvider(
+            id = LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
+            displayName = "Perplexity",
+            credentialProvider = { "test-key" },
+            transport = LauncherAiInlineSearchTransport { _, _ ->
+                throw AssertionError("fatal")
+            },
+        )
+
+        var propagated = false
+        try {
+            provider.searchAsync(LauncherSearchRequest("fatal"))
+        } catch (_: AssertionError) {
+            propagated = true
+        }
+
+        assertTrue(propagated)
+    }
+
+    @Test
     fun registeredAiProviderIsOptInRemoteInline() {
         val provider = LauncherAiInlineSearchProvider(
             id = LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
