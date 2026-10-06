@@ -248,6 +248,7 @@ object LauncherConnectedSearchProviderRegistry {
     const val CHATGPT_PROVIDER_ID = "connected.chatgpt"
     const val PERPLEXITY_PROVIDER_ID = "connected.perplexity"
     const val CLAUDE_PROVIDER_ID = "connected.claude"
+    const val GEMINI_PROVIDER_ID = "connected.gemini"
 
     private const val GOOGLE_DRIVE_PACKAGE = "com.google.android.apps.docs"
     private const val DROPBOX_PACKAGE = "com.dropbox.android"
@@ -255,6 +256,7 @@ object LauncherConnectedSearchProviderRegistry {
     private const val CHATGPT_PACKAGE = "com.openai.chatgpt"
     private const val PERPLEXITY_PACKAGE = "ai.perplexity.app.android"
     private const val CLAUDE_PACKAGE = "com.anthropic.claude"
+    private const val GEMINI_PACKAGE = "com.google.android.apps.bard"
 
     fun iconPackageNameFor(providerId: String): String? = when (providerId) {
         GOOGLE_DRIVE_PROVIDER_ID -> GOOGLE_DRIVE_PACKAGE
@@ -263,6 +265,7 @@ object LauncherConnectedSearchProviderRegistry {
         CHATGPT_PROVIDER_ID -> CHATGPT_PACKAGE
         PERPLEXITY_PROVIDER_ID -> PERPLEXITY_PACKAGE
         CLAUDE_PROVIDER_ID -> CLAUDE_PACKAGE
+        GEMINI_PROVIDER_ID -> GEMINI_PACKAGE
         else -> null
     }
 
@@ -270,6 +273,7 @@ object LauncherConnectedSearchProviderRegistry {
         CHATGPT_PROVIDER_ID,
         PERPLEXITY_PROVIDER_ID,
         CLAUDE_PROVIDER_ID,
+        GEMINI_PROVIDER_ID,
     )
 
     @Suppress("UNUSED_PARAMETER")
@@ -303,6 +307,14 @@ object LauncherConnectedSearchProviderRegistry {
                         LauncherConnectedSearchCredentialStore.read(context, CLAUDE_PROVIDER_ID)
                     },
                     transport = LauncherAnthropicMessagesTransport(),
+                )
+                GEMINI_PROVIDER_ID -> LauncherAiInlineSearchProvider(
+                    id = GEMINI_PROVIDER_ID,
+                    displayName = "Google Gemini",
+                    credentialProvider = {
+                        LauncherConnectedSearchCredentialStore.read(context, GEMINI_PROVIDER_ID)
+                    },
+                    transport = LauncherGeminiGenerateContentTransport(),
                 )
                 else -> LauncherConnectedSearchProvider(definition.providerId)
             }
@@ -437,6 +449,23 @@ object LauncherConnectedSearchProviderRegistry {
                         .scheme("https")
                         .authority("claude.ai")
                         .appendPath("new")
+                        .appendQueryParameter("q", query)
+                        .build(),
+                )
+            },
+        ),
+        LauncherConnectedSearchDefinition(
+            providerId = GEMINI_PROVIDER_ID,
+            displayName = "Google Gemini",
+            authorizationRequirement = LauncherSearchAuthorizationRequirement.ACCOUNT,
+            requiresResolution = false,
+            buildIntent = { query ->
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.Builder()
+                        .scheme("https")
+                        .authority("gemini.google.com")
+                        .appendPath("app")
                         .appendQueryParameter("q", query)
                         .build(),
                 )

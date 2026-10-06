@@ -282,6 +282,7 @@ object LauncherSearchProviderUserControlPolicy {
         LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID -> "ChatGPT"
         LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID -> "Perplexity"
         LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID -> "Claude"
+        LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID -> "Google Gemini"
         else -> providerId
     }
 
