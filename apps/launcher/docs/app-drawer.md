@@ -70,7 +70,7 @@ Current Development includes the bounded local Smart Folder views described belo
 
 Smart folders provide dynamic App Drawer collections without mutating manual folders, tabs, Home, or Dock placement. Current Development derives bounded local-only **Pinned**, optional **Suggested**, **New**, and **Updated** smart folders from explicit pins, Launcher-local launch signals, and Android freshness metadata already used by Drawer discovery. Empty smart folders are omitted. Suggested smart-folder membership respects the existing Suggested apps control; when truthful usage does not exist, its membership uses the same deterministic A-Z fallback rather than fabricating behavior.
 
-Smart folders are read-only dynamic views in this tranche. Manual override/exclusion rules, custom rule composition, persisted smart-folder ordering/naming, and portable recovery remain planned. Profile identity remains bounded by the currently selected Drawer profile, and unavailable non-primary update metadata continues to fail closed rather than borrowing another profile's state.
+The October 6 Development continuation adds per-application exclusions for **Suggested**, **New**, and **Updated**. Exclusions are keyed by exact profile-qualified Launcher app identity, affect only the selected Smart Folder kind, remain device-local, and can be cleared with an explicit **Restore** action. A Smart Folder remains recoverable even when every current candidate is excluded. **Pinned** remains controlled by the existing explicit pin/unpin authority instead of a second exclusion mechanism. Custom rule composition, persisted Smart Folder ordering/naming, and portable recovery remain planned. Profile identity remains bounded by the currently selected Drawer profile, and unavailable non-primary update metadata continues to fail closed rather than borrowing another profile's state.
 
 ## Hidden applications
 
@@ -102,7 +102,7 @@ Current Development exposes these choices from the header **Filter** action:
 
 For non-primary profiles, first-install time continues to come from profile-qualified LauncherActivityInfo. Android's public LauncherApps surface does not expose profile-qualified last-update time, so **Updated** currently fails closed for Work and other non-primary profiles instead of borrowing primary-user metadata for a same-package app. Primary-profile update time comes from PackageManager.
 
-The bounded **Pinned / Suggested / New / Updated** Smart Folder views above are implemented Development behavior. Richer editable rule-based membership remains future work and must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable.
+The bounded **Pinned / Suggested / New / Updated** Smart Folder views above are implemented Development behavior. The October 6 continuation adds reversible per-app exclusions for Suggested/New/Updated; richer user-authored rule composition and portable recovery remain separately gated and must remain local-first, transparent, explainable, user-controllable, non-sponsored, and manually overridable.
 
 A fresh installation must not fabricate prior usage.
 
