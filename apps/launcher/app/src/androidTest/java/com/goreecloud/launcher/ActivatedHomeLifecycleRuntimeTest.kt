@@ -153,8 +153,8 @@ class ActivatedHomeLifecycleRuntimeTest {
         // test's removal is still settling, which otherwise lets this case launch against stock
         // Launcher and wait forever for GoreeCloud Home semantics. add-role-holder is idempotent
         // when the package is already the holder; restore the original ownership in finally.
-        runShellCommand(
-            "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+        dispatchShellCommandSilenced(
+            "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}",
         )
         withTimeout(10_000) {
             while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
@@ -2415,7 +2415,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         // remove-role-holder transition is still settling back to Quickstep. Reassert the
         // desired holder idempotently before each HOME-dependent case, then let the caller's
         // pre-test ownership snapshot decide whether teardown removes it.
-        runShellCommandDetached(
+        dispatchShellCommandSilenced(
             "cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
@@ -2429,7 +2429,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
-        runShellCommandDetached(
+        dispatchShellCommandSilenced(
             "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
@@ -2439,12 +2439,17 @@ class ActivatedHomeLifecycleRuntimeTest {
         }
     }
 
-    private fun runShellCommandDetached(command: String) {
-        // Role mutations can occasionally keep the shell pipe open while Android is reconciling
-        // the HOME holder. Closing the child's stdout/stderr and detaching it prevents the
-        // instrumentation thread from blocking in readBytes(); RoleManager polling below remains
-        // the bounded authority for whether the mutation actually completed.
-        runShellCommand("($command) >/dev/null 2>&1 &")
+    private fun dispatchShellCommandSilenced(command: String) {
+        // UiAutomation shell execution is asynchronous. Do not wait for EOF on role mutations:
+        // Android can keep that pipe open while the role service settles. Redirect command output
+        // away from the instrumentation pipe, close our read descriptor immediately, and let the
+        // bounded RoleManager polling above remain the authority for mutation completion. Unlike
+        // the old trailing '&' workaround, this does not create a second detached shell job that
+        // can race the next test's add/remove operation.
+        InstrumentationRegistry.getInstrumentation()
+            .uiAutomation
+            .executeShellCommand("($command) >/dev/null 2>&1")
+            .close()
     }
 
     private fun runShellCommand(command: String) {
