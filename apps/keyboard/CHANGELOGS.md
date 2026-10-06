@@ -1,5 +1,16 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 5/6, 2026 — one-handed side-switch continuation
+
+- Added a 48 dp side-switch control inside the otherwise reserved one-handed gutter whenever Left or Right mode is active.
+- The control moves the key rows to the opposite edge immediately, persists through the existing device-local one-handed preference, and is exposed as a descriptive accessibility target.
+- The switch is hidden in Off mode and on widths that cannot preserve the 48 dp interaction floor; Settings remains the fallback authority.
+- Starting a new editor session now reapplies the stored one-handed mode, so Settings changes and in-keyboard side changes remain synchronized.
+- No editor text, clipboard, learning, network, account, telemetry, or synchronization authority is added.
+
+This remains a Development candidate pending exact-head CI and representative-device reachability/accessibility acceptance.
+
+
 ## October 5, 2026 — one-handed key-row Development candidate
 
 - Added device-local **Off / Left / Right** one-handed presentation modes for the rendered Keyboard key rows.

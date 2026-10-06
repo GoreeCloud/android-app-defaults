@@ -620,6 +620,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
     }
 
+    override fun onOneHandedSideChange(moveToRight: Boolean) {
+        val mode =
+            if (moveToRight) KeyboardOneHandedMode.RIGHT else KeyboardOneHandedMode.LEFT
+        settingsStore.setOneHandedMode(mode)
+        typingSettings = typingSettings.copy(oneHandedMode = mode)
+        keyboardView?.setOneHandedMode(mode)
+    }
+
     override fun onOpenSettings() {
         startActivity(
             Intent(this, KeyboardSettingsActivity::class.java)
@@ -673,6 +681,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         pendingPhraseRewrite = null
         keyboardView?.setSuggestions(emptyList())
         keyboardView?.setKeyHeightPreference(typingSettings.keyHeight)
+        keyboardView?.setOneHandedMode(typingSettings.oneHandedMode)
         keyboardView?.setToolbarStyle(typingSettings.toolbarStyle)
         keyboardView?.setKeyPressHapticsEnabled(typingSettings.hapticFeedbackEnabled)
         keyboardView?.setKeyPressSoundEnabled(typingSettings.keyPressSoundEnabled)
