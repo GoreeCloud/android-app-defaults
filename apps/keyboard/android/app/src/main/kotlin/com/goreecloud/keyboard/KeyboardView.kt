@@ -38,6 +38,7 @@ class KeyboardView @JvmOverloads constructor(
         fun onLayerChanged(layer: KeyboardLayer)
         fun onOpenClipboard() = Unit
         fun onSwitchLanguage() = Unit
+        fun onOneHandedModeChange(mode: KeyboardOneHandedMode) = Unit
         fun onOpenSettings() = Unit
     }
 
@@ -56,6 +57,7 @@ class KeyboardView @JvmOverloads constructor(
         EMOJI,
         CLIPBOARD,
         LANGUAGE,
+        ONE_HANDED_SWITCH,
         SETTINGS,
         EMOJI_SEARCH_CLEAR,
         EMOJI_SEARCH_CLOSE,
@@ -366,6 +368,14 @@ class KeyboardView @JvmOverloads constructor(
                 height = toolbarHeight,
             )
         }
+        drawOneHandedSideSwitch(
+            canvas = canvas,
+            mode = oneHandedMode,
+            leftInsetPx = oneHandedInsets.leftPx,
+            rightInsetPx = oneHandedInsets.rightPx,
+            keyboardTop = keyboardTop,
+            keyboardBottom = contentBottom,
+        )
 
         rows.forEachIndexed { rowIndex, row ->
             val totalWeight = row.sumOf { it.weight.toDouble() }.toFloat()
@@ -757,6 +767,82 @@ class KeyboardView @JvmOverloads constructor(
             drawToolbarContent(canvas, key, visualBounds)
             hitKeys += HitKey(hitBounds, key)
             left = hitBounds.right + gap
+        }
+    }
+
+    private fun drawOneHandedSideSwitch(
+        canvas: Canvas,
+        mode: KeyboardOneHandedMode,
+        leftInsetPx: Float,
+        rightInsetPx: Float,
+        keyboardTop: Float,
+        keyboardBottom: Float,
+    ) {
+        if (mode == KeyboardOneHandedMode.OFF) return
+
+        val density = resources.displayMetrics.density
+        val hitSize = KeyboardFunctionalGlyphs.TOOLBAR_HIT_DP * density
+        val gutterLeft = if (mode == KeyboardOneHandedMode.LEFT) {
+            width.toFloat() - rightInsetPx
+        } else {
+            0f
+        }
+        val gutterRight = if (mode == KeyboardOneHandedMode.LEFT) {
+            width.toFloat()
+        } else {
+            leftInsetPx
+        }
+        if (gutterRight - gutterLeft < hitSize) return
+
+        val centerX = (gutterLeft + gutterRight) / 2f
+        val centerY = (keyboardTop + keyboardBottom) / 2f
+        val hitBounds = RectF(
+            centerX - hitSize / 2f,
+            centerY - hitSize / 2f,
+            centerX + hitSize / 2f,
+            centerY + hitSize / 2f,
+        )
+        val visualBounds = KeyboardFunctionalGlyphs.centeredSquare(
+            hitBounds,
+            KeyboardFunctionalGlyphs.TOOLBAR_VISUAL_DP * density,
+        )
+        val radius = GlazeKeyboardTokens.RadiusMediumDp * density
+        canvas.drawRoundRect(visualBounds, radius, radius, utilityKeyOverlayPaint)
+        if (isPressedKey(hitBounds)) {
+            canvas.drawRoundRect(visualBounds, radius, radius, pressedKeyPaint)
+        }
+        drawOneHandedSideSwitchGlyph(canvas, visualBounds, mode)
+        hitKeys += HitKey(
+            bounds = hitBounds,
+            key = Key("one-handed-side", action = Action.ONE_HANDED_SWITCH),
+        )
+    }
+
+    private fun drawOneHandedSideSwitchGlyph(
+        canvas: Canvas,
+        bounds: RectF,
+        mode: KeyboardOneHandedMode,
+    ) {
+        val centerY = bounds.centerY()
+        val travel = bounds.width() * 0.22f
+        val head = bounds.width() * 0.14f
+        val targetX = if (mode == KeyboardOneHandedMode.LEFT) {
+            bounds.centerX() + travel
+        } else {
+            bounds.centerX() - travel
+        }
+        val sourceX = if (mode == KeyboardOneHandedMode.LEFT) {
+            bounds.centerX() - travel
+        } else {
+            bounds.centerX() + travel
+        }
+        canvas.drawLine(sourceX, centerY, targetX, centerY, iconPaint)
+        if (mode == KeyboardOneHandedMode.LEFT) {
+            canvas.drawLine(targetX, centerY, targetX - head, centerY - head, iconPaint)
+            canvas.drawLine(targetX, centerY, targetX - head, centerY + head, iconPaint)
+        } else {
+            canvas.drawLine(targetX, centerY, targetX + head, centerY - head, iconPaint)
+            canvas.drawLine(targetX, centerY, targetX + head, centerY + head, iconPaint)
         }
     }
 
@@ -1316,6 +1402,11 @@ class KeyboardView @JvmOverloads constructor(
         Action.EMOJI -> "Emoji"
         Action.CLIPBOARD -> "Clipboard and Secure Paste"
         Action.LANGUAGE -> "Switch GoreeCloud Keyboard language"
+        Action.ONE_HANDED_SWITCH -> when (oneHandedMode) {
+            KeyboardOneHandedMode.LEFT -> "Move one-handed keyboard to right"
+            KeyboardOneHandedMode.RIGHT -> "Move one-handed keyboard to left"
+            KeyboardOneHandedMode.OFF -> "Switch one-handed keyboard side"
+        }
         Action.SETTINGS -> "Keyboard settings"
         Action.EMOJI_SEARCH_CLEAR -> "Clear emoji search"
         Action.EMOJI_SEARCH_CLOSE -> "Close emoji search"
@@ -1409,6 +1500,24 @@ class KeyboardView @JvmOverloads constructor(
             Action.EMOJI -> switchLayer(KeyboardLayer.EMOJI)
             Action.CLIPBOARD -> listener?.onOpenClipboard()
             Action.LANGUAGE -> listener?.onSwitchLanguage()
+            Action.ONE_HANDED_SWITCH -> {
+                val target = when (oneHandedMode) {
+                    KeyboardOneHandedMode.LEFT -> KeyboardOneHandedMode.RIGHT
+                    KeyboardOneHandedMode.RIGHT -> KeyboardOneHandedMode.LEFT
+                    KeyboardOneHandedMode.OFF -> KeyboardOneHandedMode.OFF
+                }
+                if (target != KeyboardOneHandedMode.OFF) {
+                    setOneHandedMode(target)
+                    listener?.onOneHandedModeChange(target)
+                    announceForAccessibility(
+                        if (target == KeyboardOneHandedMode.LEFT) {
+                            "One-handed keyboard moved left"
+                        } else {
+                            "One-handed keyboard moved right"
+                        },
+                    )
+                }
+            }
             Action.SETTINGS -> listener?.onOpenSettings()
             Action.EMOJI_SEARCH_CLEAR -> {
                 emojiSearchSession.clear()
