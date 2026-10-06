@@ -120,10 +120,13 @@ These foundations are implemented only for the bounded scope described above and
 - accessibility foundations;
 - platform-system declarations and local safeguards.
 
+## Spacebar cursor control
+
+Current authoritative source implements privacy-bounded horizontal Spacebar cursor control: one-finger horizontal-dominant drags emit bounded DPAD LEFT/RIGHT steps through the active InputConnection, ordinary Space taps remain ordinary Space input, vertical/equal-axis and multi-pointer gestures fail closed, and Emoji/touch-exploration presentation disables cursor mode. The control reads no surrounding editor text and has a device-local enable setting. The active cursor-speed continuation adds device-local Precise / Standard / Fast step spacing while leaving activation authority unchanged.
+
 ## Explicitly not implemented on current `main`
 
 Current authoritative `main` does not establish:
-- accepted spacebar cursor-control behavior from Draft PRs #63/#64 or Draft PR #78;
 - the configurable utility-toolbar Draft stacks;
 - accepted Arabic/multilingual layout work from Draft PR #65 or its stacked successors;
 - system-wide GoreeCloud Secure Paste enforcement;

@@ -1,5 +1,16 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 6, 2026 — cursor-speed ergonomics and lifecycle reconciliation candidate
+
+- Reconciled repository records with authoritative source: privacy-bounded Spacebar cursor control is present on current `main`, despite stale implemented/planned records saying otherwise.
+- Added device-local **Precise / Standard / Fast** cursor movement spacing at 32 / 24 / 16 dp per DPAD step. Android touch slop remains the activation boundary.
+- Cursor speed is resolved live by the existing Spacebar touch listener, so Settings changes do not require editor-text reads or a new Keyboard process.
+- Preserved normal Space taps, bounded cumulative cursor movement, vertical/equal-axis and multi-pointer fail-closed behavior, Emoji/touch-exploration suppression, and the no-network/no-telemetry/no-surrounding-text boundary.
+- Added preference persistence and rendered runtime coverage for live speed changes between gestures.
+
+This remains Development candidate work pending fresh exact-head protected build/unit/runtime/promotion validation and representative-device ergonomics acceptance.
+
+
 ## October 6, 2026 — adaptive constrained-height row-gap candidate
 
 - Replaced unconditional fixed inter-row gap reservation with a bounded adaptive gap policy driven by the actual vertical area available to key rows.

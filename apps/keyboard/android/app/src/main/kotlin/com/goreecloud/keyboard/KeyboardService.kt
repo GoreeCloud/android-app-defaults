@@ -104,6 +104,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
                             !touchExplorationEnabled()
                     },
                     onCursorSteps = ::moveCursorFromSpacebar,
+                    stepDistancePxProvider = { settingsStore.load().cursorSpeed.stepDistanceDp * resources.displayMetrics.density },
                 ),
             )
         }

@@ -34,7 +34,7 @@
 - Android virtual accessibility-node foundations and bounded alternate-character accessibility actions for the custom-drawn input surface.
 - A privacy-minimized `goreecloud-keyboard-preferences/1` format containing exactly the last explicitly selected emoji category.
 - Strict portable-preference validation/checksum integrity, category-only reader/writer seams, explicit user-controlled Android Storage Access Framework transfer, import preview before mutation, and export review/freeze before destination selection.
-- Privacy-bounded horizontal spacebar cursor control in the active Development candidate, with ordinary Space taps preserved, ambiguous/vertical/multi-pointer gestures failing closed, no surrounding-text reconstruction, and a device-local user setting.
+- Privacy-bounded horizontal spacebar cursor control in current Development source, with ordinary Space taps preserved, ambiguous/vertical/multi-pointer gestures failing closed, no surrounding-text reconstruction, a device-local enable setting, and an active Precise / Standard / Fast cursor-step spacing continuation.
 - Historical GLAZE UI V1.2 (`1.2.0`) Development optical/material mapping pinned to reviewed source `f285b9145e27e6e7027b075c37299d101945c272`.
 - V1.2 neutral Frosted Neutral key surfaces consumed by the actual native `KeyboardView`, with Light/Dark runtime selection, explicit Deep Dark source values, 48/56 dp interaction floors, control geometry, and state calibration.
 - A V1.2 non-semantic material/atmosphere boundary that prohibits chromatic, brand, or semantic color from becoming the keyboard substrate and authorizes no editor/content sampling, remote derivation, persistence, semantic inference, telemetry, network lookup, or animated atmosphere.
