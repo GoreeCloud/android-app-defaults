@@ -42,7 +42,7 @@ Items here are planned, incomplete, blocked, or still acceptance-gated. Their pr
 - Execute representative physical-device validation for Recycle Bin browsing, Restore/Purge, ordinary Trash/permanent-delete mode, cancellation, mixed media, partial-media access, permission revocation, restart/process recreation, provider failure, OEM/profile behavior, and retention/expiry refresh.
 - Complete destructive-operation acceptance and confirm bounded post-mutation refresh behavior.
 - Refine multi-select from physical-device and accessibility evidence and add only actions backed by accepted authority.
-- Complete GLAZE UI V1.6 rendered, accessibility, adaptive-layout, performance, rollback, and Human Visual Excellence acceptance for Gallery.
+- Complete Glaze V1.7 rendered, accessibility, adaptive-layout, performance, rollback, and Human Visual Excellence acceptance for Gallery.
 - Complete TalkBack, switch access, large-text, contrast, reduced-motion/transparency, tablet/foldable, and representative-device acceptance.
 - Complete signed release packaging, upgrade/recovery validation, Release Candidate evidence, production acceptance, and Stable qualification.
 - Complete applicable Privacy Shield, Wardveil Security, Everkeep, GoreeCloud Identity, GoreeCloud Mesh, GoreeCloud Manager, GoreeCloud Policy, and GoreeCloud Observability evaluation/integration with evidence-backed dispositions.

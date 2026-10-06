@@ -24,11 +24,11 @@ The shell renders local metadata only and introduces no network permission, clou
 
 ## Current Glaze source contract
 
-The original shell milestone predates the current Gallery design-system authority. The current native Development line retains a **GLAZE UI V1.6 / 1.6.0** implementation mapping. The canonical design-system repository is `GoreeCloud/glaze`; current shared consumer authority is **Glaze V1.7 / 1.7.0**, established at `1a5756daed2294155be2e9972b24f580f6222b7b`. Because V1.7.0 intentionally inherits the accepted V1.6.0 runtime, the existing mapping is retained as implementation provenance, but Gallery remains migration-required until fresh V1.7 consumer acceptance is established.
+The original shell milestone predates the current Gallery design-system authority. The current native Development line maps to the consumer-eligible **Glaze V1.7 / 1.7.0** anchor from `GoreeCloud/glaze`. V1.7.0 inherits the accepted V1.6.0 runtime; Gallery excludes retained dev.47 / Section 48 Development behavior and does not treat those unfinished additions as consumer authority.
 
 The repository-local contract currently enforces:
 
-- GLAZE UI V1.6 / `1.6.0` as the consumer source baseline;
+- Glaze V1.7 / `1.7.0` as the bounded consumer source baseline;
 - a 48dp general interactive-target floor;
 - adaptive horizontal gutters for phone, tablet, and larger resizable widths;
 - native light/dark theme variants;
@@ -56,4 +56,4 @@ Everkeep remains authoritative for applicable recovery, preservation, portabilit
 
 ## Acceptance boundary
 
-This milestone is Development source and build validation only. It does not establish runtime permission behavior on a representative device, MediaStore behavior across supported OEMs/profiles, full selected-media reselection acceptance, rendered Glaze UI acceptance, accessibility acceptance, thumbnail performance, media mutations, release signing, upgrade/recovery evidence, production platform-system acceptance, release, or Stable qualification.
+This milestone is Development source and build validation only. It does not establish runtime permission behavior on a representative device, MediaStore behavior across supported OEMs/profiles, full selected-media reselection acceptance, rendered Glaze acceptance, accessibility acceptance, thumbnail performance, media mutations, release signing, upgrade/recovery evidence, production platform-system acceptance, Seal qualification, Production Acceptance, or Anchor qualification.

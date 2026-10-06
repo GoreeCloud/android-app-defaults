@@ -7,11 +7,11 @@ This document records the source-controlled readiness model for GoreeCloud Galle
 ## Current first-party native state
 
 - Product: GoreeCloud Gallery
-- Active Development line: `0.8.6-dev`
+- Active Development line: `0.9.0-dev`
 - Application ID: `com.goreecloud.gallery`
 - Active repository: `GoreeCloud/android-app-defaults` under `apps/gallery/`
 - Development model: original GoreeCloud-owned native Android application
-- User-facing design system: Glaze / repository-local 1.6.0 mapping
+- User-facing design system: Glaze V1.7 / repository-local 1.7.0 mapping with inherited accepted V1.6.0 runtime
 - Runtime model: offline-first local Android media application
 - Release state: Development / non-Stable
 - Stable release: Not approved
