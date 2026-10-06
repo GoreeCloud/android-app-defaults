@@ -360,7 +360,9 @@ object LauncherConnectedSearchProviderRegistry {
             .scheme("https")
             .authority(authority)
             .apply {
-                path.trim('/').takeIf { it.isNotEmpty() }?.split('/')?.forEach(::appendPath)
+                path.trim('/').takeIf { it.isNotEmpty() }?.split('/')?.forEach { segment ->
+                    appendPath(segment)
+                }
             }
             .appendQueryParameter("q", query)
             .build(),
