@@ -1,6 +1,10 @@
 package com.goreecloud.launcher.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -8,11 +12,19 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -34,41 +46,61 @@ internal fun LauncherDrawerDiscoveryFiltersRow(
         (filter != LauncherDrawerDiscoveryFilter.PINNED || pinnedAvailable) &&
             (filter != LauncherDrawerDiscoveryFilter.SUGGESTED || suggestionsEnabled)
     }
-    Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    var menuExpanded by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd,
     ) {
-        filters.forEach { filter ->
-            val active = selectedFilter == filter
-            Surface(
-                onClick = { chooseFilter(filter) },
-                modifier = Modifier
-                    .heightIn(min = 48.dp)
-                    .semantics {
-                        role = Role.Tab
-                        selected = active
-                        contentDescription = filter.displayName + " apps"
-                    },
-                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                color = if (active) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-                } else {
-                    androidx.compose.ui.graphics.Color.Transparent
+        Surface(
+            onClick = { menuExpanded = true },
+            modifier = Modifier
+                .size(48.dp)
+                .testTag("launcher-drawer-filter")
+                .semantics {
+                    role = Role.Button
+                    contentDescription = "Filter apps. Current " + selectedFilter.displayName
                 },
-                border = BorderStroke(
-                    1.dp,
-                    if (active) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.46f)
+            shape = CircleShape,
+            color = if (selectedFilter == LauncherDrawerDiscoveryFilter.ALL) {
+                androidx.compose.ui.graphics.Color.Transparent
+            } else {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+            },
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                LauncherOutlineGlyph(
+                    glyph = LauncherOutlineGlyph.SLIDERS,
+                    color = if (selectedFilter == LauncherDrawerDiscoveryFilter.ALL) {
+                        secondaryColor
                     } else {
-                        secondaryColor.copy(alpha = 0.18f)
+                        MaterialTheme.colorScheme.primary
                     },
-                ),
-            ) {
-                Text(
-                    filter.displayName,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                    color = if (active) MaterialTheme.colorScheme.primary else secondaryColor,
-                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+        DropdownMenu(
+            expanded = menuExpanded,
+            onDismissRequest = { menuExpanded = false },
+            shape = RoundedCornerShape(GlazeMetrics.radiusLarge),
+        ) {
+            filters.forEach { filter ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            filter.displayName,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    },
+                    onClick = {
+                        chooseFilter(filter)
+                        menuExpanded = false
+                    },
+                    trailingIcon = if (filter == selectedFilter) {
+                        { LauncherOutlineGlyph(LauncherOutlineGlyph.INFO, MaterialTheme.colorScheme.primary) }
+                    } else {
+                        null
+                    },
                 )
             }
         }
