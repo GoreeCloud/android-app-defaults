@@ -72,6 +72,26 @@ class LauncherDrawerViewportPolicyTest {
     }
 
     @Test
+    fun categoryViewportCountMatchesHeadersAndChunkedRows() {
+        assertTrue(
+            launcherDrawerCategoryLazyItemCount(
+                categoryAppCounts = listOf(7, 1),
+                folderCount = 6,
+                smartFolderCount = 3,
+                columns = 5,
+            ) == 9,
+        )
+        assertTrue(
+            launcherDrawerCategoryLazyItemCount(
+                categoryAppCounts = emptyList(),
+                folderCount = 0,
+                smartFolderCount = 0,
+                columns = 5,
+            ) == 0,
+        )
+    }
+
+    @Test
     fun stableRowsNeverDropEntries() {
         val input = (1..76).toList()
         val rows = launcherDrawerStableRows(input, columns = 5)
