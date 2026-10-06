@@ -308,10 +308,13 @@ internal fun launcherDockWidthFraction(
     appCount: Int,
     showSearch: Boolean,
 ): Float = when {
-    showSearch -> 0.92f
-    appCount.coerceAtLeast(0) <= 4 -> 0.72f
+    showSearch -> 0.90f
+    appCount.coerceAtLeast(0) <= 1 -> 0.38f
+    appCount == 2 -> 0.48f
+    appCount == 3 -> 0.60f
+    appCount == 4 -> 0.72f
     appCount == 5 -> 0.84f
-    else -> 0.92f
+    else -> 0.90f
 }
 
 internal fun launcherHomeSearchHeightDp(
@@ -8951,22 +8954,11 @@ private fun LauncherSettingsSearchField(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
         ) {
-            Canvas(Modifier.size(22.dp)) {
-                val stroke = 2.dp.toPx()
-                drawCircle(
-                    color = searchIconColor,
-                    radius = size.minDimension * 0.31f,
-                    center = Offset(size.width * 0.43f, size.height * 0.42f),
-                    style = Stroke(stroke),
-                )
-                drawLine(
-                    color = searchIconColor,
-                    start = Offset(size.width * 0.64f, size.height * 0.64f),
-                    end = Offset(size.width * 0.84f, size.height * 0.84f),
-                    strokeWidth = stroke,
-                    cap = StrokeCap.Round,
-                )
-            }
+            LauncherOutlineGlyph(
+                glyph = LauncherOutlineGlyph.SEARCH,
+                color = searchIconColor,
+                modifier = Modifier.size(22.dp),
+            )
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -9284,20 +9276,9 @@ private fun LauncherSettingsRootSurface(
                         category.summary.lowercase(Locale.getDefault()).contains(normalizedQuery) ||
                         category.keywords.lowercase(Locale.getDefault()).contains(normalizedQuery)
                 }
-                Surface(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
-                    ),
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = GlazeMetrics.space1),
-                    ) {
                         visibleCategories.forEachIndexed { index, category ->
                             LauncherSettingsOverviewRow(
                                 category = category,
@@ -9322,7 +9303,6 @@ private fun LauncherSettingsRootSurface(
                             )
                         }
                     }
-                }
             }
 
             SettingsSection(
