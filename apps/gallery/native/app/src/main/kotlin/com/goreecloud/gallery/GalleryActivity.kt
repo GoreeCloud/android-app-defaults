@@ -3379,7 +3379,12 @@ class GalleryActivity : Activity() {
     private fun requestMediaMove(items: List<MediaItem>, destination: GalleryMoveDestination) =
         requestMediaMove(items, destination.relativePath)
 
-    private fun requestMediaMove(items: List<MediaItem>, destinationRelativePath: String) {
+    private fun requestMediaMove(
+        items: List<MediaItem>,
+        destinationRelativePath: String,
+        purpose: MediaMovePurpose = MediaMovePurpose.MOVE,
+        displayName: String? = null,
+    ) {
         if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
         if (!AndroidMediaMoveRequests.isSupported()) {
             Toast.makeText(this, "Move requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
@@ -3407,6 +3412,10 @@ class GalleryActivity : Activity() {
         }
 
         pendingMediaMove = AndroidMediaMoveRequests.capture(request)
+        pendingMediaMovePurpose = purpose
+        pendingMediaMoveDisplayName = displayName
+            ?.let { raw -> runCatching { GalleryNewFolderMovePolicy.normalizeFolderName(raw) }.getOrNull() }
+            ?.takeIf { purpose == MediaMovePurpose.ALBUM_RENAME }
         try {
             startIntentSenderForResult(
                 request.pendingIntent.intentSender,
@@ -3418,14 +3427,22 @@ class GalleryActivity : Activity() {
             )
         } catch (_: IntentSender.SendIntentException) {
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
             Toast.makeText(this, "Android could not open move authorization.", Toast.LENGTH_SHORT).show()
         } catch (_: RuntimeException) {
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
             Toast.makeText(this, "Android could not open move authorization.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun completeConfirmedMediaMove(move: AndroidMediaMovePendingState) {
+    private fun completeConfirmedMediaMove(
+        move: AndroidMediaMovePendingState,
+        purpose: MediaMovePurpose,
+        displayName: String?,
+    ) {
         mediaMoveExecutionInProgress = true
         thread(name = "goreecloud-gallery-mediastore-move") {
             val result = try {
@@ -3443,13 +3460,23 @@ class GalleryActivity : Activity() {
                 clearSelection(render = false)
                 thumbnailCache.evictAll()
 
-                val message = when {
-                    result == null -> "Move could not be completed"
-                    result.failedCount == 0 && result.movedCount == 1 -> "Moved 1 item"
-                    result.failedCount == 0 -> "Moved ${result.movedCount} items"
-                    result.movedCount == 0 && result.failedCount == 1 -> "Move failed for 1 item"
-                    result.movedCount == 0 -> "Move failed for ${result.failedCount} items"
-                    else -> "Moved ${result.movedCount} items · ${result.failedCount} failed"
+                val message = if (purpose == MediaMovePurpose.ALBUM_RENAME) {
+                    when {
+                        result == null -> "Album rename could not be completed"
+                        result.failedCount == 0 ->
+                            "Renamed album to ${displayName ?: "new name"}"
+                        result.movedCount == 0 -> "Album rename failed"
+                        else -> "Album rename incomplete · ${result.movedCount} moved · ${result.failedCount} failed"
+                    }
+                } else {
+                    when {
+                        result == null -> "Move could not be completed"
+                        result.failedCount == 0 && result.movedCount == 1 -> "Moved 1 item"
+                        result.failedCount == 0 -> "Moved ${result.movedCount} items"
+                        result.movedCount == 0 && result.failedCount == 1 -> "Move failed for 1 item"
+                        result.movedCount == 0 -> "Move failed for ${result.failedCount} items"
+                        else -> "Moved ${result.movedCount} items · ${result.failedCount} failed"
+                    }
                 }
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
@@ -6306,6 +6333,16 @@ class GalleryActivity : Activity() {
         val isFavorites: Boolean,
     )
 
+    private enum class MediaMovePurpose(val storageValue: String) {
+        MOVE("move"),
+        ALBUM_RENAME("album_rename");
+
+        companion object {
+            fun fromStorage(value: String?): MediaMovePurpose =
+                entries.firstOrNull { it.storageValue == value } ?: MOVE
+        }
+    }
+
     private enum class GalleryDestination {
         PHOTOS,
         ALBUMS,
@@ -6326,6 +6363,8 @@ class GalleryActivity : Activity() {
         const val STATE_PENDING_MEDIA_MUTATION_URIS = "pending_media_mutation_uris"
         const val STATE_PENDING_MEDIA_MOVE_URIS = "pending_media_move_uris"
         const val STATE_PENDING_MEDIA_MOVE_DESTINATION = "pending_media_move_destination"
+        const val STATE_PENDING_MEDIA_MOVE_PURPOSE = "pending_media_move_purpose"
+        const val STATE_PENDING_MEDIA_MOVE_DISPLAY_NAME = "pending_media_move_display_name"
 
         const val GRID_GAP_DP = 3
         const val GRID_CORNER_DP = 8
