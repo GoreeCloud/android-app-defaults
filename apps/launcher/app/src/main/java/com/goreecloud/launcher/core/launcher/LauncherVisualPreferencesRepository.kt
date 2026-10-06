@@ -74,6 +74,7 @@ class LauncherVisualPreferencesRepository(
         .map { values ->
             LauncherVisualPreferences(
                 starterDockSize = (values[Keys.starterDockSize] ?: 5).coerceIn(4, 6),
+                showDrawerAlphabetIndex = values[Keys.drawerAlphabetIndex] ?: false,
                 homePageTransition =
                     LauncherHomePageTransition.fromStorage(values[Keys.homePageTransition]),
                 drawerHeaderPresentation =
@@ -87,6 +88,12 @@ class LauncherVisualPreferencesRepository(
     suspend fun setStarterDockSize(size: Int) {
         dataStore.edit { values ->
             values[Keys.starterDockSize] = size.coerceIn(4, 6)
+        }
+    }
+
+    fun setDrawerAlphabetIndex(enabled: Boolean) {
+        scope.launch {
+            dataStore.edit { values -> values[Keys.drawerAlphabetIndex] = enabled }
         }
     }
 
