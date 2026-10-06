@@ -2410,10 +2410,14 @@ class ActivatedHomeLifecycleRuntimeTest {
         // remove-role-holder transition is still settling back to Quickstep. Reassert the
         // desired holder idempotently before each HOME-dependent case, then let the caller's
         // pre-test ownership snapshot decide whether teardown removes it.
-        // Bound the shell-side role mutation itself. A stalled RoleManager shell service can
-        // otherwise keep FileInputStream.readBytes() waiting for EOF until the outer CI watchdog,
-        // hiding the real test and preventing the remaining runtime suite from executing.
-        runShellCommand(
+        //
+        // Do not drain the role command's stdout pipe here. Android 16 can keep the shell pipe
+        // open while RoleManager finishes a holder transition even after toybox timeout has
+        // bounded the child command. Waiting for EOF made the instrumentation thread consume the
+        // outer CI watchdog before the next Activity could launch. The observable role state is
+        // the authority for these helpers, so launch the bounded mutation, close our read side,
+        // and wait on RoleManager itself.
+        runShellCommandWithoutOutput(
             "toybox timeout 8 cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
@@ -2427,7 +2431,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
-        runShellCommand(
+        runShellCommandWithoutOutput(
             "toybox timeout 8 cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
@@ -2435,6 +2439,17 @@ class ActivatedHomeLifecycleRuntimeTest {
                 delay(100)
             }
         }
+        // Give the system HOME transition a short bounded settle window before the next test
+        // re-adds this package. This prevents back-to-back remove/add mutations from contending
+        // inside RoleManager while keeping suite runtime deterministic.
+        delay(500)
+    }
+
+    private fun runShellCommandWithoutOutput(command: String) {
+        InstrumentationRegistry.getInstrumentation()
+            .uiAutomation
+            .executeShellCommand(command)
+            .close()
     }
 
     private fun runShellCommand(command: String) {
