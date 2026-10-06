@@ -1,5 +1,18 @@
 # GoreeCloud Gallery Changelogs
 
+## October 6, 2026 — bounded viewer context and hardware-control candidate
+
+### Added
+- Expanded the viewer More surface with **Open containing album**, **Open Favorites** when the current item is still a Favorite, and image-only **Set photo as…**, while retaining Details.
+- Contextual visibility is derived only from the current Android-authorized snapshot; album/Favorites navigation revalidates again at click time and Set photo as rechecks current read authority plus a `content://media` item URI before Android handoff.
+- Added hardware viewer controls for Left/PageUp previous, Right/PageDown next, Space/media-play-pause playback or slideshow, F Favorite toggle, and Escape close. Ctrl/Meta/Alt-modified chords remain unclaimed.
+- Kept the new viewer actions inside the first-party Glaze popup treatment rather than restoring a platform-default menu.
+- Added pure policy coverage for stale authorization, MIME eligibility, album/Favorites availability, modifiers, navigation, playback, Favorite, and close behavior.
+
+### Boundary
+Development candidate only. No new media permission, storage mutation authority, filesystem path, provider query, network/account path, or release-state claim is introduced. Representative-device keyboard/D-pad, TalkBack/Switch Access, chooser/OEM Set-as behavior, and broader viewer acceptance remain open.
+
+
 ## October 5, 2026 — Gallery 0.9 ground-up presentation rebuild
 
 ### Changed
