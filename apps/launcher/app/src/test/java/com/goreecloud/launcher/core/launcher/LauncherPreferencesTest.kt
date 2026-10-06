@@ -117,13 +117,13 @@ class LauncherPreferencesTest {
                     itemScrollOffset = 27,
                     page = 2,
                 ),
-            )
+            ).join()
             val stored = repository.drawerPosition.first { it != null }
             assertEquals(14, stored?.itemIndex)
             assertEquals(27, stored?.itemScrollOffset)
             assertEquals(2, stored?.page)
 
-            repository.setRememberDrawerPosition(false)
+            repository.setRememberDrawerPosition(false).join()
             assertEquals(
                 false,
                 repository.experiencePreferences.first { !it.rememberDrawerPosition }
@@ -137,10 +137,10 @@ class LauncherPreferencesTest {
                     itemIndex = 9,
                     itemScrollOffset = 13,
                 ),
-            )
+            ).join()
             assertEquals(null, repository.drawerPosition.first())
 
-            repository.setRememberDrawerPosition(true)
+            repository.setRememberDrawerPosition(true).join()
             assertEquals(
                 true,
                 repository.experiencePreferences.first { it.rememberDrawerPosition }
