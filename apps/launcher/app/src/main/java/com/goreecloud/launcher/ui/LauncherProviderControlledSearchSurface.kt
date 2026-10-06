@@ -294,6 +294,9 @@ internal fun LauncherProviderControlledSearchSurface(
     val remoteInlineProviders = remember(providers) {
         providers.filterIsInstance<LauncherOptInRemoteInlineSearchProvider>()
     }
+    val remoteInlineEligible = remember(query) {
+        LauncherRemoteInlineSearchDispatchPolicy.isEligible(query)
+    }
     var results by remember(providers, query) {
         mutableStateOf<List<LauncherSearchResult>>(emptyList())
     }
@@ -331,7 +334,7 @@ internal fun LauncherProviderControlledSearchSurface(
 
         if (
             remoteInlineProviders.isEmpty() ||
-            !LauncherRemoteInlineSearchDispatchPolicy.isEligible(query)
+            !remoteInlineEligible
         ) {
             complete = true
             return@LaunchedEffect
@@ -581,6 +584,8 @@ internal fun LauncherProviderControlledSearchSurface(
                                     searchProviderPreferences == null -> "Loading search sources"
                                     providers.isEmpty() -> "Turn on sources to search this device"
                                     !complete -> "Searching…"
+                                    remoteInlineProviders.isNotEmpty() && !remoteInlineEligible ->
+                                        "Keep typing for connected AI"
                                     else -> "No results found"
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
@@ -591,6 +596,8 @@ internal fun LauncherProviderControlledSearchSurface(
                                 when {
                                     enabledIssues.isNotEmpty() ->
                                         "Check source status for missing results."
+                                    remoteInlineProviders.isNotEmpty() && !remoteInlineEligible ->
+                                        "Connected AI starts after 3 characters and a brief pause."
                                     else -> "Try a different name, number, app or filename."
                                 },
                                 style = MaterialTheme.typography.bodySmall,
