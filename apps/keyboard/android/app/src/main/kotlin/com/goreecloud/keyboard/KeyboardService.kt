@@ -77,6 +77,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             view.setLayer(currentLayer)
             view.setShifted(shifted && activeLanguage.supportsCaseShift)
             view.setKeyHeightPreference(typingSettings.keyHeight)
+            view.setOneHandedMode(typingSettings.oneHandedMode)
             view.setToolbarStyle(typingSettings.toolbarStyle)
             view.setKeyPressHapticsEnabled(typingSettings.hapticFeedbackEnabled)
             view.setKeyPressSoundEnabled(

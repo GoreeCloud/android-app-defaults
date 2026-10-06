@@ -331,6 +331,20 @@ class KeyboardSettingsActivity : Activity() {
             addView(buildHeightSegment(current.keyHeight), matchWidth())
             addDivider()
             addView(TextView(this@KeyboardSettingsActivity).apply {
+                text = getString(R.string.keyboard_settings_one_handed)
+                textSize = 17f
+                setTextColor(palette.onSurfaceArgb)
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            }, matchWidth())
+            addView(TextView(this@KeyboardSettingsActivity).apply {
+                text = getString(R.string.keyboard_settings_one_handed_summary)
+                textSize = 13f
+                setTextColor(palette.onSurfaceMutedArgb)
+                setPadding(0, dp(4), 0, dp(8))
+            }, matchWidth())
+            addView(buildOneHandedModeSegment(current.oneHandedMode), matchWidth())
+            addDivider()
+            addView(TextView(this@KeyboardSettingsActivity).apply {
                 text = getString(R.string.keyboard_settings_toolbar_style)
                 textSize = 17f
                 setTextColor(palette.onSurfaceArgb)
@@ -853,6 +867,65 @@ class KeyboardSettingsActivity : Activity() {
         buttons.forEach { (option, item) ->
             item.setOnClickListener {
                 settingsStore.setKeyHeight(option)
+                refresh(option)
+            }
+        }
+        refresh(selected)
+        return container
+    }
+
+    private fun buildOneHandedModeSegment(selected: KeyboardOneHandedMode): LinearLayout {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            background = roundedDrawable(palette.canvasArgb, palette.lineArgb, 16)
+            setPadding(dp(4), dp(4), dp(4), dp(4))
+        }
+
+        val buttons = linkedMapOf<KeyboardOneHandedMode, TextView>()
+        KeyboardOneHandedMode.values().forEach { option ->
+            val label = when (option) {
+                KeyboardOneHandedMode.OFF -> getString(R.string.keyboard_settings_one_handed_off)
+                KeyboardOneHandedMode.LEFT -> getString(R.string.keyboard_settings_one_handed_left)
+                KeyboardOneHandedMode.RIGHT -> getString(R.string.keyboard_settings_one_handed_right)
+            }
+            val item = TextView(this).apply {
+                text = label
+                gravity = Gravity.CENTER
+                textSize = 14f
+                minHeight = dp(44)
+                isClickable = true
+                isFocusable = true
+                contentDescription = "$label one-handed layout"
+            }
+            buttons[option] = item
+            container.addView(
+                item,
+                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    if (option != KeyboardOneHandedMode.RIGHT) marginEnd = dp(4)
+                },
+            )
+        }
+
+        fun refresh(value: KeyboardOneHandedMode) {
+            buttons.forEach { (option, item) ->
+                val isSelected = option == value
+                item.setTextColor(if (isSelected) Color.WHITE else palette.onSurfaceArgb)
+                item.typeface = Typeface.create(
+                    "sans-serif-medium",
+                    if (isSelected) Typeface.BOLD else Typeface.NORMAL,
+                )
+                item.background = if (isSelected) {
+                    roundedDrawable(accentColor, null, 12)
+                } else {
+                    roundedDrawable(Color.TRANSPARENT, null, 12)
+                }
+                item.isSelected = isSelected
+            }
+        }
+
+        buttons.forEach { (option, item) ->
+            item.setOnClickListener {
+                settingsStore.setOneHandedMode(option)
                 refresh(option)
             }
         }

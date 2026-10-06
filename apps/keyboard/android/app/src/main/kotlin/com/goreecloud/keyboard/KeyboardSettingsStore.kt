@@ -19,8 +19,15 @@ internal enum class KeyboardLongPressDelay {
     RELAXED,
 }
 
+internal enum class KeyboardOneHandedMode {
+    OFF,
+    LEFT,
+    RIGHT,
+}
+
 internal data class KeyboardTypingSettings(
     val keyHeight: KeyboardKeyHeight = KeyboardKeyHeight.COMPACT,
+    val oneHandedMode: KeyboardOneHandedMode = KeyboardOneHandedMode.OFF,
     val toolbarStyle: KeyboardToolbarStyle = KeyboardToolbarStyle.ICONS_ONLY,
     val swipeTypingEnabled: Boolean = true,
     val swipeTrailEnabled: Boolean = true,
@@ -52,6 +59,7 @@ internal class KeyboardSettingsStore(context: Context) {
 
     fun load(): KeyboardTypingSettings = KeyboardTypingSettings(
         keyHeight = enumPreference(KEY_HEIGHT, KeyboardKeyHeight.COMPACT),
+        oneHandedMode = enumPreference(ONE_HANDED_MODE, KeyboardOneHandedMode.OFF),
         toolbarStyle = enumPreference(TOOLBAR_STYLE, KeyboardToolbarStyle.ICONS_ONLY),
         swipeTypingEnabled = preferences.getBoolean(SWIPE_TYPING, true),
         swipeTrailEnabled = preferences.getBoolean(SWIPE_TRAIL, true),
@@ -73,6 +81,10 @@ internal class KeyboardSettingsStore(context: Context) {
 
     fun setKeyHeight(value: KeyboardKeyHeight) {
         preferences.edit().putString(KEY_HEIGHT, value.name).apply()
+    }
+
+    fun setOneHandedMode(value: KeyboardOneHandedMode) {
+        preferences.edit().putString(ONE_HANDED_MODE, value.name).apply()
     }
 
     fun setToolbarStyle(value: KeyboardToolbarStyle) {
@@ -151,6 +163,7 @@ internal class KeyboardSettingsStore(context: Context) {
     private companion object {
         const val PREFERENCES_NAME = "goreecloud_keyboard_runtime_settings"
         const val KEY_HEIGHT = "key_height"
+        const val ONE_HANDED_MODE = "one_handed_mode"
         const val TOOLBAR_STYLE = "toolbar_style"
         const val SWIPE_TYPING = "swipe_typing"
         const val SWIPE_TRAIL = "swipe_trail"

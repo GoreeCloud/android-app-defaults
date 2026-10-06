@@ -86,7 +86,9 @@ Draft PR #97 now implements the **Keyboard-side** portion of the intended Secure
 Add voice input and translation only with explicit provider/model authority, data-flow and retention rules, consent, offline/degraded behavior, privacy/security controls, and user control.
 
 ### Adaptive form factors
-Add one-handed, floating, split, tablet, foldable, posture-aware, compact-width, orientation, and large-display layouts while preserving touch accuracy, reachability, accessibility, and native IME semantics.
+The current one-handed Development candidate introduces device-local Off / Left / Right key-row presentation by compacting the authoritative rendered key geometry toward the chosen edge while leaving the candidate strip and toolbar full width. It still requires exact-head validation plus representative-device thumb-reach, Arabic/RTL, accessibility, orientation, performance, and large-screen acceptance before integration or broader maturity claims.
+
+Continue with floating and split layouts, tablet/foldable/posture-aware adaptation, compact-width and landscape refinement, and richer large-display behavior while preserving touch accuracy, reachability, accessibility, and native IME semantics.
 
 ### Broader GoreeCloud Quill assistance
 Expand beyond the accepted local suggestion boundary only when editor-data scope, sensitive-field behavior, user control, privacy authorization, model/provider authority, retention, and degraded behavior are explicit and accepted.

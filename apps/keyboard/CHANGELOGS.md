@@ -1,5 +1,16 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 5, 2026 — one-handed key-row Development candidate
+
+- Added device-local **Off / Left / Right** one-handed presentation modes for the rendered Keyboard key rows.
+- Left and Right modes keep 82% of the available keyboard width for keys and reserve the opposite edge for easier thumb reach; the candidate bar and utility toolbar remain full width.
+- Rendered key rectangles remain the single hit-test/accessibility/swipe-geometry authority, so compacting the layout does not introduce a second touch map or broaden editor-text authority.
+- Invalid/non-finite geometry fails closed to full-width presentation.
+- Added pure geometry coverage plus Android preference-persistence coverage. The setting is deliberately outside the current narrow portable-preference format and adds no network, clipboard, telemetry, Contacts, account, or learned-text authority.
+
+This remains a Development candidate. Exact-head CI plus representative-device thumb reach, Arabic/RTL, large-text, TalkBack/Switch Access, orientation, tablet/foldable, performance, and release acceptance remain required.
+
+
 ## October 2, 2026 — integrate English/Arabic subtype foundation
 
 Protected PR #185 integrated the bounded English (US) / Arabic IME subtype foundation from exact candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Arabic rows, Arabic-Indic digits, RTL metadata, and language-aware spacebar presentation are active when Android selects the Arabic subtype; English-only assistance fails closed in that mode. Keyboard build/JVM and Android 15 runtime passed inside the protected matrix. Representative-device multilingual/RTL/accessibility and release gates remain open.
