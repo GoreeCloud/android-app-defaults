@@ -7,7 +7,7 @@ component:
   repository: GoreeCloud/android-app-defaults
 
 lifecycle: development
-version: "0.8.9-dev"
+version: "0.9.0-dev"
 
 supported_platforms:
   - android
@@ -56,10 +56,11 @@ platform_systems:
     version: "1.7.0"
     evidence:
       - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryGlazeContract.kt
+      - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryDesignSystem.kt
       - native/app/src/test/kotlin/com/goreecloud/gallery/GalleryGlazeContractTest.kt
       - native/app/src/main/kotlin/com/goreecloud/gallery/GalleryGlazeSurfaces.kt
       - docs/GLAZE-UI.md
-    notes: Current shared authority is Glaze V1.7 / 1.7.0, released by integration 1a5756daed2294155be2e9972b24f580f6222b7b from qualification anchor 7c4ded83d7a8725165bb6a55dfb175667cc9589e. V1.7.0 intentionally inherits the accepted V1.6.0 runtime; Gallery's existing V1.6 native semantic mapping at a7180679ea851389e0f3004515f9a25f420e716d therefore remains implementation provenance, not V1.7 consumer acceptance. Fresh whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete, so Gallery remains applicable-migration-required.
+    notes: The 0.9 redesign pins consumer-eligible Glaze V1.7 / 1.7.0 to qualification source 7c4ded83d7a8725165bb6a55dfb175667cc9589e. V1.7.0 inherits the accepted V1.6.0 runtime from release source a7180679ea851389e0f3004515f9a25f420e716d; Gallery explicitly excludes retained dev.47 and Section 48 Development behavior. Whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete, so Gallery remains applicable-migration-required.
   mesh:
     result: applicable-blocked
     version: null
@@ -156,7 +157,7 @@ conformance:
     - docs/GLAZE-UI.md
     - docs/development/media-move.md
   blockers:
-    - Gallery retains a bounded V1.6 native semantic implementation mapping while current shared authority is Glaze V1.7 / 1.7.0. V1.7 inherits the accepted V1.6 runtime, but Gallery has not completed a fresh V1.7 contract re-pin and whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance.\n    - Android-authorized existing-folder Move and same-source New Folder Move are Development candidates; representative-device cancellation, photo/video/mixed selection, new-folder naming/collision behavior, permission/scope change, Activity recreation, refresh, OEM/profile, accessibility, and provider-failure acceptance remains incomplete. Copy remains separately gated.
+    - Gallery now carries the bounded Glaze V1.7 / 1.7.0 authority baseline, but complete downstream consumer migration and whole-application rendered, interaction, accessibility, adaptive/form-factor, representative-device, performance, Human Visual Excellence, rollback, release, and production acceptance remain incomplete.\n    - Android-authorized existing-folder Move and same-source New Folder Move are Development candidates; representative-device cancellation, photo/video/mixed selection, new-folder naming/collision behavior, permission/scope change, Activity recreation, refresh, OEM/profile, accessibility, and provider-failure acceptance remains incomplete. Copy remains separately gated.
     - Privacy Shield integration and acceptance are not established.
     - Wardveil Security integration and acceptance are not established.
     - Everkeep integration and complete Gallery-owned backup and recovery acceptance are not established.
@@ -166,4 +167,4 @@ conformance:
     - GoreeCloud Policy runtime evaluation, enforcement-coordination, explanation, freshness, exception, and evidence integration/acceptance are not established.
     - GoreeCloud Observability health, metrics, diagnostics, performance, dependency-health, provenance/freshness, alerting, collection-gap, and representative-device runtime acceptance are not established.
     - Representative physical-device/OEM/profile photo-editor, accessibility, orientation, media-permission, and destructive-operation edge-case acceptance remains incomplete.
-    - Production signing, distribution, release approval, Seal qualification, production acceptance, and Anchor qualification remain outstanding.
+    - Production signing, distribution, release approval, Seal qualification, Production Acceptance, and Anchor qualification remain outstanding.

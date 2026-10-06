@@ -45,15 +45,13 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
-    fun `bottom navigation defaults to icon only and restores all supported display modes`() {
+    fun `bottom navigation is glyph only while legacy stored modes remain parseable`() {
         val settings = GalleryUserSettings()
         assertEquals(GalleryNavigationDisplayMode.ICONS_ONLY, settings.navigationDisplayMode)
-        assertTrue(GalleryNavigationDisplayMode.ICONS_ONLY.showIcon)
-        assertFalse(GalleryNavigationDisplayMode.ICONS_ONLY.showLabel)
-        assertFalse(GalleryNavigationDisplayMode.TEXT_ONLY.showIcon)
-        assertTrue(GalleryNavigationDisplayMode.TEXT_ONLY.showLabel)
-        assertTrue(GalleryNavigationDisplayMode.ICONS_AND_TEXT.showIcon)
-        assertTrue(GalleryNavigationDisplayMode.ICONS_AND_TEXT.showLabel)
+        GalleryNavigationDisplayMode.entries.forEach { mode ->
+            assertTrue(mode.showIcon)
+            assertFalse(mode.showLabel)
+        }
         assertEquals(GalleryNavigationDisplayMode.TEXT_ONLY, GalleryNavigationDisplayMode.fromStored("text"))
         assertEquals(GalleryNavigationDisplayMode.ICONS_AND_TEXT, GalleryNavigationDisplayMode.fromStored("both"))
         assertEquals(GalleryNavigationDisplayMode.ICONS_ONLY, GalleryNavigationDisplayMode.fromStored("future-value"))
@@ -138,13 +136,18 @@ class GallerySettingsPolicyTest {
     }
 
     @Test
-    fun `sparse dense groups use a three-column presentation lane`() {
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 1))
-        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 2))
-        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(360, 4))
+    fun `dense groups prefer balanced rows when density does not gain a row`() {
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 1))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 2))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 4))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 5))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 6))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 7))
+        assertEquals(4, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 8))
+        assertEquals(3, GalleryViewDensity.DENSE.mediaGridColumnsForGroup(430, 9))
         assertEquals(
-            GalleryViewDensity.COMFORTABLE.mediaGridColumns(360),
-            GalleryViewDensity.COMFORTABLE.mediaGridColumnsForGroup(360, 1),
+            GalleryViewDensity.COMFORTABLE.mediaGridColumns(430),
+            GalleryViewDensity.COMFORTABLE.mediaGridColumnsForGroup(430, 1),
         )
     }
 

@@ -8,16 +8,19 @@ GoreeCloud Gallery is a GoreeCloud-maintained Android fork. Every Gallery-contro
 
 ## Conformance target
 
-- Target design system: **Glaze UI 1.6.0**
+- Target design system: **Glaze V1.7 / 1.7.0**
 - Canonical repository: `GoreeCloud/glaze`
-- Accepted Stable release source: `a7180679ea851389e0f3004515f9a25f420e716d`
-- Source qualification anchor: `c7509c79256b04b0aa67cb9dd0737d7588e0ae4a`
-- Stable runtime entrypoint: `js/glaze-v1.6.0.mjs`
-- Known-good shared rollback baseline: **1.5.1**
+- Current consumer-eligible anchor: **1.7.0**
+- Source qualification anchor: `7c4ded83d7a8725165bb6a55dfb175667cc9589e`
+- Stable runtime entrypoint: `js/glaze-v1.7.0.mjs`
+- Inherited accepted runtime: `js/glaze-v1.6.0.mjs`
+- Inherited accepted release source: `a7180679ea851389e0f3004515f9a25f420e716d`
+- Known-good shared rollback baseline: **1.6.0**
 - Native implementation model: Android platform-native semantic mapping rather than copied web CSS
-- Current first-party native implementation mapping: **V1.6**; current shared consumer authority: **Glaze V1.7 / 1.7.0**
+- Current first-party native source baseline: **V1.7**
+- Retained V1.7 dev.47 / Section 48 Development behavior included: **no**
 - Historical transitional implementation line: `gc.16`
-- Permanent Glaze UI exceptions: **none approved**
+- Permanent Glaze exceptions: **none approved**
 
 ## Product identity
 
@@ -27,7 +30,7 @@ The application ID is `com.goreecloud.gallery`. GoreeCloud-owned branding, packa
 
 ## Native semantic mapping
 
-Gallery's current native implementation maps the accepted Glaze UI 1.6 contract into Android resources and platform conventions. Current shared consumer authority is Glaze V1.7 / 1.7.0, whose bounded runtime intentionally inherits V1.6.0 behavior; Gallery still requires a fresh V1.7 contract re-pin and downstream acceptance. The mapping is semantic and presentation-only: it preserves roles, hierarchy, interaction intent, accessibility boundaries, and authority separation without requiring Android to reproduce browser-only effects or allowing Glaze presentation to manufacture permission, authorization, privacy/security truth, or consequential execution.
+Gallery maps the current consumer-eligible Glaze V1.7 anchor into Android resources and platform conventions. V1.7.0 inherits the accepted V1.6.0 runtime; Gallery does not consume retained dev.47 or Section 48 Development behavior. The mapping is semantic and presentation-only: it preserves roles, hierarchy, interaction intent, accessibility boundaries, and authority separation without requiring Android to reproduce browser-only effects or allowing Glaze presentation to manufacture permission, authorization, privacy/security truth, or consequential execution.
 
 The `gc.11` foundation establishes native resources for Canvas and Canvas Accent colors, Surface and muted-surface roles, primary and secondary accents, semantic text/status roles, spacing, rounded geometry, 44dp minimum and 48dp comfortable actionable targets, 90/160/220/320ms motion semantics, light/dark palettes, and Compact-first Settings composition.
 
@@ -40,6 +43,8 @@ The `gc.14` media-viewer layer applies a restrained muted Glaze overlay to full-
 The `gc.15` transient-surface refinement applies the same semantic system to sorting, grouping, filtering, destructive confirmations, overflow menus, and Settings density after representative-device visual review. It replaces generic transient white surfaces with coordinated Glaze light/dark presentation, removes redundant Settings dividers, tightens excessive card spacing, and strengthens the Settings app-bar treatment without changing application behavior.
 
 The `gc.16` dialog-geometry refinement responds to representative-device review of gc.15 by making sorting, grouping, and media-filter dialog ScrollViews measure to their actual content instead of taking the full available dialog height. This keeps the rounded Glaze surface attached to its controls, removes excessive empty space, and preserves scrollability when content genuinely exceeds the available viewport.
+
+The native **0.9 redesign generation** rebuilds the first-party shell around a shared `GalleryDesignSystem` instead of layering global-layout mutations over a monolithic activity. It establishes Compact / Medium / Expanded width classes, media-first adaptive gutters and gaps, a bounded 1440dp content canvas on large displays, larger minimum phone thumbnails, direct glyph-button styling, calmer grouped Settings surfaces, coordinated light/dark surface/divider tokens, a 56dp gesture-safe Compact/Medium navigation dock, and a 64dp Expanded navigation rail. Gallery, Trash, viewer, and photo-editor presentation are now owned at construction time; the former `GalleryUiRefinement` global-layout styling layer and its private tag resources have been removed from the active native source. This redesign is Development evidence only until rendered/device/accessibility acceptance is complete.
 
 These resources are intentionally local. Gallery does not load Glaze UI from a remote runtime, remote font service, icon CDN, analytics dependency, or network-delivered style package.
 
@@ -86,7 +91,7 @@ The adaptive Android resource qualifiers are platform-native equivalents of Glaz
 
 ## Primary navigation alignment
 
-The October 1, 2026 Gallery mockup-alignment work establishes five persistent primary destinations: **Photos**, **Albums**, **Videos**, **Trash**, and **Settings**. Trash uses the same rounded Glaze navigation capsule and selected-state semantics as the other primary destinations while retaining Android MediaStore as the authoritative Trash state. Recovery is not presented as an Albums collection. Albums smart-access shortcuts use only collections already present in the current authorized local snapshot or Gallery-local Favorites state and are presented as compact pill controls. The complete Albums grid uses rounded Raised cards with a landscape media cover and restrained title/count footer, matching the supplied Gallery visual direction without creating unsupported collection actions. Recognized local collections place a small circular Glaze badge over the lower-left of the cover; unknown collections use the generic Albums badge and video-dominant covers may use the Videos badge. Badges are decorative and never create new collection authority. Ordinary album card overflow menus may expose **Pin to top / Unpin from top** plus **Move earlier / Move later** when applicable. Pinning defines the top presentation group; manual movement is constrained within the album's current pinned or unpinned group. These are local ordering preferences only and never change MediaStore collection authority.
+The 0.9 redesign preserves five persistent primary destinations: **Photos**, **Albums**, **Videos**, **Trash**, and **Settings**. Compact and Medium layouts use a 56dp glyph-only bottom dock; Expanded layouts move the same destinations into a 64dp-wide left navigation rail so large displays do not behave like stretched phones. Both forms use restrained rounded Glaze geometry and a subtle inset selected treatment without enlarging the active destination. Trash uses the exact same navigation geometry and placement while retaining Android MediaStore as the authoritative Trash state. Recovery is not presented as an Albums collection. Albums smart-access shortcuts use only collections already present in the current authorized local snapshot or Gallery-local Favorites state and are presented as compact pill controls. Every quick-access pill includes a first-party glyph; unrecognized collections use the generic Albums glyph rather than falling back to text-only presentation. The complete Albums grid uses rounded Raised cards with a landscape media cover and restrained title/count footer, matching the supplied Gallery visual direction without creating unsupported collection actions. Recognized local collections place a small circular Glaze badge over the lower-left of the cover; unknown collections use the generic Albums badge and video-dominant covers may use the Videos badge. Badges are decorative and never create new collection authority. Ordinary album card overflow menus may expose **Pin to top / Unpin from top** plus **Move earlier / Move later** when applicable. Pinning defines the top presentation group; manual movement is constrained within the album's current pinned or unpinned group. These are local ordering preferences only and never change MediaStore collection authority.
 
 The navigation shell must keep media dominant, preserve 48dp-or-larger actionable targets, expose selected state beyond color alone, remain usable at compact phone widths, and reserve a real viewport lane so media does not render beneath persistent navigation. Selection chrome may expose **Copy** alongside Share, Favorite, Move, Delete, and More when the bounded current selection establishes Copy destination authority. Copy destination/new-folder dialogs reuse the same content-sized Glaze overlay and 48dp-or-larger action treatment as Move while explicitly describing that originals remain unchanged. Moving recovery into the Trash tab must not broaden media permission or mutation authority.
 
@@ -94,9 +99,11 @@ Photos and Videos keep destination identity, Search, and Sort as the persistent 
 
 The Settings Playback group exposes **Slideshow speed** as a content-sized Glaze choice surface with 3 / 5 / 10 second options and **Animate GIFs in thumbnails** as an opt-in Glaze toggle. Both are persisted presentation preferences and do not change media authority. Animated GIF cards retain the same rounded card geometry and are required to fall back to the ordinary static thumbnail presentation when animation cannot be decoded safely.
 
-The refreshed **Videos** destination uses a mockup-aligned media-card hierarchy rather than the ordinary photo timeline grid: the first visible video receives a wide featured card, following items use responsive two-column phone / three-column wider-layout cards, and each video keeps a centered play affordance plus its bounded duration badge. Optional Screen recordings, Camera, and Favorites chips are rendered only when those categories can be derived from the already-authorized local snapshot or Gallery-local Favorites state; the interface must not imply unavailable People, Places, Documents, or other unimplemented smart collections. Filter and smart-access pills use compact semantic icons with the same foreground tint as their labels so the control remains legible in light and dark Glaze themes without making color the only state cue.
+Photos timeline grouping may reduce the configured dense column count by one only when the row count stays unchanged and the final row becomes better populated. The rule is deterministic, never drops below three columns for the dense balancing path, and is presentation-only; it does not reorder or omit authorized media.
 
-Album and video cards may expose a trailing vertical overflow control matching the supplied mockups. Overflow controls use the general 48dp target floor, remain separately focusable from the card itself, and expose only bounded contextual actions already supported by Gallery. Destructive Android-authorized mutation is not placed in these compact card menus.
+The refreshed **Videos** destination uses a mockup-aligned media-card hierarchy rather than the ordinary photo timeline grid: compact phones avoid an oversized first-item hero and render the full visible set in the adaptive grid, while 720dp-and-wider layouts may use one bounded featured first card before the wider grid. The grid uses one column on sub-360dp layouts, two columns on phones, three columns on medium/wide layouts, and four columns on very wide layouts. Each video keeps a centered play affordance; the duration badge is rendered only when Android supplies an authoritative duration. Optional Screen recordings, Camera, and Favorites chips are rendered only when those categories can be derived from the already-authorized local snapshot or Gallery-local Favorites state; the interface must not imply unavailable People, Places, Documents, or other unimplemented smart collections. Filter and smart-access pills use compact semantic icons with the same foreground tint as their labels so the control remains legible in light and dark Glaze themes without making color the only state cue.
+
+Album and video cards may expose a trailing vertical overflow control matching the supplied mockups. Overflow controls use the general 48dp target floor, remain separately focusable from the card itself, and expose only bounded contextual actions already supported by Gallery. Video-card overflow is rendered as a rounded first-party Glaze overlay with semantic action glyphs rather than the platform-default rectangular popup. Destructive Android-authorized mutation is not placed in these compact card menus.
 
 Photos retain the dense media-first grid but sparse dense-mode date groups use a three-column presentation lane so one- and two-item days do not look visually stranded inside a four-column grid.
 
@@ -132,13 +139,25 @@ The full-screen media viewer receives a restrained Overlay treatment in `gc.14`:
 
 - the viewer toolbar uses the semantic muted Glaze surface rather than a separate branded gradient so controls remain subordinate to the media;
 - the bottom action area uses a rounded-top muted Glaze overlay with a restrained semantic outline;
-- visible viewer actions use 48dp comfortable targets and retain their existing Android selection feedback and content descriptions;
+- visible viewer actions use compact icon/glyph controls inside 48dp comfortable targets, retain Android selection feedback, content descriptions, and tooltips, and keep destructive actions semantically distinct;
 - the compact photo view-options control presents Fit, Fill, a bounded 2× zoom preset, and Reset zoom when applicable; pinch zoom and drag-to-pan remain direct media gestures, while the explicit menu preserves a discoverable non-pinch zoom/reset path;
 - photos and videos remain unframed primary content; the design system is applied to chrome rather than placed over the media as decorative cards;
 - delete and other destructive operations retain their existing behavior and confirmation requirements;
 - no blur, remote asset, analytics, tracking, advertising, or network dependency is added.
 
 The media viewer intentionally uses a quieter Glaze treatment than Settings or browsing navigation. GoreeCloud identity should be recognizable in the controls without competing with the user’s photo or video.
+
+## Icon-first action controls
+
+Gallery uses icon/glyph controls for persistent, repeated action chrome when the meaning can remain clear through platform-familiar iconography plus accessibility semantics. This includes full-screen viewer actions, multi-selection actions, Trash Refresh/selection/viewer actions, photo-editor transforms, and compact Settings action affordances.
+
+The icon-first rule does not remove labels where the text itself is the value. Crop ratios such as **1:1**, **4:3**, and **16:9**, preference values, titles, explanatory copy, and ambiguous menu choices remain textual. Every icon-only action must preserve a descriptive accessibility name, a discoverability tooltip where Android supports it, at least a 48dp comfortable interaction target for persistent chrome, visible enabled/disabled state, and explicit selected/toggled semantics where applicable. Destructive actions must not rely on the trash-can glyph alone; they retain semantic danger treatment and Android-owned confirmation where required.
+
+The photo editor uses a two-row control composition on compact phones instead of a horizontally scrolling strip of long labels: transform actions are equal-width glyph controls and aspect presets are short value labels. The active crop preset receives explicit selected styling and state semantics; dragging to a custom crop clears that preset state. Settings action rows keep the complete row title/subtitle as the semantic label while the trailing action becomes a compact glyph. This reduces visual density without turning the interface into unlabeled mystery icons.
+
+Persistent action chrome must use first-party vector geometry rather than Unicode/font pseudo-glyphs when a governed icon exists or can be provided. Viewer previous/next controls, media play overlays, selection checks, overflow affordances, and navigation chevrons therefore use vector assets. First-party icon controls should also provide bounded press feedback that follows the control geometry without replacing selected or destructive semantics. Header title and subtitle text must remain single-line and ellipsized when needed so compact-width action geometry stays stable. Album cards, album quick-access chips, media-access actions, and inline-search dismissal participate in the same bounded feedback contract. Stateful icon surfaces must expose non-color state semantics through Android selection/state-description APIs when supported, including active viewer toggles, selected media tiles, selected dialog choices, and selected bulk-action states. Permission and recovery actions may use glyph-plus-label controls rather than icon-only controls when the visible text is materially important to authorization clarity; Gallery's media-access action follows this exception with contextual first-party glyphs.
+
+Settings state presentation distinguishes actions, choices, and booleans inside shared grouped section surfaces: individual rows are transparent, compact, and divider-separated rather than independently carded. Actions use compact glyph affordances; choices keep the current textual value and add a directional chevron; boolean rows use vector on/off switch indicators with On/Off/Unavailable state descriptions. Empty library/search/Trash surfaces use lightweight canvas treatment rather than oversized raised cards; adjacent title/message text remains the accessibility authority.
 
 ## Transient surfaces and dialogs
 
@@ -187,7 +206,7 @@ A surface is not considered Glaze UI compliant merely because its background col
 
 ## Accessibility and resilience contract
 
-Visual quality does not override accessibility. Stable-release review must include, where applicable, TalkBack identification, meaningful labels for icon-only controls, practical touch-target sizing, readable contrast, large-font and increased-display-size behavior, usable focus order, reduced-motion behavior, and safe solid-surface presentation when advanced effects are unavailable or inappropriate.
+Visual quality does not override accessibility. Anchor / Production Acceptance review must include, where applicable, TalkBack identification, meaningful labels for icon-only controls, practical touch-target sizing, readable contrast, large-font and increased-display-size behavior, usable focus order, reduced-motion behavior, and safe solid-surface presentation when advanced effects are unavailable or inappropriate.
 
 The gc.11 Settings treatment, gc.12 browsing actions, gc.14 media-viewer controls, and gc.15 dialog controls use 48dp comfortable interactive targets. The gc.13 search empty state, gc.14 viewer overlay, and gc.15 dialogs use solid semantic surfaces rather than depending on translucency for readability. gc.16 keeps those dialog surfaces content-sized while preserving scrollability for large-font or constrained-height cases. Any Glaze UI treatment that materially weakens accessibility must be revised even if it matches the preferred aesthetic.
 
@@ -229,8 +248,12 @@ No permanent Glaze UI exception is approved for GoreeCloud Gallery at this time.
 
 If a future material constraint prevents compliance, the exception record must identify the affected surface or behavior, the requirement that cannot be met, the reason, user-visible impact, compensating or approved alternative, owner, review condition, and condition for removal. Convenience, schedule pressure, upstream defaults, or unfinished redesign work are not production exceptions.
 
-## Stable-release boundary
+## Anchor / production-acceptance boundary
 
-Glaze UI compliance is a blocking Stable-release requirement. Stable promotion requires both automated conformance evidence and the applicable real-device visual/accessibility acceptance in `docs/STABLE-RELEASE-CHECKLIST.md`.
+Glaze conformance is a blocking Anchor / Production Acceptance requirement. Promotion requires both automated conformance evidence and the applicable real-device visual/accessibility acceptance in `docs/STABLE-RELEASE-CHECKLIST.md`.
 
 A green build, successful APK assembly, or successful signing workflow alone does not establish Glaze UI production readiness.
+
+
+### Glyph-only navigation contract — October 3, 2026
+Primary Gallery navigation intentionally renders glyphs only. Legacy stored navigation-display values remain parseable for settings-file compatibility, but they do not restore visible tab labels. Destination names are exposed through content descriptions, state descriptions, and tooltips. The rail uses the same height, side margins, bottom margin, icon optical size, slot distribution, and selected-state geometry on every Gallery destination. Selection changes may use bounded micro motion, but the selected slot must not become larger than the other four slots.

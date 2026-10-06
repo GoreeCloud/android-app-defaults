@@ -160,7 +160,7 @@ Gallery must display provider-owned truth rather than manufacture provider autho
 
 Gallery must use the latest accepted Stable Glaze UI contract applicable to the product at candidate acceptance time.
 
-Current accepted `main` maps the native Development line to Glaze UI V1.6 / `1.6.0` at the accepted source recorded in repository evidence. This is a source mapping, not whole-application conformance.
+The 0.9 redesign maps the native Development line to the consumer-eligible Glaze V1.7 / `1.7.0` anchor recorded in repository evidence. V1.7.0 inherits the accepted V1.6.0 runtime and Gallery does not include retained dev.47 / Section 48 Development behavior. This is a source mapping and implementation migration, not whole-application conformance.
 
 Gallery-specific conformance requires fresh rendered, interaction, accessibility, adaptive/form-factor, performance, Human Visual Excellence, representative-device/OEM/profile, fallback/resilience, rollback, release, and production evidence.
 
@@ -193,7 +193,7 @@ Authoritative `main` currently includes the first-party native Development capab
 - Restore/Purge foundations;
 - Android-authorized Move foundation;
 - local settings and portability controls; and
-- Glaze UI V1.6 source mapping.
+- Glaze V1.7 source mapping and shared native 0.9 design-system foundation.
 
 These capabilities remain Development and retain the acceptance gates stated in the lifecycle records.
 

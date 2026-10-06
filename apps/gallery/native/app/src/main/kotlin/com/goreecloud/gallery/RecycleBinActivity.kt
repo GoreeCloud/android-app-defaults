@@ -15,6 +15,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.LruCache
 import android.util.Size
 import android.util.TypedValue
@@ -52,6 +53,7 @@ import kotlin.concurrent.thread
 class RecycleBinActivity : Activity() {
     private lateinit var root: FrameLayout
     private lateinit var body: LinearLayout
+    private lateinit var libraryScroll: ScrollView
     private lateinit var headerTitle: TextView
     private lateinit var headerSubtitle: TextView
     private lateinit var navigationCapsule: LinearLayout
@@ -173,12 +175,13 @@ class RecycleBinActivity : Activity() {
             setBackgroundColor(canvasColor())
         }
 
+        val designMetrics = GalleryDesignSystem.metrics(this)
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(
-                dp(horizontalGutterDp()),
-                dp(14),
-                dp(horizontalGutterDp()),
+                dp(designMetrics.horizontalGutterDp),
+                dp(designMetrics.topPaddingDp),
+                dp(designMetrics.horizontalGutterDp),
                 dp(GalleryGlazeContract.CONTENT_BOTTOM_INSET_DP),
             )
             setBackgroundColor(canvasColor())
@@ -194,8 +197,8 @@ class RecycleBinActivity : Activity() {
                 scaleType = ImageView.ScaleType.CENTER_INSIDE
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
             },
-            LinearLayout.LayoutParams(dp(40), dp(40)).apply {
-                marginEnd = dp(8)
+            LinearLayout.LayoutParams(dp(28), dp(28)).apply {
+                marginEnd = dp(10)
             },
         )
 
@@ -204,14 +207,13 @@ class RecycleBinActivity : Activity() {
         }
         headerTitle = TextView(this).apply {
             text = "Trash"
-            setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-            setTypeface(typeface, Typeface.BOLD)
+            GalleryDesignSystem.applyTitle(this, primaryTextColor())
+            ellipsize = TextUtils.TruncateAt.END
         }
         headerSubtitle = TextView(this).apply {
             text = "Android controls Trash retention and expiration"
-            setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+            GalleryDesignSystem.applySubtitle(this, secondaryTextColor())
+            ellipsize = TextUtils.TruncateAt.END
         }
         titles.addView(headerTitle)
         titles.addView(headerSubtitle)
@@ -219,8 +221,8 @@ class RecycleBinActivity : Activity() {
             marginStart = dp(4)
         })
         header.addView(
-            textAction("Refresh", "Refresh Trash") { loadRecycleBin() },
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(48)),
+            headerIconAction(R.drawable.ic_gallery_refresh, "Refresh Trash") { loadRecycleBin() },
+            LinearLayout.LayoutParams(dp(48), dp(48)),
         )
         content.addView(header)
 
@@ -233,31 +235,53 @@ class RecycleBinActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply {
-                topMargin = dp(10)
-                bottomMargin = dp(2)
+                topMargin = dp(3)
+                bottomMargin = 0
             },
         )
 
         body = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(0, dp(8), 0, 0)
+            setPadding(0, dp(4), 0, 0)
         }
         content.addView(body)
 
-        val scroll = ScrollView(this).apply {
+        val contentHost = FrameLayout(this).apply {
+            val widthPx = if (resources.configuration.screenWidthDp > GalleryGlazeContract.CONTENT_MAX_WIDTH_DP) {
+                dp(GalleryGlazeContract.CONTENT_MAX_WIDTH_DP)
+            } else {
+                ViewGroup.LayoutParams.MATCH_PARENT
+            }
+            addView(
+                content,
+                FrameLayout.LayoutParams(widthPx, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                    gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                },
+            )
+        }
+        libraryScroll = ScrollView(this).apply {
             isFillViewport = true
             clipToPadding = false
-            addView(content, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+            addView(
+                contentHost,
+                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT),
+            )
         }
+        val widthDp = resources.configuration.screenWidthDp
+        val usesRail = GalleryGlazeContract.usesNavigationRail(widthDp)
         root.addView(
-            scroll,
+            libraryScroll,
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT).apply {
-                bottomMargin = dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+                if (usesRail) {
+                    marginStart = dp(GalleryGlazeContract.navigationRailLaneDp(widthDp))
+                } else {
+                    bottomMargin = dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+                }
             },
         )
 
         navigationCapsule = buildNavigationCapsule()
-        root.addView(navigationCapsule, bottomCapsuleLayoutParams())
+        root.addView(navigationCapsule, navigationCapsuleLayoutParams())
 
         actionBar = bottomCapsuleSurface().apply {
             visibility = View.GONE
@@ -269,10 +293,9 @@ class RecycleBinActivity : Activity() {
     }
 
     private fun buildNavigationCapsule(): LinearLayout = bottomCapsuleSurface().apply {
-        val navigationMode = GalleryNavigationDisplayMode.fromStored(
-            getSharedPreferences(GallerySetupPreferences.PREFERENCES_NAME, MODE_PRIVATE)
-                .getString(GalleryNavigationDisplayMode.PREFERENCE_KEY, null),
-        )
+        val navigationMode = GalleryNavigationDisplayMode.ICONS_ONLY
+        val usesRail = GalleryGlazeContract.usesNavigationRail(resources.configuration.screenWidthDp)
+        orientation = if (usesRail) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
         val items = listOf(
             Triple("Photos", R.drawable.ic_gallery_nav_photos, GalleryNavigationContract.PHOTOS),
             Triple("Albums", R.drawable.ic_gallery_nav_albums, GalleryNavigationContract.ALBUMS),
@@ -291,7 +314,7 @@ class RecycleBinActivity : Activity() {
                         iconRes = icon,
                         mode = navigationMode,
                         selected = selected,
-                        foreground = if (selected) accentColor() else primaryTextColor(),
+                        foreground = if (selected) accentColor() else secondaryTextColor(),
                     )
                     isSelected = selected
                     isClickable = true
@@ -306,7 +329,14 @@ class RecycleBinActivity : Activity() {
                         }
                     }
                 },
-                LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f),
+                if (usesRail) {
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        dp(GalleryGlazeContract.NAVIGATION_RAIL_ITEM_HEIGHT_DP),
+                    )
+                } else {
+                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
+                },
             )
         }
     }
@@ -320,27 +350,72 @@ class RecycleBinActivity : Activity() {
         finish()
     }
 
-    private fun bottomCapsuleLayoutParams(): FrameLayout.LayoutParams =
-        FrameLayout.LayoutParams(
+    private fun navigationCapsuleLayoutParams(): FrameLayout.LayoutParams {
+        val widthDp = resources.configuration.screenWidthDp
+        if (GalleryGlazeContract.usesNavigationRail(widthDp)) {
+            return FrameLayout.LayoutParams(
+                dp(GalleryGlazeContract.NAVIGATION_RAIL_WIDTH_DP),
+                dp(
+                    (GalleryGlazeContract.NAVIGATION_RAIL_ITEM_HEIGHT_DP * 5) + 8,
+                ),
+            ).apply {
+                gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                marginStart = dp(GalleryGlazeContract.NAVIGATION_RAIL_SIDE_MARGIN_DP)
+            }
+        }
+        return bottomCapsuleLayoutParams()
+    }
+
+    private fun updateLibraryViewportForChrome() {
+        if (!::libraryScroll.isInitialized) return
+        val params = libraryScroll.layoutParams as? FrameLayout.LayoutParams ?: return
+        val widthDp = resources.configuration.screenWidthDp
+        val usesRail = GalleryGlazeContract.usesNavigationRail(widthDp)
+        val inSelectionMode = selectedUris.isNotEmpty()
+        val desiredStartMargin = if (usesRail && !inSelectionMode) {
+            dp(GalleryGlazeContract.navigationRailLaneDp(widthDp))
+        } else {
+            0
+        }
+        val desiredBottomMargin = if (!usesRail || inSelectionMode) {
+            dp(GalleryGlazeContract.NAVIGATION_RESERVED_SPACE_DP)
+        } else {
+            0
+        }
+        if (
+            params.marginStart != desiredStartMargin ||
+            params.bottomMargin != desiredBottomMargin
+        ) {
+            params.marginStart = desiredStartMargin
+            params.bottomMargin = desiredBottomMargin
+            libraryScroll.layoutParams = params
+        }
+    }
+
+    private fun bottomCapsuleLayoutParams(): FrameLayout.LayoutParams {
+        val metrics = GalleryDesignSystem.metrics(this)
+        return FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            dp(GalleryGlazeContract.NAVIGATION_HEIGHT_DP),
+            dp(metrics.navigationHeightDp),
         ).apply {
             gravity = Gravity.BOTTOM
-            marginStart = dp(GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
-            marginEnd = dp(GalleryGlazeContract.NAVIGATION_SIDE_MARGIN_DP)
-            bottomMargin = dp(GalleryGlazeContract.NAVIGATION_BOTTOM_MARGIN_DP)
+            marginStart = dp(metrics.navigationSideMarginDp)
+            marginEnd = dp(metrics.navigationSideMarginDp)
+            bottomMargin = dp(metrics.navigationBottomMarginDp)
         }
+    }
 
     private fun bottomCapsuleSurface(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER
-        setPadding(dp(3), dp(3), dp(3), dp(3))
+        setPadding(dp(4), dp(4), dp(4), dp(4))
         background = GalleryGlazeSurfaces.drawable(
             context,
             GalleryGlazeSurfaces.Role.CHROME,
             GalleryGlazeContract.NAVIGATION_RADIUS_DP,
         )
         elevation = dp(GalleryGlazeContract.NAVIGATION_ELEVATION_DP).toFloat()
+        clipToOutline = true
     }
 
     private fun loadRecycleBin() {
@@ -362,7 +437,7 @@ class RecycleBinActivity : Activity() {
             trashedItems = emptyList()
             headerTitle.text = "Trash"
             headerSubtitle.text = "Media access required"
-            body.addView(emptyState("Media access required", "Open GoreeCloud Gallery and allow Android media access before browsing Trash."))
+            body.addView(emptyState("Media access required", "Choose media in Gallery before opening Trash."))
             return
         }
 
@@ -422,11 +497,17 @@ class RecycleBinActivity : Activity() {
     }
 
     private fun renderMediaGrid(items: List<MediaItem>, currentGeneration: Int) {
+        val widthDp = resources.configuration.screenWidthDp
         val columns = gridColumns()
-        val gap = dp(4)
+        val gap = dp(GalleryGlazeContract.mediaGapDp(widthDp))
         val totalGap = gap * (columns - 1)
-        val tileSize = ((resources.displayMetrics.widthPixels - dp(horizontalGutterDp() * 2) - totalGap) / columns)
-            .coerceAtLeast(dp(72))
+        val contentWidthPx = minOf(
+            resources.displayMetrics.widthPixels,
+            dp(GalleryGlazeContract.CONTENT_MAX_WIDTH_DP),
+        )
+        val tileSize = (
+            (contentWidthPx - dp(GalleryGlazeContract.horizontalGutterDp(widthDp) * 2) - totalGap) / columns
+        ).coerceAtLeast(dp(GalleryGlazeContract.MIN_GRID_TILE_DP))
 
         items.chunked(columns).forEachIndexed { rowIndex, rowItems ->
             val row = LinearLayout(this).apply {
@@ -473,8 +554,12 @@ class RecycleBinActivity : Activity() {
             isClickable = true
             isLongClickable = true
             isFocusable = true
+            GalleryInteractionFeedback.applyBoundedRipple(this, Color.WHITE, 14)
             isSelected = selected
             contentDescription = tileDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                stateDescription = if (selected) "Selected" else null
+            }
             setOnClickListener {
                 if (selectedUris.isNotEmpty()) {
                     toggleSelection(item)
@@ -499,30 +584,51 @@ class RecycleBinActivity : Activity() {
                 FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
             )
             if (item.mimeType.startsWith("video/")) {
-                addView(TextView(context).apply {
-                    text = item.durationMillis?.let(::formatDuration) ?: "VIDEO"
-                    setTextColor(Color.WHITE)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
-                    setTypeface(typeface, Typeface.BOLD)
-                    gravity = Gravity.CENTER
-                    setPadding(dp(7), dp(3), dp(7), dp(3))
-                    background = roundedSurface(0xb3000000.toInt(), 9)
-                    importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                }, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                    gravity = Gravity.END or Gravity.BOTTOM
-                    marginEnd = dp(5)
-                    bottomMargin = dp(5)
-                })
+                addView(
+                    ImageView(context).apply {
+                        tag = VIDEO_PLAY_TAG
+                        visibility = if (selectedUris.isEmpty()) View.VISIBLE else View.GONE
+                        setImageResource(R.drawable.ic_gallery_play)
+                        setColorFilter(Color.WHITE)
+                        scaleType = ImageView.ScaleType.CENTER_INSIDE
+                        setPadding(dp(12), dp(12), dp(12), dp(12))
+                        background = roundedSurface(0xb3000000.toInt(), 20)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    },
+                    FrameLayout.LayoutParams(dp(40), dp(40)).apply {
+                        gravity = Gravity.CENTER
+                    },
+                )
+                item.durationMillis?.let { durationMillis ->
+                    addView(
+                        TextView(context).apply {
+                            text = formatDuration(durationMillis)
+                            setTextColor(Color.WHITE)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+                            setTypeface(typeface, Typeface.BOLD)
+                            gravity = Gravity.CENTER
+                            setPadding(dp(7), dp(3), dp(7), dp(3))
+                            background = roundedSurface(0xb3000000.toInt(), 9)
+                            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                        },
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ).apply {
+                            gravity = Gravity.END or Gravity.BOTTOM
+                            marginEnd = dp(5)
+                            bottomMargin = dp(5)
+                        },
+                    )
+                }
             }
             addView(
-                TextView(context).apply {
+                ImageView(context).apply {
                     tag = SELECTION_CHECK_TAG
                     visibility = if (selected) View.VISIBLE else View.GONE
-                    text = "✓"
-                    gravity = Gravity.CENTER
-                    setTextColor(Color.WHITE)
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-                    setTypeface(typeface, Typeface.BOLD)
+                    setImageResource(R.drawable.ic_gallery_check_white)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setPadding(dp(6), dp(6), dp(6), dp(6))
                     background = roundedSurface(accentColor(), 14)
                     importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                 },
@@ -549,8 +655,13 @@ class RecycleBinActivity : Activity() {
             val selected = uri in selectedUris
             tile.isSelected = selected
             tile.contentDescription = tileDescription(item, selected)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                tile.stateDescription = if (selected) "Selected" else null
+            }
             tile.findViewWithTag<View>(SELECTION_OVERLAY_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
             tile.findViewWithTag<View>(SELECTION_CHECK_TAG)?.visibility = if (selected) View.VISIBLE else View.GONE
+            tile.findViewWithTag<View>(VIDEO_PLAY_TAG)?.visibility =
+                if (selectedUris.isEmpty()) View.VISIBLE else View.GONE
         }
         headerTitle.text = if (selectedUris.isEmpty()) "Trash" else if (selectedUris.size == 1) "1 selected" else "${selectedUris.size} selected"
         if (selectedUris.isEmpty()) {
@@ -563,6 +674,7 @@ class RecycleBinActivity : Activity() {
 
     private fun renderActionBar() {
         if (!::actionBar.isInitialized || !::navigationCapsule.isInitialized) return
+        updateLibraryViewportForChrome()
         actionBar.removeAllViews()
         if (selectedUris.isEmpty() || viewerOverlay != null) {
             actionBar.visibility = View.GONE
@@ -572,18 +684,22 @@ class RecycleBinActivity : Activity() {
         navigationCapsule.visibility = View.GONE
         actionBar.visibility = View.VISIBLE
         val actions = listOf(
-            textAction("Select all", "Select all currently loaded trashed media") {
+            iconAction(R.drawable.ic_gallery_select_all, "Select all currently loaded trashed media") {
                 selectedUris.clear()
                 selectedUris.addAll(GallerySelectionPolicy.selectAll(trashedItems))
                 renderSelectionState()
             },
-            textAction("Restore", "Restore selected media through Android confirmation") {
+            iconAction(R.drawable.ic_gallery_restore, "Restore selected media through Android confirmation") {
                 requestMutation(AndroidMediaMutationMode.RESTORE)
             },
-            textAction("Delete permanently", "Permanently delete selected media through Android confirmation") {
+            iconAction(
+                R.drawable.ic_gallery_delete,
+                "Permanently delete selected media through Android confirmation",
+                destructive = true,
+            ) {
                 requestMutation(AndroidMediaMutationMode.DELETE)
             },
-            textAction("Cancel", "Clear Trash selection") {
+            iconAction(R.drawable.ic_gallery_close, "Clear Trash selection") {
                 selectedUris.clear()
                 renderSelectionState()
             },
@@ -613,6 +729,11 @@ class RecycleBinActivity : Activity() {
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
         }
         viewerOverlay = overlay
+        val viewerChromeWidth = if (resources.configuration.screenWidthDp >= GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP + 20) {
+            dp(GalleryGlazeContract.SETTINGS_MAX_WIDTH_DP)
+        } else {
+            ViewGroup.LayoutParams.MATCH_PARENT
+        }
         root.addView(
             overlay,
             FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
@@ -638,11 +759,16 @@ class RecycleBinActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(10), dp(8), dp(10), dp(8))
-            background = roundedSurface(0xd9141416.toInt(), 22)
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
         }
-        val viewerBack = viewerAction("‹", "Close Trash viewer") { closeViewer() }.apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-        }
+        val viewerBack = viewerIconAction(
+            R.drawable.ic_gallery_back,
+            "Close Trash viewer",
+        ) { closeViewer() }
         topBar.addView(viewerBack, LinearLayout.LayoutParams(dp(48), dp(48)))
         val viewerTitle = TextView(this).apply {
             setTextColor(Color.WHITE)
@@ -668,18 +794,22 @@ class RecycleBinActivity : Activity() {
         )
         overlay.addView(
             topBar,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(64)).apply {
-                gravity = Gravity.TOP
+            FrameLayout.LayoutParams(viewerChromeWidth, dp(68)).apply {
+                gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
                 marginStart = dp(10)
                 marginEnd = dp(10)
                 topMargin = dp(6)
             },
         )
 
-        val previous = viewerAction("‹", "Previous trashed media") {}
-        val next = viewerAction("›", "Next trashed media") {}
-        previous.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
-        next.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        val previous = viewerIconAction(
+            R.drawable.ic_gallery_chevron_left,
+            "Previous trashed media",
+        ) {}
+        val next = viewerIconAction(
+            R.drawable.ic_gallery_chevron_right,
+            "Next trashed media",
+        ) {}
         overlay.addView(previous, FrameLayout.LayoutParams(dp(52), dp(64)).apply {
             gravity = Gravity.START or Gravity.CENTER_VERTICAL
             marginStart = dp(10)
@@ -693,11 +823,25 @@ class RecycleBinActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             setPadding(dp(6), dp(6), dp(6), dp(6))
-            background = roundedSurface(0xe8141416.toInt(), 24)
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
         }
-        val restore = viewerAction("Restore", "Restore this media through Android confirmation") {}
-        val purge = viewerAction("Delete permanently", "Permanently delete this media through Android confirmation") {}
-        val more = viewerAction("More", "Show details for this trashed media") {}
+        val restore = viewerIconAction(
+            R.drawable.ic_gallery_restore,
+            "Restore this media through Android confirmation",
+        ) {}
+        val purge = viewerIconAction(
+            R.drawable.ic_gallery_delete,
+            "Permanently delete this media through Android confirmation",
+            destructive = true,
+        ) {}
+        val more = viewerIconAction(
+            R.drawable.ic_gallery_more,
+            "Show details for this trashed media",
+        ) {}
         listOf(restore, purge, more).forEachIndexed { index, action ->
             bottomBar.addView(action, LinearLayout.LayoutParams(0, dp(60), 1f).apply {
                 if (index > 0) marginStart = dp(3)
@@ -705,8 +849,8 @@ class RecycleBinActivity : Activity() {
         }
         overlay.addView(
             bottomBar,
-            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(72)).apply {
-                gravity = Gravity.BOTTOM
+            FrameLayout.LayoutParams(viewerChromeWidth, dp(72)).apply {
+                gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                 marginStart = dp(10)
                 marginEnd = dp(10)
                 bottomMargin = dp(16)
@@ -908,64 +1052,144 @@ class RecycleBinActivity : Activity() {
         return "$minutes:${remainder.toString().padStart(2, '0')}"
     }
 
-    private fun textAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
-        text = label
+    private fun headerIconAction(
+        iconResource: Int,
+        description: String,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
         gravity = Gravity.CENTER
-        minHeight = dp(48)
-        setPadding(dp(10), 0, dp(10), 0)
-        setTextColor(accentColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, if (label.length > 12) 10.5f else 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(withAlpha(accentColor(), 0.10f), 18)
-        isClickable = true
-        isFocusable = true
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(accentColor())
+        GalleryDesignSystem.applyIconButton(this, accentColor())
         contentDescription = description
+        tooltipText = description
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            accentColor(),
+            GalleryGlazeContract.SHAPE_CONTROL_DP,
+        )
         setOnClickListener { onClick() }
     }
 
-    private fun viewerAction(label: String, description: String, onClick: () -> Unit): TextView = TextView(this).apply {
-        text = label
+    private fun iconAction(
+        iconResource: Int,
+        description: String,
+        destructive: Boolean = false,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
+        gravity = Gravity.CENTER
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        val foreground = if (destructive) getColor(android.R.color.holo_red_light) else accentColor()
+        compoundDrawableTintList = ColorStateList.valueOf(foreground)
+        GalleryDesignSystem.applyIconButton(
+            this,
+            foreground,
+            destructive = destructive,
+        )
+        contentDescription = description
+        tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (destructive) "Destructive action" else null
+        }
+        GalleryInteractionFeedback.applyBoundedRipple(this, foreground, 18)
+        setOnClickListener { onClick() }
+    }
+
+    private fun viewerIconAction(
+        iconResource: Int,
+        description: String,
+        destructive: Boolean = false,
+        onClick: () -> Unit,
+    ): TextView = TextView(this).apply {
+        text = ""
         gravity = Gravity.CENTER
         minHeight = dp(48)
         minWidth = dp(48)
-        setPadding(dp(8), 0, dp(8), 0)
-        setTextColor(Color.WHITE)
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, if (label.length > 12) 10.5f else 12f)
-        setTypeface(typeface, Typeface.BOLD)
-        background = roundedSurface(0x26ffffff, 18)
+        setPadding(dp(12), dp(12), dp(12), dp(12))
+        setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0)
+        compoundDrawableTintList = ColorStateList.valueOf(
+            if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+        )
+        background = GalleryDesignSystem.mediaIconBackground(
+            context = context,
+            foreground = if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+            destructive = destructive,
+        )
         isClickable = true
         isFocusable = true
         contentDescription = description
+        tooltipText = description
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            stateDescription = if (destructive) "Destructive action" else null
+        }
+        GalleryInteractionFeedback.applyBoundedRipple(
+            this,
+            if (destructive) 0xffff8a80.toInt() else Color.WHITE,
+            18,
+        )
         setOnClickListener { onClick() }
     }
 
     private fun sectionHeader(label: String): TextView = TextView(this).apply {
         text = label
-        setTextColor(primaryTextColor())
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-        setTypeface(typeface, Typeface.BOLD)
-        setPadding(dp(2), dp(8), 0, dp(10))
+        GalleryDesignSystem.applySectionLabel(this, primaryTextColor())
+        setPadding(dp(2), dp(14), 0, dp(8))
     }
 
     private fun messageRow(title: String, message: String): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(dp(18), dp(18), dp(18), dp(18))
-        background = roundedSurface(withAlpha(primaryTextColor(), if (isNightMode()) 0.10f else 0.045f), 20)
+        setPadding(dp(2), dp(5), dp(2), dp(5))
+        background = null
         addView(TextView(context).apply {
             text = title
             setTextColor(primaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
             setTypeface(typeface, Typeface.BOLD)
         })
         addView(TextView(context).apply {
             text = message
-            setTextColor(secondaryTextColor())
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            setPadding(0, dp(5), 0, 0)
+            GalleryDesignSystem.applySupportingText(this, secondaryTextColor())
+            setPadding(0, dp(2), 0, 0)
         })
     }
 
-    private fun emptyState(title: String, message: String): View = messageRow(title, message)
+    private fun emptyState(title: String, message: String): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER
+        setPadding(dp(16), dp(22), dp(16), dp(18))
+        background = GalleryDesignSystem.emptyStateSurface(context)
+        addView(
+            ImageView(context).apply {
+                setImageResource(R.drawable.ic_gallery_nav_trash)
+                setColorFilter(accentColor())
+                scaleType = ImageView.ScaleType.CENTER_INSIDE
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                alpha = 0.82f
+            },
+            LinearLayout.LayoutParams(dp(34), dp(34)).apply {
+                bottomMargin = dp(7)
+            },
+        )
+        addView(TextView(context).apply {
+            text = title
+            gravity = Gravity.CENTER
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        addView(TextView(context).apply {
+            text = message
+            gravity = Gravity.CENTER
+            setTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.75f)
+            setLineSpacing(0f, 1.04f)
+            setPadding(0, dp(4), 0, 0)
+        })
+    }
 
     private fun roundedSurface(color: Int, radiusDp: Int): GradientDrawable = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
@@ -1000,23 +1224,16 @@ class RecycleBinActivity : Activity() {
     private fun isNightMode(): Boolean =
         resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
-    private fun canvasColor(): Int = if (isNightMode()) 0xff0b0b0d.toInt() else 0xfffbfbfc.toInt()
-    private fun primaryTextColor(): Int = if (isNightMode()) Color.WHITE else 0xff202124.toInt()
-    private fun secondaryTextColor(): Int = if (isNightMode()) 0xffb8b8bd.toInt() else 0xff73757a.toInt()
-    private fun accentColor(): Int = if (isNightMode()) 0xff70d8ca.toInt() else 0xff008f83.toInt()
+    private fun canvasColor(): Int = getColor(R.color.gallery_canvas)
+    private fun primaryTextColor(): Int = getColor(R.color.gallery_text_primary)
+    private fun secondaryTextColor(): Int = getColor(R.color.gallery_text_secondary)
+    private fun accentColor(): Int = getColor(R.color.gallery_accent)
 
-    private fun horizontalGutterDp(): Int = when {
-        resources.configuration.screenWidthDp >= 840 -> 32
-        resources.configuration.screenWidthDp >= 600 -> 24
-        else -> 16
-    }
+    private fun horizontalGutterDp(): Int =
+        GalleryGlazeContract.horizontalGutterDp(resources.configuration.screenWidthDp)
 
-    private fun gridColumns(): Int = when {
-        resources.configuration.screenWidthDp >= 840 -> 6
-        resources.configuration.screenWidthDp >= 600 -> 5
-        resources.configuration.screenWidthDp >= 360 -> 4
-        else -> 3
-    }
+    private fun gridColumns(): Int =
+        GalleryGlazeContract.trashGridColumns(resources.configuration.screenWidthDp)
 
     private fun gridCacheKey(contentUri: String): String = "$GRID_CACHE_PREFIX:$contentUri"
     private fun viewerCacheKey(contentUri: String): String = "$VIEWER_CACHE_PREFIX:$contentUri"
@@ -1033,6 +1250,7 @@ class RecycleBinActivity : Activity() {
         private const val VIEWER_CACHE_PREFIX = "recycle-viewer"
         private const val SELECTION_OVERLAY_TAG = "goreecloud_recycle_selection_overlay"
         private const val SELECTION_CHECK_TAG = "goreecloud_recycle_selection_check"
+        private const val VIDEO_PLAY_TAG = "goreecloud_recycle_video_play"
         private const val LOCAL_STATE_PREFERENCES = "goreecloud_gallery_local_state"
         private const val FAVORITES_KEY = "favorite_content_uris"
 
