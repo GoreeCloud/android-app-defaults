@@ -60,6 +60,32 @@ class LauncherAiInlineSearchProviderTest {
     }
 
     @Test
+    fun providerFailureReturnsSafeRecoveryResultWithoutErrorDetails() = runBlocking {
+        val provider = LauncherAiInlineSearchProvider(
+            id = LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
+            displayName = "ChatGPT",
+            credentialProvider = { "secret-test-key" },
+            transport = LauncherAiInlineSearchTransport { _, _ ->
+                error("provider-specific-secret-detail")
+            },
+        )
+
+        val result = provider.searchAsync(LauncherSearchRequest("status")).single()
+
+        assertEquals("ChatGPT couldn’t load an answer", result.title)
+        assertEquals(
+            "Check your connection or API key · tap to review source",
+            result.subtitle,
+        )
+        assertEquals(
+            LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
+            (result.action as LauncherManageSearchSourceAction).providerId,
+        )
+        assertFalse(result.title.contains("secret"))
+        assertFalse(result.subtitle.orEmpty().contains("secret"))
+    }
+
+    @Test
     fun registeredAiProviderIsOptInRemoteInline() {
         val provider = LauncherAiInlineSearchProvider(
             id = LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
@@ -89,6 +115,7 @@ class LauncherAiInlineSearchProviderTest {
             LauncherSearchProviderUserControlPolicy.displayNameFor(provider.id),
         )
     }
+
     @Test
     fun geminiProviderIsCredentialGatedAndNamedForSourceControls() {
         val providerId = LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID
@@ -99,5 +126,4 @@ class LauncherAiInlineSearchProviderTest {
             LauncherSearchProviderUserControlPolicy.displayNameFor(providerId),
         )
     }
-
 }
