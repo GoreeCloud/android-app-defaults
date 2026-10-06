@@ -1,6 +1,6 @@
 # GoreeCloud Keyboard — Changelogs
 
-## October 6, 2026 — adaptive constrained-height row-gap candidate
+## October 6, 2026 — adaptive constrained-height row gaps integrated
 
 - Replaced unconditional fixed inter-row gap reservation with a bounded adaptive gap policy driven by the actual vertical area available to key rows.
 - Under constrained IME height, row whitespace compresses toward zero before keys surrender space that can preserve the active Glaze interaction floor, including Touch Assistance.
@@ -8,7 +8,7 @@
 - Added focused JVM coverage for Touch Assistance compression, ordinary maximum spacing, and degenerate geometry.
 - No typed-content, learning, clipboard, network, account, telemetry, or synchronization authority is added.
 
-This remains a Development candidate pending exact-head CI plus representative-device constrained-height, landscape, large-text, TalkBack/Switch Access, OEM/editor-host, and one-handed coexistence acceptance.
+Protected PR #262 integrated exact candidate `8053a888bc6b3230c6a24f353db276c69ddc566e` as main `f33ecc92e3f01349a6946b20f44a911055522d1e` after provenance, Foundation, Keyboard build/runtime, and promotion passed. Representative-device constrained-height, landscape, large-text, TalkBack/Switch Access, OEM/editor-host, one-handed coexistence, and release acceptance remain open.
 
 
 ## October 5/6, 2026 — one-handed side-switch continuation
@@ -36,6 +36,10 @@ This remains a Development candidate. Exact-head CI plus representative-device t
 ## October 2, 2026 — integrate English/Arabic subtype foundation
 
 Protected PR #185 integrated the bounded English (US) / Arabic IME subtype foundation from exact candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Arabic rows, Arabic-Indic digits, RTL metadata, and language-aware spacebar presentation are active when Android selects the Arabic subtype; English-only assistance fails closed in that mode. Keyboard build/JVM and Android 15 runtime passed inside the protected matrix. Representative-device multilingual/RTL/accessibility and release gates remain open.
+
+## October 2, 2026 — Arabic punctuation and deterministic alternates integrated
+
+Protected PR #187 integrated Arabic comma presentation and deterministic language-aware long-press variants for common Arabic letters, punctuation, and diacritics from exact candidate `a41c306fcbae1001d5439c10e2e85339cb0e9e88` as main `8a066a2f9fa4b6de6692640a7e2528dfa23b01d6`. English alternates and assistance boundaries remain unchanged; Arabic still fails closed on English-only correction/prediction/swipe-learning. Broader Arabic dictionaries/prediction, RTL/BiDi host acceptance, representative-device ergonomics, accessibility, native-language validation, and release gates remain open.
 
 ## September 29, 2026 — legacy Unicode-normalization reconciliation candidate
 
