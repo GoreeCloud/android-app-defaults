@@ -79,7 +79,7 @@ class LauncherDrawerViewportPolicyTest {
                 folderCount = 6,
                 smartFolderCount = 3,
                 columns = 5,
-            ) == 9,
+            ) == 10,
         )
         assertTrue(
             launcherDrawerCategoryLazyItemCount(
