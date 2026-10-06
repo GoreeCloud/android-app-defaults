@@ -4,7 +4,6 @@ import com.goreecloud.launcher.core.launcher.LauncherDrawerDiscoveryFilter
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerNavigation
 import com.goreecloud.launcher.core.launcher.LauncherDrawerProfileKind
-import com.goreecloud.launcher.core.launcher.LauncherDrawerSortOrder
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
