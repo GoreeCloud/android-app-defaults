@@ -89,4 +89,15 @@ class LauncherAiInlineSearchProviderTest {
             LauncherSearchProviderUserControlPolicy.displayNameFor(provider.id),
         )
     }
+    @Test
+    fun geminiProviderIsCredentialGatedAndNamedForSourceControls() {
+        val providerId = LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID
+
+        assertTrue(LauncherConnectedSearchProviderRegistry.isCredentialInlineProvider(providerId))
+        assertEquals(
+            "Google Gemini",
+            LauncherSearchProviderUserControlPolicy.displayNameFor(providerId),
+        )
+    }
+
 }
