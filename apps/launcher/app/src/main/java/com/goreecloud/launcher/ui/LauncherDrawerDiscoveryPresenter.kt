@@ -98,12 +98,35 @@ internal fun LauncherDrawerDiscoveryFiltersRow(
                         menuExpanded = false
                     },
                     trailingIcon = if (filter == selectedFilter) {
-                        { GlazePopupActionGlyph(GlazePopupActionSymbol.CHECK, MaterialTheme.colorScheme.primary, iconSize = 16.dp) }
+                        { LauncherDrawerFilterSelectedGlyph(MaterialTheme.colorScheme.primary) }
                     } else {
                         null
                     },
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LauncherDrawerFilterSelectedGlyph(
+    color: androidx.compose.ui.graphics.Color,
+) {
+    androidx.compose.foundation.Canvas(Modifier.size(16.dp)) {
+        val stroke = 2.dp.toPx()
+        drawLine(
+            color = color,
+            start = androidx.compose.ui.geometry.Offset(size.width * 0.18f, size.height * 0.52f),
+            end = androidx.compose.ui.geometry.Offset(size.width * 0.41f, size.height * 0.73f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            color = color,
+            start = androidx.compose.ui.geometry.Offset(size.width * 0.41f, size.height * 0.73f),
+            end = androidx.compose.ui.geometry.Offset(size.width * 0.82f, size.height * 0.28f),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
     }
 }
