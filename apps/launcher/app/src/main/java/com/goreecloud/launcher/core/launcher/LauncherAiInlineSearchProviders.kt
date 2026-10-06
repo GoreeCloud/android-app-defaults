@@ -171,7 +171,7 @@ internal class LauncherAiInlineSearchProvider(
                 .takeIf(String::isNotBlank)
         } catch (cancelled: CancellationException) {
             throw cancelled
-        } catch (_: Throwable) {
+        } catch (_: Exception) {
             return listOf(
                 LauncherSearchResult(
                     providerId = id,
