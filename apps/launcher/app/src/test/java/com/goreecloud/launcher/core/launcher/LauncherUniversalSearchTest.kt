@@ -234,6 +234,30 @@ class LauncherUniversalSearchTest {
     }
 
     @Test
+    fun remoteInlineDispatchWaitsForMeaningfulSettledQuery() {
+        assertFalse(LauncherRemoteInlineSearchDispatchPolicy.isEligible(""))
+        assertFalse(LauncherRemoteInlineSearchDispatchPolicy.isEligible(" a "))
+        assertFalse(LauncherRemoteInlineSearchDispatchPolicy.isEligible("ab"))
+        assertTrue(LauncherRemoteInlineSearchDispatchPolicy.isEligible("abc"))
+        assertEquals(450L, LauncherRemoteInlineSearchDispatchPolicy.SETTLE_DELAY_MILLIS)
+    }
+
+    @Test
+    fun combinedImmediateAndRemoteResultsRetainGlobalRanking() {
+        val immediate = listOf(
+            searchResult("local", "exact", "Camera", 400),
+            searchResult("local", "contains", "Camera tools", 200),
+        )
+        val remote = listOf(
+            searchResult("remote", "answer", "AI answer", 260),
+        )
+
+        val combined = LauncherUniversalSearch.combineResults(immediate, remote)
+
+        assertEquals(listOf("Camera", "AI answer", "Camera tools"), combined.map { it.title })
+    }
+
+    @Test
     fun coreActionsProviderDoesNotExposeDirectLauncherSettingsEntry() {
         val results = LauncherCoreActionsSearchProvider().search("settings")
 
