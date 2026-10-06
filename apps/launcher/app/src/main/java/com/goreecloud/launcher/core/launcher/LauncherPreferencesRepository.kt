@@ -312,6 +312,23 @@ data class LauncherGestureAction(
     }
 }
 
+data class LauncherDrawerPosition(
+    val contextKey: String,
+    val itemIndex: Int = 0,
+    val itemScrollOffset: Int = 0,
+    val page: Int = 0,
+) {
+    fun sanitized(): LauncherDrawerPosition? {
+        val normalizedContext = contextKey.trim().takeIf(String::isNotEmpty)?.take(512) ?: return null
+        return copy(
+            contextKey = normalizedContext,
+            itemIndex = itemIndex.coerceIn(0, 100_000),
+            itemScrollOffset = itemScrollOffset.coerceIn(0, 100_000),
+            page = page.coerceIn(0, 10_000),
+        )
+    }
+}
+
 data class LauncherExperiencePreferences(
     val homeCardStyle: LauncherHomeCardStyle = LauncherHomeCardStyle.CLOCK,
     val showHomeQuickActions: Boolean = false,
@@ -323,6 +340,7 @@ data class LauncherExperiencePreferences(
     val drawerSearchPlacement: LauncherDrawerSearchPlacement = LauncherDrawerSearchPlacement.OFF,
     val drawerNavigation: LauncherDrawerNavigation = LauncherDrawerNavigation.SCROLL,
     val drawerEntryMode: LauncherDrawerEntryMode = LauncherDrawerEntryMode.BROWSE,
+    val rememberDrawerPosition: Boolean = true,
     val drawerSpacing: LauncherDrawerSpacing = LauncherDrawerSpacing.STANDARD,
     val drawerPageRows: Int = 5,
     val showDrawerAppCount: Boolean = false,
@@ -405,6 +423,11 @@ class LauncherPreferencesRepository(
         val drawerSearchPlacement = stringPreferencesKey("drawer_search_placement")
         val drawerNavigation = stringPreferencesKey("drawer_navigation")
         val drawerEntryMode = stringPreferencesKey("drawer_entry_mode")
+        val rememberDrawerPosition = booleanPreferencesKey("remember_drawer_position_v1")
+        val drawerPositionContext = stringPreferencesKey("drawer_position_context_v1")
+        val drawerPositionItemIndex = intPreferencesKey("drawer_position_item_index_v1")
+        val drawerPositionItemOffset = intPreferencesKey("drawer_position_item_offset_v1")
+        val drawerPositionPage = intPreferencesKey("drawer_position_page_v1")
         val drawerSpacing = stringPreferencesKey("drawer_spacing")
         val drawerPageRows = intPreferencesKey("drawer_page_rows")
         val showDrawerAppCount = booleanPreferencesKey("show_drawer_app_count")
@@ -562,6 +585,25 @@ class LauncherPreferencesRepository(
      * v1 portable preference subset. These settings may evolve during Development without silently
      * changing backup/recovery compatibility.
      */
+    /**
+     * Device-local App Drawer location captured when the Drawer leaves composition. The location is
+     * deliberately outside portable preference backup/restore: it is ephemeral presentation state,
+     * not workspace organization. Corrupt or incomplete stored state fails closed to no position.
+     */
+    val drawerPosition: Flow<LauncherDrawerPosition?> = dataStore.data
+        .map { values ->
+            values[Keys.drawerPositionContext]
+                ?.let { contextKey ->
+                    LauncherDrawerPosition(
+                        contextKey = contextKey,
+                        itemIndex = values[Keys.drawerPositionItemIndex] ?: 0,
+                        itemScrollOffset = values[Keys.drawerPositionItemOffset] ?: 0,
+                        page = values[Keys.drawerPositionPage] ?: 0,
+                    ).sanitized()
+                }
+        }
+        .distinctUntilChanged()
+
     val experiencePreferences: Flow<LauncherExperiencePreferences> = dataStore.data
         .map { values ->
             LauncherExperiencePreferences(
@@ -575,6 +617,7 @@ class LauncherPreferencesRepository(
                 drawerSearchPlacement = LauncherDrawerSearchPlacement.fromStorage(values[Keys.drawerSearchPlacement]),
                 drawerNavigation = LauncherDrawerNavigation.fromStorage(values[Keys.drawerNavigation]),
                 drawerEntryMode = LauncherDrawerEntryMode.fromStorage(values[Keys.drawerEntryMode]),
+                rememberDrawerPosition = values[Keys.rememberDrawerPosition] ?: true,
                 drawerSpacing = LauncherDrawerSpacing.fromStorage(values[Keys.drawerSpacing]),
                 drawerPageRows = (values[Keys.drawerPageRows] ?: 5).coerceIn(4, 6),
                 showDrawerAppCount = values[Keys.showDrawerAppCount] ?: false,
@@ -793,6 +836,40 @@ class LauncherPreferencesRepository(
                 values[Keys.drawerEntryMode] = mode.storageValue
             }
         }
+    }
+
+    fun setRememberDrawerPosition(enabled: Boolean) {
+        scope.launch {
+            dataStore.edit { values ->
+                values[Keys.rememberDrawerPosition] = enabled
+                if (!enabled) {
+                    clearDrawerPosition(values)
+                }
+            }
+        }
+    }
+
+    fun setDrawerPosition(position: LauncherDrawerPosition?) {
+        scope.launch {
+            dataStore.edit { values ->
+                val normalized = position?.sanitized()
+                if (normalized == null) {
+                    clearDrawerPosition(values)
+                } else {
+                    values[Keys.drawerPositionContext] = normalized.contextKey
+                    values[Keys.drawerPositionItemIndex] = normalized.itemIndex
+                    values[Keys.drawerPositionItemOffset] = normalized.itemScrollOffset
+                    values[Keys.drawerPositionPage] = normalized.page
+                }
+            }
+        }
+    }
+
+    private fun clearDrawerPosition(values: MutablePreferences) {
+        values.remove(Keys.drawerPositionContext)
+        values.remove(Keys.drawerPositionItemIndex)
+        values.remove(Keys.drawerPositionItemOffset)
+        values.remove(Keys.drawerPositionPage)
     }
 
     fun setDrawerSpacing(spacing: LauncherDrawerSpacing) {
