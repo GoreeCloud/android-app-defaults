@@ -2415,7 +2415,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         // remove-role-holder transition is still settling back to Quickstep. Reassert the
         // desired holder idempotently before each HOME-dependent case, then let the caller's
         // pre-test ownership snapshot decide whether teardown removes it.
-        runShellCommand(
+        runShellCommandDetached(
             "cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
@@ -2429,7 +2429,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
-        runShellCommand(
+        runShellCommandDetached(
             "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
@@ -2437,6 +2437,14 @@ class ActivatedHomeLifecycleRuntimeTest {
                 delay(100)
             }
         }
+    }
+
+    private fun runShellCommandDetached(command: String) {
+        // Role mutations can occasionally keep the shell pipe open while Android is reconciling
+        // the HOME holder. Closing the child's stdout/stderr and detaching it prevents the
+        // instrumentation thread from blocking in readBytes(); RoleManager polling below remains
+        // the bounded authority for whether the mutation actually completed.
+        runShellCommand("($command) >/dev/null 2>&1 &")
     }
 
     private fun runShellCommand(command: String) {
