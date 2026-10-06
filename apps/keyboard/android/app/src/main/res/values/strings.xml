@@ -69,6 +69,11 @@
     <string name="keyboard_settings_key_height_compact">Compact</string>
     <string name="keyboard_settings_key_height_standard">Standard</string>
     <string name="keyboard_settings_key_height_tall">Tall</string>
+    <string name="keyboard_settings_one_handed">One-handed layout</string>
+    <string name="keyboard_settings_one_handed_summary">Keep key rows full width or bring them closer to the left or right edge for easier thumb reach. Suggestions and toolbar stay full width.</string>
+    <string name="keyboard_settings_one_handed_off">Off</string>
+    <string name="keyboard_settings_one_handed_left">Left</string>
+    <string name="keyboard_settings_one_handed_right">Right</string>
     <string name="keyboard_settings_toolbar_style">Toolbar style</string>
     <string name="keyboard_settings_toolbar_style_summary">Use icons only by default, or show short labels beside toolbar icons.</string>
     <string name="keyboard_settings_toolbar_icons_only">Icons only</string>
