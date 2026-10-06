@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.pm.LauncherActivityInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Process
 import android.net.Uri
 import android.content.Intent
 import android.widget.Toast
@@ -682,6 +683,9 @@ internal fun LauncherProviderControlledSearchSurface(
                                     val byApplication = shortcutResults.groupBy {
                                         it.first.packageName to it.first.user
                                     }
+                                    val profileCountByPackage = byApplication.keys
+                                        .groupingBy { it.first }
+                                        .eachCount()
                                     val groupedShortcuts = byApplication.entries.toList()
                                     items(
                                         groupedShortcuts,
@@ -693,9 +697,17 @@ internal fun LauncherProviderControlledSearchSurface(
                                             app.componentName.packageName == entry.key.first &&
                                                 app.user == entry.key.second
                                         }
+                                        val profileLabel = if (
+                                            (profileCountByPackage[entry.key.first] ?: 0) > 1
+                                        ) {
+                                            if (entry.key.second == Process.myUserHandle()) "User" else "Work"
+                                        } else {
+                                            null
+                                        }
                                         LauncherGlazeShortcutPanel(
                                             app = matchingApp,
                                             packageName = entry.key.first,
+                                            profileLabel = profileLabel,
                                             shortcuts = entry.value.map { it.second },
                                             onLaunchShortcut = onLaunchShortcut,
                                         )
@@ -1540,6 +1552,7 @@ private fun LauncherGlazeSearchAppTile(
 private fun LauncherGlazeShortcutPanel(
     app: LauncherActivityInfo?,
     packageName: String,
+    profileLabel: String?,
     shortcuts: List<LauncherSearchResult>,
     onLaunchShortcut: (LauncherLaunchShortcutSearchAction) -> Unit,
 ) {
@@ -1570,15 +1583,26 @@ private fun LauncherGlazeShortcutPanel(
                     contentScale = ContentScale.Fit,
                 )
             }
-            Text(
-                app?.let(::launcherVisibleAppLabel) ?: packageName.substringAfterLast('.'),
+            Column(
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            ) {
+                Text(
+                    app?.let(::launcherVisibleAppLabel) ?: packageName.substringAfterLast('.'),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (profileLabel != null) {
+                    Text(
+                        profileLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
+            }
             Row(
                 modifier = Modifier
                     .widthIn(max = if (expanded) 184.dp else 148.dp)
