@@ -55,6 +55,7 @@ import com.goreecloud.gallery.android.AndroidMediaMutationPendingStates
 import com.goreecloud.gallery.android.AndroidMediaMutationRequests
 import com.goreecloud.gallery.android.AndroidMediaStoreReader
 import com.goreecloud.gallery.core.GalleryBulkActionPolicy
+import com.goreecloud.gallery.core.GalleryAlbumRenamePolicy
 import com.goreecloud.gallery.core.AuthorizedMediaSearch
 import com.goreecloud.gallery.core.GalleryDragSelectionPolicy
 import com.goreecloud.gallery.core.GalleryDragSelectionSession
@@ -131,6 +132,8 @@ class GalleryActivity : Activity() {
     private var viewerSlideshowStop: (() -> Unit)? = null
     private var pendingMediaMutation: AndroidMediaMutationPendingState? = null
     private var pendingMediaMove: AndroidMediaMovePendingState? = null
+    private var pendingMediaMovePurpose = MediaMovePurpose.MOVE
+    private var pendingMediaMoveDisplayName: String? = null
     private var mediaMoveExecutionInProgress = false
     private var mediaCopyExecutionInProgress = false
     private var setupDialog: AlertDialog? = null
@@ -158,9 +161,22 @@ class GalleryActivity : Activity() {
             .orEmpty()
         pendingMediaMutation = restorePendingMediaMutation(savedInstanceState)
         pendingMediaMove = restorePendingMediaMove(savedInstanceState)
+        if (pendingMediaMove != null) {
+            pendingMediaMovePurpose = MediaMovePurpose.fromStorage(
+                savedInstanceState?.getString(STATE_PENDING_MEDIA_MOVE_PURPOSE),
+            )
+            pendingMediaMoveDisplayName = savedInstanceState
+                ?.getString(STATE_PENDING_MEDIA_MOVE_DISPLAY_NAME)
+                ?.let { raw ->
+                    runCatching { GalleryNewFolderMovePolicy.normalizeFolderName(raw) }.getOrNull()
+                }
+                ?.takeIf { pendingMediaMovePurpose == MediaMovePurpose.ALBUM_RENAME }
+        }
         if (pendingMediaMutation != null && pendingMediaMove != null) {
             pendingMediaMutation = null
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
         }
         requestedDestination(intent)?.let { destination = it }
         selectedSort = currentUserSettings().sortPreference.mediaSortOrder
@@ -232,6 +248,13 @@ class GalleryActivity : Activity() {
                 STATE_PENDING_MEDIA_MOVE_DESTINATION,
                 move.destinationRelativePath,
             )
+            outState.putString(
+                STATE_PENDING_MEDIA_MOVE_PURPOSE,
+                pendingMediaMovePurpose.storageValue,
+            )
+            pendingMediaMoveDisplayName?.let { name ->
+                outState.putString(STATE_PENDING_MEDIA_MOVE_DISPLAY_NAME, name)
+            }
         }
         super.onSaveInstanceState(outState)
     }
@@ -294,11 +317,19 @@ class GalleryActivity : Activity() {
 
         if (requestCode == MEDIA_MOVE_REQUEST) {
             val move = pendingMediaMove
+            val purpose = pendingMediaMovePurpose
+            val displayName = pendingMediaMoveDisplayName
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
             if (resultCode == RESULT_OK && move != null) {
-                completeConfirmedMediaMove(move)
+                completeConfirmedMediaMove(move, purpose, displayName)
             } else if (move != null) {
-                Toast.makeText(this, "Move canceled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    if (purpose == MediaMovePurpose.ALBUM_RENAME) "Album rename canceled" else "Move canceled",
+                    Toast.LENGTH_SHORT,
+                ).show()
             }
             return
         }
