@@ -1,5 +1,19 @@
 # GoreeCloud Gallery Changelogs
 
+## October 5, 2026 — bounded provider-backed Album Rename candidate
+
+### Added
+- Added **Rename** to ordinary album-card overflow menus only when Gallery has complete local image-and-video access and the full Android-authorized album snapshot resolves to one nested provider-owned `RELATIVE_PATH` on one concrete `VOLUME_NAME`.
+- Added a core rename policy that preserves the existing parent directory, validates the new folder name through the same bounded folder-name rules used by Move, rejects root-level or ambiguous album authority, rejects sibling-name collisions on the same volume, and requires the provider album name to agree with the path leaf.
+- Reused the existing Android 11+ `MediaStore.createWriteRequest(...)` move-confirmation authority over the exact bounded album item URIs rather than introducing filesystem rename authority.
+- Preserved pending rename purpose/name across Activity recreation so approve/cancel and partial-failure reporting remain truthful after Android-owned authorization.
+- Kept rename bounded by the existing 250-item MediaStore mutation scope and derived mutation scope from the complete Android-authorized snapshot rather than Gallery-local hidden/include/exclude presentation filters.
+- Added focused policy and overflow-action coverage.
+
+### Boundary
+This remains a Development candidate. Partial/selective media access intentionally does not expose Rename because Gallery cannot prove it sees the complete album. Root-level folders, mixed paths/volumes, stale or duplicate item scope, same-name requests, and known sibling collisions fail closed. No arbitrary filesystem path, `MANAGE_EXTERNAL_STORAGE`, network, cloud, account, cross-profile, or second album database authority is added. Representative-device/OEM/profile, removable-volume, large-album, provider-failure/partial-execution, accessibility, performance/power, current Glaze UI, recovery, signing, and release acceptance remain open.
+
+
 ## October 3, 2026 — system-gallery entry-point candidate
 
 ### Added
