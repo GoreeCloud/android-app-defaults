@@ -617,6 +617,15 @@ internal fun LauncherProviderControlledSearchSurface(
                         val fullSectionCounts = results
                             .groupBy { result -> result.category }
                             .mapValues { (_, items) -> items.size }
+                        val appProfileCountByPackage = results
+                            .mapNotNull { result ->
+                                (result.action as? LaunchApplicationSearchAction)
+                                    ?.app
+                                    ?.componentName
+                                    ?.packageName
+                            }
+                            .groupingBy { packageName -> packageName }
+                            .eachCount()
                         val grouped = LauncherGlazeSearchGroups.group(results.drop(1))
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
@@ -707,6 +716,11 @@ internal fun LauncherProviderControlledSearchSurface(
                                                         LauncherGlazeSearchAppTile(
                                                             result = result,
                                                             action = action,
+                                                            profileLabel = result.subtitle.takeIf {
+                                                                (appProfileCountByPackage[
+                                                                    action.app.componentName.packageName
+                                                                ] ?: 0) > 1
+                                                            },
                                                             onLaunch = { onLaunchApp(action.app) },
                                                             modifier = Modifier.weight(1f),
                                                         )
@@ -1533,6 +1547,7 @@ internal object LauncherGlazeSearchGroups {
 private fun LauncherGlazeSearchAppTile(
     result: LauncherSearchResult,
     action: LaunchApplicationSearchAction,
+    profileLabel: String?,
     onLaunch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1573,15 +1588,28 @@ private fun LauncherGlazeSearchAppTile(
                     )
                 }
             }
-            Text(
-                result.title,
+            Column(
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-            )
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(
+                    result.title,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                profileLabel?.let { label ->
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }
