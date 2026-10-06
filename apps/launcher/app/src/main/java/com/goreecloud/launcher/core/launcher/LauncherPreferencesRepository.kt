@@ -581,11 +581,6 @@ class LauncherPreferencesRepository(
         .distinctUntilChanged()
 
     /**
-     * Launcher-owned visual preferences that intentionally remain outside the strict seven-field
-     * v1 portable preference subset. These settings may evolve during Development without silently
-     * changing backup/recovery compatibility.
-     */
-    /**
      * Device-local App Drawer location captured when the Drawer leaves composition. The location is
      * deliberately outside portable preference backup/restore: it is ephemeral presentation state,
      * not workspace organization. Corrupt or incomplete stored state fails closed to no position.
@@ -604,6 +599,11 @@ class LauncherPreferencesRepository(
         }
         .distinctUntilChanged()
 
+    /**
+     * Launcher-owned visual preferences that intentionally remain outside the strict seven-field
+     * v1 portable preference subset. These settings may evolve during Development without silently
+     * changing backup/recovery compatibility.
+     */
     val experiencePreferences: Flow<LauncherExperiencePreferences> = dataStore.data
         .map { values ->
             LauncherExperiencePreferences(
