@@ -268,6 +268,10 @@ data class LauncherNavigateSearchAction(
     val destination: LauncherSearchDestination,
 ) : LauncherSearchAction
 
+data class LauncherManageSearchSourceAction(
+    val providerId: String,
+) : LauncherSearchAction
+
 /**
  * First built-in Universal Search provider. Android LauncherApps remains application-inventory
  * authority; this provider only projects that authoritative inventory into Launcher search.
