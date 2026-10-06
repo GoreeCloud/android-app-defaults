@@ -153,13 +153,10 @@ internal class LauncherAiInlineSearchProvider(
     override val id: String,
     private val displayName: String,
     private val credentialProvider: () -> String?,
-    private val credentialConfigured: () -> Boolean = {
-        !credentialProvider().isNullOrBlank()
-    },
     private val transport: LauncherAiInlineSearchTransport,
 ) : LauncherOptInRemoteInlineSearchProvider {
     override val isInlineExecutionReady: Boolean
-        get() = credentialConfigured()
+        get() = !credentialProvider().isNullOrBlank()
 
     override fun search(rawQuery: String): List<LauncherSearchResult> = emptyList()
 

@@ -286,9 +286,6 @@ object LauncherConnectedSearchProviderRegistry {
                     credentialProvider = {
                         LauncherConnectedSearchCredentialStore.read(context, CHATGPT_PROVIDER_ID)
                     },
-                    credentialConfigured = {
-                        LauncherConnectedSearchCredentialStore.isConfigured(context, CHATGPT_PROVIDER_ID)
-                    },
                     transport = LauncherOpenAiResponsesTransport(),
                 )
                 PERPLEXITY_PROVIDER_ID -> LauncherAiInlineSearchProvider(
@@ -297,9 +294,6 @@ object LauncherConnectedSearchProviderRegistry {
                     credentialProvider = {
                         LauncherConnectedSearchCredentialStore.read(context, PERPLEXITY_PROVIDER_ID)
                     },
-                    credentialConfigured = {
-                        LauncherConnectedSearchCredentialStore.isConfigured(context, PERPLEXITY_PROVIDER_ID)
-                    },
                     transport = LauncherPerplexityAgentTransport(),
                 )
                 CLAUDE_PROVIDER_ID -> LauncherAiInlineSearchProvider(
@@ -307,9 +301,6 @@ object LauncherConnectedSearchProviderRegistry {
                     displayName = "Claude",
                     credentialProvider = {
                         LauncherConnectedSearchCredentialStore.read(context, CLAUDE_PROVIDER_ID)
-                    },
-                    credentialConfigured = {
-                        LauncherConnectedSearchCredentialStore.isConfigured(context, CLAUDE_PROVIDER_ID)
                     },
                     transport = LauncherAnthropicMessagesTransport(),
                 )
