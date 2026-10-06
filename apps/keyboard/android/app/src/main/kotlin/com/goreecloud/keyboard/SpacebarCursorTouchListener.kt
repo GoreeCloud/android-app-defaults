@@ -20,6 +20,7 @@ internal class SpacebarCursorTouchListener(
     private val activationDistancePx: Float =
         ViewConfiguration.get(keyboardView.context).scaledTouchSlop.toFloat(),
     private val stepDistancePx: Float = 24f * keyboardView.resources.displayMetrics.density,
+    private val stepDistancePxProvider: (() -> Float)? = null,
 ) : View.OnTouchListener {
     private var spaceBounds: RectF? = null
     private var startX = 0f
@@ -62,7 +63,7 @@ internal class SpacebarCursorTouchListener(
                     deltaX = event.x - startX,
                     deltaY = if (cursorMode) 0f else event.y - startY,
                     activationDistancePx = activationDistancePx,
-                    stepDistancePx = stepDistancePx,
+                    stepDistancePx = stepDistancePxProvider?.invoke() ?: stepDistancePx,
                 )
 
                 return when (decision.mode) {

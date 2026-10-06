@@ -25,6 +25,12 @@ internal enum class KeyboardOneHandedMode {
     RIGHT,
 }
 
+internal enum class KeyboardCursorSpeed(val stepDistanceDp: Float) {
+    PRECISE(32f),
+    STANDARD(24f),
+    FAST(16f),
+}
+
 internal data class KeyboardTypingSettings(
     val keyHeight: KeyboardKeyHeight = KeyboardKeyHeight.COMPACT,
     val oneHandedMode: KeyboardOneHandedMode = KeyboardOneHandedMode.OFF,
@@ -32,6 +38,7 @@ internal data class KeyboardTypingSettings(
     val swipeTypingEnabled: Boolean = true,
     val swipeTrailEnabled: Boolean = true,
     val spacebarCursorControlEnabled: Boolean = true,
+    val cursorSpeed: KeyboardCursorSpeed = KeyboardCursorSpeed.STANDARD,
     val suggestionsEnabled: Boolean = true,
     val autocorrectEnabled: Boolean = true,
     val predictionsEnabled: Boolean = true,
@@ -64,6 +71,7 @@ internal class KeyboardSettingsStore(context: Context) {
         swipeTypingEnabled = preferences.getBoolean(SWIPE_TYPING, true),
         swipeTrailEnabled = preferences.getBoolean(SWIPE_TRAIL, true),
         spacebarCursorControlEnabled = preferences.getBoolean(SPACEBAR_CURSOR_CONTROL, true),
+        cursorSpeed = enumPreference(CURSOR_SPEED, KeyboardCursorSpeed.STANDARD),
         suggestionsEnabled = preferences.getBoolean(SUGGESTIONS, true),
         autocorrectEnabled = preferences.getBoolean(AUTOCORRECT, true),
         predictionsEnabled = preferences.getBoolean(PREDICTIONS, true),
@@ -101,6 +109,10 @@ internal class KeyboardSettingsStore(context: Context) {
 
     fun setSpacebarCursorControlEnabled(value: Boolean) {
         preferences.edit().putBoolean(SPACEBAR_CURSOR_CONTROL, value).apply()
+    }
+
+    fun setCursorSpeed(value: KeyboardCursorSpeed) {
+        preferences.edit().putString(CURSOR_SPEED, value.name).apply()
     }
 
     fun setSuggestionsEnabled(value: Boolean) {
@@ -168,6 +180,7 @@ internal class KeyboardSettingsStore(context: Context) {
         const val SWIPE_TYPING = "swipe_typing"
         const val SWIPE_TRAIL = "swipe_trail"
         const val SPACEBAR_CURSOR_CONTROL = "spacebar_cursor_control"
+        const val CURSOR_SPEED = "cursor_speed"
         const val SUGGESTIONS = "suggestions"
         const val AUTOCORRECT = "autocorrect"
         const val PREDICTIONS = "predictions"

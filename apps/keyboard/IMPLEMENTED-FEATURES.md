@@ -2,13 +2,17 @@
 
 ## October 6, 2026 — adaptive constrained-height row gaps
 
-Development candidate source now computes inter-row spacing from the actual key-row area instead of always reserving the full fixed gap. When host height is constrained, whitespace compresses before key rows fall below the active Glaze interaction floor, including Touch Assistance. The policy is presentation-only and preserves the existing suggestion, toolbar, one-handed, touch/accessibility, editor, clipboard, learning, and network authority boundaries. Exact-head protected validation is still required before integration.
+Protected PR #262 integrated adaptive inter-row spacing from exact candidate `8053a888bc6b3230c6a24f353db276c69ddc566e` as protected-main commit `f33ecc92e3f01349a6946b20f44a911055522d1e`. The Keyboard now computes spacing from the actual key-row area instead of always reserving the full fixed gap. When host height is constrained, whitespace compresses before key rows fall below the active Glaze interaction floor, including Touch Assistance. Provenance #1072, Foundation #1564, Migrated Android apps CI #1098 including Keyboard Android 15 runtime, and Protected promotion #1052 passed on the exact candidate. The policy is presentation-only and preserves suggestion, toolbar, one-handed, touch/accessibility, editor, clipboard, learning, network, and account authority boundaries. Representative-device constrained-height, landscape, large-text, one-handed coexistence, OEM/editor-host, accessibility, and release acceptance remain open.
 
 ## October 2, 2026 — English (US) and Arabic subtype foundation
 
 Protected PR #185 integrated a first-party Arabic IME subtype alongside English (US). Android's explicitly selected IME subtype is the sole language authority. Arabic selection renders Arabic letter rows, Arabic-Indic digits, RTL language metadata, an Arabic spacebar label, and no case-shift key. English-only local correction, prediction, swipe-dictionary decoding, and learning capture fail closed while Arabic is active instead of applying English models to Arabic input.
 
-The accepted candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` passed Keyboard source/JVM/build and Android 15 runtime within the complete protected matrix before squash merge as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. The change adds no network, Contacts, microphone, telemetry, or remote-model authority. Broader Arabic alternates/punctuation/dictionaries, explicit switching acceptance, RTL/BiDi host behavior, accessibility, representative-device ergonomics, signing/recovery, and release qualification remain open.
+The accepted candidate `69a65412f24271ecb627b2eb5aaf96b55de9e570` passed Keyboard source/JVM/build and Android 15 runtime within the complete protected matrix before squash merge as monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. The change adds no network, Contacts, microphone, telemetry, or remote-model authority. Arabic punctuation/long-press alternates were integrated separately by PR #187; broader Arabic dictionaries/prediction, explicit switching acceptance, RTL/BiDi host behavior, accessibility, representative-device ergonomics, signing/recovery, and release qualification remain open.
+
+## October 2, 2026 — Arabic punctuation and deterministic alternates
+
+Protected PR #187 integrated Arabic comma presentation on the primary Arabic letter row plus deterministic language-aware long-press variants for common alef/hamza forms, taa marbuta, alif maqsura, Arabic semicolon/question-mark access, and common Arabic diacritics. Exact candidate `a41c306fcbae1001d5439c10e2e85339cb0e9e88` was squash-merged as `8a066a2f9fa4b6de6692640a7e2528dfa23b01d6`. English alternate behavior remains unchanged, and English-only correction, prediction, swipe-dictionary decoding, and learning remain disabled while Arabic is active. The capability adds no editor-context inference, typed-content persistence, network lookup, Contacts access, or telemetry. Broader Arabic dictionaries/prediction, BiDi host acceptance, physical-device ergonomics, accessibility, and native-language validation remain open.
 
 ## September 28, 2026 — Clipboard policy selected-state accessibility
 
@@ -120,10 +124,13 @@ These foundations are implemented only for the bounded scope described above and
 - accessibility foundations;
 - platform-system declarations and local safeguards.
 
+## Spacebar cursor control
+
+Current authoritative source implements privacy-bounded horizontal Spacebar cursor control: one-finger horizontal-dominant drags emit bounded DPAD LEFT/RIGHT steps through the active InputConnection, ordinary Space taps remain ordinary Space input, vertical/equal-axis and multi-pointer gestures fail closed, and Emoji/touch-exploration presentation disables cursor mode. The control reads no surrounding editor text and has a device-local enable setting. The active cursor-speed continuation adds device-local Precise / Standard / Fast step spacing while leaving activation authority unchanged.
+
 ## Explicitly not implemented on current `main`
 
 Current authoritative `main` does not establish:
-- accepted spacebar cursor-control behavior from Draft PRs #63/#64 or Draft PR #78;
 - the configurable utility-toolbar Draft stacks;
 - accepted Arabic/multilingual layout work from Draft PR #65 or its stacked successors;
 - system-wide GoreeCloud Secure Paste enforcement;
