@@ -933,10 +933,11 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
 
                 // ROOM authority can become visible before the launched Home finishes startup-owned
-                // reconciliation. Wait for the real Home surface plus both authoritative Room
-                // projections before performing this test-owned setup mutation; otherwise a healthy
-                // guarded write can legitimately lose a snapshot race and contaminate later tests.
-                waitForDisplayedTag("launcher-home-swipe-surface")
+                // reconciliation. Wait for the visible primary-page indicator plus both authoritative
+                // Room projections before performing this test-owned setup mutation. The outer
+                // gesture-container tag is not a readiness contract and can be absent from displayed
+                // semantics while the primary Home projection is still settling.
+                waitForSelectedHomePage(pageNumber = 1, timeoutMillis = 15_000)
                 composeRule.waitForIdle()
                 withTimeout(10_000) {
                     runtime.observeHomePages().first { state ->
