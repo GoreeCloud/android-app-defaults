@@ -3642,7 +3642,8 @@ private fun connectedSourceDetail(
         "Inline answers are opt-in. While this source is enabled, Launcher waits for at least " +
             "three query characters and a brief typing pause before sending the settled query to " +
             "this provider. The API key stays in Android Keystore-backed, no-backup app storage " +
-            "and is never written to Launcher preferences, Room, logs, or diagnostics."
+            "and is never written to Launcher preferences, Room, logs, or diagnostics. Query " +
+            "processing and retention outside Launcher remain subject to the provider's API policy."
     } else {
         "Add your own provider API key to enable inline answers. The key is stored only in " +
             "Android Keystore-backed, no-backup Launcher storage and can be removed here at any time."
