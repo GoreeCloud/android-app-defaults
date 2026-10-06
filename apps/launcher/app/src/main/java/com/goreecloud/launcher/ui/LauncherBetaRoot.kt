@@ -308,13 +308,13 @@ internal fun launcherDockWidthFraction(
     appCount: Int,
     showSearch: Boolean,
 ): Float = when {
-    showSearch -> 0.90f
-    appCount.coerceAtLeast(0) <= 1 -> 0.38f
-    appCount == 2 -> 0.48f
-    appCount == 3 -> 0.60f
-    appCount == 4 -> 0.72f
-    appCount == 5 -> 0.84f
-    else -> 0.90f
+    showSearch -> 0.82f
+    appCount.coerceAtLeast(0) <= 1 -> 0.32f
+    appCount == 2 -> 0.40f
+    appCount == 3 -> 0.50f
+    appCount == 4 -> 0.62f
+    appCount == 5 -> 0.72f
+    else -> 0.82f
 }
 
 internal fun launcherHomeSearchHeightDp(
@@ -5936,7 +5936,7 @@ private fun GlazeActionChip(
         color = when (resolvedPresentation.materialRole) {
             GlazeV16MaterialRole.SOLID -> MaterialTheme.colorScheme.surface
             GlazeV16MaterialRole.RAISED -> MaterialTheme.colorScheme.surface.copy(alpha = 0.97f)
-            else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.64f)
+            else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.52f)
         },
         border = BorderStroke(
             1.dp,
@@ -11402,8 +11402,8 @@ internal fun GlazeDock(
                     .height(
                         when {
                             showLabels -> 96.dp
-                            style == LauncherDockStyle.EDGE -> 84.dp
-                            else -> 76.dp
+                            style == LauncherDockStyle.EDGE -> 80.dp
+                            else -> 72.dp
                         },
                     ),
             ) {
