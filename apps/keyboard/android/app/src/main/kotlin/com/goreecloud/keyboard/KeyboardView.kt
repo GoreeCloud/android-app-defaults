@@ -38,7 +38,7 @@ class KeyboardView @JvmOverloads constructor(
         fun onLayerChanged(layer: KeyboardLayer)
         fun onOpenClipboard() = Unit
         fun onSwitchLanguage() = Unit
-        fun onOneHandedModeChange(mode: KeyboardOneHandedMode) = Unit
+        fun onOneHandedSideChange(moveToRight: Boolean) = Unit
         fun onOpenSettings() = Unit
     }
 
@@ -1508,7 +1508,7 @@ class KeyboardView @JvmOverloads constructor(
                 }
                 if (target != KeyboardOneHandedMode.OFF) {
                     setOneHandedMode(target)
-                    listener?.onOneHandedModeChange(target)
+                    listener?.onOneHandedSideChange(target == KeyboardOneHandedMode.RIGHT)
                     announceForAccessibility(
                         if (target == KeyboardOneHandedMode.LEFT) {
                             "One-handed keyboard moved left"
