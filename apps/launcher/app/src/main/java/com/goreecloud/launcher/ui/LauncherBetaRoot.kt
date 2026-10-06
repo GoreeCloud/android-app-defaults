@@ -7205,7 +7205,7 @@ private fun AppDrawerSurface(
             freshnessByKey = drawerFreshnessByAppKey,
             nowMillis = drawerFreshnessNowMillis,
             includeSuggested = experiencePreferences.showDrawerSuggestions,
-        excludedKeysByKind = smartFolderExclusions,
+            excludedKeysByKind = smartFolderExclusions,
         )
     }
     val selectedSmartFolder = remember(
