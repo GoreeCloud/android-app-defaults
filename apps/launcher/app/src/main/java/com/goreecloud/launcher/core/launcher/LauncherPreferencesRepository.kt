@@ -196,7 +196,7 @@ enum class LauncherDockStyle(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): LauncherDockStyle =
-            entries.firstOrNull { it.storageValue == value } ?: CLEAR
+            entries.firstOrNull { it.storageValue == value } ?: GLASS
     }
 }
 
