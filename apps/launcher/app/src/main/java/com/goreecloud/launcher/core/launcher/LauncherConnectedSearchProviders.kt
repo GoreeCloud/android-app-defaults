@@ -308,6 +308,14 @@ object LauncherConnectedSearchProviderRegistry {
                     },
                     transport = LauncherAnthropicMessagesTransport(),
                 )
+                GEMINI_PROVIDER_ID -> LauncherAiInlineSearchProvider(
+                    id = GEMINI_PROVIDER_ID,
+                    displayName = "Google Gemini",
+                    credentialProvider = {
+                        LauncherConnectedSearchCredentialStore.read(context, GEMINI_PROVIDER_ID)
+                    },
+                    transport = LauncherGeminiGenerateContentTransport(),
+                )
                 else -> LauncherConnectedSearchProvider(definition.providerId)
             }
             LauncherSearchProviderRegistration(
@@ -441,6 +449,23 @@ object LauncherConnectedSearchProviderRegistry {
                         .scheme("https")
                         .authority("claude.ai")
                         .appendPath("new")
+                        .appendQueryParameter("q", query)
+                        .build(),
+                )
+            },
+        ),
+        LauncherConnectedSearchDefinition(
+            providerId = GEMINI_PROVIDER_ID,
+            displayName = "Google Gemini",
+            authorizationRequirement = LauncherSearchAuthorizationRequirement.ACCOUNT,
+            requiresResolution = false,
+            buildIntent = { query ->
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.Builder()
+                        .scheme("https")
+                        .authority("gemini.google.com")
+                        .appendPath("app")
                         .appendQueryParameter("q", query)
                         .build(),
                 )
