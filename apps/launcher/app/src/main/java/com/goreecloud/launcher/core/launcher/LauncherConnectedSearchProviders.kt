@@ -256,6 +256,7 @@ object LauncherConnectedSearchProviderRegistry {
     private const val CHATGPT_PACKAGE = "com.openai.chatgpt"
     private const val PERPLEXITY_PACKAGE = "ai.perplexity.app.android"
     private const val CLAUDE_PACKAGE = "com.anthropic.claude"
+    private const val GEMINI_PACKAGE = "com.google.android.apps.bard"
 
     fun iconPackageNameFor(providerId: String): String? = when (providerId) {
         GOOGLE_DRIVE_PROVIDER_ID -> GOOGLE_DRIVE_PACKAGE
@@ -264,6 +265,7 @@ object LauncherConnectedSearchProviderRegistry {
         CHATGPT_PROVIDER_ID -> CHATGPT_PACKAGE
         PERPLEXITY_PROVIDER_ID -> PERPLEXITY_PACKAGE
         CLAUDE_PROVIDER_ID -> CLAUDE_PACKAGE
+        GEMINI_PROVIDER_ID -> GEMINI_PACKAGE
         else -> null
     }
 
@@ -271,6 +273,7 @@ object LauncherConnectedSearchProviderRegistry {
         CHATGPT_PROVIDER_ID,
         PERPLEXITY_PROVIDER_ID,
         CLAUDE_PROVIDER_ID,
+        GEMINI_PROVIDER_ID,
     )
 
     @Suppress("UNUSED_PARAMETER")
