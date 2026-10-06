@@ -2406,50 +2406,53 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
-        // RoleManager can transiently report this package as HOME while a preceding test's
-        // remove-role-holder transition is still settling back to Quickstep. Reassert the
-        // desired holder idempotently before each HOME-dependent case, then let the caller's
-        // pre-test ownership snapshot decide whether teardown removes it.
-        //
-        // Do not drain the role command's stdout pipe here. Android 16 can keep the shell pipe
-        // open while RoleManager finishes a holder transition even after toybox timeout has
-        // bounded the child command. Waiting for EOF made the instrumentation thread consume the
-        // outer CI watchdog before the next Activity could launch. The observable role state is
-        // the authority for these helpers, so launch the bounded mutation, close our read side,
-        // and wait on RoleManager itself.
-        runShellCommandWithoutOutput(
-            "toybox timeout 8 cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        mutateHomeRoleAndAwait(
+            roleManager = roleManager,
+            packageName = packageName,
+            shouldBeHeld = true,
         )
-        withTimeout(10_000) {
-            while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
-            }
-        }
     }
 
     private suspend fun removeHomeRoleAndAwait(
         roleManager: RoleManager,
         packageName: String,
     ) {
-        runShellCommandWithoutOutput(
-            "toybox timeout 8 cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        mutateHomeRoleAndAwait(
+            roleManager = roleManager,
+            packageName = packageName,
+            shouldBeHeld = false,
         )
-        withTimeout(10_000) {
-            while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
-            }
-        }
-        // Give the system HOME transition a short bounded settle window before the next test
-        // re-adds this package. This prevents back-to-back remove/add mutations from contending
-        // inside RoleManager while keeping suite runtime deterministic.
-        delay(500)
     }
 
-    private fun runShellCommandWithoutOutput(command: String) {
-        InstrumentationRegistry.getInstrumentation()
+    private suspend fun mutateHomeRoleAndAwait(
+        roleManager: RoleManager,
+        packageName: String,
+        shouldBeHeld: Boolean,
+    ) {
+        val operation = if (shouldBeHeld) "add-role-holder" else "remove-role-holder"
+        // UiAutomation shell execution is asynchronous. Keep the descriptor alive so closing the
+        // read side cannot cancel the command, but never drain stdout: Android 16 can leave that
+        // pipe open while RoleManager finishes a holder transition. RoleManager is the bounded,
+        // observable authority for completion.
+        val descriptor = InstrumentationRegistry.getInstrumentation()
             .uiAutomation
-            .executeShellCommand(command)
-            .close()
+            .executeShellCommand(
+                "toybox timeout 8 cmd role $operation ${RoleManager.ROLE_HOME} $packageName",
+            )
+        try {
+            withTimeout(10_000) {
+                while (roleManager.isRoleHeld(RoleManager.ROLE_HOME) != shouldBeHeld) {
+                    delay(100)
+                }
+            }
+            if (!shouldBeHeld) {
+                // Avoid immediate remove/add contention between adjacent test cases while keeping
+                // the settle interval deterministic and far below the suite watchdog.
+                delay(500)
+            }
+        } finally {
+            descriptor.close()
+        }
     }
 
     private fun runShellCommand(command: String) {
