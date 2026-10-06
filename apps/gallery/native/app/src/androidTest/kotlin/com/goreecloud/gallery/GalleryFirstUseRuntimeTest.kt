@@ -80,7 +80,7 @@ class GalleryFirstUseRuntimeTest {
             onView(withText("Set up Gallery")).check(doesNotExist())
             onView(withContentDescription("Settings")).perform(click())
             onView(withContentDescription(containsString("Replay setup."))).perform(scrollTo(), click())
-            onView(withText("Review Gallery setup")).inRoot(isDialog()).check(matches(isDisplayed()))
+            waitForDialogText("Review Gallery setup")
             onView(withContentDescription("Return to Gallery")).inRoot(isDialog()).perform(click())
             onView(withText("Review Gallery setup")).check(doesNotExist())
         }
