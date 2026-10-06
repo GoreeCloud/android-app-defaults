@@ -158,6 +158,12 @@ Below the custom App Drawer tabs, the Development discovery row provides **All**
 
 These controls filter Launcher presentation only. They do not install, disable, uninstall, hide, lock, or move applications. For a Work or managed profile where Android does not expose package update metadata to Launcher, **Updated** returns no fabricated match rather than borrowing primary-profile metadata.
 
+### Smart Folders
+
+In **Category** layout, Launcher can show local **Pinned**, **Suggested**, **New**, and **Updated** Smart Folders when the applicable source has candidates. Open a Smart Folder to browse the current dynamic collection. Suggested uses only Launcher-local signals; New and Updated reuse the same bounded freshness metadata as Drawer discovery.
+
+The active Development continuation lets you exclude an individual application from **Suggested**, **New**, or **Updated** without hiding the app, uninstalling it, moving it, or changing another Smart Folder. Exclusions use the exact profile-qualified Launcher identity. If exclusions exist, the Smart Folder shows how many were excluded and provides **Restore** to clear that Smart Folder's exclusions. **Pinned** membership remains controlled with Pin/Unpin rather than an exclusion button.
+
 ### Custom App Drawer tabs
 
 Apps includes an **All** tab and supports up to eight device-local custom tabs. Use the **+** tab action to create one. Select a custom tab to filter the current User/Work profile page to that collection, and use the adjacent edit action to rename or delete the selected custom tab.
