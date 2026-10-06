@@ -852,8 +852,9 @@ class LauncherPreferencesRepository(
     fun setDrawerPosition(position: LauncherDrawerPosition?) {
         scope.launch {
             dataStore.edit { values ->
+                val rememberPosition = values[Keys.rememberDrawerPosition] ?: true
                 val normalized = position?.sanitized()
-                if (normalized == null) {
+                if (!rememberPosition || normalized == null) {
                     clearDrawerPosition(values)
                 } else {
                     values[Keys.drawerPositionContext] = normalized.contextKey
