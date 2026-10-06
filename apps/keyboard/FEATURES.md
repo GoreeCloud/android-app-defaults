@@ -48,7 +48,7 @@
 - The 0.1.22 crash-recovery candidate keeps Android attached to a stable KeyboardInputSurfaceHost while Keyboard, Clipboard, and edit surfaces swap inside that host. This addresses the representative-device failure where the Keyboard could disappear after auxiliary Clipboard-surface use.
 - Clipboard payloads are excluded from backup, portable preferences, language learning, suggestion/prediction context, synchronization, telemetry, and network paths. Privileged system-wide Secure Paste enforcement remains unimplemented.
 - Unit, build, governance, and Android emulator validation paths cover registration, privacy lifecycle, Unicode deletion, suggestion authority, emoji search, portable preference boundaries, Glaze UI mapping/context, accessibility, setup completion state, stable IME surface restoration, Clipboard history/edit rules, smart-content detection, and native interaction.
-- The current one-handed Development candidate adds device-local Off / Left / Right key-row presentation while retaining one authoritative rendered geometry for touch, accessibility, alternates, and swipe decoding; suggestions and toolbar remain full width and no input-observation authority is added.
+- The current one-handed Development candidate adds device-local Off / Left / Right key-row presentation plus an accessible 48 dp in-gutter side switch for active Left/Right modes, while retaining one authoritative rendered geometry for touch, accessibility, alternates, and swipe decoding; suggestions and toolbar remain full width and no input-observation authority is added.
 
 ## Development / acceptance work still required
 
