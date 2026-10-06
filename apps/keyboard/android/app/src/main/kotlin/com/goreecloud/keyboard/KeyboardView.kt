@@ -152,6 +152,7 @@ class KeyboardView @JvmOverloads constructor(
     private var glazeV16PresentationContext = GlazeKeyboardV16PresentationContext()
     private var bottomNavigationInsetPx = 0
     private var keyHeightPreference = KeyboardKeyHeight.COMPACT
+    private var oneHandedMode = KeyboardOneHandedMode.OFF
     private var toolbarStyle = KeyboardToolbarStyle.ICONS_ONLY
     private var keyPressHapticsEnabled = true
     private var keyPressSoundEnabled = false
@@ -285,6 +286,14 @@ class KeyboardView @JvmOverloads constructor(
         invalidateStructure()
     }
 
+    internal fun setOneHandedMode(value: KeyboardOneHandedMode) {
+        if (oneHandedMode == value) return
+        oneHandedMode = value
+        cancelAlternateInteraction()
+        cancelSwipeInteraction()
+        invalidateStructure()
+    }
+
     internal fun setToolbarStyle(value: KeyboardToolbarStyle) {
         if (toolbarStyle == value) return
         toolbarStyle = value
@@ -343,6 +352,10 @@ class KeyboardView @JvmOverloads constructor(
         val rowGapCount = (rows.size - 1).coerceAtLeast(0)
         val rowHeight = max(1f, (contentBottom - keyboardTop - gap * rowGapCount) / rows.size)
         val keyRadius = GlazeKeyboardTokens.RadiusMediumDp * density
+        val oneHandedInsets = KeyboardOneHandedLayoutPolicy.horizontalInsets(
+            totalWidthPx = width.toFloat(),
+            mode = oneHandedMode,
+        )
 
         drawSuggestionStrip(canvas, horizontalPadding, topArea)
         if (toolbarHeight > 0f) {
@@ -356,9 +369,23 @@ class KeyboardView @JvmOverloads constructor(
 
         rows.forEachIndexed { rowIndex, row ->
             val totalWeight = row.sumOf { it.weight.toDouble() }.toFloat()
-            val rowHorizontalPadding = horizontalPadding + centeredLetterRowInset(row, gap, horizontalPadding)
-            val availableWidth = width - rowHorizontalPadding * 2 - gap * (row.size - 1)
-            var left = rowHorizontalPadding
+            val baseLeftPadding = horizontalPadding + oneHandedInsets.leftPx
+            val baseRightPadding = horizontalPadding + oneHandedInsets.rightPx
+            val centeredInset = centeredLetterRowInset(
+                row = row,
+                gap = gap,
+                leftPadding = baseLeftPadding,
+                rightPadding = baseRightPadding,
+            )
+            val rowLeftPadding = baseLeftPadding + centeredInset
+            val rowRightPadding = baseRightPadding + centeredInset
+            val availableWidth = (
+                width.toFloat() -
+                    rowLeftPadding -
+                    rowRightPadding -
+                    gap * (row.size - 1)
+                ).coerceAtLeast(1f)
+            var left = rowLeftPadding
             val top = keyboardTop + rowIndex * (rowHeight + gap)
 
             row.forEach { key ->
@@ -404,14 +431,16 @@ class KeyboardView @JvmOverloads constructor(
     private fun centeredLetterRowInset(
         row: List<Key>,
         gap: Float,
-        horizontalPadding: Float,
+        leftPadding: Float,
+        rightPadding: Float,
     ): Float {
         if (layer != KeyboardLayer.LETTERS || row.size != 9 || row.any { it.action != Action.TEXT }) {
             return 0f
         }
-        val topRowKeyWidth = (width - horizontalPadding * 2 - gap * 9) / 10f
+        val usableWidth = (width.toFloat() - leftPadding - rightPadding).coerceAtLeast(1f)
+        val topRowKeyWidth = ((usableWidth - gap * 9) / 10f).coerceAtLeast(1f)
         val desiredWidth = topRowKeyWidth * row.size + gap * (row.size - 1)
-        return max(0f, (width - desiredWidth) / 2f - horizontalPadding)
+        return max(0f, (usableWidth - desiredWidth) / 2f)
     }
 
     private fun currentRows(): List<List<Key>> {
