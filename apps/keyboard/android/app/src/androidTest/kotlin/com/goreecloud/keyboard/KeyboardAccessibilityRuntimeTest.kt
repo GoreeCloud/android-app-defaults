@@ -166,7 +166,13 @@ class KeyboardAccessibilityRuntimeTest {
     fun oneHandedSideSwitchUsesReservedGutterAndTogglesDirection() {
         val requestedModes = mutableListOf<KeyboardOneHandedMode>()
         val view = createRenderedKeyboard().apply {
-            listener = listener(onOneHandedModeChange = requestedModes::add)
+            listener = listener { moveToRight ->
+                requestedModes += if (moveToRight) {
+                    KeyboardOneHandedMode.RIGHT
+                } else {
+                    KeyboardOneHandedMode.LEFT
+                }
+            }
             setOneHandedMode(KeyboardOneHandedMode.LEFT)
         }
         render(view)
@@ -245,7 +251,7 @@ class KeyboardAccessibilityRuntimeTest {
     private fun listener(
         onText: (String) -> Unit = {},
         onSuggestion: (String) -> Unit = {},
-        onOneHandedModeChange: (KeyboardOneHandedMode) -> Unit = {},
+        onOneHandedSideChange: (Boolean) -> Unit = {},
     ) = object : KeyboardView.Listener {
         override fun onText(value: String) = onText(value)
         override fun onSwipe(keyPath: List<String>) = Unit
@@ -255,7 +261,7 @@ class KeyboardAccessibilityRuntimeTest {
         override fun onShift() = Unit
         override fun onSuggestion(value: String) = onSuggestion(value)
         override fun onLayerChanged(layer: KeyboardLayer) = Unit
-        override fun onOneHandedModeChange(mode: KeyboardOneHandedMode) =
-            onOneHandedModeChange(mode)
+        override fun onOneHandedSideChange(moveToRight: Boolean) =
+            onOneHandedSideChange(moveToRight)
     }
 }
