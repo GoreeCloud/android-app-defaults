@@ -96,6 +96,7 @@ import com.goreecloud.launcher.core.launcher.LauncherLocalSearchPermissions
 import com.goreecloud.launcher.core.launcher.LauncherLocalSearchDiagnostics
 import com.goreecloud.launcher.core.launcher.LauncherLocalSearchIssue
 import com.goreecloud.launcher.core.launcher.LauncherMessagesSearchProvider
+import com.goreecloud.launcher.core.launcher.LauncherManageSearchSourceAction
 import com.goreecloud.launcher.core.launcher.LauncherOpenUriSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherRuntimeSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherQuickAnswersSearchProvider
@@ -627,6 +628,8 @@ internal fun LauncherProviderControlledSearchSurface(
                                                     onOpenDocument(action)
                                                 is LauncherNavigateSearchAction ->
                                                     onNavigate(action.destination)
+                                                is LauncherManageSearchSourceAction ->
+                                                    showSources = true
                                                 else -> Unit
                                             }
                                         },
@@ -741,6 +744,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                                     is LauncherOpenUriSearchAction -> onOpenSearchUri(action)
                                                     is LauncherOpenDocumentSearchAction -> onOpenDocument(action)
                                                     is LauncherNavigateSearchAction -> onNavigate(action.destination)
+                                                    is LauncherManageSearchSourceAction -> showSources = true
                                                     else -> Unit
                                                 }
                                             },
