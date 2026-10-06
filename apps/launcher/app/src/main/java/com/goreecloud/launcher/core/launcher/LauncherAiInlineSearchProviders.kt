@@ -37,12 +37,8 @@ object LauncherConnectedSearchCredentialStore {
 
     val revision = revisionState.asStateFlow()
 
-    fun isConfigured(context: Context, providerId: String): Boolean = synchronized(lock) {
-        if (!LauncherConnectedSearchProviderRegistry.isCredentialInlineProvider(providerId)) {
-            return false
-        }
-        readCiphertextRoot(context).has(providerId)
-    }
+    fun isConfigured(context: Context, providerId: String): Boolean =
+        read(context, providerId) != null
 
     internal fun read(context: Context, providerId: String): String? = synchronized(lock) {
         if (!LauncherConnectedSearchProviderRegistry.isCredentialInlineProvider(providerId)) return null
