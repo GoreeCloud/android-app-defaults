@@ -118,6 +118,14 @@ internal class GalleryVideoPlayerSurface(
         return true
     }
 
+    fun seekBy(deltaMillis: Long): Long? {
+        captureProgress()
+        val progress = playbackProgress ?: return null
+        val target = progress.relativeSeekTarget(deltaMillis)
+        if (!seekTo(target)) return null
+        return target
+    }
+
     fun progressSnapshot(): GalleryVideoPlaybackProgress? {
         captureProgress()
         return playbackProgress
