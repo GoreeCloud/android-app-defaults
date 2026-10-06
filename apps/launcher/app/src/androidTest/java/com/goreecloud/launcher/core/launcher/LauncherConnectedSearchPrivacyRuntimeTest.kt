@@ -80,6 +80,11 @@ class LauncherConnectedSearchPrivacyRuntimeTest {
                 LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
             ),
         )
+        assertTrue(
+            providerIds.contains(
+                LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID,
+            ),
+        )
 
         val dropboxId = LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID
         if (!LauncherConnectedSearchProviderRegistry.isExplicitHandoffAvailable(context, dropboxId)) {
