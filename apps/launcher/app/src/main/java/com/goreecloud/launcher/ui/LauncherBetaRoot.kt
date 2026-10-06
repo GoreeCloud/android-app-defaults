@@ -304,6 +304,16 @@ internal fun launcherDockMaterialRole(
     LauncherDockStyle.RAISED -> GlazeV16MaterialRole.RAISED
 }
 
+internal fun launcherDockWidthFraction(
+    appCount: Int,
+    showSearch: Boolean,
+): Float = when {
+    showSearch -> 0.92f
+    appCount.coerceAtLeast(0) <= 4 -> 0.72f
+    appCount == 5 -> 0.84f
+    else -> 0.92f
+}
+
 internal fun launcherHomeSearchHeightDp(
     style: LauncherHomeSearchStyle,
     largeText: Boolean,
@@ -11378,45 +11388,47 @@ internal fun GlazeDock(
         )
     }
 
-    val compactWidthFraction = when {
-        showSearch -> 0.92f
-        apps.size <= 4 -> 0.72f
-        apps.size == 5 -> 0.84f
-        else -> 0.92f
-    }
+    val compactWidthFraction = launcherDockWidthFraction(
+        appCount = apps.size,
+        showSearch = showSearch,
+    )
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth(compactWidthFraction)
-            .widthIn(max = 560.dp)
-            .testTag("launcher-home-dock")
-            .onGloballyPositioned {
-                val bounds = it.boundsInRoot()
-                measuredBounds = bounds
-                onDockBoundsChanged(bounds)
-            },
-        shape = shape,
-        color = if (dockHasSurface || dockHovered) color else Color.Transparent,
-        border = if (dockHasSurface || dockHovered) border else null,
-        shadowElevation = when {
-            style == LauncherDockStyle.RAISED -> 3.dp
-            style == LauncherDockStyle.SOLID -> 1.dp
-            dockHovered && resolvedPresentation.materialRole == GlazeV16MaterialRole.RAISED -> 2.dp
-            else -> 0.dp
-        },
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
     ) {
-        BoxWithConstraints(
+        Surface(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(
-                    when {
-                        showLabels -> 96.dp
-                        style == LauncherDockStyle.EDGE -> 84.dp
-                        else -> 76.dp
-                    },
-                ),
+                .fillMaxWidth(compactWidthFraction)
+                .widthIn(max = 560.dp)
+                .testTag("launcher-home-dock")
+                .onGloballyPositioned {
+                    val bounds = it.boundsInRoot()
+                    measuredBounds = bounds
+                    onDockBoundsChanged(bounds)
+                },
+            shape = shape,
+            color = if (dockHasSurface || dockHovered) color else Color.Transparent,
+            border = if (dockHasSurface || dockHovered) border else null,
+            shadowElevation = when {
+                style == LauncherDockStyle.RAISED -> 3.dp
+                style == LauncherDockStyle.SOLID -> 1.dp
+                dockHovered && resolvedPresentation.materialRole == GlazeV16MaterialRole.RAISED -> 2.dp
+                else -> 0.dp
+            },
         ) {
-            val minimumSlot = resolvedPresentation.minimumInteractionTarget.coerceAtLeast(48.dp)
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(
+                        when {
+                            showLabels -> 96.dp
+                            style == LauncherDockStyle.EDGE -> 84.dp
+                            else -> 76.dp
+                        },
+                    ),
+            ) {
+                val minimumSlot = resolvedPresentation.minimumInteractionTarget.coerceAtLeast(48.dp)
             val preferredSlot = if (minimumSlot > 60.dp) minimumSlot else 60.dp
             val horizontalPadding = GlazeMetrics.space3
             val searchReservation = if (showSearch) minimumSlot + GlazeMetrics.space1 else 0.dp
@@ -11695,6 +11707,7 @@ internal fun GlazeDock(
             }
         }
     }
+}
 }
 
 @Suppress("DEPRECATION")
