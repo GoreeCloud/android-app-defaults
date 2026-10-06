@@ -374,7 +374,12 @@ internal class LauncherGeminiGenerateContentTransport :
             )
             .put(
                 "generationConfig",
-                JSONObject().put("maxOutputTokens", 256),
+                JSONObject()
+                    .put("maxOutputTokens", 256)
+                    .put(
+                        "thinkingConfig",
+                        JSONObject().put("thinkingLevel", "low"),
+                    ),
             )
 
     override fun applyAuthentication(
