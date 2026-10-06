@@ -20,6 +20,10 @@ class KeyboardSettingsRuntimeTest {
                 store.setKeyHeight(height)
                 assertEquals(height, store.load().keyHeight)
             }
+            KeyboardOneHandedMode.values().forEach { mode ->
+                store.setOneHandedMode(mode)
+                assertEquals(mode, store.load().oneHandedMode)
+            }
             KeyboardToolbarStyle.values().forEach { style ->
                 store.setToolbarStyle(style)
                 assertEquals(style, store.load().toolbarStyle)
@@ -62,6 +66,7 @@ class KeyboardSettingsRuntimeTest {
         } finally {
             // Restore Development defaults so this test cannot affect later IME runtime tests.
             store.setKeyHeight(KeyboardKeyHeight.COMPACT)
+            store.setOneHandedMode(KeyboardOneHandedMode.OFF)
             store.setToolbarStyle(KeyboardToolbarStyle.ICONS_ONLY)
             store.setSwipeTypingEnabled(true)
             store.setSwipeTrailEnabled(true)
@@ -83,6 +88,7 @@ class KeyboardSettingsRuntimeTest {
 
         val defaults = store.load()
         assertEquals(KeyboardKeyHeight.COMPACT, defaults.keyHeight)
+        assertEquals(KeyboardOneHandedMode.OFF, defaults.oneHandedMode)
         assertEquals(KeyboardToolbarStyle.ICONS_ONLY, defaults.toolbarStyle)
         assertTrue(defaults.swipeTypingEnabled)
         assertTrue(defaults.swipeTrailEnabled)
