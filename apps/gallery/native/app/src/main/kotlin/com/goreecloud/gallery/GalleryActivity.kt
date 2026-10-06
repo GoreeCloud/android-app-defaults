@@ -4881,7 +4881,7 @@ class GalleryActivity : Activity() {
                 subtitle = "Review first-use guidance without resetting preferences.",
                 actionIcon = R.drawable.ic_gallery_play,
                 actionDescription = "Replay setup",
-            ) { transitionSetupWizard(replay = true, requestedStep = 0) },
+            ) { showSetupWizard(replay = true, requestedStep = 0) },
         )
     }
 
