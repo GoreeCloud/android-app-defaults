@@ -25,7 +25,6 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
@@ -154,14 +153,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         // test's removal is still settling, which otherwise lets this case launch against stock
         // Launcher and wait forever for GoreeCloud Home semantics. add-role-holder is idempotent
         // when the package is already the holder; restore the original ownership in finally.
-        runShellCommand(
-            "cmd role add-role-holder ${RoleManager.ROLE_HOME} ${context.packageName}"
+        ensureHomeRoleHeld(
+            roleManager = roleManager,
+            packageName = context.packageName,
         )
-        withTimeout(10_000) {
-            while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
-            }
-        }
 
         try {
             val apps = withTimeout(10_000) {
@@ -934,10 +929,11 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
 
                 // ROOM authority can become visible before the launched Home finishes startup-owned
-                // reconciliation. Wait for the real Home surface plus both authoritative Room
-                // projections before performing this test-owned setup mutation; otherwise a healthy
-                // guarded write can legitimately lose a snapshot race and contaminate later tests.
-                waitForDisplayedTag("launcher-home-swipe-surface")
+                // reconciliation. Wait for the visible primary-page indicator plus both authoritative
+                // Room projections before performing this test-owned setup mutation. The outer
+                // gesture-container tag is not a readiness contract and can be absent from displayed
+                // semantics while the primary Home projection is still settling.
+                waitForSelectedHomePage(pageNumber = 1, timeoutMillis = 15_000)
                 composeRule.waitForIdle()
                 withTimeout(10_000) {
                     runtime.observeHomePages().first { state ->
@@ -1103,15 +1099,18 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
                 waitForDisplayedLabel(candidate.label.toString())
 
-                composeRule
+                val appBounds = composeRule
                     .onNodeWithText(candidate.label.toString(), useUnmergedTree = true)
-                    .performTouchInput {
-                        swipeDown(
-                            startY = top + 1f,
-                            endY = bottom + 320f,
-                            durationMillis = 400,
-                        )
-                    }
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+                val swipeX = ((appBounds.left + appBounds.right) / 2f).toInt()
+                injectTouchSwipe(
+                    startX = swipeX,
+                    startY = (appBounds.top + 1f).toInt(),
+                    endX = swipeX,
+                    endY = (appBounds.bottom + 320f).toInt(),
+                    durationMillis = 400L,
+                )
 
                 // Swipe-down Search enters a compact, keyboard-focused app-discovery panel.
                 // Frequent/Recent remain local-only usage projections; New / Updated is derived
@@ -1383,30 +1382,30 @@ class ActivatedHomeLifecycleRuntimeTest {
                 repository.state.first { it.authority == WorkspaceAuthority.ROOM }
             }
 
-            val scenario = ActivityScenario.launch(MainActivity::class.java)
-            try {
-                val dao = LauncherDatabaseProvider.get(context).workspaceDao()
-                val preferences = LauncherPreferencesRepository(context).preferences.first()
-                val roomPlacement = WorkspaceRoomPlacementRepository(
-                    authorityRepository = repository,
-                    workspaceDaoProvider = { dao },
-                )
-                val baseline = roomPlacement.replace(
-                    favoriteKeys = listOf(firstKey, secondKey),
-                    dockKeys = emptyList(),
-                    homeGrid = WorkspaceGridPlacement.Grid(
-                        columns = preferences.homeColumns,
-                        rows = preferences.homeRows,
-                    ),
-                )
-                check(baseline is WorkspaceRoomWriteResult.Written)
-
-                val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+            val dao = LauncherDatabaseProvider.get(context).workspaceDao()
+            val preferences = LauncherPreferencesRepository(context).preferences.first()
+            val roomPlacement = WorkspaceRoomPlacementRepository(
+                authorityRepository = repository,
+                workspaceDaoProvider = { dao },
+            )
+            val baseline = roomPlacement.replace(
+                favoriteKeys = listOf(firstKey, secondKey),
+                dockKeys = emptyList(),
+                homeGrid = WorkspaceGridPlacement.Grid(
                     columns = preferences.homeColumns,
                     rows = preferences.homeRows,
-                )
-                check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+                ),
+            )
+            check(baseline is WorkspaceRoomWriteResult.Written)
 
+            val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+                columns = preferences.homeColumns,
+                rows = preferences.homeRows,
+            )
+            check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+
+            val scenario = ActivityScenario.launch(MainActivity::class.java)
+            try {
                 waitForDisplayedLabel(firstApp.label.toString())
                 waitForDisplayedLabel(secondApp.label.toString())
 
@@ -2361,7 +2360,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 source = InputDevice.SOURCE_TOUCHSCREEN
             }
             try {
-                check(uiAutomation.injectInputEvent(event, true)) {
+                // These gestures intentionally replace the surface receiving input. Queue the
+                // event asynchronously so instrumentation cannot block on a disappearing window;
+                // the bounded UI-state waits after each gesture own completion synchronization.
+                check(uiAutomation.injectInputEvent(event, false)) {
                     "Android input injection failed for action=$action at ($x, $y)."
                 }
             } finally {
@@ -2405,31 +2407,46 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
-        // RoleManager can transiently report this package as HOME while a preceding test's
-        // remove-role-holder transition is still settling back to Quickstep. Reassert the
-        // desired holder idempotently before each HOME-dependent case, then let the caller's
-        // pre-test ownership snapshot decide whether teardown removes it.
-        runShellCommand(
-            "cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        mutateHomeRoleAndAwait(
+            roleManager = roleManager,
+            packageName = packageName,
+            shouldBeHeld = true,
         )
-        withTimeout(10_000) {
-            while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
-            }
-        }
     }
 
     private suspend fun removeHomeRoleAndAwait(
         roleManager: RoleManager,
         packageName: String,
     ) {
-        runShellCommand(
-            "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
+        mutateHomeRoleAndAwait(
+            roleManager = roleManager,
+            packageName = packageName,
+            shouldBeHeld = false,
         )
-        withTimeout(10_000) {
-            while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
-                delay(100)
+    }
+
+    private suspend fun mutateHomeRoleAndAwait(
+        roleManager: RoleManager,
+        packageName: String,
+        shouldBeHeld: Boolean,
+    ) {
+        val operation = if (shouldBeHeld) "add-role-holder" else "remove-role-holder"
+        // UiAutomation shell execution is asynchronous. Keep the command descriptor alive while
+        // RoleManager is the bounded authority for mutation completion; closing it immediately can
+        // cancel the command before Android commits the HOME-role transition.
+        val descriptor = InstrumentationRegistry.getInstrumentation()
+            .uiAutomation
+            .executeShellCommand(
+                "cmd role $operation ${RoleManager.ROLE_HOME} $packageName >/dev/null 2>&1",
+            )
+        try {
+            withTimeout(10_000) {
+                while (roleManager.isRoleHeld(RoleManager.ROLE_HOME) != shouldBeHeld) {
+                    delay(100)
+                }
             }
+        } finally {
+            descriptor.close()
         }
     }
 

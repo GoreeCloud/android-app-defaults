@@ -45,6 +45,7 @@ internal enum class LauncherOutlineGlyph {
     FILE,
     SETTINGS,
     EDIT,
+    EXCLUDE,
 }
 
 @Composable
@@ -337,6 +338,16 @@ internal fun LauncherOutlineGlyph(
                 roundedBox(.20f, .22f, .52f, .56f, .06f)
                 line(.45f, .60f, .77f, .28f)
                 line(.68f, .24f, .81f, .37f)
+            }
+
+            LauncherOutlineGlyph.EXCLUDE -> {
+                drawCircle(
+                    color = color,
+                    radius = u * .30f,
+                    center = Offset(u * .50f, u * .50f),
+                    style = stroke,
+                )
+                line(.32f, .50f, .68f, .50f)
             }
         }
     }

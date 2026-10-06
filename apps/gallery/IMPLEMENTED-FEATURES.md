@@ -83,6 +83,10 @@ All Android PopupMenu-based overflow/context surfaces now inherit a rounded Glaz
 
 These changes alter local observation and presentation only; they do not expand MediaStore permission scope, mutation authority, filesystem access, account/network authority, or release status.
 
+## October 6, 2026 — lifecycle reconciliation for selection overflow and slideshow Loop
+
+Authoritative current source includes the bounded multi-select overflow action that switches between **Select all visible** and **Clear selection** over the already-authorized presented scope, with Details restricted to one selected item. It also includes the session-local slideshow **Loop** control: repeat wraps from the end to the first eligible photo only when another eligible photo exists, and a one-photo collection fails closed. Both paths have focused policy coverage and add no media permission, mutation, filesystem, account, network, cloud, or persisted slideshow-repeat authority. Representative-device and release acceptance remain separate.
+
 ## October 2, 2026 — slideshow pause and resume
 
 Protected PR #185 integrated explicit **Pause / Resume** controls into the existing local photo-only slideshow. Pause cancels the pending advance without discarding the current viewer position; Resume continues from that photo using the already-persisted 3/5/10-second interval. Manual Previous/Next, swipe navigation, scale/zoom interaction, Activity pause/destroy, viewer replacement, and viewer close continue to terminate slideshow state so playback never progresses in the background.
