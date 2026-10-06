@@ -163,6 +163,43 @@ class KeyboardAccessibilityRuntimeTest {
     }
 
     @Test
+    fun oneHandedSideSwitchUsesReservedGutterAndTogglesDirection() {
+        val requestedModes = mutableListOf<KeyboardOneHandedMode>()
+        val view = createRenderedKeyboard().apply {
+            listener = listener { moveToRight ->
+                requestedModes += if (moveToRight) {
+                    KeyboardOneHandedMode.RIGHT
+                } else {
+                    KeyboardOneHandedMode.LEFT
+                }
+            }
+            setOneHandedMode(KeyboardOneHandedMode.LEFT)
+        }
+        render(view)
+
+        var target = view.accessibilityTargets()
+            .single { it.label == "Move one-handed keyboard to right" }
+        assertTrue(
+            "Left one-handed mode must place its switch in the reserved right gutter",
+            target.bounds.centerX() > view.width * 0.82f,
+        )
+        assertTrue(
+            "One-handed side switch must preserve the 48 dp interaction floor",
+            target.bounds.width() >= 48f * view.resources.displayMetrics.density,
+        )
+        assertTrue(view.performAccessibilityTarget(target.id))
+        assertEquals(listOf(KeyboardOneHandedMode.RIGHT), requestedModes)
+
+        render(view)
+        target = view.accessibilityTargets()
+            .single { it.label == "Move one-handed keyboard to left" }
+        assertTrue(
+            "Right one-handed mode must place its switch in the reserved left gutter",
+            target.bounds.centerX() < view.width * 0.18f,
+        )
+    }
+
+    @Test
     fun emojiExistsOnlyInTheToolbarOnLettersLayer() {
         val view = createRenderedKeyboard()
         val emojiTargets = view.accessibilityTargets().filter { it.label == "Emoji" }
@@ -214,6 +251,7 @@ class KeyboardAccessibilityRuntimeTest {
     private fun listener(
         onText: (String) -> Unit = {},
         onSuggestion: (String) -> Unit = {},
+        onOneHandedSideChange: (Boolean) -> Unit = {},
     ) = object : KeyboardView.Listener {
         override fun onText(value: String) = onText(value)
         override fun onSwipe(keyPath: List<String>) = Unit
@@ -223,5 +261,7 @@ class KeyboardAccessibilityRuntimeTest {
         override fun onShift() = Unit
         override fun onSuggestion(value: String) = onSuggestion(value)
         override fun onLayerChanged(layer: KeyboardLayer) = Unit
+        override fun onOneHandedSideChange(moveToRight: Boolean) =
+            onOneHandedSideChange(moveToRight)
     }
 }
