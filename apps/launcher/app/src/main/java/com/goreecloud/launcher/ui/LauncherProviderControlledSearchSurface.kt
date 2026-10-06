@@ -1185,13 +1185,11 @@ private fun LauncherSearchHandoffRow(
     apps: List<LauncherActivityInfo>,
     onClick: () -> Unit,
 ) {
-    val packageName = remember(provider.providerId) {
-        LauncherConnectedSearchProviderRegistry.iconPackageNameFor(provider.providerId)
+    val packageNames = remember(provider.providerId) {
+        LauncherConnectedSearchProviderRegistry.iconPackageNamesFor(provider.providerId)
     }
-    val sourceApp = remember(apps, packageName) {
-        packageName?.let { targetPackage ->
-            apps.firstOrNull { app -> app.componentName.packageName == targetPackage }
-        }
+    val sourceApp = remember(apps, packageNames) {
+        apps.firstOrNull { app -> app.componentName.packageName in packageNames }
     }
     val icon = sourceApp?.let { rememberLauncherAppIcon(it) }
     Surface(
@@ -1487,29 +1485,39 @@ private fun LauncherGlazeSearchAppTile(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (icon != null) {
-                Image(
-                    bitmap = icon,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(30.dp).launcherIconMask(),
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            RoundedCornerShape(10.dp),
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        result.title.take(1),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+            Box(modifier = Modifier.size(34.dp)) {
+                if (icon != null) {
+                    Image(
+                        bitmap = icon,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.size(30.dp).align(Alignment.Center).launcherIconMask(),
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .align(Alignment.Center)
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                RoundedCornerShape(10.dp),
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            result.title.take(1),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
                 }
+                LauncherAppProfileBadge(
+                    app = action.app,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset(x = (-3).dp, y = (-3).dp),
+                    compact = true,
+                )
             }
             Text(
                 result.title,
@@ -1519,10 +1527,6 @@ private fun LauncherGlazeSearchAppTile(
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
-            )
-            LauncherAppProfileBadge(
-                app = action.app,
-                compact = true,
             )
         }
     }
@@ -1688,8 +1692,8 @@ private fun LauncherShortcutActionButton(
                     android.os.Process.myUserHandle(),
                 ),
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 3.dp, y = (-3).dp),
+                    .align(Alignment.TopStart)
+                    .offset(x = (-3).dp, y = (-3).dp),
                 compact = true,
             )
         }
@@ -2009,29 +2013,40 @@ private fun LauncherGlazeSearchResult(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    if (appIcon != null) {
-                        Image(
-                            bitmap = appIcon,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(iconSize).launcherIconMask(),
-                        )
-                    } else if (isContact) {
-                        Surface(
-                            modifier = Modifier.size(iconSize),
-                            shape = RoundedCornerShape(GlazeMetrics.radiusPill),
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    result.title.trim().take(1).uppercase(),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                )
+                    Box(modifier = Modifier.size(iconSize), contentAlignment = Alignment.Center) {
+                        if (appIcon != null) {
+                            Image(
+                                bitmap = appIcon,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize().launcherIconMask(),
+                            )
+                        } else if (isContact) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                shape = RoundedCornerShape(GlazeMetrics.radiusPill),
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        result.title.trim().take(1).uppercase(),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    )
+                                }
                             }
+                        } else {
+                            LauncherSearchResultCategoryGlyph(result.category)
                         }
-                    } else {
-                        LauncherSearchResultCategoryGlyph(result.category)
+                        profileKind?.let { kind ->
+                            LauncherProfileBadge(
+                                kind = kind,
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .offset(x = (-3).dp, y = (-3).dp),
+                                compact = true,
+                            )
+                        }
                     }
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -2089,12 +2104,6 @@ private fun LauncherGlazeSearchResult(
                                     ),
                                 )
                             },
-                        )
-                    }
-                    profileKind?.let { kind ->
-                        LauncherProfileBadge(
-                            kind = kind,
-                            compact = true,
                         )
                     }
                     LauncherSearchResultTrailingGlyph(
@@ -2436,15 +2445,11 @@ private fun LauncherSearchSourceBadge(
     ) {
         Box(contentAlignment = Alignment.Center) {
             if (section == LauncherSearchSourceSection.CONNECTED) {
-                val packageName = remember(option.providerId) {
-                    LauncherConnectedSearchProviderRegistry.iconPackageNameFor(option.providerId)
+                val packageNames = remember(option.providerId) {
+                    LauncherConnectedSearchProviderRegistry.iconPackageNamesFor(option.providerId)
                 }
-                val sourceApp = remember(apps, packageName) {
-                    packageName?.let { targetPackage ->
-                        apps.firstOrNull { app ->
-                            app.componentName.packageName == targetPackage
-                        }
-                    }
+                val sourceApp = remember(apps, packageNames) {
+                    apps.firstOrNull { app -> app.componentName.packageName in packageNames }
                 }
                 val icon = sourceApp?.let { rememberLauncherAppIcon(it) }
                 if (icon != null) {
@@ -3232,12 +3237,11 @@ private fun sourceSectionFor(
     LauncherFilesSearchProvider.PROVIDER_ID,
     -> LauncherSearchSourceSection.PERSONAL
 
-    LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID,
-    LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID,
-    LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID,
-    -> LauncherSearchSourceSection.CONNECTED
-
-    else -> LauncherSearchSourceSection.DEVICE
+    else -> if (LauncherConnectedSearchProviderRegistry.isConnectedProvider(option.providerId)) {
+        LauncherSearchSourceSection.CONNECTED
+    } else {
+        LauncherSearchSourceSection.DEVICE
+    }
 }
 
 private fun compactSourceSummary(
@@ -3256,15 +3260,19 @@ private fun compactSourceSummary(
         } else {
             "Cloud · Optional"
         }
-    LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID ->
-        "Web · Optional"
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
         "App handoff · Optional"
-    else -> when (option.invocationMode) {
+    else -> when {
+        LauncherConnectedSearchProviderRegistry.isAiProvider(option.providerId) ->
+            "AI · Explicit handoff"
+        LauncherConnectedSearchProviderRegistry.isWebSearchProvider(option.providerId) ->
+            "Web · Explicit handoff"
+        else -> when (option.invocationMode) {
         LauncherSearchProviderInvocationMode.AUTOMATIC_LOCAL -> "Local · Automatic"
         LauncherSearchProviderInvocationMode.OPT_IN_LOCAL -> "Local · Permission"
         LauncherSearchProviderInvocationMode.OPT_IN_REMOTE_INLINE -> "Connected · Optional"
         LauncherSearchProviderInvocationMode.EXPLICIT_USER_HANDOFF -> "Handoff · Optional"
+        }
     }
 }
 
@@ -3272,8 +3280,8 @@ private fun connectedSourceDetail(
     context: android.content.Context,
     option: LauncherSearchProviderControlOption,
     fileSearchRoots: List<Uri>,
-): String? = when (option.providerId) {
-    LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID ->
+): String? = when {
+    option.providerId == LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID ->
         if (LauncherGoogleDriveAuthorizationState.isConnected()) {
             "Universal Search sends the typed query to the Google Drive API only while this source " +
                 "is enabled. Launcher keeps the short-lived access token in process memory only."
@@ -3286,13 +3294,17 @@ private fun connectedSourceDetail(
             "Enable Google Drive to authorize a Google account for metadata-only Drive search. " +
                 "Folder-scoped local document search remains under Files."
         }
-    LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID ->
-        "The official Brave Autosuggest API requires a confidential subscription token. Launcher " +
-            "will not embed that provider secret in the APK or scrape Brave pages; inline suggestions " +
-            "remain unavailable until a governed server-side credential path exists."
-    LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
+    option.providerId == LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
         "Dropbox inline results require a reviewed OAuth adapter. Until that authorization path " +
             "exists, Launcher keeps this source behind an explicit handoff."
+    LauncherConnectedSearchProviderRegistry.isAiProvider(option.providerId) ->
+        option.displayName + " receives the query only after you explicitly choose this source. " +
+            "Launcher does not send typed queries to this AI service in the background. The " +
+            "provider's own account, privacy, and retention rules apply."
+    LauncherConnectedSearchProviderRegistry.isWebSearchProvider(option.providerId) ->
+        option.displayName + " receives the query only after you explicitly choose this source. " +
+            "Launcher does not fan typed queries out to web providers automatically. The provider's " +
+            "own privacy and retention rules apply."
     else -> null
 }
 

@@ -309,13 +309,22 @@ internal fun launcherDockWidthFraction(
     appCount: Int,
     showSearch: Boolean,
 ): Float = when {
-    showSearch -> 0.82f
+    showSearch -> 0.88f
     appCount.coerceAtLeast(0) <= 1 -> 0.32f
-    appCount == 2 -> 0.40f
-    appCount == 3 -> 0.50f
-    appCount == 4 -> 0.62f
-    appCount == 5 -> 0.72f
-    else -> 0.82f
+    appCount == 2 -> 0.42f
+    appCount == 3 -> 0.55f
+    appCount == 4 -> 0.68f
+    appCount == 5 -> 0.80f
+    else -> 0.88f
+}
+
+internal fun launcherExternalDockContentClearanceDp(
+    showLabels: Boolean,
+    style: LauncherDockStyle,
+): Float = when {
+    showLabels -> 100f
+    style == LauncherDockStyle.EDGE -> 84f
+    else -> 76f
 }
 
 internal fun launcherHomeSearchHeightDp(
@@ -1334,10 +1343,8 @@ fun LauncherBetaRoot(
                     )
                 }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding(),
+                Box(
+                    modifier = Modifier.fillMaxSize(),
                 ) {
                     if (unifiedPagerEnabled) {
                         val pagerState = rememberPagerState(
@@ -1367,8 +1374,7 @@ fun LauncherBetaRoot(
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .testTag("launcher-home-unified-pager")
                                 .launcherHomePagerBoundaryGestureNavigation(
                                     enabled = activeDrag == null,
@@ -1412,9 +1418,7 @@ fun LauncherBetaRoot(
                         }
                     } else {
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
+                            modifier = Modifier.fillMaxSize(),
                         ) {
                             primaryHomeContent(false)
                         }
@@ -1425,7 +1429,14 @@ fun LauncherBetaRoot(
                         activeDrag != null ||
                         experiencePreferences.showDockSearch
                     ) {
-                        EditableHomeDock(
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .navigationBarsPadding()
+                                .padding(bottom = 2.dp),
+                        ) {
+                            EditableHomeDock(
                             apps = rootDockApps,
                             iconScale = preferences.iconScale,
                             style = experiencePreferences.dockStyle,
@@ -1513,9 +1524,9 @@ fun LauncherBetaRoot(
                                     onLaunchApp = onLaunchApp,
                                 )
                             },
-                        )
+                            )
+                        }
                     }
-                    Spacer(Modifier.height(2.dp))
                 }
             }
             LauncherSurfaceMode.SEARCH -> LauncherProviderControlledSearchSurface(
@@ -2408,23 +2419,25 @@ private fun HomeSurface(
             LauncherHomeSpacing.AIRY -> GlazeMetrics.space3
         }
 
+        val externalDockContentClearance = if (
+            dockHostedExternally &&
+            (dockApps.isNotEmpty() || activeDrag != null || experiencePreferences.showDockSearch)
+        ) {
+            launcherExternalDockContentClearanceDp(
+                showLabels = experiencePreferences.showDockLabels,
+                style = experiencePreferences.dockStyle,
+            ).dp
+        } else {
+            0.dp
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .then(
-                    if (
-                        primaryHomeShouldOwnBottomInset(
-                            contentOnly = contentOnly,
-                            dockHostedExternally = dockHostedExternally,
-                        )
-                    ) {
-                        Modifier.navigationBarsPadding()
-                    } else {
-                        Modifier
-                    },
-                )
-                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space2),
+                .navigationBarsPadding()
+                .padding(horizontal = GlazeMetrics.space4, vertical = GlazeMetrics.space2)
+                .padding(bottom = externalDockContentClearance),
             verticalArrangement = Arrangement.spacedBy(homeVerticalSpacing),
         ) {
             if (editMode) {
@@ -5887,8 +5900,8 @@ private fun HomeFavoriteTile(
                     LauncherAppProfileBadge(
                         app = app,
                         modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .offset(y = (-4).dp),
+                            .align(Alignment.TopStart)
+                            .offset(x = (-4).dp, y = (-4).dp),
                     )
                     LauncherAppBadgeMark(
                         app,
@@ -12165,7 +12178,7 @@ private fun LauncherAppTile(
             )
             if (pinnedInDrawer) {
                 DrawerPinnedMark(
-                    modifier = Modifier.align(Alignment.TopStart),
+                    modifier = Modifier.align(Alignment.BottomStart),
                 )
             }
             if (lockedByLauncher) {
@@ -12348,13 +12361,13 @@ private fun LauncherAppListRow(
             LauncherAppProfileBadge(
                 app = app,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 4.dp, y = (-3).dp),
+                    .align(Alignment.TopStart)
+                    .offset(x = (-3).dp, y = (-3).dp),
                 compact = true,
             )
             if (pinnedInDrawer) {
                 DrawerPinnedMark(
-                    modifier = Modifier.align(Alignment.TopStart),
+                    modifier = Modifier.align(Alignment.BottomStart),
                 )
             }
             if (lockedByLauncher) {
@@ -14139,12 +14152,21 @@ private fun AppContextPopup(
                     horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                 ) {
                     if (icon != null) {
-                        Image(
-                            bitmap = icon,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(42.dp).launcherIconMask(),
-                        )
+                        Box(modifier = Modifier.size(46.dp)) {
+                            Image(
+                                bitmap = icon,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.size(42.dp).align(Alignment.Center).launcherIconMask(),
+                            )
+                            LauncherAppProfileBadge(
+                                app = app,
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .offset(x = (-3).dp, y = (-3).dp),
+                                compact = true,
+                            )
+                        }
                     }
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -14173,7 +14195,6 @@ private fun AppContextPopup(
                             )
                         }
                     }
-                    LauncherAppProfileBadge(app = app)
                 }
 
                 Surface(
