@@ -12147,6 +12147,12 @@ private fun LauncherAppTile(
                     }
                 }
             }
+            LauncherAppProfileBadge(
+                app = app,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-4).dp),
+            )
             LauncherAppBadgeMark(
                 app,
                 modifier = launcherBadgePositionModifier(),
@@ -14154,6 +14160,7 @@ private fun AppContextPopup(
                             )
                         }
                     }
+                    LauncherAppProfileBadge(app = app)
                 }
 
                 Surface(
@@ -14219,6 +14226,10 @@ private fun AppContextPopup(
                             label = shortcut.label,
                             symbol = GlazePopupActionSymbol.SHORTCUT,
                             onClick = { onLaunchShortcut(shortcut.action) },
+                            profileKind = launcherProfileBadgeKindForUser(
+                                app.user,
+                                Process.myUserHandle(),
+                            ),
                         )
                     }
                 }
@@ -14615,6 +14626,7 @@ private fun GlazeLauncherPopupAction(
     onClick: () -> Unit,
     enabled: Boolean = true,
     destructive: Boolean = false,
+    profileKind: LauncherDrawerProfileKind? = null,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
@@ -14636,6 +14648,7 @@ private fun GlazeLauncherPopupAction(
             GlazePopupActionGlyph(symbol, actionColor)
             Text(
                 label,
+                modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.bodyMedium,
                 color = when {
                     !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
@@ -14645,6 +14658,12 @@ private fun GlazeLauncherPopupAction(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            profileKind?.let { kind ->
+                LauncherProfileBadge(
+                    kind = kind,
+                    compact = true,
+                )
+            }
         }
     }
 }

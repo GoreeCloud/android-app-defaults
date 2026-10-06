@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -1519,6 +1520,10 @@ private fun LauncherGlazeSearchAppTile(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
             )
+            LauncherAppProfileBadge(
+                app = action.app,
+                compact = true,
+            )
         }
     }
 }
@@ -1676,6 +1681,16 @@ private fun LauncherShortcutActionButton(
             LauncherShortcutActionGlyph(
                 label = result.title,
                 tint = MaterialTheme.colorScheme.primary,
+            )
+            LauncherProfileBadge(
+                kind = launcherProfileBadgeKindForUser(
+                    action.user,
+                    android.os.Process.myUserHandle(),
+                ),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 3.dp, y = (-3).dp),
+                compact = true,
             )
         }
     }
@@ -1950,6 +1965,19 @@ private fun LauncherGlazeSearchResult(
     val isContact = result.category == LauncherSearchCategory.CONTACT
     val appAction = result.action as? LaunchApplicationSearchAction
     val appIcon = if (appAction != null) rememberLauncherAppIcon(appAction.app) else null
+    val profileKind = when (val action = result.action) {
+        is LaunchApplicationSearchAction ->
+            launcherProfileBadgeKindForUser(
+                action.app.user,
+                android.os.Process.myUserHandle(),
+            )
+        is LauncherLaunchShortcutSearchAction ->
+            launcherProfileBadgeKindForUser(
+                action.user,
+                android.os.Process.myUserHandle(),
+            )
+        else -> null
+    }
     val number = result.subtitle?.takeIf { it.any(Char::isDigit) }
     val iconSize = if (prominent) 42.dp else 34.dp
     Surface(
@@ -2061,6 +2089,12 @@ private fun LauncherGlazeSearchResult(
                                     ),
                                 )
                             },
+                        )
+                    }
+                    profileKind?.let { kind ->
+                        LauncherProfileBadge(
+                            kind = kind,
+                            compact = true,
                         )
                     }
                     LauncherSearchResultTrailingGlyph(
