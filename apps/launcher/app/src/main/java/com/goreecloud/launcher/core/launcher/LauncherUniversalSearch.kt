@@ -327,10 +327,9 @@ class LauncherInstalledAppsSearchProvider(
             val label = launcherVisibleAppLabel(app)
             val packageName = app.componentName.packageName
             val profileLabel = if (app.user == primaryUser) "User" else "Work"
-            val subtitle = "$profileLabel · $packageName"
             val score = LauncherSearchTextRanking.score(
                 title = label,
-                subtitle = subtitle,
+                subtitle = "$profileLabel · $packageName",
                 rawQuery = rawQuery,
             ) ?: return@mapNotNull null
 
@@ -338,7 +337,7 @@ class LauncherInstalledAppsSearchProvider(
                 providerId = id,
                 resultId = app.user.hashCode().toString() + ":" + app.componentName.flattenToString(),
                 title = label,
-                subtitle = subtitle,
+                subtitle = profileLabel,
                 category = LauncherSearchCategory.APPLICATION,
                 score = score,
                 action = LaunchApplicationSearchAction(app),
