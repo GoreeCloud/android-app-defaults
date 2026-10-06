@@ -56,6 +56,7 @@ import com.goreecloud.gallery.android.AndroidMediaMutationPendingStates
 import com.goreecloud.gallery.android.AndroidMediaMutationRequests
 import com.goreecloud.gallery.android.AndroidMediaStoreReader
 import com.goreecloud.gallery.core.GalleryBulkActionPolicy
+import com.goreecloud.gallery.core.GalleryAlbumRenamePolicy
 import com.goreecloud.gallery.core.AuthorizedMediaSearch
 import com.goreecloud.gallery.core.GalleryDragSelectionPolicy
 import com.goreecloud.gallery.core.GalleryDragSelectionSession
@@ -133,6 +134,8 @@ class GalleryActivity : Activity() {
     private var viewerSlideshowStop: (() -> Unit)? = null
     private var pendingMediaMutation: AndroidMediaMutationPendingState? = null
     private var pendingMediaMove: AndroidMediaMovePendingState? = null
+    private var pendingMediaMovePurpose = MediaMovePurpose.MOVE
+    private var pendingMediaMoveDisplayName: String? = null
     private var mediaMoveExecutionInProgress = false
     private var mediaCopyExecutionInProgress = false
     private var setupDialog: AlertDialog? = null
@@ -160,9 +163,22 @@ class GalleryActivity : Activity() {
             .orEmpty()
         pendingMediaMutation = restorePendingMediaMutation(savedInstanceState)
         pendingMediaMove = restorePendingMediaMove(savedInstanceState)
+        if (pendingMediaMove != null) {
+            pendingMediaMovePurpose = MediaMovePurpose.fromStorage(
+                savedInstanceState?.getString(STATE_PENDING_MEDIA_MOVE_PURPOSE),
+            )
+            pendingMediaMoveDisplayName = savedInstanceState
+                ?.getString(STATE_PENDING_MEDIA_MOVE_DISPLAY_NAME)
+                ?.let { raw ->
+                    runCatching { GalleryNewFolderMovePolicy.normalizeFolderName(raw) }.getOrNull()
+                }
+                ?.takeIf { pendingMediaMovePurpose == MediaMovePurpose.ALBUM_RENAME }
+        }
         if (pendingMediaMutation != null && pendingMediaMove != null) {
             pendingMediaMutation = null
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
         }
         requestedDestination(intent)?.let { destination = it }
         selectedSort = currentUserSettings().sortPreference.mediaSortOrder
@@ -234,6 +250,13 @@ class GalleryActivity : Activity() {
                 STATE_PENDING_MEDIA_MOVE_DESTINATION,
                 move.destinationRelativePath,
             )
+            outState.putString(
+                STATE_PENDING_MEDIA_MOVE_PURPOSE,
+                pendingMediaMovePurpose.storageValue,
+            )
+            pendingMediaMoveDisplayName?.let { name ->
+                outState.putString(STATE_PENDING_MEDIA_MOVE_DISPLAY_NAME, name)
+            }
         }
         super.onSaveInstanceState(outState)
     }
@@ -296,11 +319,19 @@ class GalleryActivity : Activity() {
 
         if (requestCode == MEDIA_MOVE_REQUEST) {
             val move = pendingMediaMove
+            val purpose = pendingMediaMovePurpose
+            val displayName = pendingMediaMoveDisplayName
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
             if (resultCode == RESULT_OK && move != null) {
-                completeConfirmedMediaMove(move)
+                completeConfirmedMediaMove(move, purpose, displayName)
             } else if (move != null) {
-                Toast.makeText(this, "Move canceled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    if (purpose == MediaMovePurpose.ALBUM_RENAME) "Album rename canceled" else "Move canceled",
+                    Toast.LENGTH_SHORT,
+                ).show()
             }
             return
         }
@@ -2065,6 +2096,7 @@ class GalleryActivity : Activity() {
                         }
                         GalleryCardOverflowAction.DETAILS -> showItemDetails(item)
                         GalleryCardOverflowAction.OPEN,
+                        GalleryCardOverflowAction.RENAME,
                         GalleryCardOverflowAction.PIN_TO_TOP,
                         GalleryCardOverflowAction.UNPIN_FROM_TOP,
                         GalleryCardOverflowAction.MOVE_EARLIER,
@@ -2150,6 +2182,16 @@ class GalleryActivity : Activity() {
         val albumId = album.id
         val settings = currentUserSettings()
         val isPinned = albumId != null && albumId in settings.pinnedAlbumIds
+        val renameSource = if (
+            albumId != null &&
+            AndroidMediaMoveRequests.isSupported() &&
+            !GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())
+        ) {
+            GalleryAlbumRenamePolicy.sourceForAlbum(authorizedItems, albumId)
+                ?.takeIf { it.contentUris.size <= AndroidMediaMutationRequests.MAX_MUTATION_ITEMS }
+        } else {
+            null
+        }
         val availability = if (albumId == null) {
             GalleryAlbumMoveAvailability(canMoveEarlier = false, canMoveLater = false)
         } else {
@@ -2165,6 +2207,7 @@ class GalleryActivity : Activity() {
             canPin = albumId != null,
             canMoveEarlier = availability.canMoveEarlier,
             canMoveLater = availability.canMoveLater,
+            canRename = renameSource != null,
         )
         val byId = actions.associateBy { action -> action.ordinal + 1 }
         PopupMenu(this, anchor).apply {
@@ -2174,6 +2217,7 @@ class GalleryActivity : Activity() {
             setOnMenuItemClickListener { menuItem ->
                 when (byId[menuItem.itemId]) {
                     GalleryCardOverflowAction.OPEN -> openAlbumPresentation(album)
+                    GalleryCardOverflowAction.RENAME -> showAlbumRenameDialog(album)
                     GalleryCardOverflowAction.PIN_TO_TOP -> setAlbumPinned(album, pinned = true)
                     GalleryCardOverflowAction.UNPIN_FROM_TOP -> setAlbumPinned(album, pinned = false)
                     GalleryCardOverflowAction.MOVE_EARLIER ->
@@ -2190,6 +2234,184 @@ class GalleryActivity : Activity() {
             }
             show()
         }
+    }
+
+    private fun showAlbumRenameDialog(album: AlbumPresentation) {
+        val albumId = album.id ?: return
+        if (!AndroidMediaMoveRequests.isSupported()) {
+            Toast.makeText(
+                this,
+                "Album rename requires Android 11 or newer in this Development build.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
+        if (GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())) {
+            Toast.makeText(
+                this,
+                "Album rename requires full local photo and video access.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
+
+        val source = GalleryAlbumRenamePolicy.sourceForAlbum(
+            currentScope = authorizedItems,
+            albumId = albumId,
+        )?.takeIf { it.contentUris.size <= AndroidMediaMutationRequests.MAX_MUTATION_ITEMS }
+        if (source == null) {
+            Toast.makeText(
+                this,
+                "This album cannot be safely renamed from the current media snapshot.",
+                Toast.LENGTH_SHORT,
+            ).show()
+            return
+        }
+
+        var dialog: AlertDialog? = null
+        val nameField = EditText(this).apply {
+            hint = "Album name"
+            setSingleLine(true)
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(primaryTextColor())
+            setHintTextColor(secondaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.CONTROL,
+                GalleryGlazeContract.SHAPE_CONTROL_DP,
+            )
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+            contentDescription = "New album name"
+            setText(source.currentName)
+            setSelection(text.length)
+        }
+        val renameAction = TextView(this).apply {
+            text = "Rename"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(accentColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            background = roundedSurface(withAlpha(accentColor(), 0.12f), GalleryGlazeContract.SHAPE_CONTROL_DP)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Rename album"
+        }
+        val cancelAction = TextView(this).apply {
+            text = "Cancel"
+            gravity = Gravity.CENTER
+            minHeight = dp(GalleryGlazeContract.GENERAL_TARGET_DP)
+            setPadding(dp(14), 0, dp(14), 0)
+            setTextColor(primaryTextColor())
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setTypeface(typeface, Typeface.BOLD)
+            setBackgroundColor(Color.TRANSPARENT)
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Cancel album rename"
+            setOnClickListener { dialog?.dismiss() }
+        }
+
+        renameAction.setOnClickListener {
+            val currentScope = authorizedItems
+            val destination = try {
+                GalleryAlbumRenamePolicy.destinationForAlbum(
+                    currentScope = currentScope,
+                    albumId = albumId,
+                    rawName = nameField.text?.toString().orEmpty(),
+                )
+            } catch (error: IllegalArgumentException) {
+                nameField.error = error.message ?: "Choose a valid album name"
+                nameField.requestFocus()
+                return@setOnClickListener
+            }
+            if (destination.source.contentUris.size > AndroidMediaMutationRequests.MAX_MUTATION_ITEMS) {
+                nameField.error =
+                    "Album rename is limited to ${AndroidMediaMutationRequests.MAX_MUTATION_ITEMS} items at a time"
+                nameField.requestFocus()
+                return@setOnClickListener
+            }
+
+            val byUri = currentScope.associateBy { it.contentUri }
+            val items = destination.source.contentUris.mapNotNull(byUri::get)
+            if (items.size != destination.source.contentUris.size) {
+                Toast.makeText(
+                    this,
+                    "The album changed before rename could start.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                dialog?.dismiss()
+                return@setOnClickListener
+            }
+
+            dialog?.dismiss()
+            requestMediaMove(
+                items = items,
+                destinationRelativePath = destination.destinationRelativePath,
+                purpose = MediaMovePurpose.ALBUM_RENAME,
+                displayName = destination.newName,
+            )
+        }
+
+        val actions = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
+            setPadding(0, dp(14), 0, 0)
+            addView(cancelAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f).apply {
+                marginEnd = dp(6)
+            })
+            addView(renameAction, LinearLayout.LayoutParams(0, dp(GalleryGlazeContract.GENERAL_TARGET_DP), 1f))
+        }
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(22), dp(20), dp(22), dp(18))
+            background = GalleryGlazeSurfaces.drawable(
+                context,
+                GalleryGlazeSurfaces.Role.OVERLAY,
+                GalleryGlazeContract.SHAPE_OVERLAY_DP,
+            )
+            addView(TextView(context).apply {
+                text = "Rename album"
+                setTextColor(primaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+                setTypeface(typeface, Typeface.BOLD)
+            })
+            addView(TextView(context).apply {
+                text =
+                    "Rename ${source.currentName} on this storage volume. Android will ask for write approval before Gallery moves ${itemCountLabel(source.contentUris.size)} to the renamed folder."
+                setTextColor(secondaryTextColor())
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f)
+                setLineSpacing(0f, 1.06f)
+                setPadding(0, dp(4), 0, dp(14))
+            })
+            addView(nameField, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52)))
+            addView(actions)
+        }
+
+        dialog = AlertDialog.Builder(this).setView(panel).create()
+        dialog?.setOnShowListener {
+            dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+            dialog?.window?.setDimAmount(0.42f)
+            dialog?.window?.setLayout(
+                resources.displayMetrics.widthPixels - dp(32),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            )
+            nameField.requestFocus()
+            nameField.post {
+                (getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager)
+                    ?.showSoftInput(nameField, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+        dialog?.show()
+        dialog?.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.setDimAmount(0.42f)
+        dialog?.window?.setLayout(
+            resources.displayMetrics.widthPixels - dp(32),
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        )
     }
 
     private fun setAlbumPinned(album: AlbumPresentation, pinned: Boolean) {
@@ -3666,7 +3888,12 @@ class GalleryActivity : Activity() {
     private fun requestMediaMove(items: List<MediaItem>, destination: GalleryMoveDestination) =
         requestMediaMove(items, destination.relativePath)
 
-    private fun requestMediaMove(items: List<MediaItem>, destinationRelativePath: String) {
+    private fun requestMediaMove(
+        items: List<MediaItem>,
+        destinationRelativePath: String,
+        purpose: MediaMovePurpose = MediaMovePurpose.MOVE,
+        displayName: String? = null,
+    ) {
         if (items.isEmpty() || pendingMediaMove != null || pendingMediaMutation != null || mediaMoveExecutionInProgress || mediaCopyExecutionInProgress) return
         if (!AndroidMediaMoveRequests.isSupported()) {
             Toast.makeText(this, "Move requires Android 11 or newer in this Development build.", Toast.LENGTH_SHORT).show()
@@ -3694,6 +3921,10 @@ class GalleryActivity : Activity() {
         }
 
         pendingMediaMove = AndroidMediaMoveRequests.capture(request)
+        pendingMediaMovePurpose = purpose
+        pendingMediaMoveDisplayName = displayName
+            ?.let { raw -> runCatching { GalleryNewFolderMovePolicy.normalizeFolderName(raw) }.getOrNull() }
+            ?.takeIf { purpose == MediaMovePurpose.ALBUM_RENAME }
         try {
             startIntentSenderForResult(
                 request.pendingIntent.intentSender,
@@ -3705,14 +3936,22 @@ class GalleryActivity : Activity() {
             )
         } catch (_: IntentSender.SendIntentException) {
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
             Toast.makeText(this, "Android could not open move authorization.", Toast.LENGTH_SHORT).show()
         } catch (_: RuntimeException) {
             pendingMediaMove = null
+            pendingMediaMovePurpose = MediaMovePurpose.MOVE
+            pendingMediaMoveDisplayName = null
             Toast.makeText(this, "Android could not open move authorization.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun completeConfirmedMediaMove(move: AndroidMediaMovePendingState) {
+    private fun completeConfirmedMediaMove(
+        move: AndroidMediaMovePendingState,
+        purpose: MediaMovePurpose,
+        displayName: String?,
+    ) {
         mediaMoveExecutionInProgress = true
         thread(name = "goreecloud-gallery-mediastore-move") {
             val result = try {
@@ -3730,13 +3969,23 @@ class GalleryActivity : Activity() {
                 clearSelection(render = false)
                 thumbnailCache.evictAll()
 
-                val message = when {
-                    result == null -> "Move could not be completed"
-                    result.failedCount == 0 && result.movedCount == 1 -> "Moved 1 item"
-                    result.failedCount == 0 -> "Moved ${result.movedCount} items"
-                    result.movedCount == 0 && result.failedCount == 1 -> "Move failed for 1 item"
-                    result.movedCount == 0 -> "Move failed for ${result.failedCount} items"
-                    else -> "Moved ${result.movedCount} items · ${result.failedCount} failed"
+                val message = if (purpose == MediaMovePurpose.ALBUM_RENAME) {
+                    when {
+                        result == null -> "Album rename could not be completed"
+                        result.failedCount == 0 ->
+                            "Renamed album to ${displayName ?: "new name"}"
+                        result.movedCount == 0 -> "Album rename failed"
+                        else -> "Album rename incomplete · ${result.movedCount} moved · ${result.failedCount} failed"
+                    }
+                } else {
+                    when {
+                        result == null -> "Move could not be completed"
+                        result.failedCount == 0 && result.movedCount == 1 -> "Moved 1 item"
+                        result.failedCount == 0 -> "Moved ${result.movedCount} items"
+                        result.movedCount == 0 && result.failedCount == 1 -> "Move failed for 1 item"
+                        result.movedCount == 0 -> "Move failed for ${result.failedCount} items"
+                        else -> "Moved ${result.movedCount} items · ${result.failedCount} failed"
+                    }
                 }
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
@@ -6801,6 +7050,16 @@ class GalleryActivity : Activity() {
         val isFavorites: Boolean,
     )
 
+    private enum class MediaMovePurpose(val storageValue: String) {
+        MOVE("move"),
+        ALBUM_RENAME("album_rename");
+
+        companion object {
+            fun fromStorage(value: String?): MediaMovePurpose =
+                entries.firstOrNull { it.storageValue == value } ?: MOVE
+        }
+    }
+
     private enum class GalleryDestination {
         PHOTOS,
         ALBUMS,
@@ -6821,6 +7080,8 @@ class GalleryActivity : Activity() {
         const val STATE_PENDING_MEDIA_MUTATION_URIS = "pending_media_mutation_uris"
         const val STATE_PENDING_MEDIA_MOVE_URIS = "pending_media_move_uris"
         const val STATE_PENDING_MEDIA_MOVE_DESTINATION = "pending_media_move_destination"
+        const val STATE_PENDING_MEDIA_MOVE_PURPOSE = "pending_media_move_purpose"
+        const val STATE_PENDING_MEDIA_MOVE_DISPLAY_NAME = "pending_media_move_display_name"
 
         const val GRID_GAP_DP = 3
         const val GRID_CORNER_DP = 8
