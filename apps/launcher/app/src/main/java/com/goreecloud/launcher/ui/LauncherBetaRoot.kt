@@ -1144,69 +1144,10 @@ fun LauncherBetaRoot(
         ).motionMode
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .onGloballyPositioned { launcherBounds = it.boundsInRoot() }
-            .dragAndDropTarget(
-                shouldStartDragAndDrop = { event ->
-                    event.launcherAppDragData()?.let { drag ->
-                        drag.origin != LauncherAppDragOrigin.HOME ||
-                            drag.sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
-                    } == true
-                },
-                target = launcherDragTarget,
-            ),
-    ) {
-        AnimatedContent(
-            targetState = surfaceMode,
-            transitionSpec = {
-            val profile = LauncherSurfaceTransitionPolicy.resolve(
-                initial = initialState,
-                target = targetState,
-                motionMode = surfaceTransitionMotionMode,
-            )
-            when {
-                !profile.spatial ->
-                    fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis)) togetherWith
-                        fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
-
-                initialState == LauncherSurfaceMode.HOME &&
-                    targetState == LauncherSurfaceMode.DRAWER ->
-                    (
-                        slideInVertically(
-                            animationSpec = tween(durationMillis = profile.enterDurationMillis),
-                            initialOffsetY = { height -> height / profile.enterOffsetDivisor },
-                        ) + fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis))
-                    ) togetherWith (
-                        slideOutVertically(
-                            animationSpec = tween(durationMillis = profile.exitDurationMillis),
-                            targetOffsetY = { height -> -height / profile.exitOffsetDivisor },
-                        ) + fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
-                    )
-
-                initialState == LauncherSurfaceMode.DRAWER &&
-                    targetState == LauncherSurfaceMode.HOME ->
-                    (
-                        slideInVertically(
-                            animationSpec = tween(durationMillis = profile.enterDurationMillis),
-                            initialOffsetY = { height -> -height / profile.enterOffsetDivisor },
-                        ) + fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis))
-                    ) togetherWith (
-                        slideOutVertically(
-                            animationSpec = tween(durationMillis = profile.exitDurationMillis),
-                            targetOffsetY = { height -> height / profile.exitOffsetDivisor },
-                        ) + fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
-                    )
-
-                else ->
-                    fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis)) togetherWith
-                        fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
-            }
-        },
-    ) { targetSurfaceMode ->
-        when (targetSurfaceMode) {
-            LauncherSurfaceMode.HOME -> {
+    // Keep LauncherBetaRoot below Android Runtime's compiler instruction ceiling by
+    // moving the two largest composition bodies into child composable lambdas. State ownership,
+    // callbacks, persistence, and surface behavior remain rooted in LauncherBetaRoot.
+    val homeModeContent: @Composable () -> Unit = {
                 val selectedSecondaryPage = selectedSecondaryHomePage(
                     selectedHomePageId = selectedHomePageId,
                     pages = homePages,
@@ -1480,7 +1421,431 @@ fun LauncherBetaRoot(
                         }
                     }
                 }
+    }
+
+    val overlayContent: @Composable () -> Unit = {
+        if (activeDrag == null) selectedApp?.let { app ->
+            selectedAppAnchor?.let { anchor ->
+                val appKey = app.workspaceKey()
+                val pinnedIndex = drawerPinnedAppOrder.indexOf(appKey)
+                val dockIndex = workspace.dockKeys.indexOf(appKey)
+                AppContextPopup(
+                    app = app,
+                    anchor = anchor,
+                    contextOrigin = selectedAppContextOrigin,
+                    workspace = workspace,
+                    layoutLocked = preferences.layoutLocked,
+                    drawerPinned = appKey in drawerPinnedAppKeys,
+                    canMoveDrawerPinnedEarlier =
+                        selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER && pinnedIndex > 0,
+                    canMoveDrawerPinnedLater =
+                        selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
+                            pinnedIndex >= 0 &&
+                            pinnedIndex < drawerPinnedAppOrder.lastIndex,
+                    canResetDrawerPinnedOrder =
+                        selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
+                            drawerPinnedAppKeys.size > 1,
+                    hasDrawerTabs = drawerTabs.isNotEmpty(),
+                    canMoveDockEarlier =
+                        selectedAppContextOrigin == LauncherAppContextOrigin.DOCK && dockIndex > 0,
+                    canMoveDockLater =
+                        selectedAppContextOrigin == LauncherAppContextOrigin.DOCK &&
+                            dockIndex >= 0 &&
+                            dockIndex < workspace.dockKeys.lastIndex,
+                    hiddenFromLauncher = appKey in hiddenAppKeys,
+                    lockedByLauncher = appKey in lockedAppKeys,
+                    availableAndroidWidgets = availableAndroidWidgets,
+                    onHomeAction = {
+                        if (
+                            selectedAppContextOrigin == LauncherAppContextOrigin.HOME &&
+                            appKey !in workspace.favoriteKeys
+                        ) {
+                            onSetHomeSuggestionHidden(appKey, true)
+                        } else {
+                            onToggleFavorite(app)
+                        }
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onToggleDock = {
+                        onToggleDock(app)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onOpenAppInfo = {
+                        onOpenAppInfo(app)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onRequestUninstall = {
+                        onRequestUninstall(app)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onToggleDrawerPinned = {
+                        onSetDrawerAppPinned(
+                            appKey,
+                            appKey !in drawerPinnedAppKeys,
+                        )
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onMoveDrawerPinnedEarlier = {
+                        onMoveDrawerPinnedApp(appKey, -1)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onMoveDrawerPinnedLater = {
+                        onMoveDrawerPinnedApp(appKey, 1)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onMoveDockEarlier = {
+                        onMoveDock(app, WorkspaceMoveDirection.EARLIER)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onMoveDockLater = {
+                        onMoveDock(app, WorkspaceMoveDirection.LATER)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onResetDrawerPinnedOrder = {
+                        val alphabeticalOrder = drawerPinnedAppKeys
+                            .mapNotNull { key ->
+                                rootAppsByKey[key]?.let { pinnedApp ->
+                                    key to pinnedApp.label.toString()
+                                }
+                            }
+                            .sortedWith(
+                                compareBy<Pair<String, String>> {
+                                    it.second.lowercase(java.util.Locale.ROOT)
+                                }.thenBy { it.first },
+                            )
+                            .map { it.first }
+                        onSetDrawerPinnedAppOrder(alphabeticalOrder)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onManageDrawerTabs = {
+                        drawerTabMembershipAppKey = appKey
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onToggleHidden = {
+                        onSetAppHidden(appKey, appKey !in hiddenAppKeys)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onToggleLocked = {
+                        onSetAppLocked(appKey, appKey !in lockedAppKeys)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onAddToFolder = {
+                        selectedApp = null
+                        selectedAppAnchor = null
+                        val appProfileId = app.user.hashCode()
+                        val compatibleFolders = folders.filter { folder ->
+                            LauncherFolderProfilePolicy.belongsToProfile(
+                                folder = folder,
+                                profileId = appProfileId,
+                                primaryProfileId = primaryFolderProfileId,
+                            )
+                        }
+                        folderAssignmentAppKey = appKey
+                        if (compatibleFolders.isEmpty()) {
+                            folderManagerProfileId = appProfileId
+                            folderManagerAddToHome = appProfileId == primaryFolderProfileId
+                            showFolderManager = true
+                        }
+                    },
+                    onOpenWidgets = { providers ->
+                        selectedApp = null
+                        selectedAppAnchor = null
+                        appWidgetChoices = providers
+                        appWidgetChoiceTitle = app.label.toString()
+                    },
+                    onLaunchShortcut = { action ->
+                        onLaunchSearchShortcut(action)
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                    onClose = {
+                        selectedApp = null
+                        selectedAppAnchor = null
+                    },
+                )
             }
+        }
+
+        if (activeDrag == null) {
+            drawerTabMembershipAppKey
+                ?.let(rootAppsByKey::get)
+                ?.let { app ->
+                    LauncherDrawerTabMembershipDialog(
+                        app = app,
+                        tabs = drawerTabs,
+                        onSetMembership = { tabId, enabled ->
+                            onSetDrawerTabMembership(tabId, app.workspaceKey(), enabled)
+                        },
+                        onClose = { drawerTabMembershipAppKey = null },
+                    )
+                }
+        }
+
+        if (activeDrag == null && appWidgetChoices.isNotEmpty()) {
+            LauncherAppWidgetChoicesDialog(
+                appLabel = appWidgetChoiceTitle.orEmpty(),
+                providers = appWidgetChoices,
+                apps = apps,
+                onChoose = { descriptor ->
+                    appWidgetChoices = emptyList()
+                    appWidgetChoiceTitle = null
+                    onPickInstalledAndroidWidget(descriptor)
+                },
+                onClose = {
+                    appWidgetChoices = emptyList()
+                    appWidgetChoiceTitle = null
+                },
+            )
+        }
+
+        if (activeDrag == null) selectedWidget?.let { widget ->
+            LauncherWidgetManagementDialog(
+                widget = widget,
+                columns = preferences.homeColumns,
+                rows = preferences.homeRows,
+                layoutLocked = preferences.layoutLocked,
+                onResize = { spanX, spanY ->
+                    onResizeWidget(widget, spanX, spanY)
+                    selectedWidget = null
+                },
+                onRemove = {
+                    onRemoveWidget(widget)
+                    selectedWidget = null
+                },
+                onMove = { cellX, cellY ->
+                    onMoveWidget(widget, cellX, cellY)
+                    selectedWidget = null
+                },
+                moveTargets = homeMoveTargetPages(
+                    pages = homePages,
+                    currentPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
+                ),
+                onMoveToPage = { targetPageId ->
+                    onMoveWidgetToPage(widget, targetPageId)
+                    selectedWidget = null
+                },
+                onClose = { selectedWidget = null },
+            )
+        }
+
+        selectedFolderId
+            ?.let { id -> folders.firstOrNull { it.id == id } }
+            ?.let { folder ->
+                val folderProfileId = folder.profileId ?: primaryFolderProfileId
+                val allowHomePlacement = folderProfileId == primaryFolderProfileId
+                LauncherFolderContentsSheet(
+                    folder = folder,
+                    appsByKey = rootAppsByKey,
+                    isOnHome = allowHomePlacement && folder.id in homeFolderIds,
+                    allowHomePlacement = allowHomePlacement,
+                    onLaunchApp = onLaunchApp,
+                    onRemoveApp = { app -> onRemoveAppFromFolder(folder.id, app) },
+                    onAddApps = {
+                        selectedFolderId = null
+                        folderAppPickerId = folder.id
+                    },
+                    onRename = { name -> onRenameFolder(folder.id, name) },
+                    onAddToHome = { onAddFolderToHome(folder) },
+                    onRemoveFromHome = { onRemoveFolderFromHome(folder) },
+                    moveTargets = if (allowHomePlacement) {
+                        homePages.filter { page ->
+                            page.folderPlacements.none { placement -> placement.folderId == folder.id }
+                        }
+                    } else {
+                        emptyList()
+                    },
+                    onMoveToPage = { target ->
+                        onMoveFolderToPage(folder, target)
+                        selectedFolderId = null
+                    },
+                    onDelete = {
+                        selectedFolderId = null
+                        onDeleteFolder(folder)
+                    },
+                    onDismiss = { selectedFolderId = null },
+                )
+            }
+
+        folderAppPickerId
+            ?.let { id -> folders.firstOrNull { it.id == id } }
+            ?.let { folder ->
+                val folderProfileId = folder.profileId ?: primaryFolderProfileId
+                LauncherFolderAppPickerSheet(
+                    folder = folder,
+                    availableApps = rootAppsByKey.values.filter { app ->
+                        app.user.hashCode() == folderProfileId
+                    },
+                    onAddApp = { app -> onAddAppToFolder(folder.id, app) },
+                    onDismiss = {
+                        folderAppPickerId = null
+                        selectedFolderId = folder.id
+                    },
+                )
+            }
+
+        if (showHiddenAppsManager) {
+            LauncherHiddenAppsManagerSheet(
+                hiddenApps = hiddenAppKeys
+                    .asSequence()
+                    .mapNotNull(rootAppsByKey::get)
+                    .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) }
+                    .toList(),
+                onRestore = { app -> onSetAppHidden(app.workspaceKey(), false) },
+                onDismiss = { showHiddenAppsManager = false },
+            )
+        }
+
+        if (showAppLockManager) {
+            LauncherAppLockManagerSheet(
+                apps = rootAppsByKey.values
+                    .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) },
+                lockedAppKeys = lockedAppKeys,
+                onSetLocked = { app, locked -> onSetAppLocked(app.workspaceKey(), locked) },
+                onDismiss = { showAppLockManager = false },
+            )
+        }
+
+        if (showFolderManager) {
+            val managedFolders = folders.filter { folder ->
+                LauncherFolderProfilePolicy.belongsToProfile(
+                    folder = folder,
+                    profileId = folderManagerProfileId,
+                    primaryProfileId = primaryFolderProfileId,
+                )
+            }
+            LauncherFolderManagerSheet(
+                folders = managedFolders,
+                appsByKey = rootAppsByKey,
+                homeFolderIds = homeFolderIds,
+                defaultAddToHome = folderManagerAddToHome,
+                allowHomePlacement = folderManagerProfileId == primaryFolderProfileId,
+                onCreate = { name, addToHome ->
+                    val initialApp = folderAssignmentAppKey?.let(rootAppsByKey::get)
+                    onCreateFolder(
+                        name,
+                        addToHome && folderManagerProfileId == primaryFolderProfileId,
+                        initialApp,
+                        folderManagerProfileId,
+                    )
+                    folderAssignmentAppKey = null
+                },
+                onOpen = { folder ->
+                    showFolderManager = false
+                    selectedFolderId = folder.id
+                },
+                onAddToHome = onAddFolderToHome,
+                onRemoveFromHome = onRemoveFolderFromHome,
+                onDismiss = {
+                    showFolderManager = false
+                    folderAssignmentAppKey = null
+                },
+            )
+        }
+
+        if (!showFolderManager) folderAssignmentAppKey
+            ?.let(rootAppsByKey::get)
+            ?.let { app ->
+                val appProfileId = app.user.hashCode()
+                val compatibleFolders = folders.filter { folder ->
+                    LauncherFolderProfilePolicy.belongsToProfile(
+                        folder = folder,
+                        profileId = appProfileId,
+                        primaryProfileId = primaryFolderProfileId,
+                    )
+                }
+                LauncherFolderAssignmentSheet(
+                    app = app,
+                    folders = compatibleFolders,
+                    onAssign = { folder ->
+                        onAddAppToFolder(folder.id, app)
+                        folderAssignmentAppKey = null
+                    },
+                    onCreateFolder = {
+                        folderManagerProfileId = appProfileId
+                        folderManagerAddToHome = appProfileId == primaryFolderProfileId
+                        showFolderManager = true
+                    },
+                    onDismiss = { folderAssignmentAppKey = null },
+                )
+            }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onGloballyPositioned { launcherBounds = it.boundsInRoot() }
+            .dragAndDropTarget(
+                shouldStartDragAndDrop = { event ->
+                    event.launcherAppDragData()?.let { drag ->
+                        drag.origin != LauncherAppDragOrigin.HOME ||
+                            drag.sourcePageId == WorkspaceLegacyImportMapper.HOME_PAGE_ID
+                    } == true
+                },
+                target = launcherDragTarget,
+            ),
+    ) {
+        AnimatedContent(
+            targetState = surfaceMode,
+            transitionSpec = {
+            val profile = LauncherSurfaceTransitionPolicy.resolve(
+                initial = initialState,
+                target = targetState,
+                motionMode = surfaceTransitionMotionMode,
+            )
+            when {
+                !profile.spatial ->
+                    fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis)) togetherWith
+                        fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
+
+                initialState == LauncherSurfaceMode.HOME &&
+                    targetState == LauncherSurfaceMode.DRAWER ->
+                    (
+                        slideInVertically(
+                            animationSpec = tween(durationMillis = profile.enterDurationMillis),
+                            initialOffsetY = { height -> height / profile.enterOffsetDivisor },
+                        ) + fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis))
+                    ) togetherWith (
+                        slideOutVertically(
+                            animationSpec = tween(durationMillis = profile.exitDurationMillis),
+                            targetOffsetY = { height -> -height / profile.exitOffsetDivisor },
+                        ) + fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
+                    )
+
+                initialState == LauncherSurfaceMode.DRAWER &&
+                    targetState == LauncherSurfaceMode.HOME ->
+                    (
+                        slideInVertically(
+                            animationSpec = tween(durationMillis = profile.enterDurationMillis),
+                            initialOffsetY = { height -> -height / profile.enterOffsetDivisor },
+                        ) + fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis))
+                    ) togetherWith (
+                        slideOutVertically(
+                            animationSpec = tween(durationMillis = profile.exitDurationMillis),
+                            targetOffsetY = { height -> height / profile.exitOffsetDivisor },
+                        ) + fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
+                    )
+
+                else ->
+                    fadeIn(animationSpec = tween(durationMillis = profile.enterDurationMillis)) togetherWith
+                        fadeOut(animationSpec = tween(durationMillis = profile.exitDurationMillis))
+            }
+        },
+    ) { targetSurfaceMode ->
+        when (targetSurfaceMode) {
+            LauncherSurfaceMode.HOME -> homeModeContent()
             LauncherSurfaceMode.SEARCH -> LauncherProviderControlledSearchSurface(
                 apps = discoverableApps,
                 recentAppKeys = recentAppKeys,
@@ -1664,363 +2029,7 @@ fun LauncherBetaRoot(
 
     }
 
-    if (activeDrag == null) selectedApp?.let { app ->
-        selectedAppAnchor?.let { anchor ->
-            val appKey = app.workspaceKey()
-            val pinnedIndex = drawerPinnedAppOrder.indexOf(appKey)
-            val dockIndex = workspace.dockKeys.indexOf(appKey)
-            AppContextPopup(
-                app = app,
-                anchor = anchor,
-                contextOrigin = selectedAppContextOrigin,
-                workspace = workspace,
-                layoutLocked = preferences.layoutLocked,
-                drawerPinned = appKey in drawerPinnedAppKeys,
-                canMoveDrawerPinnedEarlier =
-                    selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER && pinnedIndex > 0,
-                canMoveDrawerPinnedLater =
-                    selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
-                        pinnedIndex >= 0 &&
-                        pinnedIndex < drawerPinnedAppOrder.lastIndex,
-                canResetDrawerPinnedOrder =
-                    selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
-                        drawerPinnedAppKeys.size > 1,
-                hasDrawerTabs = drawerTabs.isNotEmpty(),
-                canMoveDockEarlier =
-                    selectedAppContextOrigin == LauncherAppContextOrigin.DOCK && dockIndex > 0,
-                canMoveDockLater =
-                    selectedAppContextOrigin == LauncherAppContextOrigin.DOCK &&
-                        dockIndex >= 0 &&
-                        dockIndex < workspace.dockKeys.lastIndex,
-                hiddenFromLauncher = appKey in hiddenAppKeys,
-                lockedByLauncher = appKey in lockedAppKeys,
-                availableAndroidWidgets = availableAndroidWidgets,
-                onHomeAction = {
-                    if (
-                        selectedAppContextOrigin == LauncherAppContextOrigin.HOME &&
-                        appKey !in workspace.favoriteKeys
-                    ) {
-                        onSetHomeSuggestionHidden(appKey, true)
-                    } else {
-                        onToggleFavorite(app)
-                    }
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onToggleDock = {
-                    onToggleDock(app)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onOpenAppInfo = {
-                    onOpenAppInfo(app)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onRequestUninstall = {
-                    onRequestUninstall(app)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onToggleDrawerPinned = {
-                    onSetDrawerAppPinned(
-                        appKey,
-                        appKey !in drawerPinnedAppKeys,
-                    )
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onMoveDrawerPinnedEarlier = {
-                    onMoveDrawerPinnedApp(appKey, -1)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onMoveDrawerPinnedLater = {
-                    onMoveDrawerPinnedApp(appKey, 1)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onMoveDockEarlier = {
-                    onMoveDock(app, WorkspaceMoveDirection.EARLIER)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onMoveDockLater = {
-                    onMoveDock(app, WorkspaceMoveDirection.LATER)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onResetDrawerPinnedOrder = {
-                    val alphabeticalOrder = drawerPinnedAppKeys
-                        .mapNotNull { key ->
-                            rootAppsByKey[key]?.let { pinnedApp ->
-                                key to pinnedApp.label.toString()
-                            }
-                        }
-                        .sortedWith(
-                            compareBy<Pair<String, String>> {
-                                it.second.lowercase(java.util.Locale.ROOT)
-                            }.thenBy { it.first },
-                        )
-                        .map { it.first }
-                    onSetDrawerPinnedAppOrder(alphabeticalOrder)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onManageDrawerTabs = {
-                    drawerTabMembershipAppKey = appKey
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onToggleHidden = {
-                    onSetAppHidden(appKey, appKey !in hiddenAppKeys)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onToggleLocked = {
-                    onSetAppLocked(appKey, appKey !in lockedAppKeys)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onAddToFolder = {
-                    selectedApp = null
-                    selectedAppAnchor = null
-                    val appProfileId = app.user.hashCode()
-                    val compatibleFolders = folders.filter { folder ->
-                        LauncherFolderProfilePolicy.belongsToProfile(
-                            folder = folder,
-                            profileId = appProfileId,
-                            primaryProfileId = primaryFolderProfileId,
-                        )
-                    }
-                    folderAssignmentAppKey = appKey
-                    if (compatibleFolders.isEmpty()) {
-                        folderManagerProfileId = appProfileId
-                        folderManagerAddToHome = appProfileId == primaryFolderProfileId
-                        showFolderManager = true
-                    }
-                },
-                onOpenWidgets = { providers ->
-                    selectedApp = null
-                    selectedAppAnchor = null
-                    appWidgetChoices = providers
-                    appWidgetChoiceTitle = app.label.toString()
-                },
-                onLaunchShortcut = { action ->
-                    onLaunchSearchShortcut(action)
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-                onClose = {
-                    selectedApp = null
-                    selectedAppAnchor = null
-                },
-            )
-        }
-    }
-
-    if (activeDrag == null) {
-        drawerTabMembershipAppKey
-            ?.let(rootAppsByKey::get)
-            ?.let { app ->
-                LauncherDrawerTabMembershipDialog(
-                    app = app,
-                    tabs = drawerTabs,
-                    onSetMembership = { tabId, enabled ->
-                        onSetDrawerTabMembership(tabId, app.workspaceKey(), enabled)
-                    },
-                    onClose = { drawerTabMembershipAppKey = null },
-                )
-            }
-    }
-
-    if (activeDrag == null && appWidgetChoices.isNotEmpty()) {
-        LauncherAppWidgetChoicesDialog(
-            appLabel = appWidgetChoiceTitle.orEmpty(),
-            providers = appWidgetChoices,
-            apps = apps,
-            onChoose = { descriptor ->
-                appWidgetChoices = emptyList()
-                appWidgetChoiceTitle = null
-                onPickInstalledAndroidWidget(descriptor)
-            },
-            onClose = {
-                appWidgetChoices = emptyList()
-                appWidgetChoiceTitle = null
-            },
-        )
-    }
-
-    if (activeDrag == null) selectedWidget?.let { widget ->
-        LauncherWidgetManagementDialog(
-            widget = widget,
-            columns = preferences.homeColumns,
-            rows = preferences.homeRows,
-            layoutLocked = preferences.layoutLocked,
-            onResize = { spanX, spanY ->
-                onResizeWidget(widget, spanX, spanY)
-                selectedWidget = null
-            },
-            onRemove = {
-                onRemoveWidget(widget)
-                selectedWidget = null
-            },
-            onMove = { cellX, cellY ->
-                onMoveWidget(widget, cellX, cellY)
-                selectedWidget = null
-            },
-            moveTargets = homeMoveTargetPages(
-                pages = homePages,
-                currentPageId = WorkspaceLegacyImportMapper.HOME_PAGE_ID,
-            ),
-            onMoveToPage = { targetPageId ->
-                onMoveWidgetToPage(widget, targetPageId)
-                selectedWidget = null
-            },
-            onClose = { selectedWidget = null },
-        )
-    }
-
-    selectedFolderId
-        ?.let { id -> folders.firstOrNull { it.id == id } }
-        ?.let { folder ->
-            val folderProfileId = folder.profileId ?: primaryFolderProfileId
-            val allowHomePlacement = folderProfileId == primaryFolderProfileId
-            LauncherFolderContentsSheet(
-                folder = folder,
-                appsByKey = rootAppsByKey,
-                isOnHome = allowHomePlacement && folder.id in homeFolderIds,
-                allowHomePlacement = allowHomePlacement,
-                onLaunchApp = onLaunchApp,
-                onRemoveApp = { app -> onRemoveAppFromFolder(folder.id, app) },
-                onAddApps = {
-                    selectedFolderId = null
-                    folderAppPickerId = folder.id
-                },
-                onRename = { name -> onRenameFolder(folder.id, name) },
-                onAddToHome = { onAddFolderToHome(folder) },
-                onRemoveFromHome = { onRemoveFolderFromHome(folder) },
-                moveTargets = if (allowHomePlacement) {
-                    homePages.filter { page ->
-                        page.folderPlacements.none { placement -> placement.folderId == folder.id }
-                    }
-                } else {
-                    emptyList()
-                },
-                onMoveToPage = { target ->
-                    onMoveFolderToPage(folder, target)
-                    selectedFolderId = null
-                },
-                onDelete = {
-                    selectedFolderId = null
-                    onDeleteFolder(folder)
-                },
-                onDismiss = { selectedFolderId = null },
-            )
-        }
-
-    folderAppPickerId
-        ?.let { id -> folders.firstOrNull { it.id == id } }
-        ?.let { folder ->
-            val folderProfileId = folder.profileId ?: primaryFolderProfileId
-            LauncherFolderAppPickerSheet(
-                folder = folder,
-                availableApps = rootAppsByKey.values.filter { app ->
-                    app.user.hashCode() == folderProfileId
-                },
-                onAddApp = { app -> onAddAppToFolder(folder.id, app) },
-                onDismiss = {
-                    folderAppPickerId = null
-                    selectedFolderId = folder.id
-                },
-            )
-        }
-
-    if (showHiddenAppsManager) {
-        LauncherHiddenAppsManagerSheet(
-            hiddenApps = hiddenAppKeys
-                .asSequence()
-                .mapNotNull(rootAppsByKey::get)
-                .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) }
-                .toList(),
-            onRestore = { app -> onSetAppHidden(app.workspaceKey(), false) },
-            onDismiss = { showHiddenAppsManager = false },
-        )
-    }
-
-    if (showAppLockManager) {
-        LauncherAppLockManagerSheet(
-            apps = rootAppsByKey.values
-                .sortedBy { app -> app.label.toString().lowercase(Locale.getDefault()) },
-            lockedAppKeys = lockedAppKeys,
-            onSetLocked = { app, locked -> onSetAppLocked(app.workspaceKey(), locked) },
-            onDismiss = { showAppLockManager = false },
-        )
-    }
-
-    if (showFolderManager) {
-        val managedFolders = folders.filter { folder ->
-            LauncherFolderProfilePolicy.belongsToProfile(
-                folder = folder,
-                profileId = folderManagerProfileId,
-                primaryProfileId = primaryFolderProfileId,
-            )
-        }
-        LauncherFolderManagerSheet(
-            folders = managedFolders,
-            appsByKey = rootAppsByKey,
-            homeFolderIds = homeFolderIds,
-            defaultAddToHome = folderManagerAddToHome,
-            allowHomePlacement = folderManagerProfileId == primaryFolderProfileId,
-            onCreate = { name, addToHome ->
-                val initialApp = folderAssignmentAppKey?.let(rootAppsByKey::get)
-                onCreateFolder(
-                    name,
-                    addToHome && folderManagerProfileId == primaryFolderProfileId,
-                    initialApp,
-                    folderManagerProfileId,
-                )
-                folderAssignmentAppKey = null
-            },
-            onOpen = { folder ->
-                showFolderManager = false
-                selectedFolderId = folder.id
-            },
-            onAddToHome = onAddFolderToHome,
-            onRemoveFromHome = onRemoveFolderFromHome,
-            onDismiss = {
-                showFolderManager = false
-                folderAssignmentAppKey = null
-            },
-        )
-    }
-
-    if (!showFolderManager) folderAssignmentAppKey
-        ?.let(rootAppsByKey::get)
-        ?.let { app ->
-            val appProfileId = app.user.hashCode()
-            val compatibleFolders = folders.filter { folder ->
-                LauncherFolderProfilePolicy.belongsToProfile(
-                    folder = folder,
-                    profileId = appProfileId,
-                    primaryProfileId = primaryFolderProfileId,
-                )
-            }
-            LauncherFolderAssignmentSheet(
-                app = app,
-                folders = compatibleFolders,
-                onAssign = { folder ->
-                    onAddAppToFolder(folder.id, app)
-                    folderAssignmentAppKey = null
-                },
-                onCreateFolder = {
-                    folderManagerProfileId = appProfileId
-                    folderManagerAddToHome = appProfileId == primaryFolderProfileId
-                    showFolderManager = true
-                },
-                onDismiss = { folderAssignmentAppKey = null },
-            )
-        }
+    overlayContent()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
