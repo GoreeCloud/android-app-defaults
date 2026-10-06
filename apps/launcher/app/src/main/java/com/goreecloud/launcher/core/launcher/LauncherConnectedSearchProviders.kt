@@ -248,6 +248,7 @@ object LauncherConnectedSearchProviderRegistry {
     const val CHATGPT_PROVIDER_ID = "connected.chatgpt"
     const val PERPLEXITY_PROVIDER_ID = "connected.perplexity"
     const val CLAUDE_PROVIDER_ID = "connected.claude"
+    const val GEMINI_PROVIDER_ID = "connected.gemini"
 
     private const val GOOGLE_DRIVE_PACKAGE = "com.google.android.apps.docs"
     private const val DROPBOX_PACKAGE = "com.dropbox.android"
