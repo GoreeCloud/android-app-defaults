@@ -6,6 +6,8 @@
 - Original first-party keyboard rendering, hit-testing, and pointer-input surface, including bounded nearest-key recovery for small touches landing in visual key gaps instead of silently dropping the tap.
 - Runtime input-method registration checks through Android `InputMethodManager`.
 - QWERTY letter entry.
+- First-party English (US) and Arabic Android IME subtypes with Android-selected language authority, Arabic letter rows, Arabic-Indic digits, RTL metadata, Arabic punctuation/alternates, and an explicit toolbar action that asks Android to switch between enabled GoreeCloud Keyboard subtypes.
+- The active Development candidate adds bounded Arabic **prefix-only** completion over a small static first-party lexicon. It uses only the locally tracked current Arabic prefix, never reads surrounding editor context for Arabic candidate generation, and does not enable Arabic autocorrection, next-word prediction, swipe decoding, learning, network lookup, or typed-content persistence.
 - Shift, backspace, space, and enter controls.
 - A unified first-party functional glyph family for Shift, Backspace, Enter, Emoji, and Settings with 1.85 dp rounded strokes, compact optical geometry, monochrome default presentation, selected-state accent treatment, and stable accessibility semantics.
 - Letters/symbols mode switching with a primary digit/common-punctuation page and a second first-party symbol page for brackets, operators, currency marks, and common typographic symbols.
@@ -69,7 +71,7 @@
 - Higher-order swipe recognition quality, multilingual gesture models, and representative physical-device acceptance beyond the current QWERTY shape-aware Development decoder.
 - Representative physical-device acceptance for the current spacebar cursor-control source, including ergonomics, RTL/BiDi, accessibility, and host-editor/OEM behavior.
 - Stronger local prediction/correction and user/language dictionaries.
-- Multilingual input and language switching.
+- Broader multilingual input beyond the implemented English/Arabic subtype and explicit-switching foundation, including additional language dictionaries, script-appropriate assistance, and representative multilingual acceptance.
 - User-controlled personalization and learned-language features where separately approved.
 - Privileged GoreeCloud Secure Paste Broker integration and system-wide cross-application enforcement beyond the implemented 0.1.22 Draft Keyboard-side clipboard controls.
 - Optional voice input/adapters where platform, privacy, and security policies permit.
