@@ -1,3 +1,15 @@
+## October 6, 2026 — App Drawer Remember Position candidate
+
+- Added **Remember position** under App Drawer settings, defaulting on for ordinary Launcher use.
+- When enabled, compatible Grid/Compact/List/Category scroll state and paged Drawer page/within-page position are restored approximately when Apps reopens.
+- Position restoration is context-bound to profile, layout, navigation mode, sort order, discovery filter, custom tab, column count and rows-per-page so changed presentation does not reuse stale coordinates.
+- Temporary Search results reset to their starting position while preserving the prior ordinary-browse viewport for a later return.
+- Disabling the setting immediately clears stored viewport state and subsequent Drawer opens start from the beginning.
+- The remembered location is device-local presentation state and remains outside the portable preference/backup contract; no new permission, network access, telemetry or cross-profile authority is introduced.
+- Added focused persistence/default/clear/sanitization tests and deterministic viewport-context coverage.
+
+**Status:** Draft PR #277 Development candidate only. Exact-head CI and representative-device enabled/disabled reopen, short-screen/large-text, profile, accessibility and performance acceptance remain required.
+
 ## October 6, 2026 — owner-directed visual cohesion and lightweight Search/Home refinement candidate
 
 The current Development continuation applies a broader visual-quality pass from representative-device owner screenshots rather than treating each mismatch as an isolated patch. Fresh/default Dock presentation now uses **Clear** and the rendered Dock is width-bounded to its current density instead of spanning the full Home canvas; paging, drag/drop, optional Search, labels, and the Glaze 48 dp interaction floor remain intact. This makes the ordinary Dock read as a lightweight floating icon row over wallpaper while the existing Solid/Raised/Edge material choices remain explicit user options.
