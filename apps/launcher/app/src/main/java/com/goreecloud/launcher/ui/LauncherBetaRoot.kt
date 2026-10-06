@@ -141,6 +141,7 @@ import com.goreecloud.launcher.core.launcher.LauncherDrawerEntryMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerHeaderPresentation
 import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
 import com.goreecloud.launcher.core.launcher.LauncherDrawerNavigation
+import com.goreecloud.launcher.core.launcher.LauncherDrawerPosition
 import com.goreecloud.launcher.core.launcher.LauncherDrawerProfileKind
 import com.goreecloud.launcher.core.launcher.LauncherDrawerSearchPlacement
 import com.goreecloud.launcher.core.launcher.LauncherDrawerSpacing
@@ -738,6 +739,7 @@ fun LauncherBetaRoot(
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
+    drawerPosition: LauncherDrawerPosition? = null,
     homePageTransition: LauncherHomePageTransition = LauncherHomePageTransition.SLIDE,
     recentAppKeys: List<String>,
     localLaunchCounts: Map<String, Long>,
@@ -857,6 +859,8 @@ fun LauncherBetaRoot(
     onSetDrawerSearchPlacement: (LauncherDrawerSearchPlacement) -> Unit,
     onSetDrawerNavigation: (LauncherDrawerNavigation) -> Unit,
     onSetDrawerEntryMode: (LauncherDrawerEntryMode) -> Unit,
+    onSetRememberDrawerPosition: (Boolean) -> Unit = {},
+    onSetDrawerPosition: (LauncherDrawerPosition?) -> Unit = {},
     onSetDrawerSpacing: (LauncherDrawerSpacing) -> Unit,
     onSetDrawerPageRows: (Int) -> Unit,
     onSetShowDrawerAppCount: (Boolean) -> Unit,
@@ -881,6 +885,15 @@ fun LauncherBetaRoot(
     secondaryHomeContent: @Composable (WorkspaceRenderedHomePage) -> Unit = {},
 ) {
     var surfaceModeName by rememberSaveable { mutableStateOf(requestedSurfaceMode.name) }
+    var sessionDrawerPosition by remember { mutableStateOf(drawerPosition) }
+    LaunchedEffect(drawerPosition) {
+        sessionDrawerPosition = drawerPosition
+    }
+    LaunchedEffect(experiencePreferences.rememberDrawerPosition) {
+        if (!experiencePreferences.rememberDrawerPosition) {
+            sessionDrawerPosition = null
+        }
+    }
     val surfaceMode = runCatching { LauncherSurfaceMode.valueOf(surfaceModeName) }
         .getOrDefault(LauncherSurfaceMode.HOME)
     var selectedApp by remember { mutableStateOf<LauncherActivityInfo?>(null) }
@@ -1565,6 +1578,11 @@ fun LauncherBetaRoot(
                 preferences = preferences,
                 drawerLayoutMode = drawerLayoutMode,
                 experiencePreferences = experiencePreferences,
+                rememberedPosition = if (experiencePreferences.rememberDrawerPosition) {
+                    sessionDrawerPosition
+                } else {
+                    null
+                },
                 focusSearch = drawerSearchRequested,
                 onLaunchApp = onLaunchApp,
                 onManageApp = { app, anchor ->
@@ -1580,6 +1598,12 @@ fun LauncherBetaRoot(
                 },
                 onSetSortOrderName = onSetDrawerSortOrderName,
                 onSetDrawerLayoutMode = onSetDrawerLayoutMode,
+                onDrawerPositionChanged = { position ->
+                    if (experiencePreferences.rememberDrawerPosition) {
+                        sessionDrawerPosition = position
+                        onSetDrawerPosition(position)
+                    }
+                },
                 onOpenSettings = {
                     drawerSearchRequested = false
                     surfaceModeName = LauncherSurfaceMode.SETTINGS.name
@@ -1640,6 +1664,12 @@ fun LauncherBetaRoot(
                         onSetDrawerSearchPlacement = onSetDrawerSearchPlacement,
                         onSetDrawerNavigation = onSetDrawerNavigation,
                         onSetDrawerEntryMode = onSetDrawerEntryMode,
+                        onSetRememberDrawerPosition = { enabled ->
+                            if (!enabled) {
+                                sessionDrawerPosition = null
+                            }
+                            onSetRememberDrawerPosition(enabled)
+                        },
                         onSetDrawerSpacing = onSetDrawerSpacing,
                         onSetDrawerPageRows = onSetDrawerPageRows,
                         onSetShowDrawerAppCount = onSetShowDrawerAppCount,
@@ -7023,6 +7053,7 @@ private fun AppDrawerSurface(
     preferences: LauncherPreferences,
     drawerLayoutMode: LauncherDrawerLayoutMode,
     experiencePreferences: LauncherExperiencePreferences,
+    rememberedPosition: LauncherDrawerPosition?,
     focusSearch: Boolean,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
@@ -7030,6 +7061,7 @@ private fun AppDrawerSurface(
     onManageFolders: (Int) -> Unit,
     onSetSortOrderName: (String?) -> Unit,
     onSetDrawerLayoutMode: (LauncherDrawerLayoutMode) -> Unit,
+    onDrawerPositionChanged: (LauncherDrawerPosition) -> Unit,
     onOpenSettings: () -> Unit,
     onCreateDrawerTab: (String) -> Unit,
     onRenameDrawerTab: (String, String) -> Unit,
@@ -9106,6 +9138,7 @@ private fun LauncherSettingsRootSurface(
     onSetDrawerSearchPlacement: (LauncherDrawerSearchPlacement) -> Unit,
     onSetDrawerNavigation: (LauncherDrawerNavigation) -> Unit,
     onSetDrawerEntryMode: (LauncherDrawerEntryMode) -> Unit,
+    onSetRememberDrawerPosition: (Boolean) -> Unit,
     onSetDrawerSpacing: (LauncherDrawerSpacing) -> Unit,
     onSetDrawerPageRows: (Int) -> Unit,
     onSetShowDrawerAppCount: (Boolean) -> Unit,
@@ -9835,6 +9868,20 @@ private fun LauncherSettingsRootSurface(
                         onChoice = { onSetDrawerPageRows(it.toInt()) },
                     )
                 }
+                SettingSwitch(
+                    "Remember position",
+                    experiencePreferences.rememberDrawerPosition,
+                    onSetRememberDrawerPosition,
+                )
+                Text(
+                    if (experiencePreferences.rememberDrawerPosition) {
+                        "Continue where you left off when Apps reopens."
+                    } else {
+                        "Start fresh from the beginning each time Apps opens."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 SettingSwitch(
                     "Show app labels",
                     experiencePreferences.showDrawerLabels,
