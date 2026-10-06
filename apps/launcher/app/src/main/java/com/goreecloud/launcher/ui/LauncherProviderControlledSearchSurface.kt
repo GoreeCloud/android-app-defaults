@@ -3219,6 +3219,12 @@ private fun LauncherSearchSourceManager(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    Text(
+                        "Provider API usage may be billed separately from any consumer app or " +
+                            "subscription you already use.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     OutlinedTextField(
                         value = credentialDraft,
                         onValueChange = {

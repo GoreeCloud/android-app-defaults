@@ -4,7 +4,7 @@ The connected-source catalog now includes **ChatGPT**, **Perplexity**, and **Cla
 
 Provider secrets are encrypted with Android Keystore and written only to app-private no-backup storage. Removing a key disables the provider; unreadable/missing credentials fail closed. The adapters use bounded HTTPS requests with cooperative cancellation and normalize one concise provider answer into the existing connected-result stream with tap-to-copy behavior. Android-installed ChatGPT, Perplexity, and Claude artwork is reused where available rather than drawing substitute brand marks.
 
-The source implementation follows the current public provider contracts verified during this tranche: OpenAI Responses supports `chat-latest`; Anthropic's active `claude-sonnet-4-6` Messages model uses `x-api-key`; and Perplexity's raw HTTP Agent API uses `POST /v1/agent` with the `fast` preset. No provider key, response body, or typed query is written to logs, diagnostics, portable backup state, or repository configuration.
+The source implementation follows the current public provider contracts verified during this tranche: OpenAI Responses supports `chat-latest`; Anthropic's active `claude-sonnet-5` Messages model uses `x-api-key`; and Perplexity's raw HTTP Agent API uses `POST /v1/agent` with the `fast` preset. No provider key, response body, or typed query is written to logs, diagnostics, portable backup state, or repository configuration.
 
 **Acceptance boundary:** Development candidate only. CI/runtime correctness does not replace live representative-device API/billing/rate-limit/revocation/latency/privacy/branding acceptance or protected signing/release gates.
 

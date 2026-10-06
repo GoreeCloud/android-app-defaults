@@ -286,7 +286,7 @@ internal class LauncherAnthropicMessagesTransport :
     LauncherBoundedJsonHttpTransport("https://api.anthropic.com/v1/messages") {
     override fun buildRequest(rawQuery: String): JSONObject =
         JSONObject()
-            .put("model", "claude-sonnet-4-6")
+            .put("model", "claude-sonnet-5")
             .put("max_tokens", 160)
             .put(
                 "system",
