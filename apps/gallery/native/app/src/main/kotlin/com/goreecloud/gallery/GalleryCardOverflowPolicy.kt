@@ -2,6 +2,7 @@ package com.goreecloud.gallery
 
 enum class GalleryCardOverflowAction(val label: String) {
     OPEN("Open"),
+    RENAME("Rename"),
     PIN_TO_TOP("Pin to top"),
     UNPIN_FROM_TOP("Unpin from top"),
     MOVE_EARLIER("Move earlier"),
@@ -18,8 +19,10 @@ object GalleryCardOverflowPolicy {
         canPin: Boolean,
         canMoveEarlier: Boolean,
         canMoveLater: Boolean,
+        canRename: Boolean = false,
     ): List<GalleryCardOverflowAction> = buildList {
         add(GalleryCardOverflowAction.OPEN)
+        if (canRename) add(GalleryCardOverflowAction.RENAME)
         if (canPin) {
             add(
                 if (isPinned) GalleryCardOverflowAction.UNPIN_FROM_TOP

@@ -23,6 +23,21 @@ class GalleryCardOverflowPolicyTest {
         assertEquals(
             listOf(
                 GalleryCardOverflowAction.OPEN,
+                GalleryCardOverflowAction.RENAME,
+                GalleryCardOverflowAction.PIN_TO_TOP,
+                GalleryCardOverflowAction.DETAILS,
+            ),
+            GalleryCardOverflowPolicy.albumActions(
+                isPinned = false,
+                canPin = true,
+                canMoveEarlier = false,
+                canMoveLater = false,
+                canRename = true,
+            ),
+        )
+        assertEquals(
+            listOf(
+                GalleryCardOverflowAction.OPEN,
                 GalleryCardOverflowAction.UNPIN_FROM_TOP,
                 GalleryCardOverflowAction.MOVE_EARLIER,
                 GalleryCardOverflowAction.MOVE_LATER,

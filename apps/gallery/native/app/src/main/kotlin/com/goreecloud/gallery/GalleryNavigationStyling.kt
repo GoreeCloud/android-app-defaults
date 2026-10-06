@@ -3,19 +3,14 @@ package com.goreecloud.gallery
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.RippleDrawable
 import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 
-/**
- * Shared visual treatment for Gallery's five primary bottom-navigation destinations.
- *
- * Navigation semantics and destination authority stay owned by the Activities. This object only
- * applies Glaze presentation so Gallery and Trash render the same geometry from the first frame.
- */
 object GalleryNavigationStyling {
     fun apply(
         activity: Activity,
@@ -26,53 +21,39 @@ object GalleryNavigationStyling {
         selected: Boolean,
         foreground: Int,
     ) {
+        val stateChanged = item.isSelected != selected
         val placement = GalleryNavigationPresentationPolicy.iconPlacement(mode)
-        val drawable = if (placement == GalleryNavigationIconPlacement.NONE) {
-            null
-        } else {
-            activity.getDrawable(iconRes)?.mutate()?.apply {
-                val iconPx = dp(activity, GalleryGlazeContract.NAVIGATION_ICON_DP)
-                setBounds(0, 0, iconPx, iconPx)
-            }
+        val drawable = activity.getDrawable(iconRes)?.mutate()?.apply {
+            val iconPx = dp(activity, GalleryGlazeContract.NAVIGATION_ICON_DP)
+            setBounds(0, 0, iconPx, iconPx)
         }
 
-        item.text = if (mode.showLabel) label else ""
+        item.text = ""
         item.gravity = Gravity.CENTER
         item.textAlignment = View.TEXT_ALIGNMENT_CENTER
         item.includeFontPadding = false
-        item.minHeight = dp(activity, GalleryGlazeContract.GENERAL_TARGET_DP)
-        item.setTextSize(
-            android.util.TypedValue.COMPLEX_UNIT_SP,
-            GalleryGlazeContract.NAVIGATION_LABEL_SP,
-        )
-        item.setTextColor(foreground)
-        item.setTypeface(null, if (selected) Typeface.BOLD else Typeface.NORMAL)
-        item.setPadding(
-            dp(activity, GalleryGlazeContract.NAVIGATION_ITEM_HORIZONTAL_PADDING_DP),
-            dp(activity, GalleryGlazeContract.NAVIGATION_ITEM_VERTICAL_PADDING_DP),
-            dp(activity, GalleryGlazeContract.NAVIGATION_ITEM_HORIZONTAL_PADDING_DP),
-            dp(activity, GalleryGlazeContract.NAVIGATION_ITEM_VERTICAL_PADDING_DP),
-        )
+        item.minimumHeight = dp(activity, GalleryGlazeContract.GENERAL_TARGET_DP)
+        item.setPadding(0, 0, 0, 0)
 
         when (placement) {
-            GalleryNavigationIconPlacement.NONE ->
-                item.setCompoundDrawables(null, null, null, null)
-            GalleryNavigationIconPlacement.CENTERED ->
-                item.setCompoundDrawables(drawable, null, null, null)
-            GalleryNavigationIconPlacement.ABOVE_LABEL ->
-                item.setCompoundDrawables(null, drawable, null, null)
+            GalleryNavigationIconPlacement.NONE -> item.setCompoundDrawables(null, null, null, null)
+            GalleryNavigationIconPlacement.CENTERED -> item.setCompoundDrawables(drawable, null, null, null)
+            GalleryNavigationIconPlacement.ABOVE_LABEL -> item.setCompoundDrawables(null, drawable, null, null)
         }
         item.compoundDrawableTintList = ColorStateList.valueOf(foreground)
-        item.compoundDrawablePadding =
-            if (placement == GalleryNavigationIconPlacement.ABOVE_LABEL) dp(activity, 2) else 0
+        item.compoundDrawablePadding = 0
 
         item.background = if (selected) {
             InsetDrawable(
-                GalleryGlazeSurfaces.drawable(
-                    activity,
-                    GalleryGlazeSurfaces.Role.CONTROL,
-                    GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP,
-                ),
+                GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = dp(activity, GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP).toFloat()
+                    setColor(Color.argb(22, Color.red(foreground), Color.green(foreground), Color.blue(foreground)))
+                    setStroke(
+                        dp(activity, 1).coerceAtLeast(1),
+                        Color.argb(38, Color.red(foreground), Color.green(foreground), Color.blue(foreground)),
+                    )
+                },
                 dp(activity, GalleryNavigationPresentationPolicy.selectedHorizontalInsetDp(mode)),
                 dp(activity, GalleryNavigationPresentationPolicy.selectedVerticalInsetDp(mode)),
                 dp(activity, GalleryNavigationPresentationPolicy.selectedHorizontalInsetDp(mode)),
@@ -80,6 +61,36 @@ object GalleryNavigationStyling {
             )
         } else {
             ColorDrawable(Color.TRANSPARENT)
+        }
+
+        item.foreground = RippleDrawable(
+            ColorStateList.valueOf(
+                Color.argb(28, Color.red(foreground), Color.green(foreground), Color.blue(foreground)),
+            ),
+            null,
+            GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                cornerRadius = dp(activity, GalleryGlazeContract.NAVIGATION_ITEM_RADIUS_DP).toFloat()
+                setColor(Color.WHITE)
+            },
+        )
+
+        val targetAlpha = if (selected) 1f else 0.72f
+        item.animate().cancel()
+        if (stateChanged) {
+            item.alpha = if (selected) 0.72f else 1f
+            item.scaleX = if (selected) 0.94f else 1f
+            item.scaleY = if (selected) 0.94f else 1f
+            item.animate()
+                .alpha(targetAlpha)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(GalleryGlazeContract.MOTION_MICRO_MS)
+                .start()
+        } else {
+            item.alpha = targetAlpha
+            item.scaleX = 1f
+            item.scaleY = 1f
         }
 
         item.tooltipText = label
