@@ -41,6 +41,7 @@ internal fun LauncherDrawerDiscoveryFiltersRow(
     suggestionsEnabled: Boolean,
     secondaryColor: androidx.compose.ui.graphics.Color,
     chooseFilter: (LauncherDrawerDiscoveryFilter) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val filters = LauncherDrawerDiscoveryFilter.entries.filter { filter ->
         (filter != LauncherDrawerDiscoveryFilter.PINNED || pinnedAvailable) &&
@@ -48,8 +49,8 @@ internal fun LauncherDrawerDiscoveryFiltersRow(
     }
     var menuExpanded by remember { mutableStateOf(false) }
     Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd,
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
     ) {
         Surface(
             onClick = { menuExpanded = true },
@@ -97,7 +98,7 @@ internal fun LauncherDrawerDiscoveryFiltersRow(
                         menuExpanded = false
                     },
                     trailingIcon = if (filter == selectedFilter) {
-                        { LauncherOutlineGlyph(LauncherOutlineGlyph.INFO, MaterialTheme.colorScheme.primary) }
+                        { GlazePopupActionGlyph(GlazePopupActionSymbol.CHECK, MaterialTheme.colorScheme.primary, iconSize = 16.dp) }
                     } else {
                         null
                     },
