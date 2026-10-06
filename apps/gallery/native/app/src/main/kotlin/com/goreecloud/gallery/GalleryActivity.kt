@@ -5093,19 +5093,14 @@ class GalleryActivity : Activity() {
         val currentDialog = setupDialog
         setupDialog = null
 
-        if (currentDialog == null) {
-            if (!isFinishing && !isDestroyed) {
-                showSetupWizard(replay = replay, requestedStep = requestedStep)
-            }
-            return
-        }
+        currentDialog?.setOnDismissListener(null)
+        currentDialog?.dismiss()
 
-        currentDialog.setOnDismissListener {
+        rootFrame.post {
             if (!isFinishing && !isDestroyed) {
                 showSetupWizard(replay = replay, requestedStep = requestedStep)
             }
         }
-        currentDialog.dismiss()
     }
 
     private fun dialogDismissAction(
