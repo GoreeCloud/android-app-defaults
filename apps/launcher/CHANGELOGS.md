@@ -1,6 +1,18 @@
+## October 6, 2026 — reversible Smart Folder overrides and Dock keyboard paging candidate
+
+- Added device-local, profile-qualified exclusions for **Suggested**, **New**, and **Updated** App Drawer Smart Folders. Excluding an app affects only that dynamic collection; it does not hide, uninstall, lock, move, unpin, or alter manual folder/tab membership.
+- Kept **Pinned** under the existing explicit pin/unpin authority and fail closed against persisted Pinned exclusion records.
+- Kept fully excluded dynamic Smart Folders recoverable, showing an excluded count and explicit **Restore** action instead of silently removing the collection.
+- Added bounded exclusion decoding/persistence outside portable preference v1 plus focused codec, policy, and DataStore tests.
+- Added hardware **Page Up / Page Down** navigation for multi-page Dock paging through the existing pager authority. D-pad arrows remain untouched so this continuation does not hijack ordinary focus traversal or pointer/gesture navigation.
+- Added a pure Dock page-navigation target policy with edge coverage; active drag continues to disable keyboard page switching.
+- No new Android permission, network path, telemetry, package mutation, workspace schema, Home/Dock placement authority, or remote dependency is introduced.
+
+**Acceptance boundary:** Development candidate only. Exact-head protected build/JVM/lint/runtime, review, and representative-device Smart Folder recovery, hardware-keyboard focus, TalkBack/Switch Access, large-text, RTL, profile/form-factor, performance/power, signing/update, and release acceptance remain required.
+
 ## October 6, 2026 — owner-directed visual cohesion and lightweight Search/Home refinement candidate
 
-The current Development continuation applies a broader visual-quality pass from representative-device owner screenshots rather than treating each mismatch as an isolated patch. Fresh/default Dock presentation now uses **Clear** and the rendered Dock is width-bounded to its current density instead of spanning the full Home canvas; paging, drag/drop, optional Search, labels, and the Glaze 48 dp interaction floor remain intact. This makes the ordinary Dock read as a lightweight floating icon row over wallpaper while the existing Solid/Raised/Edge material choices remain explicit user options.
+The current Development continuation applies a broader visual-quality pass from representative-device owner screenshots rather than treating each mismatch as an isolated patch. Fresh/default Dock presentation now uses **Glaze** and the rendered Dock is width-bounded to its current density instead of spanning the full Home canvas; paging, drag/drop, optional Search, labels, and the Glaze 48 dp interaction floor remain intact. This makes the ordinary Dock read as a lightweight floating icon row over wallpaper while Clear/Solid/Raised/Edge remain explicit user options.
 
 A new shared first-party Launcher outline-glyph family establishes one 24 dp optical box, one rounded 1.8 dp stroke system, consistent joins/caps, and common geometry for Settings, onboarding, local Search-source badges, and generic Search-result category artwork. The onboarding **Swipe down** and **Search bar** examples now render as miniature Home demonstrations rather than rough arrow/dot diagrams. Universal Search app, shortcut, handoff, source-group, and detail presentation is denser and flatter: routine rows lose redundant borders, source badges/trailing controls use consistent columns, and nested detail panels are visually quieter while maintaining the existing 48 dp interaction contract.
 
