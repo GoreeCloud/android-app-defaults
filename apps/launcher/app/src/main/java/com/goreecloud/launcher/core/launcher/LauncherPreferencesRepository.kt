@@ -63,7 +63,7 @@ enum class LauncherDrawerBackdrop(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): LauncherDrawerBackdrop =
-            entries.firstOrNull { it.storageValue == value } ?: CLEAR
+            entries.firstOrNull { it.storageValue == value } ?: GLASS
     }
 }
 
@@ -196,7 +196,7 @@ enum class LauncherDockStyle(val storageValue: String) {
 
     companion object {
         fun fromStorage(value: String?): LauncherDockStyle =
-            entries.firstOrNull { it.storageValue == value } ?: GLASS
+            entries.firstOrNull { it.storageValue == value } ?: CLEAR
     }
 }
 
