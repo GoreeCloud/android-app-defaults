@@ -4332,24 +4332,51 @@ class GalleryActivity : Activity() {
             },
         )
 
+        val rewindVideo = viewerIconAction(
+            R.drawable.ic_gallery_rewind,
+            true,
+            "Rewind video 10 seconds",
+        ) {}
         val playbackToggle = viewerIconAction(
             R.drawable.ic_gallery_play,
             true,
             "Play video",
-        ) {}.apply {
+        ) {}
+        val forwardVideo = viewerIconAction(
+            R.drawable.ic_gallery_fast_forward,
+            true,
+            "Forward video 10 seconds",
+        ) {}
+        val playbackControls = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(4), dp(4), dp(4), dp(4))
+            background = GalleryDesignSystem.mediaChromeSurface(
+                context,
+                GalleryGlazeContract.SHAPE_ROUNDED_DP,
+                strong = true,
+            )
             visibility = View.GONE
+            listOf(rewindVideo, playbackToggle, forwardVideo).forEachIndexed { index, control ->
+                addView(
+                    control,
+                    LinearLayout.LayoutParams(0, dp(48), 1f).apply {
+                        if (index > 0) marginStart = dp(2)
+                    },
+                )
+            }
         }
         overlay.addView(
-            playbackToggle,
-            FrameLayout.LayoutParams(dp(104), dp(48)).apply {
+            playbackControls,
+            FrameLayout.LayoutParams(dp(180), dp(56)).apply {
                 gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
-                bottomMargin = dp(96)
+                bottomMargin = dp(92)
             },
         )
         videoSurface.onPlaybackError = { _, _ ->
             videoSurface.visibility = View.GONE
             preview.visibility = View.VISIBLE
-            playbackToggle.visibility = View.GONE
+            playbackControls.visibility = View.GONE
             Toast.makeText(this, "Video playback is unavailable for this item.", Toast.LENGTH_SHORT).show()
         }
 
@@ -4484,7 +4511,7 @@ class GalleryActivity : Activity() {
             resetViewerZoom()
             videoSurface.stop()
             videoSurface.visibility = View.GONE
-            playbackToggle.visibility = View.GONE
+            playbackControls.visibility = View.GONE
             preview.visibility = View.VISIBLE
 
             val viewerCacheKey = thumbnailCacheKey(VIEWER_THUMBNAIL_NAMESPACE, item.contentUri)
@@ -4495,7 +4522,8 @@ class GalleryActivity : Activity() {
                     "Pinch to zoom up to 400 percent and drag to pan while zoomed. " +
                     "Use the view-options control for Fit, Fill, and 2 times zoom."
             } else {
-                "Viewer for ${item.displayName}. Swipe left or right to navigate the current collection."
+                "Viewer for ${item.displayName}. Swipe left or right to navigate the current collection. " +
+                    "Use the playback controls to rewind or forward 10 seconds."
             }
             viewerTitle.text = item.displayName
             viewerSubtitle.text = mediaMetadata(item)
@@ -4532,7 +4560,7 @@ class GalleryActivity : Activity() {
                 try {
                     videoSurface.load(item.contentUri, playbackPlan)
                     videoSurface.visibility = View.VISIBLE
-                    playbackToggle.visibility = View.VISIBLE
+                    playbackControls.visibility = View.VISIBLE
                     setViewerActionIcon(
                         playbackToggle,
                         if (playbackPlan.shouldAutoPlay) R.drawable.ic_gallery_pause else R.drawable.ic_gallery_play,
@@ -4543,11 +4571,11 @@ class GalleryActivity : Activity() {
                     playbackToggle.tooltipText = playbackToggle.contentDescription
                 } catch (_: IllegalArgumentException) {
                     videoSurface.visibility = View.GONE
-                    playbackToggle.visibility = View.GONE
+                    playbackControls.visibility = View.GONE
                     Toast.makeText(this, "Gallery refused an invalid video item URI.", Toast.LENGTH_SHORT).show()
                 } catch (_: RuntimeException) {
                     videoSurface.visibility = View.GONE
-                    playbackToggle.visibility = View.GONE
+                    playbackControls.visibility = View.GONE
                     Toast.makeText(this, "Video playback is unavailable for this item.", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -4656,6 +4684,14 @@ class GalleryActivity : Activity() {
             }
         }
 
+        fun seekVideoBy(deltaMillis: Long) {
+            val target = videoSurface.seekBy(deltaMillis) ?: return
+            announceForAccessibility("Video position ${target / 1_000L} seconds")
+        }
+
+        rewindVideo.setOnClickListener {
+            seekVideoBy(-VIDEO_SEEK_INTERVAL_MILLIS)
+        }
         playbackToggle.setOnClickListener {
             val plan = activePlaybackPlan ?: return@setOnClickListener
             if (plan.presentation != GalleryViewerPresentation.VIDEO_PLAYBACK || !videoSurface.hasLoadedVideo()) {
@@ -4670,6 +4706,9 @@ class GalleryActivity : Activity() {
                 playbackToggle.contentDescription = "Pause video"
             }
             playbackToggle.tooltipText = playbackToggle.contentDescription
+        }
+        forwardVideo.setOnClickListener {
+            seekVideoBy(VIDEO_SEEK_INTERVAL_MILLIS)
         }
 
         previous.setOnClickListener {
@@ -4702,7 +4741,7 @@ class GalleryActivity : Activity() {
                     }
                 }
                 GalleryViewerKeyboardAction.TOGGLE_PLAYBACK -> {
-                    if (videoSurface.visibility == View.VISIBLE && playbackToggle.visibility == View.VISIBLE) {
+                    if (videoSurface.visibility == View.VISIBLE && playbackControls.visibility == View.VISIBLE) {
                         playbackToggle.performClick()
                     } else {
                         slideshow.performClick()
