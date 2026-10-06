@@ -216,7 +216,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
         currentInputConnection?.commitText(output, 1)
 
-        if (languageCaptureAllowed()) {
+        if (localPrefixCaptureAllowed()) {
             if (isLetterText) {
                 sentenceStartPending = false
                 if (composingWord.isEmpty()) {
@@ -375,10 +375,23 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             return
         }
 
-        if (languageCaptureAllowed() && !composingCaptureExhausted && composingWord.isNotEmpty()) {
+        if (
+            activeLanguage.supportsLocalEnglishAssistance &&
+            languageCaptureAllowed() &&
+            !composingCaptureExhausted &&
+            composingWord.isNotEmpty()
+        ) {
             val lastCodePointStart = composingWord.offsetByCodePoints(composingWord.length, -1)
             composingWord.delete(lastCodePointStart, composingWord.length)
             if (composingWord.isEmpty()) composingStartsCapitalized = false
+        } else if (activeLanguage == KeyboardLanguage.ARABIC && composingWord.isNotEmpty()) {
+            // Arabic suggestions never reconstruct a prefix from editor look-behind after cursor
+            // edits. Drop the local prefix and fail closed until the next explicit word boundary.
+            composingWord.clear()
+            composingStartsCapitalized = false
+            composingCaptureExhausted = true
+            presentedSuggestions = emptyList()
+            keyboardView?.setSuggestions(emptyList())
         } else if (composingWord.isEmpty()) {
             // Cursor edits outside the locally tracked word invalidate transient prediction context.
             committedHistory.clear()
@@ -422,10 +435,13 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
 
         if (
             editorSuppressesLanguageAssistance ||
-            !activeLanguage.supportsLocalEnglishAssistance ||
             !typingSettings.suggestionsEnabled ||
             sensitiveInput ||
-            composingCaptureExhausted
+            composingCaptureExhausted ||
+            (
+                !activeLanguage.supportsLocalEnglishAssistance &&
+                    activeLanguage != KeyboardLanguage.ARABIC
+            )
         ) return
         if (!SuggestionCommitPolicy.isPresentedCandidate(value, presentedSuggestions)) return
 
@@ -447,7 +463,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
 
         connection.commitText("$value ", 1)
-        recordCommittedWord(value)
+        if (activeLanguage.supportsLocalEnglishAssistance) {
+            recordCommittedWord(value)
+        }
         sentenceStartPending = false
         clearComposingBoundary()
         resetOneShotShift()
@@ -845,6 +863,7 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         var committedWord: String? = prefix.takeIf { it.isNotEmpty() }
 
         if (
+            activeLanguage.supportsLocalEnglishAssistance &&
             typingSettings.autocorrectEnabled &&
             !editorSuppressesLanguageAssistance &&
             !sensitiveInput &&
@@ -884,7 +903,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
             connection.commitText(separator, 1)
         }
 
-        committedWord?.let(::recordCommittedWord)
+        if (activeLanguage.supportsLocalEnglishAssistance) {
+            committedWord?.let(::recordCommittedWord)
+        }
 
         if (separator in SENTENCE_ENDINGS) {
             committedHistory.clear()
@@ -1054,7 +1075,10 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         if (
             sensitiveInput ||
             editorSuppressesLanguageAssistance ||
-            !activeLanguage.supportsLocalEnglishAssistance ||
+            (
+                !activeLanguage.supportsLocalEnglishAssistance &&
+                    activeLanguage != KeyboardLanguage.ARABIC
+            ) ||
             composingCaptureExhausted
         ) {
             cancelScheduledSuggestionRefresh()
@@ -1082,7 +1106,6 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         if (
             sensitiveInput ||
             editorSuppressesLanguageAssistance ||
-            !activeLanguage.supportsLocalEnglishAssistance ||
             composingCaptureExhausted
         ) {
             presentedSuggestions = emptyList()
@@ -1091,12 +1114,31 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         }
 
         val synchronizedPrefix = synchronizeComposingWordFromEditor()
-        val contextHistory = transientContextHistory(
-            excludeCurrentComposingWord = synchronizedPrefix.isNotEmpty(),
-        )
+        val englishAssistance = activeLanguage.supportsLocalEnglishAssistance
+        val contextHistory = if (englishAssistance) {
+            transientContextHistory(
+                excludeCurrentComposingWord = synchronizedPrefix.isNotEmpty(),
+            )
+        } else {
+            emptyList()
+        }
 
         presentedSuggestions = when {
-            synchronizedPrefix.isNotEmpty() && typingSettings.suggestionsEnabled -> {
+            activeLanguage == KeyboardLanguage.ARABIC &&
+                synchronizedPrefix.isNotEmpty() &&
+                typingSettings.suggestionsEnabled -> {
+                pendingPhraseRewrite = null
+                ArabicPrefixSuggestions.suggest(synchronizedPrefix)
+            }
+
+            activeLanguage == KeyboardLanguage.ARABIC -> {
+                pendingPhraseRewrite = null
+                emptyList()
+            }
+
+            englishAssistance &&
+                synchronizedPrefix.isNotEmpty() &&
+                typingSettings.suggestionsEnabled -> {
                 pendingPhraseRewrite = null
                 val dictionary = activeDictionary()
                 val segmented =
@@ -1123,7 +1165,9 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
                     .map(::formatCandidateCase)
             }
 
-            composingWord.isEmpty() && typingSettings.predictionsEnabled -> {
+            englishAssistance &&
+                composingWord.isEmpty() &&
+                typingSettings.predictionsEnabled -> {
                 val rewrite = HyphenatedCompoundModel.rewriteForTail(contextHistory)
                 pendingPhraseRewrite = rewrite
                 buildList<String> {
@@ -1208,6 +1252,14 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
         return if (parsed.isNotEmpty()) parsed.takeLast(MAX_CONTEXT_WORDS)
         else committedHistory.takeLast(MAX_CONTEXT_WORDS)
     }
+
+    private fun localPrefixCaptureAllowed(): Boolean =
+        !sensitiveInput &&
+            !editorSuppressesLanguageAssistance &&
+            (
+                activeLanguage.supportsLocalEnglishAssistance ||
+                    activeLanguage == KeyboardLanguage.ARABIC
+            )
 
     private fun languageCaptureAllowed(): Boolean =
         activeLanguage.supportsLocalEnglishAssistance &&
