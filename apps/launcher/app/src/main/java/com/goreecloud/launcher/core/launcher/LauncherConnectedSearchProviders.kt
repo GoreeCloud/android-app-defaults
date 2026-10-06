@@ -245,17 +245,32 @@ object LauncherConnectedSearchProviderRegistry {
     const val GOOGLE_DRIVE_PROVIDER_ID = "connected.google-drive"
     const val DROPBOX_PROVIDER_ID = "connected.dropbox"
     const val BRAVE_SEARCH_PROVIDER_ID = "connected.brave-search"
+    const val CHATGPT_PROVIDER_ID = "connected.chatgpt"
+    const val PERPLEXITY_PROVIDER_ID = "connected.perplexity"
+    const val CLAUDE_PROVIDER_ID = "connected.claude"
 
     private const val GOOGLE_DRIVE_PACKAGE = "com.google.android.apps.docs"
     private const val DROPBOX_PACKAGE = "com.dropbox.android"
     private const val BRAVE_BROWSER_PACKAGE = "com.brave.browser"
+    private const val CHATGPT_PACKAGE = "com.openai.chatgpt"
+    private const val PERPLEXITY_PACKAGE = "ai.perplexity.app.android"
+    private const val CLAUDE_PACKAGE = "com.anthropic.claude"
 
     fun iconPackageNameFor(providerId: String): String? = when (providerId) {
         GOOGLE_DRIVE_PROVIDER_ID -> GOOGLE_DRIVE_PACKAGE
         DROPBOX_PROVIDER_ID -> DROPBOX_PACKAGE
         BRAVE_SEARCH_PROVIDER_ID -> BRAVE_BROWSER_PACKAGE
+        CHATGPT_PROVIDER_ID -> CHATGPT_PACKAGE
+        PERPLEXITY_PROVIDER_ID -> PERPLEXITY_PACKAGE
+        CLAUDE_PROVIDER_ID -> CLAUDE_PACKAGE
         else -> null
     }
+
+    fun isCredentialInlineProvider(providerId: String): Boolean = providerId in setOf(
+        CHATGPT_PROVIDER_ID,
+        PERPLEXITY_PROVIDER_ID,
+        CLAUDE_PROVIDER_ID,
+    )
 
     @Suppress("UNUSED_PARAMETER")
     fun registrations(
@@ -263,12 +278,43 @@ object LauncherConnectedSearchProviderRegistry {
         fileRoots: List<Uri> = emptyList(),
     ): List<LauncherSearchProviderRegistration> =
         definitions().map { definition ->
-            val provider: LauncherSearchProvider =
-                if (definition.providerId == GOOGLE_DRIVE_PROVIDER_ID) {
-                    LauncherGoogleDriveSearchProvider()
-                } else {
-                    LauncherConnectedSearchProvider(definition.providerId)
-                }
+            val provider: LauncherSearchProvider = when (definition.providerId) {
+                GOOGLE_DRIVE_PROVIDER_ID -> LauncherGoogleDriveSearchProvider()
+                CHATGPT_PROVIDER_ID -> LauncherAiInlineSearchProvider(
+                    id = CHATGPT_PROVIDER_ID,
+                    displayName = "ChatGPT",
+                    credentialProvider = {
+                        LauncherConnectedSearchCredentialStore.read(context, CHATGPT_PROVIDER_ID)
+                    },
+                    credentialConfigured = {
+                        LauncherConnectedSearchCredentialStore.isConfigured(context, CHATGPT_PROVIDER_ID)
+                    },
+                    transport = LauncherOpenAiResponsesTransport(),
+                )
+                PERPLEXITY_PROVIDER_ID -> LauncherAiInlineSearchProvider(
+                    id = PERPLEXITY_PROVIDER_ID,
+                    displayName = "Perplexity",
+                    credentialProvider = {
+                        LauncherConnectedSearchCredentialStore.read(context, PERPLEXITY_PROVIDER_ID)
+                    },
+                    credentialConfigured = {
+                        LauncherConnectedSearchCredentialStore.isConfigured(context, PERPLEXITY_PROVIDER_ID)
+                    },
+                    transport = LauncherPerplexityAgentTransport(),
+                )
+                CLAUDE_PROVIDER_ID -> LauncherAiInlineSearchProvider(
+                    id = CLAUDE_PROVIDER_ID,
+                    displayName = "Claude",
+                    credentialProvider = {
+                        LauncherConnectedSearchCredentialStore.read(context, CLAUDE_PROVIDER_ID)
+                    },
+                    credentialConfigured = {
+                        LauncherConnectedSearchCredentialStore.isConfigured(context, CLAUDE_PROVIDER_ID)
+                    },
+                    transport = LauncherAnthropicMessagesTransport(),
+                )
+                else -> LauncherConnectedSearchProvider(definition.providerId)
+            }
             LauncherSearchProviderRegistration(
                 provider = provider,
                 metadata = LauncherSearchProviderMetadata(
@@ -350,6 +396,56 @@ object LauncherConnectedSearchProviderRegistry {
                         .scheme("https")
                         .authority("search.brave.com")
                         .appendPath("search")
+                        .appendQueryParameter("q", query)
+                        .build(),
+                )
+            },
+        ),
+        LauncherConnectedSearchDefinition(
+            providerId = CHATGPT_PROVIDER_ID,
+            displayName = "ChatGPT",
+            authorizationRequirement = LauncherSearchAuthorizationRequirement.ACCOUNT,
+            requiresResolution = false,
+            buildIntent = { query ->
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.Builder()
+                        .scheme("https")
+                        .authority("chatgpt.com")
+                        .appendQueryParameter("q", query)
+                        .build(),
+                )
+            },
+        ),
+        LauncherConnectedSearchDefinition(
+            providerId = PERPLEXITY_PROVIDER_ID,
+            displayName = "Perplexity",
+            authorizationRequirement = LauncherSearchAuthorizationRequirement.ACCOUNT,
+            requiresResolution = false,
+            buildIntent = { query ->
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.Builder()
+                        .scheme("https")
+                        .authority("www.perplexity.ai")
+                        .appendPath("search")
+                        .appendQueryParameter("q", query)
+                        .build(),
+                )
+            },
+        ),
+        LauncherConnectedSearchDefinition(
+            providerId = CLAUDE_PROVIDER_ID,
+            displayName = "Claude",
+            authorizationRequirement = LauncherSearchAuthorizationRequirement.ACCOUNT,
+            requiresResolution = false,
+            buildIntent = { query ->
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.Builder()
+                        .scheme("https")
+                        .authority("claude.ai")
+                        .appendPath("new")
                         .appendQueryParameter("q", query)
                         .build(),
                 )

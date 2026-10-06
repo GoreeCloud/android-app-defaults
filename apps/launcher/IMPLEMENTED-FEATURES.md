@@ -1,3 +1,15 @@
+## October 6, 2026 — opt-in ChatGPT, Perplexity, and Claude inline Search candidate
+
+Development source now registers **ChatGPT**, **Perplexity**, and **Claude** as first-class connected Universal Search providers instead of forcing users out to their standalone apps. Each provider adopts the existing `OPT_IN_REMOTE_INLINE` contract: it is disabled by default, cannot receive typed queries merely because it is registered, and joins the live result stream only after the owner both enables the source and configures a provider credential.
+
+Provider API keys are encrypted with a non-exportable Android Keystore AES key and the ciphertext is stored only under Launcher `noBackupFilesDir`, outside DataStore, Room, Android cloud backup/device transfer, logs, diagnostics, and repository state. Search Sources exposes masked credential entry, replacement, and removal controls. Removing a key also disables that source. Provider failures remain isolated by the existing Universal Search aggregation path.
+
+The current adapters use the providers' current public HTTPS APIs with bounded request/response sizes and cooperative cancellation: OpenAI Responses with `chat-latest`, Anthropic Messages with `claude-sonnet-4-6`, and Perplexity Agent API with the `fast` preset. Results are normalized into the existing connected-source result contract and tap-to-copy action. Installed ChatGPT, Perplexity, and Claude Android application artwork is used automatically when Android exposes it.
+
+Focused JVM coverage verifies fail-closed behavior, query/credential forwarding only after readiness, normalized inline-answer mapping, and remote-inline policy classification. Android runtime coverage verifies the connected catalog exposes all three sources and that an opted-in AI provider still cannot execute until an Android-Keystore-backed credential exists.
+
+**Acceptance boundary:** Development candidate only. Exact-head protected build/JVM/lint/runtime evidence plus representative-device provider authentication, live API response, error/revocation, billing/rate-limit, latency, privacy-copy, accessibility, and visual-branding acceptance remain open.
+
 ## October 5, 2026 — legacy/adaptive icon optical-fill refinement candidate
 
 Development source extends the shared mask-ready icon pipeline to cover both adaptive and legacy artwork. Adaptive foregrounds receive bounded overscan before the selected Launcher mask is applied. Legacy drawables are rasterized to the bounded decode canvas, inspected by alpha bounds, and enlarged only when unusually padded; the normalization targets 90% visible fill below an 84% threshold and caps enlargement at 1.24×.

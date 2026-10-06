@@ -279,6 +279,9 @@ object LauncherSearchProviderUserControlPolicy {
         LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID -> "Google Drive"
         LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID -> "Dropbox"
         LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID -> "Brave Search"
+        LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID -> "ChatGPT"
+        LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID -> "Perplexity"
+        LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID -> "Claude"
         else -> providerId
     }
 

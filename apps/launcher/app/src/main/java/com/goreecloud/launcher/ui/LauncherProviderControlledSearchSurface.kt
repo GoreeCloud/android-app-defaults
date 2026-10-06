@@ -39,8 +39,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -71,12 +73,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.goreecloud.launcher.BuildConfig
 import com.goreecloud.launcher.R
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
+import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchCredentialStore
 import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherCopyTextSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherContactsSearchProvider
@@ -253,11 +257,14 @@ internal fun LauncherProviderControlledSearchSurface(
 
     val googleDriveAuthorizationRevision by
         LauncherGoogleDriveAuthorizationState.revision.collectAsState()
+    val connectedCredentialRevision by
+        LauncherConnectedSearchCredentialStore.revision.collectAsState()
     val catalog = remember(
         apps,
         context,
         fileSearchRoots,
         googleDriveAuthorizationRevision,
+        connectedCredentialRevision,
     ) {
         LauncherRuntimeSearchProviderRegistry.catalog(context, apps, fileSearchRoots)
     }
@@ -2585,6 +2592,9 @@ private fun LauncherSearchSourceManager(
     val issues by LauncherLocalSearchDiagnostics.issues.collectAsState()
     var reorderMode by rememberSaveable { mutableStateOf(false) }
     var detailProviderId by rememberSaveable { mutableStateOf<String?>(null) }
+    var credentialDialogProviderId by rememberSaveable { mutableStateOf<String?>(null) }
+    var credentialDraft by rememberSaveable { mutableStateOf("") }
+    var credentialError by rememberSaveable { mutableStateOf<String?>(null) }
 
     val sections = remember(controls.orderedOptions) {
         LauncherSearchSourceSection.entries.mapNotNull { section ->
@@ -2763,6 +2773,15 @@ private fun LauncherSearchSourceManager(
                                         option.providerId ==
                                             LauncherConnectedSearchProviderRegistry
                                                 .GOOGLE_DRIVE_PROVIDER_ID
+                                    val credentialInlineSource =
+                                        LauncherConnectedSearchProviderRegistry
+                                            .isCredentialInlineProvider(option.providerId)
+                                    val credentialConfigured =
+                                        credentialInlineSource &&
+                                            LauncherConnectedSearchCredentialStore.isConfigured(
+                                                context,
+                                                option.providerId,
+                                            )
                                     val driveConnected =
                                         driveSource &&
                                             LauncherGoogleDriveAuthorizationState.isConnected()
@@ -2780,6 +2799,7 @@ private fun LauncherSearchSourceManager(
                                                 )
                                     val providerReady = when {
                                         driveSource -> driveConnected
+                                        credentialInlineSource -> credentialConfigured
                                         else -> connectedHandoffAvailable
                                     }
                                     val issue = issues[option.providerId]
@@ -2816,6 +2836,8 @@ private fun LauncherSearchSourceManager(
                                             "Choose folder"
                                         driveSource && !driveConnectionAvailable ->
                                             "Signed build required"
+                                        credentialInlineSource && !credentialConfigured ->
+                                            "API key required"
                                         !connectedHandoffAvailable &&
                                             option.providerId ==
                                                 LauncherConnectedSearchProviderRegistry
@@ -2908,12 +2930,23 @@ private fun LauncherSearchSourceManager(
                                                         enabled &&
                                                             permissionGranted &&
                                                             providerReady,
-                                                    onCheckedChange = {
-                                                        onSetEnabled(
-                                                            controls,
-                                                            option.providerId,
-                                                            it,
-                                                        )
+                                                    onCheckedChange = { requestedEnabled ->
+                                                        if (
+                                                            requestedEnabled &&
+                                                            credentialInlineSource &&
+                                                            !credentialConfigured
+                                                        ) {
+                                                            credentialDialogProviderId =
+                                                                option.providerId
+                                                            credentialDraft = ""
+                                                            credentialError = null
+                                                        } else {
+                                                            onSetEnabled(
+                                                                controls,
+                                                                option.providerId,
+                                                                requestedEnabled,
+                                                            )
+                                                        }
                                                     },
                                                     enabled =
                                                         ready &&
@@ -2979,6 +3012,57 @@ private fun LauncherSearchSourceManager(
                                                             color = MaterialTheme.colorScheme
                                                                 .onSurfaceVariant,
                                                         )
+                                                    }
+
+                                                    if (credentialInlineSource) {
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement =
+                                                                Arrangement.spacedBy(
+                                                                    GlazeMetrics.space1,
+                                                                ),
+                                                        ) {
+                                                            TextButton(
+                                                                onClick = {
+                                                                    credentialDialogProviderId =
+                                                                        option.providerId
+                                                                    credentialDraft = ""
+                                                                    credentialError = null
+                                                                },
+                                                                enabled = ready,
+                                                                modifier =
+                                                                    Modifier.heightIn(min = 48.dp),
+                                                            ) {
+                                                                Text(
+                                                                    if (credentialConfigured) {
+                                                                        "Replace API key"
+                                                                    } else {
+                                                                        "Add API key"
+                                                                    },
+                                                                )
+                                                            }
+                                                            if (credentialConfigured) {
+                                                                TextButton(
+                                                                    onClick = {
+                                                                        LauncherConnectedSearchCredentialStore
+                                                                            .clear(
+                                                                                context,
+                                                                                option.providerId,
+                                                                            )
+                                                                        onSetEnabled(
+                                                                            controls,
+                                                                            option.providerId,
+                                                                            false,
+                                                                        )
+                                                                    },
+                                                                    enabled = ready,
+                                                                    modifier =
+                                                                        Modifier.heightIn(min = 48.dp),
+                                                                ) {
+                                                                    Text("Remove key")
+                                                                }
+                                                            }
+                                                        }
                                                     }
 
                                                     if (
@@ -3111,6 +3195,93 @@ private fun LauncherSearchSourceManager(
             }
         }
     }
+
+    credentialDialogProviderId?.let { providerId ->
+        val displayName = controls.orderedOptions
+            .firstOrNull { option -> option.providerId == providerId }
+            ?.displayName
+            ?: "AI provider"
+        AlertDialog(
+            onDismissRequest = {
+                credentialDialogProviderId = null
+                credentialDraft = ""
+                credentialError = null
+            },
+            title = { Text("Connect $displayName") },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                ) {
+                    Text(
+                        "Enter an API key for inline Universal Search answers. The key is encrypted " +
+                            "with Android Keystore, stored only in Launcher private no-backup storage, " +
+                            "and is sent only to $displayName when this source is enabled.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = credentialDraft,
+                        onValueChange = {
+                            credentialDraft = it
+                            credentialError = null
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("launcher-connected-credential-" + providerId),
+                        singleLine = true,
+                        label = { Text("API key") },
+                        visualTransformation = PasswordVisualTransformation(),
+                    )
+                    credentialError?.let { message ->
+                        Text(
+                            message,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val key = credentialDraft.trim()
+                        if (key.isBlank()) {
+                            credentialError = "Enter an API key."
+                        } else {
+                            runCatching {
+                                LauncherConnectedSearchCredentialStore.save(
+                                    context,
+                                    providerId,
+                                    key,
+                                )
+                            }.onSuccess {
+                                onSetEnabled(controls, providerId, true)
+                                credentialDialogProviderId = null
+                                credentialDraft = ""
+                                credentialError = null
+                            }.onFailure {
+                                credentialError = "Launcher could not securely save this API key."
+                            }
+                        }
+                    },
+                    enabled = ready,
+                ) {
+                    Text("Connect")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        credentialDialogProviderId = null
+                        credentialDraft = ""
+                        credentialError = null
+                    },
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -3201,6 +3372,9 @@ private fun sourceSectionFor(
     LauncherConnectedSearchProviderRegistry.GOOGLE_DRIVE_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
     -> LauncherSearchSourceSection.CONNECTED
 
     else -> LauncherSearchSourceSection.DEVICE
@@ -3226,6 +3400,14 @@ private fun compactSourceSummary(
         "Web · Optional"
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
         "App handoff · Optional"
+    LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
+    -> if (LauncherConnectedSearchCredentialStore.isConfigured(context, option.providerId)) {
+        "AI · Connected"
+    } else {
+        "AI · API key required"
+    }
     else -> when (option.invocationMode) {
         LauncherSearchProviderInvocationMode.AUTOMATIC_LOCAL -> "Local · Automatic"
         LauncherSearchProviderInvocationMode.OPT_IN_LOCAL -> "Local · Permission"
@@ -3259,6 +3441,17 @@ private fun connectedSourceDetail(
     LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
         "Dropbox inline results require a reviewed OAuth adapter. Until that authorization path " +
             "exists, Launcher keeps this source behind an explicit handoff."
+    LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
+    LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
+    -> if (LauncherConnectedSearchCredentialStore.isConfigured(context, option.providerId)) {
+        "Inline answers are opt-in. While this source is enabled, Launcher sends the typed query " +
+            "to this provider using the API key stored in Android Keystore-backed, no-backup app " +
+            "storage. The key is never written to Launcher preferences, Room, logs, or diagnostics."
+    } else {
+        "Add your own provider API key to enable inline answers. The key is stored only in " +
+            "Android Keystore-backed, no-backup Launcher storage and can be removed here at any time."
+    }
     else -> null
 }
 

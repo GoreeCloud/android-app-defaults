@@ -12,8 +12,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The owner must see Drive even without an exported app search Activity. No registered third-party
- * provider receives typed input automatically, including when the owner opted into its handoff.
+ * Connected Search remains fail closed. Handoff providers never receive live typed input, and an
+ * opt-in remote-inline provider receives it only after both explicit source enablement and its own
+ * credential/authorization readiness gate are satisfied.
  */
 @RunWith(AndroidJUnit4::class)
 class LauncherConnectedSearchPrivacyRuntimeTest {
@@ -64,6 +65,21 @@ class LauncherConnectedSearchPrivacyRuntimeTest {
                 LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID,
             ),
         )
+        assertTrue(
+            providerIds.contains(
+                LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
+            ),
+        )
+        assertTrue(
+            providerIds.contains(
+                LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID,
+            ),
+        )
+        assertTrue(
+            providerIds.contains(
+                LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
+            ),
+        )
 
         val dropboxId = LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID
         if (!LauncherConnectedSearchProviderRegistry.isExplicitHandoffAvailable(context, dropboxId)) {
@@ -75,6 +91,52 @@ class LauncherConnectedSearchPrivacyRuntimeTest {
                 ),
             )
         }
+    }
+
+    @Test
+    fun remoteInlineAiRequiresBothOptInAndKeystoreCredential() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val providerId = LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID
+        LauncherConnectedSearchCredentialStore.clear(context, providerId)
+
+        try {
+            val catalog = LauncherSearchProviderContract.evaluate(
+                LauncherConnectedSearchProviderRegistry.registrations(context),
+            )
+            val optedIn = LauncherSearchProviderUserControlPolicy.normalize(
+                catalog = catalog,
+                requestedEnabledProviderIds = setOf(providerId),
+                requestedProviderOrder = listOf(providerId),
+            )
+
+            assertTrue(optedIn.isEnabled(providerId))
+            assertFalse(
+                LauncherSearchProviderUserControlPolicy
+                    .automaticProviders(catalog, optedIn)
+                    .any { provider -> provider.id == providerId },
+            )
+
+            LauncherConnectedSearchCredentialStore.save(
+                context,
+                providerId,
+                "runtime-test-key",
+            )
+
+            assertTrue(LauncherConnectedSearchCredentialStore.isConfigured(context, providerId))
+            assertEquals(
+                "runtime-test-key",
+                LauncherConnectedSearchCredentialStore.read(context, providerId),
+            )
+            assertTrue(
+                LauncherSearchProviderUserControlPolicy
+                    .automaticProviders(catalog, optedIn)
+                    .any { provider -> provider.id == providerId },
+            )
+        } finally {
+            LauncherConnectedSearchCredentialStore.clear(context, providerId)
+        }
+
+        assertFalse(LauncherConnectedSearchCredentialStore.isConfigured(context, providerId))
     }
 
     @Test

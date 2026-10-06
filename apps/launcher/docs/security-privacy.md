@@ -2,7 +2,9 @@
 
 The launcher is high-trust software because it becomes the HOME surface and can enumerate launchable apps. Its default architecture therefore keeps app inventory, layout, folders, local search data and usage-derived suggestions on-device.
 
-No advertising, attribution, sponsorship or engagement SDK is included. Milestone 0 requested no `INTERNET` permission. The current PR #248 Development candidate now declares `INTERNET` only for explicitly enabled connected Search adapters such as the authorized Google Drive metadata provider. Core Home, Apps, settings, and local Search remain offline-capable; cleartext traffic is disabled and provider opt-in/authorization remains the transmission boundary.
+No advertising, attribution, sponsorship or engagement SDK is included. Milestone 0 requested no `INTERNET` permission. The current Development line declares `INTERNET` only for explicitly enabled connected Search adapters such as authorized Google Drive metadata search and owner-configured ChatGPT, Perplexity, or Claude inline answers. Core Home, Apps, settings, and local Search remain offline-capable; cleartext traffic is disabled and provider opt-in/authorization remains the transmission boundary.
+
+Connected AI provider API keys are never stored in DataStore, Room, portable preferences, logs, diagnostics, or source control. Launcher encrypts them with a non-exportable Android Keystore AES key and stores only ciphertext plus IVs under `noBackupFilesDir`, so Android cloud backup and device-transfer extraction do not export them. A provider is not eligible for live typed-query execution unless its source is explicitly enabled and its credential can be decrypted successfully; missing or unreadable credentials fail closed. Keys can be replaced or removed directly from Universal Search Sources, and removal disables the source.
 
 Do not add Accessibility Service or device-admin privileges merely to imitate privileged launcher behavior. Imported themes/backups are untrusted input.
 

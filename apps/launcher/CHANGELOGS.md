@@ -1,3 +1,13 @@
+## October 6, 2026 — ChatGPT, Perplexity, and Claude inline Universal Search candidate
+
+The connected-source catalog now includes **ChatGPT**, **Perplexity**, and **Claude** as opt-in remote-inline providers. They are disabled on first run and remain non-executable until the owner explicitly enables the source and adds that provider's own API key. The Search Sources screen now exposes masked credential setup, replacement, and removal without moving keys into Launcher preferences or Room.
+
+Provider secrets are encrypted with Android Keystore and written only to app-private no-backup storage. Removing a key disables the provider; unreadable/missing credentials fail closed. The adapters use bounded HTTPS requests with cooperative cancellation and normalize one concise provider answer into the existing connected-result stream with tap-to-copy behavior. Android-installed ChatGPT, Perplexity, and Claude artwork is reused where available rather than drawing substitute brand marks.
+
+The source implementation follows the current public provider contracts verified during this tranche: OpenAI Responses supports `chat-latest`; Anthropic's active `claude-sonnet-4-6` Messages model uses `x-api-key`; and Perplexity's raw HTTP Agent API uses `POST /v1/agent` with the `fast` preset. No provider key, response body, or typed query is written to logs, diagnostics, portable backup state, or repository configuration.
+
+**Acceptance boundary:** Development candidate only. CI/runtime correctness does not replace live representative-device API/billing/rate-limit/revocation/latency/privacy/branding acceptance or protected signing/release gates.
+
 ## October 6, 2026 — owner-directed visual cohesion and lightweight Search/Home refinement candidate
 
 The current Development continuation applies a broader visual-quality pass from representative-device owner screenshots rather than treating each mismatch as an isolated patch. Fresh/default Dock presentation now uses **Clear** and the rendered Dock is width-bounded to its current density instead of spanning the full Home canvas; paging, drag/drop, optional Search, labels, and the Glaze 48 dp interaction floor remain intact. This makes the ordinary Dock read as a lightweight floating icon row over wallpaper while the existing Solid/Raised/Edge material choices remain explicit user options.
