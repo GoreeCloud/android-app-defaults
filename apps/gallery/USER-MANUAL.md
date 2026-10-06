@@ -2,7 +2,7 @@
 
 ## Status
 
-This manual describes the **current first-party native Development experience**. It includes the five-destination Photos / Albums / Videos / Trash / Settings interface, Android-authorized local browsing and mutation paths, bounded native viewer playback, and the current mockup-aligned presentation candidate. It does not describe a Stable or production-approved release.
+This manual describes the **current first-party native Development experience**. It includes the five-destination Photos / Albums / Videos / Trash / Settings interface, Android-authorized local browsing and mutation paths, bounded native viewer playback, and the current mockup-aligned presentation candidate. It does not describe an Anchor-qualified or Production Accepted release.
 
 The initial `0.6.0-dev` destructive-operation build is superseded. `0.6.1-dev` corrected the MediaStore item URI path, and representative-device testing subsequently verified single-item Trash plus tested 26-item and 10-item multi-select Trash operations. `0.6.2-dev` also physically corrected the prior select/deselect screen flash.
 
@@ -11,7 +11,7 @@ Use **disposable copied photos and videos** when testing Restore, permanent dele
 ## Opening the local library
 
 1. Launch **GoreeCloud Gallery**.
-2. If media access has not been granted, choose the media-access action and use Android's permission surface to select the access scope you want to provide.
+2. If media access has not been granted, choose the media-access action and use Android's permission surface to select the access scope you want to provide. The no-access Gallery surface intentionally uses one compact permission row rather than a second full-width empty-state card.
 3. Gallery reads only the local MediaStore view allowed by the current Android permission scope.
 4. If Android denies the read or the provider is unavailable, Gallery reports that failure instead of presenting it as an empty library.
 
@@ -23,12 +23,12 @@ While Gallery remains in the foreground, it observes Android MediaStore and auto
 
 The current native Development experience provides direct **Photos**, **Albums**, **Videos**, **Trash**, and **Settings** destinations.
 
-The bottom navigation defaults to **Icons only**. In this mode, each glyph is centered in an equal-width destination slot and the selected destination uses a compact inset Glaze pill. Long-press/hover tooltips expose destination names where Android supports them, and accessibility services retain destination and selected-state semantics in every visual mode. Use **Settings > Appearance > Bottom navigation** to switch to **Text only** or **Icons & text**. Tapping the already-selected destination returns that view to the top.
+The bottom navigation is a fixed **glyph-only** five-destination rail. Photos, Albums, Videos, Trash, and Settings use equal-width 48dp destination slots with centered glyphs, a restrained selected-state accent, and no visible tab labels. Destination names remain available through accessibility descriptions and tooltips. Tapping the already-selected destination returns that view to the top.
 
-- Photos uses an adaptive local timeline grid. Dense day groups retain the compact multi-column layout, while sparse one- and two-item groups use a larger three-column presentation lane closer to the current Gallery mockup.
-- Videos uses a featured first card followed by two-column phone cards (three columns on wider layouts), with play affordances, duration badges, title/date metadata, and category chips that appear only when the current Android-authorized snapshot actually contains matching Screen recordings, Camera, or Favorites media.
-- Albums uses Android-authorized album metadata and includes a device-local Favorites collection when Favorites exist. Use an ordinary album card's More menu to **Pin to top / Unpin from top** and, when available, **Move earlier / Move later**. Pinned albums always remain in the top group; manual moves reorder only within the current pinned or unpinned group. These actions change only Gallery's local Collections presentation and do not move or rename media. Settings > Appearance exposes **Reset album order** after a manual order exists; resetting keeps Pin/Unpin choices. Recovery is no longer embedded in Albums.
-- Trash is a dedicated bottom-navigation destination on Android 11+ and uses Android MediaStore Trash as the authoritative recovery state. Restore and permanent deletion continue to use Android-owned confirmation.
+- Photos uses an adaptive local timeline grid. Sparse groups use a larger three-column presentation lane, and dense groups may step down one column when that keeps the same row count but produces a visibly fuller final row (for example, 3+3 instead of 4+2).
+- Videos uses a balanced card grid on phones instead of an oversized first-item hero: one column on very narrow devices, two columns on ordinary phones, and a featured first card only from 600dp upward before the wider three/four-column grid. Video identity uses a play glyph; a duration badge appears only when Android supplies a duration. Category chips still appear only from the current Android-authorized snapshot. Card More actions use a rounded Glaze menu with first-party glyphs.
+- Albums quick-access chips always include a first-party glyph, falling back to the generic Albums glyph for unrecognized collection names. Albums uses Android-authorized album metadata and includes a device-local Favorites collection when Favorites exist. Use an ordinary album card's More menu to **Pin to top / Unpin from top** and, when available, **Move earlier / Move later**. Pinned albums always remain in the top group; manual moves reorder only within the current pinned or unpinned group. These ordering actions change only Gallery's local Collections presentation. The active Development rename candidate additionally exposes **Rename** only when Gallery has full local image-and-video access and every authorized item in the album agrees on one nested MediaStore folder and one storage volume. Rename preserves the provider-owned parent folder, rejects root-level/ambiguous albums and sibling-name collisions, and routes the exact bounded item URIs through Android's write-confirmation surface before changing `RELATIVE_PATH`. Settings > Appearance exposes **Reset album order** after a manual order exists; resetting keeps Pin/Unpin choices. Recovery is no longer embedded in Albums.
+- Trash is a dedicated bottom-navigation destination on Android 11+ and uses Android MediaStore Trash as the authoritative recovery state. Phone layouts favor three larger thumbnail columns for scanability before scaling wider on tablets/desktops; Restore and permanent deletion continue to use Android-owned confirmation.
 - Photos and Videos keep the main canvas focused on Search, Sort, media, and destination-specific filters. Grouping and view-density remain available in Settings > Appearance.
 - Long-press a media tile to enter multi-select mode.
 
@@ -36,14 +36,20 @@ The bottom navigation defaults to **Icons only**. In this mode, each glyph is ce
 
 Tap a visible photo or video to open the bounded full-screen viewer.
 
+The viewer now uses compact icon/glyph actions rather than labeled text buttons for its persistent chrome. Long-press/hover tooltips and accessibility names describe each control, selected/toggled states remain exposed, and destructive Delete retains distinct treatment.
+
+The first-use setup also uses icon-first navigation controls with a visible three-step progress rail. Screen titles and explanatory guidance remain textual; Back, Return, Continue, and Finish are exposed as glyph controls with descriptive accessibility names.
+
+Settings groups related rows inside shared section surfaces instead of placing every preference in its own card. Choices show a compact value/chevron, booleans use vector switch glyphs, and TalkBack/state semantics announce current values. Empty Photos, Albums, Videos, search results, and Trash states use lightweight semantic icon treatment without oversized full-width cards.
+
 - Use Previous and Next within the current authorized/presented collection. Horizontal swipe navigation remains available at baseline photo scale.
 - For photos, use the viewer's view-options control for **Fit entire photo**, **Fill viewer**, or **Zoom 2×**. You can also pinch from 1× up to 4×; while zoomed, drag the photo to pan. Item-navigation swipes are disabled while zoomed so a pan does not change photos. Choose **Reset zoom** or navigate to another item to return to baseline zoom.
 - Share hands the current content URI to Android with a read-only URI grant.
 - Favorite/Unfavorite changes Gallery's device-local Favorites state.
 - More displays available media details.
 - Delete on Android 11+ routes through Android's system-owned Trash or permanent-delete confirmation according to the current setting.
-- Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled.
-- Slide/Stop runs the photo-only slideshow using the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.
+- Edit is available for authorized photos through the bounded first-party rotate/flip/crop/save-copy editor; unsupported media types remain disabled. In the editor, Cancel/Save, Rotate left/right, Flip, and Reset are icon controls, while **Original**, **1:1**, **4:3**, and **16:9** remain short textual crop presets because the ratio is the value being chosen.
+- The slideshow control changes between slideshow and pause glyphs while retaining an accessibility label; repeat uses a selected state instead of adding a text checkmark. The photo-only slideshow uses the locally configured **Slideshow speed** of 3, 5, or 10 seconds per photo. Five seconds is the default.
 
 Image viewing now includes bounded session-local zoom/pan over the existing orientation-aware viewer bitmap, but it is still a Development viewer path rather than unrestricted original-resolution zoom: the underlying decode remains bounded to the current viewport with a 2048px long-edge ceiling. Authorized videos use the native bounded playback surface with Play/Pause, lifecycle-safe pause/resume, and the persisted autoplay/loop preferences; representative-device playback and zoom/pan acceptance remain separate.
 
@@ -51,7 +57,7 @@ Image viewing now includes bounded session-local zoom/pan over the existing orie
 
 Long-press a visible media tile to enter selection mode, then tap additional items to add or remove them.
 
-Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, **Copy** to another authorized folder or **Create & copy** destination while preserving originals, and More/Details when exactly one item is selected.
+Current actions include Share, Favorite/Unfavorite, Android-authorized Delete on Android 11+, Move when the current authorized selection has a safe existing-folder or new-folder destination, **Copy** to another authorized folder or **Create & copy** destination while preserving originals, and More/Details when exactly one item is selected. These persistent selection actions are icon-first; accessible names and tooltips preserve their labels for assistive technology and discovery.
 
 The `0.6.2-dev` in-place selection renderer is physically verified on the representative device: selecting and deselecting no longer causes the previous whole-screen flash.
 
@@ -104,6 +110,7 @@ Ordinary Photos/Albums/Videos media queries continue to exclude trashed items by
 When no selection is active, tap a visible trashed-media tile to open the Trash viewer.
 
 - Use **Previous** and **Next** across the currently loaded trashed-media collection.
+- The viewer uses icon/glyph actions for Back, Restore, permanent Delete, and More while keeping the same accessibility names and Android confirmation behavior.
 - **Restore** asks Android to restore the current item from Trash.
 - **Delete permanently** asks Android to permanently delete the current trashed item.
 - **More** shows the available media details and explicitly identifies the item as being in Android Recycle Bin state.
@@ -112,12 +119,14 @@ The Trash viewer remains a bounded recovery surface. It does not broaden ordinar
 
 ### Selecting trashed items
 
-Long-press a visible Trash tile to enter selection mode, then tap additional items to toggle them. Selection updates resident tiles in place. The current action surface provides:
+Long-press a visible Trash tile to enter selection mode, then tap additional items to toggle them. Selection updates resident tiles in place. The current action surface is icon-first and provides:
 
 - **Select all** — select the currently loaded trashed items.
 - **Restore** — ask Android to restore the selected items from Trash.
 - **Delete permanently** — ask Android to permanently delete the selected trashed items.
 - **Cancel** — clear the current selection.
+
+Each glyph keeps an explicit accessibility label and tooltip; the permanent-delete action keeps destructive styling.
 
 ### Restore
 
@@ -148,11 +157,11 @@ Canceling Android's Restore or permanent-delete confirmation must not be treated
 
 ### Trash acceptance boundary
 
-The Trash/Recycle Bin implementation originated in rendered `0.7.1-dev` acceptance evidence and remains a Development capability in the current `0.8.6-dev` line. Earlier representative-device testing verified Trash-to-bin visibility, populated Recycle Bin browsing, stable in-place selection, Android-owned Restore and permanent-delete confirmation surfaces, denial/cancellation for both recovery mutations, successful permanent purge of 28 selected photos, the post-purge empty-bin state, and mixed photo/video Trash-to-Recycle-Bin plus Restore through the previous Albums recovery entry. The new dedicated five-tab Trash navigation introduced on October 1, 2026 still requires fresh representative-device and accessibility validation. In the mixed-media test, Gallery recognized the test video in Videos, Android separately confirmed moving the video and a photo to Trash, both appeared in the Recycle Bin, Android presented a `move 2 items out of trash` confirmation for the mixed selection, Gallery reported `Restored 2 items`, and the video returned to Videos while the photo returned to the ordinary library. In the 28-photo purge test, Android presented its system-owned confirmation, Gallery reported `Deleted 28 items permanently`, refreshed the Recycle Bin to 0 items, and rendered the intended `Recycle Bin is empty` state. Remaining required device testing includes mixed photo/video permanent-purge behavior, partial-media permission behavior, permission revocation, provider failure, restart/process recreation, OEM/profile behavior, and retention/expiry refresh. This evidence does not establish Stable or production acceptance.
+The Trash/Recycle Bin implementation originated in rendered `0.7.1-dev` acceptance evidence and remains a Development capability in the current `0.9.0-dev` line. Earlier representative-device testing verified Trash-to-bin visibility, populated Recycle Bin browsing, stable in-place selection, Android-owned Restore and permanent-delete confirmation surfaces, denial/cancellation for both recovery mutations, successful permanent purge of 28 selected photos, the post-purge empty-bin state, and mixed photo/video Trash-to-Recycle-Bin plus Restore through the previous Albums recovery entry. The new dedicated five-tab Trash navigation introduced on October 1, 2026 still requires fresh representative-device and accessibility validation. In the mixed-media test, Gallery recognized the test video in Videos, Android separately confirmed moving the video and a photo to Trash, both appeared in the Recycle Bin, Android presented a `move 2 items out of trash` confirmation for the mixed selection, Gallery reported `Restored 2 items`, and the video returned to Videos while the photo returned to the ordinary library. In the 28-photo purge test, Android presented its system-owned confirmation, Gallery reported `Deleted 28 items permanently`, refreshed the Recycle Bin to 0 items, and rendered the intended `Recycle Bin is empty` state. Remaining required device testing includes mixed photo/video permanent-purge behavior, partial-media permission behavior, permission revocation, provider failure, restart/process recreation, OEM/profile behavior, and retention/expiry refresh. This evidence does not establish Anchor qualification or Production Acceptance.
 
 ## Settings
 
-Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, slideshow speed, Favorites/settings import/export (including app-local album pins and slideshow pace), cache clearing, and the Trash versus permanent-delete choice on supported Android versions.
+Current active settings include local thumbnail loading priority, included/excluded folder presentation, hidden-item visibility within Android's authorized snapshot, rounded-square thumbnails, slideshow speed, Favorites/settings import/export (including app-local album pins and slideshow pace), cache clearing, and the Trash versus permanent-delete choice on supported Android versions. Action rows such as Clear, Import/Export, Reset, and Replay setup use compact trailing glyphs; the full row title and description remain the accessibility and semantic label.
 
 Video autoplay and looping are active viewer preferences. **Animate GIFs in thumbnails** is also active under Playback; it is off by default and, when enabled, animates authorized GIF cards/covers while they are visible. Automatic empty-folder cleanup remains a compatibility-only settings field and is not shown as an active control.
 
@@ -170,7 +179,7 @@ Protected Photos/password protection is not simulated with insecure app-local cr
 
 ## Current design-system authority
 
-The current shared authority is **Glaze V1.7 / 1.7.0** (Anchor / Stable compatibility), established by release integration `1a5756daed2294155be2e9972b24f580f6222b7b` from qualification anchor `7c4ded83d7a8725165bb6a55dfb175667cc9589e`. V1.7.0 intentionally inherits the accepted V1.6.0 runtime. Gallery still implements its bounded V1.6 native semantic mapping, so fresh V1.7 contract adoption plus rendered, accessibility, adaptive-device, Human Visual Excellence, and production acceptance remain separate gates.
+The current shared authority identifies **Glaze V1.7 / 1.7.0** as the consumer-eligible anchor. Gallery pins qualification source `7c4ded83d7a8725165bb6a55dfb175667cc9589e`; V1.7.0 inherits the accepted V1.6.0 runtime from release source `a7180679ea851389e0f3004515f9a25f420e716d`. Gallery does not consume the unfinished V1.7.1 / retained dev.47 behavior. Complete rendered, accessibility, adaptive-device, Human Visual Excellence, and production conformance remain separate acceptance gates.
 
 ## Local browsing controls
 
@@ -178,9 +187,9 @@ Gallery keeps browsing controls local to the device. **Sort** in the media heade
 
 ## Major capability backlog
 
-The native restoration still includes more work than the earlier rough "11 features" estimate implied. Distinct remaining capability areas include full physical Recycle Bin acceptance; full-resolution image viewing and physical orientation acceptance; native video playback plus autoplay/loop behavior; representative-device/accessibility/performance acceptance for the implemented animated GIF thumbnail path; approved photo/video editing; approved metadata editing; representative-device acceptance and refinement of the implemented Move and preserve-original Copy paths; broader selection tools where appropriate; album creation, rename, provider-backed organization beyond the implemented local manual ordering, and richer album actions; richer grouping/timeline modes; additional view-density/layout controls; slideshow and other established local presentation actions; broader contextual/overflow actions; broader export/share workflows where required; secure Private/Protected Photos; fuller hidden/sensitive-media policy; automatic empty-folder cleanup; and any additional established first-party Gallery capability verified by historical GoreeCloud Gallery evidence.
+The native restoration still includes more work than the earlier rough "11 features" estimate implied. Distinct remaining capability areas include full physical Recycle Bin acceptance; full-resolution image viewing and physical orientation acceptance; native video playback plus autoplay/loop behavior; representative-device/accessibility/performance acceptance for the implemented animated GIF thumbnail path; approved photo/video editing; approved metadata editing; representative-device acceptance and refinement of the implemented Move and preserve-original Copy paths; broader selection tools where appropriate; album creation beyond the bounded Move/Copy-new-folder paths, representative-device acceptance and refinement of the active bounded album-rename candidate, broader provider-backed organization, and richer album actions; richer grouping/timeline modes; additional view-density/layout controls; slideshow and other established local presentation actions; broader contextual/overflow actions; broader export/share workflows where required; secure Private/Protected Photos; fuller hidden/sensitive-media policy; automatic empty-folder cleanup; and any additional established first-party Gallery capability verified by historical GoreeCloud Gallery evidence.
 
-Separate release gates include GLAZE UI V1.6 application acceptance, accessibility/adaptive/OEM/profile testing, Privacy Shield/Wardveil/Everkeep/Identity/Mesh integration where applicable, long-lived signing, upgrade/recovery validation, production approval, and Stable qualification.
+Separate release gates include Glaze V1.7 application acceptance, accessibility/adaptive/OEM/profile testing, Privacy Shield/Wardveil/Everkeep/Identity/Mesh integration where applicable, long-lived signing, upgrade/recovery validation, Seal qualification, Production Acceptance, and Anchor qualification.
 
 ## Troubleshooting
 

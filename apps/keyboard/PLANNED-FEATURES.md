@@ -1,5 +1,9 @@
 # GoreeCloud Keyboard — Planned Features
 
+## October 6, 2026 — adaptive constrained-height stabilization candidate
+
+The current candidate restores adaptive row-gap compression on top of the integrated one-handed Keyboard baseline. Exact-head Android CI plus representative physical-device typing, Touch Exploration, TalkBack/Switch Access, OEM/editor-host constrained-height, landscape, large-text, one-handed Left/Right, tablet/foldable, and performance acceptance remain open.
+
 ## October 2, 2026 — Arabic punctuation and alternates candidate
 
 The current capability-expansion candidate deepens the already-integrated Arabic layout with Arabic comma presentation on the primary letter row plus deterministic device-local long-press variants for common alef/hamza forms, taa marbuta, alif maqsura, Arabic semicolon/question-mark access, and Arabic diacritics. Alternate lookup is explicitly language-aware; English alternate behavior remains unchanged, and English-only prediction/correction/swipe-learning remains disabled while Arabic is active. The change performs no editor-context inference, learning, persistence, network lookup, Contacts access, or telemetry. Focused JVM coverage verifies Arabic alternates and language-aware punctuation. Broader Arabic dictionaries/prediction, BiDi editor acceptance, physical-device ergonomics, accessibility, and native-language validation remain open.

@@ -16,11 +16,6 @@ required_files=(
   CONTRIBUTING.md
   NOTICE.md
   .gitignore
-  .github/CODEOWNERS
-  .github/dependabot.yml
-  .github/pull_request_template.md
-  .github/workflows/build-and-validate.yml
-  .github/workflows/build-signed-release-candidate.yml
   docs/ARCHITECTURE.md
   docs/BUILD-AND-RELEASE.md
   docs/GLAZE-UI.md
@@ -54,6 +49,30 @@ for path in "${required_files[@]}"; do
   [ -s "$path" ] || fail "required file is missing or empty: $path"
 done
 
+repository_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)"
+gallery_root="$(pwd -P)"
+
+if [ "$repository_root" = "$gallery_root" ]; then
+  standalone_control_files=(
+    .github/CODEOWNERS
+    .github/dependabot.yml
+    .github/pull_request_template.md
+    .github/workflows/build-and-validate.yml
+    .github/workflows/build-signed-release-candidate.yml
+  )
+  for path in "${standalone_control_files[@]}"; do
+    [ -s "$path" ] || fail "standalone control-plane file is missing or empty: $path"
+  done
+  grep -Fq '@GoreeCloud' .github/CODEOWNERS ||
+    fail 'standalone CODEOWNERS does not identify GoreeCloud review ownership'
+else
+  migrated_ci="$repository_root/.github/workflows/migrated-android-apps-ci.yml"
+  [ -s "$migrated_ci" ] || fail 'monorepo migrated Android CI workflow is missing'
+  grep -Fq 'gallery:' "$migrated_ci" || fail 'monorepo CI does not define the Gallery validation job'
+  grep -Fq 'working-directory: apps/gallery/native' "$migrated_ci" ||
+    fail 'monorepo CI does not target the Gallery native project'
+fi
+
 [ ! -e FEATURE-ROADMAP.md ] || fail 'retired FEATURE-ROADMAP.md must not exist at repository root'
 [ ! -e CHANGELOG.md ] || fail 'retired singular CHANGELOG.md must not exist at repository root'
 
@@ -66,18 +85,19 @@ grep -Fq 'com.goreecloud.gallery' README.md || fail 'README does not record the 
 grep -Fq 'Glaze UI' README.md || fail 'README does not record the Glaze UI requirement'
 grep -Fq 'GNU GENERAL PUBLIC LICENSE' LICENSE || fail 'root LICENSE is not the GNU GPL license text'
 grep -Fq 'Version 3, 29 June 2007' LICENSE || fail 'root LICENSE does not identify GNU GPL version 3'
-grep -Fq '@GoreeCloud' .github/CODEOWNERS || fail 'CODEOWNERS does not identify GoreeCloud review ownership'
 grep -Fq 'GNU General Public License' NOTICE.md || fail 'NOTICE does not record the GPL license boundary'
 grep -Fq 'b28299dc33821eee8d108a9880ce87876cf31443' NOTICE.md || fail 'NOTICE does not record the pinned Fossify Gallery revision'
 grep -Fq 'acfd352df1a1852d17a5f77def8b7ad6e522a5b6' NOTICE.md || fail 'NOTICE does not record the pinned Fossify Commons revision'
 
 grep -Fq 'Android user / profile boundary' docs/ARCHITECTURE.md || fail 'architecture does not document Android user/profile isolation'
 grep -Fq 'Glaze UI architecture' docs/ARCHITECTURE.md || fail 'architecture does not document the Glaze UI layer'
-grep -Fq 'GoreeCloud Gallery Glaze UI Contract' docs/GLAZE-UI.md || fail 'Glaze UI contract does not identify its Gallery scope'
-grep -Fq 'Target design system: **Glaze UI 1.6.0**' docs/GLAZE-UI.md || fail 'Glaze UI target version is not documented'
-grep -Fq 'a7180679ea851389e0f3004515f9a25f420e716d' docs/GLAZE-UI.md || fail 'accepted Stable Glaze UI release source is not documented'
-grep -Fq 'Current first-party native source baseline: **V1.6**' docs/GLAZE-UI.md || fail 'current native Glaze UI baseline is not documented'
-grep -Fq 'Historical transitional implementation line: `gc.16`' docs/GLAZE-UI.md || fail 'historical transitional Glaze UI baseline is not documented'
+grep -Fq 'GoreeCloud Gallery Glaze UI Contract' docs/GLAZE-UI.md || fail 'Glaze contract does not identify its Gallery scope'
+grep -Fq 'Target design system: **Glaze V1.7 / 1.7.0**' docs/GLAZE-UI.md || fail 'Glaze target version is not documented'
+grep -Fq '7c4ded83d7a8725165bb6a55dfb175667cc9589e' docs/GLAZE-UI.md || fail 'current Glaze qualification anchor is not documented'
+grep -Fq 'a7180679ea851389e0f3004515f9a25f420e716d' docs/GLAZE-UI.md || fail 'inherited accepted Glaze runtime release source is not documented'
+grep -Fq 'Current first-party native source baseline: **V1.7**' docs/GLAZE-UI.md || fail 'current native Glaze baseline is not documented'
+grep -Fq 'Retained V1.7 dev.47 / Section 48 Development behavior included: **no**' docs/GLAZE-UI.md || fail 'excluded Glaze Development behavior is not documented'
+grep -Fq 'Historical transitional implementation line: `gc.16`' docs/GLAZE-UI.md || fail 'historical transitional Glaze baseline is not documented'
 grep -Fq 'No permanent Glaze UI exception is approved' docs/GLAZE-UI.md || fail 'Glaze UI exception boundary is not documented'
 grep -Fq 'meaningful GoreeCloud-owned JVM tests actually execute' docs/GLAZE-UI.md || fail 'Glaze UI contract does not preserve behavioral-test evidence requirements'
 grep -Fq 'The third finding is a functional defect' docs/GC17-DEVICE-ACCEPTANCE-FIXES.md || fail 'gc.17 functional regression record is incomplete'

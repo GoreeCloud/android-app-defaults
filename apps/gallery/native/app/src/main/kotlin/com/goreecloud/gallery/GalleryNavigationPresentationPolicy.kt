@@ -7,24 +7,19 @@ enum class GalleryNavigationIconPlacement {
 }
 
 object GalleryNavigationPresentationPolicy {
-    fun iconPlacement(mode: GalleryNavigationDisplayMode): GalleryNavigationIconPlacement =
-        when {
-            !mode.showIcon -> GalleryNavigationIconPlacement.NONE
-            mode.showLabel -> GalleryNavigationIconPlacement.ABOVE_LABEL
-            else -> GalleryNavigationIconPlacement.CENTERED
-        }
+    fun iconPlacement(
+        @Suppress("UNUSED_PARAMETER") mode: GalleryNavigationDisplayMode,
+    ): GalleryNavigationIconPlacement = GalleryNavigationIconPlacement.CENTERED
 
-    fun selectedHorizontalInsetDp(mode: GalleryNavigationDisplayMode): Int =
-        if (mode == GalleryNavigationDisplayMode.ICONS_ONLY) {
-            GalleryGlazeContract.NAVIGATION_ICON_ONLY_SELECTED_HORIZONTAL_INSET_DP
-        } else {
-            GalleryGlazeContract.NAVIGATION_LABELED_SELECTED_HORIZONTAL_INSET_DP
-        }
+    fun showsVisibleLabel(
+        @Suppress("UNUSED_PARAMETER") mode: GalleryNavigationDisplayMode,
+    ): Boolean = false
 
-    fun selectedVerticalInsetDp(mode: GalleryNavigationDisplayMode): Int =
-        if (mode == GalleryNavigationDisplayMode.ICONS_ONLY) {
-            GalleryGlazeContract.NAVIGATION_ICON_ONLY_SELECTED_VERTICAL_INSET_DP
-        } else {
-            GalleryGlazeContract.NAVIGATION_LABELED_SELECTED_VERTICAL_INSET_DP
-        }
+    fun selectedHorizontalInsetDp(
+        @Suppress("UNUSED_PARAMETER") mode: GalleryNavigationDisplayMode,
+    ): Int = GalleryGlazeContract.NAVIGATION_SELECTED_HORIZONTAL_INSET_DP
+
+    fun selectedVerticalInsetDp(
+        @Suppress("UNUSED_PARAMETER") mode: GalleryNavigationDisplayMode,
+    ): Int = GalleryGlazeContract.NAVIGATION_SELECTED_VERTICAL_INSET_DP
 }
