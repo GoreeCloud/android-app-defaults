@@ -6929,6 +6929,9 @@ private fun StableDrawerVerticalGrid(
     onOpenFolder: (LauncherFolder) -> Unit,
     onDismiss: () -> Unit,
     alphabetJumpRequest: Pair<Int, Int>? = null,
+    restoredPosition: LauncherDrawerPosition? = null,
+    positionContextKey: String,
+    onPositionChanged: (LauncherDrawerPosition) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val columnCount = columns.coerceAtLeast(1)
@@ -6939,7 +6942,20 @@ private fun StableDrawerVerticalGrid(
         // Keep ordinary profile inventories composed for the lifetime of this drawer surface.
         // This intentionally trades a small bounded composition cost for stable icon/label
         // ownership on OEM builds where recycled lazy cells intermittently disappear.
-        val scrollState = rememberScrollState()
+        val scrollState = rememberScrollState(
+            initial = restoredPosition?.itemScrollOffset ?: 0,
+        )
+        val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+        DisposableEffect(positionContextKey, scrollState) {
+            onDispose {
+                currentOnPositionChanged(
+                    LauncherDrawerPosition(
+                        contextKey = positionContextKey,
+                        itemScrollOffset = scrollState.value,
+                    ),
+                )
+            }
+        }
         val rowStridePx = with(LocalDensity.current) { (tileHeight + spacing).roundToPx() }
         LaunchedEffect(alphabetJumpRequest, columnCount, rowStridePx) {
             alphabetJumpRequest?.first?.let { itemIndex ->
@@ -6988,7 +7004,24 @@ private fun StableDrawerVerticalGrid(
             }
         }
     } else {
-        val listState = rememberLazyListState()
+        val listState = rememberLazyListState(
+            initialFirstVisibleItemIndex = restoredPosition?.itemIndex
+                ?.coerceIn(0, (rows.size - 1).coerceAtLeast(0))
+                ?: 0,
+            initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
+        )
+        val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+        DisposableEffect(positionContextKey, listState) {
+            onDispose {
+                currentOnPositionChanged(
+                    LauncherDrawerPosition(
+                        contextKey = positionContextKey,
+                        itemIndex = listState.firstVisibleItemIndex,
+                        itemScrollOffset = listState.firstVisibleItemScrollOffset,
+                    ),
+                )
+            }
+        }
         LaunchedEffect(alphabetJumpRequest, columnCount) {
             alphabetJumpRequest?.first?.let { itemIndex ->
                 listState.animateScrollToItem(itemIndex / columnCount)
@@ -7733,6 +7766,27 @@ private fun AppDrawerSurface(
                             )
                         }
                     } else {
+                        val positionContextKey = remember(
+                            page.kind,
+                            drawerLayoutMode,
+                            experiencePreferences.drawerNavigation,
+                            drawerSortOrder,
+                            discoveryFilter,
+                            selectedDrawerTab?.id,
+                            preferences.drawerColumns,
+                            experiencePreferences.drawerPageRows,
+                        ) {
+                            launcherDrawerPositionContextKey(
+                                profileKind = page.kind,
+                                layoutMode = drawerLayoutMode,
+                                navigation = experiencePreferences.drawerNavigation,
+                                sortOrder = drawerSortOrder,
+                                discoveryFilter = discoveryFilter,
+                                drawerTabId = selectedDrawerTab?.id,
+                                columns = preferences.drawerColumns,
+                                rowsPerPage = experiencePreferences.drawerPageRows,
+                            )
+                        }
                         DrawerAppsContent(
                             apps = pageApps,
                             folders = pageFolders,
@@ -7747,6 +7801,9 @@ private fun AppDrawerSurface(
                             drawerLayoutMode = drawerLayoutMode,
                             experiencePreferences = experiencePreferences,
                             sortOrder = drawerSortOrder,
+                            positionContextKey = positionContextKey,
+                            rememberedPosition = rememberedPosition,
+                            onPositionChanged = onDrawerPositionChanged,
                             smartFolders = if (
                                 drawerQuery.isBlank() &&
                                 discoveryFilter == LauncherDrawerDiscoveryFilter.ALL &&
@@ -8204,6 +8261,26 @@ private fun DrawerProfileTabs(
     }
 }
 
+internal fun launcherDrawerPositionContextKey(
+    profileKind: LauncherDrawerProfileKind,
+    layoutMode: LauncherDrawerLayoutMode,
+    navigation: LauncherDrawerNavigation,
+    sortOrder: LauncherDrawerSortOrder,
+    discoveryFilter: LauncherDrawerDiscoveryFilter,
+    drawerTabId: String?,
+    columns: Int,
+    rowsPerPage: Int,
+): String = listOf(
+    profileKind.name,
+    layoutMode.name,
+    navigation.name,
+    sortOrder.name,
+    discoveryFilter.name,
+    drawerTabId.orEmpty(),
+    columns.coerceIn(1, 12).toString(),
+    rowsPerPage.coerceIn(1, 12).toString(),
+).joinToString("|")
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DrawerAppsContent(
@@ -8221,6 +8298,9 @@ private fun DrawerAppsContent(
     experiencePreferences: LauncherExperiencePreferences,
     sortOrder: LauncherDrawerSortOrder,
     smartFolders: List<LauncherDrawerSmartFolder>,
+    positionContextKey: String,
+    rememberedPosition: LauncherDrawerPosition?,
+    onPositionChanged: (LauncherDrawerPosition) -> Unit,
     onLaunchApp: (LauncherActivityInfo) -> Unit,
     onManageApp: (LauncherActivityInfo, Rect?) -> Unit,
     onOpenFolder: (LauncherFolder) -> Unit,
@@ -8252,6 +8332,10 @@ private fun DrawerAppsContent(
             freshnessByAppKey = freshnessByAppKey,
         )
     }
+    val restoredPosition = rememberedPosition?.takeIf { position ->
+        query.isBlank() && position.contextKey == positionContextKey
+    }
+
     if (entries.isEmpty() && query.isNotBlank()) {
         Box(
             modifier = modifier.fillMaxWidth(),
@@ -8298,12 +8382,36 @@ private fun DrawerAppsContent(
             preferences.drawerColumns * experiencePreferences.drawerPageRows.coerceIn(4, 6)
         ).coerceAtLeast(1)
         val pageCount = ((entries.size + pageSize - 1) / pageSize).coerceAtLeast(1)
-        val pagerState = rememberPagerState(pageCount = { pageCount })
+        val initialPage = restoredPosition?.page?.coerceIn(0, pageCount - 1) ?: 0
+        val pagerState = rememberPagerState(
+            initialPage = initialPage,
+            pageCount = { pageCount },
+        )
         val pagerScope = rememberCoroutineScope()
+        val pageGridStates = remember(positionContextKey) {
+            mutableStateMapOf<Int, androidx.compose.foundation.lazy.grid.LazyGridState>()
+        }
+        val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
 
-        LaunchedEffect(query, pageCount) {
-            if (pagerState.currentPage >= pageCount || query.isNotBlank()) {
-                pagerState.scrollToPage(0)
+        LaunchedEffect(positionContextKey, query, pageCount, restoredPosition) {
+            val targetPage = restoredPosition?.page?.coerceIn(0, pageCount - 1) ?: 0
+            if (pagerState.currentPage != targetPage) {
+                pagerState.scrollToPage(targetPage)
+            }
+        }
+        DisposableEffect(positionContextKey, query, pagerState) {
+            onDispose {
+                if (query.isBlank()) {
+                    val currentGrid = pageGridStates[pagerState.currentPage]
+                    currentOnPositionChanged(
+                        LauncherDrawerPosition(
+                            contextKey = positionContextKey,
+                            page = pagerState.currentPage,
+                            itemIndex = currentGrid?.firstVisibleItemIndex ?: 0,
+                            itemScrollOffset = currentGrid?.firstVisibleItemScrollOffset ?: 0,
+                        ),
+                    )
+                }
             }
         }
 
@@ -8317,8 +8425,29 @@ private fun DrawerAppsContent(
                 pageSpacing = GlazeMetrics.space3,
             ) { page ->
                 val pageItems = entries.drop(page * pageSize).take(pageSize)
+                val gridState = rememberLazyGridState(
+                    initialFirstVisibleItemIndex = if (page == initialPage) {
+                        restoredPosition?.itemIndex
+                            ?.coerceIn(0, (pageItems.size - 1).coerceAtLeast(0))
+                            ?: 0
+                    } else {
+                        0
+                    },
+                    initialFirstVisibleItemScrollOffset = if (page == initialPage) {
+                        restoredPosition?.itemScrollOffset ?: 0
+                    } else {
+                        0
+                    },
+                )
+                SideEffect {
+                    pageGridStates[page] = gridState
+                }
+                DisposableEffect(page) {
+                    onDispose { pageGridStates.remove(page) }
+                }
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(preferences.drawerColumns),
+                    state = gridState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = GlazeMetrics.space2),
                     horizontalArrangement = Arrangement.spacedBy(
@@ -8423,12 +8552,34 @@ private fun DrawerAppsContent(
                     onOpenFolder = onOpenFolder,
                     onDismiss = onDismiss,
                     alphabetJumpRequest = alphabetJumpRequest,
+                    restoredPosition = restoredPosition,
+                    positionContextKey = positionContextKey,
+                    onPositionChanged = onPositionChanged,
                     modifier = Modifier.weight(1f),
                 )
             }
         }
         LauncherDrawerLayoutMode.COMPACT -> {
-            val gridState = rememberLazyGridState()
+            val gridState = rememberLazyGridState(
+                initialFirstVisibleItemIndex = restoredPosition?.itemIndex
+                    ?.coerceIn(0, (entries.size - 1).coerceAtLeast(0))
+                    ?: 0,
+                initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
+            )
+            val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+            DisposableEffect(positionContextKey, query, gridState) {
+                onDispose {
+                    if (query.isBlank()) {
+                        currentOnPositionChanged(
+                            LauncherDrawerPosition(
+                                contextKey = positionContextKey,
+                                itemIndex = gridState.firstVisibleItemIndex,
+                                itemScrollOffset = gridState.firstVisibleItemScrollOffset,
+                            ),
+                        )
+                    }
+                }
+            }
             val dismissConnection = rememberDrawerDismissNestedScrollConnection(
                 canScrollBackward = { gridState.canScrollBackward },
                 onDismiss = onDismiss,
@@ -8488,7 +8639,26 @@ private fun DrawerAppsContent(
             }
         }
         LauncherDrawerLayoutMode.LIST -> {
-            val listState = rememberLazyListState()
+            val listState = rememberLazyListState(
+                initialFirstVisibleItemIndex = restoredPosition?.itemIndex
+                    ?.coerceIn(0, (entries.size - 1).coerceAtLeast(0))
+                    ?: 0,
+                initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
+            )
+            val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+            DisposableEffect(positionContextKey, query, listState) {
+                onDispose {
+                    if (query.isBlank()) {
+                        currentOnPositionChanged(
+                            LauncherDrawerPosition(
+                                contextKey = positionContextKey,
+                                itemIndex = listState.firstVisibleItemIndex,
+                                itemScrollOffset = listState.firstVisibleItemScrollOffset,
+                            ),
+                        )
+                    }
+                }
+            }
             val dismissConnection = rememberDrawerDismissNestedScrollConnection(
                 canScrollBackward = { listState.canScrollBackward },
                 onDismiss = onDismiss,
@@ -8566,7 +8736,26 @@ private fun DrawerAppsContent(
                         ),
                     )
             }
-            val listState = rememberLazyListState()
+            val listState = rememberLazyListState(
+                initialFirstVisibleItemIndex = restoredPosition?.itemIndex
+                    ?.coerceIn(0, categoryGroups.size.coerceAtLeast(1) - 1)
+                    ?: 0,
+                initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
+            )
+            val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
+            DisposableEffect(positionContextKey, query, listState) {
+                onDispose {
+                    if (query.isBlank()) {
+                        currentOnPositionChanged(
+                            LauncherDrawerPosition(
+                                contextKey = positionContextKey,
+                                itemIndex = listState.firstVisibleItemIndex,
+                                itemScrollOffset = listState.firstVisibleItemScrollOffset,
+                            ),
+                        )
+                    }
+                }
+            }
             val dismissConnection = rememberDrawerDismissNestedScrollConnection(
                 canScrollBackward = { listState.canScrollBackward },
                 onDismiss = onDismiss,
