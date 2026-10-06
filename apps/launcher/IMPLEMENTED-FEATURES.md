@@ -1,3 +1,11 @@
+## October 6, 2026 — representative-device Dock, profile-badge, and Search-hub refinement candidate
+
+Owner representative-device feedback is now reflected as launcher-wide presentation and Search-provider rules rather than one-screen patches. The floating Home Dock is overlaid on full-bleed wallpaper so no full-width bottom strip, panel, tint, or scrim is allocated behind it; ordinary multi-icon Dock widths are expanded to add horizontal breathing room without reducing the interaction floor. User/Work profile identity moves to the top-left icon corner across Home, Dock, Apps, Search, and app-context surfaces; Drawer pin state vacates that slot and uses a separate bottom-left mark.
+
+Universal Search expands its Connected catalog beyond Google Drive, Dropbox, and Brave Search with individually configurable Google Search, Bing, DuckDuckGo, ChatGPT, Gemini, Perplexity, Claude, and Microsoft Copilot entries. Web providers remain explicit user handoffs; AI sources also remain explicit handoffs and do not receive typed queries automatically. When an official Android provider app is installed, Launcher reuses that app's official icon artwork; unavailable app-backed AI handoffs remain visible with explicit readiness state instead of disappearing.
+
+**Acceptance boundary:** Draft PR #277 Development candidate only. Fresh exact-head protected build/JVM/lint/runtime validation and representative-device wallpaper continuity, Dock density, profile-badge collision/accessibility, provider handoff, large-text, phone/tablet/foldable, and reduced-effects acceptance remain required.
+
 ## October 6, 2026 — explicit User/Work profile identity badges candidate
 
 Development source now gives both App Drawer profile identities an explicit Launcher-owned visual mark: **User** uses a person badge and **Work** uses a briefcase badge. The badge is intentionally separate from notification, pin, and App Lock indicators, so profile identity remains visible even when those states are also present and no unbadged state has to be interpreted as Personal/User.
