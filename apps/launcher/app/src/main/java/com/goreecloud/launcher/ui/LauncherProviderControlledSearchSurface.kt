@@ -3360,7 +3360,8 @@ private fun LauncherSearchSourceManager(
                     Text(
                         "Enter an API key for inline Universal Search answers. The key is encrypted " +
                             "with Android Keystore, stored only in Launcher private no-backup storage, " +
-                            "and is sent only to $displayName when this source is enabled.",
+                            "and is sent only to $displayName when this source is enabled and a settled " +
+                            "query is dispatched.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -3603,9 +3604,10 @@ private fun connectedSourceDetail(
     LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
     LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID,
     -> if (LauncherConnectedSearchCredentialStore.isConfigured(context, option.providerId)) {
-        "Inline answers are opt-in. While this source is enabled, Launcher sends the typed query " +
-            "to this provider using the API key stored in Android Keystore-backed, no-backup app " +
-            "storage. The key is never written to Launcher preferences, Room, logs, or diagnostics."
+        "Inline answers are opt-in. While this source is enabled, Launcher waits for at least " +
+            "three query characters and a brief typing pause before sending the settled query to " +
+            "this provider. The API key stays in Android Keystore-backed, no-backup app storage " +
+            "and is never written to Launcher preferences, Room, logs, or diagnostics."
     } else {
         "Add your own provider API key to enable inline answers. The key is stored only in " +
             "Android Keystore-backed, no-backup Launcher storage and can be removed here at any time."
