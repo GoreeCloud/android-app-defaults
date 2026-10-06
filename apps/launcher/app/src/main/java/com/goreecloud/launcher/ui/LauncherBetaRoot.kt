@@ -6883,10 +6883,10 @@ private fun LauncherDrawerSmartFolderSheet(
                                 color = Color.Transparent,
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    GlazePopupActionGlyph(
-                                        symbol = GlazePopupActionSymbol.EXCLUDE,
+                                    LauncherOutlineGlyph(
+                                        glyph = LauncherOutlineGlyph.EXCLUDE,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        iconSize = 18.dp,
+                                        modifier = Modifier.size(18.dp),
                                     )
                                 }
                             }
@@ -14100,7 +14100,6 @@ private enum class GlazePopupActionSymbol {
     INFO,
     LOCK,
     VISIBILITY,
-    EXCLUDE,
     UNINSTALL,
 }
 
@@ -14312,15 +14311,6 @@ private fun GlazePopupActionGlyph(
                     center = Offset(u * .50f, u * .50f),
                     style = Stroke(w),
                 )
-            }
-            GlazePopupActionSymbol.EXCLUDE -> {
-                drawCircle(
-                    color = color,
-                    radius = u * .34f,
-                    center = Offset(u * .50f, u * .50f),
-                    style = Stroke(w),
-                )
-                segment(.31f, .50f, .69f, .50f)
             }
             GlazePopupActionSymbol.UNINSTALL -> {
                 segment(.24f, .24f, .76f, .76f)
