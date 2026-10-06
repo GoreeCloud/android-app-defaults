@@ -12169,8 +12169,8 @@ private fun LauncherAppTile(
             LauncherAppProfileBadge(
                 app = app,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-4).dp),
+                    .align(Alignment.TopStart)
+                    .offset(x = (-4).dp, y = (-4).dp),
             )
             LauncherAppBadgeMark(
                 app,
@@ -14679,7 +14679,21 @@ private fun GlazeLauncherPopupAction(
                 destructive -> MaterialTheme.colorScheme.error
                 else -> MaterialTheme.colorScheme.onSurface
             }
-            GlazePopupActionGlyph(symbol, actionColor)
+            Box(
+                modifier = Modifier.size(28.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                GlazePopupActionGlyph(symbol, actionColor)
+                profileKind?.let { kind ->
+                    LauncherProfileBadge(
+                        kind = kind,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .offset(x = (-4).dp, y = (-4).dp),
+                        compact = true,
+                    )
+                }
+            }
             Text(
                 label,
                 modifier = Modifier.weight(1f),
@@ -14692,12 +14706,6 @@ private fun GlazeLauncherPopupAction(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            profileKind?.let { kind ->
-                LauncherProfileBadge(
-                    kind = kind,
-                    compact = true,
-                )
-            }
         }
     }
 }
