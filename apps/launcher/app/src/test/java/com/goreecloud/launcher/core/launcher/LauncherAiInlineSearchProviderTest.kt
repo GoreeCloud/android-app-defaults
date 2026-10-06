@@ -1,5 +1,6 @@
 package com.goreecloud.launcher.core.launcher
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -83,6 +84,27 @@ class LauncherAiInlineSearchProviderTest {
         )
         assertFalse(result.title.contains("secret"))
         assertFalse(result.subtitle.orEmpty().contains("secret"))
+    }
+
+    @Test
+    fun providerCancellationStillPropagates() = runBlocking {
+        val provider = LauncherAiInlineSearchProvider(
+            id = LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID,
+            displayName = "Google Gemini",
+            credentialProvider = { "test-key" },
+            transport = LauncherAiInlineSearchTransport { _, _ ->
+                throw CancellationException("cancelled")
+            },
+        )
+
+        var cancelled = false
+        try {
+            provider.searchAsync(LauncherSearchRequest("cancel me"))
+        } catch (_: CancellationException) {
+            cancelled = true
+        }
+
+        assertTrue(cancelled)
     }
 
     @Test
