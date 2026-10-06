@@ -13,6 +13,7 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -162,12 +163,27 @@ internal class LauncherAiInlineSearchProvider(
         } ?: return emptyList()
         val query = request.rawQuery.trim().take(MAX_QUERY_LENGTH)
         if (query.isBlank()) return emptyList()
-        val answer = transport.answer(key, query)
-            .replace(Regex("\\s+"), " ")
-            .trim()
-            .take(MAX_ANSWER_LENGTH)
-            .takeIf(String::isNotBlank)
-            ?: return emptyList()
+        val answer = try {
+            transport.answer(key, query)
+                .replace(Regex("\\s+"), " ")
+                .trim()
+                .take(MAX_ANSWER_LENGTH)
+                .takeIf(String::isNotBlank)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Throwable) {
+            return listOf(
+                LauncherSearchResult(
+                    providerId = id,
+                    resultId = "$id:error:" + query.hashCode().toUInt().toString(16),
+                    title = "$displayName couldn’t load an answer",
+                    subtitle = "Check your connection or API key · tap to review source",
+                    category = LauncherSearchCategory.CONNECTED_SOURCE,
+                    score = 55,
+                    action = LauncherManageSearchSourceAction(id),
+                ),
+            )
+        } ?: return emptyList()
 
         return listOf(
             LauncherSearchResult(
