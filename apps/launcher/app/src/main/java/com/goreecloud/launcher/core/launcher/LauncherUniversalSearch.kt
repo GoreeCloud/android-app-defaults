@@ -57,6 +57,14 @@ interface LauncherOptInRemoteInlineSearchProvider :
     val isInlineExecutionReady: Boolean
 }
 
+object LauncherRemoteInlineSearchDispatchPolicy {
+    const val MIN_QUERY_CHARACTERS: Int = 3
+    const val SETTLE_DELAY_MILLIS: Long = 450L
+
+    fun isEligible(rawQuery: String): Boolean =
+        rawQuery.trim().length >= MIN_QUERY_CHARACTERS
+}
+
 data class LauncherSearchRequest(
     val rawQuery: String,
 )
@@ -479,6 +487,11 @@ object LauncherUniversalSearch {
                     .getOrDefault(emptyList())
             },
         )
+
+    fun combineResults(
+        vararg resultGroups: List<LauncherSearchResult>,
+    ): List<LauncherSearchResult> =
+        normalizeResults(resultGroups.flatMap { it })
 
     /**
      * Executes providers concurrently with caller-owned cancellation/timeout policy.
