@@ -1,3 +1,11 @@
+## October 6, 2026 — Smart Folder override and Dock keyboard-navigation continuation
+
+Development source now adds reversible, exact-profile per-app exclusions for dynamic **Suggested**, **New**, and **Updated** Smart Folders. Exclusion state is local presentation data outside portable preference v1, fully excluded collections remain visible for recovery, and **Restore** clears only the selected Smart Folder kind. **Pinned** deliberately remains governed only by explicit Drawer pin/unpin state.
+
+The same Development continuation adds hardware **Page Up / Page Down** paging to the existing multi-page Dock pager without intercepting D-pad arrows, touch swipes, drag-handoff, or accessibility Previous/Next actions. A bounded navigation policy returns no target at non-looping edges and active drag suppresses keyboard page changes.
+
+Focused JVM/DataStore coverage verifies Smart Folder exclusion scoping/recovery, Pinned fail-closed behavior, persistence by exact profile-qualified app key, and Dock page-navigation boundaries. **Acceptance boundary:** candidate source only until fresh exact-head protected validation and guarded integration. Representative-device keyboard focus, TalkBack/Switch Access, large text, RTL, managed-profile behavior, form factors, performance/power, signing/update continuity, and release gates remain open.
+
 ## October 5, 2026 — legacy/adaptive icon optical-fill refinement candidate
 
 Development source extends the shared mask-ready icon pipeline to cover both adaptive and legacy artwork. Adaptive foregrounds receive bounded overscan before the selected Launcher mask is applied. Legacy drawables are rasterized to the bounded decode canvas, inspected by alpha bounds, and enlarged only when unusually padded; the normalization targets 90% visible fill below an 84% threshold and caps enlargement at 1.24×.
@@ -48,9 +56,9 @@ Apps now has a direct accessible layout quick-switch in its header. It cycles Gr
 
 ## October 5, 2026 — local Smart Folder candidate
 
-Development source now contains bounded, profile-scoped App Drawer Smart Folder presentation for **Pinned**, optional **Suggested**, **New**, and **Updated** collections. Membership is computed locally from explicit Drawer pins, existing Launcher-local suggestion signals, and the existing install/update freshness metadata. Empty dynamic collections are omitted, Suggested remains user-controllable and deterministic on first use, and the views do not alter manual folders, custom tabs, Home/Dock placement, package state, hidden state, or App Lock.
+Protected PR #249 integrated bounded, profile-scoped App Drawer Smart Folder presentation for **Pinned**, optional **Suggested**, **New**, and **Updated** collections. Membership is computed locally from explicit Drawer pins, existing Launcher-local suggestion signals, and existing install/update freshness metadata; Suggested remains user-controllable and deterministic on first use, and the views do not alter manual folders, custom tabs, Home/Dock placement, package state, hidden state, or App Lock.
 
-**Acceptance boundary:** candidate source only until exact-head protected validation and guarded integration. Representative-device profile correctness, TalkBack/Switch Access, keyboard/D-pad, large-text, RTL, form-factor, performance/power, and manual override/exclusion behavior remain open.
+The October 6 continuation above adds reversible manual exclusions for Suggested/New/Updated. Richer user-authored rule composition, portable recovery, and representative-device acceptance remain open.
 
 ## October 3, 2026 — inset, icon-mask, Search, and widget-gallery correction candidate
 
