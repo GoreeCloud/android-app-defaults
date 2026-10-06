@@ -884,7 +884,7 @@ class ActivatedHomeLifecycleRuntimeTest {
     }
 
     @Test
-    fun swipeUpOpensDrawerAndSwipeDownDismissesWithoutHeaderActions() = runBlocking {
+    fun swipeUpOpensDrawerWithFiveHeaderActionsAndSwipeDownDismisses() = runBlocking {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
         val roleManager = context.getSystemService(RoleManager::class.java)
@@ -1011,16 +1011,17 @@ class ActivatedHomeLifecycleRuntimeTest {
                         .fetchSemanticsNodes()
                         .isEmpty(),
                 )
-                check(
-                    composeRule.onAllNodesWithText("⚙", useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                        .isEmpty(),
-                )
-                check(
-                    composeRule.onAllNodesWithText("⌄", useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                        .isEmpty(),
-                )
+                listOf(
+                    "launcher-drawer-settings",
+                    "launcher-drawer-sort-order",
+                    "launcher-drawer-filter",
+                    "launcher-drawer-new-folder",
+                    "launcher-drawer-layout-mode",
+                ).forEach { tag ->
+                    composeRule
+                        .onNodeWithTag(tag, useUnmergedTree = true)
+                        .assertIsDisplayed()
+                }
 
                 // The Drawer intentionally leaves composition as soon as its downward
                 // dismissal threshold is crossed. Inject this gesture at the Android input layer
