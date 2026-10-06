@@ -170,6 +170,18 @@ For ordinary non-sensitive clips, local **smart content detection** can identify
 
 Clipboard payloads are not used for suggestions, autocorrect, prediction, learning, portable preference export, backup, synchronization, or telemetry. The current Keyboard-side controls are not the future privileged GoreeCloud Secure Paste Broker and cannot globally stop another Android app from using the platform clipboard APIs.
 
+## One-handed key rows
+
+In this Development candidate, **Settings → One-handed layout** offers **Off**, **Left**, and **Right**.
+
+- **Off** keeps the key rows full width.
+- **Left** brings the keys toward the left edge and leaves extra space on the right.
+- **Right** brings the keys toward the right edge and leaves extra space on the left.
+- The suggestion strip and utility toolbar stay full width so predictions, Clipboard, Emoji, and Settings remain in stable positions.
+- The same rendered key bounds are used for tapping, accessibility targets, long-press alternates, and local swipe geometry.
+
+The preference is device-local and is not included in the current narrow portable-preference export. Representative-device reachability, RTL/Arabic, accessibility, orientation, tablet/foldable, and release acceptance remain open.
+
 ## Appearance
 
 The governed consumer target is GLAZE UI V1.6 (`1.6.0`) at accepted source revision `a7180679ea851389e0f3004515f9a25f420e716d`. The current rendered key substrate still carries the inherited V1.2 Frosted Neutral optical/material implementation while the V1.6 presentation-context layer supplies current runtime accessibility and motion signals.
@@ -180,7 +192,7 @@ Complete V1.6 optical/component migration, Reduced Transparency/Motion acceptanc
 
 ## Current limitations
 
-The Weave-stage implementation does not yet claim production-grade gesture recognition, multilingual input, privileged system-wide Secure Paste enforcement, voice input, one-handed/split layouts, full tablet/foldable adaptation, complete accessibility acceptance, user dictionary synchronization, complete Unicode grapheme segmentation for every script, signed production packaging, Seal qualification, production acceptance, or Anchor acceptance.
+The Weave-stage implementation does not yet claim production-grade gesture recognition, complete multilingual input, privileged system-wide Secure Paste enforcement, voice input, split/floating layouts, complete tablet/foldable adaptation, representative-device acceptance of the Development one-handed key-row mode, complete accessibility acceptance, user dictionary synchronization, complete Unicode grapheme segmentation for every script, signed production packaging, Seal qualification, production acceptance, or Anchor acceptance.
 
 ## Privacy and security expectations
 
