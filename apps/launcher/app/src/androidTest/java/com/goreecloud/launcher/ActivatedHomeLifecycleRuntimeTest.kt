@@ -25,7 +25,6 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import androidx.compose.ui.test.swipeUp
@@ -934,10 +933,11 @@ class ActivatedHomeLifecycleRuntimeTest {
                 )
 
                 // ROOM authority can become visible before the launched Home finishes startup-owned
-                // reconciliation. Wait for the real Home surface plus both authoritative Room
-                // projections before performing this test-owned setup mutation; otherwise a healthy
-                // guarded write can legitimately lose a snapshot race and contaminate later tests.
-                waitForDisplayedTag("launcher-home-swipe-surface")
+                // reconciliation. Wait for the visible primary-page indicator plus both authoritative
+                // Room projections before performing this test-owned setup mutation. The outer
+                // gesture-container tag is not a readiness contract and can be absent from displayed
+                // semantics while the primary Home projection is still settling.
+                waitForSelectedHomePage(pageNumber = 1, timeoutMillis = 15_000)
                 composeRule.waitForIdle()
                 withTimeout(10_000) {
                     runtime.observeHomePages().first { state ->
@@ -1103,15 +1103,18 @@ class ActivatedHomeLifecycleRuntimeTest {
                 }
                 waitForDisplayedLabel(candidate.label.toString())
 
-                composeRule
+                val appBounds = composeRule
                     .onNodeWithText(candidate.label.toString(), useUnmergedTree = true)
-                    .performTouchInput {
-                        swipeDown(
-                            startY = top + 1f,
-                            endY = bottom + 320f,
-                            durationMillis = 400,
-                        )
-                    }
+                    .fetchSemanticsNode()
+                    .boundsInRoot
+                val swipeX = ((appBounds.left + appBounds.right) / 2f).toInt()
+                injectTouchSwipe(
+                    startX = swipeX,
+                    startY = (appBounds.top + 1f).toInt(),
+                    endX = swipeX,
+                    endY = (appBounds.bottom + 320f).toInt(),
+                    durationMillis = 400L,
+                )
 
                 // Swipe-down Search enters a compact, keyboard-focused app-discovery panel.
                 // Frequent/Recent remain local-only usage projections; New / Updated is derived
@@ -1383,30 +1386,30 @@ class ActivatedHomeLifecycleRuntimeTest {
                 repository.state.first { it.authority == WorkspaceAuthority.ROOM }
             }
 
-            val scenario = ActivityScenario.launch(MainActivity::class.java)
-            try {
-                val dao = LauncherDatabaseProvider.get(context).workspaceDao()
-                val preferences = LauncherPreferencesRepository(context).preferences.first()
-                val roomPlacement = WorkspaceRoomPlacementRepository(
-                    authorityRepository = repository,
-                    workspaceDaoProvider = { dao },
-                )
-                val baseline = roomPlacement.replace(
-                    favoriteKeys = listOf(firstKey, secondKey),
-                    dockKeys = emptyList(),
-                    homeGrid = WorkspaceGridPlacement.Grid(
-                        columns = preferences.homeColumns,
-                        rows = preferences.homeRows,
-                    ),
-                )
-                check(baseline is WorkspaceRoomWriteResult.Written)
-
-                val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+            val dao = LauncherDatabaseProvider.get(context).workspaceDao()
+            val preferences = LauncherPreferencesRepository(context).preferences.first()
+            val roomPlacement = WorkspaceRoomPlacementRepository(
+                authorityRepository = repository,
+                workspaceDaoProvider = { dao },
+            )
+            val baseline = roomPlacement.replace(
+                favoriteKeys = listOf(firstKey, secondKey),
+                dockKeys = emptyList(),
+                homeGrid = WorkspaceGridPlacement.Grid(
                     columns = preferences.homeColumns,
                     rows = preferences.homeRows,
-                )
-                check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+                ),
+            )
+            check(baseline is WorkspaceRoomWriteResult.Written)
 
+            val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+                columns = preferences.homeColumns,
+                rows = preferences.homeRows,
+            )
+            check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+
+            val scenario = ActivityScenario.launch(MainActivity::class.java)
+            try {
                 waitForDisplayedLabel(firstApp.label.toString())
                 waitForDisplayedLabel(secondApp.label.toString())
 
@@ -2361,7 +2364,10 @@ class ActivatedHomeLifecycleRuntimeTest {
                 source = InputDevice.SOURCE_TOUCHSCREEN
             }
             try {
-                check(uiAutomation.injectInputEvent(event, true)) {
+                // These gestures intentionally replace the surface receiving input. Queue the
+                // event asynchronously so instrumentation cannot block on a disappearing window;
+                // the bounded UI-state waits after each gesture own completion synchronization.
+                check(uiAutomation.injectInputEvent(event, false)) {
                     "Android input injection failed for action=$action at ($x, $y)."
                 }
             } finally {

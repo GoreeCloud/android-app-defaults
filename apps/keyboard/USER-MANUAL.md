@@ -25,12 +25,18 @@ The keyboard opens in its **letters** layer.
 - Tap **⇧** to shift the next alphabetic character.
 - Tap **⌫** to delete the preceding text unit supported by the current deletion model.
 - Tap the direct **,** and **.** keys for common punctuation.
-- Tap the **English (US)** spacebar to insert a space.
+- Tap the **English (US)** spacebar to insert a space. In eligible ordinary text fields, drag horizontally from Space to move the text cursor when **Spacebar cursor control** is enabled. Cursor dragging is disabled in sensitive/password editors, in the Emoji layer, and while Android touch exploration is active. Vertical or ambiguous drags fail closed rather than becoming cursor movement. The **Cursor speed** setting changes DPAD step spacing after cursor mode activates; Android touch slop remains the activation boundary.
 - Tap **↵** to send the Android Enter key action to the active editor.
 
 Backspace and Enter use first-party vector-style icons rather than generic text glyphs in the current Development candidate. Tap Backspace for one immediate deletion, or hold it to continue deleting at a controlled repeat rate until you lift your finger; dragging off the key cancels the repeat.
 
 The temporary shift state resets after a shifted alphabetic character is entered. In ordinary text fields, the current Development candidate can also automatically shift at sentence starts when **Automatic capitalization** is enabled.
+
+## Move the cursor from Space
+
+With **Spacebar cursor control** enabled, start on the rendered Space key and drag horizontally. GoreeCloud Keyboard emits bounded Android Left/Right cursor steps and does not read surrounding editor text to reconstruct position. A normal Space tap remains a normal Space. Vertical/equal-axis motion and multi-pointer gestures fail closed, and cursor dragging is disabled for the Emoji layer and touch-exploration presentation.
+
+The active Development continuation adds **Cursor speed** under Keyboard Settings: **Precise** (32 dp per step), **Standard** (24 dp), or **Fast** (16 dp). This changes only movement spacing after cursor mode activates; Android touch slop remains the activation boundary.
 
 ## Type numbers and symbols
 

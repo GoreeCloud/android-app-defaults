@@ -1,5 +1,12 @@
 # GoreeCloud Gallery Changelogs
 
+## October 6, 2026 — reconcile integrated selection and slideshow behavior
+
+- Corrected lifecycle records to match authoritative `main`: **Select all visible / Clear selection** is already implemented in the bounded multi-select More menu, with stale or foreign selection unable to expand authority.
+- Corrected lifecycle records to match authoritative `main`: session-local slideshow **Loop** is already implemented, wrapping only when at least two eligible photos exist and failing closed for a one-photo collection.
+- No runtime behavior, permission, storage mutation, network, account, or persistence authority changed in this reconciliation.
+
+
 ## October 6, 2026 — bounded viewer context and hardware-control candidate
 
 ### Added

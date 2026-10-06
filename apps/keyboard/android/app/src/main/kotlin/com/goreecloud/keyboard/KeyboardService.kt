@@ -99,11 +99,15 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
                 SpacebarCursorTouchListener(
                     keyboardView = view,
                     isEnabled = {
-                        settingsStore.load().spacebarCursorControlEnabled &&
-                            currentLayer != KeyboardLayer.EMOJI &&
-                            !touchExplorationEnabled()
+                        SpacebarCursorAvailabilityPolicy.isEnabled(
+                            settingEnabled = settingsStore.load().spacebarCursorControlEnabled,
+                            sensitiveInput = sensitiveInput,
+                            layer = currentLayer,
+                            touchExplorationEnabled = touchExplorationEnabled(),
+                        )
                     },
                     onCursorSteps = ::moveCursorFromSpacebar,
+                    stepDistancePxProvider = { settingsStore.load().cursorSpeed.stepDistanceDp * resources.displayMetrics.density },
                 ),
             )
         }
@@ -636,7 +640,17 @@ class KeyboardService : InputMethodService(), KeyboardView.Listener {
     }
 
     private fun moveCursorFromSpacebar(requestedSteps: Int) {
-        if (requestedSteps == 0) return
+        if (
+            requestedSteps == 0 ||
+            !SpacebarCursorAvailabilityPolicy.isEnabled(
+                settingEnabled = typingSettings.spacebarCursorControlEnabled,
+                sensitiveInput = sensitiveInput,
+                layer = currentLayer,
+                touchExplorationEnabled = touchExplorationEnabled(),
+            )
+        ) {
+            return
+        }
         val connection = currentInputConnection ?: return
         val steps = requestedSteps.coerceIn(
             -MAX_CURSOR_STEPS_PER_CALLBACK,

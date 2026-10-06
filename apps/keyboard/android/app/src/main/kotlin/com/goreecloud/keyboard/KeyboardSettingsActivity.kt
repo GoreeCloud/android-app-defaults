@@ -314,6 +314,20 @@ class KeyboardSettingsActivity : Activity() {
                 current.spacebarCursorControlEnabled,
                 settingsStore::setSpacebarCursorControlEnabled,
             ), matchWidth())
+            addView(TextView(this@KeyboardSettingsActivity).apply {
+                text = getString(R.string.keyboard_settings_cursor_speed)
+                textSize = 17f
+                setTextColor(palette.onSurfaceArgb)
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                setPadding(0, dp(14), 0, 0)
+            }, matchWidth())
+            addView(TextView(this@KeyboardSettingsActivity).apply {
+                text = getString(R.string.keyboard_settings_cursor_speed_summary)
+                textSize = 14f
+                setTextColor(palette.onSurfaceMutedArgb)
+                setPadding(0, dp(5), 0, dp(14))
+            }, matchWidth())
+            addView(buildCursorSpeedSegment(current.cursorSpeed), matchWidth())
             addDivider()
             addView(settingRow(
                 getString(R.string.keyboard_settings_number_row),
@@ -813,6 +827,49 @@ class KeyboardSettingsActivity : Activity() {
             },
             LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f),
         )
+    }
+
+    private fun buildCursorSpeedSegment(selected: KeyboardCursorSpeed): LinearLayout {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            background = roundedDrawable(palette.canvasArgb, palette.lineArgb, 16)
+            setPadding(dp(4), dp(4), dp(4), dp(4))
+        }
+        val buttons = linkedMapOf<KeyboardCursorSpeed, TextView>()
+        KeyboardCursorSpeed.values().forEach { option ->
+            val label = when (option) {
+                KeyboardCursorSpeed.PRECISE -> getString(R.string.keyboard_settings_cursor_speed_precise)
+                KeyboardCursorSpeed.STANDARD -> getString(R.string.keyboard_settings_cursor_speed_standard)
+                KeyboardCursorSpeed.FAST -> getString(R.string.keyboard_settings_cursor_speed_fast)
+            }
+            val item = TextView(this).apply {
+                text = label
+                gravity = Gravity.CENTER
+                textSize = 14f
+                minHeight = dp(44)
+                isClickable = true
+                isFocusable = true
+                contentDescription = "$label cursor speed"
+            }
+            buttons[option] = item
+            container.addView(item, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                if (option != KeyboardCursorSpeed.FAST) marginEnd = dp(4)
+            })
+        }
+        fun refresh(value: KeyboardCursorSpeed) {
+            buttons.forEach { (option, item) ->
+                val isSelected = option == value
+                item.setTextColor(if (isSelected) Color.WHITE else palette.onSurfaceArgb)
+                item.typeface = Typeface.create("sans-serif-medium", if (isSelected) Typeface.BOLD else Typeface.NORMAL)
+                item.background = if (isSelected) roundedDrawable(accentColor, null, 12) else roundedDrawable(Color.TRANSPARENT, null, 12)
+                item.isSelected = isSelected
+            }
+        }
+        buttons.forEach { (option, item) ->
+            item.setOnClickListener { settingsStore.setCursorSpeed(option); refresh(option) }
+        }
+        refresh(selected)
+        return container
     }
 
     private fun buildHeightSegment(selected: KeyboardKeyHeight): LinearLayout {

@@ -65,6 +65,37 @@ class SpacebarCursorRuntimeTest {
     }
 
     @Test
+    fun liveStepDistanceProviderChangesCursorSpeedBetweenGestures() {
+        val view = createRenderedView()
+        val cursorSteps = mutableListOf<Int>()
+        var stepDistance = 20f
+        view.listener = listener(onSpaceAction = {})
+        view.setOnTouchListener(
+            SpacebarCursorTouchListener(
+                keyboardView = view,
+                isEnabled = { true },
+                onCursorSteps = cursorSteps::add,
+                activationDistancePx = 10f,
+                stepDistancePx = 20f,
+                stepDistancePxProvider = { stepDistance },
+            ),
+        )
+        val bounds = spaceBounds(view)
+        val x = bounds.centerX()
+        val y = bounds.centerY()
+        dispatch(view, MotionEvent.ACTION_DOWN, x, y)
+        dispatch(view, MotionEvent.ACTION_MOVE, x + 35f, y)
+        dispatch(view, MotionEvent.ACTION_UP, x + 35f, y)
+        assertEquals(listOf(2), cursorSteps)
+        cursorSteps.clear()
+        stepDistance = 10f
+        dispatch(view, MotionEvent.ACTION_DOWN, x, y)
+        dispatch(view, MotionEvent.ACTION_MOVE, x + 35f, y)
+        dispatch(view, MotionEvent.ACTION_UP, x + 35f, y)
+        assertEquals(listOf(3), cursorSteps)
+    }
+
+    @Test
     fun verticalDominantSpacebarGestureCommitsNeitherSpaceNorCursorMove() {
         val view = createRenderedView()
         var spaces = 0
