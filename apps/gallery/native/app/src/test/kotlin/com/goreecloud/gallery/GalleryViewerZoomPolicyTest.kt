@@ -15,6 +15,14 @@ class GalleryViewerZoomPolicyTest {
     }
 
     @Test
+    fun `double tap toggles between baseline and accessible preset`() {
+        assertEquals(2f, GalleryViewerZoomPolicy.scaleAfterDoubleTap(1f))
+        assertEquals(1f, GalleryViewerZoomPolicy.scaleAfterDoubleTap(2f))
+        assertEquals(1f, GalleryViewerZoomPolicy.scaleAfterDoubleTap(4f))
+        assertEquals(2f, GalleryViewerZoomPolicy.scaleAfterDoubleTap(Float.NaN))
+    }
+
+    @Test
     fun `translation is zero at baseline scale`() {
         assertEquals(
             GalleryViewerTranslation(0f, 0f),
