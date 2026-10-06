@@ -7182,7 +7182,7 @@ private fun AppDrawerSurface(
         MaterialTheme.colorScheme.background
     }
     val drawerSecondaryColor = if (glass) {
-        Color.White.copy(alpha = 0.68f)
+        Color.White.copy(alpha = 0.84f)
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -9278,9 +9278,18 @@ private fun LauncherSettingsRootSurface(
                         category.summary.lowercase(Locale.getDefault()).contains(normalizedQuery) ||
                         category.keywords.lowercase(Locale.getDefault()).contains(normalizedQuery)
                 }
-                Column(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(GlazeMetrics.radiusExtraLarge),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.34f),
+                    ),
+                    tonalElevation = 0.dp,
+                    shadowElevation = 1.dp,
                 ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         visibleCategories.forEachIndexed { index, category ->
                             LauncherSettingsOverviewRow(
                                 category = category,
@@ -9292,7 +9301,7 @@ private fun LauncherSettingsRootSurface(
                             if (index != visibleCategories.lastIndex) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = GlazeMetrics.space3),
-                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.32f),
                                 )
                             }
                         }
@@ -9305,6 +9314,7 @@ private fun LauncherSettingsRootSurface(
                             )
                         }
                     }
+                }
             }
 
             SettingsSection(
