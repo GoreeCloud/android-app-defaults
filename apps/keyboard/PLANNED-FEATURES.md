@@ -1,5 +1,12 @@
 # GoreeCloud Keyboard — Planned Features
 
+## October 6, 2026 — bounded Arabic prefix-completion candidate
+
+The active Development candidate adds a small first-party Arabic lexicon that offers at most three deterministic completions for the locally tracked current Arabic prefix. It does not infer language, read editor look-behind for Arabic suggestion generation, apply typo correction, predict the next word, decode Arabic swipe gestures, persist typed Arabic, or feed Arabic text into the English learned-language/history model. Exact candidate selection is revalidated against the local prefix immediately before commit and fails closed on mismatch.
+
+Remaining Arabic work includes broader vocabulary and ranking quality, separately justified contextual prediction/correction if a privacy-safe design is accepted, RTL/BiDi host-editor acceptance, native-language review, representative physical-device ergonomics, accessibility, performance/power, signing/recovery, and release qualification.
+
+
 ## October 6, 2026 — adaptive constrained-height acceptance
 
 Protected PR #262 integrated adaptive row-gap compression to protected main `f33ecc92e3f01349a6946b20f44a911055522d1e` after exact-head Android CI including Keyboard Android 15 runtime passed. Remaining obligations are representative physical-device typing, Touch Exploration, TalkBack/Switch Access, OEM/editor-host constrained-height, landscape, large-text, one-handed Left/Right coexistence, tablet/foldable, performance/power, signing/recovery, and release acceptance.
@@ -8,11 +15,11 @@ Protected PR #262 integrated adaptive row-gap compression to protected main `f33
 
 Protected PR #187 integrated Arabic comma presentation and deterministic language-aware Arabic long-press variants as main `8a066a2f9fa4b6de6692640a7e2528dfa23b01d6`. Implementation is no longer planned work. Remaining obligations are broader Arabic dictionaries/prediction, RTL/BiDi editor acceptance, representative physical-device ergonomics, TalkBack/Switch Access and other accessibility acceptance, native-language validation, performance/power, signing/recovery, and release qualification.
 
-## October 2, 2026 — English/Arabic foundation integration and switching candidate
+## October 2, 2026 — English/Arabic foundation and explicit switching integrated
 
-Protected PR #185 integrated the bounded first-party English (US) / Arabic subtype foundation to authoritative monorepo main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Android's explicitly selected IME subtype remains the sole language authority. Arabic renders Arabic letter rows, Arabic-Indic digits, RTL metadata, an Arabic spacebar label, and no case-shift key; English-only correction, prediction, swipe-dictionary decoding, and learning capture fail closed while Arabic is active.
+Protected PR #185 integrated the bounded first-party English (US) / Arabic subtype foundation as main `7902e7bd58a510591e6c8f8778a3872df4c77642`. Protected PR #186 then integrated the explicit toolbar language action as main `1bd60b949696d7774058ed19b7a6ecf67126e293`. Android's explicitly selected/enabled IME subtypes remain the sole language authority: the toolbar shows **AR** while English is active and **EN** while Arabic is active and asks Android to switch to the next enabled GoreeCloud Keyboard subtype. The control clears transient correction state and announces when no alternate subtype is enabled; it does not infer language from typed text, application identity, or device locale.
 
-The current continuation exposes an explicit Keyboard toolbar language action that asks Android to switch to the next enabled subtype of this IME. The control displays **AR** while English is active and **EN** while Arabic is active, clears transient English correction state before switching, and announces when no alternate GoreeCloud Keyboard subtype is enabled. It does not infer language from typed text, application identity, or device locale and adds no network, Contacts, microphone, telemetry, or remote-model authority. Broader Arabic dictionaries/prediction, BiDi editor acceptance, physical-device ergonomics, accessibility, native-language validation, and multilingual switching acceptance remain open. This increment remains Development candidate work until protected exact-head validation and integration complete.
+Broader language dictionaries/prediction, BiDi editor acceptance, physical-device ergonomics, accessibility, native-language validation, and multilingual switching acceptance remain open.
 
 ## 2026-09-29 setup replay continuation
 
