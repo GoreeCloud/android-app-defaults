@@ -1899,7 +1899,7 @@ class GalleryActivity : Activity() {
             albumId != null &&
             !GalleryMediaAccessPolicy.isPartial(currentMediaAccessScope())
         ) {
-            GalleryAlbumRenamePolicy.sourceForAlbum(visibleAuthorizedItems(), albumId)
+            GalleryAlbumRenamePolicy.sourceForAlbum(authorizedItems, albumId)
                 ?.takeIf { it.contentUris.size <= AndroidMediaMutationRequests.MAX_MUTATION_ITEMS }
         } else {
             null
@@ -1960,7 +1960,7 @@ class GalleryActivity : Activity() {
         }
 
         val source = GalleryAlbumRenamePolicy.sourceForAlbum(
-            currentScope = visibleAuthorizedItems(),
+            currentScope = authorizedItems,
             albumId = albumId,
         )?.takeIf { it.contentUris.size <= AndroidMediaMutationRequests.MAX_MUTATION_ITEMS }
         if (source == null) {
@@ -2020,7 +2020,7 @@ class GalleryActivity : Activity() {
         }
 
         renameAction.setOnClickListener {
-            val currentScope = visibleAuthorizedItems()
+            val currentScope = authorizedItems
             val destination = try {
                 GalleryAlbumRenamePolicy.destinationForAlbum(
                     currentScope = currentScope,
