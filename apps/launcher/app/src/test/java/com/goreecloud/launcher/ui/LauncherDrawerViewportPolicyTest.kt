@@ -1,5 +1,10 @@
 package com.goreecloud.launcher.ui
 
+import com.goreecloud.launcher.core.launcher.LauncherDrawerDiscoveryFilter
+import com.goreecloud.launcher.core.launcher.LauncherDrawerLayoutMode
+import com.goreecloud.launcher.core.launcher.LauncherDrawerNavigation
+import com.goreecloud.launcher.core.launcher.LauncherDrawerProfileKind
+import com.goreecloud.launcher.core.launcher.LauncherDrawerSortOrder
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -11,6 +16,44 @@ class LauncherDrawerViewportPolicyTest {
         assertTrue(launcherDrawerUsesEagerGrid(76))
         assertTrue(launcherDrawerUsesEagerGrid(320))
         assertFalse(launcherDrawerUsesEagerGrid(321))
+    }
+
+    @Test
+    fun rememberedPositionContextChangesWhenDrawerPresentationChanges() {
+        val baseline = launcherDrawerPositionContextKey(
+            profileKind = LauncherDrawerProfileKind.USER,
+            layoutMode = LauncherDrawerLayoutMode.GRID,
+            navigation = LauncherDrawerNavigation.SCROLL,
+            sortOrder = LauncherDrawerSortOrder.ALPHABETICAL,
+            discoveryFilter = LauncherDrawerDiscoveryFilter.ALL,
+            drawerTabId = null,
+            columns = 5,
+            rowsPerPage = 5,
+        )
+        val workProfile = launcherDrawerPositionContextKey(
+            profileKind = LauncherDrawerProfileKind.WORK,
+            layoutMode = LauncherDrawerLayoutMode.GRID,
+            navigation = LauncherDrawerNavigation.SCROLL,
+            sortOrder = LauncherDrawerSortOrder.ALPHABETICAL,
+            discoveryFilter = LauncherDrawerDiscoveryFilter.ALL,
+            drawerTabId = null,
+            columns = 5,
+            rowsPerPage = 5,
+        )
+        val paged = launcherDrawerPositionContextKey(
+            profileKind = LauncherDrawerProfileKind.USER,
+            layoutMode = LauncherDrawerLayoutMode.GRID,
+            navigation = LauncherDrawerNavigation.PAGES,
+            sortOrder = LauncherDrawerSortOrder.ALPHABETICAL,
+            discoveryFilter = LauncherDrawerDiscoveryFilter.ALL,
+            drawerTabId = null,
+            columns = 5,
+            rowsPerPage = 5,
+        )
+
+        assertTrue(baseline != workProfile)
+        assertTrue(baseline != paged)
+        assertTrue(baseline.startsWith("USER|GRID|SCROLL|ALPHABETICAL|ALL|"))
     }
 
     @Test
