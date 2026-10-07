@@ -14,7 +14,6 @@ import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore
-import java.security.SecureRandom
 import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -293,9 +292,10 @@ internal class LauncherDirectApiSourceStore(private val context: Context) {
     }
 
     private fun writeEncrypted(plain: ByteArray) {
-        val iv = ByteArray(12).also { SecureRandom().nextBytes(it) }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, keystoreKey(), GCMParameterSpec(128, iv))
+        cipher.init(Cipher.ENCRYPT_MODE, keystoreKey())
+        val iv = cipher.iv
+        require(iv.size == 12) { "Android Keystore returned an unexpected GCM IV length" }
         val result = byteArrayOf(1) + iv + cipher.doFinal(plain)
         val output = file.startWrite()
         try {
