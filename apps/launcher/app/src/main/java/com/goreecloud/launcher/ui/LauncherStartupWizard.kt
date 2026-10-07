@@ -59,6 +59,7 @@ data class LauncherStartupConfiguration(
     val addNewAppsToHome: Boolean,
     val showHints: Boolean,
     val dockSize: Int = 5,
+    val enableDrawerTabs: Boolean = false,
 )
 
 @Composable
