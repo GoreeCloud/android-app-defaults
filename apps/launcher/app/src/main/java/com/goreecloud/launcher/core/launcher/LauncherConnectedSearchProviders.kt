@@ -253,26 +253,22 @@ object LauncherConnectedSearchProviderRegistry {
     const val GOOGLE_DRIVE_PROVIDER_ID = "connected.google-drive"
     const val DROPBOX_PROVIDER_ID = "connected.dropbox"
     const val GOOGLE_SEARCH_PROVIDER_ID = "connected.google-search"
-    const val BING_SEARCH_PROVIDER_ID = "connected.bing-search"
     const val DUCKDUCKGO_PROVIDER_ID = "connected.duckduckgo"
     const val BRAVE_SEARCH_PROVIDER_ID = "connected.brave-search"
     const val CHATGPT_PROVIDER_ID = "connected.chatgpt"
     const val GEMINI_PROVIDER_ID = "connected.gemini"
     const val PERPLEXITY_PROVIDER_ID = "connected.perplexity"
     const val CLAUDE_PROVIDER_ID = "connected.claude"
-    const val MICROSOFT_COPILOT_PROVIDER_ID = "connected.microsoft-copilot"
 
     private const val GOOGLE_DRIVE_PACKAGE = "com.google.android.apps.docs"
     private const val DROPBOX_PACKAGE = "com.dropbox.android"
     private const val GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox"
     private const val GOOGLE_GEMINI_PACKAGE = "com.google.android.apps.bard"
-    private const val BING_PACKAGE = "com.microsoft.bing"
     private const val DUCKDUCKGO_PACKAGE = "com.duckduckgo.mobile.android"
     private const val BRAVE_BROWSER_PACKAGE = "com.brave.browser"
     private const val CHATGPT_PACKAGE = "com.openai.chatgpt"
     private const val PERPLEXITY_PACKAGE = "ai.perplexity.app.android"
     private const val CLAUDE_PACKAGE = "com.anthropic.claude"
-    private const val MICROSOFT_COPILOT_PACKAGE = "com.microsoft.copilot"
 
     fun iconPackageNamesFor(providerId: String): List<String> =
         definitions().firstOrNull { it.providerId == providerId }?.iconPackageNames.orEmpty()
