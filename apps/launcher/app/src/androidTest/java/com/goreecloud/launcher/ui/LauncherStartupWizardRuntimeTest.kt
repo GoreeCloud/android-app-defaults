@@ -90,7 +90,7 @@ class LauncherStartupWizardRuntimeTest {
         assertEquals(5, result?.homeColumns)
         assertEquals(6, result?.homeRows)
         assertEquals(LauncherUniversalSearchHomeMode.SWIPE_DOWN_ONLY, result?.universalSearchHomeMode)
-        assertEquals(false, result?.enableDrawerTabs)
+        assertEquals(true, result?.enableDrawerTabs)
     }
     @Test
     fun wizardKeepsAdvancedDetailsBehindLearnMore() {
