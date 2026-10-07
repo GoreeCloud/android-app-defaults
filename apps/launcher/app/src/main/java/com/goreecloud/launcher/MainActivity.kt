@@ -1562,11 +1562,11 @@ class MainActivity : ComponentActivity() {
                             onSetHomeSearchPlacement = launcherPreferencesRepository::setHomeSearchPlacement,
                             onSetHomeSearchStyle = launcherPreferencesRepository::setHomeSearchStyle,
                             onSetHomeSpacing = launcherPreferencesRepository::setHomeSpacing,
-                            onSetDockStyle = launcherPreferencesRepository::setDockStyle,
-                            onSetDockPageSize = launcherPreferencesRepository::setDockPageSize,
-                            onSetDockLoopPages = launcherPreferencesRepository::setDockLoopPages,
-                            onSetShowDockLabels = launcherPreferencesRepository::setShowDockLabels,
-                            onSetShowDockSearch = launcherPreferencesRepository::setShowDockSearch,
+                            onSetDockStyle = { launcherPreferencesRepository.setDockStyle(it) },
+                            onSetDockPageSize = { launcherPreferencesRepository.setDockPageSize(it) },
+                            onSetDockLoopPages = { launcherPreferencesRepository.setDockLoopPages(it) },
+                            onSetShowDockLabels = { launcherPreferencesRepository.setShowDockLabels(it) },
+                            onSetShowDockSearch = { launcherPreferencesRepository.setShowDockSearch(it) },
                             onSetWallpaperShade = launcherPreferencesRepository::setWallpaperShade,
                             onSetGestureSensitivity = { sensitivity ->
                                 launcherPreferencesRepository.setGestureSensitivity(sensitivity)
