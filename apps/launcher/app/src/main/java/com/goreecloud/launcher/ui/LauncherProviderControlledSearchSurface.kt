@@ -326,14 +326,13 @@ internal fun LauncherProviderControlledSearchSurface(
     var complete by remember(providers, query, searchProviderPreferences) {
         mutableStateOf(false)
     }
-    val automaticProviderIds = remember(providers) {
-        providers.mapTo(linkedSetOf()) { provider -> provider.id }
-    }
-    val explicitHandoffs = remember(query, controls, automaticProviderIds) {
+    val explicitHandoffs = remember(query, controls) {
+        // Inline-capable connected sources keep their external handoff as an optional user action.
+        // Inline execution remains the automatic path only after source opt-in and authorization.
         LauncherSearchPresentationPolicy.explicitHandoffProviders(
             rawQuery = query,
             providerControls = controls,
-        ).filterNot { provider -> provider.providerId in automaticProviderIds }
+        )
     }
 
     LaunchedEffect(providers, query, searchProviderPreferences) {
@@ -356,8 +355,8 @@ internal fun LauncherProviderControlledSearchSurface(
         complete = true
     }
 
-    // Search remains a light floating overlay above the Launcher wallpaper. Current connected
-    // providers stay tap-only; future reviewed remote-inline providers require explicit opt-in.
+    // Search remains a light floating overlay above the Launcher wallpaper. Reviewed inline
+    // providers execute only after opt-in/authorization; external handoff remains an optional action.
     Column(
         modifier = Modifier.fillMaxSize()
             .safeDrawingPadding()
