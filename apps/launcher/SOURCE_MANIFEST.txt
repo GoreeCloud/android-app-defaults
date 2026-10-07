@@ -178,6 +178,7 @@ app/src/main/res/xml/data_extraction_rules.xml
 app/src/test/java/com/goreecloud/launcher/LauncherHomeIntentPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherAppVisibilityPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherBuiltInWallpapersTest.kt
+app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherDirectApiSourcesTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherDockDragPagePolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherDockPagePolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherDrawerDiscoveryPolicyTest.kt
@@ -210,7 +211,6 @@ app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderCo
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderPreferenceContractTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderPreferencesRepositoryTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderUserControlPolicyTest.kt
-app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherDirectApiSourcesTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherStarterHomeDefaultsPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequestPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUniversalSearchTest.kt
