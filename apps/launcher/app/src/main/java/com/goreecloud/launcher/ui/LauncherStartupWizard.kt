@@ -72,6 +72,7 @@ fun LauncherStartupWizard(
     initialUniversalSearchHomeMode: LauncherUniversalSearchHomeMode,
     initialAddNewAppsToHome: Boolean,
     initialShowHints: Boolean,
+    initialEnableDrawerTabs: Boolean = false,
     initialDockSize: Int = 5,
     initialStep: Int = 0,
     onStepChange: (Int) -> Unit = {},
@@ -91,6 +92,7 @@ fun LauncherStartupWizard(
     }
     var addNewAppsToHome by rememberSaveable { mutableStateOf(initialAddNewAppsToHome) }
     var showHints by rememberSaveable { mutableStateOf(initialShowHints) }
+    var enableDrawerTabs by rememberSaveable { mutableStateOf(initialEnableDrawerTabs) }
     var dockSize by rememberSaveable { mutableIntStateOf(initialDockSize.coerceIn(4, 6)) }
     var showDetails by rememberSaveable { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -285,6 +287,13 @@ fun LauncherStartupWizard(
                                 checked = addNewAppsToHome,
                                 onCheckedChange = { addNewAppsToHome = it },
                             )
+                            WizardSectionTitle("App Drawer (optional)")
+                            WizardSwitchRow(
+                                title = "Enable App Drawer Tabs",
+                                summary = "Off by default. Add custom tabs beside the Apps heading.",
+                                checked = enableDrawerTabs,
+                                onCheckedChange = { enableDrawerTabs = it },
+                            )
                         }
 
                         else -> {
@@ -427,6 +436,7 @@ fun LauncherStartupWizard(
                                             addNewAppsToHome = addNewAppsToHome,
                                             showHints = showHints,
                                             dockSize = dockSize,
+                                            enableDrawerTabs = enableDrawerTabs,
                                         ),
                                     )
                                 }
