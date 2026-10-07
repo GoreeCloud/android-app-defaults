@@ -140,7 +140,6 @@ app/src/main/java/com/goreecloud/launcher/ui/LauncherHomePageTransition.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherLazyListItems.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherLocalAppSearch.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherProviderControlledSearchSurface.kt
-app/src/main/java/com/goreecloud/launcher/ui/LauncherUserApiSourcesUi.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherProfileBadge.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherRoot.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherSearchSuggestionTabIcon.kt
@@ -150,6 +149,7 @@ app/src/main/java/com/goreecloud/launcher/ui/LauncherSettingsSurface.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherStartupWizard.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherSurfaceTransitionPolicy.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherTransitionDiagnostics.kt
+app/src/main/java/com/goreecloud/launcher/ui/LauncherUserApiSourcesUi.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherWallpaperPickerSheet.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherWeatherIcon.kt
 app/src/main/java/com/goreecloud/launcher/ui/LayoutLockHoldControl.kt
