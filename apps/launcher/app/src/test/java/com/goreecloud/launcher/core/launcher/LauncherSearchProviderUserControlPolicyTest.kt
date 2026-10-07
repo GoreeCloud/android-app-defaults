@@ -6,6 +6,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LauncherSearchProviderUserControlPolicyTest {
+    @Test fun workOnlyConnectedAppIsVisible() {
+        data class App(val pkg: String, val user: String)
+        val result = launcherConnectedAppVisibility(
+            listOf(App("com.dropbox.android", "work")), "com.dropbox.android",
+            "personal", { it.pkg }, { it.user },
+        )
+        assertEquals(LauncherConnectedAppVisibility.WORK, result)
+    }
+
     @Test
     fun localRetentionFreeFirstPartyProviderExecutesAutomaticallyByDefault() {
         val registration = registration(
