@@ -74,6 +74,8 @@ class LauncherStartupWizardRuntimeTest {
             .assertIsSelected()
         composeRule.onNodeWithText("None")
             .assertIsNotSelected()
+        composeRule.onNodeWithTag("launcher-wizard-drawer-tabs")
+            .performScrollTo().assertIsOff().performClick().assertIsOn()
         composeRule.onNodeWithText("Continue").performScrollTo().performClick()
 
         composeRule.onNodeWithText("Search and gestures")
