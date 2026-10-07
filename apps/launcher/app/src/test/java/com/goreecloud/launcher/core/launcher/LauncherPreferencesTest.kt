@@ -85,6 +85,14 @@ class LauncherPreferencesTest {
                 tabs.single().memberKeys,
             )
 
+            repository.setDrawerTabsEnabled(true).join()
+            assertEquals(true, repository.experiencePreferences.first().enableDrawerTabs)
+            repository.setDrawerTabsEnabled(false).join()
+            assertFalse(repository.experiencePreferences.first().enableDrawerTabs)
+            assertEquals(tabs, repository.drawerTabs.first())
+            repository.setDrawerTabsEnabled(true).join()
+            assertEquals(tabs, repository.drawerTabs.first())
+
             repository.renameDrawerTab(tab.id, "Development").join()
             assertEquals(
                 "Development",
