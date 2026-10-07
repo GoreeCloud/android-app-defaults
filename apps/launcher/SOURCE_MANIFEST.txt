@@ -27,6 +27,7 @@ app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherConnected
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherNotificationBadgePrivacyRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherPortableRestorePersistenceRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequestRuntimeTest.kt
+app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherUserApiSourcesRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceAuthoritativePlacementObserverRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceAuthoritativePlacementRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/workspace/db/WorkspaceCutoverReadinessRuntimeTest.kt
