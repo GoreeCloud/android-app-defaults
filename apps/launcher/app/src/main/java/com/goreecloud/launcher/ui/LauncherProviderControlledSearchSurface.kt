@@ -2688,6 +2688,15 @@ private fun LauncherSearchSourceManager(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val dropboxVisibility = remember(apps) {
+        launcherConnectedAppVisibility(
+            apps = apps,
+            targetPackage = LauncherConnectedSearchProviderRegistry.DROPBOX_PACKAGE,
+            primaryUser = android.os.Process.myUserHandle(),
+            packageOf = { app -> app.componentName.packageName },
+            userOf = { app -> app.user },
+        )
+    }
     val ready = persisted != null
     val issues by LauncherLocalSearchDiagnostics.issues.collectAsState()
     var reorderMode by rememberSaveable { mutableStateOf(false) }
