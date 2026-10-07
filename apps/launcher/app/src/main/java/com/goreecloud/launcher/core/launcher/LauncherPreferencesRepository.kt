@@ -626,7 +626,8 @@ class LauncherPreferencesRepository(
                 drawerPageRows = (values[Keys.drawerPageRows] ?: 5).coerceIn(4, 6),
                 showDrawerAppCount = values[Keys.showDrawerAppCount] ?: false,
                 showDrawerSuggestions = values[Keys.showDrawerSuggestions] ?: false,
-                enableDrawerTabs = values[Keys.enableDrawerTabs] ?: false,
+                enableDrawerTabs = values[Keys.enableDrawerTabs]
+                    ?: LauncherDrawerTabsCodec.decode(values[Keys.drawerTabs]).isNotEmpty(),
                 homeGlanceAlignment = LauncherHomeGlanceAlignment.fromStorage(values[Keys.homeGlanceAlignment]),
                 homeSearchPlacement = LauncherHomeSearchPlacement.fromStorage(values[Keys.homeSearchPlacement]),
                 homeSearchStyle = LauncherHomeSearchStyle.fromStorage(values[Keys.homeSearchStyle]),
