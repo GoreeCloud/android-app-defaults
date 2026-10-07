@@ -1,16 +1,21 @@
 package com.goreecloud.launcher.ui
 
+import android.content.pm.LauncherActivityInfo
+
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -30,12 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherUserApiKind
 import com.goreecloud.launcher.core.launcher.LauncherUserApiSourceInput
 import com.goreecloud.launcher.core.launcher.LauncherUserApiSourcePolicy
@@ -54,6 +62,7 @@ import kotlinx.coroutines.launch
 internal fun LauncherUserApiSourcesManager(
     repository: LauncherUserApiSourceRepository,
     sources: List<LauncherUserApiSourceSummary>,
+    apps: List<LauncherActivityInfo>,
 ) {
     val scope = rememberCoroutineScope()
     var editor by remember { mutableStateOf<LauncherUserApiSourceSummary?>(null) }
@@ -98,9 +107,12 @@ internal fun LauncherUserApiSourcesManager(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    LauncherUserApiSourceIcon(source = source, apps = apps)
                     Column(Modifier.weight(1f)) {
                         Text(
                             source.title,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -192,6 +204,56 @@ internal fun LauncherUserApiSourcesManager(
                 }
             },
         )
+    }
+}
+
+
+/** Prefer the official installed provider app artwork; otherwise show a neutral API mark. */
+@Composable
+private fun LauncherUserApiSourceIcon(
+    source: LauncherUserApiSourceSummary,
+    apps: List<LauncherActivityInfo>,
+) {
+    val packages = remember(source.kind) {
+        val handoffProviderId = when (source.kind) {
+            LauncherUserApiKind.OPENAI ->
+                LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID
+            LauncherUserApiKind.ANTHROPIC ->
+                LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID
+            LauncherUserApiKind.GEMINI ->
+                LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID
+            LauncherUserApiKind.PERPLEXITY ->
+                LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID
+            LauncherUserApiKind.CUSTOM_OPENAI_COMPATIBLE -> ""
+        }
+        LauncherConnectedSearchProviderRegistry.iconPackageNamesFor(handoffProviderId)
+    }
+    val matched = remember(apps, packages) {
+        apps.firstOrNull { app -> app.componentName.packageName in packages }
+    }
+    val bitmap = matched?.let { rememberLauncherAppIcon(it) }
+    Surface(
+        modifier = Modifier.size(40.dp),
+        shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.62f),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(28.dp).launcherIconMask(),
+                )
+            } else {
+                Text(
+                    "API",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
     }
 }
 
