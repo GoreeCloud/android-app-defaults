@@ -12,11 +12,13 @@ import java.net.URI
 import java.net.URL
 import java.nio.ByteBuffer
 import java.security.KeyStore
+import kotlin.coroutines.coroutineContext
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
@@ -167,6 +169,10 @@ private data class LauncherUserApiStoredSource(
     val apiKey: String,
     val enabled: Boolean,
 ) {
+    // Never allow Kotlin's data-class default toString() to print the stored credential.
+    override fun toString(): String =
+        "LauncherUserApiStoredSource(" + id + ", credential=<redacted>)"
+
     fun summary(): LauncherUserApiSourceSummary = LauncherUserApiSourceSummary(
         id = id, title = title, kind = kind, model = model,
         endpoint = endpoint, enabled = enabled, configured = apiKey.isNotBlank(),
@@ -361,7 +367,11 @@ class LauncherUserApiSourceRepository(context: Context) {
         }
     }
 
-    private fun postQuestion(source: LauncherUserApiStoredSource, endpoint: String, query: String): String {
+    private suspend fun postQuestion(
+        source: LauncherUserApiStoredSource,
+        endpoint: String,
+        query: String,
+    ): String {
         val message = JSONObject().put("role", "user").put("content", query)
         val request = when (source.kind) {
             LauncherUserApiKind.ANTHROPIC -> JSONObject()
@@ -393,6 +403,9 @@ class LauncherUserApiSourceRepository(context: Context) {
                 else -> setRequestProperty("Authorization", "Bearer " + source.apiKey)
             }
         }
+        val cancellationHandle = coroutineContext.job.invokeOnCompletion {
+            connection.disconnect()
+        }
         try {
             connection.outputStream.use { output ->
                 output.write(request.toString().toByteArray(Charsets.UTF_8))
@@ -422,6 +435,7 @@ class LauncherUserApiSourceRepository(context: Context) {
             require(answer.isNotBlank()) { "Provider returned no answer text" }
             return answer.take(LauncherUserApiSourcePolicy.MAX_ANSWER_CHARS)
         } finally {
+            cancellationHandle.dispose()
             connection.disconnect()
         }
     }
