@@ -51,6 +51,7 @@ internal fun LauncherDirectApiSourcesSettings(
     onSave: (LauncherDirectApiSource) -> String?,
     onRemove: (String) -> String?,
     onResetAll: () -> String?,
+    storageUnavailable: Boolean,
 ) {
     var editing by remember { mutableStateOf<LauncherDirectApiSource?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
@@ -153,7 +154,7 @@ internal fun LauncherDirectApiSourcesSettings(
                     },
                 ) { Text("Add search API") }
             }
-            if (sources.isNotEmpty()) {
+            if (sources.isNotEmpty() || storageUnavailable) {
                 TextButton(
                     onClick = { confirmResetAll = true },
                     modifier = Modifier.heightIn(min = 48.dp),
@@ -444,6 +445,7 @@ internal fun LauncherDirectApiAnswerPanel(
                     )
                     TextButton(
                         modifier = Modifier.heightIn(min = 48.dp),
+                        enabled = !loading,
                         onClick = {
                             job?.cancel()
                             requestVersion += 1
