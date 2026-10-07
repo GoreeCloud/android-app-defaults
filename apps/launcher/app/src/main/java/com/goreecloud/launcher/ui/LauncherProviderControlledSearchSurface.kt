@@ -2713,6 +2713,7 @@ private fun LauncherSearchSourceManager(
                 onSave = onSaveDirectApi,
                 onRemove = onRemoveDirectApi,
                 onResetAll = onResetAllDirectApi,
+                storageUnavailable = directApiStorageError != null,
             )
             directApiStorageError?.let { message ->
                 Text(
