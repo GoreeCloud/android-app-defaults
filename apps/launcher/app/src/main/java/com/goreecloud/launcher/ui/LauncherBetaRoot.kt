@@ -9957,6 +9957,17 @@ private fun LauncherSettingsRootSurface(
                 visible = selectedSettingsCategory == LauncherSettingsCategory.DRAWER,
             ) {
                 SettingsReadOnlyRow("Profiles", "User Apps · Work Apps when available")
+                SettingSwitch(
+                    "Enable App Drawer Tabs",
+                    experiencePreferences.enableDrawerTabs,
+                    onSetDrawerTabsEnabled,
+                )
+                Text(
+                    "Off by default. When enabled, custom tabs appear beside Apps. " +
+                        "Turning tabs off keeps their names and app memberships.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Text(
                     "Layout",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
