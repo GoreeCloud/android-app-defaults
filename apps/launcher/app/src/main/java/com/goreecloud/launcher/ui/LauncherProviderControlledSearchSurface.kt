@@ -842,16 +842,23 @@ private suspend fun loadLauncherAppFreshness(
     apps: List<LauncherActivityInfo>,
 ): Map<String, Long> = withContext(Dispatchers.IO) {
     val packageTimes = mutableMapOf<String, Long?>()
+    val primaryUser = android.os.Process.myUserHandle()
     buildMap {
         apps.forEach { app ->
             val packageName = app.componentName.packageName
-            if (!packageTimes.containsKey(packageName)) {
-                packageTimes[packageName] =
-                    launcherPackageFreshnessMillis(packageManager, packageName)
+            val firstInstall = app.firstInstallTime.takeIf { it > 0L }
+            val timestamp = if (app.user == primaryUser) {
+                if (!packageTimes.containsKey(packageName)) {
+                    packageTimes[packageName] =
+                        launcherPackageFreshnessMillis(packageManager, packageName)
+                }
+                listOfNotNull(firstInstall, packageTimes[packageName]).maxOrNull()
+            } else {
+                // PackageManager resolves the calling user, not the Work-profile package.
+                // LauncherActivityInfo belongs to the actual Android UserHandle.
+                firstInstall
             }
-            packageTimes[packageName]?.let { timestamp ->
-                put(app.workspaceKey(), timestamp)
-            }
+            timestamp?.let { put(app.workspaceKey(), it) }
         }
     }
 }
