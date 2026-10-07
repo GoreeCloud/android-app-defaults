@@ -12,10 +12,10 @@ Owner feedback: Universal Search must answer through the user's chosen Claude, O
 - **Claude API** — user API key and model; Anthropic Messages.
 - **Gemini API** — user API key and model; Google Gemini generateContent.
 - **Perplexity API** — user API key and model; Perplexity Sonar Chat Completions.
-- **Custom chat API** — user-named HTTPS OpenAI Chat Completions-compatible endpoint, model, authorization header, optional credential.
+- **Custom chat API** — user-named HTTPS OpenAI Chat Completions-compatible endpoint, model, authorization header, optional credential (including no-key private HTTPS servers).
 - **Custom search API** — user-named HTTPS GET JSON endpoint, query parameter, auth header, optional credential, and JSON response path. Lists of string or {title, snippet, url} objects can appear as bounded text answers.
 
-Each connection is independently enabled/disabled, edited, and (for custom entries) deleted. Official provider destinations are pinned to their fixed HTTPS origins; user-defined destinations are explicit and visibly configured, never inferred from search text. API credentials are entered through a concealed field, cannot be read back into the settings form, and are never displayed in results, diagnostics, or documentation.
+Each connection is independently enabled/disabled, edited, and (for custom entries) deleted. A separately confirmed **Delete all API connections** action erases the local ciphertext and its dedicated Keystore key to recover from unreadable key material; externally issued keys must be revoked separately. Official provider destinations are pinned to their fixed HTTPS origins; user-defined destinations are explicit and visibly configured, never inferred from search text. API credentials are entered through a concealed field, cannot be read back into the settings form, and are never displayed in results, diagnostics, or documentation.
 
 **Universal Search → type a question → Ask** sends only the current question to exactly the selected enabled API and renders the returned answer inside Launcher. A new question, navigation away, Cancel, or disposal stops the in-progress interaction and does not retain an answer history. No query-as-you-type API dispatch or multi-provider fan-out occurs. Legacy provider app handoffs and local results remain separately governed.
 

@@ -45,7 +45,11 @@ internal data class LauncherDirectApiSource(
     val authHeader: String = "Authorization",
     val searchParameter: String = "q",
     val responsePath: String = "answer",
-)
+) {
+    override fun toString(): String =
+        "LauncherDirectApiSource(id=$id, kind=$kind, title=$title, " +
+            "endpoint=[redacted], model=$model, secret=[redacted], enabled=$enabled)"
+}
 
 /** No values in this catalog are credentials. Official service endpoints are not user-editable. */
 internal object LauncherDirectApiCatalog {
@@ -185,6 +189,13 @@ internal class LauncherDirectApiSourceStore(private val context: Context) {
     fun remove(id: String) = synchronized(lock) {
         val sources = list().filterNot { it.id == id }
         writeEncrypted(serialize(sources))
+    }
+
+    /** Explicit destructive recovery when a device reset invalidates the Keystore key. */
+    fun resetAll() = synchronized(lock) {
+        file.delete()
+        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        if (store.containsAlias(KEY_ALIAS)) store.deleteEntry(KEY_ALIAS)
     }
 
     private fun serialize(sources: List<LauncherDirectApiSource>): ByteArray {
