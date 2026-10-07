@@ -24,6 +24,7 @@ app/src/androidTest/java/com/goreecloud/launcher/ActivatedHomeLifecycleRuntimeTe
 app/src/androidTest/java/com/goreecloud/launcher/HiddenAppsUiRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherAppIconRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherConnectedSearchPrivacyRuntimeTest.kt
+app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherDirectApiSourceStoreRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherNotificationBadgePrivacyRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherPortableRestorePersistenceRuntimeTest.kt
 app/src/androidTest/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequestRuntimeTest.kt
