@@ -261,7 +261,7 @@ object LauncherConnectedSearchProviderRegistry {
     const val CLAUDE_PROVIDER_ID = "connected.claude"
 
     private const val GOOGLE_DRIVE_PACKAGE = "com.google.android.apps.docs"
-    private const val DROPBOX_PACKAGE = "com.dropbox.android"
+    const val DROPBOX_PACKAGE = "com.dropbox.android"
     private const val GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox"
     private const val GOOGLE_GEMINI_PACKAGE = "com.google.android.apps.bard"
     private const val DUCKDUCKGO_PACKAGE = "com.duckduckgo.mobile.android"
@@ -391,11 +391,6 @@ object LauncherConnectedSearchProviderRegistry {
             listOf(GOOGLE_APP_PACKAGE), LauncherConnectedSearchKind.WEB,
         ) { _, query -> webSearchIntent("www.google.com", "search", query) },
         LauncherConnectedSearchDefinition(
-            BING_SEARCH_PROVIDER_ID, "Bing",
-            LauncherSearchAuthorizationRequirement.NONE, false,
-            listOf(BING_PACKAGE), LauncherConnectedSearchKind.WEB,
-        ) { _, query -> webSearchIntent("www.bing.com", "search", query) },
-        LauncherConnectedSearchDefinition(
             DUCKDUCKGO_PROVIDER_ID, "DuckDuckGo",
             LauncherSearchAuthorizationRequirement.NONE, false,
             listOf(DUCKDUCKGO_PACKAGE), LauncherConnectedSearchKind.WEB,
@@ -427,11 +422,6 @@ object LauncherConnectedSearchProviderRegistry {
             LauncherSearchAuthorizationRequirement.NONE, true,
             listOf(CLAUDE_PACKAGE), LauncherConnectedSearchKind.AI,
         ) { context, query -> shareTextIntent(context, listOf(CLAUDE_PACKAGE), query) },
-        LauncherConnectedSearchDefinition(
-            MICROSOFT_COPILOT_PROVIDER_ID, "Microsoft Copilot",
-            LauncherSearchAuthorizationRequirement.NONE, true,
-            listOf(MICROSOFT_COPILOT_PACKAGE), LauncherConnectedSearchKind.AI,
-        ) { context, query -> shareTextIntent(context, listOf(MICROSOFT_COPILOT_PACKAGE), query) },
     )
 
     private fun resolves(context: Context, intent: Intent): Boolean =
