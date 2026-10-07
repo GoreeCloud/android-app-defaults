@@ -1,3 +1,5 @@
+import java.time.Duration
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -92,7 +94,7 @@ room3 {
 // Keep JVM unit-test hangs observable and bounded. A healthy Launcher unit suite completes in
 // seconds; this generous task timeout fails closed instead of consuming the entire CI job budget.
 tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
-    timeout.set(java.time.Duration.ofMinutes(10))
+    timeout.set(Duration.ofMinutes(10))
     testLogging {
         events("started", "passed", "skipped", "failed")
         showStandardStreams = false
