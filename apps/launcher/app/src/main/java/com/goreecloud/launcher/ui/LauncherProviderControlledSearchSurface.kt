@@ -787,7 +787,7 @@ internal fun LauncherProviderControlledSearchSurface(
                     if (explicitHandoffs.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Text(
-                            "Search online",
+                            "Connected sources",
                             modifier = Modifier.padding(
                                 start = GlazeMetrics.space2,
                                 top = GlazeMetrics.space1,
@@ -2966,7 +2966,7 @@ private fun LauncherSearchSourceManager(
                                             fileSearchRoots.isEmpty() ->
                                             "Choose folder"
                                         driveSource && !driveConnectionAvailable ->
-                                            "Signed build required"
+                                            "OAuth signing not registered"
                                         dropboxSource -> when (dropboxVisibility) {
                                             LauncherConnectedAppVisibility.USER -> "Installed · User profile"
                                             LauncherConnectedAppVisibility.WORK -> "Installed · Work profile"
@@ -2975,7 +2975,7 @@ private fun LauncherSearchSourceManager(
                                                 "Not visible to Launcher"
                                         }
                                         !connectedHandoffAvailable ->
-                                            "App or handoff unavailable"
+                                            "No supported handoff app"
                                         else -> null
                                     }
                                     val rowSecondaryText =
@@ -3378,9 +3378,9 @@ private fun compactSourceSummary(
         "App handoff · Optional"
     else -> when {
         LauncherConnectedSearchProviderRegistry.isAiProvider(option.providerId) ->
-            "AI · Explicit handoff"
+            "AI · Opens external app"
         LauncherConnectedSearchProviderRegistry.isWebSearchProvider(option.providerId) ->
-            "Web · Explicit handoff"
+            "Web · Opens browser"
         else -> when (option.invocationMode) {
         LauncherSearchProviderInvocationMode.AUTOMATIC_LOCAL -> "Local · Automatic"
         LauncherSearchProviderInvocationMode.OPT_IN_LOCAL -> "Local · Permission"
@@ -3409,8 +3409,9 @@ private fun connectedSourceDetail(
                 "Folder-scoped local document search remains under Files."
         }
     option.providerId == LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID ->
-        "Dropbox inline results require a reviewed OAuth adapter. Until that authorization path " +
-            "exists, Launcher keeps this source behind an explicit handoff."
+        "Dropbox installed in an accessible Android profile can be opened there. The app " +
+            "may require you to search again inside Dropbox. Inline file results require " +
+            "a separately reviewed Dropbox OAuth connection; no query is sent to Dropbox by this source."
     LauncherConnectedSearchProviderRegistry.isAiProvider(option.providerId) ->
         option.displayName + " receives the query only after you explicitly choose this source. " +
             "Launcher does not send typed queries to this AI service in the background. The " +
