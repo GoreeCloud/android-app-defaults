@@ -2,6 +2,7 @@ package com.goreecloud.launcher.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -213,7 +214,10 @@ private fun LauncherUserApiSourceEditor(
         onDismissRequest = onDismiss,
         title = { Text(if (source.configured) "Manage API source" else "Connect API source") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 Text(
                     if (custom) {
                         "Custom APIs currently support the OpenAI-compatible chat-completions " +
@@ -282,7 +286,7 @@ private fun LauncherUserApiSourceEditor(
                         model = model.trim(),
                         endpoint = endpoint.trim(),
                         newApiKey = apiKey,
-                        enabled = true,
+                        enabled = source.enabled || !source.configured,
                     )
                     error = LauncherUserApiSourcePolicy.validate(source.id, input)
                         ?: if (!source.configured && apiKey.isBlank()) {
@@ -330,7 +334,8 @@ internal fun LauncherUserApiAskPanel(
     query: String,
 ) {
     val available = sources.filter { it.configured && it.enabled }
-    var requested by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var requested by remember { mutableStateOf<Triple<String, String, Long>?>(null) }
+    var requestNumber by remember { mutableStateOf(0L) }
     var answer by remember { mutableStateOf<Pair<String, String>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -388,7 +393,8 @@ internal fun LauncherUserApiAskPanel(
                 available.forEach { source ->
                     TextButton(
                         onClick = {
-                            requested = source.id to query
+                            requestNumber += 1L
+                            requested = Triple(source.id, query, requestNumber)
                             answer = null
                             error = null
                         },
@@ -415,8 +421,15 @@ internal fun LauncherUserApiAskPanel(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
-                SelectionContainer {
-                    Text(body, style = MaterialTheme.typography.bodyMedium)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 260.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    SelectionContainer {
+                        Text(body, style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
             }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
