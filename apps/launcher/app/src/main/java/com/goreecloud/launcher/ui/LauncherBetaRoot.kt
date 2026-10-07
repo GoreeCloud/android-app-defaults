@@ -7120,7 +7120,9 @@ private fun AppDrawerSurface(
     var showCreateDrawerTabDialog by rememberSaveable { mutableStateOf(false) }
     var editingDrawerTabId by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedSmartFolderKindName by rememberSaveable { mutableStateOf<String?>(null) }
-    val selectedDrawerTab = drawerTabs.firstOrNull { it.id == selectedDrawerTabId }
+    val selectedDrawerTab = if (experiencePreferences.enableDrawerTabs) {
+        drawerTabs.firstOrNull { it.id == selectedDrawerTabId }
+    } else null
     LaunchedEffect(drawerTabs.map { it.id }) {
         if (selectedDrawerTabId != null && drawerTabs.none { it.id == selectedDrawerTabId }) {
             selectedDrawerTabId = null
@@ -7425,7 +7427,12 @@ private fun AppDrawerSurface(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
                 ) {
-                    Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.widthIn(max = 168.dp)) {
                         Text(
                             if (selectedPage.kind == LauncherDrawerProfileKind.USER) {
                                 "Apps"
@@ -7448,6 +7455,24 @@ private fun AppDrawerSurface(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
+                        }
+
+                        if (experiencePreferences.enableDrawerTabs) {
+                            DrawerCustomTabsRow(
+                                tabs = drawerTabs,
+                                selectedTabId = selectedDrawerTabId,
+                                onSelectTab = { tabId ->
+                                    selectedDrawerTabId = tabId
+                                    discoveryFilterName = LauncherDrawerDiscoveryFilter.ALL.name
+                                },
+                                onCreateTab = {
+                                    if (drawerTabs.size < 8) showCreateDrawerTabDialog = true
+                                },
+                                onEditTab = { tabId -> editingDrawerTabId = tabId },
+                                secondaryColor = drawerSecondaryColor,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
                     }
                     Row(
                         modifier = Modifier
@@ -7611,20 +7636,6 @@ private fun AppDrawerSurface(
                         secondaryColor = drawerSecondaryColor,
                     )
                 }
-                Spacer(Modifier.height(GlazeMetrics.space2))
-                DrawerCustomTabsRow(
-                    tabs = drawerTabs,
-                    selectedTabId = selectedDrawerTabId,
-                    onSelectTab = { tabId ->
-                        selectedDrawerTabId = tabId
-                        discoveryFilterName = LauncherDrawerDiscoveryFilter.ALL.name
-                    },
-                    onCreateTab = {
-                        if (drawerTabs.size < 8) showCreateDrawerTabDialog = true
-                    },
-                    onEditTab = { tabId -> editingDrawerTabId = tabId },
-                    secondaryColor = drawerSecondaryColor,
-                )
                 Spacer(Modifier.height(GlazeMetrics.space1))
                 LaunchedEffect(
                     experiencePreferences.showDrawerSuggestions,
@@ -7960,11 +7971,11 @@ private fun DrawerCustomTabsRow(
     onCreateTab: () -> Unit,
     onEditTab: (String) -> Unit,
     secondaryColor: Color,
+    modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .horizontalScroll(scrollState)
             .testTag("launcher-drawer-custom-tabs"),
         horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
