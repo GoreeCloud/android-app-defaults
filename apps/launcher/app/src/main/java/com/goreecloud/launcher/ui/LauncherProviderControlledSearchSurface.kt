@@ -2905,7 +2905,11 @@ private fun LauncherSearchSourceManager(
                                             debugBuild = BuildConfig.DEBUG,
                                             alreadyConnected = driveConnected,
                                         )
+                                    val dropboxSource = option.providerId ==
+                                        LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID
                                     val connectedHandoffAvailable =
+                                        (dropboxSource &&
+                                            dropboxVisibility != LauncherConnectedAppVisibility.NOT_VISIBLE) ||
                                         !option.providerId.startsWith("connected.") ||
                                             LauncherConnectedSearchProviderRegistry
                                                 .isExplicitHandoffAvailable(
