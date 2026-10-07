@@ -2954,13 +2954,15 @@ private fun LauncherSearchSourceManager(
                                             "Choose folder"
                                         driveSource && !driveConnectionAvailable ->
                                             "Signed build required"
-                                        !connectedHandoffAvailable &&
-                                            option.providerId ==
-                                                LauncherConnectedSearchProviderRegistry
-                                                    .DROPBOX_PROVIDER_ID ->
-                                            "Dropbox app required"
+                                        dropboxSource -> when (dropboxVisibility) {
+                                            LauncherConnectedAppVisibility.USER -> "Installed · User profile"
+                                            LauncherConnectedAppVisibility.WORK -> "Installed · Work profile"
+                                            LauncherConnectedAppVisibility.BOTH -> "Installed · User & Work"
+                                            LauncherConnectedAppVisibility.NOT_VISIBLE ->
+                                                "Not visible to Launcher"
+                                        }
                                         !connectedHandoffAvailable ->
-                                            "Provider unavailable"
+                                            "App or handoff unavailable"
                                         else -> null
                                     }
                                     val rowSecondaryText =
