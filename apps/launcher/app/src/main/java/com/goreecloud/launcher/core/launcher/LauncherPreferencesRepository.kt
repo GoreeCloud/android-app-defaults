@@ -346,6 +346,7 @@ data class LauncherExperiencePreferences(
     val drawerPageRows: Int = 5,
     val showDrawerAppCount: Boolean = false,
     val showDrawerSuggestions: Boolean = false,
+    val enableDrawerTabs: Boolean = false,
     val homeGlanceAlignment: LauncherHomeGlanceAlignment = LauncherHomeGlanceAlignment.LEFT,
     val homeSearchPlacement: LauncherHomeSearchPlacement = LauncherHomeSearchPlacement.BOTTOM,
     val homeSearchStyle: LauncherHomeSearchStyle = LauncherHomeSearchStyle.GLASS,
