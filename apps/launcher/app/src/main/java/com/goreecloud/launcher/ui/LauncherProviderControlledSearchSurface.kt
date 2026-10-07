@@ -114,6 +114,8 @@ import com.goreecloud.launcher.core.launcher.LauncherSearchSuggestionPresentatio
 import com.goreecloud.launcher.core.launcher.LauncherSearchProviderUserControlPolicy
 import com.goreecloud.launcher.core.launcher.LauncherSearchResult
 import com.goreecloud.launcher.core.launcher.LauncherUniversalSearch
+import com.goreecloud.launcher.core.launcher.LauncherUserApiSourceRepository
+import com.goreecloud.launcher.core.launcher.LauncherUserApiSourceSummary
 import com.goreecloud.launcher.core.launcher.launcherVisibleAppLabel
 import com.goreecloud.launcher.core.workspace.workspaceKey
 import com.goreecloud.launcher.ui.theme.GlazeMetrics
@@ -149,6 +151,15 @@ internal fun LauncherProviderControlledSearchSurface(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
+    val userApiRepository = remember(context.applicationContext) {
+        LauncherUserApiSourceRepository(context.applicationContext)
+    }
+    val userApiSources by userApiRepository.sources.collectAsState()
+    LaunchedEffect(userApiRepository) {
+        // Invalidated/deleted Android Keystore entries fail closed: never silently re-enable
+        // a remote provider after an unreadable encrypted local vault.
+        runCatching { userApiRepository.refresh() }
+    }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val presentationContext = LocalGlazeV16PresentationContext.current
@@ -359,6 +370,8 @@ internal fun LauncherProviderControlledSearchSurface(
             }
             LauncherSearchSourceManager(
                 apps = apps,
+                userApiRepository = userApiRepository,
+                userApiSources = userApiSources,
                 suggestionPresentation = suggestionPresentation,
                 onSelectSuggestionPresentation = searchAppearancePreferences::setPresentation,
                 persisted = searchProviderPreferences,
@@ -528,6 +541,12 @@ internal fun LauncherProviderControlledSearchSurface(
                             }
                         }
                     }
+
+                    LauncherUserApiAskPanel(
+                        repository = userApiRepository,
+                        sources = userApiSources,
+                        query = query,
+                    )
 
                     if (results.isEmpty() && explicitHandoffs.isEmpty()) {
                         Column(
@@ -2607,6 +2626,8 @@ private fun LauncherSourceToolbarAction(
 @Composable
 private fun LauncherSearchSourceManager(
     apps: List<LauncherActivityInfo>,
+    userApiRepository: LauncherUserApiSourceRepository,
+    userApiSources: List<LauncherUserApiSourceSummary>,
     suggestionPresentation: LauncherSearchSuggestionPresentation,
     onSelectSuggestionPresentation: (LauncherSearchSuggestionPresentation) -> Unit,
     persisted: LauncherSearchProviderPreferenceDecodeResult?,
@@ -2640,6 +2661,12 @@ private fun LauncherSearchSourceManager(
             .testTag("launcher-search-source-manager"),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        item(key = "connected-user-apis") {
+            LauncherUserApiSourcesManager(
+                repository = userApiRepository,
+                sources = userApiSources,
+            )
+        }
         item(key = "suggestion-presentation") {
             LauncherSearchSuggestionPresentationControl(
                 selected = suggestionPresentation,
