@@ -1,6 +1,7 @@
 package com.goreecloud.launcher
 
 import android.app.role.RoleManager
+import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
@@ -55,6 +56,10 @@ import com.goreecloud.launcher.core.workspace.db.WorkspaceRoomPlacementRepositor
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRoomWriteResult
 import com.goreecloud.launcher.core.workspace.db.WorkspaceWidgetMutationResult
 import com.goreecloud.launcher.core.workspace.workspaceKey
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -2408,10 +2413,11 @@ class ActivatedHomeLifecycleRuntimeTest {
         // remove-role-holder transition is still settling back to Quickstep. Reassert the
         // desired holder idempotently before each HOME-dependent case, then let the caller's
         // pre-test ownership snapshot decide whether teardown removes it.
-        // Dispatch the shell mutation without blocking on command-pipe EOF. RoleManager state
-        // below remains the authoritative completion signal and is separately time-bounded.
+        // Bound both the shell-side mutation and the host-side pipe drain. This lets the
+        // RoleManager command complete normally while preventing one stalled shell pipe from
+        // hanging the entire Android instrumentation suite.
         runShellCommand(
-            "cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
+            "toybox timeout 8 cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
             while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
@@ -2425,7 +2431,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         packageName: String,
     ) {
         runShellCommand(
-            "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
+            "toybox timeout 8 cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
             while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
@@ -2435,13 +2441,37 @@ class ActivatedHomeLifecycleRuntimeTest {
     }
 
     private fun runShellCommand(command: String) {
-        // None of these test commands consume stdout. Redirect output and close the read descriptor
-        // immediately so a stuck Android shell service cannot deadlock the instrumentation thread.
-        // Callers wait on the resulting Android/Compose state with explicit timeouts.
-        InstrumentationRegistry.getInstrumentation()
-            .uiAutomation
-            .executeShellCommand("$command >/dev/null 2>&1")
-            .close()
+        val descriptor: ParcelFileDescriptor =
+            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
+        val completion = FutureTask<ByteArray> {
+            ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { input ->
+                input.readBytes()
+            }
+        }
+        Thread(completion, "launcher-role-shell").apply {
+            isDaemon = true
+            start()
+        }
+        try {
+            completion.get(12, TimeUnit.SECONDS)
+        } catch (timeout: TimeoutException) {
+            runCatching { descriptor.close() }
+            completion.cancel(true)
+            throw AssertionError("Timed out waiting for Android shell command completion", timeout)
+        } catch (execution: ExecutionException) {
+            throw AssertionError(
+                "Android shell command failed while draining output",
+                execution.cause ?: execution,
+            )
+        } catch (interrupted: InterruptedException) {
+            runCatching { descriptor.close() }
+            completion.cancel(true)
+            Thread.currentThread().interrupt()
+            throw AssertionError(
+                "Interrupted while waiting for Android shell command completion",
+                interrupted,
+            )
+        }
     }
 
 
