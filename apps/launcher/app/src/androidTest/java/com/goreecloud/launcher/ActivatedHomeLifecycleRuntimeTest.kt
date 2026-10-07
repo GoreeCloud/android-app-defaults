@@ -56,7 +56,10 @@ import com.goreecloud.launcher.core.workspace.db.WorkspaceRoomPlacementRepositor
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRoomWriteResult
 import com.goreecloud.launcher.core.workspace.db.WorkspaceWidgetMutationResult
 import com.goreecloud.launcher.core.workspace.workspaceKey
-import java.io.FileInputStream
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -2440,10 +2443,35 @@ class ActivatedHomeLifecycleRuntimeTest {
     private fun runShellCommand(command: String) {
         val descriptor: ParcelFileDescriptor =
             InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
-        FileInputStream(descriptor.fileDescriptor).use { input ->
-            input.readBytes()
+        val completion = FutureTask<ByteArray> {
+            ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { input ->
+                input.readBytes()
+            }
         }
-        descriptor.close()
+        Thread(completion, "launcher-role-shell").apply {
+            isDaemon = true
+            start()
+        }
+        try {
+            completion.get(12, TimeUnit.SECONDS)
+        } catch (timeout: TimeoutException) {
+            runCatching { descriptor.close() }
+            completion.cancel(true)
+            throw AssertionError("Timed out waiting for Android shell command completion", timeout)
+        } catch (execution: ExecutionException) {
+            throw AssertionError(
+                "Android shell command failed while draining output",
+                execution.cause ?: execution,
+            )
+        } catch (interrupted: InterruptedException) {
+            runCatching { descriptor.close() }
+            completion.cancel(true)
+            Thread.currentThread().interrupt()
+            throw AssertionError(
+                "Interrupted while waiting for Android shell command completion",
+                interrupted,
+            )
+        }
     }
 
 
