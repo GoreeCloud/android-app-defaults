@@ -1,6 +1,7 @@
 package com.goreecloud.launcher
 
 import android.app.role.RoleManager
+import android.content.Intent
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.view.InputDevice
@@ -2464,29 +2465,47 @@ class ActivatedHomeLifecycleRuntimeTest {
         shouldBeHeld: Boolean,
     ) {
         val operation = if (shouldBeHeld) "add-role-holder" else "remove-role-holder"
-        // UiAutomation shell execution is asynchronous. Keep the descriptor alive so closing the
-        // read side cannot cancel the command, but never drain stdout: Android 16 can leave that
-        // pipe open while RoleManager finishes a holder transition. RoleManager is the bounded,
-        // observable authority for completion.
-        val descriptor = InstrumentationRegistry.getInstrumentation()
-            .uiAutomation
-            .executeShellCommand(
-                "toybox timeout 8 cmd role $operation ${RoleManager.ROLE_HOME} $packageName",
-            )
-        try {
-            withTimeout(10_000) {
-                while (roleManager.isRoleHeld(RoleManager.ROLE_HOME) != shouldBeHeld) {
-                    delay(100)
+        // Keep the role child completely off UiAutomation's stdout/stderr pipe. Android 16 can
+        // leave the cmd-role pipe open after the service transition, and polling RoleManager while
+        // that command still owns the role-service transaction can block the instrumentation
+        // thread. Wait for the bounded shell wrapper to exit first, then require both the role
+        // service and the actual HOME intent resolver to agree continuously before proceeding.
+        runShellCommand(
+            "sh -c 'toybox timeout 8 cmd role $operation ${RoleManager.ROLE_HOME} $packageName " +
+                ">/dev/null 2>&1'",
+        )
+
+        withTimeout(10_000) {
+            var stableSinceMillis: Long? = null
+            while (true) {
+                val roleMatches =
+                    roleManager.isRoleHeld(RoleManager.ROLE_HOME) == shouldBeHeld
+                val resolverMatches =
+                    homeResolvesToPackage(packageName) == shouldBeHeld
+                val now = SystemClock.uptimeMillis()
+
+                if (roleMatches && resolverMatches) {
+                    val stableSince = stableSinceMillis ?: now.also {
+                        stableSinceMillis = it
+                    }
+                    if (now - stableSince >= 500L) {
+                        break
+                    }
+                } else {
+                    stableSinceMillis = null
                 }
+                delay(100)
             }
-            if (!shouldBeHeld) {
-                // Avoid immediate remove/add contention between adjacent test cases while keeping
-                // the settle interval deterministic and far below the suite watchdog.
-                delay(500)
-            }
-        } finally {
-            descriptor.close()
         }
+    }
+
+    private fun homeResolvesToPackage(packageName: String): Boolean {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        return context.packageManager
+            .resolveActivity(homeIntent, 0)
+            ?.activityInfo
+            ?.packageName == packageName
     }
 
     private fun runShellCommand(command: String) {
