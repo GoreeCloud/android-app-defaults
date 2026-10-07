@@ -65,6 +65,7 @@ class LauncherPreferencesTest {
         val repository = LauncherPreferencesRepository(dataStore)
 
         try {
+            assertFalse(repository.experiencePreferences.first().enableDrawerTabs)
             repository.createDrawerTab("  Work tools  ").join()
             var tabs = repository.drawerTabs.first { it.size == 1 }
             val tab = tabs.single()
