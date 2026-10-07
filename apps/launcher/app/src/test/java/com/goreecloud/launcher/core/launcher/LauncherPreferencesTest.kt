@@ -219,6 +219,7 @@ class LauncherPreferencesTest {
                 universalSearchHomeMode = LauncherUniversalSearchHomeMode.PERMANENT,
                 addNewAppsToHome = true,
                 showHints = false,
+                enableDrawerTabs = true,
             )
 
             val preferences = repository.preferences.first()
@@ -237,6 +238,7 @@ class LauncherPreferencesTest {
             assertEquals(true, experience.homeHintsDismissed)
             assertEquals(0, experience.startupWizardStep)
             assertEquals(true, experience.startupWizardCompleted)
+            assertEquals(true, experience.enableDrawerTabs)
         } finally {
             dataStoreScope.cancel()
         }
