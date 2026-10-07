@@ -7,6 +7,8 @@ import android.util.AtomicFile
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.HttpURLConnection
+import java.net.Inet6Address
+import java.net.InetAddress
 import java.net.URI
 import java.net.URL
 import java.net.URLEncoder
@@ -105,17 +107,62 @@ internal object LauncherDirectApiCatalog {
     fun nextCustomId(): String = "custom." + UUID.randomUUID().toString()
 }
 
+/**
+ * A custom API cannot be a loopback/LAN endpoint, an IP literal, an arbitrary port, or an
+ * endpoint that embeds a secret in the URL. Caller-selected public HTTPS is required.
+ * Official service destinations remain pinned by LauncherDirectApiCatalog.resolveSaved.
+ */
 internal fun launcherDirectApiValidHttpsEndpoint(raw: String): Boolean = runCatching {
     val uri = URI(raw)
+    val host = uri.host?.lowercase() ?: return@runCatching false
+    val labels = host.split('.')
     uri.scheme.equals("https", ignoreCase = true) &&
-        !uri.host.isNullOrBlank() &&
         uri.rawUserInfo == null &&
         uri.rawQuery == null &&
         uri.rawFragment == null &&
-        uri.port in -1..65535 &&
-        raw.length <= 1000 &&
-        !raw.any { it.isWhitespace() }
+        (uri.port == -1 || uri.port == 443) &&
+        raw.length in 12..1000 &&
+        !raw.any { it.isWhitespace() } &&
+        host.length <= 253 &&
+        !host.contains(':') &&
+        !host.matches(Regex("[0-9]+(\\.[0-9]+){3}")) &&
+        host != "localhost" &&
+        listOf(".localhost", ".local", ".internal", ".test", ".invalid", ".example", ".onion")
+            .none(host::endsWith) &&
+        labels.size >= 2 &&
+        labels.all { it.matches(Regex("[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")) } &&
+        !uri.rawPath.orEmpty().contains('\\')
 }.getOrDefault(false)
+
+/** Reject private, loopback, benchmark and shared address space before any API secret is sent. */
+internal fun launcherDirectApiIsPublicAddress(address: InetAddress): Boolean {
+    if (address.isAnyLocalAddress || address.isLoopbackAddress ||
+        address.isLinkLocalAddress || address.isSiteLocalAddress ||
+        address.isMulticastAddress
+    ) return false
+    val octets = address.address
+    if (address is Inet6Address) {
+        if (octets.size != 16 || (octets[0].toInt() and 0xfe) == 0xfc) return false
+        val ipv4Mapped = (0..9).all { octets[it] == 0.toByte() } &&
+            (octets[10].toInt() and 0xff) == 0xff &&
+            (octets[11].toInt() and 0xff) == 0xff
+        return if (ipv4Mapped) {
+            launcherDirectApiIsPublicAddress(
+                InetAddress.getByAddress(octets.copyOfRange(12, 16)),
+            )
+        } else {
+            true
+        }
+    }
+    if (octets.size != 4) return false
+    val a = octets[0].toInt() and 0xff
+    val b = octets[1].toInt() and 0xff
+    if (a == 0 || a >= 224) return false
+    if (a == 100 && b in 64..127) return false
+    if (a == 192 && b == 0) return false
+    if (a == 198 && b in 18..19) return false
+    return true
+}
 
 internal fun launcherDirectApiValidFieldName(raw: String): Boolean =
     raw.length in 1..64 && raw.all { it.isLetterOrDigit() || it == '-' || it == '_' }
@@ -290,6 +337,12 @@ internal class LauncherDirectApiAnswerClient {
                     URLEncoder.encode(trusted.searchParameter, "UTF-8") + "=" +
                     URLEncoder.encode(query, "UTF-8")
                 else -> trusted.endpoint
+            }
+            // Reject DNS resolving to private/device addresses before attaching any API key.
+            // Redirects remain disabled; a hardened DNS-pinned broker is still a later gate.
+            val addresses = InetAddress.getAllByName(checkNotNull(URI(endpoint).host))
+            require(addresses.isNotEmpty() && addresses.all(::launcherDirectApiIsPublicAddress)) {
+                "The API endpoint must resolve to a public address"
             }
             val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
                 requestMethod =
