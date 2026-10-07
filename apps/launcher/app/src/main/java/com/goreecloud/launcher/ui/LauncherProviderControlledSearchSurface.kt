@@ -2665,6 +2665,7 @@ private fun LauncherSearchSourceManager(
             LauncherUserApiSourcesManager(
                 repository = userApiRepository,
                 sources = userApiSources,
+                apps = apps,
             )
         }
         item(key = "suggestion-presentation") {
