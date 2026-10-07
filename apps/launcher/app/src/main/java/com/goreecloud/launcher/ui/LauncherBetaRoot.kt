@@ -874,6 +874,7 @@ fun LauncherBetaRoot(
     onSetDrawerPageRows: (Int) -> Unit,
     onSetShowDrawerAppCount: (Boolean) -> Unit,
     onSetShowDrawerSuggestions: (Boolean) -> Unit,
+    onSetDrawerTabsEnabled: (Boolean) -> Unit,
     onSetHomeGlanceAlignment: (LauncherHomeGlanceAlignment) -> Unit,
     onSetHomeSearchPlacement: (LauncherHomeSearchPlacement) -> Unit,
     onSetHomeSearchStyle: (LauncherHomeSearchStyle) -> Unit,
@@ -1445,7 +1446,7 @@ fun LauncherBetaRoot(
                     canResetDrawerPinnedOrder =
                         selectedAppContextOrigin == LauncherAppContextOrigin.DRAWER &&
                             drawerPinnedAppKeys.size > 1,
-                    hasDrawerTabs = drawerTabs.isNotEmpty(),
+                    hasDrawerTabs = experiencePreferences.enableDrawerTabs && drawerTabs.isNotEmpty(),
                     canMoveDockEarlier =
                         selectedAppContextOrigin == LauncherAppContextOrigin.DOCK && dockIndex > 0,
                     canMoveDockLater =
@@ -2002,6 +2003,7 @@ fun LauncherBetaRoot(
                         onSetDrawerPageRows = onSetDrawerPageRows,
                         onSetShowDrawerAppCount = onSetShowDrawerAppCount,
                         onSetShowDrawerSuggestions = onSetShowDrawerSuggestions,
+                        onSetDrawerTabsEnabled = onSetDrawerTabsEnabled,
                         onSetHomeGlanceAlignment = onSetHomeGlanceAlignment,
                         onSetHomeSearchPlacement = onSetHomeSearchPlacement,
                         onSetHomeSearchStyle = onSetHomeSearchStyle,
@@ -9403,6 +9405,7 @@ private fun LauncherSettingsRootSurface(
     onSetDrawerPageRows: (Int) -> Unit,
     onSetShowDrawerAppCount: (Boolean) -> Unit,
     onSetShowDrawerSuggestions: (Boolean) -> Unit,
+    onSetDrawerTabsEnabled: (Boolean) -> Unit,
     onSetHomeGlanceAlignment: (LauncherHomeGlanceAlignment) -> Unit,
     onSetHomeSearchPlacement: (LauncherHomeSearchPlacement) -> Unit,
     onSetHomeSearchStyle: (LauncherHomeSearchStyle) -> Unit,
