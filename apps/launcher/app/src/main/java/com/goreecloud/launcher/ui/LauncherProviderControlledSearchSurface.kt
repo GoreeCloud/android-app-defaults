@@ -273,9 +273,7 @@ internal fun LauncherProviderControlledSearchSurface(
         suggestionKeys
             .asSequence()
             .mapNotNull(appsByKey::get)
-            .distinctBy { app ->
-                app.user.hashCode().toString() + ":" + app.componentName.packageName
-            }
+            .distinctBy { app -> app.user to app.componentName.packageName }
             .take(LauncherSearchSuggestionPolicy.DEFAULT_LIMIT)
             .toList()
     }
@@ -1196,29 +1194,37 @@ private fun LauncherUniversalSearchSuggestionApp(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(GlazeMetrics.space1),
         ) {
-            if (icon != null) {
-                Image(
-                    bitmap = icon,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(42.dp)
-                        .launcherIconMask(),
-                )
-            } else {
-                Surface(
-                    modifier = Modifier.size(42.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            app.label.toString().trim().take(1).uppercase(),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
+            Box(modifier = Modifier.size(48.dp)) {
+                if (icon != null) {
+                    Image(
+                        bitmap = icon,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(42.dp)
+                            .align(Alignment.Center)
+                            .launcherIconMask(),
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier.size(42.dp).align(Alignment.Center),
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                app.label.toString().trim().take(1).uppercase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
                     }
                 }
+                LauncherAppProfileBadge(
+                    app = app,
+                    modifier = Modifier.align(Alignment.TopStart).offset(x = (-2).dp, y = (-2).dp),
+                    compact = true,
+                )
             }
             Text(
                 app.label.toString(),
