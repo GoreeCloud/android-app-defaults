@@ -184,6 +184,16 @@ internal fun LauncherProviderControlledSearchSurface(
             "Could not delete this API connection."
         }
     }
+    val onResetAllDirectApi: () -> String? = {
+        try {
+            directApiStore.resetAll()
+            directApiSources = emptyList()
+            directApiStorageError = null
+            null
+        } catch (_: Exception) {
+            "Could not clear secure API connection storage."
+        }
+    }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val presentationContext = LocalGlazeV16PresentationContext.current
@@ -400,6 +410,7 @@ internal fun LauncherProviderControlledSearchSurface(
                 directApiStorageError = directApiStorageError,
                 onSaveDirectApi = onSaveDirectApi,
                 onRemoveDirectApi = onRemoveDirectApi,
+                onResetAllDirectApi = onResetAllDirectApi,
                 persisted = searchProviderPreferences,
                 controls = controls,
                 onSet = onSetSearchProviderPreferences,
@@ -2657,6 +2668,7 @@ private fun LauncherSearchSourceManager(
     directApiStorageError: String?,
     onSaveDirectApi: (LauncherDirectApiSource) -> String?,
     onRemoveDirectApi: (String) -> String?,
+    onResetAllDirectApi: () -> String?,
     persisted: LauncherSearchProviderPreferenceDecodeResult?,
     controls: LauncherSearchProviderControlState,
     fileSearchRoots: List<Uri>,
@@ -2700,6 +2712,7 @@ private fun LauncherSearchSourceManager(
                 sources = directApiSources,
                 onSave = onSaveDirectApi,
                 onRemove = onRemoveDirectApi,
+                onResetAll = onResetAllDirectApi,
             )
             directApiStorageError?.let { message ->
                 Text(

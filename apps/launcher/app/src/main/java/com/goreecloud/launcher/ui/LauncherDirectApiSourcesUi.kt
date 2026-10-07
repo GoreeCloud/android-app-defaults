@@ -35,6 +35,7 @@ import com.goreecloud.launcher.core.launcher.LauncherDirectApiAnswerClient
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiCatalog
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiKind
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiSource
+import com.goreecloud.launcher.core.launcher.launcherDirectApiValidHttpsEndpoint
 import com.goreecloud.launcher.ui.theme.GlazeMetrics
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -49,9 +50,11 @@ internal fun LauncherDirectApiSourcesSettings(
     sources: List<LauncherDirectApiSource>,
     onSave: (LauncherDirectApiSource) -> String?,
     onRemove: (String) -> String?,
+    onResetAll: () -> String?,
 ) {
     var editing by remember { mutableStateOf<LauncherDirectApiSource?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    var confirmResetAll by remember { mutableStateOf(false) }
     val templates = remember { LauncherDirectApiCatalog.templates() }
     val options = templates.map { template ->
         sources.firstOrNull { it.id == template.id } ?: template
@@ -79,9 +82,12 @@ internal fun LauncherDirectApiSourcesSettings(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             options.forEach { source ->
-                val connected = source.secret.isNotBlank() ||
-                    (source.kind == LauncherDirectApiKind.CUSTOM_SEARCH &&
-                        source.endpoint.startsWith("https://"))
+                val connected = when (source.kind) {
+                    LauncherDirectApiKind.CUSTOM_CHAT,
+                    LauncherDirectApiKind.CUSTOM_SEARCH ->
+                        launcherDirectApiValidHttpsEndpoint(source.endpoint)
+                    else -> source.secret.isNotBlank()
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                     horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
@@ -147,10 +153,37 @@ internal fun LauncherDirectApiSourcesSettings(
                     },
                 ) { Text("Add search API") }
             }
+            if (sources.isNotEmpty()) {
+                TextButton(
+                    onClick = { confirmResetAll = true },
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) { Text("Delete all API connections") }
+            }
             notice?.let {
                 Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
             }
         }
+    }
+    if (confirmResetAll) {
+        AlertDialog(
+            onDismissRequest = { confirmResetAll = false },
+            title = { Text("Delete all API connections?") },
+            text = {
+                Text(
+                    "This permanently removes the locally stored API keys and source settings " +
+                        "from Launcher. It does not revoke keys at external providers."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    notice = onResetAll()
+                    if (notice == null) confirmResetAll = false
+                }) { Text("Delete connections") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmResetAll = false }) { Text("Cancel") }
+            },
+        )
     }
     editing?.let { source ->
         LauncherDirectApiSourceDialog(
@@ -307,7 +340,12 @@ private fun LauncherDirectApiSourceDialog(
             TextButton(onClick = {
                 val effectiveSecret = keyEntry.trim().ifEmpty { source.secret }
                 if (enabled && effectiveSecret.isEmpty() &&
-                    source.kind != LauncherDirectApiKind.CUSTOM_SEARCH
+                    source.kind in setOf(
+                        LauncherDirectApiKind.OPENAI,
+                        LauncherDirectApiKind.CLAUDE,
+                        LauncherDirectApiKind.GEMINI,
+                        LauncherDirectApiKind.PERPLEXITY,
+                    )
                 ) {
                     error = "Enter an API key to enable this source"
                 } else {
@@ -337,7 +375,13 @@ internal fun LauncherDirectApiAnswerPanel(
 ) {
     val readySources = sources.filter { source ->
         source.enabled &&
-            (source.secret.isNotBlank() || source.kind == LauncherDirectApiKind.CUSTOM_SEARCH)
+            (
+                source.secret.isNotBlank() ||
+                    source.kind in setOf(
+                        LauncherDirectApiKind.CUSTOM_CHAT,
+                        LauncherDirectApiKind.CUSTOM_SEARCH,
+                    )
+                )
     }
     if (readySources.isEmpty()) return
 
@@ -451,7 +495,10 @@ internal fun LauncherDirectApiAnswerPanel(
                 Text(
                     it,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.testTag("launcher-direct-api-answer"),
+                    modifier = Modifier
+                        .heightIn(max = 230.dp)
+                        .verticalScroll(rememberScrollState())
+                        .testTag("launcher-direct-api-answer"),
                 )
             }
             error?.let {
