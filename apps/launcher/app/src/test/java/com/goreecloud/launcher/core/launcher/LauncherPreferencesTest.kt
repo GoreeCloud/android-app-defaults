@@ -67,6 +67,7 @@ class LauncherPreferencesTest {
         try {
             assertFalse(repository.experiencePreferences.first().enableDrawerTabs)
             repository.createDrawerTab("  Work tools  ").join()
+            assertEquals(true, repository.experiencePreferences.first().enableDrawerTabs)
             var tabs = repository.drawerTabs.first { it.size == 1 }
             val tab = tabs.single()
             assertEquals("Work tools", tab.name)
