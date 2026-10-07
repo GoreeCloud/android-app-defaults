@@ -7,6 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Rule
@@ -32,23 +33,41 @@ class LauncherPreferencesTest {
             assertFalse(experience.showDockSearch)
 
             repository.setDockStyle(LauncherDockStyle.RAISED)
-            repository.setDockPageSize(99)
-            repository.setDockLoopPages(true)
-            repository.setShowDockLabels(true)
-            repository.setShowDockSearch(true)
-
-            experience = repository.experiencePreferences.first {
-                it.dockStyle == LauncherDockStyle.RAISED &&
-                    it.dockPageSize == 7 &&
-                    it.dockLoopPages &&
-                    it.showDockLabels &&
-                    it.showDockSearch
+            withTimeout(5_000) {
+                repository.experiencePreferences.first {
+                    it.dockStyle == LauncherDockStyle.RAISED
+                }
             }
+
+            repository.setDockPageSize(99)
+            withTimeout(5_000) {
+                repository.experiencePreferences.first { it.dockPageSize == 7 }
+            }
+
+            repository.setDockLoopPages(true)
+            withTimeout(5_000) {
+                repository.experiencePreferences.first { it.dockLoopPages }
+            }
+
+            repository.setShowDockLabels(true)
+            withTimeout(5_000) {
+                repository.experiencePreferences.first { it.showDockLabels }
+            }
+
+            repository.setShowDockSearch(true)
+            experience = withTimeout(5_000) {
+                repository.experiencePreferences.first { it.showDockSearch }
+            }
+            assertEquals(LauncherDockStyle.RAISED, experience.dockStyle)
             assertEquals(7, experience.dockPageSize)
             assertEquals(true, experience.dockLoopPages)
+            assertEquals(true, experience.showDockLabels)
+            assertEquals(true, experience.showDockSearch)
 
             repository.setDockPageSize(1)
-            experience = repository.experiencePreferences.first { it.dockPageSize == 4 }
+            experience = withTimeout(5_000) {
+                repository.experiencePreferences.first { it.dockPageSize == 4 }
+            }
             assertEquals(4, experience.dockPageSize)
         } finally {
             dataStoreScope.cancel()
