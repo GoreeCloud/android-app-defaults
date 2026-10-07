@@ -13,6 +13,10 @@ class LauncherSearchProviderUserControlPolicyTest {
             "personal", { it.pkg }, { it.user },
         )
         assertEquals(LauncherConnectedAppVisibility.WORK, result)
+        assertEquals(LauncherConnectedAppVisibility.BOTH, launcherConnectedAppVisibility(
+            listOf(App("com.dropbox.android", "personal"), App("com.dropbox.android", "work")),
+            "com.dropbox.android", "personal", { it.pkg }, { it.user },
+        ))
     }
 
     @Test
