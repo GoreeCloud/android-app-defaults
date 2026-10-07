@@ -1399,30 +1399,32 @@ class ActivatedHomeLifecycleRuntimeTest {
                 repository.state.first { it.authority == WorkspaceAuthority.ROOM }
             }
 
-            val scenario = ActivityScenario.launch(MainActivity::class.java)
-            try {
-                val dao = LauncherDatabaseProvider.get(context).workspaceDao()
-                val preferences = LauncherPreferencesRepository(context).preferences.first()
-                val roomPlacement = WorkspaceRoomPlacementRepository(
-                    authorityRepository = repository,
-                    workspaceDaoProvider = { dao },
-                )
-                val baseline = roomPlacement.replace(
-                    favoriteKeys = listOf(firstKey, secondKey),
-                    dockKeys = emptyList(),
-                    homeGrid = WorkspaceGridPlacement.Grid(
-                        columns = preferences.homeColumns,
-                        rows = preferences.homeRows,
-                    ),
-                )
-                check(baseline is WorkspaceRoomWriteResult.Written)
-
-                val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+            val dao = LauncherDatabaseProvider.get(context).workspaceDao()
+            val preferences = LauncherPreferencesRepository(context).preferences.first()
+            val roomPlacement = WorkspaceRoomPlacementRepository(
+                authorityRepository = repository,
+                workspaceDaoProvider = { dao },
+            )
+            val baseline = roomPlacement.replace(
+                favoriteKeys = listOf(firstKey, secondKey),
+                dockKeys = emptyList(),
+                homeGrid = WorkspaceGridPlacement.Grid(
                     columns = preferences.homeColumns,
                     rows = preferences.homeRows,
-                )
-                check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+                ),
+            )
+            check(baseline is WorkspaceRoomWriteResult.Written) {
+                "Expected deterministic Room baseline before Activity launch; result was $baseline."
+            }
 
+            val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+                columns = preferences.homeColumns,
+                rows = preferences.homeRows,
+            )
+            check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+
+            val scenario = ActivityScenario.launch(MainActivity::class.java)
+            try {
                 waitForDisplayedLabel(firstApp.label.toString())
                 waitForDisplayedLabel(secondApp.label.toString())
 
