@@ -100,6 +100,8 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.2")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.google.android.gms:play-services-auth:22.0.0")
+    implementation("com.dropbox.core:dropbox-core-sdk:7.1.1")
+    implementation("com.dropbox.core:dropbox-android-sdk:7.1.1")
     implementation("androidx.room3:room3-runtime:3.0.2")
     implementation("androidx.sqlite:sqlite-framework:2.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
