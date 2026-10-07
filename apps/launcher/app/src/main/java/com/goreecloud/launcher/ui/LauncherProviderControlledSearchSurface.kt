@@ -2710,6 +2710,7 @@ private fun LauncherSearchSourceManager(
         item(key = "direct-api-connections") {
             LauncherDirectApiSourcesSettings(
                 sources = directApiSources,
+                apps = apps,
                 onSave = onSaveDirectApi,
                 onRemove = onRemoveDirectApi,
                 onResetAll = onResetAllDirectApi,
