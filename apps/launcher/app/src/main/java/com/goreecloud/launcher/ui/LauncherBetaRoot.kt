@@ -7433,28 +7433,28 @@ private fun AppDrawerSurface(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(modifier = Modifier.widthIn(max = 168.dp)) {
-                        Text(
-                            if (selectedPage.kind == LauncherDrawerProfileKind.USER) {
-                                "Apps"
-                            } else {
-                                selectedPage.kind.displayName
-                            },
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            buildString {
-                                if (experiencePreferences.showDrawerAppCount || drawerQuery.isNotBlank()) {
-                                    append(selectedFilteredCount)
-                                    append(if (drawerQuery.isBlank()) " installed · " else " shown · ")
-                                }
-                                append(layoutDescription)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = drawerSecondaryColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                            Text(
+                                if (selectedPage.kind == LauncherDrawerProfileKind.USER) {
+                                    "Apps"
+                                } else {
+                                    selectedPage.kind.displayName
+                                },
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                buildString {
+                                    if (experiencePreferences.showDrawerAppCount || drawerQuery.isNotBlank()) {
+                                        append(selectedFilteredCount)
+                                        append(if (drawerQuery.isBlank()) " installed · " else " shown · ")
+                                    }
+                                    append(layoutDescription)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = drawerSecondaryColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
 
                         if (experiencePreferences.enableDrawerTabs) {
