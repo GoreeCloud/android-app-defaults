@@ -1255,13 +1255,21 @@ private fun LauncherSearchHandoffRow(
         apps.firstOrNull { app -> app.componentName.packageName in packageNames }
     }
     val icon = sourceApp?.let { rememberLauncherAppIcon(it) }
+    val dropboxAppHandoff = provider.providerId ==
+        LauncherConnectedSearchProviderRegistry.DROPBOX_PROVIDER_ID
+    val workProfileApp = sourceApp?.user != null &&
+        sourceApp.user != android.os.Process.myUserHandle()
     Surface(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .testTag("launcher-search-handoff-" + provider.providerId)
             .semantics {
-                contentDescription = "Search " + provider.displayName + " for " + query
+                contentDescription = if (dropboxAppHandoff) {
+                    "Open Dropbox in its profile and search in the app"
+                } else {
+                    "Search " + provider.displayName + " for " + query
+                }
             },
         shape = RoundedCornerShape(GlazeMetrics.radiusMedium),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.30f),
@@ -1301,7 +1309,12 @@ private fun LauncherSearchHandoffRow(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    "Search online for “" + query + "”",
+                    if (dropboxAppHandoff) {
+                        if (workProfileApp) "Open Work app · search in Dropbox"
+                        else "Open app · search in Dropbox"
+                    } else {
+                        "Search online for “" + query + "”"
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
