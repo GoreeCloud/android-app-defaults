@@ -1,7 +1,12 @@
 package com.goreecloud.launcher.ui
 
+import android.content.pm.LauncherActivityInfo
+
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,11 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiAnswerClient
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiCatalog
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiKind
@@ -48,6 +55,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun LauncherDirectApiSourcesSettings(
     sources: List<LauncherDirectApiSource>,
+    apps: List<LauncherActivityInfo>,
     onSave: (LauncherDirectApiSource) -> String?,
     onRemove: (String) -> String?,
     onResetAll: () -> String?,
@@ -94,6 +102,7 @@ internal fun LauncherDirectApiSourcesSettings(
                     horizontalArrangement = Arrangement.spacedBy(GlazeMetrics.space2),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    LauncherDirectApiSourceBrand(source = source, apps = apps)
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             source.title,
@@ -205,6 +214,62 @@ internal fun LauncherDirectApiSourcesSettings(
                 }
             } else null,
         )
+    }
+}
+
+
+/**
+ * Use the provider's actual installed Android app icon when available. Launcher never forges
+ * third-party logos or presents fallback shapes as official provider artwork.
+ */
+@Composable
+private fun LauncherDirectApiSourceBrand(
+    source: LauncherDirectApiSource,
+    apps: List<LauncherActivityInfo>,
+) {
+    val providerId = when (source.kind) {
+        LauncherDirectApiKind.OPENAI ->
+            LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID
+        LauncherDirectApiKind.CLAUDE ->
+            LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID
+        LauncherDirectApiKind.GEMINI ->
+            LauncherConnectedSearchProviderRegistry.GEMINI_PROVIDER_ID
+        LauncherDirectApiKind.PERPLEXITY ->
+            LauncherConnectedSearchProviderRegistry.PERPLEXITY_PROVIDER_ID
+        LauncherDirectApiKind.CUSTOM_CHAT,
+        LauncherDirectApiKind.CUSTOM_SEARCH -> ""
+    }
+    val packages = remember(providerId) {
+        LauncherConnectedSearchProviderRegistry.iconPackageNamesFor(providerId)
+    }
+    val installedApp = remember(apps, packages) {
+        apps.firstOrNull { app -> app.componentName.packageName in packages }
+    }
+    val bitmap = installedApp?.let { rememberLauncherAppIcon(it) }
+    Surface(
+        modifier = Modifier.size(40.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(
+            GlazeMetrics.radiusMedium,
+        ),
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.62f),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(28.dp).launcherIconMask(),
+                )
+            } else {
+                Text(
+                    "API",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
     }
 }
 
