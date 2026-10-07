@@ -1063,6 +1063,7 @@ class LauncherPreferencesRepository(
         universalSearchHomeMode: LauncherUniversalSearchHomeMode,
         addNewAppsToHome: Boolean,
         showHints: Boolean,
+        enableDrawerTabs: Boolean = false,
     ) {
         val normalizedGrid = LauncherPreferences(
             homeColumns = homeColumns,
@@ -1077,6 +1078,7 @@ class LauncherPreferencesRepository(
             values[Keys.universalSearchHomeMode] = universalSearchHomeMode.storageValue
             values[Keys.addNewAppsToHome] = addNewAppsToHome
             values[Keys.homeHintsDismissed] = !showHints
+            values[Keys.enableDrawerTabs] = enableDrawerTabs
             values[Keys.startupWizardStep] = 0
             values[Keys.startupWizardCompleted] = true
         }
