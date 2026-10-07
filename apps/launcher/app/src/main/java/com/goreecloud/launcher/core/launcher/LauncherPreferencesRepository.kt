@@ -434,6 +434,7 @@ class LauncherPreferencesRepository(
         val drawerPageRows = intPreferencesKey("drawer_page_rows")
         val showDrawerAppCount = booleanPreferencesKey("show_drawer_app_count")
         val showDrawerSuggestions = booleanPreferencesKey("show_drawer_suggestions_v1")
+        val enableDrawerTabs = booleanPreferencesKey("drawer_tabs_enabled_v1")
         val homeGlanceAlignment = stringPreferencesKey("home_glance_alignment")
         val homeSearchPlacement = stringPreferencesKey("home_search_placement")
         val homeSearchStyle = stringPreferencesKey("home_search_style")
@@ -625,6 +626,7 @@ class LauncherPreferencesRepository(
                 drawerPageRows = (values[Keys.drawerPageRows] ?: 5).coerceIn(4, 6),
                 showDrawerAppCount = values[Keys.showDrawerAppCount] ?: false,
                 showDrawerSuggestions = values[Keys.showDrawerSuggestions] ?: false,
+                enableDrawerTabs = values[Keys.enableDrawerTabs] ?: false,
                 homeGlanceAlignment = LauncherHomeGlanceAlignment.fromStorage(values[Keys.homeGlanceAlignment]),
                 homeSearchPlacement = LauncherHomeSearchPlacement.fromStorage(values[Keys.homeSearchPlacement]),
                 homeSearchStyle = LauncherHomeSearchStyle.fromStorage(values[Keys.homeSearchStyle]),
