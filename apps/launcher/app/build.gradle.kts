@@ -14,16 +14,6 @@ val developmentVersionCode =
         .firstOrNull()
         ?: 1
 
-val dropboxAppKey =
-    sequenceOf(
-        providers.gradleProperty("GOREECLOUD_LAUNCHER_DROPBOX_APP_KEY").orNull,
-        providers.environmentVariable("GOREECLOUD_LAUNCHER_DROPBOX_APP_KEY").orNull,
-    ).mapNotNull { raw -> raw?.trim()?.takeIf { it.isNotEmpty() } }
-        .firstOrNull()
-        .orEmpty()
-val dropboxAppKeyLiteral =
-    "\\"" + dropboxAppKey.replace("\\", "\\\\").replace("\\"", "\\\\"") + "\\""
-
 val developmentKeystorePath =
     providers.environmentVariable("GOREECLOUD_DEV_KEYSTORE_PATH").orNull
 val developmentKeystorePassword =
@@ -74,8 +64,6 @@ android {
         versionCode = developmentVersionCode
         versionName = "0.1.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "DROPBOX_APP_KEY", dropboxAppKeyLiteral)
-        manifestPlaceholders["dropboxAppKey"] = dropboxAppKey.ifBlank { "unconfigured" }
     }
     buildTypes {
         debug {
@@ -112,8 +100,6 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.2")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.google.android.gms:play-services-auth:22.0.0")
-    implementation("com.dropbox.core:dropbox-core-sdk:7.1.1")
-    implementation("com.dropbox.core:dropbox-android-sdk:7.1.1")
     implementation("androidx.room3:room3-runtime:3.0.2")
     implementation("androidx.sqlite:sqlite-framework:2.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
