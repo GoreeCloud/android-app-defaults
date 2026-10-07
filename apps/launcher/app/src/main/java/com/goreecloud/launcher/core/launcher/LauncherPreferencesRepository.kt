@@ -914,6 +914,12 @@ class LauncherPreferencesRepository(
         }
     }
 
+    fun setDrawerTabsEnabled(enabled: Boolean): Job = scope.launch {
+        dataStore.edit { values ->
+            values[Keys.enableDrawerTabs] = enabled
+        }
+    }
+
     fun setShowDrawerSuggestions(show: Boolean) {
         scope.launch {
             dataStore.edit { values ->
