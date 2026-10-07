@@ -373,12 +373,6 @@ class LauncherSearchProviderUserControlPolicyTest {
             ),
         )
         assertEquals(
-            "Bing",
-            LauncherSearchProviderUserControlPolicy.displayNameFor(
-                LauncherConnectedSearchProviderRegistry.BING_SEARCH_PROVIDER_ID,
-            ),
-        )
-        assertEquals(
             "DuckDuckGo",
             LauncherSearchProviderUserControlPolicy.displayNameFor(
                 LauncherConnectedSearchProviderRegistry.DUCKDUCKGO_PROVIDER_ID,
@@ -408,12 +402,6 @@ class LauncherSearchProviderUserControlPolicyTest {
                 LauncherConnectedSearchProviderRegistry.CLAUDE_PROVIDER_ID,
             ),
         )
-        assertEquals(
-            "Microsoft Copilot",
-            LauncherSearchProviderUserControlPolicy.displayNameFor(
-                LauncherConnectedSearchProviderRegistry.MICROSOFT_COPILOT_PROVIDER_ID,
-            ),
-        )
         assertTrue(
             LauncherConnectedSearchProviderRegistry.isWebSearchProvider(
                 LauncherConnectedSearchProviderRegistry.GOOGLE_SEARCH_PROVIDER_ID,
@@ -424,6 +412,13 @@ class LauncherSearchProviderUserControlPolicyTest {
                 LauncherConnectedSearchProviderRegistry.CHATGPT_PROVIDER_ID,
             ),
         )
+
+        // Retired integration identities remain rejected even after a persisted-order migration.
+        listOf("connected.bing-search", "connected.microsoft-copilot").forEach { retired ->
+            assertFalse(LauncherConnectedSearchProviderRegistry.isConnectedProvider(retired))
+            assertEquals(null, LauncherConnectedSearchProviderRegistry.displayNameFor(retired))
+            assertEquals(emptyList<String>(), LauncherConnectedSearchProviderRegistry.iconPackageNamesFor(retired))
+        }
 
         val metadata = metadata(
             providerId = LauncherConnectedSearchProviderRegistry.BRAVE_SEARCH_PROVIDER_ID,
