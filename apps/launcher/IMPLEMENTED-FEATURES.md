@@ -6,6 +6,14 @@ Primary Home retains its dedicated 20 dp indicator reserve and secondary Home pa
 
 Focused tests cover Home-only visibility, disabled/single-page suppression, Dock-aware clearance, and secondary reserve behavior. **Acceptance boundary:** Development candidate only; fresh exact-head protected validation plus representative-device Home/App Drawer transition and overlap acceptance remain required.
 
+## October 6, 2026 — Smart Folder override and Dock keyboard-navigation continuation
+
+Development source now adds reversible, exact-profile per-app exclusions for dynamic **Suggested**, **New**, and **Updated** Smart Folders. Exclusion state is local presentation data outside portable preference v1, fully excluded collections remain visible for recovery, and **Restore** clears only the selected Smart Folder kind. **Pinned** deliberately remains governed only by explicit Drawer pin/unpin state.
+
+The same Development continuation adds hardware **Page Up / Page Down** paging to the existing multi-page Dock pager without intercepting D-pad arrows, touch swipes, drag-handoff, or accessibility Previous/Next actions. A bounded navigation policy returns no target at non-looping edges and active drag suppresses keyboard page changes.
+
+Focused JVM/DataStore coverage verifies Smart Folder exclusion scoping/recovery, Pinned fail-closed behavior, persistence by exact profile-qualified app key, and Dock page-navigation boundaries. **Acceptance boundary:** candidate source only until fresh exact-head protected validation and guarded integration. Representative-device keyboard focus, TalkBack/Switch Access, large text, RTL, managed-profile behavior, form factors, performance/power, signing/update continuity, and release gates remain open.
+
 ## October 6, 2026 — direct AI and custom search API answers candidate
 
 The current unintegrated Development branch adds **Direct API answers** to Universal Search. Users can configure API keys and model IDs for OpenAI/ChatGPT, Anthropic Claude, Google Gemini, and Perplexity, or define HTTPS OpenAI-compatible chat and read-only GET/JSON search sources. These integrations are distinct from the previously available app handoff providers: a deliberate **Ask** in Universal Search invokes exactly one enabled API and shows its response on the same screen.
