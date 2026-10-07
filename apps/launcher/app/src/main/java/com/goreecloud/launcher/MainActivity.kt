@@ -815,6 +815,7 @@ class MainActivity : ComponentActivity() {
                         initialUniversalSearchHomeMode = launcherPreferences.universalSearchHomeMode,
                         initialAddNewAppsToHome = experiencePreferences.addNewAppsToHome,
                         initialShowHints = !experiencePreferences.homeHintsDismissed,
+                        initialEnableDrawerTabs = experiencePreferences.enableDrawerTabs,
                         initialDockSize = visualPreferences.starterDockSize,
                         initialStep = experiencePreferences.startupWizardStep,
                         onStepChange = launcherPreferencesRepository::setStartupWizardStep,
