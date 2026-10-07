@@ -91,6 +91,7 @@ app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherStarterHomeDefau
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherTransactionalPortableRestoreWriter.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequest.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherUniversalSearch.kt
+app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherUserApiSources.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherVisualPreferencesRepository.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/LauncherWeather.kt
 app/src/main/java/com/goreecloud/launcher/core/launcher/StarterWorkspacePolicy.kt
@@ -139,6 +140,7 @@ app/src/main/java/com/goreecloud/launcher/ui/LauncherHomePageTransition.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherLazyListItems.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherLocalAppSearch.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherProviderControlledSearchSurface.kt
+app/src/main/java/com/goreecloud/launcher/ui/LauncherUserApiSourcesUi.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherProfileBadge.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherRoot.kt
 app/src/main/java/com/goreecloud/launcher/ui/LauncherSearchSuggestionTabIcon.kt
@@ -211,6 +213,7 @@ app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherSearchProviderUs
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherStarterHomeDefaultsPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUninstallRequestPolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUniversalSearchTest.kt
+app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherUserApiSourcePolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/LauncherWeatherTest.kt
 app/src/test/java/com/goreecloud/launcher/core/launcher/StarterWorkspacePolicyTest.kt
 app/src/test/java/com/goreecloud/launcher/core/workspace/GlazeMotionExperimentalConsumerTest.kt
