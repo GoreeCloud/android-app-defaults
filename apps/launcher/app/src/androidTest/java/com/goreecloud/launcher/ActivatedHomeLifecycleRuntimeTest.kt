@@ -1,7 +1,6 @@
 package com.goreecloud.launcher
 
 import android.app.role.RoleManager
-import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.MotionEvent
@@ -56,7 +55,6 @@ import com.goreecloud.launcher.core.workspace.db.WorkspaceRoomPlacementRepositor
 import com.goreecloud.launcher.core.workspace.db.WorkspaceRoomWriteResult
 import com.goreecloud.launcher.core.workspace.db.WorkspaceWidgetMutationResult
 import com.goreecloud.launcher.core.workspace.workspaceKey
-import java.io.FileInputStream
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -2410,11 +2408,10 @@ class ActivatedHomeLifecycleRuntimeTest {
         // remove-role-holder transition is still settling back to Quickstep. Reassert the
         // desired holder idempotently before each HOME-dependent case, then let the caller's
         // pre-test ownership snapshot decide whether teardown removes it.
-        // Bound the shell-side role mutation itself. A stalled RoleManager shell service can
-        // otherwise keep FileInputStream.readBytes() waiting for EOF until the outer CI watchdog,
-        // hiding the real test and preventing the remaining runtime suite from executing.
+        // Dispatch the shell mutation without blocking on command-pipe EOF. RoleManager state
+        // below remains the authoritative completion signal and is separately time-bounded.
         runShellCommand(
-            "toybox timeout 8 cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
+            "cmd role add-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
             while (!roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
@@ -2428,7 +2425,7 @@ class ActivatedHomeLifecycleRuntimeTest {
         packageName: String,
     ) {
         runShellCommand(
-            "toybox timeout 8 cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
+            "cmd role remove-role-holder ${RoleManager.ROLE_HOME} $packageName",
         )
         withTimeout(10_000) {
             while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
@@ -2438,12 +2435,13 @@ class ActivatedHomeLifecycleRuntimeTest {
     }
 
     private fun runShellCommand(command: String) {
-        val descriptor: ParcelFileDescriptor =
-            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
-        FileInputStream(descriptor.fileDescriptor).use { input ->
-            input.readBytes()
-        }
-        descriptor.close()
+        // None of these test commands consume stdout. Redirect output and close the read descriptor
+        // immediately so a stuck Android shell service cannot deadlock the instrumentation thread.
+        // Callers wait on the resulting Android/Compose state with explicit timeouts.
+        InstrumentationRegistry.getInstrumentation()
+            .uiAutomation
+            .executeShellCommand("$command >/dev/null 2>&1")
+            .close()
     }
 
 
