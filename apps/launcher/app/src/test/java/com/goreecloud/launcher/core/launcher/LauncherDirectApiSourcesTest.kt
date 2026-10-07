@@ -2,6 +2,7 @@ package com.goreecloud.launcher.core.launcher
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import java.net.InetAddress
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -44,6 +45,39 @@ class LauncherDirectApiSourcesTest {
         assertFalse(launcherDirectApiValidHttpsEndpoint("https://api.example.com/chat?q=secret"))
         assertFalse(launcherDirectApiValidHttpsEndpoint("file:///etc/passwd"))
         assertFalse(launcherDirectApiValidHttpsEndpoint("https://"))
+    }
+
+    @Test
+    fun customEndpointAndResolvedAddressRejectLocalTargets() {
+        for (endpoint in listOf(
+            "https://localhost/api",
+            "https://device.local/search",
+            "https://metadata.google.internal/latest",
+            "https://127.0.0.1/api",
+            "https://192.168.1.40/api",
+            "https://[::1]/api",
+            "https://public.example.org:8080/api",
+        )) {
+            assertFalse(endpoint, launcherDirectApiValidHttpsEndpoint(endpoint))
+        }
+
+        fun inet(vararg octets: Int): InetAddress =
+            InetAddress.getByAddress(octets.map { it.toByte() }.toByteArray())
+
+        for (address in listOf(
+            inet(0, 0, 0, 0),
+            inet(10, 1, 2, 3),
+            inet(127, 0, 0, 1),
+            inet(169, 254, 169, 254),
+            inet(172, 16, 0, 4),
+            inet(192, 168, 1, 1),
+            inet(100, 100, 1, 2),
+            inet(198, 18, 0, 1),
+            inet(224, 0, 0, 1),
+        )) {
+            assertFalse(launcherDirectApiIsPublicAddress(address))
+        }
+        assertTrue(launcherDirectApiIsPublicAddress(inet(8, 8, 8, 8)))
     }
 
     @Test
