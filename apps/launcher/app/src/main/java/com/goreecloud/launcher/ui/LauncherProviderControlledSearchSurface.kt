@@ -80,6 +80,8 @@ import com.goreecloud.launcher.R
 import com.goreecloud.launcher.core.launcher.LaunchApplicationSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiSource
 import com.goreecloud.launcher.core.launcher.LauncherDirectApiSourceStore
+import com.goreecloud.launcher.core.launcher.LauncherConnectedAppVisibility
+import com.goreecloud.launcher.core.launcher.launcherConnectedAppVisibility
 import com.goreecloud.launcher.core.launcher.LauncherConnectedSearchProviderRegistry
 import com.goreecloud.launcher.core.launcher.LauncherCopyTextSearchAction
 import com.goreecloud.launcher.core.launcher.LauncherContactsSearchProvider
