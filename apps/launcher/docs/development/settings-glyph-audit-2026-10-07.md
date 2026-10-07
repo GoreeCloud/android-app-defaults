@@ -8,17 +8,17 @@ The Settings overview maps 13 categories to the same Canvas-based `LauncherOutli
 
 | Category | Glyph | Source audit outcome |
 | --- | --- | --- |
-| Home | HOME | Existing house shape retained; check small-scale roof junction |
+| Home | HOME | Refined house outline and door proportions |
 | App Drawer | APPS | Existing four-tile grid retained |
 | Dock | DOCK | Refined three aligned app boxes and rounded tray |
 | Folders | FOLDER | Refined rounded folder outline and tab |
 | Universal Search | SEARCH | Existing search lens retained |
-| Widgets & Glaze Cards | WIDGETS | Existing asymmetric widget blocks retained |
+| Widgets & Glaze Cards | WIDGETS | Refined aligned widget blocks and marker |
 | Gestures & Actions | GESTURE | Refined curved swipe and arrow |
 | Appearance | APPEARANCE | Existing palette retained |
-| Notifications & Badges | BELL | Existing notification bell retained |
+| Notifications & Badges | BELL | Refined bell contour and clapper |
 | Privacy & Permissions | SHIELD | Existing shield retained |
-| Backup & Restore | BACKUP | Existing recovery shape retained; follow-up optical check |
+| Backup & Restore | BACKUP | Refined recovery arrow and lower tray; follow-up optical check |
 | Advanced | SLIDERS | Refined sliders to remove lines behind thumb circles |
 | About | INFO | Existing information mark retained |
 
