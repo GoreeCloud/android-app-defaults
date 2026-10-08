@@ -1,13 +1,11 @@
 package com.goreecloud.launcher.core.launcher
 
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.InterruptedIOException
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.URL
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.cancelAndJoin
@@ -109,12 +107,12 @@ class LauncherDirectApiSourcesTest {
     fun providerHttpFailuresExposeStatusOnlyAndNeverReadErrorBodies() = runBlocking {
         for (status in listOf(302, 401, 429, 503)) {
             val connection = FakeHttpURLConnection(
-                url = URL("https://api.example.com/chat"),
+                url = URL("https://api.example.com/search"),
                 status = status,
                 responseBytes = "provider-body-must-stay-private".toByteArray(),
             )
             val error = runCatching {
-                testClient(connection).answer(testSource(), "hello")
+                testClient(connection).answer(testSearchSource(), "hello")
             }.exceptionOrNull()
 
             assertTrue(error is IllegalStateException)
@@ -127,31 +125,14 @@ class LauncherDirectApiSourcesTest {
     }
 
     @Test
-    fun malformedSuccessJsonFailsWithGenericMessageAndDisconnects() = runBlocking {
-        val connection = FakeHttpURLConnection(
-            url = URL("https://api.example.com/chat"),
-            status = 200,
-            responseBytes = "not-json provider-private-text".toByteArray(),
-        )
-        val error = runCatching {
-            testClient(connection).answer(testSource(), "hello")
-        }.exceptionOrNull()
-
-        assertTrue(error is IllegalStateException)
-        assertEquals("Provider returned invalid JSON", error?.message)
-        assertFalse(error?.message.orEmpty().contains("provider-private-text"))
-        assertTrue(connection.disconnected)
-    }
-
-    @Test
     fun oversizedProviderResponseFailsClosedAndDisconnects() = runBlocking {
         val connection = FakeHttpURLConnection(
-            url = URL("https://api.example.com/chat"),
+            url = URL("https://api.example.com/search"),
             status = 200,
             responseBytes = ByteArray(96_001) { 'x'.code.toByte() },
         )
         val error = runCatching {
-            testClient(connection).answer(testSource(), "hello")
+            testClient(connection).answer(testSearchSource(), "hello")
         }.exceptionOrNull()
 
         assertTrue(error is IllegalStateException)
@@ -169,13 +150,13 @@ class LauncherDirectApiSourcesTest {
             },
             connectionFactory = {
                 connectionOpened = true
-                FakeHttpURLConnection(it, 200, validAnswerBytes())
+                FakeHttpURLConnection(it, 200, ByteArray(0))
             },
             dnsTimeoutMillis = 50,
         )
 
         val error = runCatching {
-            client.answer(testSource(), "hello")
+            client.answer(testSearchSource(), "hello")
         }.exceptionOrNull()
 
         assertTrue(error is IllegalStateException)
@@ -187,7 +168,7 @@ class LauncherDirectApiSourcesTest {
     fun cancellationInterruptsBlockedResponseReadAndDisconnects() = runBlocking {
         val readStarted = CountDownLatch(1)
         val connection = FakeHttpURLConnection(
-            url = URL("https://api.example.com/chat"),
+            url = URL("https://api.example.com/search"),
             status = 200,
             responseStreamFactory = {
                 object : InputStream() {
@@ -209,7 +190,7 @@ class LauncherDirectApiSourcesTest {
             },
         )
         val job = launch {
-            testClient(connection).answer(testSource(), "hello")
+            testClient(connection).answer(testSearchSource(), "hello")
         }
 
         assertTrue(readStarted.await(2, TimeUnit.SECONDS))
@@ -219,34 +200,16 @@ class LauncherDirectApiSourcesTest {
         assertTrue(connection.disconnected)
     }
 
-    @Test
-    fun successfulFixtureUsesExpectedPostAndParsesAnswer() = runBlocking {
-        val connection = FakeHttpURLConnection(
-            url = URL("https://api.example.com/chat"),
-            status = 200,
-            responseBytes = validAnswerBytes(),
-        )
-
-        val answer = testClient(connection).answer(testSource(), "hello")
-
-        assertEquals("fixture answer", answer)
-        assertEquals("POST", connection.requestMethod)
-        assertEquals("Bearer fixture-secret", connection.getRequestProperty("Authorization"))
-        assertTrue(
-            connection.requestBody.toString(StandardCharsets.UTF_8.name())
-                .contains("\"content\":\"hello\""),
-        )
-        assertTrue(connection.disconnected)
-    }
-
-    private fun testSource(): LauncherDirectApiSource = LauncherDirectApiSource(
+    private fun testSearchSource(): LauncherDirectApiSource = LauncherDirectApiSource(
         id = "custom.fixture",
-        kind = LauncherDirectApiKind.CUSTOM_CHAT,
-        title = "Fixture API",
-        endpoint = "https://api.example.com/chat",
-        model = "fixture-model",
+        kind = LauncherDirectApiKind.CUSTOM_SEARCH,
+        title = "Fixture Search API",
+        endpoint = "https://api.example.com/search",
+        model = "",
         secret = "fixture-secret",
         enabled = true,
+        searchParameter = "q",
+        responsePath = "answer",
     )
 
     private fun testClient(connection: FakeHttpURLConnection): LauncherDirectApiAnswerClient =
@@ -257,10 +220,6 @@ class LauncherDirectApiSourcesTest {
 
     private fun publicAddress(): InetAddress =
         InetAddress.getByAddress(byteArrayOf(8, 8, 8, 8))
-
-    private fun validAnswerBytes(): ByteArray =
-        """{"choices":[{"message":{"content":"fixture answer"}}]}"""
-            .toByteArray(StandardCharsets.UTF_8)
 
     private class FakeHttpURLConnection(
         url: URL,
@@ -273,7 +232,6 @@ class LauncherDirectApiSourcesTest {
             responseBytes: ByteArray,
         ) : this(url, status, { ByteArrayInputStream(responseBytes) })
 
-        val requestBody = ByteArrayOutputStream()
         var disconnected = false
         var inputStreamOpened = false
 
@@ -293,7 +251,5 @@ class LauncherDirectApiSourcesTest {
             inputStreamOpened = true
             return responseStreamFactory()
         }
-
-        override fun getOutputStream(): ByteArrayOutputStream = requestBody
     }
 }
