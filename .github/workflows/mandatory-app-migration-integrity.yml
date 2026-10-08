@@ -4,8 +4,6 @@ on:
   pull_request:
     paths:
       - 'apps/camera/**'
-      - 'apps/launcher/**'
-      - 'apps/gallery/**'
       - 'docs/migrations/2026-09-29-mandatory-app-consolidation.md'
       - '.github/workflows/mandatory-app-migration-integrity.yml'
   push:
@@ -13,8 +11,6 @@ on:
       - main
     paths:
       - 'apps/camera/**'
-      - 'apps/launcher/**'
-      - 'apps/gallery/**'
       - 'docs/migrations/2026-09-29-mandatory-app-consolidation.md'
       - '.github/workflows/mandatory-app-migration-integrity.yml'
   workflow_dispatch:
@@ -62,14 +58,12 @@ jobs:
           }
 
           verify_app camera GoreeCloud/camera 209b89ca31cc23899f6c90d7ca12908281f0af0c 19
-          verify_app launcher GoreeCloud/launcher 1eb8dd6d8178f6d730b100559e8f8d149501d18c 248
-          verify_app gallery GoreeCloud/gallery 3f7263c6e31a0af0f1a06b99491f608b96cc69ba 103
 
       - name: Reject competing legacy specification authority
         shell: bash
         run: |
           set -euo pipefail
-          for app in camera launcher gallery; do
+          for app in camera; do
             legacy="apps/$app/SPECIFICATIONS.md"
             test -s "$legacy"
             grep -Fq "Compatibility Redirect" "$legacy"

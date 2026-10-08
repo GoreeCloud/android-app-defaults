@@ -1,6 +1,6 @@
 # Mandatory Android app consolidation — 2026-09-29
 
-At its September 29, 2026 cutover, this monorepo imported Camera, Launcher, Keyboard, and Gallery. The October 8, 2026 owner directive supersedes that requirement for Keyboard: `apps/keyboard/` is retired, and new Keyboard development belongs in the separate `GoreeCloud/keyboard` repository. This document retains historical cutover evidence while describing the current ownership exception.
+At its September 29, 2026 cutover, this monorepo imported Camera, Launcher, Keyboard, and Gallery. October 8 owner directives supersede imported-source ownership for Keyboard, Gallery, and Launcher. Keyboard uses its separate `GoreeCloud/keyboard` repository. Gallery will be rebuilt from new source in an individual repository. Launcher returns to `GoreeCloud/launcher` using preserved app-specific history; the source-copy PR must be accepted before final monorepo removal. This document retains historical cutover evidence while describing the current ownership exception.
 
 ## Imported Development revisions
 
@@ -20,10 +20,8 @@ Repository-scoped `.github/` content and generated `artifacts/` are excluded fro
 Each migrated application initially retains its own Gradle root inside its destination directory. This avoids silently rewriting build systems while relocating source ownership:
 
 - `apps/camera/`
-- `apps/launcher/`
-- `apps/gallery/`
 
-The repository root Gradle build continues to own the applications already integrated into that build. The migrated-app CI runs the three retained imported Gradle roots from their new monorepo paths. Shared-build convergence is a separate, reviewable engineering change.
+The repository root Gradle build continues to own the applications already integrated into that build. The migrated-app CI runs the sole retained imported Gradle root from their new monorepo paths. Shared-build convergence is a separate, reviewable engineering change.
 
 ## Validation boundary
 
@@ -38,9 +36,9 @@ The mandatory cutover intentionally preserved only the active Development integr
 Material reconciliation carried by this finalization candidate includes:
 
 - **Camera:** all non-documentation legacy branches are ancestry-contained in the imported cutover. The remaining project-specification/project-record branch is incorporated into `apps/camera/PROJECT-SPECIFICATIONS.md` and `PROJECT-RECORD.md`.
-- **Gallery:** the unique FR-001…FR-009 legacy roadmap disposition ledger from standalone PR #92 is preserved in `apps/gallery/PROJECT-RECORD.md`. Older search, selection, Glaze, Move, and physical-device stabilization branches were reviewed as superseded by newer current source or explicitly retired product direction. The project-governance branch is incorporated into the canonical project records.
+- **Gallery (historical):** the unique FR-001…FR-009 legacy roadmap disposition ledger from standalone PR #92 was preserved at the original cutover in the now-retired `apps/gallery/PROJECT-RECORD.md` (accessible via Git history). Older search, selection, Glaze, Move, and physical-device stabilization branches were reviewed as superseded by newer current source or explicitly retired product direction. The project-governance branch is incorporated into the canonical project records.
 - **Keyboard (historical only):** source, tests, assets, project records, and historical patch files previously imported under `apps/keyboard/` are retired from this monorepo following the October 8 owner directive. The new independent repository does not inherit monorepo Development or validation status.
-- **Launcher:** the reusable Platform Contract 0.4 validator pin from standalone PRs #218/#251 is translated into monorepo-root `.github/workflows/migrated-platform-contract.yml`. Legacy PR #79 exposed a lost Room dependency delta, so the Launcher Room plugin/runtime/compiler are restored from 3.0.1 to 3.0.2 for current exact-head validation. Earlier Unicode search/sort, transactional restore, security/privacy, icon/inventory, Home/page, and Glaze work was verified as present or superseded; obsolete group-operation prototypes remain planned/open rather than being misrepresented as accepted source.
+- **Launcher (historical):** the reusable Platform Contract 0.4 validator pin from standalone PRs #218/#251 is translated into monorepo-root `.github/workflows/migrated-platform-contract.yml`. Legacy PR #79 exposed a lost Room dependency delta, so the Launcher Room plugin/runtime/compiler are restored from 3.0.1 to 3.0.2 for current exact-head validation. Earlier Unicode search/sort, transactional restore, security/privacy, icon/inventory, Home/page, and Glaze work was verified as present or superseded; obsolete group-operation prototypes remain planned/open rather than being misrepresented as accepted source.
 - **Repository-scoped CI:** because nested `.github/workflows` do not execute as application workflows, relevant Platform Contract validation is reproduced at monorepo root instead of copying legacy workflow directories into `apps/*`.
 - **Migration integrity:** the one-time frozen-tree equality check is replaced with permanent provenance enforcement so legitimate post-cutover development no longer fails merely because app source changes after migration.
 
@@ -48,15 +46,19 @@ The earlier retirement issue #72 does not authorize deletion of the independent 
 
 ## Legacy repository retirement and deletion
 
-For Camera, Launcher, and Gallery, these were historical legacy-repository retirement requirements. **`GoreeCloud/keyboard` is exempt** because it is the new independent home for Keyboard development; do not delete it under the former consolidation plan.
+These are historical legacy-repository retirement requirements for Camera only. Keyboard and Launcher now have independent source ownership; Gallery will be independently rebuilt. Do not delete these independent repositories under the old consolidation rule.
 
 Required completion state:
 
 1. Reconcile every remaining legacy branch, pull-request change, issue dependency, release reference, external link, and repository-native dependency that still carries unique required information or source.
 2. Preserve required substantive project history in the monorepo project records and migration provenance before destructive retirement.
-3. Verify the monorepo default branch contains the accepted migrated state and the three retained imported application paths remain buildable under destination CI.
+3. Verify the monorepo default branch contains the accepted migrated state and the sole retained imported application path remain buildable under destination CI.
 4. Remove or update stale references that would point users or automation at the standalone repositories.
-5. Retire `GoreeCloud/camera`, `GoreeCloud/launcher`, and `GoreeCloud/gallery` when their own prerequisites are met; retain the independent `GoreeCloud/keyboard` repository.
-6. Verify live GitHub state for the remaining legacy repositories and the retained independent Keyboard repository; reconcile the canonical repository inventory from that verified state.
+5. Retire any old Camera legacy repository only when its own prerequisites are met; preserve independent Keyboard and Launcher and any future independent Gallery repositories.
+6. Verify live GitHub state for the current Camera repository and the independent Keyboard and Launcher repositories; reconcile the canonical repository inventory from that verified state.
 
-Legacy repository retirement applies to the remaining consolidated applications only. The independent Keyboard repository is not subject to this migration-deletion requirement.
+Legacy repository retirement applies only to Camera consolidation. The independent Keyboard and Launcher repositories and future Gallery repository are exempt from that historical requirement.
+
+## October 8, 2026 — Since repository split
+
+Since was an existing monorepo application before the September four-app cutover. The owner has directed native Since development to its individual `GoreeCloud/since` repository. The standalone migration PR #1 preserves the original monorepo Since tree at `9097c8cb7adecc3c969f162fc33a9e8fdde20cc4`, extracted 25-commit app history tip `6c26cccd8d912d34d427e13e14eef0282ae9c86c` and previous standalone initial history. Since source, root module wiring, app-specific CI and stale ownership references are retired from this candidate only after verified destination acceptance. Camera and Clock remain maintained in this monorepo.

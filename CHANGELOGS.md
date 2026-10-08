@@ -1,5 +1,7 @@
 # Android App Defaults — Changelogs
 
+> Historical Since entries below are dated provenance. Current Since source ownership and active feature records move to the independent `GoreeCloud/since` repository after accepted migration.
+
 
 ## 2026-09-29 — Clock widget detail personalization candidate
 
