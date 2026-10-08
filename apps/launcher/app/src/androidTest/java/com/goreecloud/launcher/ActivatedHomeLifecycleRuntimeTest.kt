@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -74,6 +75,36 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ActivatedHomeLifecycleRuntimeTest {
+    companion object {
+        private var suiteAcquiredHomeRole = false
+
+        @JvmStatic
+        @AfterClass
+        fun restoreHomeRoleAfterRuntimeSuite() = runBlocking {
+            if (!suiteAcquiredHomeRole) return@runBlocking
+
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            val roleManager = context.getSystemService(RoleManager::class.java)
+            val descriptor = InstrumentationRegistry.getInstrumentation()
+                .uiAutomation
+                .executeShellCommand(
+                    "toybox timeout 8 cmd role remove-role-holder " +
+                        "${RoleManager.ROLE_HOME} ${context.packageName}",
+                )
+            try {
+                withTimeout(10_000) {
+                    while (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                        delay(100)
+                    }
+                }
+                delay(500)
+            } finally {
+                descriptor.close()
+                suiteAcquiredHomeRole = false
+            }
+        }
+    }
+
     @get:Rule
     val composeRule = createEmptyComposeRule()
 
@@ -2440,17 +2471,26 @@ class ActivatedHomeLifecycleRuntimeTest {
         roleManager: RoleManager,
         packageName: String,
     ) {
+        if (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) return
+
         mutateHomeRoleAndAwait(
             roleManager = roleManager,
             packageName = packageName,
             shouldBeHeld = true,
         )
+        // All HOME-sensitive methods in this class require Launcher ownership. Retain the role
+        // once this suite acquires it so adjacent methods cannot race remove -> add transitions.
+        suiteAcquiredHomeRole = true
     }
 
     private suspend fun removeHomeRoleAndAwait(
         roleManager: RoleManager,
         packageName: String,
     ) {
+        if (suiteAcquiredHomeRole) {
+            // Restored once by @AfterClass after every HOME-sensitive method has completed.
+            return
+        }
         mutateHomeRoleAndAwait(
             roleManager = roleManager,
             packageName = packageName,
@@ -2464,35 +2504,26 @@ class ActivatedHomeLifecycleRuntimeTest {
         shouldBeHeld: Boolean,
     ) {
         val operation = if (shouldBeHeld) "add-role-holder" else "remove-role-holder"
-        // Keep the role child completely off UiAutomation's stdout/stderr pipe. Android 16 can
-        // leave the cmd-role pipe open after the service transition. Wait for the bounded shell
-        // wrapper to exit first, then use RoleManager as the authoritative completion signal.
-        // Require the expected state to remain stable briefly so adjacent tests cannot observe a
-        // transient remove/add transition.
-        runShellCommand(
-            "sh -c 'toybox timeout 8 cmd role $operation ${RoleManager.ROLE_HOME} $packageName " +
-                ">/dev/null 2>&1'",
-        )
-
-        withTimeout(10_000) {
-            var stableSinceMillis: Long? = null
-            while (true) {
-                val roleMatches =
-                    roleManager.isRoleHeld(RoleManager.ROLE_HOME) == shouldBeHeld
-                val now = SystemClock.uptimeMillis()
-
-                if (roleMatches) {
-                    val stableSince = stableSinceMillis ?: now.also {
-                        stableSinceMillis = it
-                    }
-                    if (now - stableSince >= 500L) {
-                        break
-                    }
-                } else {
-                    stableSinceMillis = null
+        // UiAutomation shell execution is asynchronous. Keep the descriptor alive so closing the
+        // read side cannot cancel the role command, but never drain stdout: Android 16 can leave
+        // that pipe open while RoleManager finishes the transition. RoleManager is the bounded,
+        // observable authority for completion.
+        val descriptor = InstrumentationRegistry.getInstrumentation()
+            .uiAutomation
+            .executeShellCommand(
+                "toybox timeout 8 cmd role $operation ${RoleManager.ROLE_HOME} $packageName",
+            )
+        try {
+            withTimeout(10_000) {
+                while (roleManager.isRoleHeld(RoleManager.ROLE_HOME) != shouldBeHeld) {
+                    delay(100)
                 }
-                delay(100)
             }
+            if (!shouldBeHeld) {
+                delay(500)
+            }
+        } finally {
+            descriptor.close()
         }
     }
 
