@@ -622,9 +622,6 @@ internal fun LauncherProviderControlledSearchSurface(
                         }
                     } else {
                         val topResult = results.firstOrNull()
-                        val fullSectionCounts = results
-                            .groupBy { result -> result.category }
-                            .mapValues { (_, items) -> items.size }
                         val grouped = LauncherGlazeSearchGroups.group(results.drop(1))
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
@@ -683,7 +680,7 @@ internal fun LauncherProviderControlledSearchSurface(
                                 item(key = "header:" + section.category.name) {
                                     Text(
                                         section.title + " (" +
-                                            (fullSectionCounts[section.category] ?: section.items.size) +
+                                            section.items.size +
                                             ")",
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -713,11 +710,11 @@ internal fun LauncherProviderControlledSearchSurface(
                                                             result = result,
                                                             action = action,
                                                             onLaunch = { onLaunchApp(action.app) },
-                                                            modifier = Modifier.weight(1f),
+                                                            modifier = if (chunk.size == 1) Modifier.fillMaxWidth() else Modifier.weight(1f),
                                                         )
                                                     }
                                                 }
-                                                repeat(2 - chunk.size) { Spacer(Modifier.weight(1f)) }
+                                                // A single app should occupy the whole row rather than leaving an empty column.
                                             }
                                         }
                                     }
