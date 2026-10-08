@@ -52,8 +52,8 @@ jobs:
           ).splitlines()
 
           expected = {
-              "Since build, unit tests, lint, schema, and manifest guard",
-              "Since Android 16 runtime instrumentation",
+              "Clock build, unit tests, lint, and manifest guard",
+              "Clock Android 16 runtime instrumentation",
           }
 
           app_checks = {

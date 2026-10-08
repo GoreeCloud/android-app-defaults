@@ -58,3 +58,7 @@ Required completion state:
 6. Verify live GitHub state for the current Camera repository and the independent Keyboard and Launcher repositories; reconcile the canonical repository inventory from that verified state.
 
 Legacy repository retirement applies only to Camera consolidation. The independent Keyboard and Launcher repositories and future Gallery repository are exempt from that historical requirement.
+
+## October 8, 2026 — Since repository split
+
+Since was an existing monorepo application before the September four-app cutover. The owner has directed native Since development to its individual `GoreeCloud/since` repository. The standalone migration PR #1 preserves the original monorepo Since tree at `9097c8cb7adecc3c969f162fc33a9e8fdde20cc4`, extracted 25-commit app history tip `6c26cccd8d912d34d427e13e14eef0282ae9c86c` and previous standalone initial history. Since source, root module wiring, app-specific CI and stale ownership references are retired from this candidate only after verified destination acceptance. Camera and Clock remain maintained in this monorepo.
