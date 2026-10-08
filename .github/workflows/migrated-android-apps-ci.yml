@@ -22,7 +22,6 @@ jobs:
     outputs:
       camera: ${{ steps.changes.outputs.camera }}
       launcher: ${{ steps.changes.outputs.launcher }}
-      keyboard: ${{ steps.changes.outputs.keyboard }}
       gallery: ${{ steps.changes.outputs.gallery }}
 
     steps:
@@ -66,7 +65,7 @@ jobs:
             run_all=true
           fi
 
-          for app in camera launcher keyboard gallery; do
+          for app in camera launcher gallery; do
             value=false
 
             if [ "$run_all" = "true" ] ||
@@ -377,109 +376,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  keyboard:
-    needs: changes
-    if: needs.changes.outputs.keyboard == 'true'
-    name: Keyboard validation, unit tests, and build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: apps/keyboard
-    steps:
-      - name: Check out exact candidate
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - name: Verify exact source revision
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
-      - name: Set up Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Set up Gradle 8.11.1
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          gradle-version: '8.11.1'
-      - name: Validate Keyboard boundaries
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/check_glaze_motion_evaluation.py
-          python3 scripts/check_editor_privacy_lifecycle.py
-          python3 scripts/check_keyboard_accessibility.py
-          python3 scripts/check_repository_feature_records.py
-      - name: Test and build Keyboard
-        run: gradle --no-daemon :android:app:testDebugUnitTest :android:app:assembleDebug --stacktrace
-
-  keyboard-runtime:
-    needs:
-      - changes
-      - keyboard
-    if: needs.changes.outputs.keyboard == 'true' && needs.keyboard.result == 'success'
-    name: Keyboard Android 15 runtime instrumentation
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    defaults:
-      run:
-        working-directory: apps/keyboard
-    steps:
-      - name: Check out exact candidate
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - name: Verify exact source revision
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
-      - name: Set up Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Set up Gradle 8.11.1
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          gradle-version: '8.11.1'
-      - name: Detect Android emulator acceleration
-        id: emulator-accel
-        shell: bash
-        run: |
-          if [ -e /dev/kvm ]; then
-            sudo chmod 0666 /dev/kvm || true
-          fi
-          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then
-            echo "kvm_available=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "kvm_available=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::KVM acceleration is unavailable; Keyboard Android 15 instrumentation will use software acceleration."
-          fi
-      - name: Run complete Keyboard Android 15 instrumentation suite
-        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
-        with:
-          api-level: 35
-          target: default
-          arch: x86_64
-          disable-animations: true
-          disable-linux-hw-accel: ${{ steps.emulator-accel.outputs.kvm_available != 'true' }}
-          script: gradle --project-dir "$GITHUB_WORKSPACE/apps/keyboard" --no-daemon :android:app:connectedDebugAndroidTest --stacktrace
-      - name: Upload Keyboard Android 15 test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: keyboard-android15-runtime-reports
-          path: |
-            apps/keyboard/android/app/build/reports/androidTests/connected/**
-            apps/keyboard/android/app/build/outputs/androidTest-results/connected/**
-          if-no-files-found: warn
-          retention-days: 14
 
   gallery:
     needs: changes
@@ -667,8 +563,6 @@ jobs:
       - launcher
       - launcher-runtime
       - launcher-transition-performance
-      - keyboard
-      - keyboard-runtime
       - gallery
       - gallery-runtime
     runs-on: ubuntu-24.04
@@ -687,10 +581,6 @@ jobs:
           LAUNCHER_RESULT: ${{ needs.launcher.result }}
           LAUNCHER_RUNTIME_RESULT: ${{ needs.launcher-runtime.result }}
           LAUNCHER_PERFORMANCE_RESULT: ${{ needs.launcher-transition-performance.result }}
-
-          KEYBOARD_CHANGED: ${{ needs.changes.outputs.keyboard }}
-          KEYBOARD_RESULT: ${{ needs.keyboard.result }}
-          KEYBOARD_RUNTIME_RESULT: ${{ needs.keyboard-runtime.result }}
 
           GALLERY_CHANGED: ${{ needs.changes.outputs.gallery }}
           GALLERY_RESULT: ${{ needs.gallery.result }}
@@ -728,7 +618,5 @@ jobs:
           require_result "$LAUNCHER_CHANGED" "$LAUNCHER_RESULT" "Launcher"
           require_result "$LAUNCHER_CHANGED" "$LAUNCHER_RUNTIME_RESULT" "Launcher Android 16 runtime"
           require_result "$LAUNCHER_CHANGED" "$LAUNCHER_PERFORMANCE_RESULT" "Launcher transition performance"
-          require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RESULT" "Keyboard"
-          require_result "$KEYBOARD_CHANGED" "$KEYBOARD_RUNTIME_RESULT" "Keyboard Android 15 runtime"
           require_result "$GALLERY_CHANGED" "$GALLERY_RESULT" "Gallery"
           require_result "$GALLERY_CHANGED" "$GALLERY_RUNTIME_RESULT" "Gallery Android 16 runtime"

@@ -1,6 +1,6 @@
 # Mandatory Android app consolidation — 2026-09-29
 
-GoreeCloud Camera, GoreeCloud Launcher, GoreeCloud Keyboard, and GoreeCloud Gallery are required to use `GoreeCloud/android-app-defaults` as their source-development repository.
+At its September 29, 2026 cutover, this monorepo imported Camera, Launcher, Keyboard, and Gallery. The October 8, 2026 owner directive supersedes that requirement for Keyboard: `apps/keyboard/` is retired, and new Keyboard development belongs in the separate `GoreeCloud/keyboard` repository. This document retains historical cutover evidence while describing the current ownership exception.
 
 ## Imported Development revisions
 
@@ -21,10 +21,9 @@ Each migrated application initially retains its own Gradle root inside its desti
 
 - `apps/camera/`
 - `apps/launcher/`
-- `apps/keyboard/`
 - `apps/gallery/`
 
-The repository root Gradle build continues to own the applications already integrated into that build. The migrated-app CI runs the four imported Gradle roots from their new monorepo paths. Shared-build convergence is a separate, reviewable engineering change.
+The repository root Gradle build continues to own the applications already integrated into that build. The migrated-app CI runs the three retained imported Gradle roots from their new monorepo paths. Shared-build convergence is a separate, reviewable engineering change.
 
 ## Validation boundary
 
@@ -40,24 +39,24 @@ Material reconciliation carried by this finalization candidate includes:
 
 - **Camera:** all non-documentation legacy branches are ancestry-contained in the imported cutover. The remaining project-specification/project-record branch is incorporated into `apps/camera/PROJECT-SPECIFICATIONS.md` and `PROJECT-RECORD.md`.
 - **Gallery:** the unique FR-001…FR-009 legacy roadmap disposition ledger from standalone PR #92 is preserved in `apps/gallery/PROJECT-RECORD.md`. Older search, selection, Glaze, Move, and physical-device stabilization branches were reviewed as superseded by newer current source or explicitly retired product direction. The project-governance branch is incorporated into the canonical project records.
-- **Keyboard:** the standalone security boundary is preserved as `apps/keyboard/SECURITY.md`. Legacy PR #61 exposed one substantive lost behavior—NFC normalization for canonically equivalent local suggestion matching—so that behavior is adapted to the current indexed/ranked `SuggestionEngine` with regression tests. Historical Glaze/platform/accessibility/cursor/toolbar work is either superseded by current cutover source or explicitly retired while its still-open product obligations remain in `PLANNED-FEATURES.md`.
+- **Keyboard (historical only):** source, tests, assets, project records, and historical patch files previously imported under `apps/keyboard/` are retired from this monorepo following the October 8 owner directive. The new independent repository does not inherit monorepo Development or validation status.
 - **Launcher:** the reusable Platform Contract 0.4 validator pin from standalone PRs #218/#251 is translated into monorepo-root `.github/workflows/migrated-platform-contract.yml`. Legacy PR #79 exposed a lost Room dependency delta, so the Launcher Room plugin/runtime/compiler are restored from 3.0.1 to 3.0.2 for current exact-head validation. Earlier Unicode search/sort, transactional restore, security/privacy, icon/inventory, Home/page, and Glaze work was verified as present or superseded; obsolete group-operation prototypes remain planned/open rather than being misrepresented as accepted source.
 - **Repository-scoped CI:** because nested `.github/workflows` do not execute as application workflows, relevant Platform Contract validation is reproduced at monorepo root instead of copying legacy workflow directories into `apps/*`.
 - **Migration integrity:** the one-time frozen-tree equality check is replaced with permanent provenance enforcement so legitimate post-cutover development no longer fails merely because app source changes after migration.
 
-Target issue #72 controls destructive retirement. Repository deletion is permitted only after the reconciliation issues are complete, the accepted monorepo default branch is read back, destination CI is green, required references/dependencies are updated, and the canonical repository index can be reconciled from verified post-deletion GitHub state.
+The earlier retirement issue #72 does not authorize deletion of the independent Keyboard repository. Target issue #72 controlled historical destructive retirement. Repository deletion is permitted only after the reconciliation issues are complete, the accepted monorepo default branch is read back, destination CI is green, required references/dependencies are updated, and the canonical repository index can be reconciled from verified post-deletion GitHub state.
 
 ## Legacy repository retirement and deletion
 
-The four standalone repositories are temporary migration sources, not permanent archives. New product source development belongs only in this monorepo after the migration cutover.
+For Camera, Launcher, and Gallery, these were historical legacy-repository retirement requirements. **`GoreeCloud/keyboard` is exempt** because it is the new independent home for Keyboard development; do not delete it under the former consolidation plan.
 
 Required completion state:
 
 1. Reconcile every remaining legacy branch, pull-request change, issue dependency, release reference, external link, and repository-native dependency that still carries unique required information or source.
 2. Preserve required substantive project history in the monorepo project records and migration provenance before destructive retirement.
-3. Verify the monorepo default branch contains the accepted migrated state and the four application paths remain buildable under destination CI.
+3. Verify the monorepo default branch contains the accepted migrated state and the three retained imported application paths remain buildable under destination CI.
 4. Remove or update stale references that would point users or automation at the standalone repositories.
-5. Delete `GoreeCloud/camera`, `GoreeCloud/launcher`, `GoreeCloud/keyboard`, and `GoreeCloud/gallery` after the preceding reconciliation is complete.
-6. Verify GitHub no longer reports those standalone repositories, then update the canonical GoreeCloud repository inventory from that live state.
+5. Retire `GoreeCloud/camera`, `GoreeCloud/launcher`, and `GoreeCloud/gallery` when their own prerequisites are met; retain the independent `GoreeCloud/keyboard` repository.
+6. Verify live GitHub state for the remaining legacy repositories and the retained independent Keyboard repository; reconcile the canonical repository inventory from that verified state.
 
-Repository deletion is a migration completion requirement. Until deletion is verified, the consolidation remains operationally incomplete even though active source ownership has already moved to this monorepo.
+Legacy repository retirement applies to the remaining consolidated applications only. The independent Keyboard repository is not subject to this migration-deletion requirement.
