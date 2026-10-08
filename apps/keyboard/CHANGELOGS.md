@@ -1,5 +1,18 @@
 # GoreeCloud Keyboard — Changelogs
 
+## October 6, 2026 — bounded Arabic prefix suggestions candidate
+
+- Added a small first-party, device-local Arabic completion lexicon for the explicitly selected Arabic IME subtype.
+- Arabic candidates are **prefix completions only** from the word entered through GoreeCloud Keyboard in the current session. Arabic does not read surrounding editor context for candidate generation and still has no autocorrection, next-word prediction, swipe-dictionary decoding, or learned-language capture.
+- Candidate acceptance verifies only the exact locally tracked prefix immediately before the cursor before replacement; stale or mismatched editor state fails closed.
+- Arabic backspace invalidates the local candidate prefix rather than reconstructing a word from editor look-behind.
+- Sensitive editors and host no-suggestions editors continue to suppress capture, display, and acceptance.
+- Added Unicode/NFC and fail-closed coverage for Arabic-only prefix matching.
+- Reconciled repository lifecycle records: protected main commit `1bd60b949696d7774058ed19b7a6ecf67126e293` (#186) already integrated explicit English/Arabic toolbar switching through Android's enabled IME subtype authority.
+
+This remains a Development candidate pending fresh exact-head CI plus native-language, RTL/BiDi, TalkBack/Switch Access, host-editor/OEM, performance/power, signing, recovery, and release acceptance.
+
+
 ## October 6, 2026 — Spacebar cursor privacy and ergonomics combined candidate
 
 - Centralized cursor-control eligibility behind a fail-closed policy using only the existing device setting, editor sensitivity classification, Keyboard layer, and Android touch-exploration state.

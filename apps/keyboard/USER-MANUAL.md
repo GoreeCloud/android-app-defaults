@@ -176,6 +176,18 @@ For ordinary non-sensitive clips, local **smart content detection** can identify
 
 Clipboard payloads are not used for suggestions, autocorrect, prediction, learning, portable preference export, backup, synchronization, or telemetry. The current Keyboard-side controls are not the future privileged GoreeCloud Secure Paste Broker and cannot globally stop another Android app from using the platform clipboard APIs.
 
+## English and Arabic input
+
+GoreeCloud Keyboard exposes first-party **English (US)** and **Arabic** Android IME subtypes. Android's explicitly selected subtype is the language authority; Keyboard does not guess language from what you type, the current app, or the device locale.
+
+- The toolbar language control shows **AR** while English is active and **EN** while Arabic is active. Selecting it asks Android to switch to the next enabled GoreeCloud Keyboard subtype. If the other subtype is not enabled, Keyboard announces that no alternate GoreeCloud Keyboard language is available.
+- Arabic uses Arabic letter rows, Arabic-Indic digits, an Arabic spacebar label, RTL language metadata, Arabic punctuation, and language-specific long-press alternates.
+- In this Development candidate, Arabic can show up to three **prefix completions** from a small packaged local lexicon. Candidates use only the Arabic word prefix entered through GoreeCloud Keyboard in the current session.
+- Arabic candidate generation does not read surrounding editor text, auto-correct Arabic, predict the next word, decode Arabic swipe gestures, learn from Arabic typing, or persist/upload typed Arabic. Sensitive fields and editors that disable suggestions continue to suppress the candidate strip.
+- If cursor/backspace activity makes the locally tracked Arabic prefix uncertain, Keyboard drops the Arabic candidate prefix until the next word boundary rather than rebuilding it from editor context.
+
+Broader Arabic vocabulary/ranking, contextual assistance, RTL/BiDi host-editor acceptance, native-language review, accessibility, and representative-device acceptance remain open.
+
 ## One-handed key rows
 
 In this Development candidate, **Settings → One-handed layout** offers **Off**, **Left**, and **Right**.

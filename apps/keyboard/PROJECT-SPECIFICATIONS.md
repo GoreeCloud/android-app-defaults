@@ -143,7 +143,7 @@ Historical Glaze Motion evaluation remains test-only and provides no current V1.
 GoreeCloud Keyboard must evolve as a complete first-party input product rather than a minimal demo. Subject to separate implementation and acceptance, target capability families include:
 
 - broader language dictionaries, context-aware prediction, user dictionaries, and higher-confidence multi-edit correction without default typed-content retention;
-- multilingual layouts and explicit language switching;
+- broader multilingual layouts and script-appropriate assistance beyond the implemented English/Arabic subtype foundation and explicit Android-authorized switching;
 - multilingual and higher-order gesture/swipe recognition beyond the current local QWERTY shape decoder;
 - richer emoji, symbol, kaomoji, and specialized input discovery;
 - GoreeCloud Secure Paste and privacy-governed clipboard tools;
