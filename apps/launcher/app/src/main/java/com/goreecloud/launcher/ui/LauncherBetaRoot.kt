@@ -8725,39 +8725,6 @@ private fun DrawerAppsContent(
             }
         }
         LauncherDrawerLayoutMode.COMPACT -> {
-            val gridState = rememberLazyGridState(
-                initialFirstVisibleItemIndex = restoredPosition?.itemIndex
-                    ?.coerceIn(0, (entries.size - 1).coerceAtLeast(0))
-                    ?: 0,
-                initialFirstVisibleItemScrollOffset = restoredPosition?.itemScrollOffset ?: 0,
-            )
-            val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
-            LaunchedEffect(positionContextKey, query, restoredPosition, entries.size) {
-                val targetIndex = restoredPosition?.itemIndex
-                    ?.coerceIn(0, (entries.size - 1).coerceAtLeast(0))
-                    ?: 0
-                gridState.scrollToItem(
-                    targetIndex,
-                    restoredPosition?.itemScrollOffset ?: 0,
-                )
-            }
-            DisposableEffect(positionContextKey, query, positionCaptureEnabled, gridState) {
-                onDispose {
-                    if (query.isBlank() && positionCaptureEnabled) {
-                        currentOnPositionChanged(
-                            LauncherDrawerPosition(
-                                contextKey = positionContextKey,
-                                itemIndex = gridState.firstVisibleItemIndex,
-                                itemScrollOffset = gridState.firstVisibleItemScrollOffset,
-                            ),
-                        )
-                    }
-                }
-            }
-            val dismissConnection = rememberDrawerDismissNestedScrollConnection(
-                canScrollBackward = { gridState.canScrollBackward },
-                onDismiss = onDismiss,
-            )
             val alphabetTargets = remember(entries, sortOrder, query) {
                 if (sortOrder == LauncherDrawerSortOrder.ALPHABETICAL && query.isBlank()) {
                     launcherDrawerAlphabetTargets(entries) { it.label }
@@ -8765,51 +8732,39 @@ private fun DrawerAppsContent(
                     emptyList()
                 }
             }
-            val alphabetScope = rememberCoroutineScope()
+            var alphabetJumpRequest by remember {
+                mutableStateOf<Pair<Int, Int>?>(null)
+            }
             Column(modifier = modifier.fillMaxWidth()) {
                 DrawerAlphabetIndex(
                     targets = if (showAlphabetIndex) alphabetTargets else emptyList(),
                     secondaryColor = secondaryColor,
                     onJumpToIndex = { index ->
-                        alphabetScope.launch { gridState.animateScrollToItem(index) }
+                        alphabetJumpRequest = index to ((alphabetJumpRequest?.second ?: 0) + 1)
                     },
                 )
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(preferences.drawerColumns),
-                    state = gridState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .nestedScroll(dismissConnection),
-                    contentPadding = PaddingValues(vertical = compactSpacing),
-                    horizontalArrangement = Arrangement.spacedBy(compactSpacing),
-                    verticalArrangement = Arrangement.spacedBy(compactSpacing),
-                ) {
-                    items(
-                        items = entries,
-                        key = { entry -> entry.stableKey },
-                        contentType = { entry ->
-                            when (entry) {
-                                is LauncherDrawerVisualEntry.Application -> "app"
-                                is LauncherDrawerVisualEntry.Folder -> "folder"
-                            }
-                        },
-                    ) { entry ->
-                        LauncherDrawerVisualTile(
-                            entry = entry,
-                            allApps = apps,
-                            lockedAppKeys = lockedAppKeys,
-                            iconScale = preferences.iconScale,
-                            showLabel = experiencePreferences.showDrawerLabels,
-                            compact = true,
-                            layoutLocked = preferences.layoutLocked,
-                            onLaunchApp = onLaunchApp,
-                            onManageApp = onManageApp,
-                            onOpenFolder = onOpenFolder,
-                            modifier = Modifier.height(compactTileHeight),
-                        )
-                    }
-                }
+                StableDrawerVerticalGrid(
+                    entries = entries,
+                    allApps = apps,
+                    lockedAppKeys = lockedAppKeys,
+                    columns = preferences.drawerColumns,
+                    iconScale = preferences.iconScale,
+                    showLabel = experiencePreferences.showDrawerLabels,
+                    compact = true,
+                    layoutLocked = preferences.layoutLocked,
+                    spacing = compactSpacing,
+                    tileHeight = compactTileHeight,
+                    onLaunchApp = onLaunchApp,
+                    onManageApp = onManageApp,
+                    onOpenFolder = onOpenFolder,
+                    onDismiss = onDismiss,
+                    alphabetJumpRequest = alphabetJumpRequest,
+                    restoredPosition = restoredPosition,
+                    positionContextKey = positionContextKey,
+                    positionEnabled = query.isBlank() && positionCaptureEnabled,
+                    onPositionChanged = onPositionChanged,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
         LauncherDrawerLayoutMode.LIST -> {
