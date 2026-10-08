@@ -36,6 +36,27 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
 
+      - name: Reject retired app source and Gradle modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Launcher, Since, and Keyboard are independent repositories.
+          # Gallery is a separate new-source project, not an in-monorepo import.
+          for retired in keyboard gallery launcher since; do
+            if [ -n "$(git ls-files -- "apps/${retired}")" ]; then
+              echo "::error::Retired apps/${retired}/ source must not return to android-app-defaults."
+              exit 1
+            fi
+          done
+          if [ -n "$(git ls-files -- docs/migrations/legacy-source/keyboard)" ]; then
+            echo "::error::Retired Keyboard migration source must not return."
+            exit 1
+          fi
+          if grep -Eq ':apps:(keyboard|gallery|launcher|since)["\x27]' settings.gradle.kts; then
+            echo "::error file=settings.gradle.kts::Retired application module declaration was restored."
+            exit 1
+          fi
+
       - name: Detect affected migrated apps
         id: changes
         shell: bash
