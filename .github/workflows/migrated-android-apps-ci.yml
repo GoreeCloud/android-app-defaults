@@ -52,7 +52,7 @@ jobs:
             echo "::error::Retired Keyboard migration source must not return."
             exit 1
           fi
-          if grep -Eq ':apps:(keyboard|gallery|launcher|since)["\x27]' settings.gradle.kts; then
+          if grep -Eq ':apps:(keyboard|gallery|launcher|since)' settings.gradle.kts; then
             echo "::error file=settings.gradle.kts::Retired application module declaration was restored."
             exit 1
           fi
