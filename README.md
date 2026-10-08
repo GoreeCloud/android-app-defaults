@@ -2,15 +2,17 @@
 
 A privacy-focused monorepo of lightweight replacements for common Android default and utility apps. Each app remains independently installable and maintainable while sharing architecture, UI components, privacy controls, accessibility features, themes, utilities, and development standards.
 
-## Mandatory app repository consolidation
+## Current source ownership — verified October 8, 2026
 
-Camera remains consolidated under `apps/camera/`. The owner has directed Keyboard, Gallery, and Launcher to separate ownership. Keyboard now has independent source ownership in `GoreeCloud/keyboard`; Gallery will be redeveloped from new source in its own repository; Launcher source and history are transferred through the separate `GoreeCloud/launcher` migration, with final monorepo retirement contingent on that accepted destination. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
+The owner-directed source split was accepted through protected monorepo [PR #291](https://github.com/GoreeCloud/android-app-defaults/pull/291) and read back on `main` at `068a958074431fabecff8748c9b630ea9dfdf6b9`. **Only `apps/camera/` and `apps/clock/` remain maintained here.** Their builds and the post-merge Android 16 Clock runtime gate passed.
 
-## Current Development state
+Keyboard belongs to the independent [`GoreeCloud/keyboard`](https://github.com/GoreeCloud/keyboard) repository. Launcher belongs to independent [`GoreeCloud/launcher`](https://github.com/GoreeCloud/launcher); the source migration merged in Launcher PR #1, and the documentation follow-up merged in PR #2. Since belongs to independent [`GoreeCloud/since`](https://github.com/GoreeCloud/since); its source and documentation migrations merged in PRs #1 and #2. The owner directed a **new-source** standalone Gallery application; the `GoreeCloud/gallery` destination has not yet been created or verified. Previous Gallery source, like the other retired module sources, remains recoverable through this repository's Git history, but is not the current development destination.
 
-This repository retains `apps/camera/` and `apps/clock/`. The owner has directed GoreeCloud Since to its independent `GoreeCloud/since` repository, with old `apps/since/` ownership retired in this candidate only after standalone acceptance. Historical source and development evidence remain accessible in Git history. Earlier imported Keyboard, Gallery, and Launcher were retired in the preceding stacked candidate.
+The required migrated-app CI change-detection job rejects tracked `apps/keyboard/`, `apps/gallery/`, `apps/launcher/`, and `apps/since/` reintroductions and their old root Gradle module declarations. This restriction does not prohibit preserving honest historical references within migration documents.
 
-**Development:** the repository split does not imply Stable or production acceptance. Since-specific source, tasks and feature tracking belong in `GoreeCloud/since` following verified migration.
+**Lifecycle:** all source transfers are Development-level integrations, not physical-device, persistent-signing/update-continuity, nine-platform-system, Release Candidate, Production, or Stable acceptance. Independent Launcher post-merge Android 16 test reliability remains tracked in [Launcher issue #3](https://github.com/GoreeCloud/launcher/issues/3).
+
+See [the migration history](docs/migrations/2026-09-29-mandatory-app-consolidation.md) for the former September monorepo cutover and the October owner-directed split.
 
 ## Build
 
@@ -29,7 +31,7 @@ gradle :apps:clock:testDebugUnitTest :apps:clock:lintDebug :apps:clock:assembleD
 - [Planned features](PLANNED-FEATURES.md)
 - [Changelogs](CHANGELOGS.md)
 
-GitHub issue #1 tracks the current GoreeCloud Since Development and stabilization work.
+Former monorepo issue #1 is historical Since tracking provenance. Current Since development and ongoing product tasks are owned by `GoreeCloud/since` and GoreeCloud's authoritative Drive task records.
 
 
 ## GoreeCloud Clock Development candidate
