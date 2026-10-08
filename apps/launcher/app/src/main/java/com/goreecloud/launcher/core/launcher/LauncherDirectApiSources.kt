@@ -187,6 +187,17 @@ internal class LauncherDirectApiSourceStore(
     private val lock = Any()
     private val file = AtomicFile(File(context.noBackupFilesDir, fileName))
 
+    init {
+        require(
+            fileName.matches(Regex("direct_api_sources_[A-Za-z0-9_.-]{1,100}\\.enc")),
+        ) { "Direct API storage filename is outside the app-private namespace" }
+        require(
+            keyAlias.matches(
+                Regex("goreecloud_launcher_search_direct_api_[A-Za-z0-9_.-]{1,160}"),
+            ),
+        ) { "Direct API Keystore alias is outside the Launcher namespace" }
+    }
+
     fun list(): List<LauncherDirectApiSource> = synchronized(lock) {
         val raw = readEncrypted() ?: return@synchronized emptyList()
         val array = JSONObject(String(raw, StandardCharsets.UTF_8)).getJSONArray("sources")
