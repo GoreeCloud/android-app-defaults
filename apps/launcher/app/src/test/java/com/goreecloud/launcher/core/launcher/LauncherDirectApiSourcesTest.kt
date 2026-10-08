@@ -8,6 +8,7 @@ import java.net.InetAddress
 import java.net.URL
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -189,7 +190,7 @@ class LauncherDirectApiSourcesTest {
                 }
             },
         )
-        val job = launch {
+        val job = launch(Dispatchers.Default) {
             testClient(connection).answer(testSearchSource(), "hello")
         }
 
