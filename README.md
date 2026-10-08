@@ -4,13 +4,13 @@ A privacy-focused monorepo of lightweight replacements for common Android defaul
 
 ## Mandatory app repository consolidation
 
-Camera, Launcher, and Gallery remain in this monorepo under `apps/camera/`, `apps/launcher/`, and `apps/gallery/`. Keyboard was included in the historical September 2026 cutover, but the owner has since directed its removal from this repository and independent redevelopment in `GoreeCloud/keyboard`. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
+Camera remains consolidated under `apps/camera/`. The owner has directed Keyboard, Gallery, and Launcher to separate ownership. Keyboard now has independent source ownership in `GoreeCloud/keyboard`; Gallery will be redeveloped from new source in its own repository; Launcher source and history are transferred through the separate `GoreeCloud/launcher` migration, with final monorepo retirement contingent on that accepted destination. See [the migration record](docs/migrations/2026-09-29-mandatory-app-consolidation.md).
 
 ## Current Development state
 
-The repository is in **Development**. Current application modules include GoreeCloud Since plus the mandatorily consolidated Camera, Launcher, and Gallery projects under `apps/`. Keyboard is retired from this monorepo.
+The repository is in **Development**. The maintained application directories are `apps/since/`, `apps/clock/`, and `apps/camera/`. The historical Keyboard, Gallery, and Launcher imported directories are retired by this migration candidate.
 
-PR #50 carries the first GoreeCloud Clock candidate under `apps/clock/`; Clock is not represented as integrated into `main` until that PR is accepted.
+GoreeCloud Clock source is present under `apps/clock/`. This migration does not alter its code or build.
 
 Verified `main` contains the independent Android application foundation and Room persistence foundation: local-only/fail-closed manifest behavior, calendar-aware elapsed-time semantics, Room schema v1, SQLite invariants, transactional tracker aggregate creation, repository/domain mapping, committed schema evidence, and Android 16 runtime database tests.
 
