@@ -373,7 +373,7 @@ internal class LauncherDirectApiAnswerClient(
             // hardened DNS-pinned broker is still a later gate.
             val host = checkNotNull(URI(endpoint).host)
             val addresses = withTimeoutOrNull(dnsTimeoutMillis) {
-                runInterruptible(Dispatchers.IO) { addressResolver(host) }
+                runDirectApiInterruptible { addressResolver(host) }
             } ?: throw IllegalStateException("Provider DNS lookup timed out")
             require(addresses.isNotEmpty() && addresses.all(::launcherDirectApiIsPublicAddress)) {
                 "The API endpoint must resolve to a public address"
@@ -441,13 +441,13 @@ internal class LauncherDirectApiAnswerClient(
                             ))
                         }
                     }
-                    runInterruptible(Dispatchers.IO) {
+                    runDirectApiInterruptible {
                         connection.outputStream.use { stream ->
                             stream.write(request.toString().toByteArray(StandardCharsets.UTF_8))
                         }
                     }
                 }
-                val status = runInterruptible(Dispatchers.IO) { connection.responseCode }
+                val status = runDirectApiInterruptible { connection.responseCode }
                 if (status !in 200..299) {
                     throw IllegalStateException("Provider returned HTTP " + status)
                 }
@@ -456,7 +456,7 @@ internal class LauncherDirectApiAnswerClient(
                     val block = ByteArray(4096)
                     while (true) {
                         coroutineContext.ensureActive()
-                        val count = runInterruptible(Dispatchers.IO) { stream.read(block) }
+                        val count = runDirectApiInterruptible { stream.read(block) }
                         if (count < 0) break
                         if (output.size() + count > 96_000) {
                             throw IllegalStateException("Provider response exceeds the size limit")
@@ -477,6 +477,17 @@ internal class LauncherDirectApiAnswerClient(
                 cancellation.dispose()
                 connection.disconnect()
             }
+        }
+
+    private suspend fun <T> runDirectApiInterruptible(block: () -> T): T =
+        try {
+            runInterruptible(Dispatchers.IO, block)
+        } catch (failure: Exception) {
+            // Blocking Java I/O may surface InterruptedIOException/SocketException before
+            // runInterruptible can rethrow coroutine cancellation. Preserve cancellation as the
+            // authoritative result so UI Cancel/query changes never become provider-error states.
+            coroutineContext.ensureActive()
+            throw failure
         }
 
     private fun extractAnswer(source: LauncherDirectApiSource, root: JSONObject): String =
