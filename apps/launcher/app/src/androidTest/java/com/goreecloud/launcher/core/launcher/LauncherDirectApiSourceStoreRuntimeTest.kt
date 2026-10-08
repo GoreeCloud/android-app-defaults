@@ -2,9 +2,18 @@ package com.goreecloud.launcher.core.launcher
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.InetAddress
+import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.security.KeyStore
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -107,4 +116,101 @@ class LauncherDirectApiSourceStoreRuntimeTest {
         }
         assertFalse(file.exists())
     }
+}
+
+
+/** Android-runtime coverage for response parsing and request construction unavailable to JVM stubs. */
+@RunWith(AndroidJUnit4::class)
+class LauncherDirectApiAnswerClientRuntimeTest {
+    @Test
+    fun malformedSuccessJsonFailsWithGenericMessageAndDisconnects() = runBlocking {
+        val connection = DirectApiFakeHttpURLConnection(
+            url = URL("https://api.example.com/chat"),
+            status = 200,
+            responseBytes = "not-json provider-private-text".toByteArray(),
+        )
+        val error = runCatching {
+            runtimeClient(connection).answer(runtimeChatSource(), "hello")
+        }.exceptionOrNull()
+
+        assertTrue(error is IllegalStateException)
+        assertEquals("Provider returned invalid JSON", error?.message)
+        assertFalse(error?.message.orEmpty().contains("provider-private-text"))
+        assertTrue(connection.disconnected)
+    }
+
+    @Test
+    fun successfulFixtureUsesExpectedPostAndParsesAnswer() = runBlocking {
+        val connection = DirectApiFakeHttpURLConnection(
+            url = URL("https://api.example.com/chat"),
+            status = 200,
+            responseBytes = runtimeValidAnswerBytes(),
+        )
+
+        val answer = runtimeClient(connection).answer(runtimeChatSource(), "hello")
+
+        assertEquals("fixture answer", answer)
+        assertEquals("POST", connection.requestMethod)
+        assertEquals("Bearer fixture-secret", connection.getRequestProperty("Authorization"))
+        assertTrue(
+            connection.requestBody.toString(StandardCharsets.UTF_8.name())
+                .contains("\"content\":\"hello\""),
+        )
+        assertTrue(connection.disconnected)
+    }
+
+    private fun runtimeChatSource(): LauncherDirectApiSource = LauncherDirectApiSource(
+        id = "custom.runtime.fixture",
+        kind = LauncherDirectApiKind.CUSTOM_CHAT,
+        title = "Runtime fixture API",
+        endpoint = "https://api.example.com/chat",
+        model = "fixture-model",
+        secret = "fixture-secret",
+        enabled = true,
+    )
+
+    private fun runtimeClient(
+        connection: DirectApiFakeHttpURLConnection,
+    ): LauncherDirectApiAnswerClient = LauncherDirectApiAnswerClient(
+        addressResolver = { arrayOf(runtimePublicAddress()) },
+        connectionFactory = { connection },
+    )
+
+    private fun runtimePublicAddress(): InetAddress =
+        InetAddress.getByAddress(byteArrayOf(8, 8, 8, 8))
+
+    private fun runtimeValidAnswerBytes(): ByteArray =
+        """{"choices":[{"message":{"content":"fixture answer"}}]}"""
+            .toByteArray(StandardCharsets.UTF_8)
+}
+
+private class DirectApiFakeHttpURLConnection(
+    url: URL,
+    private val status: Int,
+    private val responseStreamFactory: () -> InputStream,
+) : HttpURLConnection(url) {
+    constructor(
+        url: URL,
+        status: Int,
+        responseBytes: ByteArray,
+    ) : this(url, status, { ByteArrayInputStream(responseBytes) })
+
+    val requestBody = ByteArrayOutputStream()
+    var disconnected = false
+
+    override fun disconnect() {
+        disconnected = true
+    }
+
+    override fun usingProxy(): Boolean = false
+
+    override fun connect() {
+        connected = true
+    }
+
+    override fun getResponseCode(): Int = status
+
+    override fun getInputStream(): InputStream = responseStreamFactory()
+
+    override fun getOutputStream(): ByteArrayOutputStream = requestBody
 }

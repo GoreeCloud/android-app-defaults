@@ -1427,30 +1427,82 @@ class ActivatedHomeLifecycleRuntimeTest {
 
             val dao = LauncherDatabaseProvider.get(context).workspaceDao()
             val preferences = LauncherPreferencesRepository(context).preferences.first()
-            val roomPlacement = WorkspaceRoomPlacementRepository(
-                authorityRepository = repository,
-                workspaceDaoProvider = { dao },
-            )
-            val baseline = roomPlacement.replace(
-                favoriteKeys = listOf(firstKey, secondKey),
-                dockKeys = emptyList(),
-                homeGrid = WorkspaceGridPlacement.Grid(
-                    columns = preferences.homeColumns,
-                    rows = preferences.homeRows,
-                ),
-            )
-            check(baseline is WorkspaceRoomWriteResult.Written) {
-                "Expected deterministic Room baseline before Activity launch; result was $baseline."
-            }
-
-            val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
-                columns = preferences.homeColumns,
-                rows = preferences.homeRows,
-            )
-            check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
-
             val scenario = ActivityScenario.launch(MainActivity::class.java)
             try {
+                waitForDisplayedTag("launcher-home-swipe-surface")
+                composeRule.waitForIdle()
+
+                // HOME remains owned across this instrumentation class. Android may therefore
+                // relaunch MainActivity between tests before this method explicitly launches its
+                // scenario. Normalize app placement only through the production coordinator that
+                // Home observes instead of rewriting the Room snapshot underneath a live Home.
+                val expectedFavoriteKeys = setOf(firstKey, secondKey)
+                val baselinePlacement = withTimeout(10_000) {
+                    runtime.observePlacement().first { state ->
+                        state is WorkspaceAuthoritativePlacementState.Ready
+                    }
+                } as WorkspaceAuthoritativePlacementState.Ready
+
+                baselinePlacement.snapshot.favoriteKeys
+                    .filterNot(expectedFavoriteKeys::contains)
+                    .forEach { existingKey ->
+                        val removal = runtime.toggleFavorite(
+                            key = existingKey,
+                            homeColumns = preferences.homeColumns,
+                            homeRows = preferences.homeRows,
+                        )
+                        check(removal is WorkspaceAuthoritativeWriteResult.Written) {
+                            "Expected production favorite removal; result was $removal."
+                        }
+                    }
+                baselinePlacement.snapshot.dockKeys.forEach { existingKey ->
+                    val removal = runtime.toggleDock(existingKey)
+                    check(removal is WorkspaceAuthoritativeWriteResult.Written) {
+                        "Expected production Dock removal; result was $removal."
+                    }
+                }
+
+                var normalizedPlacement = withTimeout(10_000) {
+                    runtime.observePlacement().first { state ->
+                        state is WorkspaceAuthoritativePlacementState.Ready &&
+                            state.snapshot.favoriteKeys.all(expectedFavoriteKeys::contains) &&
+                            state.snapshot.dockKeys.isEmpty()
+                    }
+                } as WorkspaceAuthoritativePlacementState.Ready
+
+                listOf(firstKey, secondKey).forEach { expectedKey ->
+                    if (expectedKey !in normalizedPlacement.snapshot.favoriteKeys) {
+                        val addition = runtime.toggleFavorite(
+                            key = expectedKey,
+                            homeColumns = preferences.homeColumns,
+                            homeRows = preferences.homeRows,
+                        )
+                        check(addition is WorkspaceAuthoritativeWriteResult.Written) {
+                            "Expected production favorite write; result was $addition."
+                        }
+                        normalizedPlacement = withTimeout(10_000) {
+                            runtime.observePlacement().first { state ->
+                                state is WorkspaceAuthoritativePlacementState.Ready &&
+                                    expectedKey in state.snapshot.favoriteKeys
+                            }
+                        } as WorkspaceAuthoritativePlacementState.Ready
+                    }
+                }
+
+                withTimeout(10_000) {
+                    runtime.observePlacement().first { state ->
+                        state is WorkspaceAuthoritativePlacementState.Ready &&
+                            state.snapshot.favoriteKeys.toSet() == expectedFavoriteKeys &&
+                            state.snapshot.dockKeys.isEmpty()
+                    }
+                }
+
+                val spatialReady = runtime.ensurePrimaryHomeSpatialGrid(
+                    columns = preferences.homeColumns,
+                    rows = preferences.homeRows,
+                )
+                check(spatialReady is WorkspacePrimaryHomeSpatialResult.Ready)
+
                 waitForDisplayedLabel(firstApp.label.toString())
                 waitForDisplayedLabel(secondApp.label.toString())
 
