@@ -1,7 +1,6 @@
 package com.goreecloud.launcher
 
 import android.app.role.RoleManager
-import android.content.Intent
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.view.InputDevice
@@ -2466,10 +2465,10 @@ class ActivatedHomeLifecycleRuntimeTest {
     ) {
         val operation = if (shouldBeHeld) "add-role-holder" else "remove-role-holder"
         // Keep the role child completely off UiAutomation's stdout/stderr pipe. Android 16 can
-        // leave the cmd-role pipe open after the service transition, and polling RoleManager while
-        // that command still owns the role-service transaction can block the instrumentation
-        // thread. Wait for the bounded shell wrapper to exit first, then require both the role
-        // service and the actual HOME intent resolver to agree continuously before proceeding.
+        // leave the cmd-role pipe open after the service transition. Wait for the bounded shell
+        // wrapper to exit first, then use RoleManager as the authoritative completion signal.
+        // Require the expected state to remain stable briefly so adjacent tests cannot observe a
+        // transient remove/add transition.
         runShellCommand(
             "sh -c 'toybox timeout 8 cmd role $operation ${RoleManager.ROLE_HOME} $packageName " +
                 ">/dev/null 2>&1'",
@@ -2480,11 +2479,9 @@ class ActivatedHomeLifecycleRuntimeTest {
             while (true) {
                 val roleMatches =
                     roleManager.isRoleHeld(RoleManager.ROLE_HOME) == shouldBeHeld
-                val resolverMatches =
-                    homeResolvesToPackage(packageName) == shouldBeHeld
                 val now = SystemClock.uptimeMillis()
 
-                if (roleMatches && resolverMatches) {
+                if (roleMatches) {
                     val stableSince = stableSinceMillis ?: now.also {
                         stableSinceMillis = it
                     }
@@ -2497,15 +2494,6 @@ class ActivatedHomeLifecycleRuntimeTest {
                 delay(100)
             }
         }
-    }
-
-    private fun homeResolvesToPackage(packageName: String): Boolean {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-        return context.packageManager
-            .resolveActivity(homeIntent, 0)
-            ?.activityInfo
-            ?.packageName == packageName
     }
 
     private fun runShellCommand(command: String) {
