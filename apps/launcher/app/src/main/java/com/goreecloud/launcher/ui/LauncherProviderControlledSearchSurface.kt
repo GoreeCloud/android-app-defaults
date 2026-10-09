@@ -578,10 +578,6 @@ internal fun LauncherProviderControlledSearchSurface(
                         }
                     }
 
-                    LauncherDirectApiAnswerPanel(
-                        query = query,
-                        sources = directApiSources,
-                    )
 
                     if (results.isEmpty() && explicitHandoffs.isEmpty()) {
                         Column(
@@ -780,6 +776,10 @@ internal fun LauncherProviderControlledSearchSurface(
                             }
                         }
                     }
+                    LauncherDirectApiAnswerPanel(
+                        query = query,
+                        sources = directApiSources,
+                    )
                     if (explicitHandoffs.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Text(
