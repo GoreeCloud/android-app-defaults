@@ -14,9 +14,9 @@ GoreeCloud Camera should communicate trustworthy capture, privacy and user owner
 
 ## Interface system
 
-The application must use the current accepted **Glaze UI** consumer contract. The current portfolio target is **1.4.1**.
+The application must use the current accepted **GoreeCloud UI** consumer contract. Supported component and token scope must be verified against `GoreeCloud/gc-ui`; application conformance remains pending.
 
-Glaze UI conformance is not currently implemented or accepted. The repository must not display compliance claims until application-specific evidence exists.
+GoreeCloud UI conformance is not currently implemented or accepted. The repository must not display compliance claims until application-specific evidence exists.
 
 ## Viewfinder principle
 
