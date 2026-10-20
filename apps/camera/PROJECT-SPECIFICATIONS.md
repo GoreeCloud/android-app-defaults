@@ -90,7 +90,7 @@ The PR #8 Android emulator gate re-qualified the existing preview/JPEG behavior 
 - local settings persistence;
 - robust interrupted/process-death still/video recovery beyond handled in-process cleanup;
 - production signing or packaged release;
-- accepted Glaze UI, Privacy Shield, Wardveil Security, Everkeep, Manager, Mesh, or Identity runtime integration;
+- accepted GoreeCloud UI, Privacy Shield, Wardveil Security, Everkeep, Manager, Mesh, or Identity runtime integration;
 - a recognized open-source repository license.
 
 Earlier runtime attempts exposed a case-sensitive shutter-selector defect, one Quickstep emulator ANR, and an engineering-shutter/system-taskbar overlap. Those failures did not establish a Camera2/MediaStore defect; the overlap was corrected with bottom system-bar inset handling, the runtime selector was constrained to the Camera package, and later exact candidates plus authoritative merged revisions subsequently passed.
@@ -130,7 +130,7 @@ The implementation uses direct **Camera2** APIs for preview, capability discover
 
 ### 4.3 User-interface direction
 
-The current activity is an **engineering capture shell**, not an accepted GoreeCloud Camera user experience. The production UI must use the current approved Stable GoreeCloud Glaze UI contract. Portfolio authority is currently **Glaze UI 1.5.0**. No Glaze UI conformance is claimed by the current engineering shell.
+The current activity is an **engineering capture shell**, not an accepted GoreeCloud Camera user experience. The production UI must follow the supported GoreeCloud UI contract maintained in `GoreeCloud/gc-ui`. The former 1.5.0 target is superseded; no GoreeCloud UI application conformance is claimed by the current engineering shell.
 
 Unsupported hardware capabilities must remain hidden or unavailable rather than being advertised from theoretical API support.
 
@@ -289,7 +289,7 @@ These controls do not constitute Wardveil Security acceptance.
 
 ## 13. GoreeCloud Platform Contract
 
-The repository declares **Platform Contract 0.2** and exactly seven Integral Platform Systems. The current approved Stable Glaze UI consumer target is **1.5.0**; Camera remains `applicable-blocked` and has no application-specific Glaze acceptance.
+The repository declares **Platform Contract 0.2** and exactly seven Integral Platform Systems. The recorded legacy consumer target at this milestone was 1.5.0; current GoreeCloud UI authority is `GoreeCloud/gc-ui`. Camera remains `applicable-blocked` without application-specific acceptance.
 
 All seven remain **applicable-blocked** at this milestone because application-specific runtime acceptance evidence does not exist:
 
@@ -297,7 +297,7 @@ All seven remain **applicable-blocked** at this milestone because application-sp
 2. Privacy Shield
 3. Wardveil Security
 4. Everkeep
-5. Glaze UI
+5. GoreeCloud UI
 6. GoreeCloud Mesh
 7. GoreeCloud Identity
 
@@ -375,7 +375,7 @@ Future validation must cover explicit video/audio runtime capture, MP4 integrity
 
 ## 19. Production acceptance
 
-Camera must not be classified Stable until applicable GoreeCloud production-readiness requirements and Camera-specific gates are satisfied, including an identifiable candidate, qualified real-device matrix, no release-blocking media-loss/corruption/privacy/security defects, verified offline core capture and recovery, accepted applicable Platform System integrations, current Stable Glaze UI application-specific acceptance, synchronized repository/Drive documentation, and required human visual/usability/device acceptance.
+Camera must not be classified Stable until applicable GoreeCloud production-readiness requirements and Camera-specific gates are satisfied, including an identifiable candidate, qualified real-device matrix, no release-blocking media-loss/corruption/privacy/security defects, verified offline core capture and recovery, accepted applicable Platform System integrations, GoreeCloud UI application-specific acceptance, synchronized repository/Drive documentation, and required human visual/usability/device acceptance.
 
 This Concept-stage foundation and bounded still/video source implementation are not a release candidate and are not production accepted.
 
@@ -413,7 +413,7 @@ The next bounded Phase 1 slice is therefore **video/audio runtime qualification*
 7. preserve no-Internet/no-location/no-broad-storage/no-media-read authority and keep microphone authority limited to the explicit recording purpose;
 8. preserve Concept lifecycle and all application-specific Platform System acceptance blockers until separately satisfied.
 
-Local settings, stronger process-death recovery, licensing, current Stable Glaze UI implementation, Platform System acceptance, production signing/release, and Stable qualification remain separate obligations and must not be silently folded into a broader unreviewable change.
+Local settings, stronger process-death recovery, licensing, GoreeCloud UI implementation, Platform System acceptance, production signing/release, and Stable qualification remain separate obligations and must not be silently folded into a broader unreviewable change.
 
 
 ## 22. Migrated detailed requirements preserved from the Drive project specification
@@ -551,7 +551,7 @@ Camera must not be classified Stable until all applicable production-readiness r
 - core capture functioning without Internet, account login, Photos server, or external AI;
 - interruption/recovery tests showing no silent loss of recoverable media;
 - accepted Privacy Shield and Wardveil Security requirements for applicable sensitive features;
-- current Stable Glaze UI application-specific conformance and accessibility acceptance;
+- GoreeCloud UI application-specific conformance and accessibility acceptance;
 - accepted or explicitly non-applicable platform integrations;
 - synchronized repository documentation, lifecycle metadata, feature state, platform contract, changelog, and project specification;
 - completion of required human visual, usability, real-device, and acceptance work.
