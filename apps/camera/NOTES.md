@@ -19,7 +19,7 @@
 - Android Gradle Plugin: 9.4.0.
 - CI Gradle baseline: 9.6.0.
 - Platform Contract target for this candidate: 0.4.
-- Current Official Stable GLAZE UI consumer target: 1.6.0.
+- Current design authority: GoreeCloud UI (`GoreeCloud/gc-ui`); application migration and conformance remain unverified.
 - Integral Platform Systems: exactly nine under v3.0 / Contract 0.4; GoreeCloud Sync remains separately governed.
 - Source includes Camera2 capability discovery, lifecycle-owned preview/still/video session control, bounded JPEG still capture, and bounded Camera2/MediaRecorder MP4 recording with H.264 video plus AAC microphone audio.
 - Current stacked PR #12 exact-head Android 16 / API 36 emulator evidence qualifies preview, one JPEG + MediaStore still-capture path, and the explicit microphone-permission video/audio path through a non-empty published MP4 with H.264 video, AAC audio, non-trivial duration, and preview restoration. It does not qualify physical-device/OEM camera/audio behavior or microphone signal quality.
@@ -75,4 +75,4 @@ The central Camera user-manual record exists at `GoreeCloud/User Manuals/User Ma
 
 ## Next engineering milestone
 
-After Contract 0.4 reconciliation, the next source-controlled presentation milestone is repository-local GLAZE UI V1.6 mapping without relabeling the engineering shell as accepted. Physical-device/OEM capture and microphone qualification, local settings, process-death/stale-pending recovery, licensing, nine-system runtime acceptance, signing/release provenance, Production Acceptance, and Stable qualification remain separate open gates.
+After Contract 0.4 reconciliation, the next source-controlled presentation milestone is repository-local GoreeCloud UI mapping without relabeling the engineering shell as accepted. Physical-device/OEM capture and microphone qualification, local settings, process-death/stale-pending recovery, licensing, nine-system runtime acceptance, signing/release provenance, Production Acceptance, and Stable qualification remain separate open gates.
