@@ -1,5 +1,7 @@
 # GoreeCloud Camera — Project Record
 
+> **Current design authority — October 20, 2026:** GoreeCloud UI (`GoreeCloud/gc-ui`) permanently supersedes the legacy design system. Prior dated milestone names in this change-history document are historical evidence only, not current implementation, version, or conformance requirements. Camera adoption and acceptance remain unverified.
+
 ## 2026-09-29 — Mandatory repository consolidation
 
 Active source development moved from `GoreeCloud/camera` to `GoreeCloud/android-app-defaults` at `apps/camera/`. The imported Development revision was `209b89ca31cc23899f6c90d7ca12908281f0af0c`; the consolidation merged through target PR #62 as `20ca33c7c0c565f361deda206c9c950154dec327`. Legacy documentation migration PR #17 is preserved as source provenance for this repository-local record. No lifecycle promotion is implied.
@@ -41,7 +43,7 @@ Current main remains lifecycle Concept.
 
 Accepted repository state includes the native Android foundation, Camera2 preview, one bounded JPEG + MediaStore still-capture path with representative Android-emulator qualification, and a bounded Camera2/MediaRecorder video-with-audio source/build foundation.
 
-The accepted main history through PR #9 does not establish physical-device/OEM Camera qualification, production Glaze UI acceptance, application-specific Integral Platform System acceptance, signing/distribution readiness, Release Candidate status, Production Acceptance, or Stable status.
+The accepted main history through PR #9 does not establish physical-device/OEM Camera qualification, production GoreeCloud UI acceptance, application-specific Integral Platform System acceptance, signing/distribution readiness, Release Candidate status, Production Acceptance, or Stable status.
 
 The public repository still has an unresolved recognized open-source license-selection blocker.
 
