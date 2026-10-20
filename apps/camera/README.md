@@ -47,7 +47,7 @@ The release lifecycle remains **Concept**. Emulator success, source presence, an
 - broader local settings beyond the current composition-grid candidate;
 - zoom/focus/exposure and lens-switching controls;
 - robust process-death/interrupted-capture and interrupted-recording recovery;
-- production Glaze UI implementation and acceptance;
+- production GoreeCloud UI implementation and acceptance;
 - Privacy Shield, Wardveil Security, Everkeep, Manager, Mesh, and Identity application acceptance where applicable;
 - device-specific qualification profiles and camera-quirk evidence;
 - Private Capture, richer metadata/provenance controls, and Gallery/Photos handoff;
@@ -71,8 +71,8 @@ Core capture remains local and offline-first. Android 10+ MediaStore lets Camera
 ## GoreeCloud platform direction
 
 - Platform Contract target for this candidate: **0.4**.
-- Current required GLAZE UI consumer target: **1.6.0**.
-- Nine Integral Platform Systems are evaluated explicitly: GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, GoreeCloud Mesh, GoreeCloud Identity, GoreeCloud Policy, and GoreeCloud Observability.
+- Current design authority: **GoreeCloud UI** (`GoreeCloud/gc-ui`); consumer migration and acceptance remain unverified.
+- Nine Integral Platform Systems are evaluated explicitly: GoreeCloud Manager, Privacy Shield, Wardveil Security, Everkeep, GoreeCloud UI, GoreeCloud Mesh, GoreeCloud Identity, GoreeCloud Policy, and GoreeCloud Observability.
 - GoreeCloud Sync remains separately governed and is not a tenth Integral Platform System.
 
 ## Repository documentation
@@ -95,4 +95,4 @@ A recognized open-source license has not yet been selected and committed. Reposi
 
 ## Status integrity
 
-The current work does not prove Experimental lifecycle eligibility, physical-device/OEM support, GLAZE UI V1.6 application conformance, any Integral Platform System runtime acceptance, production readiness, or Stable status.
+The current work does not prove Experimental lifecycle eligibility, physical-device/OEM support, GoreeCloud UI application conformance, any Integral Platform System runtime acceptance, production readiness, or Stable status.

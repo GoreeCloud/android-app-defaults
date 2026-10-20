@@ -58,7 +58,7 @@ The video/audio implementation is **source/build verified**, not runtime qualifi
 - broader local settings beyond the persisted composition-grid, self-timer, and volume-key shutter candidate;
 - robust interrupted/process-death photo and recording recovery;
 - zoom/focus/exposure controls and lens switching UI;
-- production Glaze UI components and acceptance;
+- production GoreeCloud UI components and acceptance;
 - Private Capture;
 - richer metadata/provenance controls;
 - Gallery/Photos handoff;

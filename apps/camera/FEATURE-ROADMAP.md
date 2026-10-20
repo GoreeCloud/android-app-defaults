@@ -156,7 +156,7 @@ Private Capture, protected destinations, metadata policy, sharing-time privacy c
 ### Phase 9 — GoreeCloud ecosystem integration
 Status: **Planned**
 
-Platform Contract 0.4 evaluation against exactly nine Integral Platform Systems: Manager, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, Mesh, Identity, Policy, and Observability. GoreeCloud Sync remains separately governed. GLAZE UI migration must target current Official Stable V1.6 / 1.6.0 and remain repository-locally acceptance-gated; no application-specific Glaze acceptance is claimed by the current engineering shell.
+Platform Contract 0.4 evaluation against exactly nine Integral Platform Systems: Manager, Privacy Shield, Wardveil Security, Everkeep, GoreeCloud UI, Mesh, Identity, Policy, and Observability. GoreeCloud Sync remains separately governed. GoreeCloud UI migration must follow the current supported `GoreeCloud/gc-ui` contract and remain repository-locally acceptance-gated; no application-specific GoreeCloud UI acceptance is claimed by the current engineering shell.
 
 ### Phase 10 — Remote and adaptive hardware experiences
 Status: **Planned**
@@ -166,8 +166,8 @@ Remote Viewfinder, explicit pairing/session authority, foldable and large-screen
 ### Phase 11 — Release qualification
 Status: **Planned**
 
-Real-device matrix, recovery/security/privacy/accessibility acceptance, current Glaze UI conformance, platform-system evidence, packaging/release evidence, documentation synchronization, and production-readiness gates before Stable.
+Real-device matrix, recovery/security/privacy/accessibility acceptance, current GoreeCloud UI conformance, platform-system evidence, packaging/release evidence, documentation synchronization, and production-readiness gates before Stable.
 
 ## Canonical feature families
 
-The synchronized Drive roadmap retains the detailed capability requirements for automatic photography, low light, portraits, Motion Photos, Best Shot, professional still/video, Cinema, stabilization, dual/multi-camera, creative capture, Lenses, filters, creator tools, scanning, visual utilities, Camera Intelligence, Private Capture, metadata, offline-first architecture, Gallery/Photos/Everkeep relationships, Glaze UI, Wardveil Security, Privacy Shield, Everkeep, capability profiles, reliability, storage/thermal/battery safeguards, provenance, accessibility, diagnostics, qualification, and release acceptance.
+The synchronized Drive roadmap retains the detailed capability requirements for automatic photography, low light, portraits, Motion Photos, Best Shot, professional still/video, Cinema, stabilization, dual/multi-camera, creative capture, Lenses, filters, creator tools, scanning, visual utilities, Camera Intelligence, Private Capture, metadata, offline-first architecture, Gallery/Photos/Everkeep relationships, GoreeCloud UI, Wardveil Security, Privacy Shield, Everkeep, capability profiles, reliability, storage/thermal/battery safeguards, provenance, accessibility, diagnostics, qualification, and release acceptance.

@@ -40,7 +40,7 @@ This setting changes preview presentation only. It does not grant Camera or micr
 
 ## Current limitations
 
-The interface remains an engineering shell. Video/audio representative-device qualification, microphone-routing evidence, physical-device support, broader local settings beyond the composition grid/self-timer/volume-key controls, zoom/focus/exposure UI, production Glaze UI, Private Capture, rich metadata policy, downstream Gallery/Photos handoff, interrupted/process-death recovery, and production signing remain unqualified or unimplemented.
+The interface remains an engineering shell. Video/audio representative-device qualification, microphone-routing evidence, physical-device support, broader local settings beyond the composition grid/self-timer/volume-key controls, zoom/focus/exposure UI, production GoreeCloud UI, Private Capture, rich metadata policy, downstream Gallery/Photos handoff, interrupted/process-death recovery, and production signing remain unqualified or unimplemented.
 
 A visible `Photo saved` or `Video saved` result is engineering-state feedback; supported-device claims require the separate qualification process and artifact verification appropriate to the capability.
 

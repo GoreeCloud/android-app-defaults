@@ -13,7 +13,7 @@ GoreeCloud Clock is a privacy-focused, offline-first Android clock and time-mana
 - Permission-minimal behavior with permissions tied to active alarm/timer capabilities.
 - Accessible Android semantics, scalable text, large touch targets, logical focus order, and reduced-motion compatibility.
 - Reliable alarm and timer scheduling using documented Android mechanisms instead of continuous background processing.
-- Current official GLAZE UI consumer direction: 1.6.0 anchor. Consumer acceptance remains repository-local.
+- Current design authority: GoreeCloud UI (`GoreeCloud/gc-ui`); Clock consumer acceptance is pending. Consumer acceptance remains repository-local.
 
 ## Required capabilities
 
@@ -114,7 +114,7 @@ All alarms, timers, stopwatch state, world-clock selections, and preferences are
 
 ## Development status
 
-The current foundation is Development, not Release Candidate, production, Stable, or complete GLAZE UI consumer acceptance. The candidate includes Android 16 instrumentation and rendered-evidence automation, but emulator evidence does not substitute for representative physical-device alarm delivery, OEM behavior, Doze/reboot/time-zone testing, TalkBack/switch-access testing, large-text/RTL review, representative launcher-widget acceptance, signing, distribution, or release qualification.
+The current foundation is Development, not Release Candidate, production, Stable, or complete GoreeCloud UI consumer acceptance. The candidate includes Android 16 instrumentation and rendered-evidence automation, but emulator evidence does not substitute for representative physical-device alarm delivery, OEM behavior, Doze/reboot/time-zone testing, TalkBack/switch-access testing, large-text/RTL review, representative launcher-widget acceptance, signing, distribution, or release qualification.
 
 
 Onboarding replay and first-use completion are distinct persisted states. Starting a replay does not mark a previously oriented installation incomplete; interrupted replay may resume, and closing replay restores ordinary use without changing valid product configuration. A one-time schema migration recognizes existing Development installs with prior Clock state so introducing onboarding does not itself reset the startup experience.
