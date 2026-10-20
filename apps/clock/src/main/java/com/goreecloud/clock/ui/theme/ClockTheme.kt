@@ -80,7 +80,7 @@ private val ClockShapes = Shapes(
 )
 
 /**
- * GoreeCloud Clock visual theme aligned to the current official GLAZE UI 1.6.0 anchor.
+ * GoreeCloud Clock visual theme; the current design authority is GoreeCloud UI (GC UI).
  * Consumer acceptance remains repository-local; native Material 3 primitives preserve
  * Android accessibility, scaling, focus, and platform semantics.
  */
