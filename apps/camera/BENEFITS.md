@@ -36,4 +36,4 @@ Capture finalization, recording recovery, storage protection, thermal behavior, 
 
 ## GoreeCloud integration without lock-in
 
-Camera is intended to integrate with Gallery, Photos, Privacy Shield, Wardveil Security, Everkeep, Glaze UI, Mesh, Identity, and other applicable GoreeCloud systems while keeping basic capture independently useful.
+Camera is intended to integrate with Gallery, Photos, Privacy Shield, Wardveil Security, Everkeep, GoreeCloud UI, Mesh, Identity, and other applicable GoreeCloud systems while keeping basic capture independently useful.
